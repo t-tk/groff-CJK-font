@@ -1,0 +1,487 @@
+# Copyright (C) 2002-2018 Free Software Foundation, Inc.
+#      Original Makefile.sub written by Werner Lemberg <wl@gnu.org>
+#      Automake migration by 
+#      Bertrand Garrigues <bertrand.garrigues@laposte.net>
+#
+#
+# This file is part of groff.
+#
+# groff is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# groff is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+doc_srcdir = $(abs_top_srcdir)/doc
+doc_builddir = $(abs_top_builddir)/doc
+
+DOC_SED = $(SED) -e "s;[@]VERSION[@];$(VERSION);"
+
+DOC_GROFF_ONLY=\
+  GROFF_COMMAND_PREFIX= \
+  GROFF_BIN_PATH="$(GROFF_BIN_PATH)" \
+  $(GROFFBIN) -I$(abs_top_builddir) -M $(doc_srcdir) \
+	$(TFLAG) $(FFLAG) -Upet -ww 
+
+DOC_GROFF = $(DOC_SED) $< | $(DOC_GROFF_ONLY)
+
+# Other doc, installed in $(docdir)
+if BUILD_OTHERDOC
+# Files located in the source tree
+DOCFILES= \
+  doc/meref.me \
+  doc/meintro.me \
+  doc/meintro_fr.me \
+  doc/pic.ms
+# Files generated in the build tree
+PROCESSEDDOCFILES = \
+  doc/meref.ps \
+  doc/meintro.ps \
+  doc/meintro_fr.ps \
+  doc/pic.ps
+
+otherdocdir = $(docdir)
+dist_otherdoc_DATA = $(DOCFILES)
+nodist_otherdoc_DATA = $(PROCESSEDDOCFILES)
+MOSTLYCLEANFILES += $(PROCESSEDDOCFILES)
+else
+EXTRA_DIST += $(DOCFILES)
+endif
+
+# pdf doc, written in mom and therefore using contrib/mom/mom.am
+# definitions
+EXTRA_DIST += doc/automake.mom
+if BUILD_PDFDOC
+docpdfdocdir = $(pdfdocdir)
+nodist_docpdfdoc_DATA = doc/automake.pdf
+MOSTLYCLEANFILES += doc/automake.pdf
+endif
+doc/automake.pdf: doc/automake.mom \
+  groff troff gropdf pdfmom font/devpdf/build_font_files \
+  contrib/mom/om.tmac
+
+# GNU PIC html documentation, installed in $(htmldocdir)
+# Other pic*.html files are installed by the local rule
+if BUILD_HTML
+HTMLDOCFILES = \
+  doc/pic.html
+htmlpicdir = $(htmldocdir)
+htmlpic_DATA = $(HTMLDOCFILES)
+HTMLDOCFILESALL = pic*.html
+HTMLDOCIMAGEFILES = pic*
+endif
+
+# Examples files, installed in $(exampledir)
+
+# source tree files
+EXAMPLEFILES = \
+  doc/webpage.ms \
+  doc/groff.css \
+  doc/grnexmpl.g \
+  doc/grnexmpl.me
+
+if BUILD_EXAMPLES
+# Generated in the build tree
+PROCESSEDEXAMPLEFILES = \
+  doc/webpage.ps \
+  doc/grnexmpl.ps
+docexamplesdir = $(exampledir)
+dist_docexamples_DATA = $(EXAMPLEFILES)
+nodist_docexamples_DATA = $(PROCESSEDEXAMPLEFILES)
+MOSTLYCLEANFILES += $(PROCESSEDEXAMPLEFILES)
+else
+EXTRA_DIST += $(EXAMPLEFILES)
+endif
+
+if BUILD_HTMLEXAMPLES
+# webpage.html is generated, webpage*.html files are installed by the local rule.
+HTMLEXAMPLEFILES = doc/webpage.html
+HTMLEXAMPLEFILESALL = webpage*.html
+HTMLEXAMPLEIMAGEFILES = webpage*
+htmlexamplesdir = $(exampledir)
+nodist_htmlexamples_DATA = $(HTMLEXAMPLEFILES)
+endif
+
+imagedir = img
+htmldocimagedir = $(htmldocdir)/img
+exampleimagedir = $(exampledir)/img
+
+MOSTLYCLEANFILES += doc/examples.stamp
+
+EXTRA_DIST += \
+  doc/gnu.xpm \
+  doc/fixinfo.sh \
+  doc/txi-en.tex
+
+SUFFIXES += .me .ms .ps .html .txt .texi .dvi .pdf .xhtml
+
+# For simplicity, we always call preconv, grn, and eqn.
+.me.txt:
+	$(GROFF_V)$(MKDIR_P) `dirname $@` \
+	&& $(DOC_GROFF) -k -Tutf8 -ge -me >$@
+.me.ps:
+	$(GROFF_V)$(MKDIR_P) `dirname $@` \
+	&& $(DOC_GROFF) -k -Tps -ge -me >$@
+
+.ms.html:
+	$(GROFF_V)$(MKDIR_P) `dirname $@` \
+	&& $(DOC_GROFF) -P-p -P-b -P-I`basename $< | sed -e 's|.ms$$||'` \
+	                -P-D$(imagedir) -Thtml -ms >$@
+.ms.txt:
+	$(GROFF_V)$(MKDIR_P) `dirname $@` \
+	&& $(DOC_GROFF) -Tascii -ms -mwww >$@
+.ms.ps:
+	$(GROFF_V)$(MKDIR_P) `dirname $@` \
+	&& $(DOC_GROFF) -Tps -ms -mwww >$@
+
+$(PROCESSEDEXAMPLEFILES): $(bin_PROGRAMS) $(prefixexecbin_PROGRAMS) gnu.eps
+$(PROCESSEDEXAMPLEFILES): $(dist_devpsfont_DATA) $(nodist_devpsfont_DATA) $(hdtbltmac_DATA)
+$(PROCESSEDEXAMPLEFILES): $(dist_tmac_DATA) $(nodist_tmac_DATA)
+$(PROCESSEDDOCFILES): $(bin_PROGRAMS) $(prefixexecbin_PROGRAMS) gnu.eps
+
+doc/pic.html: tmac/www.tmac
+doc/pic.html: $(bin_PROGRAMS) $(prefixexecbin_PROGRAMS)
+doc/pic.html: doc/examples.stamp
+doc/pic.html: $(dist_devpsfont_DATA) $(nodist_devpsfont_DATA)
+doc/pic.html: $(doc_srcdir)/pic.ms $(devhtmlfont_DATA)
+	$(GROFF_V)$(MKDIR_P) $(doc_builddir) \
+	&& cd $(doc_builddir) \
+	&& $(DOC_SED) $(doc_srcdir)/pic.ms \
+	   | $(DOC_GROFF_ONLY) -P-p -P-Ipic -P-D$(imagedir) -P-jpic \
+	                       -Thtml -ms > pic.html
+
+doc/examples.stamp: doc/groff.css
+	@$(MKDIR_P) $(doc_builddir)
+	test -f $(doc_builddir)/groff.css || cp $(doc_srcdir)/groff.css $(doc_builddir)
+	echo timestamp > $@
+
+doc/webpage.html: $(bin_PROGRAMS) $(prefixexecbin_PROGRAMS)
+doc/webpage.html: doc/examples.stamp $(devhtmlfont_DATA)
+doc/webpage.html: $(dist_devpsfont_DATA) $(nodist_devpsfont_DATA) 
+doc/webpage.html: $(doc_srcdir)/webpage.ms gnu.eps $(doc_srcdir)/groff.css
+	$(GROFF_V)$(MKDIR_P) doc \
+	&& cd $(doc_builddir) \
+	&& $(DOC_SED) $(doc_srcdir)/webpage.ms \
+	   | $(DOC_GROFF_ONLY) -P-jwebpage -P-nrpb -P-Iwebpage \
+	                       -P-D$(imagedir) -Thtml -ms > webpage.html
+
+doc/grnexmpl.ps: doc/grnexmpl.me doc/grnexmpl.g
+
+# Note that we remove groff.css only if out-of-source build tree
+mostlyclean-local: mostlyclean_doc
+mostlyclean_doc:
+if BUILD_HTML
+	if test -d $(doc_builddir); then \
+	  cd $(doc_builddir) && \
+	  for f in $(HTMLDOCFILESALL); do \
+	    $(RM) $$f; \
+	  done; \
+	fi
+	if test -d $(doc_builddir)/$(imagedir); then \
+	  cd $(doc_builddir)/$(imagedir) && \
+	  for f in $(HTMLDOCIMAGEFILES); do \
+	    $(RM) $$f; \
+	  done; \
+	fi
+endif
+	if test $(top_builddir) != $(top_srcdir); then \
+	  $(RM) $(top_builddir)/doc/groff.css; \
+	fi
+
+if BUILD_HTMLEXAMPLES
+	if test -d $(doc_builddir); then \
+	  cd $(doc_builddir) && \
+	  for f in $(HTMLEXAMPLEFILESALL); do \
+	    $(RM) $$f; \
+	  done; \
+	fi
+	if test -d $(doc_builddir)/$(imagedir); then \
+	  cd $(doc_builddir)/$(imagedir) && \
+	  for f in $(HTMLEXAMPLEIMAGEFILES); do \
+	    $(RM) $$f; \
+	  done; \
+	fi
+endif
+
+install-data-hook: install_doc_htmldoc
+install_doc_htmldoc:
+if BUILD_HTML
+	cd $(doc_builddir) && \
+	for f in `ls $(HTMLDOCFILESALL)`; do \
+	  $(RM) $(DESTDIR)$(htmldocdir)/$$f; \
+	  $(INSTALL_DATA) $$f $(DESTDIR)$(htmldocdir)/$$f; \
+	done
+	-test -d $(DESTDIR)$(htmldocimagedir) \
+	  || $(mkinstalldirs) $(DESTDIR)$(htmldocimagedir)
+	$(RM) $(DESTDIR)$(htmldocimagedir)/$(HTMLDOCIMAGEFILES)
+	$(INSTALL_DATA) $(doc_builddir)/$(imagedir)/$(HTMLDOCIMAGEFILES) \
+	  $(DESTDIR)$(htmldocimagedir)
+endif
+
+install-data-hook: install_doc_examples
+install_doc_examples: gnu.eps
+if BUILD_EXAMPLES
+# Prefer gnu.eps in builddir over srcdir.
+	d=.; test -f "gnu.eps" || d=$(doc_srcdir); \
+	  $(RM) $(DESTDIR)$(exampledir)/gnu.eps; \
+	  $(INSTALL_DATA) $$d/gnu.eps $(DESTDIR)$(exampledir)/gnu.eps
+endif
+if BUILD_HTMLEXAMPLES
+	cd $(doc_builddir) && \
+	for f in `ls $(HTMLEXAMPLEFILESALL)`; do \
+	  $(RM) $(DESTDIR)$(exampledir)/$$f; \
+	  $(INSTALL_DATA) $$f $(DESTDIR)$(exampledir)/$$f; \
+	done
+	-test -d $(DESTDIR)$(exampleimagedir) \
+	  || $(mkinstalldirs) $(DESTDIR)$(exampleimagedir)
+	$(RM) $(DESTDIR)$(exampleimagedir)/$(HTMLEXAMPLEIMAGEFILES)
+	$(INSTALL_DATA) $(doc_builddir)/$(imagedir)/$(HTMLEXAMPLEIMAGEFILES) \
+	  $(DESTDIR)$(exampleimagedir)
+endif
+
+uninstall-hook: uninstall_doc_examples uninstall_doc_htmldoc uninstall_mom
+uninstall_doc_examples:
+if BUILD_EXAMPLES
+	$(RM) -f $(DESTDIR)$(exampledir)/gnu.eps
+endif
+if BUILD_HTMLEXAMPLES
+	-test -d $(DESTDIR)$(docexamplesdir) && \
+	cd $(DESTDIR)$(docexamplesdir) && \
+	for f in $(HTMLEXAMPLEFILESALL); do \
+	  $(RM) $$f; \
+	done
+	-test -d $(DESTDIR)$(docexamplesdir)/$(imagedir) && \
+	cd $(DESTDIR)$(docexamplesdir)/$(imagedir) && \
+	for f in $(HTMLEXAMPLEIMAGEFILES); do \
+	  $(RM) $$f; \
+	done
+	-rmdir $(DESTDIR)$(docexamplesdir)/$(imagedir)
+	-rmdir $(DESTDIR)$(docexamplesdir)
+endif
+
+uninstall_doc_htmldoc:
+if BUILD_HTML
+	-test -d $(DESTDIR)$(htmldocdir) && \
+	cd $(DESTDIR)$(htmldocdir) && \
+	for f in $(HTMLDOCFILESALL); do \
+	  $(RM) $$f; \
+	done
+	-test -d $(DESTDIR)$(htmldocdir)/$(imagedir) && \
+	cd $(DESTDIR)$(htmldocdir)/$(imagedir) && \
+	for f in $(HTMLDOCIMAGEFILES); do \
+	  $(RM) $$f; \
+	done
+	-rmdir $(DESTDIR)$(htmldocdir)/$(imagedir)
+	-rmdir $(DESTDIR)$(htmldocdir)
+endif
+
+# Texinfo doc
+#
+# Users who want to print out the groff manual are expected to have a
+# working TeX installation.  Note that texi2dvi properly honours the
+# `MAKEINFO' environment variable.
+#
+# We can't use automake's facilities because the make dist target attempts to 
+# generate a pdf version of groff.texi by invoking texi2dvi without the -e 
+# option, which is needed to build this file.
+# info_TEXINFOS = doc/groff.texi
+# doc_groff_TEXINFOS = doc/fdl.texi
+#
+# Note that GNU standards require to install only info doc. Info doc
+# can still be disabled by passing 
+# --with-doc=<something else than info or yes> 
+# to configure
+
+all: build_infodoc
+if BUILD_INFODOC
+build_infodoc: doc/groff.info
+groffinfodir = $(infodir)
+groffpdfdir = $(infodir)
+MOSTLYCLEANFILES += doc/groff.info doc/groff.info-2 doc/groff.info-2
+doc/groff.info: $(doc_srcdir)/groff.texi
+	@$(MKDIR_P) $(doc_builddir)
+	LANG=C \
+	LC_ALL=C \
+	$(MAKEINFO) -o doc/groff.info --enable-encoding -I$(doc_srcdir) $(doc_srcdir)/groff.texi
+else
+build_infodoc:
+endif
+EXTRA_DIST += doc/groff.texi doc/fdl.texi
+
+# GNU Make has a built-in variable TEXI2DVI but it is not the case of
+# all 'make' implementation.  As it default to 'texi2dvi' we simply
+# redefine it here.
+
+TEXI2DVI = texi2dvi
+texi2dvi_missing = no
+# Rules to generate various doc files from .texi files.
+.texi.txt:
+	@$(MKDIR_P) $(doc_builddir)
+	LANG=C \
+	LC_ALL=C \
+	$(MAKEINFO) --enable-encoding -I$(doc_srcdir) --plaintext -o $@ $<
+
+.texi.dvi:
+if HAVE_TEXI2DVI
+	@$(MKDIR_P) $(doc_builddir)
+	LANG=C \
+	LC_ALL=C \
+	TEXINPUTS="$(top_srcdir)/build-aux:$(TEXINPUTS)" \
+	MAKEINFO='$(MAKEINFO) -I $(doc_srcdir)' \
+	$(TEXI2DVI) -e --batch --build-dir=doc/`basename $@`.t2d -o $@ $<
+else
+	@echo "Program texi2dvi is missing, cannot generate dvi doc"; \
+	exit 1
+endif
+
+.texi.pdf:
+if HAVE_TEXI2DVI
+	@$(MKDIR_P) $(doc_builddir)
+	LANG=C \
+	LC_ALL=C \
+	TEXINPUTS="$(top_srcdir)/build-aux:$(TEXINPUTS)" \
+	MAKEINFO='$(MAKEINFO) -I $(doc_srcdir)' \
+	$(TEXI2DVI) -e --batch --pdf --build-dir=doc/`basename $@`.t2p -o $@ $<
+else
+	@echo "Program texi2dvi is missing, cannot generate pdf doc"; \
+	exit 1
+endif
+
+# This will generate both html split into several files and html doc
+# in a single file. If texinfo version < 5.0, we process the resulting
+# (mono) .html file with fixinfo.sh du to a problem with blockquote
+# closing (for example 5.6.1 Setting Registers, the 'Request'
+# blockquote is not properly closed, see fixinfo.sh for more details
+.texi.html:
+	@$(MKDIR_P) $(doc_builddir)/
+	LANG=C \
+	LC_ALL=C \
+	$(MAKEINFO) --html -I $(doc_srcdir) \
+	  -o doc/`basename $@`.node $<
+	LANG=C \
+	LC_ALL=C \
+	$(MAKEINFO) --html -I $(doc_srcdir) --no-split \
+	  -o $@ $<
+	if test "$(makeinfo_version_numeric)" -lt 5000; then \
+	  echo "patching $@ with fixinfo.sh"; \
+	  $(SHELL) $(doc_srcdir)/fixinfo.sh \
+	    doc/`basename $@`.mono/`basename $@`; \
+	fi
+
+# Targets to make all the doc in all formats. These doc are not built
+# by default. pdf, dvi, ps, html and their install equivalent
+# install-pdf, install-dvi, install-ps, install-html are standard
+# Automake targets.
+
+if BUILD_INFODOC
+doc: doc_all
+doc_all: doc_txt dvi pdf html
+doc_txt: doc/groff.txt
+dvi: doc_dvi
+doc_dvi: doc/groff.dvi
+pdf: doc_pdf
+doc_pdf: doc/groff.pdf
+html: doc_html
+doc_html: doc/groff.html
+install-doc: install-pdf install-html
+endif
+
+distclean-local: clean_infodoc clean_otherdoc
+maintainer-clean-local: clean_infodoc clean_otherdoc
+clean_infodoc:
+	-$(RM) $(doc_builddir)/groff.info*
+	-$(RM) $(doc_builddir)/groff.pdf
+	-$(RM) $(doc_builddir)/groff.dvi
+	-$(RM) -r $(doc_builddir)/groff.html.*
+clean_otherdoc:
+	-cd $(doc_builddir) && \
+	  $(RM) -r *.pdf *.html *.txt *.dvi *.t2p *.t2d
+
+install-data-local: install_infodoc
+if BUILD_INFODOC
+install_infodoc: doc/groff.info
+	-test -d $(DESTDIR)$(infodir) || $(mkinstalldirs) $(DESTDIR)$(infodir)
+	  for p in doc/groff.info `ls doc/groff.info*`; do \
+	    f=`basename $$p`; \
+	    $(RM) $(DESTDIR)$(infodir)/$$f; \
+	    $(INSTALL_DATA) $$p $(DESTDIR)$(infodir)/$$f; \
+	  done
+	$(INSTALL_INFO) --info-dir=$(DESTDIR)$(infodir) \
+	  $(DESTDIR)$(infodir)/groff.info
+install-pdf-local: doc/groff.pdf
+	-test -d $(DESTDIR)$(pdfdocdir) || $(mkinstalldirs) $(DESTDIR)$(pdfdocdir)
+	cp $(top_builddir)/doc/groff.pdf $(DESTDIR)$(pdfdocdir)
+install-html-local: doc/groff.html
+	-test -d $(DESTDIR)$(htmldocdir)/groff.html.mono || $(mkinstalldirs) $(DESTDIR)$(htmldocdir)/groff.html.mono
+	cp -r $(top_builddir)/doc/groff.html $(DESTDIR)$(htmldocdir)/groff.html.mono
+	cp -r $(top_builddir)/doc/groff.html.node $(DESTDIR)$(htmldocdir)
+else
+install_infodoc:
+endif
+
+uninstall-local: uninstall_infodoc uninstall-pdf uninstall-html
+uninstall_doc: uninstall-local
+uninstall-doc: uninstall-local
+uninstall_infodoc:
+if BUILD_INFODOC
+	-$(INSTALL_INFO) --remove --info-dir=$(DESTDIR)$(infodir) \
+	  $(DESTDIR)$(infodir)/groff.info
+	-for f in `ls $(DESTDIR)$(infodir)/groff.info*`; do \
+	  $(RM) $$f; \
+	done
+endif
+uninstall-pdf:
+if BUILD_INFODOC
+	-$(RM) -f $(DESTDIR)$(pdfdocdir)/groff.pdf 
+endif
+uninstall-html:
+if BUILD_INFODOC
+	-$(RM) -r $(DESTDIR)$(htmldocdir)/groff.html.*
+endif
+
+# File used by contrib/hdtbl and contrib/pdfmark. It is distributed in
+# doc.eps. We try in priority to use the file in 'doc'.
+EXTRA_DIST += doc/gnu.xpm
+MOSTLYCLEANFILES += gnu.eps
+gnu.eps:
+	echo $(XPMTOPPM)
+	if test -f $(top_srcdir)/doc/gnu.eps; then \
+	  cp $(top_srcdir)/doc/gnu.eps . ; \
+	elif test -f $(top_builddir)/doc/gnu.eps; then \
+	  cp $(top_builddir)/doc/gnu.eps . ; \
+	else \
+	  if test ""$(XPMTOPPM) != "found"; then \
+	    echo "Program xpmtoppm is missing, can't generate gnu.eps" ; \
+	    exit 1; \
+	  fi; \
+	  if test ""$(pnmtops) != "found"; then \
+	    echo "Program pnmtops is missing, can't generate gnu.eps" ; \
+	    exit 1; \
+	  fi; \
+	  if test "$(pnmtops_nosetpage)" != "pnmtops -nosetpage"; then \
+	    echo "Program pnmtops can't handle -nosetpage, can't generate gnu.eps" ; \
+	    exit 1; \
+	  fi; \
+	  xpmtoppm $(top_srcdir)/doc/gnu.xpm | pnmdepth 15 \
+	    | $(pnmtops_nosetpage) -noturn -rle >$@ ; \
+	fi
+
+# Copy gnu.eps in 'doc' directory
+dist-hook: dist-gnueps
+dist-gnueps:
+	chmod u+w $(distdir)/doc
+	cp -f gnu.eps $(distdir)/doc
+
+
+########################################################################
+### Emacs settings
+# Local Variables:
+# mode: makefile-automake
+# End:

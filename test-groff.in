@@ -1,0 +1,50 @@
+#! /bin/sh
+#
+# Copyright (C) 1989-2018 Free Software Foundation, Inc.
+#
+# This file is part of groff.
+#
+# groff is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# groff is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# This script runs groff without requiring that it be installed.
+
+SEP='@PATH_SEPARATOR@'
+builddir=@abs_top_builddir@
+srcdir=@abs_top_srcdir@
+
+GROFF_BIN_PATH=$builddir
+
+XENVIRONMENT=$srcdir/src/devices/xditview/GXditview.ad
+export XENVIRONMENT
+
+GROFF_COMMAND_PREFIX=
+GROFF_FONT_PATH=$builddir/font\
+$SEP$srcdir/font\
+
+GROFF_TMAC_PATH=$srcdir/tmac\
+$SEP$builddir/tmac\
+$SEP$srcdir/contrib/mom\
+$SEP$builddir/contrib/mom\
+$SEP$srcdir/contrib/hdtbl\
+$SEP$builddir/contrib/hdtbl\
+$SEP$srcdir/contrib/mm\
+$SEP$builddir/contrib/mm\
+$SEP$srcdir/contrib/mm/locale\
+$SEP$builddir/contrib/mm/locale\
+$SEP$srcdir/contrib/pdfmark\
+$SEP$builddir/contrib/pdfmark\
+
+export GROFF_BIN_PATH GROFF_COMMAND_PREFIX GROFF_FONT_PATH GROFF_TMAC_PATH
+
+exec $builddir/groff -b -ww ${1+"$@"}

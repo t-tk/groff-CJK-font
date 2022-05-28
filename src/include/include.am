@@ -1,0 +1,55 @@
+# Automake rules for 'include'
+#
+# File position: <groff-source>/src/include/include.am
+#
+# Copyright (C) 2014-2018 Free Software Foundation, Inc.
+#
+# Latest update: 13 Aug 2015
+#
+# 'groff' is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#
+# 'groff' is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see
+# <http://www.gnu.org/licenses/gpl-2.0.html>.
+#
+########################################################################
+
+nodist_noinst_HEADERS = defs.h
+CLEANFILES += defs.h
+defs.h: config.status
+	@$(SHELL) $(top_srcdir)/gendef.sh defs.h \
+	"PROG_PREFIX=\"$(g)\"" \
+	"DEVICE=\"$(DEVICE)\"" \
+	"INSTALLPATH=\"$(prefix)\"" \
+	"BINPATH=\"$(bindir)\"" \
+	"FONTPATH=\"$(fontpath)\"" \
+	"MACROPATH=\"$(tmacpath)\"" \
+	"INDEX_SUFFIX=\"$(indexext)\"" \
+	"COMMON_WORDS_FILE=\"$(common_words_file)\"" \
+	"DEFAULT_INDEX_DIR=\"$(indexdir)\"" \
+	"DEFAULT_INDEX_NAME=\"$(indexname)\"" \
+	"DEFAULT_INDEX=\"$(indexdir)/$(indexname)\""
+
+dist-hook: dist_include
+dist_include:
+	chmod u+w $(distdir)/src/include
+	cp -f $(top_srcdir)/src/include/*.h $(distdir)/src/include
+
+
+########################################################################
+# Editor settings
+########################################################################
+#
+# Local Variables:
+# mode: makefile-automake
+# fill-column: 72
+# End:
+# vim: set filetype=automake textwidth=72:

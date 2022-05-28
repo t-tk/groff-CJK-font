@@ -1,0 +1,466 @@
+2018-12-06  Ingo Schwarze  <schwarze@openbsd.org>
+
+	* examples/fonts_n.in, examples/fonts_x.in:
+	  Make the shell script in the .pso request more portable:
+	  1. POSIX requires "echo -n" to print "-n" followed by
+	     a newline character, so use printf(1) instead.
+	  2. According to POSIX, behaviour of tr(1) is undefined
+	     if string2 contains fewer characters than string1,
+	     and on Oracle Solaris, the excess characters in string1
+	     are not translated.  So make sure string2 contains
+	     a sufficient number of characters.
+
+2018-12-05  Bertrand Garrigues <bertrand.garrigues@laposte.net>
+
+	Skip tests if needed config is missing.
+
+	* examples/test-hdtbl.sh.in: exit 77 (indicates automake
+	to skip the result) if 'gs' is missing.
+
+	* hdtbl.am: flag correctly test program generation.
+
+2018-11-25  Bertrand Garrigues <bertrand.garrigues@laposte.net>
+
+	Clean hdtbl.am
+
+	* hdtbl.am (MOSTLYCLEANFILES): Remove 'hdmisc.tmac-s'
+	and 'hdtbl.tmac-s' (these files are no longer present).
+
+	Fixes https://savannah.gnu.org/bugs/index.php?55083, reported by
+	Bjarni Ingi Gislason <bjarniig@rhi.hi.is>.
+
+2018-11-13  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	Don't clean other people's unit tests.
+
+	* hdtbl.am: test-hdtbl.sh is generated from an .in file,
+	so while we can add it to $(TESTS), we shouldn't then add
+	$(TESTS) to $(MOSTLYCLEANFILES) or we will clobber all tests
+	that ever get defined.  This clobbered gdiffmk's test script on
+	in-tree builds.  Give it its own variable, $(hdtbl_TESTS).
+	Now it clobbers no more.
+
+	Fixes <https://savannah.gnu.org/bugs/index.php?55020>.
+
+2018-11-12  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* hdtbl.am: Remove examples/test-hdtbl.sh on 'make distclean'.
+
+2018-11-07  Bertrand Garrigues <bertrand.garrigues@laposte.net>
+
+	Add a sanity check on 2 examples.
+
+	* examples/test-hdtbl.sh.in: new test script that uses 'gs'
+	to check the number of pages of 'fonts_x.ps' and 'fonts_n.ps'.
+
+	* hdtbl.am: connect 'test-hdtbl.sh' to 'make check'
+
+2018-08-09  Ingo Schwarze  <schwarze@openbsd.org>
+
+	* examples/common.roff: Remove more dead code
+	  since the date and time are no longer used.
+
+	Reported by Bjarni Ingi Gislason in Savannah bug #54461.
+
+2018-08-09  Ingo Schwarze  <schwarze@openbsd.org>
+
+	* examples/common.roff, examples/col_rowspan_colors.roff,
+	  examples/short_reference.roff: do forgotten renamings .pv -> .t*pv
+
+	Fixing it improves the formatting of all hdtbl examples.
+	Reported by Bjarni Ingi Gislason in Savannah bug #54470.
+
+2018-08-04  Ingo Schwarze  <schwarze@openbsd.org>
+
+	* examples/*: delete the date and time macros
+	* examples/hdtbl.am: run groff without -U option
+
+2018-03-11  Colin Watson  <cjwatson@debian.org>
+
+	Remove unnecessary randomness from example output.
+
+	The examples don't need good randomness, as they're only
+	example output; removing the process ID from consideration
+	allows better integration with reproducible builds.
+
+	* examples/common.roff (random-s1): Remove process ID.
+
+2018-02-28  Werner LEMBERG  <wl@gnu.org>
+
+	* hdtbl.am (.roff.ps, .in.roff): Use $(GROFF_V) and $(AM_V_GEN).
+
+2017-11-30  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* examples/common.roff:
+	* examples/fonts_n.in:
+	* examples/fonts_x.in:
+	Make writers to stderr identify themselves.
+
+2017-11-19  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* examples/*.roff: Seed RNG.
+
+	* examples/col_rowspan_colors.roff:
+	* examples/color_boxes.roff:
+	* examples/color_nested_tables.roff:
+	* examples/color_table_cells.roff:
+	Support reproducible builds by seeding hdtbl's random
+	number generator (in examples/common.roff).
+
+	Fix issue https://savannah.gnu.org/bugs/?52462.
+
+2017-11-01  Bjarni Ingi Gislason <bjarniig@rhi.hi.is>
+
+	hdtbl.tmac-u: Fix ignored escape sequence.
+
+	The escape '\c' ignores everything after it, except "\R...".
+
+	Fix bug https://savannah.gnu.org/bugs/?51609.
+
+2015-08-22  Bernd Warken  <groff-bernd.warken-72@web.de>
+
+	* groff_hdtbl.7.man: Rename `groff_hdtbl.man'.
+
+	* hdtbl.am: Include renaming.
+
+2015-08-05  Bernd Warken  <groff-bernd.warken-72@web.de>
+
+	* hdtbl.am: Add `Last update'.  Setup Emacs mode.
+
+2015-04-03  Werner LEMBERG  <wl@gnu.org>
+
+	Fix Savannah bug #44798.
+
+	* examples/fonts_n.in, examples/fonts_x.in: Use @EGREP@.
+
+	* hdtbl.am (.in.roff): Handle @EGREP@.
+
+2015-04-03  Werner LEMBERG  <wl@gnu.org>
+
+	* groff_hdtbl.man: Make it work in compatibility mode.
+
+2013-09-03  Bernd Warken  <groff-bernd.warken-72@web.de>
+
+	* all files in groff_hdtbl: Copying and Emacs setup.
+
+2014-03-29  Steffen Nurpmeso  <sdaoden@yandex.com>
+
+	* Makefile.sub: Handle examples separately, controlled by
+	$(make{_,_install_,_uninstall_}examples).
+
+2013-02-06  Werner LEMBERG  <wl@gnu.org>
+
+	* groff_hdtbl.man: Correct details on loading hdtbl.tmac.
+
+2013-02-04  Werner LEMBERG  <wl@gnu.org>
+
+	* groff_hdtbl.man: Revised.
+
+2013-02-03  Bernd Warken  <groff-bernd.warken-72@web.de>
+
+	* groff_hdtbl.man: Correct and extend this man-page.
+
+2012-09-20  Werner LEMBERG  <wl@gnu.org>
+
+	Simplify environment handling.
+
+	Suggested by Ivan Shmakov <oneingray@gmail.com>.
+
+	* Makefile.sub (GROFF): Don't use export.
+
+2011-01-17  Werner LEMBERG  <wl@gnu.org>
+
+	* examples/color_nested_tables.roff: Fix output.
+
+	Problem reported by Ulrich Spörlein <uqs@spoerlein.net>.
+
+2011-01-17  Ulrich Spörlein  <uqs@spoerlein.net>
+
+	Don't make examples depend on bash.
+
+	* examples/common.roff, examples/fonts_n.in, examples/fonts_x.in:
+	s/bash/sh/.
+
+2010-02-09  Werner LEMBERG  <wl@gnu.org>
+
+	Make example compilation work again if srcdir != builddir.
+
+	* Makefile.sub (.roff.ps): Define `sopath' groff string.
+
+	* examples/*.roff, examples/*.in: Use it so that .so finds its input
+	file.
+
+2010-02-08  Werner LEMBEARG  <wl@gnu.org>
+
+	Fix handling of `common.roff'.
+
+	* Makefile.sub (MOSTLYCLEANADD): Don't handle `common.roff'.
+	(EXAMPLEFILES): Handle `common.roff'.
+
+2010-02-08  Larry Kollar  <kollar@alltel.net>
+
+	Fix last patch and use `t*' prefix for all non-public stuff.
+	Other minor fixes.
+
+	* hdmisc.tmac (getarg, index, SP, P1, \n[s], \n[v], \n[hy], pv, DI):
+	Rename to...
+	(t*getarg, t*index, t*SP, t*P1, \n[t*s], \n[t*v], \n[t*hy], t*pv,
+	t*DI): This.
+	Update all callers.
+	(t*EM): New auxiliary macro (using stuff from
+	`examples/common.roff'.
+
+	* hdtbl.tmac (\n[t*v], \n[t*s], \n[t*hy], \n[t*l]): Initialize.
+	(\n[t*FN], \n[t*LN]): New number registers.
+
+	* examples/*.roff: Updated.
+	* examples/common.roff: Load `hdtbl.tmac' earlier.
+	Reinstall `HM' and `BM' traps.
+	Provide `SP' macros if not defined by other macro package.
+	(\n[p], \n[o]): Initialize.
+	(\*[t*HM], \*[t*BM]): Initialize.
+	(EM): Use `t*EM'.
+	Updated.
+
+	* examples/fonts_n.in, examples/fonts_x.in: Load
+	`examples/common.roff'.
+	Updated.
+
+	* groff_hdtbl.man: Document setup of default values.
+	Document `t*EM'.
+
+2010-01-23  Larry Kollar  <kollar@alltel.net>
+
+	Break out example formatting to a separate file.
+
+	* hdmisc.tmac: Move example formatting stuff to...
+	* examples/common.roff: This new file.
+
+	* hdtbl.tmac (HM, t*HM, BM, t*BM): Remove.
+
+	* examples/*.roff: Include `common.roff'.
+
+	* groff_hdtbl.man: Remove references to `HM' and `BM'.
+
+	* Makefile.sub: Handle `examples/common.roff'.
+
+2009-04-05  Joachim Walsdorff  <Joachim.Walsdorff@urz.uni-heidelberg.de>
+
+	* hdtbl.tmac (ETB, t*free): Correct two typos, fixing register
+	incrementation.
+
+2009-01-04  Werner LEMBERG  <wl@gnu.org>
+
+	* Makefile.sub (CLEANADD): Add hdmisc.tmac-s and hdtbl.tmac-s.
+
+2009-01-03  Werner LEMBERG  <wl@gnu.org>
+
+	* README: Renamed to...
+	* TODO: This, removing most of its contents.
+
+	* groff_hdtbl.man: Add customization info which was in file README.
+
+2008-01-04  Werner LEMBERG  <wl@gnu.org>
+
+	* groff_hdtbl.man: Replace .MTO with .MT/.ME.
+	Don't include www.tmac.
+
+2006-11-17  Werner LEMBERG  <wl@gnu.org>
+
+	* Makefile.sub (install_data): Depend on gnu.eps also.
+	(uninstall_sub): Remove gnu.eps also.
+
+2006-11-17  Werner LEMBERG  <wl@gnu.org>
+
+	* hdmisc.tmac: Avoid loading itself more than once.
+	Load hdtbl.tmac unconditionally.
+	(\n[?], \n[*miscs]): Remove.
+	(random-s1): Use only 9 digits.
+
+	* hdtbl.tmac: Avoid loading itself more than once.
+	Load hdmisc.tmac unconditionally.
+	Load 62bit.tmac
+	(\n[*hdtbl]): Removed.
+	(t*cl): Prevent scaling overflow by using routines from 62bit.tmac.
+
+2006-11-15  Werner LEMBERG  <wl@gnu.org>
+
+	* hdmisc.tmac (d2x): Use string array instead of `dzx' macro.
+	Improve error handling.
+	(dzx): Removed.
+	(random#): Rewrite to generate random numbers by itself instead of
+	using an external command.
+
+2006-11-06  Joachim Walsdorff  <JWalsdorff@compuserve.de>
+
+	* hdmisc.tmac (\*[g]): Move definition back to...
+	* hdtbl.tmac: This file.
+	(TD, t*divs): Fix a bug with consecutive groups of spanned rows by
+	introducing string *rsp*\\*[#trc].  Reported by Barry Nisly.
+	(TH): Add arguments `hal', `val', and `fst'.
+
+2006-11-01  Werner LEMBERG  <wl@gnu.org>
+
+	* hdtbl.tmac (t*divs): Fix a bug which causes incorrect table cell
+	heights if the `rowspan' keyword is used.  This problem has been
+	introduced during the beautification process by introducing
+	incorrect parentheses.
+	Other minor modifications.
+	(\n[rsp...]): Array renamed to...
+	(\n[rspan...]): This.
+	(\n[csp...]): Array renamed to...
+	(\n[cspan...]): This.
+	(\n[vl...]): Array renamed to...
+	(\n[vline...]): This.
+
+2006-10-27  Werner LEMBERG  <wl@gnu.org>
+
+	* hdmisc.tmac (EM): Improve warning messages.
+
+	* hdtbl.tmac (TD): Move constant comparison out of while loop.
+
+2006-10-26  Werner LEMBERG  <wl@gnu.org>
+
+	* hdmisc.tmac: Add `\"' at various places to protect against
+	trailing spaces.
+	(getarg): Don't use a different escape character but
+	`\?' escapes to protect against incomplete input.
+	Improve documentation.
+
+	* hdtbl.tmac: Improve various warning messages.
+	(TR): Add validity check for `height' keyword.
+	(TD): Don't use `\\\\' but `\E'.
+	(\*[*#trc*]): Initialize.
+	(t*dntr): Avoid undefined register warning.
+
+2006-10-23  Werner LEMBERG  <wl@gnu.org>
+
+	* hdtbl.tmac (\n[t*#]): Initialize.
+	(TBL): Don't initialize `\*[width]'.
+	Add validity checks for all keywords.
+	(TD): Add validity checks for `rowspan' and `colspan' keywords.
+	(t*cl): Add validity checks for cell widths.
+
+2006-09-13  Werner LEMBERG  <wl@gnu.org>
+
+	* examples/fontdumps_n.in, examples/fontdumps_x.in: Renamed to...
+	* examples/fonts_n.in, examples/fonts_x.in: This.
+
+	* examples/colored_boxes.roff, examples/colored_nested_tables.roff,
+	examples/colored_table_cells.roff: Renamed to...
+	* examples/color_boxes.roff, examples/color_nested_tables.roff,
+	examples/color_table_cells.roff: This.
+
+	* Makefile.sub: Updated.
+
+2006-06-21  Werner LEMBERG  <wl@gnu.org>
+
+	* examples/fontdumps_n.roff, examples/fontdumps_x.roff: Renamed
+	to...
+	* example/fontdumps_n.in, example/fontdumps_x_in: This.
+	Rename `*fontpath' to `fontpath' and define it conditionally (using
+	`@fontdir@') so that it can be overridden on the command line.
+	
+	* Makefile.sub (GENFILES, GENFILES_): New variables for
+	fontdumps*.roff.
+	(EXAMPLEFILES): Remove fontdumps.roff.
+	(CLEANADD): Add GENFILES.
+	(.in.roff): New rule.
+	(.SUFFIXES): Add `.in'.
+	(install_data, uninstall_sub): Updated.
+
+2006-06-14  Werner LEMBERG  <wl@gnu.org>
+
+	* hdmisc.tmac: Fix test for \n[?] to avoid warning message.
+	s/\n[.s]p/\n[.ps]/.
+	(pv): Use `z' scaling indicator.
+
+	* hdtbl.tmac: Fix test for \n[?] and \n[*miscs] to avoid warning
+	messages.
+
+2006-06-11  Werner LEMBERG  <wl@gnu.org>
+
+	* groff_hdtbl.man: Use `.ig' block after NAME section to make mandb
+	happy.
+
+2006-06-05  Werner LEMBERG  <wl@gnu.org>
+
+	* hdmisc.tmac (index): Use `\?' to emulate string comparison.
+
+2006-06-04  Werner LEMBERG  <wl@gnu.org>
+
+	* hdtbl.tmac: Improve error messages.  In particular, handle
+	singular and plural correctly by using a pseudo array `nth-{1,2,3}'.
+
+	* examples/rainbow.roff: Add copyright notice.  Formatting.
+
+2006-05-31  Werner LEMBERG  <wl@gnu.org>
+
+	* examples/fontdumps_x.roff, examples/fontdumps_n.roff: Protect
+	argument of `tr' command in `.pso' call.
+
+2006-05-30  Werner LEMBERG  <wl@gnu.org>
+
+	* examples/fontdumps_x.roff: Remove warnings about
+	non-existent glyphs.
+	Add copyright notice.
+	Formatting.
+
+	* hdtbl.tmac: Replace character >= 0x80.
+
+2006-05-29  Werner LEMBERG  <wl@gnu.org>
+
+	* Makefile.sub: New file.
+	* examples/*: Replace characters >= 0x80.
+	Add final newlines.
+	Use UNIX line end convention only.
+	* examples/mixed-pickles.roff: Use gnu.eps.
+	Add copyright notice.
+	Adjust pic image.
+	Other minor fixes.
+	Formatting.
+	* examples/fontdumps_n.roff: Remove warnings about
+	non-existent glyphs.
+	Add copyright notice.
+	Formatting.
+
+2006-05-25  Werner LEMBERG  <wl@gnu.org>
+
+	* examples/*: Rename to...
+	* examples/*.roff: This.
+
+2006-05-24  Werner LEMBERG  <wl@gnu.org>
+
+	* groff_hdtbl.man: Simplify macros for switching from and to the `C'
+	font family, as suggested by Tadziu Hoffmann.
+
+2006-05-22  Werner LEMBERG  <wl@gnu.org>
+
+	* groff_hdtbl.man: Completely revised again.
+	`Normalize' font usage: Add macros similar to `.B' and `.BI' for
+	switching from and to the `C' font family, instead of using \f.
+	Fix appearance of macro syntax descriptions.
+	Add more quotation characters.
+
+2006-05-21  Werner LEMBERG  <wl@gnu.org>
+
+	* groff_hdtbl.man: Completely revised.
+
+2006-05-20  Werner LEMBERG  <wl@gnu.org>
+
+	* Import of hdtbl 0.91 (with some further modifications).  Still
+	many rough edges.
+
+________________________________________________________________________
+
+Copyright 2006-2018 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+
+Local Variables:
+version-control: never
+mode: change-log
+coding: latin-1
+End:

@@ -1,0 +1,141 @@
+    Copyright 2013-2018 Free Software Foundation, Inc.
+
+    Copying and distribution of this file, with or without
+    modification, are permitted in any medium without royalty provided
+    the copyright notice and this notice are preserved.
+
+This file contains information that supplements the generic
+installation instructions in file `INSTALL'.  It is meant for
+people building directly from the development repository, rather than
+a release or snapshot tarball.
+
+If you want to start compiling the `groff' system with an existing
+script `configure' you won't need the information in this file. You
+need them only if you want to build groff from the git repository.
+
+1. Initial build
+----------------
+
+You will need autoconf version and 2.65 or higher and automake version
+1.12.2 or higher. These minimal versions are set in the bootstrap.conf
+file.
+
+On operating systems supporting concurrent installation of multiple
+versions of the autotools, set the following environment variables:
+
+  export AUTOMAKE_VERSION=1.14
+  export AUTOCONF_VERSION=2.69
+
+You will also need to have `pkg-config' installed on your system.
+
+First invoke the bootstrap script:
+
+    $ ./bootstrap
+
+This will:
+  
+  - clone the gnulib repository as a git submodule in 'gnulib', add
+    the needed gnulib sources files in 'lib', add the needed gnulib m4
+    macros in 'gnulib_m4'
+
+  - Invoke autoreconf that will call all the `GNU autotools'
+    (`aclocal', `autoconf', `automake') in the right order for
+    creating the following files:
+
+    -- INSTALL (a symlink to gnulib's INSTALL file)
+    -- Makefile.in
+    -- aclocal.m4
+    -- autom4te.cache/
+    -- build-aux/ (that contains all the helper scripts) 
+    -- configure
+    -- src/include/config.hin
+
+Note that aclocal.m4 is generated and the groff m4 macros are included
+via the acinclude.m4 file.
+  
+At this point you can invoke the `configure' script (that generates
+the `config.status' script; it is the `config.status' script generates
+the Makefile) and call 'make' to build the groff project. You can do
+it in the source tree:
+
+    $ ./configure
+    $ make
+
+You can also build groff in an out of source build tree, which is cleaner:
+
+    $ mkdir build
+    $ cd build
+    $ ../configure
+    $ make
+
+Note that parallel build is also supported and make can be invoked
+with the -j option, which will greatly speed up the build.
+
+When the build is finished you can install the whole groff
+installation with:
+
+    $ make install
+
+Notes:
+
+If you use an old `autoreconf' version < 2.69, there might be an error
+warning like:
+
+  /usr/share/aclocal/gtkglextmm-1.2.m4:225:
+    warning: underquoted definition of AC_GTKGLEXTMM_SUPPORTS_MULTIHEAD
+  /usr/share/aclocal/gtkglextmm-1.2.m4:225:
+    run info '(automake)Extending aclocal'
+  /usr/share/aclocal/gtkglextmm-1.2.m4:225:
+    or see http://www.gnu.org/software/automake/manual/automake.html#Extending-aclocal
+
+Just ignore this.  It doesn't occur in the actual versions of
+`autoreconf'.
+
+Troff errors of the types
+
+  can't transparently output node at top level
+    and
+  can't translate character code n to special character 'c' in transparent throughput
+
+may safely be ignored.
+
+A few sanity checks can be done with the command:
+
+    $ make check
+
+This will perform some tests on the generated examples.  However,
+these checks are for the moment quite limited.
+
+The groff texinfo manual can be generated in pdf and html formats
+with:
+
+    $ make doc
+
+and installed with:
+
+    $ make install-doc
+
+
+2. Modification of autotools files
+----------------------------------
+
+Previously, when groff used `autoconf' only and not `automake', you
+had to invoke manually the autotools, depending on what you
+modified. For example, to change the file `aclocal.m4', you had to run
+the shell command 'aclocal -I m4', to recreate the files `configure'
+and `Makefile', you had to use the command 'autoreconf -I m4'.
+
+Now, as groff uses `automake', you don't need to run `autoreconf'. If
+you make some changes in Makefile.am or configure.ac, all the files
+that need to be updated will be regenerated when you execute `make'.
+
+
+
+3. Quick start on the usage of `automake' in groff
+--------------------------------------------------
+
+A little document explaining the basics of automake and its usage in
+groff is available in doc/automake.mom. It is currently not
+automatically generated, to build it:
+
+pdfmom automake.mom > automake.pdf

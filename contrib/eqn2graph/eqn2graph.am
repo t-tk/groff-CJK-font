@@ -1,0 +1,42 @@
+# Copyright (C) 2002-2018 Free Software Foundation, Inc.
+#
+# Last update: 22 Aug 2015
+#
+# This file is part of groff.
+#
+# groff is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# groff is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# eqn2graph.am
+#
+
+eqn2graph_srcdir = $(top_srcdir)/contrib/eqn2graph
+bin_SCRIPTS += eqn2graph
+man1_MANS += contrib/eqn2graph/eqn2graph.1
+EXTRA_DIST += \
+  contrib/eqn2graph/eqn2graph.1.man \
+  contrib/eqn2graph/eqn2graph.sh
+
+eqn2graph: $(top_srcdir)/contrib/eqn2graph/eqn2graph.sh
+	$(AM_V_GEN)sed -e "s|[@]g[@]|$(g)|g" \
+	    -e "s|[@]VERSION[@]|$(VERSION)|" \
+	    -e $(SH_SCRIPT_SED_CMD) $(eqn2graph_srcdir)/eqn2graph.sh \
+	    >$@ \
+	&& chmod +x $@
+
+
+########################################################################
+### Emacs settings
+# Local Variables:
+# mode: makefile-automake
+# End:

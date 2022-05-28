@@ -1,0 +1,79 @@
+#!/bin/sh
+#
+# Copyright (C) 2018- Free Software Foundation, Inc.
+# 
+# This file is part of groff.
+# 
+# groff is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# groff is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+
+builddir="@abs_top_builddir@"
+have_urw_fonts="@groff_have_urw_fonts@"
+examplesdir="$builddir/contrib/mom/examples"
+ret=0
+list="
+  letter.pdf
+  mom-pdf.pdf
+  mon_premier_doc.pdf
+  sample_docs.pdf
+  slide-demo.pdf
+  typesetting.pdf
+  "
+
+if test "$have_urw_fonts" != "yes"; then
+    echo "No URW fonts, mom examples cannot be correctly generated"
+    exit 77
+fi
+
+# $1: pdf file
+# $2: expected number of pages
+check_number_pages()
+{
+    echo "Checking number of pages of $1"
+    n_pages=`pdfinfo $1  | grep Pages | awk '{ print $2}'`
+    if test "$n_pages" != "$2"; then
+       echo "  Error: expected $2 pages, found $n_pages pages"
+       ret=255
+    fi
+}
+
+# $1 pdf file
+check_has_images()
+{
+    echo "Checking if $1 has images"
+    n_lines=`pdfimages -list $1 | wc -l `
+    if test $n_lines -le 2; then
+        echo " no images found"
+        ret=255
+    fi
+}
+
+for k in $list; do
+    if ! test -f $examplesdir/$k; then
+        echo "File $k not found"
+        exit 255
+    fi
+done
+
+check_number_pages "$examplesdir/letter.pdf" 1
+check_number_pages "$examplesdir/mom-pdf.pdf" 8
+check_number_pages "$examplesdir/mon_premier_doc.pdf" 5
+check_number_pages "$examplesdir/sample_docs.pdf" 12
+check_number_pages "$examplesdir/slide-demo.pdf" 27
+check_number_pages "$examplesdir/typesetting.pdf" 3
+
+check_has_images "$examplesdir/typesetting.pdf"
+check_has_images "$examplesdir/slide-demo.pdf"
+
+exit $ret

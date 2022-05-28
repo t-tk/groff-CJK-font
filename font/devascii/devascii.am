@@ -1,0 +1,57 @@
+# Copyright (C) 2014-2018 Free Software Foundation, Inc.
+#
+# Last update: 13 Aug 2015
+#
+# This file is part of 'groff'.
+#
+# 'groff' is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# 'groff' is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+devascii_srcdir = $(top_srcdir)/font/devascii
+DEVASCIIFONTS = R I B BI
+DEVASCIIFONTSFILES = \
+  font/devascii/R font/devascii/I font/devascii/B font/devascii/BI
+
+DEVASCIIRES = 240
+DEVASCIICPI = 10
+DEVASCIILPI = 6
+
+devasciifontdir = $(fontdir)/devascii
+devasciifont_DATA = $(DEVASCIIFONTSFILES) font/devascii/DESC
+MOSTLYCLEANFILES += $(DEVASCIIFONTSFILES) font/devascii/DESC
+EXTRA_DIST += \
+  font/devascii/R.proto \
+  font/devascii/DESC.proto
+
+$(DEVASCIIFONTSFILES): $(devascii_srcdir)/R.proto
+	$(AM_V_GEN)$(MKDIR_P) `dirname $@` \
+	&& $(RM) $@ \
+	&& $(SHELL) $(GENFONTSSH) $(devascii_srcdir)/R.proto \
+	     $(DEVASCIIRES) $(DEVASCIICPI) `basename $@` > $@
+
+font/devascii/DESC: $(devascii_srcdir)/DESC.proto
+	$(AM_V_GEN)$(MKDIR_P) `dirname $@` \
+	&& $(SHELL) $(GENDESCSH) $(devascii_srcdir)/DESC.proto \
+	     $(DEVASCIIRES) $(DEVASCIICPI) $(DEVASCIILPI) \
+	     $(DEVASCIIFONTS) > $@
+
+
+########################################################################
+# Editor settings
+########################################################################
+#
+# Local Variables:
+# mode: makefile-automake
+# fill-column: 72
+# End:
+# vim: set filetype=automake textwidth=72:

@@ -1,0 +1,47 @@
+#!/bin/sh
+#
+# Copyright (C) 2018- Free Software Foundation, Inc.
+# 
+# This file is part of groff.
+# 
+# groff is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# groff is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+
+# Test generated files 'font_n.ps' and 'font_x.ps'.  Both should have
+# 38 pages.
+
+builddir="@abs_top_builddir@"
+gs_program="@GHOSTSCRIPT@"
+ret=0
+
+if test "$gs_program" = "missing"; then
+   echo "ghostscript program missing, can't check hdtbl examples"
+   exit 77
+fi
+
+# $1 file, $2 expected number of pages
+check_number_pages()
+{
+    echo "Checking $1"
+    res=`$gs_program -o /dev/null/ -sDEVICE=bbox "$1" 2>&1 | grep HiResBoundingBox | wc -l`
+    if test $res != $2; then
+        echo "  Error: expected $2 pages, found $res pages"
+        ret=255
+    fi
+}
+
+check_number_pages $builddir/contrib/hdtbl/examples/fonts_n.ps 38
+check_number_pages $builddir/contrib/hdtbl/examples/fonts_x.ps 38
+
+exit $ret
