@@ -17,10 +17,12 @@ for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
+#define CHAR unsigned short
+
 class ps_output {
 public:
   ps_output(FILE *, int max_line_length);
-  ps_output &put_string(const char *, int);
+  ps_output &put_string(const CHAR *, int, int);
   ps_output &put_number(int);
   ps_output &put_fix_number(int);
   ps_output &put_float(double);
