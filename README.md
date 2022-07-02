@@ -21,7 +21,7 @@ The current sources are patched ones.
 It supports UTF16 encoding.
 
 ### patch for font definition
-- src/onclude/font.h
+- src/include/font.h
 - src/libs/libgroff/font.cpp
 
 It supports font definition by a range of unicode code points.
