@@ -6,7 +6,7 @@ groff unofficial patch to support CJK fonts
 # About
 
 This repository provides unofficial patch for groff (GNU troff)
-in order to better support CJK fonts.
+in order to better support CJK (Chinese, Japanese, Korean) fonts.
 
 
 # Contents
@@ -14,25 +14,33 @@ in order to better support CJK fonts.
 The original groff 1.22.4 sources by GNU are tagged as "groff-1.22.4".
 The current sources are patched ones.
 
-### patch for grops
+### patched sources for grops
 - src/devices/grops/ps.cpp
 - src/devices/grops/ps.h
 
 It supports UTF16 encoding.
 
-### patch for font definition
+### patched sources for font definition
 - src/include/font.h
 - src/libs/libgroff/font.cpp
 
 It supports font definition by a range of unicode code points.
 
 ### CJK font definition for grops
+
+#### Chinese Simplified  简体中文
 - font/devps/CSS
 - font/devps/CSH
+
+#### Chinese Traditional  繁體中文
 - font/devps/CTS
 - font/devps/CTH
+
+#### Japanese  日本語
 - font/devps/JPM
 - font/devps/JPG
+
+#### Korean  한국어
 - font/devps/KOM
 - font/devps/KOG
 
