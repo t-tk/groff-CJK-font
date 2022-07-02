@@ -9,13 +9,18 @@ SRCS += vita0.1 vita1.1 vita2.1 vita3.1 ame.1
 SRCS += kingdom0.1 leftKO.1 lucky.1
 PS    = $(SRCS:.1=.ps)
 PDF   = $(SRCS:.1=.pdf)
+PNG   = $(SRCS:.1=.png)
 
-.SUFFIXES: .ps .pdf
+.SUFFIXES: .ps .pdf .png
 
 pdf: $(PDF)
+png: $(PNG)
 
 .ps.pdf:
 	ps2pdf $^
+
+.ps.png:
+	gs -dSAFER -sDEVICE=pnggray -r300 -o $@ $^
 
 dankeCJK.ps: dankeCJK.1
 	groff -K utf8 -T ps ./dankeCJK.1 > ./dankeCJK.ps
