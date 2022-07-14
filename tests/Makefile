@@ -6,7 +6,7 @@ GROFF_TMAC_PATH := ../tmac
 SRCS  = dankeCJK.1 dankeJK0.1 dankeJK1.1 humanCJK0.1
 SRCS += ningen0.1 ningen1.1 ningen2.1 ningen3.1 ningen4.1
 SRCS += vita0.1 vita1.1 vita2.1 vita3.1 ame.1
-SRCS += kingdom0.1 leftKO.1 lucky.1
+SRCS += kingdom0.1 leftKO.1 lucky.1 width0.1
 PS    = $(SRCS:.1=.ps)
 PDF   = $(SRCS:.1=.pdf)
 PNG   = $(SRCS:.1=.png)
@@ -72,4 +72,7 @@ leftKO.ps: leftKO.1
 
 lucky.ps: lucky.1
 	groff -K utf8 -T ps ./lucky.1 > ./lucky.ps
+
+width0.ps: width0.1
+	groff -K utf8 -T ps ./width0.1 > ./width0.ps
 
