@@ -1,5 +1,5 @@
 // -*- C++ -*-
-/* Copyright (C) 1989-2018 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
 This file is part of groff.
@@ -29,7 +29,8 @@ case of a font for which math_fitting is false, these two arguments
 are normally ignored by Metafont. We need to get hold of these two
 parameters and put them in the groff font file.
 
-We do this by loading this definition after cmbase when creating cm.base.
+We do this by loading this definition after cmbase when creating
+cm.base.
 
 def ignore_math_fit(expr left_adjustment,right_adjustment) =
  special "adjustment";
@@ -163,7 +164,7 @@ int kern_iterator::next(unsigned char *c1, unsigned char *c2, int *k)
     }
   return 0;
 }
-	  
+
 tfm::tfm()
 : char_info(0), width(0), height(0), depth(0), italic(0), lig_kern(0),
   kern(0), param(0)
@@ -251,7 +252,7 @@ tfm::~tfm()
   a_delete kern;
   a_delete param;
 }
-  
+
 int read2(unsigned char *&s)
 {
   int n;
@@ -269,7 +270,6 @@ int read4(unsigned char *&s)
   n |= *s++;
   return n;
 }
-
 
 int tfm::load(const char *file)
 {
@@ -300,7 +300,7 @@ int tfm::load(const char *file)
   }
   fclose(fp);
   if (lf < 6) {
-    error("bad tfm file '%1': impossibly short", file);
+    error("bad TFM file '%1': impossibly short", file);
     a_delete buf;
     return 0;
   }
@@ -316,13 +316,14 @@ int tfm::load(const char *file)
   nk = read2(ptr);
   int ne = read2(ptr);
   np = read2(ptr);
-  if (6 + lh + (ec - bc + 1) + nw + nh + nd + ni + nl + nk + ne + np != lf) {
-    error("bad tfm file '%1': lengths do not sum", file);
+  if ((6 + lh + (ec - bc + 1) + nw + nh + nd + ni + nl + nk + ne + np)
+      != lf) {
+    error("bad TFM file '%1': lengths do not sum", file);
     a_delete buf;
     return 0;
   }
   if (lh < 2) {
-    error("bad tfm file '%1': header too short", file);
+    error("bad TFM file '%1': header too short", file);
     a_delete buf;
     return 0;
   }
@@ -592,7 +593,8 @@ struct char_list {
   char_list(const char *, char_list * = 0);
 };
 
-char_list::char_list(const char *s, char_list *p) : ch(strsave(s)), next(p)
+char_list::char_list(const char *s, char_list *p) : ch(strsave(s)),
+		     next(p)
 {
 }
 
@@ -626,7 +628,7 @@ int read_map(const char *file, char_list **table)
       return 0;
     }
     if (n < 0 || n > 255) {
-      error("%1:%2: code out of range", file, lineno);
+      error("%1:%2: code %3 out of range", file, lineno, n);
       fclose(fp);
       return 0;
     }
@@ -681,7 +683,7 @@ struct S2 {
   };
 
 static void usage(FILE *stream);
-  
+
 int main(int argc, char **argv)
 {
   program_name = argv[0];
@@ -694,7 +696,8 @@ int main(int argc, char **argv)
     { "version", no_argument, 0, 'v' },
     { NULL, 0, 0, 0 }
   };
-  while ((opt = getopt_long(argc, argv, "svg:k:", long_options, NULL)) != EOF)
+  while ((opt = getopt_long(argc, argv, "svg:k:", long_options, NULL))
+	 != EOF)
     switch (opt) {
     case 'g':
       gf_file = optarg;
@@ -710,7 +713,7 @@ int main(int argc, char **argv)
 	    || *ptr != '\0'
 	    || n < 0
 	    || n > UCHAR_MAX)
-	  error("invalid skewchar");
+	  error("invalid skew character position '%1'", optarg);
 	else
 	  skewchar = (int)n;
 	break;
@@ -730,9 +733,10 @@ int main(int argc, char **argv)
       exit(1);
       break;
     case EOF:
-      assert(0);
+      assert(0 == "EOF encountered in option processing");
     }
   if (argc - optind != 3) {
+    error("insufficient arguments");
     usage(stderr);
     exit(1);
   }
@@ -752,7 +756,8 @@ int main(int argc, char **argv)
     return 1;
   errno = 0;
   if (!freopen(font_file, "w", stdout)) {
-    error("can't open '%1' for writing: %2", font_file, strerror(errno));
+    error("can't open '%1' for writing: %2", font_file,
+	  strerror(errno));
     return 1;
   }
   printf("name %s\n", font_file);
@@ -762,8 +767,8 @@ int main(int argc, char **argv)
   int len = strlen(internal_name);
   if (len > 4 && strcmp(internal_name + len - 4, ".tfm") == 0)
     internal_name[len - 4] = '\0';
-  // DIR_SEPS[] are possible directory separator characters, see nonposix.h.
-  // We want the rightmost separator of all possible ones.
+  // DIR_SEPS[] are possible directory separator characters, see
+  // nonposix.h.  We want the rightmost separator of all possible ones.
   // Example: d:/foo\\bar.
   const char *s = strrchr(internal_name, DIR_SEPS[0]), *s1;
   const char *sep = &DIR_SEPS[1];
@@ -789,8 +794,10 @@ int main(int argc, char **argv)
   // Print the list of ligatures.
   // First find the indices of each character that can participate in
   // a ligature.
+  size_t lig_char_entries = sizeof(lig_chars)/sizeof(lig_chars[0]);
+  size_t lig_table_entries = sizeof(lig_table)/sizeof(lig_table[0]);
   for (i = 0; i < 256; i++)
-    for (unsigned int j = 0; j < sizeof(lig_chars)/sizeof(lig_chars[0]); j++)
+    for (unsigned int j = 0; j < lig_char_entries; j++)
       for (char_list *p = table[i]; p; p = p->next)
 	if (strcmp(lig_chars[j].ch, p->ch) == 0)
 	  lig_chars[j].i = i;
@@ -798,7 +805,7 @@ int main(int argc, char **argv)
   // and it appears as a ligature in the tfm file, include in
   // the list of ligatures.
   int started = 0;
-  for (i = 0; i < sizeof(lig_table)/sizeof(lig_table[0]); i++) {
+  for (i = 0; i < lig_table_entries; i++) {
     int i1 = lig_chars[lig_table[i].c1].i;
     int i2 = lig_chars[lig_table[i].c2].i;
     int r = lig_chars[lig_table[i].res].i;
@@ -837,7 +844,7 @@ int main(int argc, char **argv)
     }
   printf("charset\n");
   char_list unnamed("---");
-  for (i = 0; i < 256; i++) 
+  for (i = 0; i < 256; i++)
     if (t.contains(i)) {
       char_list *p = table[i] ? table[i] : &unnamed;
       int m[6];
@@ -868,6 +875,8 @@ int main(int argc, char **argv)
 
 static void usage(FILE *stream)
 {
-  fprintf(stream, "usage: %s [-sv] [-g gf_file] [-k skewchar] tfm_file map_file font\n",
-	  program_name);
+  fprintf(stream, "usage: %s [-s] [-g GF-FILE] [-k SKEW-CHAR] TFM-FILE"
+	  " MAP-FILE FONT\n", program_name);
+  fprintf(stream, "usage: %s -v\n", program_name);
+  fprintf(stream, "usage: %s --version\n", program_name);
 }

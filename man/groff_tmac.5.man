@@ -1,22 +1,13 @@
-.TH GROFF_TMAC @MAN5EXT@ "@MDATE@" "groff @VERSION@"
-.SH NAME
-groff_tmac \- macro files in the roff typesetting system
-.
-.\" groff_tmac(5):
-.\" Source file position: <groff_source>/man/groff_tmac.man
-.\" Installed position: <prefix>/share/man/man5/groff_tmac.5
-.
-.
-.\" Save and disable compatibility mode (for, e.g., Solaris 10/11).
-.do nr groff_tmac_C \n[.C]
-.cp 0
+.TH groff_tmac @MAN5EXT@ "@MDATE@" "groff @VERSION@"
+.SH Name
+groff_tmac \- macro files in the GNU roff typesetting system
 .
 .
 .\" ====================================================================
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 2000-2018 Free Software Foundation, Inc.
+.\" Copyright (C) 2000-2020 Free Software Foundation, Inc.
 .\"
 .\" This file is part of groff, the GNU roff type-setting system.
 .\"
@@ -30,11 +21,13 @@ groff_tmac \- macro files in the roff typesetting system
 .\" called FDL in the main directory of the groff source package.
 .
 .
-.ds Ellipsis \&.\|.\|.\&\"
+.\" Save and disable compatibility mode (for, e.g., Solaris 10/11).
+.do nr *groff_groff_tmac_5_man_C \n[.cp]
+.cp 0
 .
 .
 .\" ====================================================================
-.SH DESCRIPTION
+.SH Description
 .\" ====================================================================
 .
 The
@@ -63,7 +56,7 @@ directories.
 .
 .
 .\" ====================================================================
-.SH "GROFF MACRO PACKAGES"
+.SH "groff Macro Packages"
 .\" ====================================================================
 .
 .I groff
@@ -71,7 +64,7 @@ provides all classical macro packages, some more full packages, and
 some secondary packages for special purposes.
 .
 Note that it is not possible to use multiple primary macro packages at
-the same time; saying e.g.\&
+the same time; saying e.g.,
 .
 .IP
 .EX
@@ -101,7 +94,7 @@ file.
 .
 .
 .\" ====================================================================
-.SS "Man\~Pages"
+.SS "Man pages"
 .\" ====================================================================
 .
 .TP
@@ -134,7 +127,7 @@ Multiple man pages (in either format) can be handled.
 .
 .
 .\" ====================================================================
-.SS "Full Packages"
+.SS "Full packages"
 .\" ====================================================================
 .
 The packages in this section provide a complete set of macros for
@@ -183,7 +176,7 @@ macro package; see
 .
 .
 .\" ====================================================================
-.SS "Language-specific Packages"
+.SS "Language-specific packages"
 .\" ====================================================================
 .
 .TP
@@ -247,7 +240,7 @@ It should be used as the last macro package on the command line.
 .
 .
 .\" ====================================================================
-.SS "Input Encodings"
+.SS "Input encodings"
 .\" ====================================================================
 .
 .
@@ -264,7 +257,7 @@ Various input encodings supported directly by groff.
 Normally, this macro is loaded at the very beginning of a document or
 specified as the first macro argument on the command line.
 .
-.B @g@roff
+.I groff
 loads latin1 by default at start-up.
 .
 Note that these macro packages don't work on EBCDIC hosts.
@@ -277,7 +270,7 @@ Encoding support for EBCDIC.
 On those platforms it is loaded automatically at start-up.
 .
 Due to different character ranges used in
-.B @g@roff
+.I groff
 it doesn't work on architectures which are based on ASCII.
 .
 .
@@ -304,7 +297,7 @@ fonts which contain the necessary glyphs.
 .
 .
 .\" ====================================================================
-.SS "Special Packages"
+.SS "Special packages"
 .\" ====================================================================
 .
 The macro packages in this section are not intended for stand-alone
@@ -531,7 +524,7 @@ image's width.
 .EX
 \&.am PSPIC
 \&.\ \ vpt 0
-\&\[rs]h'(\[rs]\[rs]n[ps-offset]u + \[rs]\[rs]n[ps-deswid]u)'
+\&\[rs]h\[aq](\[rs]\[rs]n[ps-offset]u + \[rs]\[rs]n[ps-deswid]u)\[aq]
 \&.\ \ sp \-1
 \&.\ \ vpt 1
 \&..
@@ -563,11 +556,16 @@ See
 .
 .TP
 .I tty\-char
-Overrides the definition of standard troff characters and some groff
-characters for TTY devices.
+Defines fallback definitions of
+.I roff
+special characters for terminal devices.
 .
-The optical appearance is intentionally inferior compared to that of
-normal TTY formatting to allow processing with critical equipment.
+These definitions more poorly optically approximate typeset output
+compared to those of the
+.I tty
+file in favor of communicating more semantic information,
+which can allow easier processing with critical equipment.
+\" XXX: critical equipment like what?
 .
 .
 .TP
@@ -579,7 +577,7 @@ addresses; see
 .
 .
 .\" ====================================================================
-.SH NAMING
+.SH Naming
 .\" ====================================================================
 .
 Classical roff systems were designed before the conventions of the
@@ -704,7 +702,7 @@ with a leading \[oq]m\[cq] for the classical packages.
 .
 .
 .\" ====================================================================
-.SH INCLUSION
+.SH Inclusion
 .\" ====================================================================
 .
 There are several ways to use a macro package in a document.
@@ -818,7 +816,7 @@ request or the option
 .
 .ig
 .\" ====================================================================
-.SH CONVENTION
+.SH Convention
 .\" ====================================================================
 .
 .\" This section does not fit into the framework of this document.
@@ -880,7 +878,7 @@ man\~pages only the following characters should be used:
 .
 ..
 .\" ====================================================================
-.SH "WRITING MACROS"
+.SH "Writing Macros"
 .\" ====================================================================
 .
 A
@@ -909,9 +907,9 @@ macro call.
 Within the macro definition, the arguments are available as the escape
 sequences
 .BR \[rs]$1 ,
-\*[Ellipsis],
+\&.\|.\|.,
 .BR \[rs]$9 ,
-.BR \[rs]$[ \*[Ellipsis] ] ,
+.BR \[rs]$[ .\|.\|. ] ,
 .BR \[rs]$* ,
 and
 .BR \[rs]$@ ,
@@ -924,7 +922,7 @@ see
 .
 .
 .\" ====================================================================
-.SS "Copy-in Mode"
+.SS "Copy-in mode"
 .\" ====================================================================
 .
 The phase when groff reads a macro is called
@@ -951,19 +949,17 @@ escape sequence.
 .
 This doubling is most important for the positional parameters.
 .
-For example, to print information on the arguments that were passed to
-the macro to the terminal, define a macro named \[oq].print_args\[cq],
-say.
+For example, the following macro prints information on its arguments:
 .
 .
 .IP
 .ds @1 \[rs]f[I]\[rs]\[rs]$0\[rs]f[]\"
 .ds @2 arguments:\"
 .EX
-\&.ds midpart was called with
+\&.ds midpart was called with the following
 \&.de print_args
-\&.\ \ tm\ \*[@1]\ \[rs]*[midpart]\ \[rs]\[rs]n[.$]\ \*[@2]
-\&.\ \ tm\ \[rs]\[rs]$*
+\&\*[@1]\ \[rs]*[midpart]\ \[rs]\[rs]n[.$]\ \*[@2]
+\&\[rs]\[rs]$*
 \&..
 .EE
 .rm @1
@@ -979,12 +975,11 @@ When calling this macro by
 .EE
 .
 .P
-the following text is printed to the terminal:
+the following text is printed:
 .
 .IP
 .EX
-\&\f[CI]print_args\f[] was called with the following 2 arguments:
-arg1 arg2
+\&\f[CI]print_args\f[] was called with the following 2 arguments: arg1 arg2
 .EE
 .
 .
@@ -1019,7 +1014,7 @@ and
 .
 .
 .\" ====================================================================
-.SS "Draft Mode"
+.SS "Draft mode"
 .\" ====================================================================
 .
 Writing groff macros is easy when the escaping mechanism is temporarily
@@ -1044,10 +1039,10 @@ For example, the code above can be written in a simpler way by
 .ds @2 arguments:\"
 .EX
 \&.eo
-\&.ds midpart was called with
+\&.ds midpart was called with the following
 \&.de print_args
-\&.\ \ tm\ \*[@1]\ \[rs]*[midpart]\ \[rs]n[.$]\ \*[@2]
-\&.\ \ tm\ \[rs]$*
+\&\*[@1]\ \[rs]*[midpart]\ \[rs]n[.$]\ \*[@2]
+\&\[rs]$*
 \&..
 \&.ec
 .EE
@@ -1069,7 +1064,7 @@ request.
 .
 .
 .\" ====================================================================
-.SS "Tips for Macro Definitions"
+.SS "Tips for macro definitions"
 .\" ====================================================================
 .
 .IP \(bu
@@ -1117,7 +1112,7 @@ requests and macro calls (arbitrary whitespace after the leading dot).
 .
 .
 .\" ====================================================================
-.SS "Diversions"
+.SS Diversions
 .\" ====================================================================
 .
 Diversions can be used to implement quite advanced programming
@@ -1173,7 +1168,7 @@ the diversion and can be manipulated from within the macros.
 .
 .
 .\" ====================================================================
-.SH FILES
+.SH Files
 .\" ====================================================================
 .
 All macro package files must be named
@@ -1247,30 +1242,33 @@ in this installation
 .
 .
 .\" ====================================================================
-.SH ENVIRONMENT
+.SH Environment
 .\" ====================================================================
 .
 .TP
 .I GROFF_TMAC_PATH
-A colon separated list of additional tmac directories in which to search
+A colon-separated list of additional directories in which to search
 for macro files.
 .
 See the previous section for a detailed description.
 .
 .
 .\" ====================================================================
-.SH AUTHORS
+.SH Authors
 .\" ====================================================================
+.
 This document was written by
-.MT groff\-bernd.warken\-72@\:web.de
+.MT groff\-bernd\:.warken\-72@\:web\:.de
 Bernd Warken
 .ME
 and
-.MT wl@\:gnu.org
+.MT wl@\:gnu\:.org
 Werner Lemberg
 .ME .
+.
+.
 .\" ====================================================================
-.SH "SEE ALSO"
+.SH "See also"
 .\" ====================================================================
 .
 .IR "Groff: The GNU Implementation of troff" ,
@@ -1282,9 +1280,19 @@ manual.
 You can browse it interactively with \[lq]info groff\[rq].
 .
 .
+.LP
+The
+.UR https://wiki.linuxfoundation.org/lsb/fhs
+Filesystem Hierarchy Standard
+.UE
+is maintained by the Linux Foundation.
+.
+.
 .TP
 .BR groff (@MAN1EXT@)
-an overview of the groff system.
+is an overview of the
+.I groff
+system.
 .
 .
 .TP
@@ -1301,33 +1309,26 @@ an overview of the groff system.
 .BR groff_ms (@MAN7EXT@),
 .TQ
 .BR groff_trace (@MAN7EXT@),
+\~and
 .TQ
-.BR groff_www (@MAN7EXT@).
-the groff tmac macro packages.
+.BR groff_www (@MAN7EXT@)
+are
+.I groff
+macro packages.
 .
 .
 .TP
 .BR groff (@MAN7EXT@)
-the groff language.
-.
-.
-.P
-The Filesystem Hierarchy Standard is available at the
-.UR http://\:www.pathname.com/\:fhs/
-FHS web site
-.UE .
+summarizes the language recognized by GNU
+.IR troff . \" GNU
 .
 .
 .\" Restore compatibility mode (for, e.g., Solaris 10/11).
-.cp \n[groff_tmac_C]
+.cp \n[*groff_groff_tmac_5_man_C]
 .
-.
-.\" ====================================================================
-.\" Emacs settings
-.\" ====================================================================
 .
 .\" Local Variables:
-.\" mode: nroff
 .\" fill-column: 72
+.\" mode: nroff
 .\" End:
 .\" vim: set filetype=groff textwidth=72:

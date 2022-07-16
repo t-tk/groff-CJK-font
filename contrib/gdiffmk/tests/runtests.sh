@@ -2,7 +2,7 @@
 #
 #	A very simple function test for gdiffmk.sh.
 #
-# Copyright (C) 2004-2018 Free Software Foundation, Inc.
+# Copyright (C) 2004-2020 Free Software Foundation, Inc.
 # Written by Mike Bianchi <MBianchi@Foveal.com <mailto:MBianchi@Foveal.com>>
 
 # This file is part of the gdiffmk utility, which is part of groff.

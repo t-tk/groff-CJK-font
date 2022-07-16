@@ -3,16 +3,11 @@
 # Inspired by doctype script in Kernighan & Pike, Unix Programming
 # Environment, pp 306-8.
 
-# Source file position: <groff-source>/src/roff/grog/grog.pl
-# Installed position: <prefix>/bin/grog
-
-# Copyright (C) 1993-2018 Free Software Foundation, Inc.
+# Copyright (C) 1993-2020 Free Software Foundation, Inc.
 # Written by James Clark.
 # Rewritten with Perl by Bernd Warken <groff-bernd.warken-72@web.de>.
 # The macros for identifying the devices were taken from Ralph
 # Corderoy's 'grog.sh' of 2006.
-
-# Last update: 19 Jul 2015
 
 # This file is part of 'grog', which is part of 'groff'.
 
@@ -95,8 +90,6 @@ require 'subs.pl';
 
 
 1;
-########################################################################
-### Emacs settings
 # Local Variables:
 # mode: CPerl
 # End:

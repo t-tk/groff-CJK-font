@@ -1,5 +1,5 @@
 // -*- C++ -*-
-/* Copyright (C) 1992-2018 Free Software Foundation, Inc.
+/* Copyright (C) 1992-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
 This file is part of groff.
@@ -47,14 +47,25 @@ size_t file_name_max(const char *fname)
 #ifndef NAME_MAX
 #ifdef MAXNAMLEN
 #define NAME_MAX MAXNAMLEN
-#else /* !MAXNAMLEN */
+#endif
+#endif
+
+#ifndef NAME_MAX
 #ifdef MAXNAMELEN
 #define NAME_MAX MAXNAMELEN
-#else /* !MAXNAMELEN */
+#endif
+#endif
+
+#ifndef NAME_MAX
+#include <stdio.h>
+#ifdef FILENAME_MAX
+#define NAME_MAX FILENAME_MAX
+#endif
+#endif
+
+#ifndef NAME_MAX
 #define NAME_MAX 14
-#endif /* !MAXNAMELEN */
-#endif /* !MAXNAMLEN */
-#endif /* !NAME_MAX */
+#endif
 
 size_t file_name_max(const char *)
 {

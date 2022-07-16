@@ -2,10 +2,7 @@
 
 # gpinyin - European-like Chinese writing 'pinyin' into 'groff'
 
-# Source file position: <groff-source>/contrib/gpinyin/gpinyin.pl
-# Installed position: <prefix>/bin/gpinyin
-
-# Copyright (C) 2014-2018 Free Software Foundation, Inc.
+# Copyright (C) 2014-2020 Free Software Foundation, Inc.
 
 # Written by Bernd Warken <groff-bernd.warken-72@web.de>.
 
@@ -185,8 +182,8 @@ if ( $pinyin_mode ) {
 
 
 1;
-########################################################################
-### Emacs settings
 # Local Variables:
+# fill-column: 72
 # mode: CPerl
 # End:
+# vim: set autoindent textwidth=72:

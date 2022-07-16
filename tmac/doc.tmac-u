@@ -48,7 +48,7 @@
 .
 .
 .if !\n(.g \
-.  ab This version of mdoc can be run with GNU troff only!
+.  ab groff mdoc macros require groff extensions; aborting
 .
 .
 .do if d Dd .nx
@@ -57,8 +57,11 @@
 .cp 0
 .
 .
-.if (\n[.x]\n[.y] < 118) \
-.  ab You need GNU troff version 1.18 or higher to run this version of mdoc!
+.if (\n[.x]\n[.y] < 118) \{\
+.  ds doc-msg doc.tmac: groff mdoc macros require groff 1.18 or later,
+.  as doc-msg " but found groff \n[.x].\n[.y]; aborting
+.  ab \*[doc-msg]
+.\}
 .
 .
 .\" Load start-up files
@@ -475,6 +478,8 @@
 .de doc-print-recursive
 .  nr doc-reg-dpr1 \n[doc-type\n[doc-arg-ptr]]
 .  ds doc-str-dpr "\*[doc-arg\n[doc-arg-ptr]]
+.
+.  if \n[doc-do-capitalize] .stringup doc-str-dpr
 .
 .  ie (\n[doc-reg-dpr1] == 1) \{\
 .    nop \f[\n[doc-curr-font]]\s[\n[doc-curr-size]u]\c
@@ -6485,10 +6490,11 @@
 .  if (\n[doc-arg-ptr] <= \n[doc-lasttext-Lk]) \{\
 .    nop \*[doc-Em-font]\c
 .    while (\n[doc-arg-ptr] < \n[doc-lasttext-Lk]) \{\
-.      nop \*[doc-arg\n[doc-arg-ptr]]
+.      nop \&\*[doc-arg\n[doc-arg-ptr]]
 .      nr doc-arg-ptr +1
 .    \}
-.    nop \*[doc-arg\n[doc-arg-ptr]]\f[\n[doc-curr-font]]\s[\n[doc-curr-size]u]:
+.    nop \&\*[doc-arg\n[doc-arg-ptr]]\c
+.    nop \f[\n[doc-curr-font]]\s[\n[doc-curr-size]u]:
 .    nr doc-arg-ptr +1
 .  \}
 .
@@ -6498,7 +6504,7 @@
 .
 .  \" Print the delimiters, if any.
 .  while (\n[doc-arg-ptr] <= \n[doc-arg-limit]) \{\
-.    nop \*[doc-arg\n[doc-arg-ptr]]\c
+.    nop \&\*[doc-arg\n[doc-arg-ptr]]\c
 .    nr doc-arg-ptr +1
 .  \}
 .  nop \&
@@ -6570,10 +6576,6 @@
 .
 .\" load local modifications
 .mso mdoc.local
-.
-.\" ====================================================================
-.\" Editor settings
-.\" ====================================================================
 .
 .\" Local Variables:
 .\" mode: nroff

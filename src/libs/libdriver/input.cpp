@@ -2,7 +2,7 @@
 
 // <groff_src_dir>/src/libs/libdriver/input.cpp
 
-/* Copyright (C) 1989-2018 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
 
    Written by James Clark (jjc@jclark.com)
    Major rewrite 2001 by Bernd Warken <groff-bernd.warken-72@web.de>

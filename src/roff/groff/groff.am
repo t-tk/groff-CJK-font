@@ -1,28 +1,26 @@
-# Copyright (C) 1993-2018 Free Software Foundation, Inc.
+# Copyright (C) 1993-2020 Free Software Foundation, Inc.
 #
-#   Original Makefile.sub rewritten by 
+#   Original Makefile.sub rewritten by
 #   Bernd Warken <groff-bernd.warken-72@web.de>
 #   and Werner LEMBERG <wl@gnu.org>
 #
-#   Automake migration by 
+#   Automake migration by
 #   Bertrand Garrigues <bertrand.garrigues@laposte.net>
 #
-# Latest update: 22 Aug 2015
+# This file is part of groff.
 #
-# 'groff' is free software; you can redistribute it and/or modify it
+# groff is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# 'groff' is distributed in the hope that it will be useful, but
+# groff is distributed in the hope that it will be useful, but
 # WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-########################################################################
 
 bin_PROGRAMS += groff
 groff_LDADD = \
@@ -41,6 +39,28 @@ GROFF_OPTS_OUTPUT = \
   groff_opts_with_arg.txt
 groffoptsdir = $(libprogramdir)
 groffopts_DATA = $(GROFF_OPTS_OUTPUT)
+
+groff_TESTS = \
+  src/roff/groff/tests/do_not_loop_infinitely_when_breaking_cjk.sh \
+  src/roff/groff/tests/dot-cp_register_works.sh \
+  src/roff/groff/tests/on_latin1_device_oq_is_0x27.sh \
+  src/roff/groff/tests/recognize_end_of_sentence.sh \
+  src/roff/groff/tests/regression_savannah_56555.sh \
+  src/roff/groff/tests/regression_savannah_58153.sh \
+  src/roff/groff/tests/regression_savannah_58162.sh \
+  src/roff/groff/tests/regression_savannah_58337.sh \
+  src/roff/groff/tests/regression_savannah_59202.sh \
+  src/roff/groff/tests/smoke-test_html_device.sh \
+  src/roff/groff/tests/string_case_xform_errors.sh \
+  src/roff/groff/tests/string_case_xform_requests.sh \
+  src/roff/groff/tests/string_case_xform_unicode_escape.sh \
+  src/roff/groff/tests/use_point_size_escape_with_single_digit_arg.sh
+TESTS += $(groff_TESTS)
+EXTRA_DIST += $(groff_TESTS)
+
+groff_XFAIL_TESTS = \
+  src/roff/groff/tests/string_case_xform_unicode_escape.sh
+XFAIL_TESTS += $(groff_XFAIL_TESTS)
 
 MOSTLYCLEANFILES += groff_opts.tmp $(GROFF_OPTS_OUTPUT)
 
@@ -61,12 +81,8 @@ groff_opts_with_arg.txt: groff_opts_no_arg.txt
 	@cat $@
 
 
-########################################################################
-# Editor settings
-########################################################################
-#
 # Local Variables:
 # mode: makefile-automake
 # fill-column: 72
 # End:
-# vim: set filetype=automake textwidth=72:
+# vim: set autoindent filetype=automake textwidth=72:

@@ -1,5 +1,4 @@
-// -*- C++ -*-
-/* Copyright (C) 1989-2018 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
 This file is part of groff.
@@ -1583,9 +1582,6 @@ int main(int argc, char **argv)
 	exit(0);
 	break;
       }
-    case 'T':
-      // I'm sick of getting bug reports from IRIX users
-      break;
     case CHAR_MAX + 1: // --help
       usage(stdout);
       exit(0);
@@ -1597,9 +1593,9 @@ int main(int argc, char **argv)
     default:
       assert(0);
     }
-  printf(".if !\\n(.g .ab GNU tbl requires GNU troff.\n"
-	 ".if !dTS .ds TS\n"
-	 ".if !dTE .ds TE\n");
+  printf(".if !\\n(.g .ab GNU tbl requires groff extensions; aborting\n"
+	 ".do if !dTS .ds TS\n"
+	 ".do if !dTE .ds TE\n");
   if (argc > optind) {
     for (int i = optind; i < argc; i++) 
       if (argv[i][0] == '-' && argv[i][1] == '\0') {
@@ -1635,3 +1631,8 @@ int main(int argc, char **argv)
   return 0;
 }
 
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

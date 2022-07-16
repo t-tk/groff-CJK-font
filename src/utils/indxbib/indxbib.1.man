@@ -1,5 +1,5 @@
-.TH @G@INDXBIB @MAN1EXT@ "@MDATE@" "groff @VERSION@"
-.SH NAME
+.TH @g@indxbib @MAN1EXT@ "@MDATE@" "groff @VERSION@"
+.SH Name
 @g@indxbib \- make inverted index for bibliographic databases
 .
 .
@@ -7,7 +7,7 @@
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 1989-2018 Free Software Foundation, Inc.
+.\" Copyright (C) 1989-2020 Free Software Foundation, Inc.
 .\"
 .\" Permission is granted to make and distribute verbatim copies of this
 .\" manual provided the copyright notice and this permission notice are
@@ -25,15 +25,20 @@
 .\" instead of in the original English.
 .
 .
+.\" Save and disable compatibility mode (for, e.g., Solaris 10/11).
+.do nr *groff_indxbib_1_man_C \n[.cp]
+.cp 0
+.
+.
 .\" ====================================================================
-.SH SYNOPSIS
+.SH Synopsis
 .\" ====================================================================
 .
 .SY @g@indxbib
 .OP \-w
-.OP \-c file
+.OP \-c common-words-file
 .OP \-d dir
-.OP \-f file
+.OP \-f list-file
 .OP \-h n
 .OP \-i string
 .OP \-k n
@@ -41,53 +46,62 @@
 .OP \-n n
 .OP \-o file
 .OP \-t n
-.RI [ filename
+.RI [ file
 \&.\|.\|.\&]
 .YS
+.
 .
 .SY @g@indxbib
 .B \-\-help
 .YS
 .
+.
 .SY @g@indxbib
 .B \-v
+.
 .SY @g@indxbib
 .B \-\-version
 .YS
 .
+.
 .\" ====================================================================
-.SH DESCRIPTION
+.SH Description
 .\" ====================================================================
 .
-.B @g@indxbib
-makes an inverted index for the bibliographic databases in
-.IR filename \|.\|.\|.
+.I \%@g@indxbib
+makes an inverted index for the bibliographic databases in each
+.I file
 for use with
-.BR @g@refer (@MAN1EXT@),
-.BR @g@lookbib (@MAN1EXT@),
+.IR \%@g@refer (@MAN1EXT@),
+.IR \%@g@lookbib (@MAN1EXT@),
 and
-.BR lkbib (@MAN1EXT@).
+.IR \%lkbib (@MAN1EXT@).
 .
-The index will be named
-.RI filename @INDEX_SUFFIX@ ;
-the index is written to a temporary file which is then renamed to
-this.
+Each created index is named
+.RI file @INDEX_SUFFIX@ ;
+writing is done to a temporary file which is then renamed to this.
 .
-If no filenames are given on the command line because the
+If no
+.I file
+operands are given on the command line because the
 .B \-f
-option has been used, and no
+option has been used,
+and no
 .B \-o
-option is given, the index will be named
-.IR @DEFAULT_INDEX_NAME@@INDEX_SUFFIX@ .
+option is given,
+the index will be named
+.IR \%@DEFAULT_INDEX_NAME@@INDEX_SUFFIX@ .
 .
 .
 .LP
 Bibliographic databases are divided into records by blank lines.
-Within a record, each fields starts with a
+.
+Within a record,
+each field starts with a
 .B %
 character at the beginning of a line.
 .
-Fields have a one letter name which follows the
+Fields have a one letter name that follows the
 .B %
 character.
 .
@@ -99,8 +113,9 @@ The values set by the
 .BR \-l ,
 and
 .B \-t
-options are stored in the index;
-when the index is searched, keys will be discarded and truncated in a
+options are stored in the index:
+when the index is searched,
+keys will be discarded and truncated in a
 manner appropriate to these options;
 the original keys will be used for verifying that any record
 found using the index actually contains the keys.
@@ -119,44 +134,43 @@ and will be used in verifying records found using the index.
 .
 .
 .\" ====================================================================
-.SH OPTIONS
+.SH Options
 .\" ====================================================================
 .
-Whitespace is permitted between a command-line option and its argument.
-.
-.
-.TP
+.B \-\-help
+displays a usage message,
+while
 .B \-v
-Print the version number.
+and
+.B \-\-version
+show version information;
+all exit afterward.
+.
 .
 .TP
-.B \-w
-Index whole files.
-.
-Each file is a separate record.
-.
-.TP
-.BI \-c file
+.BI \-c\~ common-words-file
 Read the list of common words from
 .I file
 instead of
-.IR @COMMON_WORDS_FILE@ .
+.IR \%@COMMON_WORDS_FILE@ .
+.
 .
 .TP
-.BI \-d dir
+.BI \-d\~ dir
 Use
 .I dir
 as the pathname of the current working directory to store in the index,
 instead of the path printed by
-.BR pwd (1).
+.IR pwd (1).
 .
 Usually
 .I dir
 will be a symbolic link that points to the directory printed by
-.BR pwd (1).
+.IR pwd (1).
+.
 .
 .TP
-.BI \-f file
+.BI \-f\~ list-file
 Read the files to be indexed from
 .IR file .
 .
@@ -165,22 +179,27 @@ If
 is
 .BR \- ,
 files will be read from the standard input.
+.
 The
 .B \-f
 option can be given at most once.
 .
+.
 .TP
-.BI \-i string
+.BI \-i\~ string
 Don't index the contents of fields whose names are in
 .IR string .
 .
-Initially
+Field names are one character each.
+.
+Initially,
 .I string
 is
 .BR XYZ .
 .
+.
 .TP
-.BI \-h n
+.BI \-h\~ n
 Use the first prime greater than or equal to
 .I n
 for the size of the hash table.
@@ -190,87 +209,119 @@ Larger values of
 will usually make searching faster,
 but will make the index larger
 and
-.B @g@indxbib
+.I \%@g@indxbib
 use more memory.
 .
-Initially
+Initially,
 .I n
 is 997.
 .
+.
 .TP
-.BI \-k n
+.BI \-k\~ n
 Use at most
 .I n
 keys per input record.
 .
-Initially
+Initially,
 .I n
 is 100.
 .
+.
 .TP
-.BI \-l n
+.BI \-l\~ n
 Discard keys that are shorter than
 .IR n .
 .
-Initially
+Initially,
 .I n
 is 3.
 .
+.
 .TP
-.BI \-n n
+.BI \-n\~ n
 Discard the
 .I n
 most common words.
 .
-Initially
+Initially,
 .I n
 is 100.
 .
+.
 .TP
-.BI \-o basename
+.BI \-o\~ basename
 The index should be named
 .RI basename @INDEX_SUFFIX@ .
 .
+.
 .TP
-.BI \-t n
+.BI \-t\~ n
 Truncate keys to
 .IR n .
 .
-Initially
+Initially,
 .I n
 is 6.
 .
 .
+.TP
+.B \-w
+Index whole files.
+.
+Each file is a separate record.
+.
+.
 .\" ====================================================================
-.SH FILES
+.SH Files
 .\" ====================================================================
 .
 .TP
-.RI filename @INDEX_SUFFIX@
+.RI \%file @INDEX_SUFFIX@
 Index.
 .
+.
 .TP
-.I @DEFAULT_INDEX_NAME@@INDEX_SUFFIX@
+.I \%@DEFAULT_INDEX_NAME@@INDEX_SUFFIX@
 Default index name.
 .
-.TP
-.I @COMMON_WORDS_FILE@
-List of common words.
 .
 .TP
-.IR indxbib XXXXXX
+.I \%@COMMON_WORDS_FILE@
+List of common words.
+.
+The traditional name,
+.RI \[lq] eign \[rq],
+is an abbreviation of \[lq]English ignored [word list]\[rq].
+.
+.
+.TP
+.IR \%indxbib XXXXXX
 Temporary file.
 .
 .
 .\" ====================================================================
-.SH "SEE ALSO"
+.SH "See also"
 .\" ====================================================================
-.BR @g@refer (@MAN1EXT@),
-.BR lkbib (@MAN1EXT@),
-.BR @g@lookbib (@MAN1EXT@)
+.
+\[lq]Some Applications of Inverted Indexes on the Unix System\[rq],
+by M.\& E.\& Lesk,
+1978,
+AT&T Bell Laboratories Computing Science Technical Report No.\& 69.
+.
+.
+.LP
+.IR \%@g@refer (@MAN1EXT@),
+.IR \%lkbib (@MAN1EXT@),
+.IR \%@g@lookbib (@MAN1EXT@)
+.
+.
+.\" Restore compatibility mode (for, e.g., Solaris 10/11).
+.cp \n[*groff_indxbib_1_man_C]
 .
 .
 .\" Local Variables:
+.\" fill-column: 72
 .\" mode: nroff
 .\" End:
-.\" vim: set filetype=groff:
+.\" vim: set filetype=groff textwidth=72:

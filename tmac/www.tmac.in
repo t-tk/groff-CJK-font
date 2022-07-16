@@ -1,16 +1,13 @@
 .ig
 www.tmac - macro package for adding HTML elements to roff documents.
 
-File position: <groff_source_top>/tmac/www.tmac
-Installed position: groff's main macro directory.
-
 ------------------------------------------------------------------------
     Legalese
 ------------------------------------------------------------------------
 
 This file is part of groff, the GNU roff type-setting system.
 
-Copyright (C) 2001-2018 Free Software Foundation, Inc.
+Copyright (C) 2001-2020 Free Software Foundation, Inc.
 written by Gaius Mulley <gaius@glam.ac.uk>, with additions by
 Werner Lemberg <wl@gnu.org> and
 Bernd Warken <groff-bernd.warken-72@web.de>.
@@ -47,7 +44,7 @@ following, HTML always denotes XHTML also.
 .
 .do mso devtag.tmac
 .
-.nr _C \n(.C
+.do nr *groff_www_tmac_in_C \n[.cp]
 .cp 0
 .
 .
@@ -150,16 +147,25 @@ following, HTML always denotes XHTML also.
 .als www:error www-error
 .
 .\" --------------------------------------------------------------------
+.\" www:fatal (<test>...)
+.\"
+.\" Print fatal error message and abort.
+.\"
+.de www-fatal
+.  ab \\n[.F]:\\n[.c]: fatal macro error: \\$*
+..
+.
+.als www:fatal www-fatal
+.
+.\" --------------------------------------------------------------------
 .\" www:lenstr (<register_name> <string_name>)
 .\"
 .\" Store length of string named <string_name> into register named
 .\" <register_name>.
 .\"
 .de www:lenstr
-.  if !(\\n[.$] == 2) \{\
-.    tm .\\$0 expects 2 arguments.
-.    ab
-.  \}
+.  if !(\\n[.$] == 2) \
+.    www:fatal .\\$0 expects 2 arguments, got \\n[.$]
 .  length \\$0:n x\\*[\\$2]
 .  nr \\$1 (\\n[\\$0:n] - 1)
 .  rr \\$0:n
@@ -174,7 +180,7 @@ following, HTML always denotes XHTML also.
 .\"
 .de www:splitstr
 .  if !(\\n[.$] == 1) \
-.    www:error .\\$0 expects 1 argument.
+.    www:error .\\$0 expects 1 argument, got \\n[.$]
 .  if '\\*[\\$1]'' \
 .    return
 .  ds \\$0:r "\\*[\\$1]\"
@@ -211,7 +217,7 @@ following, HTML always denotes XHTML also.
 .\"
 .de www:url_breaks
 .  if !(\\n[.$] == 1) \
-.    www:error .\\$0 expects 1 argument.
+.    www:error .\\$0 expects 1 argument, got \\n[.$]
 .  if !\n[www:substring_ok] \
 .    return
 .  ds \\$0:s "\\*[\\$1]\"
@@ -231,7 +237,7 @@ following, HTML always denotes XHTML also.
 .de www:url_breaks_split
 .  nr \\$0:min 5        \" minimal number of characters for next line
 .  if (\\n[.$] < 2) \
-.    www:error .\\$0 expects at least 2 arguments.
+.    www:error .\\$0 expects at least 2 arguments, got \\n[.$]
 .  ds \\$0:res \\$1\"
 .  shift
 .  ds \\$0:s
@@ -1587,7 +1593,7 @@ following, HTML always denotes XHTML also.
 .\"
 .de LINKSTYLE
 .  if (\\n[.$] < 1) \
-.    www:error .\\$0 expects at least 1 argument.
+.    www:error .\\$0 expects at least 1 argument, got \\n[.$]
 .  ds www:color \\$1\"
 .  shift
 .  if (\\n[.$] < 1) \
@@ -1595,7 +1601,7 @@ following, HTML always denotes XHTML also.
 .  ds www:fontstyle \\$1\"
 .  shift
 .  if (\\n[.$] < 1) \
-.    www:error .\\$0 expects that both the open and close glyph is specified
+.    www:error .\\$0 expects both open and close glyphs to be specified
 .  ds www:open \\$1\"
 .  ds www:close \\$2\"
 ..
@@ -1620,13 +1626,9 @@ following, HTML always denotes XHTML also.
 .\}
 .
 .if r ps4html .nop \O[0]
-.cp \n(_C
+.cp \n[*groff_www_tmac_in_C]
 .
 .\" now set
-.
-.\" ====================================================================
-.\" Editor settings
-.\" ====================================================================
 .
 .\" Local Variables:
 .\" mode: nroff

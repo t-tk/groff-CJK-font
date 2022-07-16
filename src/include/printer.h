@@ -2,7 +2,7 @@
 
 // <groff_src_dir>/src/include/printer.h
 
-/* Copyright (C) 1989-2018 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
 
    Written by James Clark (jjc@jclark.com)
 

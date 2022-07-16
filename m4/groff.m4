@@ -1,5 +1,5 @@
 # Autoconf macros for groff.
-# Copyright (C) 1989-2018 Free Software Foundation, Inc.
+# Copyright (C) 1989-2020 Free Software Foundation, Inc.
 #
 # This file is part of groff.
 #
@@ -152,11 +152,12 @@ AC_DEFUN([GROFF_DOC_CHECK],
   AC_SUBST([make_uninstall_examples])])
 
 
-# We need makeinfo 4.8 or newer.
+# We need makeinfo from Texinfo 5.0 or newer, for @codequoteundirected.
+# The minor version checking logic is present for future needs.
 
 AC_DEFUN([GROFF_MAKEINFO],
   # By default automake will set MAKEINFO to MAKEINFO = ${SHELL} <top
-  # src dir>/build-aux/missing makeinfo.As we need a more precise
+  # src dir>/build-aux/missing makeinfo.  As we need a more precise
   # check of makeinfo version, we don't use it.
   [MAKEINFO=
    if test $docadd_info = yes; then
@@ -175,7 +176,7 @@ AC_DEFUN([GROFF_MAKEINFO],
        makeinfo_version_minor=`IFS=.; set x $makeinfo_version; echo 0${3}`
        makeinfo_version_numeric=`
          expr ${makeinfo_version_major}000 \+ ${makeinfo_version_minor}`
-       if test $makeinfo_version_numeric -lt 4008; then
+       if test $makeinfo_version_numeric -lt 5000; then
          missing="'makeinfo' is too old."
        fi
      fi
@@ -186,10 +187,10 @@ AC_DEFUN([GROFF_MAKEINFO],
        if test ! -f ${infofile} \
 	|| test ${srcdir}/doc/groff.texi -nt ${infofile}; then
 	 AC_MSG_ERROR($missing
-[Get the 'texinfo' package version 4.8 or newer.])
+[Get the 'texinfo' package version 5.0 or newer.])
        else
 	 AC_MSG_WARN($missing
-[Get the 'texinfo' package version 4.8 or newer if you want to convert
+[Get the 'texinfo' package version 5.0 or newer if you want to convert
 'groff.texi' into a PDF or HTML document.])
        fi
      fi
@@ -1548,23 +1549,6 @@ AC_DEFUN([GROFF_APPRESDIR_CHECK],
        ])
      fi
    fi])
-
-
-# Set up the '--with-grofferdir' command-line option.
-
-AC_DEFUN([GROFF_GROFFERDIR_OPTION],
-  [AC_ARG_WITH([grofferdir],
-     AS_HELP_STRING([--with-grofferdir=DIR],
-		    [groffer files location]))])
-
-
-AC_DEFUN([GROFF_GROFFERDIR_DEFAULT],
-  [if test "x$with_grofferdir" = "x"; then
-    groffer_dir=$libprogramdir/groffer
-  else
-    groffer_dir=$with_grofferdir
-  fi
-  AC_SUBST([groffer_dir])])
 
 
 AC_DEFUN([GROFF_LIBPROGRAMDIR_DEFAULT],

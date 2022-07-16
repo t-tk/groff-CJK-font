@@ -1,16 +1,14 @@
 '\" t
-.TH @G@TROFF @MAN1EXT@ "@MDATE@" "groff @VERSION@"
-.SH NAME
-@g@troff \- the troff processor of the groff text formatting system
-.
-.\" troff.man -> troff.1
+.TH @g@troff @MAN1EXT@ "@MDATE@" "groff @VERSION@"
+.SH Name
+@g@troff \- GNU troff document formatter
 .
 .
 .\" ====================================================================
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 1989-2018 Free Software Foundation, Inc.
+.\" Copyright (C) 1989-2020 Free Software Foundation, Inc.
 .\"
 .\" This file is part of groff, the GNU roff type-setting system.
 .\"
@@ -24,12 +22,17 @@
 .\" called FDL in the main directory of the groff source package.
 .
 .
+.\" Save and disable compatibility mode (for, e.g., Solaris 10/11).
+.do nr *groff_troff_1_man_C \n[.cp]
+.cp 0
+.
+.
 .\" ====================================================================
-.SH SYNOPSIS
+.SH Synopsis
 .\" ====================================================================
 .
 .SY @g@troff
-.OP \-abcivzCERU
+.OP \-abcizCERU
 .OP \-d cs
 .OP \-f fam
 .OP \-F dir
@@ -47,8 +50,21 @@
 .YS
 .
 .
+.SY @g@troff
+.B \-\-help
+.YS
+.
+.
+.SY @g@troff
+.B \-v
+.
+.SY @g@troff
+.B \-\-version
+.YS
+.
+.
 .\" ====================================================================
-.SH DESCRIPTION
+.SH Description
 .\" ====================================================================
 .
 This manual page describes the GNU version of
@@ -67,15 +83,35 @@ appropriate order and with the appropriate options.
 .
 .
 .\" ====================================================================
-.SH OPTIONS
+.SH Options
 .\" ====================================================================
-.
-Whitespace is permitted between a command-line option and its argument.
 .
 .
 .TP
 .B \-a
-Generate an ASCII approximation of the typeset output.
+Generate an ASCII
+(Unicode basic Latin)
+approximation of the typeset output.
+.
+The read-only register
+.B .A
+is set to\~1.
+.
+On a system using the
+.I man\-db
+manual page formatter and that installs man pages compressed with
+.IR gzip (1),
+one might use the shell command
+.
+.RS
+.RS
+.EX
+zcat $(man \-w troff) | groff \-a \-t \-man \-Tdvi | less
+.EE
+.RE
+to observe how lines are broken for the DVI device.
+.RE
+.
 .
 .TP
 .B \-b
@@ -84,20 +120,27 @@ Print a backtrace with each warning or error message.
 This backtrace should help track down the cause of the error.
 .
 The line numbers given in the backtrace may not always be correct, for
-.BR @g@troff 's
+.IR \%@g@troff 's
 idea of line numbers gets confused by
-.B as
+.B .as
 or
-.B am
+.B .am
 requests.
+.
 .
 .TP
 .B \-c
-Disable color output (always disabled in compatibility mode).
+Disable color output;
+also disable SGR escape output to
+.IR grotty (@MAN1EXT@)
+devices.
+.
 .
 .TP
 .B \-C
-Enable compatibility mode.
+Enable compatibility mode;
+implies \-c.
+.
 .
 .TP
 .BI \-d cs
@@ -114,15 +157,17 @@ must be a one letter name.
 .
 .TP
 .B \-E
-Inhibit all error messages of
-.BR @g@troff .
+Inhibit
+.I \%@g@troff
+error messages;
+implies
+.B \-Ww.
 .
-Note that this doesn't affect messages output to standard error by
-macro packages using the
-.B tm
-or
-.B tm1
-requests.
+Note that this doesn't suppress messages sent to the standard error
+stream by documents or macro packages using
+.B .tm
+or related requests.
+.
 .
 .TP
 .BI \-f fam
@@ -150,24 +195,43 @@ Read the standard input after all the named input files have been
 processed.
 .
 .TP
-.BI \-I dir
-This option may be used to add a directory to the search path for
-files (both those on the command line and those named in
-.B \&.psbb
-requests).
+.BI \-I\~ dir
+Search
+.I dir
+for files
+(those on the command line,
+those named in
+.B .psbb
+and
+.B .so
+requests,
+and
+those named in
+.RB \[lq] "\[rs]X\[aq]ps: import\[aq]" \[rq],
+.RB \[lq] "\[rs]X\[aq]ps: file\[aq]" \[rq],
+and
+.RB \[lq] "\[rs]X\[aq]pdf: pdfpic\[aq]" \[rq]
+escapes).
 .
-The search path is initialized with the current directory.
+This option may be specified more than once;
+the directories are then searched in the order specified.
 .
-This option may be specified more than once; the directories are then
-searched in the order specified (but before the current directory).
-.
-If you want to make the current directory be read before other
-directories, add
-.B \-I.\&
+If you want to search the current directory before others,
+add
+.RB \[lq] "\-I .\&" \[rq]
 at the appropriate place.
 .
-.IP
-No directory search is performed for files with an absolute file name.
+The current working directory is otherwise searched last.
+.
+.B \-I
+works similarly to,
+and is named for,
+the \[lq]include\[rq]
+option of Unix C compilers.
+.
+No directory search is performed for files specified using an absolute
+file name.
+.
 .
 .TP
 .BI \-m name
@@ -222,7 +286,7 @@ means print every page up to
 means print every page from
 .IR n .
 .
-.B @g@troff
+.I \%@g@troff
 will exit after printing the last page in the list.
 .
 .TP
@@ -238,7 +302,9 @@ to
 .I c
 must be a one character name;
 .I n
-can be any troff numeric expression.
+can be any
+.I roff
+numeric expression.
 .
 .TP
 .B \-R
@@ -247,35 +313,38 @@ Don't load
 and
 .IR troffrc\-end .
 .
+.
 .TP
 .BI \-T name
 Prepare output for device
 .IR name ,
 rather than the default
-.BR @DEVICE@ ;
+.RB \[lq] @DEVICE@ \[rq];
 see
-.BR groff (@MAN1EXT@)
+.IR groff (@MAN1EXT@)
 for a more detailed description.
+.
 .
 .TP
 .B \-U
-Unsafe mode.
-.
-This will enable the following requests:
-.BR open ,
-.BR opena ,
-.BR pso ,
-.BR sy ,
+Unsafe mode;
+enables the
+.BR .open ,
+.BR .opena ,
+.BR .pso ,
+.BR .sy ,
 and
-.BR pi .
-For security reasons, these potentially dangerous requests are
-disabled otherwise.
+.B .pi
+requests.
 .
-It will also add the current directory to the macro search path.
+For security reasons,
+these potentially dangerous requests are disabled otherwise.
 .
-.TP
-.B \-v
-Print the version number.
+It will also add the current directory to the macro search path;
+see
+.B \-m
+above.
+.
 .
 .TP
 .BI \-w name
@@ -309,11 +378,11 @@ Suppress formatted output.
 .
 .
 .\" ====================================================================
-.SH WARNINGS
+.SH Warnings
 .\" ====================================================================
 .
 The warnings that can be given by
-.B @g@troff
+.I \%@g@troff
 are divided into the following categories.
 .
 The name associated with each warning is used by the
@@ -482,7 +551,7 @@ This warning will never occur in compatibility mode.
 .
 .TP
 .BR syntax "\t128"
-Dubious syntax in numeric expressions.
+Invalid syntax.
 .
 .TP
 .BR tab "\t2048"
@@ -511,7 +580,7 @@ All warnings.
 .
 .
 .\" ====================================================================
-.SH ENVIRONMENT
+.SH Environment
 .\" ====================================================================
 .
 .TP
@@ -519,7 +588,7 @@ All warnings.
 A colon separated list of directories in which to search for
 macro files.
 .
-.B @g@troff
+.I \%@g@troff
 will scan directories given in the
 .B \-M
 option before these, and in standard directories (current directory if
@@ -539,7 +608,7 @@ A colon separated list of directories in which to search for the
 .IR dev name
 directory.
 .
-.B @g@troff
+.I \%@g@troff
 will scan directories given in the
 .B \-F
 option before these, and in standard directories
@@ -550,7 +619,7 @@ after these.
 .
 .
 .\" ====================================================================
-.SH FILES
+.SH Files
 .\" ====================================================================
 .
 .TP
@@ -599,25 +668,25 @@ necessary.
 .
 .
 .\" ====================================================================
-.SH AUTHORS
+.SH Authors
 .\" ====================================================================
 .
 The GNU version of
-.I troff
+.I troff \" generic
 was originally written by James Clark;
 he also wrote the original version of this document,
 which was modified by
-.MT wl@\:gnu.org
+.MT wl@\:gnu\:.org
 Werner Lemberg
 .ME
 and
-.MT groff\-bernd.warken\-72@\:web.de
+.MT groff\-bernd\:.warken\-72@\:web\:.de
 Bernd Warken
 .ME .
 .
 .
 .\" ====================================================================
-.SH "SEE ALSO"
+.SH "See also"
 .\" ====================================================================
 .
 .TP
@@ -626,6 +695,7 @@ The main program of the
 .I groff
 system, a wrapper around
 .IR @g@troff .
+.
 .
 .TP
 .BR groff (@MAN7EXT@)
@@ -642,7 +712,7 @@ From the command line, this is called by
 .RE
 .
 .TP
-.BR \%groff_diff (@MAN7EXT@)
+.IR groff_diff (@MAN7EXT@)
 The differences of the
 .I groff
 language and the
@@ -654,7 +724,7 @@ Currently, this is the most actual document of the
 system.
 .
 .TP
-.BR roff (@MAN7EXT@)
+.IR roff (@MAN7EXT@)
 An overview over
 .I groff
 and other
@@ -672,11 +742,12 @@ manual.
 You can browse it interactively with \(lqinfo groff\(rq.
 .
 .
-.\" ====================================================================
-.\" Emacs variables
-.\" ====================================================================
+.\" Restore compatibility mode (for, e.g., Solaris 10/11).
+.cp \n[*groff_troff_1_man_C]
+.
 .
 .\" Local Variables:
+.\" fill-column: 72
 .\" mode: nroff
 .\" End:
-.\" vim: set filetype=groff:
+.\" vim: set filetype=groff textwidth=72:

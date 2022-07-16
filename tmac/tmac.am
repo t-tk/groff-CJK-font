@@ -1,8 +1,6 @@
-# Copyright (C) 1989-2018 Free Software Foundation, Inc.
+# Copyright (C) 1989-2020 Free Software Foundation, Inc.
 #      Written by James Clark (jjc@jclark.com)
 #      Automake migration by Bertrand Garrigues
-#
-# Latest update: 22 Aug 2015
 #
 # This file is part of groff.
 #
@@ -18,12 +16,14 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 tmac_srcdir = $(top_srcdir)/tmac
 tmac_builddir = $(top_builddir)/tmac
 
 man7_MANS += \
   tmac/groff_ms.7 \
   tmac/groff_man.7 \
+  tmac/groff_man_style.7 \
   tmac/groff_me.7 \
   tmac/groff_mdoc.7 \
   tmac/groff_trace.7 \
@@ -92,36 +92,53 @@ TMACNORMALFILES = \
   tmac/hyphenex.cs \
   tmac/ja.tmac \
   tmac/zh.tmac
-NORMALFILES = `echo $(TMACNORMALFILES) | sed -e "s|tmac/||g"`
 
-# TMACSTRIPFILES are built from their unstripped version (-u)
+# TMACSTRIPFILES are built from their unstripped version (-u).
+TMACUNSTRIPFILES = tmac/e.tmac-u tmac/doc.tmac-u tmac/doc-old.tmac-u
 TMACSTRIPFILES = tmac/e.tmac tmac/doc.tmac tmac/doc-old.tmac
 
-# Files installed in tmacdir
-dist_tmac_DATA = $(TMACNORMALFILES) tmac/an.tmac tmac/s.tmac
+# files installed in tmacdir
+#
+# "s" and "an" are not "NORMAL" because they may use compatibility
+# wrappers; see install_tmac_wrap_hook.
+dist_tmac_DATA = \
+  $(TMACNORMALFILES) \
+  $(TMACUNSTRIPFILES) \
+  tmac/an.tmac \
+  tmac/s.tmac
 nodist_tmac_DATA = $(TMACSTRIPFILES) tmac/www.tmac
 
-TMACMDOCFILES = \
-  tmac/doc-common \
-  tmac/doc-ditroff \
-  tmac/doc-nroff \
-  tmac/doc-syms
-MDOCFILES = `echo $(TMACMDOCFILES) | sed -e "s|tmac/||g"`
+TMACMDOCSTRIPFILES = \
+  tmac/mdoc/doc-common \
+  tmac/mdoc/doc-ditroff \
+  tmac/mdoc/doc-nroff \
+  tmac/mdoc/doc-syms
+TMACMDOCUNSTRIPFILES = \
+  tmac/mdoc/doc-common-u \
+  tmac/mdoc/doc-ditroff-u \
+  tmac/mdoc/doc-nroff-u \
+  tmac/mdoc/doc-syms-u
 mdocdir=$(tmacdir)/mdoc
 # Files installed in mdocdir
-nodist_mdoc_DATA = $(TMACMDOCFILES)
+nodist_mdoc_DATA = $(TMACMDOCSTRIPFILES)
 
 # Installed in localtmacdir
 dist_localtmac_DATA = tmac/man.local tmac/mdoc.local
 
-MOSTLYCLEANFILES += $(TMACMDOCFILES) tmac/www.tmac $(TMACSTRIPFILES) \
+MOSTLYCLEANFILES += $(TMACMDOCSTRIPFILES) \
+   $(TMACSTRIPFILES) \
+   tmac/groff_man.7.man \
+   tmac/groff_man_style.7.man \
+   tmac/www.tmac \
+   tmac/*-stamp \
    tmac/stamp-wrap \
    tmac/*-wrap
 
 EXTRA_DIST += \
+  $(TMACMDOCUNSTRIPFILES) \
   tmac/fixmacros.sed \
   tmac/groff_ms.7.man \
-  tmac/groff_man.7.man \
+  tmac/groff_man.7.man.in \
   tmac/groff_me.7.man \
   tmac/groff_mdoc.7.man \
   tmac/groff_trace.7.man \
@@ -136,23 +153,72 @@ EXTRA_DIST += \
   tmac/TODO \
   tmac/www.tmac.in
 
-dist-hook: tmac-dist-hook
-tmac-dist-hook:
-	chmod u+w $(distdir)/tmac
-	for f in $(TMACMDOCFILES) $(TMACSTRIPFILES); do \
-	  cp -f $(top_srcdir)/$$f-u $(distdir)/tmac; \
+tmac_TESTS = \
+  tmac/tests/an-ext_ME_punct_hyphenates.sh \
+  tmac/tests/an-ext_MT_body_hyphenates.sh \
+  tmac/tests/an-ext_UE_punct_hyphenates.sh \
+  tmac/tests/an-ext_UR_body_hyphenates.sh \
+  tmac/tests/an-old_AT_and_UC_footer_saved_and_restored.sh \
+  tmac/tests/an-old_CS_register_off.sh \
+  tmac/tests/an-old_CS_register_on.sh \
+  tmac/tests/an-old_CS_register_unspecified.sh \
+  tmac/tests/an-old_CT_register_off.sh \
+  tmac/tests/an-old_CT_register_on.sh \
+  tmac/tests/an-old_CT_register_unspecified.sh \
+  tmac/tests/an-old_LL_init_sanely.sh \
+  tmac/tests/an-old_TH_repairs_ad_damage.sh \
+  tmac/tests/an-old_TH_repairs_hy_damage.sh \
+  tmac/tests/an-old_TS_do_not_keep_tables_when_cR_set.sh \
+  tmac/tests/an-old_X_register_works.sh \
+  tmac/tests/an-old_avoid_two-font_denial_of_service.sh \
+  tmac/tests/andoc-clear-doc-traps.sh \
+  tmac/tests/andoc-flush-between-packages.sh \
+  tmac/tests/doc-CS_works.sh \
+  tmac/tests/doc-CT_works.sh \
+  tmac/tests/doc-accept-mixed-case-section-headings.sh \
+  tmac/tests/doc-smoke-test.sh \
+  tmac/tests/s_R-handles-its-arguments.sh \
+  tmac/tests/s_TC-works-with-percent-in-custom-titles.sh
+TESTS += $(tmac_TESTS)
+EXTRA_DIST += $(tmac_TESTS)
+
+tmac_XFAIL_TESTS = \
+  tmac/tests/an-ext_ME_punct_hyphenates.sh \
+  tmac/tests/an-ext_UE_punct_hyphenates.sh
+XFAIL_TESTS += $(tmac_XFAIL_TESTS)
+
+$(TMACSTRIPFILES): $(TMACUNSTRIPFILES)
+	for f in $(TMACSTRIPFILES); do \
+	   sed -f $(tmac_srcdir)/strip.sed $(top_srcdir)/$$f-u \
+	     > $(top_builddir)/$$f; \
 	done
 
-$(TMACMDOCFILES) $(TMACSTRIPFILES): 
-	$(MKDIR_P) $(top_builddir)/tmac
-	for f in $(TMACMDOCFILES) $(TMACSTRIPFILES); do \
-	   sed -f $(tmac_srcdir)/strip.sed $(top_srcdir)/$$f-u > $(top_builddir)/$$f; \
+$(TMACMDOCSTRIPFILES): $(TMACMDOCUNSTRIPFILES)
+	$(MKDIR_P) $(top_builddir)/tmac/mdoc
+	for f in $(TMACMDOCSTRIPFILES); do \
+	   sed -f $(tmac_srcdir)/strip.sed $(top_srcdir)/$$f-u \
+	     > $(top_builddir)/$$f; \
 	done
 
 tmac/www.tmac: tmac/www.tmac.in
 	$(MKDIR_P) $(top_builddir)/tmac
 	sed -e "s;[@]PNMTOPS_NOSETPAGE[@];$(pnmtops_nosetpage);g" \
 	  $(tmac_srcdir)/www.tmac.in > $(top_builddir)/tmac/www.tmac
+
+
+# Check input file for bare m4 keywords.
+M4WORDS = define|divert|include|index|shift|undefine|undivert
+M4CHECK = tmac/check-groff_man-stamp
+
+$(M4CHECK): tmac/groff_man.7.man.in
+	! grep -E '(^|[[:space:]])($(M4WORDS))($$|[[:space:]])' \
+	  $(tmac_srcdir)/groff_man.7.man.in > $@
+
+tmac/groff_man.7.man: tmac/groff_man.7.man.in $(M4CHECK)
+	m4 -D_groff_man_not_style $(tmac_srcdir)/groff_man.7.man.in > $@
+
+tmac/groff_man_style.7.man: tmac/groff_man.7.man.in $(M4CHECK)
+	m4 -D_groff_man_style $(tmac_srcdir)/groff_man.7.man.in > $@
 
 # The installation of groff compatibility wrappers for vendor-provided
 # non-GNU macro sets is controlled by 'compatibility_wrappers' (see the
@@ -259,12 +325,8 @@ uninstall_tmac_hook:
 	fi
 
 
-########################################################################
-# Editor settings
-########################################################################
-#
 # Local Variables:
 # mode: makefile-automake
 # fill-column: 72
 # End:
-# vim: set filetype=automake textwidth=72:
+# vim: set autoindent filetype=automake textwidth=72:

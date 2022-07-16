@@ -2,9 +2,6 @@
 
 # chem - a groff preprocessor for producing chemical structure diagrams
 
-# Source file position: <groff-source>/contrib/chem/chem.pl
-# Installed position: <prefix>/bin/chem
-
 my $Copyright = 'Copyright (C) 2006-2014 Free Software Foundation, Inc.';
 # Written by Bernd Warken <groff-bernd.warken-72@web.de>.
 
@@ -1264,7 +1261,8 @@ EOF
 } # version()
 
 1;
-### Emacs settings
 # Local Variables:
+# fill-column: 72
 # mode: CPerl
 # End:
+# vim: set autoindent textwidth=72:

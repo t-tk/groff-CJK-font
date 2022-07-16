@@ -1,6 +1,6 @@
 .\" an-old.tmac
 .\"
-.\" Copyright (C) 1989-2018 Free Software Foundation, Inc.
+.\" Copyright (C) 1989-2020 Free Software Foundation, Inc.
 .\"      Written by James Clark (jjc@jclark.com)
 .\"
 .\" This file is part of groff.
@@ -18,115 +18,85 @@
 .\" You should have received a copy of the GNU General Public License
 .\" along with this program.  If not, see
 .\" <http://www.gnu.org/licenses/>.
-.\"
-.\"  -rcR=1 => Create a single, very long page instead of multiple
-.\"            pages.  Useful for online display.  Default in nroff
-.\"            mode.  Deactivate with -rcR=0.
-.\"  -rC1 => Number pages continuously, rather than start each at 1.
-.\"  -rD1 => Double-sided printing, ie different odd and even page
-.\"          footers.
-.\"  -rPnnn => Number first page nnn.
-.\"  -rSxx => Use size 'xx'pt (either 10, 11, or 12) for document rather
-.\"           than the default size of 10pt.
-.\"  -rXnnn => Number pages after nnn as nnna, nnnb, nnnc, ...
-.\"
+.
+.
 .\" The file man.local is loaded at the end.  Put local additions there.
 .\" If you need to add things to TH, use '.am1 TH'.
-.\"
 .
-.if !\n(.g .ab These man macros work only with groff.
+.if !\n(.g \
+.  ab groff man macros require groff extensions; aborting
 .
 .do if d RI .nx
 .
 .do mso devtag.tmac
 .
-.nr _C \n(.C
+.do nr *groff_an-old_tmac_C \n[.cp]
 .cp 0
 .
-.if (\n[.x]\n[.y] < 118) \
-.  ab You need GNU troff 1.18 or higher to run this version of man!
-.
 .\" Define a string for use in diagnostic messages.
-.ds an-old an-old.tmac
+.ds an-old an-old.tmac\"
 .
-.if !r D .nr D 0
-.if !r C .nr C 0
-.if !r S .nr S 10
-.\" We must use consecutive page numbers when using PostScript to
-.\" generate HTML images, and we must not reset the page number at the
-.\" beginning (the 'ps4html' register is automatically added to the
-.\" command line by the pre-HTML preprocessor).
-.if !r ps4html \
-.  if r P .pn 0\n[P]
-.if !r cR \{\
-.  ie n .nr cR 1
-.  el   .nr cR 0
+.if (\n[.x]\n[.y] < 118) \{\
+.  ds an-msg \*[an-old]: groff man macros require groff 1.18 or later,\"
+.  as an-msg " but found groff \n[.x].\n[.y]; aborting\"
+.  ab \*[an-msg]
 .\}
+.
+.de an-warn
+.  tm \*[an-old]:\\n[.F]:\\n[.c]: warning: \\$*
+..
 .
 .nr need_eo_h 0
 .nr need_col2 0
-.
-.\" set up the line length...
-.\" giving precedence to any prior assignment to the \n[LL] register.
-.if !r LL \{\
-.
-.  \" but if that isn't predefined...
-.  \" then try to respect any prior '.ll' request.
-.  nr LL \n[.l]
-.
-.  \" For troff, this is sufficient to give us a default line length of
-.  \" 6.5i, but for nroff, we prefer a default of 78n to nroff's default
-.  \" 65n.  This has the unfortunate side effect that we will override a
-.  \" user's '.ll 65n' request, with our preferred 78n default; we can't
-.  \" possibly know that the 65n came from a '.ll' request, and MUST
-.  \" assume that it was set by nroff, as its built-in default!  If the
-.  \" user wants to force this setting, then he MUST use the '-rLL=65n'
-.  \" option, or an equivalent '.nr LL 65n' request.
-.  if n \
-.    if (\n[LL] = 65n) \
-.      nr LL 78n
-.\}
-.
-.if !r LT \
-.  nr LT \n[LL]
-.
-.nr FT (-.5i)
-.
-.\" Default heading font
-.ds HF B\"
 .
 .nr an-first 1
 .
 .nr an-html 0
 .if '\*[.T]'html' .nr an-html 1
-.if \n[an-html] .nr C 1
-.if r ps4html .nr C 1
 .
-.\" We redefine .ne to avoid page breaks if cR is set; instead, the page
-.\" length is increased to the necessary amount (this is needed for
-.\" tables).
+.\" Define alternate requests to handle continuous rendering.
 .\"
-.\" Similarly, we redefine .bp if cR is set, adjusting the page length
-.\" to the current position so that no empty lines are inserted.
-.if \n[cR] \{\
-.  de1 ne
-.    ie \\n[.$] \
-.      nr an-ne (v;\\$*)
-.    el \
-.      nr an-ne 1v
-.    if (\\n[an-ne] >= \\n[.t]) \
-.      pl +(\\n[an-ne]u - \\n[.t]u + 1v)
-.  .
+.\" This .ne replacement avoids page breaks; instead, the page length is
+.\" increased to the necessary amount (this is needed for tables).
+.de an-ne
+.  ie \\n[.$] \
+.    nr an-need (v;\\$*)
+.  el \
+.    nr an-need 1v
+.  if (\\n[an-need] >= \\n[.t]) \
+.    pl +(\\n[an-need]u - \\n[.t]u + 1v)
+..
 .
-.  rn bp an-bp
-.  de1 bp
-.    br
-.    pl \\n[nl]u
-.    an-bp \\$*
-.  .
-.\}
+.\" This .bp replacement adjusts the page length to the current position
+.\" so that no empty lines are inserted.
+.de an-bp
+.  br
+.  pl \\n[nl]u
+.  an-real-bp \\$*
+..
 .
-.de set-an-margin
+.\" We need an end macro for continuous rendering as well, to flush any
+.\" pending output line and write the footer for the final man page
+.\" rendered.
+.de1 an-end
+.  nr % 1
+.  pl +4v
+.  fl
+.  sp 3
+.  an-p-footer
+.  pl \\n[nl]u
+..
+.
+.\" Move macros into place for continuous rendering.
+.de an-set-up-continuous-rendering
+.  rn ne an-real-ne
+.  rn bp an-real-bp
+.  rn an-ne ne
+.  rn an-bp bp
+.  em an-end
+..
+.
+.de an-set-margin
 .  nr an-level 1
 .  nr an-margin \\n[IN]
 .  nr an-saved-margin1 \\n[IN]
@@ -134,9 +104,9 @@
 .  nr an-saved-prevailing-indent1 \\n[IN]
 ..
 .
-.ds an-extra1
-.ds an-extra2
-.ds an-extra3
+.ds an-extra1 \" empty
+.ds an-extra2 \" empty
+.ds an-extra3 \" empty
 .
 .\" .TH title section extra1 extra2 extra3
 .de1 TH
@@ -145,29 +115,6 @@
 .    nop \\$1
 .    DEVTAG-EO-TL
 .  \}
-.
-.  de an-init \" This approach gets multiple man pages right.
-.    ds an-title "\\$1\"
-.    ds an-section "\\$2\"
-.    ds an-extra1 "\\$3\"
-.    ie (\\n[.$] > 3)    .ds an-extra2 "\\$4\"
-.    el                  .ds an-extra2 \"Sun Release 4.0
-.
-.    ie (\\n[.$] > 4)    .ds an-extra3 "\\$5\"
-.    el \{ .ie '\\$2'1'  .ds an-extra3 General Commands Manual
-.    el \{ .ie '\\$2'2'  .ds an-extra3 System Calls Manual
-.    el \{ .ie '\\$2'3'  .ds an-extra3 Library Functions Manual
-.    el \{ .ie '\\$2'3p' .ds an-extra3 Perl Programmers Reference Guide
-.    el \{ .ie '\\$2'4'  .ds an-extra3 Kernel Interfaces Manual
-.    el \{ .ie '\\$2'5'  .ds an-extra3 File Formats Manual
-.    el \{ .ie '\\$2'6'  .ds an-extra3 Games Manual
-.    el \{ .ie '\\$2'7'  .ds an-extra3 Miscellaneous Information Manual
-.    el \{ .ie '\\$2'8'  .ds an-extra3 System Manager's Manual
-.    el \{ .ie '\\$2'9'  .ds an-extra3 Kernel Developer's Manual
-.    el                  .ds an-extra3
-.    \}\}\}\}\}\}\}\}\}\}
-.    ds an-init
-\\..
 .
 .  DT
 .
@@ -196,23 +143,37 @@
 .
 .  ps \\n[PS]u
 .  vs \\n[VS]u
+.
+.  \" Restore parameters that a previous man page might have messed up.
+.  ad \\*[AD]
+.  hy \\n[HY]
 .  ll \\n[LL]u
+.  ss 12
 .
-.\" We must select an integer indentation value for nroff;
-.\" see comment in an-do-tag.
-.  if !r IN \{\
-.    ie t .nr IN 7.2n
-.    el   .nr IN 7n
-.  \}
 .  PD
-.  if !r SN \
-.    nr SN 3n \" indentation of sub-sub-headings relative to sub-heads
-.  set-an-margin
-.  nr an-tag-sep 1n
+.  an-set-margin
 .
+.  nr an-tag-sep 1n
 .  nr an-no-space-flag 0
 .  nr an-break-flag 0
 .  nr an-div? 0
+.
+.  ds an-title "\\$1\"
+.  if \\n[CT] .stringup an-title
+.  ds an-section "\\$2\"
+.  ie (\\n[.$] > 4)    .ds an-extra3 "\\$5\"
+.  el \{ .ie '\\$2'1'  .ds an-extra3 General Commands Manual\"
+.  el \{ .ie '\\$2'2'  .ds an-extra3 System Calls Manual\"
+.  el \{ .ie '\\$2'3'  .ds an-extra3 Library Functions Manual\"
+.  el \{ .ie '\\$2'3p' .ds an-extra3 Perl Programmer's Reference Guide\"
+.  el \{ .ie '\\$2'4'  .ds an-extra3 Kernel Interfaces Manual\"
+.  el \{ .ie '\\$2'5'  .ds an-extra3 File Formats Manual\"
+.  el \{ .ie '\\$2'6'  .ds an-extra3 Games Manual\"
+.  el \{ .ie '\\$2'7'  .ds an-extra3 Miscellaneous Information Manual\"
+.  el \{ .ie '\\$2'8'  .ds an-extra3 System Manager's Manual\"
+.  el \{ .ie '\\$2'9'  .ds an-extra3 Kernel Developer's Manual\"
+.  el                  .ds an-extra3 \" empty
+.  \}\}\}\}\}\}\}\}\}\}
 .
 .  ie \\n[cR] \
 .    an-header
@@ -226,6 +187,10 @@
 .      el        .bp 1
 .    \}
 .  \}
+.
+.  ds an-extra1 "\\$3\"
+.  ie (\\n[.$] > 3)    .ds an-extra2 "\\$4\"
+.  el                  .ds an-extra2 \" empty
 ..
 .
 .\" BSD compatibility macros: .AT and .UC
@@ -261,7 +226,8 @@
 .\" Redefine these to customize the header & footer
 .
 .de1 PT
-.  tl '\\*[an-title](\\*[an-section])'\\*[an-extra3]'\\*[an-title](\\*[an-section])'
+.  tl '\\*[an-title](\\*[an-section])'\\*[an-extra3]'\
+\\*[an-title](\\*[an-section])'
 ..
 .
 .de1 BT
@@ -276,7 +242,6 @@
 ..
 .
 .de1 an-header
-.  an-init
 .  if \\n[cR] \{\
 .    ie \\n[an-first] \
 .      nr an-first 0
@@ -314,16 +279,18 @@
 .  vs \\n[VS]u
 .  lt \\n[LT]u
 .  ie \\n[an-html] \{\
-.    ds an-page-string
-.    ds an-extra1
-.    ds an-extra2
+.    ds an-page-string \" empty
+.    ds an-extra1 \" empty
+.    ds an-extra2 \" empty
 .  \}
 .  el \{\
 .    ie r X \{\
-.      if (\\n[%] > \\n[X]) \{\
+.      ie (\\n[%] > \\n[X]) \{\
 .        nr an-page-letter (\\n[%] - \\n[X])
 .        ds an-page-string \\n[X]\\n[an-page-letter]\"
 .      \}
+.      el \
+.        ds an-page-string \\n[%]\"
 .    \}
 .    el \{\
 .      ie \\n[cR] \
@@ -336,20 +303,9 @@
 .  ev
 ..
 .
-.de1 an-end
-.  nr % 1
-.  pl +4v
-.  fl
-.  sp 3
-.  an-p-footer
-.  pl \\n[nl]u
-..
-.
-.if \n[cR] .em an-end
-.
 .de1 SH
 .  sp \\n[PD]u
-.  set-an-margin
+.  an-set-margin
 .  fi
 .  in \\n[an-margin]u
 .  ti 0
@@ -361,12 +317,16 @@
 .  ps \\n[PS-SH]u
 .  ft \\*[HF]
 .  ne (2v + 1u)
-.  if \\n[.$] \&\\$*
+.  if \\n[.$] \{\
+.    ds an-section-heading \\$*\"
+.    if \\n[CS] .stringup an-section-heading
+\&\\*[an-section-heading]
+.  \}
 ..
 .
 .de1 SS
 .  sp \\n[PD]u
-.  set-an-margin
+.  an-set-margin
 .  fi
 .  in \\n[IN]u
 .  ti \\n[SN]u
@@ -511,14 +471,12 @@
 .  ns
 ..
 .
-.ds an-empty \" this is referenced to avoid looping on, e.g., .RB ( \\ )
-.
 .de1 RI
 .  if \\n[.$] \{\
 .    ds an-result \&\f[R]\\$1\"
 .    shift
 .    while (\\n[.$] >= 2) \{\
-.      as an-result \,\f[I]\\$1\f[R]\/\\$2\\*[an-empty]\"
+.      as an-result \,\f[I]\\$1\f[R]\/\\$2\"
 .      shift 2
 .    \}
 .    if \\n[.$] .as an-result \,\f[I]\\$1\"
@@ -546,7 +504,7 @@
 .    ds an-result \&\f[I]\,\\$1\"
 .    shift
 .    while (\\n[.$] >= 2) \{\
-.      as an-result \/\f[B]\\$1\f[I]\,\\$2\\*[an-empty]\"
+.      as an-result \/\f[B]\\$1\f[I]\,\\$2\"
 .      shift 2
 .    \}
 .    if \\n[.$] .as an-result \/\f[B]\\$1\"
@@ -560,7 +518,7 @@
 .    ds an-result \&\f[B]\\$1\"
 .    shift
 .    while (\\n[.$] >= 2) \{\
-.      as an-result \,\f[I]\\$1\f[B]\/\\$2\\*[an-empty]\"
+.      as an-result \,\f[I]\\$1\f[B]\/\\$2\"
 .      shift 2
 .    \}
 .    if \\n[.$] .as an-result \,\f[I]\\$1\"
@@ -572,7 +530,7 @@
 .de1 RB
 .  ds an-result \&\"
 .  while (\\n[.$] >= 2) \{\
-.    as an-result \f[R]\\$1\f[B]\\$2\\*[an-empty]\"
+.    as an-result \f[R]\\$1\f[B]\\$2\"
 .    shift 2
 .  \}
 .  if \\n[.$] .as an-result \f[R]\\$1\"
@@ -583,7 +541,7 @@
 .de1 BR
 .  ds an-result \&\"
 .  while (\\n[.$] >= 2) \{\
-.    as an-result \f[B]\\$1\f[R]\\$2\\*[an-empty]\"
+.    as an-result \f[B]\\$1\f[R]\\$2\"
 .    shift 2
 .  \}
 .  if \\n[.$] .as an-result \f[B]\\$1\"
@@ -613,6 +571,11 @@
 .\" table support
 .
 .de1 TS
+.  \" If continuous rendering, tell tbl not to use keeps.
+.  ie \\n[cR] \
+.    nr 3usekeeps 0
+.  el \
+.    nr 3usekeeps 1
 .  sp \\n[PD]u
 .  if \\n[an-html] \{\
 .    nr an-TS-ll \\n[.l]
@@ -647,8 +610,10 @@
 .de1 R
 \c
 .  ie \\n[.$] \{\
-.    tmc \\*[an-old]: \\n[.F]: line \\n[.c]: 'R' is a string
-.    tm1 " (producing the registered sign), not a macro.
+.    ds an-msg 'R' is a string (producing the registered sign),\"
+.    as an-msg " not a macro\"
+.    an-warn \\*[an-msg]
+.    rm an-msg
 .    nop \\$*
 .  \}
 .  el \{\
@@ -664,29 +629,17 @@
 .ds S \s'\\n(PSu'\"
 .ie c\[tm] .ds Tm \(tm\"
 .el        .ds Tm (TM)\"
-.ds lq \(lq\"
-.ds rq \(rq\"
+.ie c\[lq] .ds lq \(lq\"
+.el        .ds lq ""\"
+.ie c\[rq] .ds rq \(rq\"
+.el        .ds rq ""\"
 .
-.if !\n[an-html] \{\
-.  if !rHY \{\
-.    ie \n[cR] \
-.      nr HY 4
-.    el \
-.      nr HY 6
-.  \}
-.  hy \n[HY]
-.\}
-.
-.\" For UTF-8, map some characters conservatively for the sake
-.\" of easy cut and paste.
+.\" For UTF-8, map the hyphen-minus to itself to facilitate copy and
+.\" paste of code examples, file names, and URLs embedding it.
 .
 .if '\*[.T]'utf8' \{\
-.  rchar \- - ' `
-.
 .  char \- \N'45'
 .  char  - \N'45'
-.  char  ' \N'39'
-.  char  ` \N'96'
 .\}
 .
 .\" Load man macro extensions.
@@ -695,11 +648,148 @@
 .\" Load local modifications.
 .mso man.local
 .
-.cp \n[_C]
+.\" Set each rendering parameter only if its -[dr] option or man.local
+.\" did not.
 .
-.\" ====================================================================
-.\" Editor settings
-.\" ====================================================================
+.\" continous rendering (one long page)
+.if !r cR \{\
+.  ie n \
+.    nr cR 1
+.  el \
+.    nr cR 0
+.\}
+.
+.\" continuous page numbering over multiple documents
+.\"
+.\" We must use consecutive page numbers when using PostScript to
+.\" generate HTML images; we must not reset the page number at the
+.\" beginning of each document (the 'ps4html' register is automatically
+.\" added to the command line by the pre-HTML preprocessor).
+.\"
+.\" \n[C] may get set to 1 redundantly in the below; we could replace
+.\" that with a complex conditional, but it doesn't seem to be worth the
+.\" trouble given AT&T-compatible restrictions on '!' placement.
+.ie !r C \
+.  nr C 0
+.el \
+.  if !\n[C] \
+.    if \n[an-html] \{\
+.       tm \*[an-old]: ignoring continuous page numbering in HTML output
+.       nr C 1
+.    \}
+.if \n[an-html] \
+.  nr C 1
+.if r ps4html \
+.  nr C 1
+.
+.\" full capitalization of section headings
+.if !r CS \
+.  nr CS 0
+.
+.\" full capitalization of page title
+.if !r CT \
+.  nr CT 0
+.
+.\" double-sided layout
+.ie !r D \
+.  nr D 0
+.el \
+.  if \n[D] \
+.    if \n[an-html] \{\
+.       tm \*[an-old]: ignoring double-sided layout in HTML output
+.       nr D 0
+.    \}
+.
+.\" footer distance
+.if !r FT \
+.  nr FT (-.5i)
+.
+.\" hyphenation mode
+.if !r HY \{\
+.  \" No page breaks occur in continuous rendering.
+.  ie \n[cR] \
+.    nr HY 4
+.  el \
+.    nr HY 6
+.\}
+.
+.\" standard indentation
+.if !r IN \{\
+.  \" We must select an integer indentation value for nroff; see comment
+.  \" in an-do-tag.
+.  ie t \
+.    nr IN 7.2n
+.  el \
+.    nr IN 7n
+.\}
+.
+.\" line length
+.if !r LL \{\
+.  \" If in troff mode, respect device default.
+.  ie t \
+.    nr LL \n[.l]
+.  \" Otherwise, override nroff mode default of 65n.
+.  el \
+.    nr LL 78n
+.\}
+.
+.\" title (header, footer) length
+.if !r LT \
+.  nr LT \n[LL]u
+.
+.\" starting page number
+.\"
+.\" Unlike most of these parameters, we do not set a default for P;
+.\" groff supplies a default starting page number (1).  Also, when
+.\" rendering for the HTML output device, page numbers are concealed and
+.\" used for internal purposes like image embedding.
+.\"
+.if r P \
+.  if \n[an-html] \
+.    if !(\n[P] = 1) \{\
+.       tm \*[an-old]: ignoring starting page number in HTML output
+.       rr P
+.    \}
+.
+.if !r ps4html \
+.  if r P \
+.    pn 0\n[P]
+.
+.\" point size
+.if !r S \{\
+.  nr S 10
+.  if '\*[.T]'X75-12' \
+.    nr S 12
+.  if '\*[.T]'X100-12' \
+.    nr S 12
+.\}
+.
+.\" subsection indentation
+.if !r SN \
+.  nr SN 3n
+.
+.\" page number after which to apply letter suffixes
+.\"
+.\" Unlike most of these parameters, we do not set a default for X; only
+.\" the macro an-p-footer uses it.
+.if r X \
+.  if \n[an-html] \{\
+.     tm \*[an-old]: ignoring page letter suffixing in HTML output
+.     rr X
+.  \}
+.
+.\" adjustment mode
+.if !d AD \
+.  ds AD b\"
+.
+.\" (sub)section heading font
+.if !d HF \
+.  ds HF B\"
+.
+.if \n[cR] \
+.  an-set-up-continuous-rendering
+.
+.cp \n[*groff_an-old_tmac_C]
 .
 .\" Local Variables:
 .\" mode: nroff

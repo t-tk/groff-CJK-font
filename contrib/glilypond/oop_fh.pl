@@ -3,9 +3,6 @@ my $License = q*
 # Legalese
 ########################################################################
 
-Source file position: '<groff-source>/contrib/glilypond/oop_fh.pl'
-Installed position: '<prefix>/lib/groff/glilypond/oop_fh.pl'
-
 Copyright (C) 2013-2013 Free Software Foundation, Inc.
   Written by Bernd Warken <groff-bernd.warken-72@web.de>
 
@@ -302,8 +299,8 @@ use integer;
 package main;
 
 1;
-########################################################################
-### Emacs settings
 # Local Variables:
+# fill-column: 72
 # mode: CPerl
 # End:
+# vim: set autoindent textwidth=72:

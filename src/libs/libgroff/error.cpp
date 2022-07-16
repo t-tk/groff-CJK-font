@@ -1,5 +1,5 @@
 // -*- C++ -*-
-/* Copyright (C) 1989-2018 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
 This file is part of groff.
@@ -16,6 +16,10 @@ for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>. */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -50,24 +54,19 @@ static void do_error_with_file_and_line(const char *filename,
       fprintf(stderr, "%s:%d:", filename, lineno);
     need_space = 1;
   }
-  if (need_space) {
-    fputc(' ', stderr);
-    need_space = 0;
-  }
-  switch (type) {
-  case FATAL:
-    fputs("fatal error:", stderr);
-    need_space = 1;
-    break;
-  case ERROR:
-    break;
-  case WARNING:
-    fputs("warning:", stderr);
-    need_space = 1;
-    break;
-  }
   if (need_space)
     fputc(' ', stderr);
+  switch (type) {
+  case FATAL:
+    fputs("fatal error: ", stderr);
+    break;
+  case ERROR:
+    fputs("error: ", stderr);
+    break;
+  case WARNING:
+    fputs("warning: ", stderr);
+    break;
+  }
   errprint(format, arg1, arg2, arg3);
   fputc('\n', stderr);
   fflush(stderr);

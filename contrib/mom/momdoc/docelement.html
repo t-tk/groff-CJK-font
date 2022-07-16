@@ -2,7 +2,7 @@
 <!--
 This file is part of groff, the GNU roff type-setting system.
 
-Copyright (C) 2004-2018 Free Software Foundation, Inc.
+Copyright (C) 2004-2020 Free Software Foundation, Inc.
 Written by Peter Schaffter (peter@schaffter.ca).
 
 Permission is granted to copy, distribute and/or modify this document
@@ -799,7 +799,7 @@ Mom&#8217;s default paragraph font is medium roman.
 <span class="note">Note:</span>
 PP_FONT has no effect when the PRINTSTYLE is <kbd>TYPEWRITE</kbd>.
 If you wish to set whole typewritten paragraphs in italic, invoke
-invoke <kbd>.FT I</kbd> immediately after <kbd>.PP</kbd>.  Depending
+<kbd>.FT I</kbd> immediately after <kbd>.PP</kbd>.  Depending
 on which of
 <a href="docprocessing.html#printstyle-italics">UNDERLINE_ITALIC</a>
 or
@@ -1326,7 +1326,8 @@ which may be given in any order:
   CAPS | NO_CAPS \
   SMALLCAPS | NO_SMALLCAPS \
   BASELINE_ADJUST &lt;amount to raise heading from the baseline&gt; \
-  NEEDS &lt;lines of text required beneath the heading &gt;
+  NEEDS &lt;lines of text required beneath the heading&gt; \
+  PREFIX_CHAPTER [&lt;n&gt;] \
   SPACE_AFTER | NO_SPACE_AFTER \
   NUMBER | NO_NUMBER \
   NO_SHIM | SHIM \
@@ -1355,10 +1356,10 @@ ending in _FAMILY, _FONT, _SIZE, _QUAD, or _COLOR.  See
 <kbd>UNDERSCORE</kbd> and <kbd>UNDERSCORE2</kbd> require that a
 weight for the underscore be given, in points (decimal fractions
 allowed), but without the unit of measure <kbd>p</kbd> appended.
-They also require that the underscore's distance from the baseline
-be supplied; in the case of UNDERSCORE2, an additional gap argument
-representing the distance between the two underscores must be
-provided.
+They also require that the underscore&#8217;s distance from the
+baseline be supplied; in the case of UNDERSCORE2, an additional gap
+argument representing the distance between the two underscores must
+be provided.
 </p>
 
 <p class="defaults" style="margin-bottom: 1em">
@@ -1393,11 +1394,24 @@ should not be appended to the argument.
 </p>
 
 <p class="defaults" style="margin-bottom: 1em">
+<kbd>PREFIX_CHAPTER</kbd> instructs mom to prefix the current
+chapter number to numbered headings.  If mom is unable to determine
+a chapter number, she will ask for one.
+</p>
+
+<p class="defaults" style="margin-bottom: 1em">
+Note that using <kbd>PREFIX_CHAPTER</kbd> with an explicit chapter
+number will also set the chapter number for subsequent
+<a href="images.html#autolabel">automatically-generated image and pre-processor labels</a>
+as well.
+</p>
+
+<p class="defaults" style="margin-bottom: 1em">
 <kbd>SPACE_AFTER</kbd> inserts a blank line equal to the current
 <a href="definitions.html#leading">leading</a> after a HEADING.
-If you'd like a full linespace after a heading level, use
-<kbd>SPACE_AFTER</kbd>.  If you'd like additional space before a
-heading level, you must introduce it yourself with
+If you&#8217;d like a full linespace after a heading level, use
+<kbd>SPACE_AFTER</kbd>.  If you&#8217;d like additional space before
+a heading level, you must introduce it yourself with
 <a href="typesetting.html#space">SPACE</a>
 or
 <a href="typesetting.html#ald">ALD</a>.
@@ -1426,7 +1440,7 @@ the same way if flex-spacing is enabled.
 <p class="defaults" style="padding-bottom: .5em">
 The argument list is long, so you may want to break it into
 several lines by using the backslash character (<kbd>\</kbd>).
-Here's an example of how you might style a level 1 heading:
+Here&#8217;s an example of how you might style a level 1 heading:
 <br/>
 <span class="pre defaults">
   .HEADING_STYLE 1 \
@@ -1436,7 +1450,7 @@ Here's an example of how you might style a level 1 heading:
   BASELINE_ADJUST 3p \
   NUMBER
 </span>
-This creates a level-1 heading style that's bold, centred,
+This creates a level-1 heading style that&#8217;s bold, centred,
 underscored and numbered, raised by 3 points from the baseline.
 </p>
 </div>
@@ -1453,15 +1467,24 @@ Macro: <b>PREFIX_CHAPTER_NUMBER</b> <kbd class="macro-args">&lt;none&gt; | &lt;c
 </div>
 
 <p>
-If you&#8217;ve requested numbering for any level of heading and
-you&#8217;d like mom, in addition, to prefix a chapter number to the
-numbering scheme, you can do so with PREFIX_CHAPTER_NUMBER.
+If, in addition to numbering heads, you want mom to prepend the
+chapter number, invoke <kbd>PREFIX_CHAPTER_NUMBER</kbd>.
+</p>
+
+<p>
+When you invoke <kbd>.PREFIX_CHAPTER_NUMBER</kbd> without an
+argument, mom checks to see whether the argument you passed to <a
+href="docprocessing.html#chapter">CHAPTER</a> (if it&#8217;s been
+called) is a digit.  If it isn&#8217;t (say you&#8217;ve numbered your
+chapter &#8220;One&#8221; instead of &#8220;1&#8221;), mom will
+abort with a request that you pass PREFIX_CHAPTER_NUMBER a digit
+representing the chapter number.
 </p>
 
 <p>
 After you invoke <kbd>.PREFIX_CHAPTER_NUMBER</kbd>, mom will prepend
-the current chapter number to all headings you have requested be
-numbered with
+the chapter number to all headings you have requested be numbered
+with
 <a href="#heading-style"><kbd>.HEADING_STYLE &lt;n&gt; NUMBER</a>.
 Thus, assuming chapter number twelve (12):
 <br/>
@@ -1477,31 +1500,27 @@ would become
 </span>
 </p>
 
-<p>
-When you invoke <kbd>.PREFIX_CHAPTER_NUMBER</kbd> without an
-argument, mom checks to see whether the argument you passed to
-<a href="docprocessing.html#chapter">CHAPTER</a>
-is a digit.  If it is, she immediately starts pre-pending the
-current chapter number to numbered head elements.  If it isn&#8217;t
-(say you&#8217;ve called your chapter &#8220;One&#8221; instead
-of &#8220;1&#8221;), mom will abort with a request that you pass
-PREFIX_CHAPTER_NUMBER a digit representing the current chapter
-number.
+<div class="box-tip">
+<p class="tip">
+<span class="note">Note:</span>
+If a chapter number is given to PREFIX_CHAPTER_NUMBER, automatically
+generated labels with a prepended chapter number are also affected.
 </p>
+</div>
 
 <p>
-In collated documents, mom automatically increments
-the digit used by PREFIX_CHAPTER_NUMBER by one
-(current chapter digit + 1) every time you invoke <a
-href="rectoverso.html#collate"><kbd>.COLLATE</kbd></a>, even if
-you&#8217;ve (temporarily) turned off the prefixing of chapter
-numbers.  Thus, even if you call your chapters &#8220;One&#8221;,
-&#8220;Two&#8221;, &#8220;Three&#8221; instead of &#8220;1&#8221;,
-&#8220;2&#8221;, &#8220;3&#8221;, mom will Do The Right Thing
-with respect to numbering head elements in all collated chapters
-following the first invocation of PREFIX_CHAPTER_NUMBER (assuming,
-of course, that the collated chapters are in incrementing order; if
-not, you must must put
+In collated documents, mom automatically increments the digit used
+by PREFIX_CHAPTER_NUMBER by one (current chapter digit + 1) every
+time you invoke
+<a href="rectoverso.html#collate"><kbd>.COLLATE</kbd></a>,
+even if you&#8217;ve (temporarily) turned off the prefixing
+of chapter numbers.  Thus, even if you number your chapters
+&#8220;One&#8221;, &#8220;Two&#8221;, &#8220;Three&#8221; instead of
+&#8220;1&#8221;, &#8220;2&#8221;, &#8220;3&#8221;, mom will Do The
+Right Thing with respect to numbering head (and label) elements
+in all collated chapters following the first invocation of
+PREFIX_CHAPTER_NUMBER (assuming, of course, that the collated
+chapters are in incrementing order; if not, you must put
 <br/>
 <span class="pre-in-pp">
   .PREFIX_CHAPTER_NUMBER &lt;chapter number&gt;
@@ -1519,7 +1538,8 @@ prefixing of chapter numbers to numbered head elements off and on
 according to your needs or whims.
 </p>
 
-<p>
+<div class="box-tip">
+<p class="tip">
 <span class="note">Note:</span>
 Because PREFIX_CHAPTER_NUMBER takes an (optional) digit representing
 the chapter number, it&#8217;s use need not be restricted to
@@ -1533,7 +1553,7 @@ with a
 <a href="definitions.html#numericargument">numeric argument</a>
 in your document setup. 
 </p>
-
+</div>
 <div class="rule-short"><hr/></div>
 
 <!-- ==================================================================== -->
@@ -1570,19 +1590,20 @@ description of the default styles in the sections
 <a href="#subhead">SUBHEAD</a> (now HEADING 2),
 and
 <a href="#subsubhead">SUBSUBHEAD</a> (now HEADING 3).
-Mom also emits a message to stderr alerting you to what she's doing.
+Mom also emits a message to stderr alerting you to what she&#8217;s
+doing.
 </p>
 
 <p>
 The control macros formerly associated with oldstyle headings are no
-longer present in mom's macro file, which means that if you
-made changes to mom's default for those headings, you must recreate
-the changes with the
+longer present in mom&#8217;s macro file, which means that if you
+made changes to mom&#8217;s default for those headings, you must
+recreate the changes with the
 <a href="#heading-style">HEADING_STYLE</a>
 macro.  The entire style need not be recreated, only those
-parameters that differed from mom's defaults.  Thus, if your HEADs
-were set flush left, instead of the oldstyle default, centred, but
-otherwise kept mom's settings, you need only do
+parameters that differed from mom&#8217;s defaults.  Thus, if your
+HEADs were set flush left, instead of the oldstyle default, centred,
+but otherwise kept mom&#8217;s settings, you need only do
 <br/>
 <span class="pre-in-pp">
   .HEADING_STYLE 1 QUAD L
@@ -1606,7 +1627,7 @@ paraheads, the former defaults for PARAHEAD can be set up like this:
 Equally, the macro NUMBER_PARAHEADS is no longer available.  You
 must enable numbering of the correct level for paraheads with
 HEADING_STYLE.  Again assuming a heading level of 3 for paraheads,
-it's simply done:
+it&#8217;s simply done:
 <br/>
 <span class="pre-in-pp">
   .HEADING_STYLE 3 NUMBER
@@ -2688,13 +2709,14 @@ percent sign (<kbd>%</kbd>).  Thus, is you want the point size of your CODE font
 Fixed-width fonts have notoriously whimsical
 <a href="definitions.html#xheight">x-heights</a>,
 meaning that they frequently look bigger (or, in some cases,
-smaller) than the type surrounding them, even if they're technically
-the same point size.  CODE_SIZE lets you choose a percentage of the
-prevailing point size for your fixed-width CODE font so it doesn't look
-gangly or miniscule in relation to the type around it.  All
-invocations of <kbd>.CODE</kbd> or <kbd>\*[CODE]</kbd> will use this
-size, so that if you decide to change the prevailing point size of your
-document, the CODE font will be scaled proportionally.
+smaller) than the type surrounding them, even if they&#8217;re
+technically the same point size.  CODE_SIZE lets you choose a
+percentage of the prevailing point size for your fixed-width
+CODE font so it doesn&#8217;t look gangly or miniscule in relation
+to the type around it.  All invocations of <kbd>.CODE</kbd> or
+<kbd>\*[CODE]</kbd> will use this size, so that if you decide to
+change the prevailing point size of your document, the CODE font
+will be scaled proportionally.
 </p>
 
 <div class="rule-short"><hr/></div>
@@ -3064,7 +3086,7 @@ enumerator, separator and indent appropriate to that level.
 </p>
 
 <p>
-Each invocation of <kbd>.LIST</kbd> should thus be be matched by
+Each invocation of <kbd>.LIST</kbd> should thus be matched by
 a corresponding <kbd>.LIST&nbsp;OFF</kbd> in order to fully exit
 lists.  For example,
 <br/>
@@ -3265,7 +3287,7 @@ Consider the following:
 Normally, within a nested list, when you return to an
 incrementally-enumerated list, the enumerator continues incrementing
 from where it left off.  That means, in the example above, the
-normal state of affairs for the alpha'ed list under
+normal state of affairs for the alpha&#8217;ed list under
 <br/>
 <span class="pre-in-pp">
   2.  Feed the cat
@@ -4224,7 +4246,7 @@ should be entered normally.
 </div>
 
 <div class="defaults-container" style="background-color: #ded4bd; border: none;">
-<h3 id="footnote-control" class="docs defaults">FOOTNOTE control macros macros and defaults</h3>
+<h3 id="footnote-control" class="docs defaults">FOOTNOTE control macros and defaults</h3>
 
 <ol style="margin-top: .5em; padding-bottom: .5em;">
   <li><a href="#footnote-general">Family/font/size/colour/lead/quad</a></li>
@@ -5140,7 +5162,7 @@ Macro: <b>ENDNOTE_SPACING</b> <kbd class="macro-args">&lt;space to insert betwee
 </p>
 
 <p>
-If you'd like some whitespace between endnotes, just invoke
+If you&#8217;d like some whitespace between endnotes, just invoke
 ENDNOTE_SPACING with the amount of space you want, e.g.,
 <br/>
 <span class="pre-in-pp">

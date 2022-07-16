@@ -1,5 +1,4 @@
-// -*- C++ -*-
-/* Copyright (C) 1989-2018 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
 This file is part of groff.
@@ -559,7 +558,10 @@ void cleanup_and_exit(int exit_code)
 {
   if (the_output) {
     the_output->trailer(topdiv->get_page_length());
-    delete the_output;
+    // If we're already dying, don't call the_output's destructor.  See
+    // node.cpp:real_output_file::~real_output_file().
+    if (!the_output->is_dying)
+      delete the_output;
   }
   FLUSH_INPUT_PIPE(STDIN_FILENO);
   exit(exit_code);
@@ -868,7 +870,7 @@ void top_level_diversion::set_diversion_trap(symbol, vunits)
 
 void top_level_diversion::clear_diversion_trap()
 {
-  error("can't set diversion trap when no current diversion");
+  error("can't clear diversion trap when no current diversion");
 }
 
 void diversion_trap()
@@ -1196,3 +1198,9 @@ void init_div_requests()
   number_reg_dictionary.define("nl", new nl_reg);
   number_reg_dictionary.define("%", new page_number_reg);
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

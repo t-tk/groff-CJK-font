@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2018 Free Software Foundation, Inc.
+# Copyright (C) 2002-2020 Free Software Foundation, Inc.
 #      Original Makefile.sub written by Werner Lemberg <wl@gnu.org>
 #      Automake migration by 
 #      Bertrand Garrigues <bertrand.garrigues@laposte.net>
@@ -39,12 +39,14 @@ DOCFILES= \
   doc/meref.me \
   doc/meintro.me \
   doc/meintro_fr.me \
+  doc/ms.ms \
   doc/pic.ms
 # Files generated in the build tree
 PROCESSEDDOCFILES = \
   doc/meref.ps \
   doc/meintro.ps \
   doc/meintro_fr.ps \
+  doc/ms.ps \
   doc/pic.ps
 
 otherdocdir = $(docdir)
@@ -117,7 +119,6 @@ MOSTLYCLEANFILES += doc/examples.stamp
 
 EXTRA_DIST += \
   doc/gnu.xpm \
-  doc/fixinfo.sh \
   doc/txi-en.tex
 
 SUFFIXES += .me .ms .ps .html .txt .texi .dvi .pdf .xhtml
@@ -355,10 +356,7 @@ else
 endif
 
 # This will generate both html split into several files and html doc
-# in a single file. If texinfo version < 5.0, we process the resulting
-# (mono) .html file with fixinfo.sh du to a problem with blockquote
-# closing (for example 5.6.1 Setting Registers, the 'Request'
-# blockquote is not properly closed, see fixinfo.sh for more details
+# in a single file.
 .texi.html:
 	@$(MKDIR_P) $(doc_builddir)/
 	LANG=C \
@@ -369,11 +367,6 @@ endif
 	LC_ALL=C \
 	$(MAKEINFO) --html -I $(doc_srcdir) --no-split \
 	  -o $@ $<
-	if test "$(makeinfo_version_numeric)" -lt 5000; then \
-	  echo "patching $@ with fixinfo.sh"; \
-	  $(SHELL) $(doc_srcdir)/fixinfo.sh \
-	    doc/`basename $@`.mono/`basename $@`; \
-	fi
 
 # Targets to make all the doc in all formats. These doc are not built
 # by default. pdf, dvi, ps, html and their install equivalent
@@ -480,8 +473,8 @@ dist-gnueps:
 	cp -f gnu.eps $(distdir)/doc
 
 
-########################################################################
-### Emacs settings
 # Local Variables:
+# fill-column: 72
 # mode: makefile-automake
 # End:
+# vim: set autoindent filetype=automake textwidth=72:

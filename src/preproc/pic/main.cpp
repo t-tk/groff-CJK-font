@@ -1,5 +1,4 @@
-// -*- C++ -*-
-/* Copyright (C) 1989-2018 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
 This file is part of groff.
@@ -621,8 +620,8 @@ int main(int argc, char **argv)
 #endif
   {
     out = make_troff_output();
-    printf(".if !dPS .ds PS\n"
-	   ".if !dPE .ds PE\n");
+    printf(".do if !dPS .ds PS\n"
+	   ".do if !dPE .ds PE\n");
   }
 #ifdef FIG_SUPPORT
   if (whole_file_flag) {
@@ -650,3 +649,8 @@ int main(int argc, char **argv)
   return had_parse_error;
 }
 
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

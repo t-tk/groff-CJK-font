@@ -1,4 +1,4 @@
-    Copyright 2013-2018 Free Software Foundation, Inc.
+    Copyright 2013-2020 Free Software Foundation, Inc.
 
     Copying and distribution of this file, with or without modification,
     are permitted in any medium without royalty provided the copyright
@@ -9,5 +9,27 @@ This file describes how to prepare `groff' for a new release.
 
 ########################################################################
 
-The file `INSTALL.gen' shall *never* be changed manually!  It is a
-generic file provided from GNU (normally called `INSTALL').
+* Retrieve current versions of UnicodeData.txt[1] and the Adobe Glyph
+  List (AGL)[2], and use them with
+  src/utils/afmtodit/make-afmtodit-tables to update
+  src/utils/afmtodit/afmtodit.tables.
+
+  [1] E.g., <https://www.unicode.org/Public/13.0.0/ucd/UnicodeData.txt>.
+      Check for the latest _released_ version of Unicode at the time.
+      Data for the forthcoming release may be available.
+  [2] <https://github.com/adobe-type-tools/agl-aglfn/blob/master/\
+      glyphlist.txt>
+
+* Update the 'gnulib' sub-module to the latest version.
+
+* Update the release version number where it is hard-coded.
+  + NEWS
+  + BUG-REPORT
+  + arch/mingw/grap2graph.cmd
+  + doc/groff.texi (multiple occurrences)
+  + doc/webpage.ms
+
+* Update in 'src/roff/groff/groff.cpp' the 'printf' that displays the
+  copyright.
+
+* Update the copyright year with 'update-copyright.sh'.

@@ -1,6 +1,5 @@
-// -*- C++ -*-
 /* Provide relocation for macro and font files.
-   Copyright (C) 2005-2018 Free Software Foundation, Inc.
+   Copyright (C) 2005-2020 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify it
    under the terms of the GNU Library General Public License as published
@@ -211,7 +210,8 @@ char *relocatep(const char *path)
     return strsave(path);
   char *relative_path = (char *)path + INSTALLPATHLEN;
   size_t relative_path_len = strlen(relative_path);
-  char *relocated_path = new char[curr_prefix_len + relative_path_len + 1];
+  char *relocated_path = (char *)malloc(curr_prefix_len
+					+ relative_path_len + 1);
   strcpy(relocated_path, curr_prefix);
   strcat(relocated_path, relative_path);
 #if DEBUG
@@ -234,3 +234,9 @@ char *relocate(const char *path)
 #endif
   return p;
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

@@ -1,5 +1,4 @@
-// -*- C++ -*-
-/* Copyright (C) 1989-2018 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
 This file is part of groff.
@@ -1292,9 +1291,16 @@ void space_size()
 {
   int n;
   if (get_integer(&n)) {
-    curenv->space_size = n;
+    if (n < 0)
+      warning(WARN_RANGE, "negative word space size ignored: '%1'", n);
+    else
+      curenv->space_size = n;
     if (has_arg() && get_integer(&n))
-      curenv->sentence_space_size = n;
+      if (n < 0)
+	warning(WARN_RANGE, "negative sentence space size ignored:"
+		" '%1'", n);
+      else
+	curenv->sentence_space_size = n;
     else
       curenv->sentence_space_size = curenv->space_size;
   }
@@ -2135,6 +2141,14 @@ void environment::possibly_break_line(int start_here, int forced)
     }
     distribute_space(pre, bp->nspaces, extra_space_width);
     hunits output_width = bp->width + extra_space_width;
+    // This should become an assert() when we can get reliable width
+    // data from CJK glyphs.  See Savannah #44018.
+    if (output_width <= 0) {
+      double output_width_in_ems = output_width.to_units();
+      output_warning(WARN_BREAK, "line has non-positive width %1m",
+		     output_width_in_ems);
+      return;
+    }
     input_line_start -= output_width;
     if (bp->hyphenated)
       hyphen_line_count++;
@@ -4100,3 +4114,9 @@ void init_hyphen_requests()
   init_request("hpfa", hyphenation_patterns_file_append);
   number_reg_dictionary.define(".hla", new hyphenation_language_reg);
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

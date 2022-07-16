@@ -1,8 +1,6 @@
-# Copyright (C) 1989-2018 Free Software Foundation, Inc.
+# Copyright (C) 1989-2020 Free Software Foundation, Inc.
 # Original Makefile.in written by James Clark (jjc@jclark.com)
 # Migrated to Automake by Bertrand Garrigues
-#
-# Last update: 2017-11-02
 #
 # This file is part of groff.
 #
@@ -201,7 +199,6 @@ localtmacdir=$(dataprogramdir)/site-tmac
 # `appresdir' says where to install the application resource file for
 # gxditview.
 
-# groffer_dir
 # glilypond_dir
 # grog_dir
 # gpinyin_dir
@@ -565,6 +562,7 @@ SUFFIXES =
 check_SCRIPTS =
 check_PROGRAMS =
 TESTS =
+XFAIL_TESTS =
 AM_TESTS_ENVIRONMENT = \
   abs_top_srcdir=$(abs_top_srcdir) \
   abs_top_builddir=$(abs_top_builddir) \
@@ -655,7 +653,6 @@ include $(top_srcdir)/contrib/gperl/gperl.am
 include $(top_srcdir)/contrib/gpinyin/gpinyin.am
 include $(top_srcdir)/contrib/grap2graph/grap2graph.am
 include $(top_srcdir)/contrib/groff_filenames/groff_filenames.am
-include $(top_srcdir)/contrib/groffer/groffer.am
 include $(top_srcdir)/contrib/hdtbl/hdtbl.am
 include $(top_srcdir)/contrib/mm/mm.am
 include $(top_srcdir)/contrib/mom/mom.am
@@ -904,7 +901,6 @@ SUFFIXES += .man
 	     -e "s|[@]EXAMPLEDIR[@]|`echo $(exampledir) | sed -f $(makevarescape)`|g" \
 	     -e "s|[@]FONTDIR[@]|`echo $(fontdir) | sed -f $(makevarescape)`|g" \
 	     -e "s|[@]g[@]|$(g)|g" \
-	     -e "s![@]G[@]!`echo $(g) | tr '[a-z]' '[A-Z]'`!g" \
 	     -e "s|[@]HTMLDOCDIR[@]|`echo $(htmldocdir) | sed -f $(makevarescape)`|g" \
 	     -e "s|[@]INDEX_SUFFIX[@]|$(indexext)|g" \
 	     -e "s|[@]LEGACYFONTDIR[@]|`echo $(legacyfontdir) | sed -f $(makevarescape)`|g" \
@@ -934,8 +930,8 @@ $(top_srcdir)/.version:
 dist-hook:
 	echo $(VERSION) > $(distdir)/.tarball-version
 
-########################################################################
-### Emacs settings
 # Local Variables:
+# fill-column: 72
 # mode: makefile-automake
 # End:
+# vim: set autoindent filetype=automake textwidth=72:

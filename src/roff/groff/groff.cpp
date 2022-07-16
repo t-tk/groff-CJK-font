@@ -1,5 +1,5 @@
 // -*- C++ -*-
-/* Copyright (C) 1989-2018 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
 This file is part of groff.
@@ -220,7 +220,7 @@ int main(int argc, char **argv)
       vflag = 1;
       printf("GNU groff version %s\n", Version_string);
       printf(
-	"Copyright (C) 2018 Free Software Foundation, Inc.\n"
+	"Copyright (C) 2020 Free Software Foundation, Inc.\n"
 	"GNU groff comes with ABSOLUTELY NO WARRANTY.\n"
 	"You may redistribute copies of groff and its subprograms\n"
 	"under the terms of the GNU General Public License.\n"
@@ -228,6 +228,10 @@ int main(int argc, char **argv)
 	"named COPYING.\n");
       printf("\ncalled subprograms:\n\n");
       fflush(stdout);
+      // Pass -v to all possible subprograms
+      commands[PRECONV_INDEX].append_arg(buf);
+      commands[CHEM_INDEX].append_arg(buf);
+      commands[IDEAL_INDEX].append_arg(buf);
       commands[POST_INDEX].append_arg(buf);
       // fall through
     case 'C':

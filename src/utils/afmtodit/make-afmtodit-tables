@@ -3,7 +3,7 @@
 # make-afmtodit-tables -- script for creating the 'unicode_decomposed'
 #                         and 'AGL_to_unicode' tables
 #
-# Copyright (C) 2005-2018 Free Software Foundation, Inc.
+# Copyright (C) 2005-2020 Free Software Foundation, Inc.
 #      Written by Werner Lemberg <wl@gnu.org>
 #
 # This file is part of groff.
@@ -13,8 +13,8 @@
 # Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# groff is distributed in the hope that it will be useful, but WITHOUT ANY
-# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# groff is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 # FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 # for more details.
 #
@@ -27,9 +27,9 @@
 #   make-afmtodit-tables \
 #     UnicodeData.txt version-string glyphlist.txt > afmtodit.in
 #
-# 'UnicodeData.txt' is the central database file from the Unicode standard.
-# Unfortunately, it doesn't contain a version number which must be thus
-# provided manually as an additional parameter.
+# 'UnicodeData.txt' is the central database file from the Unicode
+# standard.  Unfortunately, it doesn't contain a version number, which
+# must be thus provided manually as an additional parameter.
 #
 # 'glyphlist.txt' holds the Adobe Glyph List (AGL).
 #
@@ -41,7 +41,8 @@ CPP=cpp
 prog="$0"
 
 if test $# -ne 3; then
-  echo "usage: $0 UnicodeData.txt <version-string> glyphlist.txt > afmtodit.in"
+  echo "usage: $0 UnicodeData.txt <version-string> glyphlist.txt >" \
+    "afmtodit.in"
   exit 1
 fi
 
@@ -108,19 +109,32 @@ echo ''
 cat <<END
 # This table has been algorithmically derived from the file
 # glyphlist.txt, version 2.0, available from partners.adobe.com,
-# on `date '+%Y-%m-%d'`.
+# on `date '+%Y-%m-%d'`.  See "groff:" comments for altered mappings.
 END
 
-# Emit second table.
-echo 'my %AGL_to_unicode = ('
+# Convert AGL syntax to a chunk of Perl.
 cat "$3" \
 | sed -e '/#/d' \
       -e 's/ /_/g' \
       -e '/;\(E\|F[0-8]\)/d' \
-      -e 's/\(.*\);\(.*\)/  "\1", "\2",/'
+      -e 's/\(.*\);\(.*\)/  "\1", "\2",/' > $$5
+
+# Perform groff replacements.
+sed \
+  -e 's/\("Delta"\), "2206",$/\1, "0394", # groff: not U+2206/' \
+  -e 's/\("Omega"\), "2126",$/\1, "03A9", # groff: not U+2126/' \
+  -e 's/\("mu"\), "00B5",$/\1, "03BC", # groff: not U+00B5/' \
+  < $$5 > $$6
+
+# Emit second table.
+echo 'my %AGL_to_unicode = ('
+cat $$6
 echo ');'
 
 # Remove temporary files.
-rm $$1 $$2 $$3 $$4
+rm $$1 $$2 $$3 $$4 $$5 $$6
 
-# EOF
+# Local Variables:
+# fill-column: 72
+# End:
+# vim: set textwidth=72:

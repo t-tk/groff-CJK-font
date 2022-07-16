@@ -1,12 +1,13 @@
-.TH GPERL @MAN1EXT@ "@MDATE@" "groff @VERSION@"
-.SH NAME
-gperl \- groff preprocessor for Perl parts in roff files
+.TH gperl @MAN1EXT@ "@MDATE@" "groff @VERSION@"
+.SH Name
+gperl \- execute Perl commands in groff documents
+.
 .
 .\" ====================================================================
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 2014-2018 Free Software Foundation, Inc.
+.\" Copyright (C) 2014-2020 Free Software Foundation, Inc.
 .\"
 .\" This file is part of gperl, which is part of groff, a free software
 .\" project.
@@ -18,54 +19,48 @@ gperl \- groff preprocessor for Perl parts in roff files
 .\" The license text is available in the internet at
 .\" <http://www.gnu.org/licenses/gpl-2.0.html>.
 .
-.\" ====================================================================
-.\" Characters
-.\" ====================================================================
 .
-.\" Ellipsis ...
-.ie t .ds EL \fS\N'188'\fP\"
-.el .ds EL \&.\|.\|.\&\"
-.\" called with \*(EL
-.
-.\" Bullet
-.ie t .ds BU \(bu
-.el .ds BU *
-.\" used in '.IP \*(BU 2m' (former .Topic)
+.\" Save and disable compatibility mode (for, e.g., Solaris 10/11).
+.do nr *groff_gperl_1_man_C \n[.cp]
+.cp 0
 .
 .
 .\" ====================================================================
-.SH "SYNOPSIS"
+.SH Synopsis
 .\" ====================================================================
 .
 .SY gperl
-.RI [ filespec
-\*(EL]
+.RI [ file
+\&.\|.\|.]
 .YS
+.
 .
 .SY gperl
 .B \-h
+.
 .SY gperl
 .B \-\-help
 .YS
 .
 .SY gperl
 .B \-v
+.
 .SY gperl
 .B \-\-version
 .YS
 .
 .
 .\" ====================================================================
-.SH DESCRIPTION
+.SH Description
 .\" ====================================================================
 .
 This is a preprocessor for
-.BR \%groff (@MAN1EXT@).
+.IR groff (@MAN1EXT@).
 .
 It allows the use of
-.BR perl (7)
+.IR perl (7)
 code in
-.BR groff (7)
+.IR groff (@MAN7EXT@)
 files.
 .
 The result of a
@@ -78,55 +73,36 @@ based on the arguments at a final line of a
 .IR "Perl part" .
 .
 .
-.\" ====================================================================
-.SH "OPTIONS"
-.\" ====================================================================
-.
-So far, there are only
-.I filespec
-or
-.I breaking
-options.
-.
-.
 .P
-.I filespec
-are file names or the minus character
-.B \-
-character for standard input.
+If no operands are given,
+or if
+.I file
+is
+.RB \[lq] \- \[rq],
+.I gperl
+reads the standard input stream.
 .
-As usual, the argument
-.B \-\-
-can be used in order to let all following arguments mean file names,
-even if the names begin with a minus character
-.BR \- .
+A double-dash argument
+.RB (\[lq] \-\- \[rq])
+causes all subsequent arguments to be interpreted as
+.I file
+operands,
+even if their names start with a dash.
 .
-.
-.P
-An option is
-.IR breaking ,
-when the program just writes the information that was asked for and
-then stops.
-.
-All other arguments will be ignored by that.
-.
-These
-.I breaking
-options are here
-.
-.TP
-.B \-h\~\fR|\fB\~\-\-help
-Print help information with a short explanation of options to
-standard output.
-.
-.
-.TP
-.B \-v\~\fR|\fB\~\-\-version
-Print version information to standard output.
+.B \-h
+and
+.B \-\-help
+display a usage message,
+whereas
+.B \-v
+and
+.B \-\-version
+display version information;
+all exit afterward.
 .
 .
 .\" ====================================================================
-.SH "PERL PARTS"
+.SH "Perl Parts"
 .\" ====================================================================
 .
 .I Perl
@@ -142,7 +118,7 @@ command.
 .
 .
 .\" ====================================================================
-.SS "Starting Perl Mode"
+.SS "Starting Perl mode"
 .\" ====================================================================
 .
 The starting
@@ -151,15 +127,15 @@ can either be without arguments, or by a request that has the term
 .B start
 as its only argument.
 .RS
-.IP \*(BU 2m
+.IP \(bu
 .B .Perl
-.IP \*(BU 2m
+.IP \(bu
 .B .Perl start
 .RE
 .
 .
 .\" ====================================================================
-.SS "Ending Perl Mode without Storage"
+.SS "Ending Perl mode without storage"
 .\" ====================================================================
 .
 A
@@ -174,9 +150,9 @@ Of course, it would be reasonable to add the argument
 that's possible, but not necessary.
 .
 .RS
-.IP \*(BU 2m
+.IP \(bu
 .B .Perl stop
-.IP \*(BU 2m
+.IP \(bu
 .BI .Perl " other_than_start"
 .RE
 .
@@ -188,11 +164,11 @@ string variable name for storage \(em see next section.
 .
 .
 .\" ====================================================================
-.SS "Ending Perl Mode with Storage"
+.SS "Ending Perl mode with storage"
 .\" ====================================================================
 .
 A useful feature of
-.B gperl
+.I gperl
 is to store one or more results from the
 .IR "Perl mode" .
 .
@@ -220,7 +196,7 @@ with a single line for each array member.
 .
 .P
 This Perl array output can be stored by
-.B gperl
+.I gperl
 in either
 .TP
 .I groff strings
@@ -257,7 +233,7 @@ is not really needed before the first
 command.
 .
 That suits to
-.BR \%groff (@MAN7EXT@),
+.IR groff (@MAN7EXT@),
 because every output can be saved as
 .I groff
 string, but the number registers can be very restrictive.
@@ -266,7 +242,7 @@ string, but the number registers can be very restrictive.
 .P
 In
 .IR "string mode" ,
-.B gperl
+.I gperl
 generates a
 .I groff string
 storage line
@@ -355,7 +331,7 @@ and
 .BI ".Perl .nr" " var_name1 varname2"
 stores both variables as number register variables.
 .
-.B gperl
+.I gperl
 generates
 .RS
 .EX
@@ -381,7 +357,7 @@ by
 .
 .
 .\" ====================================================================
-.SS "Printing towards STDERR is without Storage"
+.SS "Printing towards STDERR is without storage"
 .\" ====================================================================
 .
 The printing towards
@@ -394,7 +370,7 @@ without other automatic storage.
 .
 .
 .\" ====================================================================
-.SH "EXAMPLES"
+.SH Example
 .\" ====================================================================
 .
 A possible
@@ -406,7 +382,7 @@ could look like that:
 .EX
 before
 \&.Perl start
-my $result = 'some data';
+my $result = \[aq]some data\[aq];
 print $result;
 \&.Perl stop .ds string_var
 after
@@ -428,9 +404,9 @@ such that the following line is printed:
 .EE
 .RE
 by
-.B gperl
+.I gperl
 as food for the coming
-.B groff
+.I groff
 run.
 .
 .
@@ -466,43 +442,44 @@ command lines are created:
 .
 .
 .\" ====================================================================
-.SH AUTHORS
+.SH Authors
 .\" ====================================================================
-.B gperl
+.
+.I gperl
 was written by
-.MT groff\-bernd.warken\-72@\:web.de
+.MT groff\-bernd\:.warken\-72@\:web\:.de
 Bernd Warken
 .ME .
 .
 .
 .\" ====================================================================
-.SH "SEE ALSO"
+.SH "See also"
 .\" ====================================================================
 .
 .P
 Man pages related to
 .I groff
 are
-.BR \%groff (@MAN1EXT@),
-.BR \%groff (@MAN7EXT@),
-.BR \%grog (@MAN1EXT@),
+.IR groff (@MAN1EXT@),
+.IR groff (@MAN7EXT@),
 and
-.BR \%groffer (@MAN1EXT@).
+.IR grog (@MAN1EXT@).
 .
 .
 .P
 Documents related to
 .I Perl
 are
-.BR \%perl (@MAN1EXT@),
-.BR \%perl (@MAN7EXT@).
+.IR perl (1),
+.IR perl (7).
 .
 .
-.\" ====================================================================
-.\" Emacs settings
-.\" ====================================================================
+.\" Restore compatibility mode (for, e.g., Solaris 10/11).
+.cp \n[*groff_gperl_1_man_C]
+.
 .
 .\" Local Variables:
+.\" fill-column: 72
 .\" mode: nroff
 .\" End:
-.\" vim: set filetype=groff:
+.\" vim: set filetype=groff textwidth=72:

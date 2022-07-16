@@ -1,5 +1,4 @@
-// -*- C++ -*-
-/* Copyright (C) 1989-2018 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
 This file is part of groff.
@@ -1614,6 +1613,7 @@ output_file *the_output = 0;
 
 output_file::output_file()
 {
+	is_dying = false;
 }
 
 output_file::~output_file()
@@ -1656,17 +1656,23 @@ real_output_file::~real_output_file()
 {
   if (!fp)
     return;
+  // Prevent destructor from recursing; see div.cpp:cleanup_and_exit().
+  is_dying = true;
   // To avoid looping, set fp to 0 before calling fatal().
-  if (ferror(fp) || fflush(fp) < 0) {
+  if (ferror(fp)) {
     fp = 0;
-    fatal("error writing output file");
+    fatal("error on output file stream");
+  }
+  else if (fflush(fp) < 0) {
+    fp = 0;
+    fatal("unable to flush output file: %1", strerror(errno));
   }
 #ifndef POPEN_MISSING
   if (piped) {
     int result = pclose(fp);
     fp = 0;
     if (result < 0)
-      fatal("pclose failed");
+      fatal("unable to close pipe: %1", strerror(errno));
     if (!WIFEXITED(result))
       error("output process '%1' got fatal signal %2",
 	    pipe_command,
@@ -1682,14 +1688,17 @@ real_output_file::~real_output_file()
 #endif /* not POPEN MISSING */
   if (fclose(fp) < 0) {
     fp = 0;
-    fatal("error closing output file");
+    fatal("unable to close output file: %1", strerror(errno));
   }
 }
 
 void real_output_file::flush()
 {
-  if (fflush(fp) < 0)
-    fatal("error writing output file");
+  // To avoid looping, set fp to 0 before calling fatal().
+  if (fflush(fp) < 0) {
+    fp = 0;
+    fatal("unable to flush output file: %1", strerror(errno));
+  }
 }
 
 int real_output_file::is_printing()
@@ -4122,8 +4131,8 @@ void suppress_node::tprint(troff_output_file *out)
       else {
 	// postscript (or other device)
 	if (suppress_start_page > 0 && current_page != suppress_start_page)
-	  error("suppression limit registers span more than one page;\n"
-		"image description %1 will be wrong", image_no);
+	  error("suppression limit registers span more than one page;"
+		" image description %1 will be wrong", image_no);
 	// if (topdiv->get_page_number() != suppress_start_page)
 	//  fprintf(stderr, "end of image and topdiv page = %d   and  suppress_start_page = %d\n",
 	//	  topdiv->get_page_number(), suppress_start_page);
@@ -6536,3 +6545,9 @@ void init_node_requests()
   number_reg_dictionary.define(".P", new printing_reg);
   soft_hyphen_char = get_charinfo(HYPHEN_SYMBOL);
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

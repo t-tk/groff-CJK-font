@@ -75,7 +75,7 @@ rm -rf %tdir%
 goto end
 
 :version
-echo GNU grap2graph (groff) version 1.22.4
+echo GNU grap2graph (groff) version 1.23.0
 goto end
 
 :usage

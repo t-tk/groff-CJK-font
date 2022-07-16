@@ -1,11 +1,11 @@
 #! /bin/sh
 # Emulate nroff with groff.
 #
-# Copyright (C) 1992-2018 Free Software Foundation, Inc.
+# Copyright (C) 1992-2020 Free Software Foundation, Inc.
 #
 # Written by James Clark.
 
-# This file is of 'groff'.
+# This file is part of 'groff'.
 
 # 'groff' is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License (GPL) as published
@@ -59,12 +59,11 @@ case "`exec 2>/dev/null ; locale charmap`" in
     esac ;;
 esac
 
-# 'for i; do' doesn't work with some versions of sh
-
 Topt=
 opts=
+dry_run=
 for i
-  do
+do
   case $1 in
     -c)
       opts="$opts -P-c" ;;
@@ -73,25 +72,31 @@ for i
     -[eq] | -s*)
       # ignore these options
       ;;
-    -[dMmrnoTwW])
-      echo "$prog: option $1 requires an argument" >&2
+    -[dmMnoPrTwW])
+      echo "$prog: option '$1' requires an argument" >&2
       exit 1 ;;
-    -[iptSUC] | -[dMmrnowW]*)
+    -[CEipStU] | -[dMmrnoPwW]*)
       opts="$opts $1" ;;
     -T*)
       Topt=$1 ;;
     -u*)
+      # -u is for Solaris compatibility and not otherwise documented.
+      #
       # Solaris 2.2 through at least Solaris 9 'man' invokes
-      # 'nroff -u0 ... | col -x'.  Ignore the -u0,
-      # since 'less' and 'more' can use the emboldening info.
-      # However, disable SGR, since Solaris 'col' mishandles it.
+      # 'nroff -u0 ... | col -x'.  Ignore the -u0, since 'less' and
+      # 'more' can use the emboldening info.  But disable SGR, since
+      # Solaris 'col' mishandles it.
       opts="$opts -P-c" ;;
+    -V)
+      dry_run=yes ;;
     -v | --version)
       echo "GNU nroff (groff) version @VERSION@"
-      exit 0 ;;
+      opts="$opts $1" ;;
     --help)
-      echo "usage: nroff [-CchipStUv] [-dCS] [-MDIR] [-mNAME] [-nNUM] [-oLIST]"
-      echo "             [-rCN] [-Tname] [-WNAME] [-wNAME] [FILE...]"
+      cat <<EOF
+usage: nroff [-cCEhipStUV] [-dCS] [-mNAME] [-MDIR] [-nNUM] [-oLIST]
+             [-Popt ...] [-rCN] [-Tname] [-wNAME] [-WNAME] [FILE ...]
+EOF
       exit 0 ;;
     --)
       shift
@@ -99,7 +104,7 @@ for i
     -)
       break ;;
     -*)
-      echo "$prog: invalid option $1" >&2
+      echo "$prog: invalid option '$1'; see '$prog --help'" >&2
       exit 1 ;;
     *)
       break ;;
@@ -107,10 +112,12 @@ for i
   shift
 done
 
-if test "x$Topt" != x ; then
+if test "x$Topt" != x
+then
   T=$Topt
 else
-  if test "x$Tenv" != x ; then
+  if test "x$Tenv" != x
+  then
     T=-T$Tenv
   fi
 fi
@@ -123,14 +130,46 @@ case $T in
     T=-T$Tloc ;;
 esac
 
-# Set up the 'GROFF_BIN_PATH' variable
-# to be exported in the current 'GROFF_RUNTIME' environment.
+# Load nroff-style character definitions too.
+opts="-mtty-char$opts"
 
+# Set up the 'GROFF_BIN_PATH' variable to be exported in the current
+# 'GROFF_RUNTIME' environment.
 @GROFF_BIN_PATH_SETUP@
 export GROFF_BIN_PATH
 
-# Load nroff-style character definitions too.
+# Let the test cases redirect us.
+groff=${GROFF_TEST_GROFF:-groff}
 
-PATH="$GROFF_RUNTIME$PATH" groff -mtty-char $T $opts ${1+"$@"}
+# Note 1: It would be nice to apply the DRY ("Don't Repeat Yourself")
+# principle here and store the entire command string to be executed into
+# a variable, and then either display it or execute it.  For example:
+#
+#   cmd="PATH=... groff ... $@"
+#   ...
+#   printf "%s\n" "$cmd"
+#   ...
+#   eval $cmd
+#
+# Unfortunately, the shell is a nightmarish hellscape of quoting issues.
+# Naïve attempts to solve the problem fail when arguments to nroff
+# contain embedded whitespace or shell metacharacters.  The solution
+# below works with those, but there is insufficient quoting in -V (dry
+# run) mode, such that you can't cut-and-paste the output of 'nroff -V'
+# if you pass it a filename like foo"bar (with the embedded quotation
+# mark) and expect it to run without further quoting.
+#
+# If POSIX adopts Bash's ${var@Q} or an equivalent, this issue can be
+# revisited.
+#
+# Note 2: The construction '${1+"@$"}' is not for compatibility with old
+# or buggy shells, but to preserve the absence of arguments.  We don't
+# want 'nroff' to become 'groff ... ""' if $# equals zero.
+if [ -n "$dry_run" ]
+then
+  echo PATH="$GROFF_RUNTIME$PATH" $groff $T $opts ${1+"$@"}
+else
+  PATH="$GROFF_RUNTIME$PATH" $groff $T $opts ${1+"$@"}
+fi
 
 # eof

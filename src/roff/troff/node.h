@@ -1,5 +1,5 @@
 // -*- C++ -*-
-/* Copyright (C) 1989-2018 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
 This file is part of groff.
@@ -626,6 +626,7 @@ class output_file {
   char make_g_plus_plus_shut_up;
 public:
   output_file();
+  bool is_dying;
   virtual ~output_file();
   virtual void trailer(vunits);
   virtual void flush() = 0;

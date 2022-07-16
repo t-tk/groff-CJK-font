@@ -543,7 +543,7 @@ conv(register FILE *fp,
 
       if (!gremlinfile[0]) {
 	if (!setdefault)
-	  error("at line %1: no picture filename.\n", baseline);
+	  error("no picture filename at line %1", baseline);
 	return;
       }
       char *path;

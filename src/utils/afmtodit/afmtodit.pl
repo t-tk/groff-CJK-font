@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 # -*- Perl -*-
-# Copyright (C) 1989-2018 Free Software Foundation, Inc.
+# Copyright (C) 1989-2020 Free Software Foundation, Inc.
 #      Written by James Clark (jjc@jclark.com)
 #
 # This file is part of groff.
@@ -39,8 +39,10 @@ if ($opt_v) {
 }
 
 if ($#ARGV != 2) {
-    die "usage: $prog [-ckmnsvx] [-a angle] [-d DESC] [-e encoding]\n" .
-	"       [-f name] [-i n] [-o outfile] afmfile mapfile font\n";
+    die "usage: $prog [-ckmnsx] [-a ANGLE] [-d DESC-FILE]" .
+	" [-e ENCODING] [-f NAME] [-i N]\n" .
+	" [-o OUT-FILE] AFM-FILE MAP-FILE FONT\n" .
+	"usage: $prog -v\n";
 }
 
 my $afm = $ARGV[0];
@@ -234,11 +236,11 @@ while (<MAP>) {
 	if ($field[1] eq "space") {
 	    # The PostScript character "space" is automatically mapped
 	    # to the groff character "space"; this is for grops.
-	    warn "you are not allowed to map to " .
+	    warn "$prog: you are not allowed to map to " .
 		 "the groff character 'space'";
 	}
 	elsif ($field[0] eq "space") {
-	    warn "you are not allowed to map " .
+	    warn "$prog: you are not allowed to map " .
 		 "the PostScript character 'space'";
 	}
 	else {
@@ -276,7 +278,7 @@ if (!$opt_x) {
 	if ($nmap{$ch}) {
 	    for (my $j = 0; $j < $nmap{$ch}; $j++) {
 		if (defined $mapped{$map{$ch, $j}}) {
-		    warn "both $mapped{$map{$ch, $j}} and $ch " .
+		    warn "$prog: both $mapped{$map{$ch, $j}} and $ch " .
 			 "map to $map{$ch, $j}";
 		}
 		else {
@@ -384,7 +386,7 @@ if (!$opt_x) {
 	    $u =~ s/^_/u/;
 	    if ($u) {
 		if (defined $mapped{$u}) {
-		    warn "both $mapped{$u} and $ch map to $u";
+		    warn "$prog: both $mapped{$u} and $ch map to $u";
 		}
 		else {
 		    $mapped{$u} = $ch;

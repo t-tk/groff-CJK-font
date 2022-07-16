@@ -1,4 +1,4 @@
-.\" Copyright (C) 2006-2018 Free Software Foundation, Inc.
+.\" Copyright (C) 2006-2020 Free Software Foundation, Inc.
 .\"      Written by Eric S. Raymond <esr@thyrsus.com>
 .\"
 .\" This file is part of groff.
@@ -1722,7 +1722,8 @@ GNU \fBgpic\fP also documents a one-argument form or rand,
 version.
 .PP
 The function \fBsprintf()\fP behaves like a C \fIsprintf\/\fP(3)
-function that only takes %, %e, %f, and %g format strings.
+function that only takes %%, %e, %E, %f, %g, and %G conversion
+specifications.
 .
 .
 .NH 1

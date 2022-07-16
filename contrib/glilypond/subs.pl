@@ -5,13 +5,8 @@ my $License = q*
 
 Subroutines for 'glilypond'.
 
-Source file position: '<groff-source>/contrib/glilypond/subs.pl'
-Installed position: '<prefix>/lib/groff/glilypond/subs.pl'
-
-Copyright (C) 2013-2018 Free Software Foundation, Inc.
+Copyright (C) 2013-2020 Free Software Foundation, Inc.
   Written by Bernd Warken <groff-bernd.warken-72@web.de>
-
-Last update: 10 Sep 2015
 
 This file is part of 'glilypond', which is part of 'GNU groff'.
 
@@ -464,8 +459,8 @@ sub version { # for '--version'
 # end of subs
 
 1;
-########################################################################
-### Emacs settings
 # Local Variables:
+# fill-column: 72
 # mode: CPerl
 # End:
+# vim: set autoindent textwidth=72:

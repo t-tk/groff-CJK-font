@@ -1,5 +1,4 @@
-// -*- C++ -*-
-/* Copyright (C) 1989-2018 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
 This file is part of groff.
@@ -377,8 +376,8 @@ int main(int argc, char **argv)
     }
   init_table(device);
   init_char_table();
-  printf(".if !dEQ .ds EQ\n"
-	 ".if !dEN .ds EN\n");
+  printf(".do if !dEQ .ds EQ\n"
+	 ".do if !dEN .ds EN\n");
   if (output_format == troff) {
     printf(".if !'\\*(.T'%s' "
 	   ".if !'\\*(.T'html' "	// the html device uses '-Tps' to render
@@ -423,3 +422,9 @@ int main(int argc, char **argv)
     fatal("output error");
   return 0;
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

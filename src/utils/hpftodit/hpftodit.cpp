@@ -1,5 +1,5 @@
 // -*- C++ -*-
-/* Copyright (C) 1994-2018 Free Software Foundation, Inc.
+/* Copyright (C) 1994-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
 This file is part of groff.
@@ -574,7 +574,7 @@ output_font_name(File &f)
     ;
   *(p + 1) = '\0';
   printf("# %s\n", font_name);
-  delete font_name;
+  delete[] font_name;
 }
 
 static void

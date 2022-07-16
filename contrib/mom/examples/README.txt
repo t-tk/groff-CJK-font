@@ -1,9 +1,9 @@
-    -*- mode: text; coding: utf-8; -*-
-    Copyright (C) 2004-2018 Free Software Foundation, Inc.
+-*- mode: text; coding: utf-8; -*-
+Copyright (C) 2004-2020 Free Software Foundation, Inc.
 
-    Copying and distribution of this file, with or without modification,
-    are permitted in any medium without royalty provided the copyright
-    notice and this notice are preserved.
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
 
 ========================================================================
 
@@ -88,6 +88,12 @@ TOC_HEADER_STRING is used to modity the Table of Content title to
 "Table des matières". And finally, INDENT_FIRST_PARAS is used to
 indent the first paragraph of a section -- this is the usual
 convention in French typesetting.
+
+***copyright-default.mom/copyright-chapter.mom***
+
+These two files demonstrate the correct way to insert a copyright
+page into mom documents.  "Default" is for DOCTYPE DEFAULT;
+"chapter" is for DOCTYPE CHAPTER.
 
 ***mom-pdf.mom***
 
