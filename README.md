@@ -37,9 +37,6 @@ It supports font definition by a range of unicode code points.
 - font/devps/KOM
 - font/devps/KOG
 
-# others
-- src/libs/libgroff/invalid.cpp
-
 # test samples
 - tests/*
 
