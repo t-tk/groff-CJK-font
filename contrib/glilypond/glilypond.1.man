@@ -1,18 +1,15 @@
 .TH glilypond @MAN1EXT@ "@MDATE@" "groff @VERSION@"
-.SH NAME
-glilypond \- integrate lilypond parts into groff
+.SH Name
+glilypond \- embed LilyPond musical notation in groff documents
 .
-.\" glilypond - integrate 'lilypond' parts into 'groff' files
-.\" Source file position:  <groff_source_top>/contrib/glilypond.man
-.\" Installed position:    <prefix>/share/man/man1/glilypond.1
 .
-.\" TODO: This page needs a thorough edit by a native English speaker.
+.\" TODO: This page needs a thorough edit by a fluent English speaker.
 .
 .\" ====================================================================
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 2013-2018 Free Software Foundation, Inc.
+.\" Copyright (C) 2013-2020 Free Software Foundation, Inc.
 .\"
 .\" This file is part of glilypond, which is part of GNU groff, a free
 .\" software project.
@@ -25,18 +22,13 @@ glilypond \- integrate lilypond parts into groff
 .\" <http://www.gnu.org/licenses/gpl-2.0.html>.
 .
 .
-.\" ====================================================================
-.\" Characters
-.\" ====================================================================
-.
-.\" Ellipsis ...
-.ie t .ds EL \fS\N'188'\fP\"
-.el .ds EL \&.\|.\|.\&\"
-.\" called with \*(EL
+.\" Save and disable compatibility mode (for, e.g., Solaris 10/11).
+.do nr *groff_glilypond_1_man_C \n[.cp]
+.cp 0
 .
 .
 .\" ====================================================================
-.SH SYNOPSIS
+.SH Synopsis
 .\" ====================================================================
 .
 .SY glilypond
@@ -53,8 +45,10 @@ glilypond \- integrate lilypond parts into groff
 .RB [{ \-v | \-V }]
 .OP \-
 .OP \-\-
-.RI [ filespec
-\*(EL]
+.RI [ file
+\&.\|.\|.]
+.
+.
 .SY glilypond
 .RB [{ \-\-ly2eps | \-\-pdf2eps }]
 .RB [ \-\-eps_dir
@@ -69,9 +63,10 @@ glilypond \- integrate lilypond parts into groff
 .OP \-\-verbose
 .OP \-
 .OP \-\-
-.RI [ filespec
-\*(EL]
+.RI [ file
+\&.\|.\|.]
 .YS
+.
 .
 .SY glilypond
 .B \-?
@@ -83,29 +78,32 @@ glilypond \- integrate lilypond parts into groff
 .B \-\-usage
 .YS
 .
+.
 .SY glilypond
 .B \-l
 .SY glilypond
 .B \-\-license
 .YS
 .
+.
 .SY glilypond
 .B \-\-version
 .YS
 .
+.
 .\" ====================================================================
-.SH DESCRIPTION
+.SH Description
 .\" ====================================================================
 .
-.B glilypond
+.I glilypond
 transforms sheet music written in the
 .I lilypond
 language into the
-.BR groff (@MAN7EXT@)
+.IR groff (@MAN7EXT@)
 language using the
 .B .PSPIC
 request, such that
-.BR groff (@MAN1EXT@)
+.IR groff (@MAN1EXT@)
 can transform it into a format that can be displayed directly.
 .
 .B .PDFPIC
@@ -113,20 +111,29 @@ is available, but does on yet work with lilypond.
 .
 .
 .P
-Files in
-.I groff
-language and
-.I "standard input"
-can be provided as arguments.
+If no operands are given,
+or if
+.I file
+is
+.RB \[lq] \- \[rq],
+.I glilypond
+reads the standard input stream.
+.
+A double-dash argument
+.RB (\[lq] \-\- \[rq])
+causes all subsequent arguments to be interpreted as
+.I file
+operands,
+even if their names start with a dash.
 .
 .
 .\" ====================================================================
-.SH "WORKING GLILYPOND"
+.SH "Working glilypond"
 .\" ====================================================================
 .
 Together with
 .BR .PSPIC ,
-.B glilypond can work only for
+.I glilypond can work only for
 .I troff
 devices without
 .I PDF
@@ -137,7 +144,7 @@ devices.
 .
 .P
 I.e., the following
-.B groff
+.I groff
 devices work,
 .BR \-Tps ,
 .BR \-Tdvi ,
@@ -148,86 +155,46 @@ and
 .
 .P
 I'm not sure about the
-.B ldp
+.B lbp
 and
 .B lj4
 devices.
 .
 .
 .P
-In
-.BR groffer ,
-it is easier to use the following device options, either
-.
-.BR \-\-ps ,
-.BR \-\-div ,
-.BR \-\-html ,
-or
-.BR \-\-xhtml .
-.
-.
-.P
 Unfortunately, the
-.B groff
+.I groff
 option
 .B \-Tpdf
-does not work and the
-.B groffer
-default
-.I PDF
-works neither.
-.
-.
-.P
-But
-.B groffer
-has an additional
-.IR "pdf mode" ,
-not available in
-.BR groff .
-.
-It is based on the
-.I ps mode
-in
-.B groff
-and is called through
-.B groffer \-\-pdf2
-.IR roff-file-with-lilypond .
+does not work.
 .
 .
 .\" ====================================================================
-.SH "OPTION OVERVIEW"
+.SH "Option Overview"
 .\" ====================================================================
 .
-.\" ====================================================================
-.SS "Breaking Options"
-.\" ====================================================================
 .
-.nh
-.nf
 .TP
 .BR \-? | \-h | \-\-help | \-\-usage
-Print help or usage information, then leave the program.
+Display usage information and exit.
 .
 .TP
 .B \-\-version
-Print version information.
+Display version information and exit.
 .
 .TP
 .BR \-l | \-\-license
-Print license information.
-.fi
-.hy
+Display copyright license information and exit.
 .
 .
 .\" ====================================================================
-.SS "Options for building EPS Files"
+.SS "Options for building EPS files"
 .\" ====================================================================
 .
 .TP
 .OP \-\-ly2eps
 Here the
-.B lilypond
+.I lilypond
 program creates
 .I eps
 files directly.
@@ -238,22 +205,22 @@ This is the default.
 .TP
 .OP \-\-pdf2eps
 The program
-.B glilypond
+.I glilypond
 generates a
 .I PDF
 file using
-.BR lilypond .
+.IR lilypond .
 .
 Then the
 .I eps
 file is generated by
-.B pdf2ps
+.I pdf2ps
 and
-.BR ps2eps R .
+.IR ps2eps R .
 .
 .
 .\" ====================================================================
-.SS "Directories and Files"
+.SS "Directories and files"
 .\" ====================================================================
 .
 .TP
@@ -262,7 +229,9 @@ Normally all
 .I EPS
 files are sent to the temporary directory.
 .
-With this option, you can generate your own directory, in which all useful
+With this option,
+you can generate your own directory,
+in which all useful
 .I EPS
 files are send.
 .
@@ -272,7 +241,7 @@ So at last, the temporary directory can be removed.
 .TP
 .BR \-p | \-\-prefix "\fI begin_of_name\fP"
 Normally all temporary files get names that start with the
-.BI ly \*(EL
+.BI ly .\|.\|.\&
 prefix.
 .
 With this option, you can freely change this prefix.
@@ -285,7 +254,7 @@ Normally all temporary files without the
 files are deleted.
 .
 With this option, all generated files either by the
-.B lilypond
+.I lilypond
 program or other format transposers are kept.
 .
 .
@@ -305,7 +274,7 @@ In this temporary directory, the temporary files are stored.
 .
 .
 .\" ====================================================================
-.SS "Output"
+.SS Output
 .\" ====================================================================
 .
 .TP
@@ -326,7 +295,7 @@ A lot more of information is sent to STDERR.
 .
 .
 .\" ====================================================================
-.SS "Short Option Collections"
+.SS "Short option collections"
 .\" ====================================================================
 .
 The argument handling of options
@@ -381,7 +350,7 @@ So this argument could also be written as several arguments
 .
 .
 .\" ====================================================================
-.SS "Handling of Long Options"
+.SS "Handling of long options"
 .\" ====================================================================
 .
 Arguments that start with a double dash
@@ -477,61 +446,11 @@ or even as an abbreviation like
 .
 .
 .\" ====================================================================
-.SH FILESPEC ARGUMENTS
-.\" ====================================================================
-.
-An argument that is not an option or an option argument is called a
-.I filespec
-argument.
-.
-.
-.P
-Without any
-.I filespec
-argument,
-.I "standard input"
-is read.
-.
-.
-.P
-Each
-.I filespec
-argument must either be the name of a readable file or a dash
-.B \-
-for
-.IR "standard input" .
-.
-Each input must be written in the
-.I roff
-or
-.I groff
-language and can include
-.I lilypond
-parts.
-.
-.
-.P
-Normally arguments starting with a dash
-.B \-
-are interpreted as an option.
-.
-But if you use an argument that consists only of a doubled dash
-.B \-\- R ,
-all following arguments are taken as
-.I filespec
-argument, even if such an argument starts with a dash.
-.
-This is handled according to the
-.I GNU
-standard.
-.
-.
-.\" ====================================================================
-.SH "THE LILYPOND PARTS IN ROFF INPUT"
+.SH "The LilyPond Parts in roff Input"
 .\" ====================================================================
 .
 .\" ====================================================================
-.SS "Integrated Lilypond Codes"
+.SS "Integrated lilypond codes"
 .\" ====================================================================
 .
 A
@@ -640,7 +559,7 @@ files.
 .
 .
 .\" ====================================================================
-.SH "GENERATED FILES"
+.SH "Generated Files"
 .\" ====================================================================
 .
 By the transformation process of
@@ -658,7 +577,7 @@ This process can be changed by command-line options.
 .
 .
 .\" ====================================================================
-.SS "Command Line Options for Directories"
+.SS "Command-line options for directories"
 .\" ====================================================================
 .
 The temporary directory for this program is either created
@@ -713,7 +632,7 @@ are needed for the display which can take a long time.
 .
 .
 .\" ====================================================================
-.SH "TRANSFORMATION PROCESSES FOR GENERATING EPS FILES"
+.SH "Transformation Processes for Generating EPS Files"
 .\" ====================================================================
 .
 .\" ====================================================================
@@ -759,11 +678,14 @@ files into a
 file.
 .
 This is done by the
-.BR pdf2ps (1)
+.IR pdf2ps (1)
 program using
 .RS
 .EX
-\fR$ \fP \fBpdf2ps\fP \fIfile-name\fP \fB.pdf\fP \fIfile-name\fP \fB.ps\fP
+$\~\c
+.B pdf2ps\~\c
+.IB file-name .pdf\~\c
+.IB file-name .pds
 .EE
 .RE
 .
@@ -775,7 +697,7 @@ file from the
 file.
 .
 This is done by the
-.BR ps2eps (1)
+.IR ps2eps (1)
 program using
 .RS
 .EX
@@ -814,10 +736,10 @@ command
 In earlier time, this mode was the default.
 .
 But now it does not work any more, so accept the new default
-.BR pdf2eps .
+.IR pdf2eps .
 .
 For testing, this mode can also be chosen by the
-.B glilypond
+.I glilypond
 option
 .BR \-\-ly2eps .
 .
@@ -826,13 +748,15 @@ option
 In this mode, the
 .B .ly
 files are transformed by the
-.B lilypond
+.I lilypond
 program into many files of different formats, including
 .I eps
 files, using
 .RS
 .EX
-.BI "$ lilypond \-\-ps \-dbackend=eps \-dgs\-load\-fonts \-\-output=" file\-name
+$\~\c
+.B lilypond \-\-ps \-dbackend=eps \-dgs\-load\-fonts \-\-output=\c
+.I file-name
 .EE
 .RE
 for each
@@ -878,21 +802,19 @@ commands
 .
 .
 .\" ====================================================================
-.SH "THE GENERATED NEW ROFF STRUCTURE"
+.SH "The Generated New roff Structure"
 .\" ====================================================================
 .
 The new
-.BR groff (@MAN7EXT@)
+.IR groff (@MAN7EXT@)
 structure generated by
-.B glilypond
+.I glilypond
 is either
 .
 .TP
 1)
 sent to standard output and can there be saved into a file or piped into
-.BR groff (@MAN1EXT@)
-or
-.BR groffer (@MAN1EXT@)
+.IR groff (@MAN1EXT@)
 or
 .
 .TP
@@ -903,21 +825,22 @@ stored into a file by given the option
 .
 .
 .\" ====================================================================
-.SH AUTHORS
+.SH Authors
 .\" ====================================================================
-.B glilypond
+.
+.I glilypond
 was written by
-.MT groff\-bernd.warken\-72@\:web.de
+.MT groff\-bernd\:.warken\-72@\:web\:.de
 Bernd Warken
 .ME .
 .
 .
 .\" ====================================================================
-.SH "SEE ALSO"
+.SH "See also"
 .\" ====================================================================
 .
 .TP
-.BR groff (@MAN1EXT@)
+.IR groff (@MAN1EXT@)
 describes the usage of the
 .I groff
 command and contains pointers to further documentation of the
@@ -926,21 +849,21 @@ system.
 .
 .
 .TP
-.BR groff_tmac (@MAN5EXT@)
+.IR groff_tmac (@MAN5EXT@)
 describes the
 .B .PSPIC
 request.
 .
 .
 .TP
-.BR lilypond (1)
+.IR lilypond (1)
 briefly describes the
-.B lilypond
+.I lilypond
 command and contains pointers to further documentation.
 .
 .
 .TP
-.BR pdf2ps (1)
+.IR pdf2ps (1)
 transforms a
 .I PDF
 file into a
@@ -949,7 +872,7 @@ format.
 .
 .
 .TP
-.BR ps2eps (1)
+.IR ps2eps (1)
 transforms a
 .I PS
 file into an
@@ -957,11 +880,12 @@ file into an
 format.
 .
 .
-.\" ====================================================================
-.\" Emacs settings
-.\" ====================================================================
+.\" Restore compatibility mode (for, e.g., Solaris 10/11).
+.cp \n[*groff_glilypond_1_man_C]
+.
 .
 .\" Local Variables:
+.\" fill-column: 72
 .\" mode: nroff
 .\" End:
-.\" vim: set filetype=groff:
+.\" vim: set filetype=groff textwidth=72:

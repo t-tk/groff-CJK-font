@@ -1,5 +1,5 @@
 // -*- C++ -*-
-/* Copyright (C) 1989-2018 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
 This file is part of groff.
@@ -33,6 +33,7 @@ extern "C" const char *Version_string;
 
 static void usage(FILE *stream);
 static void usage();
+static void usage(const char *problem);
 static void version();
 static void convert_font(const font_params &, FILE *, FILE *);
 
@@ -42,14 +43,14 @@ static struct {
   const char *name;
   param_t par;
 } param_table[] = {
-  { "x-height", &font_params::x_height },
-  { "fig-height", &font_params::fig_height },
   { "asc-height", &font_params::asc_height },
+  { "body-depth", &font_params::body_depth },
   { "body-height", &font_params::body_height },
   { "cap-height", &font_params::cap_height },
   { "comma-depth", &font_params::comma_depth },
   { "desc-depth", &font_params::desc_depth },
-  { "body-depth", &font_params::body_depth },
+  { "fig-height", &font_params::fig_height },
+  { "x-height", &font_params::x_height },
 };
 
 // These are all in thousandths of an em.
@@ -77,17 +78,20 @@ int main(int argc, char **argv)
     }
   }
   if (argc < 4)
-    usage();
+    usage("insufficient arguments");
+  /* The next couple of usage() calls cannot provide a meaningful
+     diagnostic because we don't know whether sscanf() failed on a
+     required parameter or an option.  A refactor could fix this. */
   int resolution;
   if (sscanf(argv[argc-3], "%d", &resolution) != 1)
     usage();
   if (resolution <= 0)
-    fatal("resolution must be > 0");
+    fatal("resolution must be positive");
   int unitwidth;
   if (sscanf(argv[argc-2], "%d", &unitwidth) != 1)
     usage();
   if (unitwidth <= 0)
-    fatal("unitwidth must be > 0");
+    fatal("unit width must be positive");
   font_params param;
   const char *font = argv[argc-1];
   param.italic = (font[0] != '\0' && strchr(font, '\0')[-1] == 'I');
@@ -106,7 +110,7 @@ int main(int argc, char **argv)
       break;
     }
     if (i + 1 >= argc)
-      usage();
+      usage("option requires argument");
     size_t j;
     for (j = 0;; j++) {
       if (j >= sizeof(param_table)/sizeof(param_table[0]))
@@ -115,11 +119,11 @@ int main(int argc, char **argv)
 	break;
     }
     if (sscanf(argv[i+1], "%d", &(param.*(param_table[j].par))) != 1)
-      fatal("invalid argument '%1'", argv[i+1]);
+      fatal("invalid option argument '%1'", argv[i+1]);
     i++;
-  }    
+  }
   if (argc - i != 3)
-    usage();
+    usage("insufficient arguments");
   errno = 0;
   FILE *infp = fopen(font, "r");
   if (infp == 0)
@@ -130,14 +134,25 @@ int main(int argc, char **argv)
 
 static void usage(FILE *stream)
 {
-  fprintf(stream, "usage: %s [-v] [-param value] ... "
-		  "resolution unitwidth font\n",
-	  program_name);
+  fprintf(stream, "usage: %s", program_name);
+  size_t len = sizeof(param_table)/sizeof(param_table[0]);
+  for (int i = 0; i < len; i++)
+    fprintf(stream, " [-%s N]", param_table[i].name);
+  fprintf(stream, " RESOLUTION UNIT-WIDTH FONT\n");
+  fprintf(stream, "usage: %s -v\n", program_name);
+  fprintf(stream, "usage: %s --version\n", program_name);
 }
+
 static void usage()
 {
   usage(stderr);
   exit(1);
+}
+
+static void usage(const char *problem)
+{
+  error("%1", problem);
+  usage();
 }
 
 static void version()
@@ -157,8 +172,9 @@ static int get_line(FILE *fp, string *p)
   }
   return p->length() > 0;
 }
-  
-static void convert_font(const font_params &param, FILE *infp, FILE *outfp)
+
+static void convert_font(const font_params &param, FILE *infp,
+			 FILE *outfp)
 {
   string s;
   while (get_line(infp, &s)) {
@@ -200,18 +216,18 @@ static void convert_font(const font_params &param, FILE *infp, FILE *outfp)
 		printf(",%d,%d", metric.height, metric.depth);
 	    }
 	    else
-	      printf(",%d,%d,%d", metric.height, metric.depth, metric.ic);
+	      printf(",%d,%d,%d", metric.height, metric.depth,
+		     metric.ic);
 	  }
 	  else
-	    printf(",%d,%d,%d,%d", metric.height, metric.depth, metric.ic,
-		   metric.left_ic);
+	    printf(",%d,%d,%d,%d", metric.height, metric.depth,
+		   metric.ic, metric.left_ic);
 	}
 	else
-	  printf(",%d,%d,%d,%d,%d", metric.height, metric.depth, metric.ic,
-		 metric.left_ic, metric.sk);
+	  printf(",%d,%d,%d,%d,%d", metric.height, metric.depth,
+		 metric.ic, metric.left_ic, metric.sk);
       }
     }
     fputs(p, outfp);
   }
 }
-

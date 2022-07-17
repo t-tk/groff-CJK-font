@@ -1,18 +1,13 @@
-.TH GROPDF @MAN1EXT@ "@MDATE@" "groff @VERSION@"
-.SH NAME
-gropdf \- PDF driver for groff
-.
-.
-.\" Save and disable compatibility mode (for, e.g., Solaris 10/11).
-.do nr gropdf_C \n[.C]
-.cp 0
+.TH gropdf @MAN1EXT@ "@MDATE@" "groff @VERSION@"
+.SH Name
+gropdf \- groff output driver for Portable Document Format
 .
 .
 .\" ====================================================================
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 2011-2018 Free Software Foundation, Inc.
+.\" Copyright (C) 2011-2020 Free Software Foundation, Inc.
 .\"
 .\" Permission is granted to make and distribute verbatim copies of this
 .\" manual provided the copyright notice and this permission notice are
@@ -30,13 +25,22 @@ gropdf \- PDF driver for groff
 .\" instead of in the original English.
 .
 .
+.\" Save and disable compatibility mode (for, e.g., Solaris 10/11).
+.do nr *groff_gropdf_1_man_C \n[.cp]
+.cp 0
+.
+.
+.\" This macro definition is poor style from a portability standpoint,
+.\" but it's a good test and demonstration of the standard font
+.\" repertoire for the devices where it has any effect at all, and so
+.\" should be retained.
 .de FT
 .  if '\\*(.T'ps' .ft \\$1
 .  if '\\*(.T'pdf' .ft \\$1
 ..
 .
 .\" ====================================================================
-.SH SYNOPSIS
+.SH Synopsis
 .\" ====================================================================
 .
 .SY gropdf
@@ -52,14 +56,17 @@ gropdf \- PDF driver for groff
 \&.\|.\|.\&]
 .YS
 .
+.
 .SY gropdf
 .B \-v
+.
 .SY gropdf
 .B \-\-version
 .YS
 .
+.
 .\" ====================================================================
-.SH DESCRIPTION
+.SH Description
 .\" ====================================================================
 .
 .B gropdf
@@ -105,10 +112,14 @@ fonts for
 .
 .
 .\" ====================================================================
-.SH OPTIONS
+.SH Options
 .\" ====================================================================
 .
-Whitespace is permitted between a command-line option and its argument.
+.B \-v
+and
+.B \-\-version
+show version information;
+both exit afterward.
 .
 .
 .TP
@@ -140,7 +151,7 @@ is the name of the device, usually
 .BI \-I " dir"
 This option may be used to add a directory to the search path for
 files named in
-.B \[rs]X'pdf: pdfpic'
+.B \[rs]X\[aq]pdf: pdfpic\[aq]
 escape.
 .
 The current directory is always searched first.
@@ -199,20 +210,14 @@ You can include your own CMap by specifying a
 or have no CMap at all by omitting the argument.
 .
 .
-.TP
-.B \-v
-.TQ
-.B \-\-version
-Print the version number and exit.
-.
-.
 .\" .TP
 .\" .BI \-w n
 .\" Lines should be drawn using a thickness of
 .\" .IR n \~\c
 .\" thousandths of an em.
 .\" .
-.\" If this option is not given, the line thickness defaults to 0.04\~em.
+.\" If this option is not given, the line thickness defaults to
+.\" 0.04\~em.
 .\" .
 .\" .
 .TP
@@ -221,16 +226,16 @@ Set the foundry to use for selecting fonts of the same name.
 .
 .
 .\" ====================================================================
-.SH USAGE
+.SH Usage
 .\" ====================================================================
 .
 The input to
-.B gropdf
+.I gropdf
 must be in the format output by
-.BR @g@troff (@MAN1EXT@).
+.IR \%@g@troff (@MAN1EXT@).
 .
 This is described in
-.BR groff_out (@MAN5EXT@).
+.IR groff_out (@MAN5EXT@).
 .
 .
 .LP
@@ -269,8 +274,8 @@ PDF.
 .
 .LP
 .B gropdf
-supports the concept of foundries, that is different versions of basically
-the same font.
+supports the concept of foundries,
+that is different versions of basically the same font.
 .
 During install a
 .I Foundry
@@ -320,9 +325,9 @@ This restriction will be lifted in a later version.
 .\" .B grops
 .\" is able to display all glyphs in a PostScript font, not only 256.
 .\" .I enc_file
-.\" (or the default encoding if no encoding file specified) just defines the
-.\" order of glyphs for the first 256 characters; all other glyphs are
-.\" accessed with additional encoding vectors which
+.\" (or the default encoding if no encoding file specified) just defines
+.\" the order of glyphs for the first 256 characters;
+.\" all other glyphs are accessed with additional encoding vectors which
 .\" .B grops
 .\" produces on the fly.
 .
@@ -616,10 +621,12 @@ The lower case greek characters are automatically slanted (to match
 the SymbolSlanted font (SS) available to PostScript).
 .
 Zapf Dingbats is available as
-.BR ZD ,
-the "hand pointing left" glyph (\[rs][lh]) is available since it has
-been defined using the \[rs]X'pdf: xrev' extension which reverses the
-direction of letters within words.
+.BR ZD ;
+the \[lq]hand pointing left\[rq] glyph
+.RB ( \[rs][lh] )
+is available since it has been defined using the
+.B \[rs]X\[aq]pdf: xrev\[aq]
+extension which reverses the direction of letters within words.
 .
 .
 .LP
@@ -638,31 +645,33 @@ escape sequences supported by
 Specifically, the following is supported.
 .
 .TP
-.B "\[rs]X'ps: invis'"
+.B \[rs]X\[aq]ps: invis\[aq]
 Suppress output.
 .
 .TP
-.B "\[rs]X'ps: endinvis'"
+.B \[rs]X\[aq]ps: endinvis\[aq]
 Stop suppressing output.
 .
 .TP
-.B "\[rs]X'ps: exec gsave currentpoint 2 copy translate \fIn\fP rotate neg exch neg exch translate'"
+.BI "\[rs]X\[aq]ps: exec gsave currentpoint 2 copy translate\~" n\~\c
+.B rotate neg exch neg exch translate\[aq]
 where
 .I n
 is the angle of rotation.
+.
 This is to support the
 .I align
 command in
 .BR gpic .
 .
 .TP
-.B "\[rs]X'ps: exec grestore'"
+.B \[rs]X\[aq]ps: exec grestore\[aq]
 Again used by
 .B gpic
 to restore after rotation.
 .
 .TP
-.BI "\[rs]X'ps: exec " "n " "setlinejoin'"
+.BI "\[rs]X\[aq]ps: exec " "n\~" "setlinejoin\[aq]"
 where
 .I n
 can be one of the following values.
@@ -674,7 +683,7 @@ can be one of the following values.
 2 = Bevel join
 .
 .TP
-.BI "\[rs]X'ps: exec " "n " "setlinecap'"
+.BI "\[rs]X\[aq]ps: exec " "n " "setlinecap\[aq]"
 where
 .I n
 can be one of the following values.
@@ -688,7 +697,7 @@ can be one of the following values.
 .
 .LP
 .TP
-.B "\[rs]X'ps: ... pdfmark'"
+.BR "\[rs]X\[aq]ps:\~" .\|.\|.\& "\~pdfmark\[aq]"
 All the
 .I pdfmark
 macros installed by using
@@ -724,14 +733,20 @@ These commands are implemented with
 X commands:-
 .LP
 .TP
-.B "\[rs]X'ps: exec %%%%PAUSE"
-The section before this is treated as a block and is introduced using the
-current BLOCK transition setting (see \[oq]pdf: transition\[cq] below).
+.B \[rs]X\[aq]ps: exec %%%%PAUSE\[aq]
+The section before this is treated as a block and is introduced using
+the current
+.B BLOCK
+transition setting
+(see
+.RB \[lq] "\[rs]X\[aq]pdf: transition\[aq]" \[rq]
+below).
+.
 This command
 can be introduced using the macro
 .BR .pdfpause .
 .TP
-.B "\[rs]X'ps: exec %%%%BEGINONCE"
+.B \[rs]X\[aq]ps: exec %%%%BEGINONCE\[aq]
 Any text following this command (up to %%%%ENDONCE) is shown only once,
 the next %%%%PAUSE will remove it.
 If producing a non presentation pdf, i.e.\&
@@ -740,7 +755,7 @@ ignoring the pauses, see
 below, this text is ignored.
 .LP
 .TP
-.B "\[rs]X'ps: exec %%%%ENDONCE"
+.B \[rs]X\[aq]ps: exec %%%%ENDONCE\[aq]
 This terminates the block defined by %%%%BEGINONCE.
 This pair of commands
 is what implements the .BLOCKS Once/.BLOCKE commands in present.tmac.
@@ -768,7 +783,7 @@ One
 special used by the DVI driver is also recognised:
 .
 .TP
-.BI \[rs]X'papersize= paper-size '
+.BI \[rs]X\[aq]papersize= paper-size \[aq]
 where the
 .I paper-size
 parameter is the same as the
@@ -783,8 +798,8 @@ This means that you can alter the page size at will within the PDF file
 being created by
 .BR gropdf .
 .
-If you do want to change the paper size, it must be done before you start
-creating the page.
+If you do want to change the paper size,
+it must be done before you start creating the page.
 .
 .LP
 In addition,
@@ -796,7 +811,8 @@ tags.
 The following tags are supported:
 .
 .TP
-.BI "\[rs]X'pdf: pdfpic " "file alignment width height line-length" '
+.B \[rs]X\[aq]pdf: pdfpic\~\c
+.IR "file alignment width height line-length" \[aq]
 Place an image of the specified
 .I width
 containing the PDF drawing from file
@@ -825,23 +841,25 @@ greater than the width of the drawing is required as well.
 .
 If
 .I width
-is specified as zero then the width is scaled in proportion to the height.
+is specified as zero then the width is scaled in proportion to the
+height.
 .
 .\" .IP
 .\" See
 .\" .BR groff_tmac (@MAN7EXT@)
 .\" for a description of the
 .\" .B PSPIC
-.\" macro which provides a convenient high-level interface for inclusion of
-.\" PostScript graphics.
+.\" macro which provides a convenient high-level interface for inclusion
+.\" of PostScript graphics.
 .
 .TP
-.B \[rs]X'pdf: xrev'
+.B \[rs]X\[aq]pdf: xrev\[aq]
 This toggles a flag which reverses the direction of printing
 .IR "letter by letter" ,
 i.e., each separate letter is reversed, not the entire word.
 .
-This is useful for reversing the direction of glyphs in the Dingbats font.
+This is useful for reversing the direction of glyphs in the Dingbats
+font.
 .
 To return to normal printing repeat the command again.
 .
@@ -855,18 +873,24 @@ spot\[cq] region).
 Normally this is never used except from within the pdfmark macros.
 .
 .TP
-.B \[rs]X'pdf: markend'
-The macros which support PDF Bookmarks use this call internally to
-stop the definition of bookmark hotspot (user will have called
-\[oq].pdfhref\~L\[cq] with the text which will become the \[oq]hot
-spot\[cq] region).
+.BI "\[rs]X\[aq]pdf: markstart " "/ANN-definition" \[aq]
+.TQ
+.B \[rs]X\[aq]pdf: markend\[aq]
+The macros which support PDF bookmarks use these calls internally to
+start and stop (respectively) the definition of bookmark hot spot;
+the user will have called \[lq].pdfhref\~L\[rq] with the text which will
+become the hot spot region).
 .
-Normally this is never used except from within the pdfmark macros.
+Normally,
+these are never used except from within the
+.I pdfmark
+macros.
+.
 .
 .TP
-.B \[rs]X'pdf: marksuspend'
+.B \[rs]X\[aq]pdf: marksuspend\[aq]
 .TQ
-.B \[rs]X'pdf: markrestart'
+.B \[rs]X\[aq]pdf: markrestart\[aq]
 If you are using page traps to produce headings, footings, etc., you
 need to use these in case a \[oq]hot spot\[cq] crosses a page
 boundary, otherwise any text output by the heading or footing macro
@@ -876,19 +900,57 @@ To stop this happening just place \[oq].pdfmarksuspend\[cq] and
 \[oq].pdfmarkrestart\[cq] at the start and end of the page trap macro,
 respectively.
 .
-(These are just convenience macros which emit the \[rs]X code.
+(These are just convenience macros which emit the corresponding
+.B \[rs]X
+escapes.
 .
-These macros must only be used within page traps.)
+These macros must be used only within page traps.)
+.
 .
 .TP
-.BR "\[rs]X'pdf: transition'" "feature mode duration dimension motion direction scale bool"
+.BI "\[rs]X\[aq]pdf: pagename\~" name \[aq]
+This gives the current page a
+.IR name .
+.IP
+There are two default names for any document which do not need to
+be declared
+.IR \[oq]top\[cq] " and " \[oq]bottom\[cq] .
+.IP
+The convenience command for this is
+.BR .pdfpagename .
+.
+.TP
+.BI "\[rs]X'pdf: switchtopage\~" "when name" \[aq]
+Normally each new page is appended to the end of the document,
+this command allows following pages to be inserted at a
+.I \[oq]named\[cq]
+position within the document (see pagename command above).
+.I \[oq]when\[cq]
+can be either
+.IR \[oq]after\[cq] " or " \[oq]before\[cq] .
+If it is ommitted it defaults to
+.I \[oq]before\[cq].
+.IP
+The convenience command for this is
+.BR .pdfswitchtopage .
+It should be used at the end of the page before you want the switch to
+happen.
+.IP
+This allows pages such as a TOC to be moved to elsewhere in the
+document,
+but more esoteric uses are possible.
+.
+.TP
+.B \[rs]X\[aq]pdf: transition\~\c
+.IB "feature mode duration dimension motion direction scale bool" \[aq]
 where
 .IP
 .I feature
 can be either SLIDE or BLOCK.
 When it is SLIDE the transition is used
-when a new slide is introduced to the screen, if BLOCK then this transition
-is used for the individual blocks which make up the slide.
+when a new slide is introduced to the screen,
+if BLOCK then this transition is used for the individual blocks which
+make up the slide.
 .br
 .I mode
 is the transition type between slides:-
@@ -930,9 +992,9 @@ entry, revealing the new page.
 - The old page dissolves gradually to reveal the new one.
 .br
 .B Glitter
-- Similar to Dissolve, except that the effect sweeps across the page in a
-wide band moving from one side of the screen to the other in the
-direction specified by the
+- Similar to Dissolve,
+except that the effect sweeps across the page in a wide band moving from
+one side of the screen to the other in the direction specified by the
 .I direction
 entry.
 .br
@@ -1014,8 +1076,9 @@ Outward from the center of the page.
 .BR Cover ,
 .BR Uncover " and " Push
 transition styles only)
-The direction in which the specified transition effect shall moves, expressed in
-degrees counterclockwise starting from a left-to-right direction.
+The direction in which the specified transition effect shall moves,
+expressed in degrees counterclockwise starting from a left-to-right
+direction.
 If the value is a number, it shall be one of:
 .B 0
 = Left to right,
@@ -1078,7 +1141,7 @@ not all PDF Readers support any or all these transitions.
 .LP
 .
 .\" ====================================================================
-.SS Importing graphics
+.SS "Importing graphics"
 .\" ====================================================================
 .
 .B gropdf
@@ -1130,7 +1193,7 @@ will now load successfully.
 .
 .
 .\" ====================================================================
-.SS TrueType and other font formats
+.SS "TrueType and other font formats"
 .\" ====================================================================
 .
 .B gropdf
@@ -1138,19 +1201,14 @@ does not support any other fonts except Adobe Type 1 (PFA or PFB).
 .
 .
 .\" ====================================================================
-.SH FONT INSTALLATION
+.SH "Font Installation"
 .\" ====================================================================
 .
 This section gives a summary of the above explanations; it can serve
 as a step-by-step font installation guide for
 .BR gropdf .
 .
-.ds BU \[bu]\ \ \"
-.de LI
-.IP "" 4
-\h'-\w'\*[BU]'u'\*[BU]\c
-..
-.LI
+.IP \(bu
 Convert your font to something groff understands.
 .
 This is either a PostScript Type\~1 font in either PFA or PFB,
@@ -1168,7 +1226,7 @@ The very first line in a PFA/PFB file contains this:
 A PFB file has this also in the first line, but the string is
 preceded with some binary bytes.
 .
-.LI
+.IP \(bu
 Convert the AFM file to a groff font description file with the
 .BR \%afmtodit (@MAN1EXT@)
 program.
@@ -1204,18 +1262,18 @@ and the groff font names are
 and
 .BR TBI .
 .
-.LI
+.IP \(bu
 Install both the groff font description files and the fonts in a
 \[oq]devpdf\[cq] subdirectory of the font path which groff finds.
 .
 See section \[lq]Environment\[rq] in
-.BR @g@troff (@MAN1EXT@)
+.IR \%@g@troff (@MAN1EXT@)
 for the actual value of the font path.
 .
 Note that groff doesn't use the AFM files (but it is a good idea to
 store them anyway).
 .
-.LI
+.IP \(bu
 Register all fonts which must be downloaded to the printer in the
 .I devpdf/download
 file.
@@ -1248,7 +1306,7 @@ field should be null for the default foundry.
 .
 .
 .\" ====================================================================
-.SH ENVIRONMENT
+.SH Environment
 .\" ====================================================================
 .
 .TP
@@ -1264,9 +1322,9 @@ the font file has been specified with a full path,
 no directories are searched.
 .
 See
-.BR @g@troff (@MAN1EXT@)
+.IR \%@g@troff (@MAN1EXT@)
 and
-.BR \%groff_font (@MAN5EXT@)
+.IR groff_font (@MAN5EXT@)
 for more details.
 .
 .
@@ -1283,7 +1341,7 @@ creation timestamp in place of the current time.
 .
 .
 .\" ====================================================================
-.SH FILES
+.SH Files
 .\" ====================================================================
 .
 .TP
@@ -1333,24 +1391,25 @@ automatically loaded by
 .
 .
 .\" ====================================================================
-.SH "SEE ALSO"
+.SH "See also"
 .\" ====================================================================
 .
-.BR \%afmtodit (@MAN1EXT@),
-.BR groff (@MAN1EXT@),
-.BR @g@troff (@MAN1EXT@),
-.BR \%groff_font (@MAN5EXT@),
-.BR \%groff_out (@MAN5EXT@)
+.IR \%afmtodit (@MAN1EXT@),
+.IR groff (@MAN1EXT@),
+.IR \%@g@troff (@MAN1EXT@),
+.IR groff_font (@MAN5EXT@),
+.IR groff_out (@MAN5EXT@)
 .\" Not actually referenced in above discussion.
 .\" .BR \%pfbtops (@MAN1EXT@),
 .\" .BR \%groff_tmac (@MAN5EXT@),
 .
 .
 .\" Restore compatibility mode (for, e.g., Solaris 10/11).
-.cp \n[gropdf_C]
+.cp \n[*groff_gropdf_1_man_C]
 .
 .
 .\" Local Variables:
+.\" fill-column: 72
 .\" mode: nroff
 .\" End:
-.\" vim: set filetype=groff:
+.\" vim: set filetype=groff textwidth=72:

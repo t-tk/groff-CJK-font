@@ -1,5 +1,5 @@
 # Autoconf configuration file for groff.
-# Copyright (C) 1989-2018 Free Software Foundation, Inc.
+# Copyright (C) 1989-2020 Free Software Foundation, Inc.
 #
 # This file is part of groff.
 #
@@ -23,7 +23,7 @@ AC_INIT([GNU Troff],
         http://savannah.gnu.org/bugs/?group=groff,
         [groff])
 
-AC_PREREQ([2.62])
+AC_PREREQ([2.64])
 
 # SHORT_VERSION contains only the number of REVISION before the first '.',
 # e.g. if REVISION is '3.real.434-5aafd' then SHORT_VERSION is 'x.yy.3',
@@ -57,8 +57,6 @@ GROFF_X11
 GROFF_APPRESDIR_OPTION
 GROFF_APPRESDIR_DEFAULT
 GROFF_LIBPROGRAMDIR_DEFAULT
-GROFF_GROFFERDIR_OPTION
-GROFF_GROFFERDIR_DEFAULT
 GROFF_GLILYPONDDIR_DEFAULT
 GROFF_GPINYINDIR_DEFAULT
 GROFF_GROGDIR_DEFAULT

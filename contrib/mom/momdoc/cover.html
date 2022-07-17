@@ -2,7 +2,7 @@
 <!--
 This file is part of groff, the GNU roff type-setting system.
 
-Copyright (C) 2004-2018  Free Software Foundation, Inc.
+Copyright (C) 2004-2020 Free Software Foundation, Inc.
 Written by Peter Schaffter (peter@schaffter.ca).
 
 Permission is granted to copy, distribute and/or modify this document
@@ -123,7 +123,7 @@ covers in a collated document on-the-fly.
 Automatic generation of covers or doc-covers after the first one(s)
 only takes place if you are working with collated documents.  Mom
 provides no mechanism for saying &#8221;print a section cover
-here even though I'm still working on the same (non-collated)
+here even though I&#8217;m still working on the same (non-collated)
 document.&#8221;
 </p>
 </div>
@@ -203,12 +203,12 @@ be included in the pagination scheme (even though no page numbers
 appear), you must tell mom that&#8217;s what you want by invoking
 <br/>
 <span class="pre-in-pp">
-  .DOC_COVERS_COUNT_PAGES
+  .DOC_COVER_COUNTS_PAGES
 </span>
 or
 <br/>
 <span class="pre-in-pp">
-  .COVERS_COUNT_PAGES
+  .COVER_COUNTS_PAGES
 </span>
 </p>
 
@@ -397,7 +397,7 @@ what you want on the cover page:
       <a href="#pagination">COVERS_COUNT_PAGES</a>,
       the blank page will be taken into account in the pagination
       scheme, though no page number appears on it.  Otherwise, blank
-      pages are invisible to mom's pagination.
+      pages are invisible to mom&#8217;s pagination.
       </span>
     </dd>
 <dl/>
@@ -504,10 +504,10 @@ will print
 </div>
 
 <div class="box-macro-args">
-Macro: <b>DOC_COVERTEXT</b> <kbd class="macro-args">&lt;toggle&gt;</kbd>
+Macro: <b>DOC_COVERTEXT</b> <kbd class="macro-args">[START &lt;starting position&gt;] &lt;toggle&gt;</kbd>
 </div>
 <div class="box-macro-args" style="margin-top: 1em;">
-Macro: <b>COVERTEXT</b> <kbd class="macro-args">&lt;toggle&gt;</kbd>
+Macro: <b>COVERTEXT</b> <kbd class="macro-args">[START &lt;starting position&gt;] &lt;toggle&gt;</kbd>
 </div>
 
 <p class="requires">
@@ -548,16 +548,22 @@ is the only allowed document element tag.
 <p>
 If you do not instruct mom to put anything on doc-cover or cover
 pages except <kbd>DOC_COVERTEXT</kbd> or <kbd>COVERTEXT</kbd>, the
-cover text will begin at the document&#8217;s top margin.  You must
+cover text will begin at the document&#8217;s top margin.
+Equally, if only <kbd>COPYRIGHT</kbd> and/or <kbd>MISC</kbd> are
+to go on the pages, cover text begins at the top margin.  In all
+other cases, cover text begins below the last element on the page
+(excluding COPYRIGHT or MISC), separated by a blank line.
+</p>
+
+<p>
+If you wish to change the starting position of the text, you must
 use
 <a href="typesetting.html#space">SP</a>
 or
 <a href="typesetting.html#ald">ALD</a>
-to move it further down the page.  Equally, if only
-<kbd>COPYRIGHT</kbd> and/or <kbd>MISC</kbd> are to go on the pages,
-cover text begins at the top margin.  In all other cases, cover text
-begins below the last element on the page (excluding COPYRIGHT or
-MISC), separated by a blank line.
+to move it further down the page.  Alternatively, you may use the
+optional START argument to give a precise location for the text to
+begin.
 </p>
 
 <p>
@@ -567,7 +573,7 @@ often require.
 </p>
 
 <p>
-Here's a simple recipe for setting an abstract:
+Here&#8217;s a simple recipe for setting an abstract:
 <br/>
 <span class="pre-in-pp">
   .COVERTEXT

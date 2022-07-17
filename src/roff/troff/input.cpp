@@ -1,5 +1,4 @@
-// -*- C++ -*-
-/* Copyright (C) 1989-2018 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
 This file is part of groff.
@@ -103,6 +102,7 @@ static symbol end_macro_name;
 static symbol blank_line_macro_name;
 static symbol leading_spaces_macro_name;
 static int compatible_flag = 0;
+static int do_old_compatible_flag = -1;	// for .do request
 int ascii_output_flag = 0;
 int suppress_output_flag = 0;
 int is_html = 0;
@@ -401,8 +401,13 @@ int file_iterator::get_location(int /*allow_macro*/,
 
 void file_iterator::backtrace()
 {
-  errprint("%1:%2: backtrace: %3 '%1'\n", filename, lineno,
-	   popened ? "process" : "file");
+  const char *f;
+  int n;
+  // Get side effect of filename rewrite if stdin.
+  (void) get_location(0, &f, &n);
+  if (program_name)
+    fprintf(stderr, "%s: ", program_name);
+  errprint("backtrace: %3 '%1':%2\n", f, n, popened ? "pipe" : "file");
 }
 
 int file_iterator::set_location(const char *f, int ln)
@@ -433,7 +438,6 @@ public:
   static int get_location(int, const char **, int *);
   static int set_location(const char *, int);
   static void backtrace();
-  static void backtrace_all();
   static void next_file(FILE *, const char *);
   static void end_file();
   static void shift(int n);
@@ -696,17 +700,6 @@ int input_stack::get_location(int allow_macro, const char **filenamep, int *line
 
 void input_stack::backtrace()
 {
-  const char *f;
-  int n;
-  // only backtrace down to (not including) the topmost file
-  for (input_iterator *p = top;
-       p && !p->get_location(0, &f, &n);
-       p = p->next)
-    p->backtrace();
-}
-
-void input_stack::backtrace_all()
-{
   for (input_iterator *p = top; p; p = p->next)
     p->backtrace();
 }
@@ -794,7 +787,7 @@ inline int input_stack::get_compatible_flag()
 
 void backtrace_request()
 {
-  input_stack::backtrace_all();
+  input_stack::backtrace();
   fflush(stderr);
   skip_line();
 }
@@ -1283,7 +1276,8 @@ static color *read_rgb(char end = 0)
   color *col = new color;
   if (*s == '#') {
     if (!col->read_rgb(s)) {
-      warning(WARN_COLOR, "expecting rgb color definition not '%1'", s);
+      warning(WARN_COLOR, "expecting rgb color definition,"
+	      " not '%1'", s);
       delete col;
       return 0;
     }
@@ -1312,7 +1306,8 @@ static color *read_cmy(char end = 0)
   color *col = new color;
   if (*s == '#') {
     if (!col->read_cmy(s)) {
-      warning(WARN_COLOR, "expecting cmy color definition not '%1'", s);
+      warning(WARN_COLOR, "expecting cmy color definition,"
+	      " not '%1'", s);
       delete col;
       return 0;
     }
@@ -1341,7 +1336,8 @@ static color *read_cmyk(char end = 0)
   color *col = new color;
   if (*s == '#') {
     if (!col->read_cmyk(s)) {
-      warning(WARN_COLOR, "expecting a cmyk color definition not '%1'", s);
+      warning(WARN_COLOR, "expecting cmyk color definition,"
+	      " not '%1'", s);
       delete col;
       return 0;
     }
@@ -1371,7 +1367,8 @@ static color *read_gray(char end = 0)
   color *col = new color;
   if (*s == '#') {
     if (!col->read_gray(s)) {
-      warning(WARN_COLOR, "expecting a gray definition not '%1'", s);
+      warning(WARN_COLOR, "expecting gray definition,"
+	      " not '%1'", s);
       delete col;
       return 0;
     }
@@ -1448,7 +1445,8 @@ node *do_overstrike()
   for (;;) {
     tok.next();
     if (tok.newline() || tok.eof()) {
-      warning(WARN_DELIM, "missing closing delimiter");
+      warning(WARN_DELIM, "missing closing delimiter in"
+	      " overstrike escape (got %1)", tok.description());
       input_stack::push(make_temp_iterator("\n"));
       break;
     }
@@ -1483,13 +1481,14 @@ static node *do_bracket()
   int start_level = input_stack::get_level();
   for (;;) {
     tok.next();
-    if (tok.eof()) {
-      warning(WARN_DELIM, "missing closing delimiter");
-      break;
-    }
-    if (tok.newline()) {
-      warning(WARN_DELIM, "missing closing delimiter");
-      input_stack::push(make_temp_iterator("\n"));
+    if (tok.eof() || tok.newline()) {
+      warning(WARN_DELIM, "missing closing delimiter in"
+	      " bracket-building escape (got %1)", tok.description());
+      // XXX: Most other places we miss a closing delimiter, we push a
+      // temp iterator for the EOF case too.  What's special about \b?
+      // Exceptions: \w, \X are like this too.
+      if (tok.newline())
+	input_stack::push(make_temp_iterator("\n"));
       break;
     }
     if (tok == start
@@ -1515,7 +1514,8 @@ static int do_name_test()
   for (;;) {
     tok.next();
     if (tok.newline() || tok.eof()) {
-      warning(WARN_DELIM, "missing closing delimiter");
+      warning(WARN_DELIM, "missing closing delimiter in"
+	      " name test escape (got %1)", tok.description());
       input_stack::push(make_temp_iterator("\n"));
       break;
     }
@@ -1552,7 +1552,8 @@ static int do_expr_test()
   for (;;) {
     tok.next();
     if (tok.newline() || tok.eof()) {
-      warning(WARN_DELIM, "missing closing delimiter");
+      warning(WARN_DELIM, "missing closing delimiter in"
+	      " expression test escape (got %1)", tok.description());
       input_stack::push(make_temp_iterator("\n"));
       break;
     }
@@ -1608,7 +1609,8 @@ static node *do_zero_width()
   for (;;) {
     tok.next();
     if (tok.newline() || tok.eof()) {
-      warning(WARN_DELIM, "missing closing delimiter");
+      warning(WARN_DELIM, "missing closing delimiter in"
+	      " zero-width escape (got %1)", tok.description());
       input_stack::push(make_temp_iterator("\n"));
       break;
     }
@@ -2647,14 +2649,16 @@ static void trapping_blank_line()
 
 void do_request()
 {
-  int old_compatible_flag = compatible_flag;
+  assert(do_old_compatible_flag == -1);
+  do_old_compatible_flag = compatible_flag;
   compatible_flag = 0;
   symbol nm = get_name();
   if (nm.is_null())
     skip_line();
   else
     interpolate_macro(nm, 1);
-  compatible_flag = old_compatible_flag;
+  compatible_flag = do_old_compatible_flag;
+  do_old_compatible_flag = -1;
   request_or_macro *p = lookup_request(nm);
   macro *m = p->to_macro();
   if (m)
@@ -3570,8 +3574,11 @@ int string_iterator::get_location(int allow_macro,
 
 void string_iterator::backtrace()
 {
+  if (program_name)
+    fprintf(stderr, "%s: ", program_name);
   if (mac.filename) {
-    errprint("%1:%2: backtrace", mac.filename, mac.lineno + lineno - 1);
+    errprint("backtrace: '%1':%2", mac.filename,
+	     mac.lineno + lineno - 1);
     if (how_invoked) {
       if (!nm.is_null())
 	errprint(": %1 '%2'\n", how_invoked, nm.contents());
@@ -4717,6 +4724,57 @@ void chop_macro()
   skip_line();
 }
 
+enum case_xform_mode { STRING_UPCASE, STRING_DOWNCASE };
+
+// Case-transform each byte of the string argument's contents.
+void do_string_case_transform(case_xform_mode mode)
+{
+  assert((mode == STRING_DOWNCASE) || (mode == STRING_UPCASE));
+  symbol s = get_name(1);
+  if (s.is_null()) {
+    skip_line();
+    return;
+  }
+  request_or_macro *p = lookup_request(s);
+  macro *m = p->to_macro();
+  if (!m) {
+    error("cannot apply string case transformation to a request ('%1')",
+	  s.contents());
+    skip_line();
+    return;
+  }
+  string_iterator iter1(*m);
+  macro *mac = new macro;
+  int len = m->macro::length();
+  for (int l = 0; l < len; l++) {
+    int nc, c = iter1.get(0);
+    if (c == PUSH_GROFF_MODE
+	|| c == PUSH_COMP_MODE
+	|| c == POP_GROFFCOMP_MODE)
+      nc = c;
+    else if (c == EOF)
+      break;
+    else
+      if (mode == STRING_DOWNCASE)
+	nc = tolower(c);
+      else
+	nc = toupper(c);
+    mac->append(nc);
+  }
+  request_dictionary.define(s, mac);
+  tok.next();
+}
+
+// Uppercase-transform each byte of the string argument's contents.
+void stringdown_request() {
+  do_string_case_transform(STRING_DOWNCASE);
+}
+
+// Lowercase-transform each byte of the string argument's contents.
+void stringup_request() {
+  do_string_case_transform(STRING_UPCASE);
+}
+
 void substring_request()
 {
   int start;				// 0, 1, ..., n-1  or  -1, -2, ...
@@ -4992,7 +5050,7 @@ static int read_size(int *x)
     c = tok.ch();
   }
   int val = 0;		// pacify compiler
-  int bad = 0;
+  int bad_digit = 0;
   if (c == '(') {
     tok.next();
     c = tok.ch();
@@ -5010,13 +5068,13 @@ static int read_size(int *x)
       }
     }
     if (!csdigit(c))
-      bad = 1;
+      bad_digit = 1;
     else {
       val = c - '0';
       tok.next();
       c = tok.ch();
       if (!csdigit(c))
-	bad = 1;
+	bad_digit = 1;
       else {
 	val = val*10 + (c - '0');
 	val *= sizescale;
@@ -5025,13 +5083,17 @@ static int read_size(int *x)
   }
   else if (csdigit(c)) {
     val = c - '0';
-    if (!inc && c != '0' && c < '4') {
+    if (compatible_flag && !inc && c != '0' && c < '4') {
+      // Support legacy \sNN syntax.
       tok.next();
       c = tok.ch();
       if (!csdigit(c))
-	bad = 1;
-      else
+	bad_digit = 1;
+      else {
 	val = val*10 + (c - '0');
+	error("ambiguous point-size escape; rewrite to use '\\s(%1'"
+	      " or similar", val);
+      }
     }
     val *= sizescale;
   }
@@ -5049,17 +5111,25 @@ static int read_size(int *x)
       return 0;
     if (!(start.ch() == '[' && tok.ch() == ']') && start != tok) {
       if (start.ch() == '[')
-	error("missing ']'");
+	error("missing ']' in point-size escape");
       else
-	error("missing closing delimiter");
+	error("missing closing delimiter in point-size escape");
       return 0;
     }
   }
-  if (!bad) {
+  if (bad_digit) {
+    if (c)
+      error("bad digit in point-size escape: %1",
+	    input_char_description(c));
+    else
+      error("bad digit in point-size escape");
+    return 0;
+  }
+  else {
     switch (inc) {
     case 0:
       if (val == 0) {
-	// special case -- \s[0] and \s0 means to revert to previous size
+	// special case -- point size 0 means "revert to previous size"
 	*x = 0;
 	return 1;
       }
@@ -5076,14 +5146,11 @@ static int read_size(int *x)
     }
     if (*x <= 0) {
       warning(WARN_RANGE,
-	      "\\s escape results in non-positive point size; set to 1");
+	      "point-size escape results in non-positive size %1u;"
+	      " set to 1u", *x);
       *x = 1;
     }
     return 1;
-  }
-  else {
-    error("bad digit in point size");
-    return 0;
   }
 }
 
@@ -5188,13 +5255,14 @@ static void do_width()
   curenv = &env;
   for (;;) {
     tok.next();
-    if (tok.eof()) {
-      warning(WARN_DELIM, "missing closing delimiter");
-      break;
-    }
-    if (tok.newline()) {
-      warning(WARN_DELIM, "missing closing delimiter");
-      input_stack::push(make_temp_iterator("\n"));
+    if (tok.eof() || tok.newline()) {
+      warning(WARN_DELIM, "missing closing delimiter in"
+	      " width escape (got %1)", tok.description());
+      // XXX: Most other places we miss a closing delimiter, we push a
+      // temp iterator for the EOF case too.  What's special about \w?
+      // Exception: \b, \X are like this too.
+      if (tok.newline())
+	input_stack::push(make_temp_iterator("\n"));
       break;
     }
     if (tok == start
@@ -5375,13 +5443,14 @@ node *do_special()
   for (tok.next();
        tok != start || input_stack::get_level() != start_level;
        tok.next()) {
-    if (tok.eof()) {
-      warning(WARN_DELIM, "missing closing delimiter");
-      return 0;
-    }
-    if (tok.newline()) {
-      input_stack::push(make_temp_iterator("\n"));
-      warning(WARN_DELIM, "missing closing delimiter");
+    if (tok.eof() || tok.newline()) {
+      warning(WARN_DELIM, "missing closing delimiter in"
+	      " device special escape (got %1)", tok.description());
+      // XXX: Most other places we miss a closing delimiter, we push a
+      // temp iterator for the EOF case too.  What's special about \X?
+      // Exceptions: \b, \w are like this too.
+      if (tok.newline())
+	input_stack::push(make_temp_iterator("\n"));
       break;
     }
     unsigned char c;
@@ -5634,6 +5703,20 @@ int do_if_request()
   }
   int result;
   unsigned char c = tok.ch();
+  if (compatible_flag)
+    switch (c) {
+    case 'F':
+    case 'S':
+    case 'c':
+    case 'd':
+    case 'm':
+    case 'r':
+      warning(WARN_SYNTAX,
+	      "conditional '%1' used in compatibility mode", c);
+      break;
+    default:
+      break;
+    }
   if (c == 't') {
     tok.next();
     result = !nroff_mode;
@@ -5718,7 +5801,8 @@ int do_if_request()
       for (;;) {
 	tok.next();
 	if (tok.newline() || tok.eof()) {
-	  warning(WARN_DELIM, "missing closing delimiter");
+	  warning(WARN_DELIM, "missing closing delimiter in conditional"
+		  " expression (got %1)", tok.description());
 	  tok.next();
 	  curenv = oldenv;
 	  return 0;
@@ -6812,6 +6896,7 @@ static void init_charset_table()
   charset_table[']']->set_flags(charinfo::TRANSPARENT);
   charset_table['*']->set_flags(charinfo::TRANSPARENT);
   get_charinfo(symbol("dg"))->set_flags(charinfo::TRANSPARENT);
+  get_charinfo(symbol("dd"))->set_flags(charinfo::TRANSPARENT);
   get_charinfo(symbol("rq"))->set_flags(charinfo::TRANSPARENT);
   get_charinfo(symbol("cq"))->set_flags(charinfo::TRANSPARENT);
   get_charinfo(symbol("em"))->set_flags(charinfo::BREAK_AFTER);
@@ -7665,7 +7750,7 @@ static void process_macro_file(const char *mac)
   if (!fp)
     fatal("can't find macro file %1", mac);
   const char *s = symbol(path).contents();
-  a_delete path;
+  free(path);
   input_stack::push(new file_iterator(fp, s));
   tok.next();
   process_input_stack();
@@ -7679,7 +7764,7 @@ static void process_startup_file(const char *filename)
   FILE *fp = mac_path->open_file(filename, &path);
   if (fp) {
     input_stack::push(new file_iterator(fp, symbol(path).contents()));
-    a_delete path;
+    free(path);
     tok.next();
     process_input_stack();
   }
@@ -7722,7 +7807,7 @@ void macro_source()
     }
     if (fp) {
       input_stack::push(new file_iterator(fp, symbol(path).contents()));
-      a_delete path;
+      free(path);
     }
     else
       warning(WARN_FILE, "can't find macro file '%1'", nm.contents());
@@ -8213,6 +8298,8 @@ void init_input_requests()
   init_request("shift", shift);
   init_request("so", source);
   init_request("spreadwarn", spreadwarn_request);
+  init_request("stringdown", stringdown_request);
+  init_request("stringup", stringup_request);
   init_request("substring", substring_request);
   init_request("sy", system_request);
   init_request("tag", tag);
@@ -8238,6 +8325,7 @@ void init_input_requests()
   number_reg_dictionary.define(".$", new nargs_reg);
   number_reg_dictionary.define(".br", new break_flag_reg);
   number_reg_dictionary.define(".C", new constant_int_reg(&compatible_flag));
+  number_reg_dictionary.define(".cp", new constant_int_reg(&do_old_compatible_flag));
   number_reg_dictionary.define(".O", new variable_reg(&begin_level));
   number_reg_dictionary.define(".c", new lineno_reg);
   number_reg_dictionary.define(".color", new constant_int_reg(&color_flag));
@@ -8480,7 +8568,8 @@ static void read_color_draw_node(token &start)
     curenv->set_fill_color(col);
   while (tok != start) {
     if (tok.newline() || tok.eof()) {
-      warning(WARN_DELIM, "missing closing delimiter");
+      warning(WARN_DELIM, "missing closing delimiter in color drawing"
+	      " device command (got %1)", tok.description());
       input_stack::push(make_temp_iterator("\n"));
       break;
     }
@@ -8592,6 +8681,7 @@ static void do_error(error_type type,
     fputs("fatal error: ", stderr);
     break;
   case ERROR:
+    fputs("error: ", stderr);
     break;
   case WARNING:
     fputs("warning: ", stderr);
@@ -8679,6 +8769,8 @@ void error_with_file_and_line(const char *filename, int lineno,
 			      const errarg &arg2,
 			      const errarg &arg3)
 {
+  if (program_name)
+    fprintf(stderr, "%s: ", program_name);
   fprintf(stderr, "%s:%d: error: ", filename, lineno);
   errprint(format, arg1, arg2, arg3);
   fputc('\n', stderr);
@@ -8903,9 +8995,10 @@ charinfo *get_charinfo_by_number(int n)
 }
 
 // This overrides the same function from libgroff; while reading font
-// definition files it puts single-letter glyph names into 'charset_table'
-// and converts glyph names of the form '\x' ('x' a single letter) into 'x'.
-// Consequently, symbol("x") refers to glyph name '\x', not 'x'.
+// definition files it puts single-letter glyph names into
+// 'charset_table' and converts glyph names of the form '\x' ('x' a
+// single letter) into 'x'.  Consequently, symbol("x") refers to glyph
+// name '\x', not 'x'.
 
 glyph *name_to_glyph(const char *nm)
 {
@@ -8929,3 +9022,9 @@ const char *glyph_to_name(glyph *g)
   charinfo *ci = (charinfo *)g; // Every glyph is actually a charinfo.
   return (ci->nm != UNNAMED_SYMBOL ? ci->nm.contents() : NULL);
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

@@ -1,16 +1,14 @@
-# Copyright (C) 2014-2018 Free Software Foundation, Inc.
-#
-# Latest update: 22 Aug 2015
+# Copyright (C) 2014-2020 Free Software Foundation, Inc.
 #
 # This file is part of groff.
 #
 # groff is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free
-# Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Software Foundation, either version 3 of the License, or (at your
+# option) any later version.
 #
-# groff is distributed in the hope that it will be useful, but WITHOUT ANY
-# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# groff is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 # FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 # for more details.
 #
@@ -24,6 +22,11 @@ EXTRA_DIST += \
   src/roff/nroff/nroff.1.man \
   src/roff/nroff/nroff.sh
 
+nroff_TESTS = \
+  src/roff/nroff/tests/verbose_option_works.sh
+TESTS += $(nroff_TESTS)
+EXTRA_DIST += $(nroff_TESTS)
+
 nroff: $(nroff_srcdir)/nroff.sh $(SH_DEPS_SED_SCRIPT)
 	$(AM_V_GEN)rm -f $@ \
 	&& sed -f $(SH_DEPS_SED_SCRIPT) \
@@ -34,8 +37,8 @@ nroff: $(nroff_srcdir)/nroff.sh $(SH_DEPS_SED_SCRIPT)
 	&& chmod +x $@
 
 
-########################################################################
-### Emacs settings
 # Local Variables:
 # mode: makefile-automake
+# fill-column: 72
 # End:
+# vim: set autoindent filetype=automake textwidth=72:

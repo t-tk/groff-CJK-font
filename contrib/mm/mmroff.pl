@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 # -*- Perl -*-
-# Copyright (C) 1989-2018 Free Software Foundation, Inc.
+# Copyright (C) 1989-2020 Free Software Foundation, Inc.
 #
 # This file is part of groff.
 #
@@ -155,8 +155,6 @@ sub psbb {
 
 
 1;
-########################################################################
-### Emacs settings
 # Local Variables:
 # mode: CPerl
 # End:

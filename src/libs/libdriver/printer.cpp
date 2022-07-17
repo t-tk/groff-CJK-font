@@ -2,7 +2,7 @@
 
 // <groff_src_dir>/src/libs/libdriver/printer.cpp
 
-/* Copyright (C) 1989-2018 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
    Written by James Clark (jjc@jclark.com)
 
    This file is part of groff.
@@ -178,9 +178,11 @@ void printer::set_ascii_char(unsigned char c, const environment *env,
   buf[1] = '\0';
 
   glyph *g = set_char_and_width(buf, env, &w, &f);
-  set_char(g, f, env, w, 0);
-  if (widthp) {
-    *widthp = w;
+
+  if (g != UNDEFINED_GLYPH ) {
+    set_char(g, f, env, w, 0);
+    if (widthp)
+      *widthp = w;
   }
 }
 

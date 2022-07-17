@@ -1,9 +1,9 @@
-     -*- mode: text; coding: utf-8; -*-
-    Copyright (C) 2014-2018 Free Software Foundation, Inc.
+-*- mode: text; coding: utf-8; -*-
+Copyright (C) 2014-2020 Free Software Foundation, Inc.
 
-    Copying and distribution of this file, with or without modification,
-    are permitted in any medium without royalty provided the copyright
-    notice and this notice are preserved.
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
 
 ========================================================================
 
@@ -95,6 +95,12 @@ matières en "Table des matières" plutôt que "Table of Content". Enfin,
 le paramètre de configuration INDENT_FIRST_PARAS est activé afin
 d'indenter le premier paragraphe de chaque section -- ceci est l'usage
 en typographie française.
+
+***copyright-default.mom/copyright-chapter.mom***
+
+Deux fichiers qui montrent la bonne façon d'insérer une page des
+droits d'auteur dans les documents créés avec mom.  "Default" est
+pour DOCTYPE DEFAULT; "chapter" est pour DOCTYPE CHAPTER.
 
 ***mom-pdf.mom***
 

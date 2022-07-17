@@ -1,19 +1,14 @@
 '\" t
-.TH GROFF_MS @MAN7EXT@ "@MDATE@" "groff @VERSION@"
-.SH NAME
+.TH groff_ms @MAN7EXT@ "@MDATE@" "groff @VERSION@"
+.SH Name
 groff_ms \- GNU roff manuscript macro package for formatting documents
-.
-.
-.\" Save and disable compatibility mode (for, e.g., Solaris 10/11).
-.do nr groff_ms_C \n[.C]
-.cp 0
 .
 .
 .\" ====================================================================
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 1989-2018 Free Software Foundation, Inc.
+.\" Copyright (C) 1989-2020 Free Software Foundation, Inc.
 .\"
 .\" Permission is granted to make and distribute verbatim copies of this
 .\" manual provided the copyright notice and this permission notice are
@@ -31,8 +26,13 @@ groff_ms \- GNU roff manuscript macro package for formatting documents
 .\" instead of in the original English.
 .
 .
+.\" Save and disable compatibility mode (for, e.g., Solaris 10/11).
+.do nr *groff_groff_ms_7_man_C \n[.cp]
+.cp 0
+.
+.
 .\" ====================================================================
-.SH SYNOPSIS
+.SH Synopsis
 .\" ====================================================================
 .
 .SY "groff -ms"
@@ -40,15 +40,17 @@ groff_ms \- GNU roff manuscript macro package for formatting documents
 \&.\|.\|.\&]
 .RI [ input-file
 \&.\|.\|.\&]
+.
 .SY "groff -m ms"
 .RI [ option
 \&.\|.\|.\&]
 .RI [ input-file
 \&.\|.\|.\&]
+.YS
 .
 .
 .\" ====================================================================
-.SH DESCRIPTION
+.SH Description
 .\" ====================================================================
 .
 This manual page describes the GNU version of the
@@ -74,7 +76,7 @@ documentation.
 .
 .
 .\" ====================================================================
-.SH USAGE
+.SH Usage
 .\" ====================================================================
 .
 The
@@ -155,7 +157,7 @@ macro.
 .RS
 .TS
 cb   cb cb cb
-lfCW l  l  l.
+lfCR l  l  l.
 Reg.	Definition	Effective	Default
 _
 PO	Page offset (left margin)	next page	1i
@@ -173,7 +175,7 @@ _
 .RS
 .TS
 cb   cb cb cb
-lfCW lx l  l.
+lfCR lx l  l.
 Reg.	Definition	Effective	Default
 _
 PS	T{
@@ -202,7 +204,7 @@ _
 .RS
 .TS
 cb   cb cb cb
-lfCW lx l  l.
+lfCR lx l  l.
 Reg.	Definition	Effective	Default
 _
 PI	T{
@@ -232,7 +234,7 @@ _
 .RS
 .TS
 cb   cb cb cb
-lfCW l  l  l.
+lfCR l  l  l.
 Reg.	Definition	Effective	Default
 _
 FL	Footnote length	next footnote	\[rs]n[LL]*5/6
@@ -251,7 +253,7 @@ _
 .RS
 .TS
 cb   cb cb cb
-lfCW l  l  l.
+lfCR l  l  l.
 Reg.	Definition	Effective	Default
 _
 DD	Display, table, eqn, pic spacing	next para.	0.5v
@@ -378,10 +380,6 @@ macro indents all text at both left and right margins
 by the amount of the register
 .BR QI .
 .
-The effect is reminiscent of the HTML
-.B <BLOCKQUOTE>
-tag.
-.
 The next paragraph or heading returns the margins to normal.
 .
 .B QP
@@ -414,16 +412,17 @@ The text between
 and
 .B QE
 can be split into further paragraphs by using
-.B \&.LP
+.B .LP
 or
-.BR \&.PP .
+.BR .PP .
 .
 .
 .PP
 The
 .B XP
-macro produces an \(lqexdented\(rq paragraph; that is, one with a
-hanging indent.
+macro produces an \[lq]exdented\[rq] paragraph;
+that is,
+one with a hanging indent.
 .
 The first line of the paragraph begins at
 the left margin,
@@ -535,9 +534,9 @@ For example,
 the sequence:
 .
 .RS
-.ne 12
-.nf
 .IP
+.ne 12v
+.EX
 \&.nr PS 10
 \&.nr GROWPS 3
 \&.nr PSINCR 1.5p
@@ -550,7 +549,7 @@ Second Level Heading
 \&.
 \&.NH 3
 Third Level Heading
-.fi
+.EE
 .RE
 .
 .IP
@@ -601,24 +600,32 @@ accordingly.
 By default,
 .B SN\-STYLE
 is initialised by defining the alias
+.
+.
 .RS
-.nf
 .IP
+.EX
 \&.als SN\-STYLE SN\-DOT
-.fi
+.EE
 .RE
+.
+.
 .IP
 it may be changed to the
 .B SN\-NO\-DOT
 style,
 if preferred,
 by defining the alternative alias
+.
+.
 .RS
-.nf
 .IP
+.EX
 \&.als SN\-STYLE SN\-NO\-DOT
-.fi
+.EE
 .RE
+.
+.
 .IP
 Any such change becomes effective with the first use of
 .BR .NH ,
@@ -647,12 +654,14 @@ the user may redefine it as an alias for
 'ne 10
 by including the initialisation:
 .
+.
 .RS
-.nf
 .IP
+.EX
 \&.als SN SN\-NO\-DOT
-.fi
+.EE
 .RE
+.
 .
 .IP
 at any time;
@@ -687,13 +696,14 @@ as used in the preceding
 example,
 the sequence:
 .
+.
 .RS
-.ne
-.nf
 .IP
+.ne 2v
+.EX
 \&.SH 2
 An Unnumbered Subheading
-.fi
+.EE
 .RE
 .
 .IP
@@ -741,7 +751,7 @@ For example,
 .
 .IP
 prints
-.RB \(lq( foo )\(rq.
+.RB \[lq]( foo )\[rq].
 .
 .IP
 If you give this macro no arguments,
@@ -831,11 +841,19 @@ the normal point size
 .B PS
 register).
 .
+.
 .TP
 .BI \[rs]*{ text \[rs]*}
 Print the enclosed
 .I text
 as a superscript.
+.
+.
+.TP
+.BI \[rs]*< text \[rs]*>
+Print the enclosed
+.I text
+as a subscript.
 .
 .
 .\" ====================================================================
@@ -936,11 +954,10 @@ on a single page, or allowed to break across pages.
 The following table shows the display types available.
 .RS
 .ne 11
-.na
 .TS
 cb   s    cbt
 cb   cb   ^
-lfCW lfCW lx.
+lfCR lfCR lx.
 Display macro	Type of display
 With keep	No keep
 _
@@ -956,30 +973,12 @@ T}
 _
 .TE
 .RE
-.ad
 .
 .LP
 Use the
 .B DE
 macro to end any display type.
 .
-The macros
-.B Ds
-and
-.B De
-were formerly provided as aliases for
-.B DS
-and
-.BR DE ,
-respectively, but they have been removed, and should no longer be used.
-.
-X11 documents which actually use
-.B Ds
-and
-.B De
-always load a specific macro file from the X11 distribution
-.RI ( macros.t )
-which provides proper definitions for the two macros.
 .
 .PP
 To
@@ -1121,7 +1120,7 @@ Denote a reference to be processed by the
 preprocessor.
 .
 The GNU
-.IR @g@refer (@MAN1EXT@)
+.IR \%@g@refer (@MAN1EXT@)
 manual page provides a comprehensive reference
 to the preprocessor and the format of the
 bibliographic database.
@@ -1174,7 +1173,7 @@ Prints the footnote number as a superscript; indents the footnote
 .
 .TP
 1
-Prints the number followed by a period (that is,\~\(lq1.\(rq\&)
+Prints the number followed by a period (that is,\~\[lq]1.\[rq]\&)
 and indents the footnote.
 .
 .TP
@@ -1215,7 +1214,7 @@ are in the same order as the corresponding occurrences of
 .
 There are three ways to define headers and footers:
 .
-.IP \(bu 3n
+.IP \[bu] 3n
 Use the strings
 .BR LH ,
 .BR CH ,
@@ -1232,7 +1231,7 @@ to set the left, center, and right footers.
 The string-setting approach works best for documents that do not
 distinguish between odd and even pages.
 .
-.IP \(bu
+.IP \[bu]
 Use the
 .B OH
 and
@@ -1267,7 +1266,7 @@ You can replace the quote (\[aq]) marks with any character not
 appearing in the header or footer text.
 .
 .
-.IP \(bu
+.IP \[bu]
 You can redefine the
 .B PT
 and
@@ -1293,10 +1292,9 @@ You control margins using a set of number registers.
 The following table lists the register names and defaults:
 .RS
 .ne 8
-.na
 .TS
 cb   cb cb cb
-lfCW l  l  l.
+lfCR l  l  l.
 Reg.	Definition	Effective	Default
 _
 PO	Page offset (left margin)	next page	1i
@@ -1307,7 +1305,6 @@ FM	Bottom (footer) margin	next page	1i
 _
 .TE
 .RE
-.ad
 .
 .PP
 Note that there is no right margin setting.
@@ -1394,7 +1391,7 @@ For example:
 .
 .PP
 .ne 8
-.nf
+.EX
 \&.XS 1
 Introduction
 \&.XA 2
@@ -1403,8 +1400,9 @@ A Brief History of the Universe
 Details of Galactic Formation
 \&.\|.\|.
 \&.XE
-.fi
+.EE
 .RE
+.
 .
 .LP
 Use the
@@ -1452,14 +1450,8 @@ and
 .BR FVS .
 .
 .
-.LP
-Due to backwards compatibility, the value of
-.B VS
-must be smaller than 40000 (this is 40.0 points).
-.
-.
 .\" ====================================================================
-.SH "DIFFERENCES FROM troff ms"
+.SH "Differences from troff ms"
 .\" ====================================================================
 .
 The
@@ -1474,7 +1466,7 @@ they cannot be used with AT&T
 .
 Other differences include:
 .
-.IP \(bu 3n
+.IP \[bu] 3n
 The internals of
 .I "groff ms"
 differ from the internals of Unix
@@ -1485,13 +1477,13 @@ Documents that depend upon implementation details of Unix
 may not format properly with
 .IR "groff ms" .
 .
-.IP \(bu
+.IP \[bu]
 The error-handling policy of
 .I "groff ms"
 is to detect and report errors,
 rather than silently to ignore them.
 .
-.IP \(bu
+.IP \[bu]
 Some Bell Labs localisms are not implemented by default.
 .
 However, if you call the otherwise undocumented
@@ -1516,14 +1508,14 @@ macros both collide with different macros in the Berkeley version of
 .IP
 These emulations are sufficient to give back the 1976 Kernighan\~&
 Cherry paper
-.I "Typesetting Mathematics \(en User's Guide"
+.I "Typesetting Mathematics \[en] User's Guide"
 its section headings, and restore some text that had gone missing as
 arguments of undefined macros.
 .
 No warranty express or implied is given as to how well the typographic
 details these produce match the original Bell Labs macros.
 .
-.IP \(bu
+.IP \[bu]
 Berkeley localisms, in particular the
 .B TM
 and
@@ -1531,24 +1523,24 @@ and
 macros,
 are not implemented.
 .
-.IP \(bu
+.IP \[bu]
 .I "Groff ms"
 does not work in compatibility mode (e.g., with the
 .B \-C
 option).
 .
-.IP \(bu
+.IP \[bu]
 There is no support for typewriter-like devices.
 .
-.IP \(bu
+.IP \[bu]
 .I "Groff ms"
 does not provide cut marks.
 .
-.IP \(bu
+.IP \[bu]
 Multiple line spacing is not supported
 (use a larger vertical spacing instead).
 .
-.IP \(bu
+.IP \[bu]
 Some Unix
 .I ms
 documentation says that the
@@ -1561,7 +1553,7 @@ gutter width, respectively.
 These number registers are not used in
 .IR "groff ms" .
 .
-.IP \(bu
+.IP \[bu]
 Macros that cause a reset
 (paragraphs, headings, etc.\&)
 may change the indent.
@@ -1580,7 +1572,7 @@ and
 .B RE
 macros.
 .
-.IP \(bu
+.IP \[bu]
 The number register
 .B GS
 is set to\~1 by the
@@ -1597,7 +1589,7 @@ or
 .I "groff ms"
 should use this number register.
 .
-.IP \(bu
+.IP \[bu]
 To make
 .I "groff ms"
 use the default page offset (which also specifies the left margin),
@@ -1625,7 +1617,7 @@ macros to languages other than English:
 .RS
 .TS
 cb   cb
-lfCW l.
+lfCR l.
 String	Default Value
 _
 REFERENCES	References
@@ -1723,7 +1715,7 @@ produces an n with a tilde over it.
 .
 .
 .\" ====================================================================
-.SH "NAMING CONVENTIONS"
+.SH "Naming Conventions"
 .\" ====================================================================
 .
 The following conventions are used for names of macros, strings, and
@@ -1738,79 +1730,100 @@ macros contain only uppercase letters and digits.
 Internally the macros are divided into modules;
 naming conventions are as follows:
 .
-.IP \(bu 3n
+.IP \[bu] 3n
 Names used only within one module are of the form
-.IB \%module * name\fR.
+.IB \%module * name\c
+\&.
 .
-.IP \(bu
+.IP \[bu]
 Names used outside the module in which they are defined are of the form
-.IB \%module @ name\fR.
+.IB \%module @ name\c
+\&.
 .
-.IP \(bu
+.IP \[bu]
 Names associated with a particular environment are of the form
-.IB \%environment : name\fR;
+.IB \%environment : name\c
+\&;
 these are used only within the
 .B par
 module.
 .
-.IP \(bu
+.IP \[bu]
 .I name
 does not have a module prefix.
 .
-.IP \(bu
+.IP \[bu]
 Constructed names used to implement arrays are of the form
-.IB \%array ! index\fR.
+.IB \%array ! index\c
+\&.
 .
 .
 .PP
 Thus the groff ms macros reserve the following names:
 .
-.IP \(bu 3n
+.IP \[bu] 3n
 Names containing the characters
 .BR * ,
 .BR @ ,
 and\~\c
 .BR : .
 .
-.IP \(bu
+.IP \[bu]
 Names containing only uppercase letters and digits.
 .
 .
 .\" ====================================================================
-.SH FILES
+.SH Files
 .\" ====================================================================
 .
-.I @MACRODIR@/ms.tmac
-(a wrapper file for
-.IR s.tmac )
-.br
-.I @MACRODIR@/s.tmac
+.TP
+.I \%@MACRODIR@/\:s\:.tmac
+.I groff
+implementation of manuscript macros.
+.
+.
+.TP
+.I \%@MACRODIR@/\:ms\:.tmac
+Wrapper to load
+.IR s.tmac .
 .
 .
 .
 .\" ====================================================================
-.SH AUTHORS
+.SH Authors
 .\" ====================================================================
+.
 The GNU version of the
 .I ms
 macro package was written by James Clark and contributors.
 .
 This document was (re-)written by
-.MT lkollar@\:despammed.com
+.MT lkollar@\:despammed\:.com
 Larry Kollar
 .ME .
 .
 .
 .\" ====================================================================
-.SH "SEE ALSO"
+.SH "See also"
 .\" ====================================================================
 .
-.BR groff (@MAN1EXT@),
-.BR @g@troff (@MAN1EXT@),
-.BR @g@tbl (@MAN1EXT@),
-.BR @g@pic (@MAN1EXT@),
-.BR @g@eqn (@MAN1EXT@),
-.BR @g@refer (@MAN1EXT@)
+.
+A manual is available in source and rendered form.
+.
+On your system,
+it may be compressed and/or available in additional formats.
+.
+.
+.TP
+.I \%@DOCDIR@/\:ms\:.ms
+.TQ
+.I \%@DOCDIR@/\:ms\:.ps
+\[lq]Using
+.I groff
+with the
+.I ms
+Macro Package\[rq];
+Larry Kollar.
 .
 .
 .PP
@@ -1818,11 +1831,21 @@ Larry Kollar
 by Trent A.\& Fisher and Werner Lemberg
 .
 .
+.PP
+.IR groff (@MAN1EXT@),
+.IR \%@g@troff (@MAN1EXT@),
+.IR \%@g@tbl (@MAN1EXT@),
+.IR \%@g@pic (@MAN1EXT@),
+.IR \%@g@eqn (@MAN1EXT@),
+.IR \%@g@refer (@MAN1EXT@)
+.
+.
 .\" Restore compatibility mode (for, e.g., Solaris 10/11).
-.cp \n[groff_ms_C]
+.cp \n[*groff_groff_ms_7_man_C]
 .
 .
 .\" Local Variables:
+.\" fill-column: 72
 .\" mode: nroff
 .\" End:
-.\" vim: set filetype=groff:
+.\" vim: set filetype=groff textwidth=72:

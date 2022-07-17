@@ -1,18 +1,15 @@
-.TH GROG @MAN1EXT@ "@MDATE@" "groff @VERSION@"
-.SH NAME
-grog \- guess options for a following groff command
+.TH grog @MAN1EXT@ "@MDATE@" "groff @VERSION@"
+.SH Name
+grog \- \(lqgroff guess\(rq\(eminfer a document's groff command
 .
-.\" grog.man -> grog.1 - man page for grog (section 1)
-.\" Source file position:  <groff_source_top>/src/roff/grog/grog.man
-.\" Installed position:    <prefix>/share/man/man1/grog.1
 .
-.\" TODO: This page needs a thorough edit by a native English speaker.
+.\" TODO: This page needs a thorough edit by a fluent English speaker.
 .
 .\" ====================================================================
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 1989-2018 Free Software Foundation, Inc.
+.\" Copyright (C) 1989-2020 Free Software Foundation, Inc.
 .\"
 .\" This file is part of grog, which is part of groff, a free software
 .\" project.  You can redistribute it and/or modify it under the terms
@@ -27,17 +24,13 @@ grog \- guess options for a following groff command
 .\" <http://www.gnu.org/licenses/gpl2.0.txt>.
 .
 .
-.\" ====================================================================
-.\" Characters
-.\" ====================================================================
+.\" Save and disable compatibility mode (for, e.g., Solaris 10/11).
+.do nr *groff_grog_1_man_C \n[.cp]
+.cp 0
 .
-.\" Ellipsis ...
-.ie t .ds EL \fS\N'188'\fP\"
-.el .ds EL \&.\|.\|.\&\"
-.\" called with \*(EL
 .
 .\" ====================================================================
-.SH SYNOPSIS
+.SH Synopsis
 .\" ====================================================================
 .
 .SY grog
@@ -47,95 +40,96 @@ grog \- guess options for a following groff command
 .OP \-\-warnings
 .OP \-\-ligatures
 .RI [ groff-option
-\*(EL]
+\&.\|.\|.\&]
 .OP \-\-
-.RI [ filespec
-\*(EL]
+.RI [ file
+\&.\|.\|.]
 .YS
+.
 .
 .SY grog
 .B \-h
+.
 .SY grog
 .B \-\-help
 .YS
 .
+.
 .SY grog
 .B \-v
+.
 .SY grog
 .B \-\-version
 .YS
 .
 .
 .\" ====================================================================
-.SH DESCRIPTION
+.SH Description
 .\" ====================================================================
 .
-.B grog
+.I grog
 reads the input (file names or standard input) and guesses which of
 the
-.BR groff (@MAN1EXT@)
+.IR groff (@MAN1EXT@)
 options are needed to perform the input with the
-.B groff
+.I groff
 program.
 .
+.
+.P
+If no operands are given,
+or if
+.I file
+is
+.RB \[lq] \- \[rq],
+.I @g@chem
+reads the standard input stream.
+.
+.
+.P
 A suitable device is now always written as
 .BI \-T device
-including the groff default as
+including the
+.I groff
+default of
 .BR "\-T ps" .
 .
 .
 .P
 The corresponding
-.B groff
+.I groff
 command is usually displayed in standard output.
 .
 With the option
 .BR \-\-run ,
 the generated line is output into standard error and the generated
-.B groff
+.I groff
 command is run on the
 .IR "standard output" .
 .
-.BR groffer (@MAN1EXT@)
-relies on a perfectly running
-.BR groff (@MAN1EXT@).
-.
 .
 .\" ====================================================================
-.SH OPTIONS
+.SH Options
 .\" ====================================================================
 .
-The option
-.B \-v
-or
-.B \-\-version
-prints information on the version number.
-.
-Also
 .B \-h
-or
+and
 .B \-\-help
-prints usage information.
+display a usage message,
+whereas
+.B \-v
+and
+.B \-\-version
+display version information;
+all exit afterward.
 .
-Both of these options automatically end the
-.B grog
-program.
-.
-Other options are thenignored, and no
-.B groff
-command line is generated.
-.
-.
-The following 3 options are the only
-.B grog
-options,
 .
 .TP
 .B \-C
 this option means enabling the
 .I groff
 compatibility mode, which is also transfered to the generated
-.B groff
+.I groff
 command line.
 .
 .TP
@@ -146,10 +140,12 @@ within the generated
 .B groff
 command line.
 .
+.
 .TP
 .B \-\-run
 with this option, the command line is output at standard error and
 then run on the computer.
+.
 .
 .TP
 .B \-\-warnings
@@ -161,7 +157,7 @@ All other specified short options (words starting with one minus
 character
 .BR \- )
 are interpreted as
-.B groff
+.I groff
 options or option clusters with or without argument.
 .
 No space is allowed between options and their argument.
@@ -170,34 +166,22 @@ Except from the
 .BI \-m arg
 options, all options will be passed on, i.e.\& they are included
 unchanged in the command for the output without effecting the work of
-.BR grog .
-.
-.
-.P
-A
-.I filespec
-argument can either be the name of an existing file or a single minus
-.B \-
-to mean standard input.
-.
-If no
-.I filespec
-is specified standard input is read automatically.
+.IR grog .
 .
 .
 .\" ====================================================================
-.SH DETAILS
+.SH Details
 .\" ====================================================================
 .
-.B grog
+.I grog
 reads all
-.I filespec
+.I file
 parameters as a whole.
 .
 It tries to guess which of the following
-.B groff
+.I groff
 options are required for running the input under
-.BR groff :
+.IR groff :
 .BR \-e ,
 .BR \-g ,
 .BR \-G ,
@@ -222,15 +206,15 @@ and
 .
 .P
 The guessed
-.B groff
+.I groff
 command including those options and the found
-.I filespec
+.I file
 parameters is put on the standard output.
 .
 .
 .P
 It is possible to specify arbitrary
-.B groff
+.I groff
 options on the command line.
 .
 These are passed on the output without change, except for the
@@ -240,13 +224,13 @@ options.
 .
 .P
 The
-.B groff
+.I groff
 program has trouble when the wrong
 .BI \-m arg
 option or several of these options are specified.
 .
 In these cases,
-.B grog
+.I grog
 will print an error message and exit with an error code.
 .
 It is better to specify no
@@ -262,7 +246,7 @@ does not find any of these options or the same option is found.
 If several different
 .BI \-m arg
 options are found by
-.B grog
+.I grog
 an error message is produced and the program is terminated with an
 error code.
 .
@@ -278,7 +262,7 @@ file can also be written in the
 .I groff
 language without any macro package.
 .
-.B grog
+.I grog
 will produce an output without an
 .BI \-m arg
 option.
@@ -286,7 +270,7 @@ option.
 .
 .P
 As
-.B groff
+.I groff
 also works with pure text files without any
 .I roff
 requests,
@@ -297,14 +281,8 @@ file.
 .
 .
 .P
-The
-.BR groffer  (@MAN1EXT@)
-program heavily depends on a working
-.BR grog .
-.
-.
 .\" ====================================================================
-.SH EXAMPLES
+.SH Example
 .\" ====================================================================
 .
 Calling
@@ -321,7 +299,7 @@ groff \-me meintro.me
 .RE
 .
 So
-.B grog
+.I grog
 recognized that the file
 .B meintro.me
 is written with the
@@ -347,7 +325,7 @@ groff \-p \-t \-e \-ms pic.ms
 .
 Besides determining the macro package
 .BR \-ms ,
-.B grog
+.I grog
 recognized that the file
 .B pic.ms
 additionally needs
@@ -375,7 +353,7 @@ grog meintro.me pic.ms
 .RE
 .
 an error message is sent to standard error because
-.B groff
+.I groff
 cannot work with two different macro packages:
 .
 .RS
@@ -405,9 +383,9 @@ grog \-ksS \-Tdvi grnexmpl.g
 .RE
 .
 contains several
-.B groff
+.I groff
 options that are just passed on the output without any interface to
-.BR grog .
+.IR grog .
 These are the option cluster
 .B \-ksS
 consisting of
@@ -428,44 +406,41 @@ groff \-k \-s \-S \-Tdvi grnexmpl.g
 .RE
 .
 so no additional option was added by
-.BR grog .
+.IR grog .
 As no option
 .BI \-m arg
 was found by
-.B grog
+.I grog
 this file does not use a macro package.
 .
 .
 .\" ====================================================================
-.SH AUTHORS
+.SH Authors
 .\" ====================================================================
-.B grog
+.
+.I grog
 was originally written by James Clark.
 .
 The current Perl implementation was written by
-.MT groff\-bernd.warken\-72@\:web.de
+.MT groff\-bernd\:.warken\-72@\:web\:.de
 Bernd Warken
 .ME
-with contributions from Ralph Corderoy,
-and is maintained by
-.MT wl@\:gnu.org
-Werner Lemberg
-.ME .
+with contributions from Ralph Corderoy.
 .
 .
 .\" ====================================================================
-.SH "SEE ALSO"
+.SH "See also"
 .\" ====================================================================
 .
-.BR groff (@MAN1EXT@),
-.BR groffer (@MAN1EXT@)
+.IR groff (@MAN1EXT@)
 .
 .
-.\" ====================================================================
-.\" Emacs settings
-.\" ====================================================================
+.\" Restore compatibility mode (for, e.g., Solaris 10/11).
+.cp \n[*groff_grog_1_man_C]
+.
 .
 .\" Local Variables:
+.\" fill-column: 72
 .\" mode: nroff
 .\" End:
-.\" vim: set filetype=groff:
+.\" vim: set filetype=groff textwidth=72:

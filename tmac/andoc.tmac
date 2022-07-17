@@ -4,8 +4,9 @@
 .\" handled.
 .\"
 .\"
-.\" Copyright (C) 1991-2018 Free Software Foundation, Inc.
-.\"      Written by James Clark (jjc@jclark.com)
+.\" Copyright (C) 1991-2020 Free Software Foundation, Inc.
+.\"      Written by Werner Lemberg (wl@gnu.org),
+.\"      based on a patch from Tadziu Hoffmann.
 .\"
 .\" This file is part of groff.
 .\"
@@ -25,13 +26,14 @@
 .\"
 .
 .if !\n(.g \
-.  ab These macros require groff.
+.  ab groff man macros require groff extensions; aborting
 .
-.nr _C \n(.C
+.do nr *groff_andoc_tmac_C \n[.cp]
 .cp 0
 .
 .als andoc-em em
 .als andoc-bp bp
+.als andoc-ne ne
 .
 .
 .\" We must not use '.de1' for 'reload-doc' or 'reload-man'!  'doc.tmac'
@@ -45,12 +47,18 @@
 .
 .
 .de reload-doc
+.  \" Flush any partially collected output line and write page footer in
+.  \" continuous rendering mode.
+.  do if d an-end \
+.    do an-end
+.
 .  do ch an-header   \" remove trap set by an-old.tmac
 .  do ch an-footer   \" remove trap set by an-old.tmac
 .  do ch an-p-footer \" remove trap set by an-old.tmac
 .
 .  do als em andoc-em
 .  do als bp andoc-bp
+.  do als ne andoc-ne
 .  do rm Dd          \" disable load-only-once, see doc.tmac
 .
 .  do mso doc.tmac
@@ -63,8 +71,13 @@
 .de reload-man
 .  do cp \n(.C       \" restore original compatibility mode
 .
-.  do ch header      \" remove trap set by doc.tmac
-.  do ch footer      \" remove trap set by doc.tmac
+.  \" Flush any partially collected output line and write page footer in
+.  \" continuous rendering mode.
+.  do if d doc-end-macro \
+.    do doc-end-macro
+.
+.  do ch doc-header  \" remove trap set by mdoc/doc-{n,dit}roff
+.  do ch doc-footer  \" remove trap set by mdoc/doc-{n,dit}roff
 .
 .  do als em andoc-em
 .  do als bp andoc-bp
@@ -88,11 +101,7 @@
 .de EN
 ..
 .
-.cp \n[_C]
-.
-.\" ====================================================================
-.\" Editor settings
-.\" ====================================================================
+.cp \n[*groff_andoc_tmac_C]
 .
 .\" Local Variables:
 .\" mode: nroff

@@ -3,7 +3,7 @@
 #   BuildFoundries   : Given a Foundry file generate groff and download files
 #   Deri James       : Monday 07 Feb 2011
 
-# Copyright (C) 2011-2018 Free Software Foundation, Inc.
+# Copyright (C) 2011-2020 Free Software Foundation, Inc.
 #      Written by Deri James <deri@chuzzlewit.demon.co.uk>
 #
 # This file is part of groff.
@@ -22,6 +22,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 use strict;
+use Getopt::Long;
+
+my $check=0;
+my $dirURW='';
+
+GetOptions("check" => \$check, "dirURW=s" => \$dirURW);
 
 (my $progname = $0) =~s @.*/@@;
 my $where=shift||'';
@@ -32,11 +38,19 @@ my $GSpath=FindGSpath();
 my $warn=0;
 my $lct=0;
 my $foundry='';	# the default foundry
+my $notFoundFont=0;
 
-LoadDownload("download");
-LoadFoundry("Foundry");
-WriteDownload("download");
-
+if ($check)
+{
+    CheckFoundry("Foundry.in");
+    exit $notFoundFont;
+}
+else
+{
+    LoadDownload("download");
+    LoadFoundry("Foundry");
+    WriteDownload("download");
+}
 exit 0;
 
 
@@ -45,7 +59,7 @@ sub LoadFoundry
 {
     my $fn=shift;
     my $foundrypath='';
-    my $notFoundFont=0;
+    $notFoundFont=0;
 
     open(F,"<$fn") or Die("No $fn file found");
 
@@ -72,7 +86,9 @@ sub LoadFoundry
 	{
 	    Warn("\nThe path(s) used for searching:\n$foundrypath\n") if $notFoundFont;
 	    $foundry=uc($r[1]);
-	    $foundrypath=$r[2].' : '.$devps;
+            $foundrypath='';
+            $foundrypath.="$dirURW : " if $dirURW;
+	    $foundrypath.=$r[2].' : '.$devps;
 	    $foundrypath=~s/\(gs\)/$GSpath /;
 	    $notFoundFont=0;
 	}
@@ -84,13 +100,6 @@ sub LoadFoundry
 	    # 3=map file
 	    # 4=encoding file
 	    # 5=font file
-	    # 6=afm file
-
-	    if (!defined($r[6]) or $r[6] eq '')
-	    {
-		# if no afm file, have a guess!
-		$r[6]=substr($r[5],0,-3)."afm";
-	    }
 
 	    my $gfont=($foundry eq '')?$r[0]:"$foundry-$r[0]";
 
@@ -126,7 +135,7 @@ sub LoadFoundry
 	    else
 	    {
 		# We need to run afmtodit to create this groff font
-		my $psfont=RunAfmtodit($gfont,LocateAF($foundrypath,$r[6]),$r[2],$r[3],$r[4]);
+		my $psfont=RunAfmtodit($gfont,LocateAF($foundrypath,$r[5]),$r[2],$r[3],$r[4]);
 
 		if ($psfont)
 		{
@@ -177,7 +186,7 @@ sub RunAfmtodit
 	$cmd.=" $flg{$f}";
     }
 
-    system("$cmd $enc '$afmfile' $map $gfont 2>/dev/null");
+    system("$cmd $enc '$afmfile' $map $gfont");
 
     if ($?)
     {
@@ -230,6 +239,15 @@ sub LocateFile
 
     foreach my $file (split('!',$files))
     {
+        if ($tryafm)
+        {
+            if (!($file=~s/\..+$/.afm/))
+            {
+                # no extenaion
+                $file.='.afm';
+            }
+        }
+
     if ($file=~m'/')
     {
 	# path given with file name so no need to search the paths
@@ -457,4 +475,75 @@ sub Die {
 sub Msg {
     my $msg=shift;
     print STDERR "$progname: $msg\n";
+}
+
+sub CheckFoundry
+{
+    my $fn=shift;
+    my $foundrypath='';
+    $notFoundFont=0;
+
+    open(F,"<$fn") or Die("No $fn file found");
+
+    while (<F>)
+    {
+	chomp;
+	s/\r$//;	# in case edited in windows
+
+	s/\s*#.*?$//;	# remove comments
+
+	next if $_ eq '';
+
+	if (m/^[A-Za-z]=/)
+	{
+	    next;
+	}
+
+	my (@r)=split('\|');
+
+	if (lc($r[0]) eq 'foundry')
+	{
+	    $foundry=uc($r[1]);
+            $foundrypath='';
+            $foundrypath.="$dirURW : " if $dirURW;
+	    $foundrypath.=$r[2].' : '.$devps;
+	    $foundrypath=~s/\(gs\)/$GSpath /;
+	}
+	else
+	{
+	    # 0=groff font name
+	    # 1=IsBase Y/N (one of PDFs 14 base fonts)
+	    # 2=afmtodit flag
+	    # 3=map file
+	    # 4=encoding file
+	    # 5=font file
+
+	    my $gfont=($foundry eq '')?$r[0]:"$foundry-$r[0]";
+
+	    if ($r[2] eq '')
+	    {
+		# Don't run afmtodit, just copy the grops font file
+
+		my $gotf=1;
+		my $gropsfnt=LocateFile($devps,$r[0],0);
+
+		if ($gropsfnt ne '' and -r "$gropsfnt")
+		{
+
+		}
+		else
+		{
+                    $notFoundFont|=1;
+		}
+	    }
+	    else
+	    {
+		# We need to run afmtodit to create this groff font
+		$notFoundFont|=2 if !LocateAF($foundrypath,$r[5]);
+		$notFoundFont|=1 if !LocatePF($foundrypath,$r[5]);
+	    }
+	}
+    }
+
+    close();
 }

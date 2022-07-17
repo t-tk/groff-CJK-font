@@ -1,18 +1,13 @@
-.TH GROPS @MAN1EXT@ "@MDATE@" "groff @VERSION@"
-.SH NAME
-grops \- PostScript driver for groff
-.
-.
-.\" Save and disable compatibility mode (for, e.g., Solaris 10/11).
-.do nr grops_C \n[.C]
-.cp 0
+.TH grops @MAN1EXT@ "@MDATE@" "groff @VERSION@"
+.SH Name
+grops \- groff output driver for PostScript
 .
 .
 .\" ====================================================================
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 1989-2018 Free Software Foundation, Inc.
+.\" Copyright (C) 1989-2018, 2020 Free Software Foundation, Inc.
 .\"
 .\" Permission is granted to make and distribute verbatim copies of this
 .\" manual provided the copyright notice and this permission notice are
@@ -30,17 +25,26 @@ grops \- PostScript driver for groff
 .\" instead of in the original English.
 .
 .
+.\" Save and disable compatibility mode (for, e.g., Solaris 10/11).
+.do nr *groff_grops_1_man_C \n[.cp]
+.cp 0
+.
+.
+.\" This macro definition is poor style from a portability standpoint,
+.\" but it's a good test and demonstration of the standard font
+.\" repertoire for the devices where it has any effect at all, and so
+.\" should be retained.
 .de FT
 .  if '\\*(.T'ps' .ft \\$1
 .  if '\\*(.T'pdf' .ft \\$1
 ..
 .
 .\" ====================================================================
-.SH SYNOPSIS
+.SH Synopsis
 .\" ====================================================================
 .
 .SY grops
-.OP \-glmv
+.OP \-glm
 .OP \-b n
 .OP \-c n
 .OP \-F dir
@@ -53,8 +57,21 @@ grops \- PostScript driver for groff
 .YS
 .
 .
+.SY grops
+.B \-\-help
+.YS
+.
+.
+.SY grops
+.B \-v
+.
+.SY grops
+.B \-\-version
+.YS
+.
+.
 .\" ====================================================================
-.SH DESCRIPTION
+.SH Description
 .\" ====================================================================
 .
 .B grops
@@ -110,10 +127,17 @@ fonts for
 .
 .
 .\" ====================================================================
-.SH OPTIONS
+.SH Options
 .\" ====================================================================
 .
-Whitespace is permitted between a command-line option and its argument.
+.B \-\-help
+displays a usage message,
+while
+.B \-v
+and
+.B \-\-version
+show version information;
+all exit afterward.
 .
 .
 .TP
@@ -238,9 +262,9 @@ both on letter (8.5\[mu]11) paper and on A4 paper without change.
 .BI \-I dir
 This option may be used to add a directory to the search path for
 files on the command line and files named in
-.B \[rs]X'ps: import'
+.B \[rs]X\[aq]ps: \%import\[aq]
 and
-.B \[rs]X'ps: file'
+.B \[rs]X\[aq]ps: file\[aq]
 escapes.
 .
 The search path is initialized with the current directory.
@@ -248,7 +272,8 @@ The search path is initialized with the current directory.
 This option may be specified more than once; the directories are then
 searched in the order specified (but before the current directory).
 .
-If you want to make the current directory be read before other directories,
+If you want to make the current directory be read before other
+directories,
 add
 .B \-I.\&
 at the appropriate place.
@@ -301,22 +326,18 @@ thousandths of an em.
 .
 If this option is not given, the line thickness defaults to 0.04\~em.
 .
-.TP
-.B \-v
-Print the version number.
-.
 .
 .\" ====================================================================
-.SH USAGE
+.SH Usage
 .\" ====================================================================
 .
 The input to
 .B grops
 must be in the format output by
-.BR @g@troff (@MAN1EXT@).
+.IR \%@g@troff (@MAN1EXT@).
 .
 This is described in
-.BR groff_out (@MAN5EXT@).
+.IR groff_out (@MAN5EXT@).
 .
 .LP
 In addition, the device and font description files for the device used
@@ -369,8 +390,9 @@ Lines starting with
 and blank lines are ignored.
 .
 The code for each character given in the font file must correspond
-to the code for the character in encoding file, or to the code in the default
-encoding for the font if the PostScript font is not to be reencoded.
+to the code for the character in encoding file,
+or to the code in the default encoding for the font if the PostScript
+font is not to be reencoded.
 .
 This code can be used with the
 .B \[rs]N
@@ -762,8 +784,9 @@ containing slanted lowercase Greek letters taken from PS Symbol.
 .
 Zapf Dingbats is available as
 .BR ZD ,
-and a reversed version of ZapfDingbats (with symbols pointing in the opposite
-direction) is available as
+and a reversed version of ZapfDingbats
+(with symbols pointing in the opposite direction)
+is available as
 .BR ZDR ;
 most characters in these fonts are unnamed and must be accessed using
 .BR \[rs]N .
@@ -798,7 +821,7 @@ only interprets commands that begin with a
 tag.
 .
 .TP
-.BI \[rs]X'ps:\ exec\  code '
+.BI "\[rs]X\[aq]ps: exec\~" code \[aq]
 This executes the arbitrary PostScript commands in
 .IR code .
 .
@@ -819,12 +842,10 @@ For example,
 .
 .RS
 .IP
-.B
+.EX
 \&.nr x 1i
-.br
-.B
-\[rs]X'ps: exec \[rs]nx u 0 rlineto stroke'
-.br
+\[rs]X\[aq]ps: exec \[rs]nx u 0 rlineto stroke\[aq]
+.EE
 .RE
 .
 .IP
@@ -842,7 +863,9 @@ is on top of the dictionary stack.
 .
 If your code adds definitions to this dictionary,
 you should allocate space for them using
-.BI \[rs]X'ps\ mdef \ n '\fR.
+.BI "\[rs]X\[aq]ps mdef\~" n \[aq]\c
+\&.
+.
 .
 Any definitions persist only until the end of the page.
 .
@@ -854,10 +877,10 @@ can extend over multiple lines.
 .
 For example,
 .
+.
 .RS
 .IP
-.nf
-.ft B
+.EX
 \&.nr x 1i
 \&.de y
 \&ps: exec
@@ -865,8 +888,8 @@ For example,
 \&stroke
 \&..
 \&\[rs]Yy
-.ft R
-.fi
+.EE
+.
 .
 .LP
 is another way to draw a horizontal line one inch long.
@@ -894,14 +917,14 @@ This must be supplied by the user, if necessary.
 .RE
 .
 .TP
-.BI \[rs]X'ps:\ file\  name '
+.BI "\[rs]X\[aq]ps: file\~" name \[aq]
 This is the same as the
 .B exec
 command except that the PostScript code is read from file
 .IR name .
 .
 .TP
-.BI \[rs]X'ps:\ def\  code '
+.BI "\[rs]X\[aq]ps: def\~" code \[aq]
 Place a PostScript definition contained in
 .I code
 in the prologue.
@@ -929,7 +952,7 @@ escape sequence with an argument that names a macro,
 can extend over multiple lines.
 .
 .TP
-.BI \[rs]X'ps:\ mdef\  n\ code  '
+.BI "\[rs]X\[aq]ps: mdef\~" "n code" \[aq]
 Like
 .BR def ,
 except that
@@ -946,7 +969,9 @@ so that it can create an appropriately sized PostScript dictionary
 to contain them.
 .
 .TP
-.BI \[rs]X'ps:\ import\  file\ llx\ lly\ urx\ ury\ width\ \fR[\fP\ height\ \fR]\fP '
+.BI "\[rs]X\[aq]ps: import\~" "file llx lly urx ury width\~"\c
+.RI [ height ]\c
+.B \[aq]
 Import a PostScript graphic from
 .IR file .
 .
@@ -1013,9 +1038,9 @@ macro which provides a convenient high-level interface for inclusion of
 PostScript graphics.
 .
 .TP
-.B \[rs]X'ps:\ invis'
+.B \[rs]X\[aq]ps: invis\[aq]
 .TQ
-.B \[rs]X'ps:\ endinvis'
+.B \[rs]X\[aq]ps: endinvis\[aq]
 No output is generated for text and drawing commands
 that are bracketed with these
 .B \[rs]X
@@ -1042,14 +1067,14 @@ character because the standard X11 fonts do not provide it;
 this problem can be overcome by executing the following
 request
 .
+.
 .IP
-.ft B
-.nf
-\&.char \[rs](em \[rs]X'ps: invis'\[rs]
-\[rs]Z'\[rs]v'-.25m'\[rs]h'.05m'\[rs]D'l .9m 0'\[rs]h'.05m''\[rs]
-\[rs]X'ps: endinvis'\[rs](em
-.ft
-.fi
+.EX
+\&.char \[rs][em] \[rs]X\[aq]ps: invis\[aq]\[rs]
+\[rs]Z\[aq]\[rs]v\[aq]-.25m\[aq]\[rs]h\[aq].05m\[aq]\c
+\[rs]D\[aq]l .9m 0\[aq]\[rs]h\[aq].05m\[aq]\[aq]\[rs]
+\[rs]X\[aq]ps: endinvis\[aq]\[rs][em]
+.EE
 .
 .
 .LP
@@ -1084,10 +1109,11 @@ anything is drawn or written by groff).
 .
 For example, to underlay the page contents with the word
 \[oq]DRAFT\[cq] in light gray, you might use
+.
+.
 .RS
 .LP
-.nf
-.ft B
+.EX
 \&.de XX
 ps: def
 /BPhook
@@ -1099,27 +1125,30 @@ ps: def
 def
 \&..
 \&.devicem XX
-.ft R
-.fi
+.EE
 .RE
+.
+.
 .LP
 Or, to cause lines and polygons to be drawn with square linecaps
 and mitered linejoins instead of the round linecaps and linejoins
 normally used by
 .BR grops ,
 use
+.
+.
 .RS
 .LP
-.nf
-.ft B
+.EX
 \&.de XX
 ps: def
 /BPhook { 2 setlinecap 0 setlinejoin } def
 \&..
 \&.devicem XX
-.ft R
-.fi
+.EE
 .RE
+.
+.
 .LP
 (square linecaps, as opposed to butt linecaps (0 setlinecap),
 give true corners in boxed tables even though the lines are
@@ -1127,7 +1156,7 @@ drawn unconnected).
 .
 .
 .\" ====================================================================
-.SS Encapsulated PostScript
+.SS "Encapsulated PostScript"
 .\" ====================================================================
 .
 .B grops
@@ -1140,16 +1169,14 @@ produces an encapsulated PS file.
 .
 .RS
 .LP
-.nf
-.ft B
+.EX
 #! /bin/sh
 groff \-P\-b16 $1 > $1.ps
 gs \-dNOPAUSE \-sDEVICE=bbox \-\- $1.ps 2> $1.bbox
 sed \-e "/\[ha]%%Orientation/r $1.bbox" \[rs]
     \-e "/\[ha]%!PS-Adobe-3.0/s/$/ EPSF-3.0/" $1.ps > $1.eps
 rm $1.ps $1.bbox
-.ft R
-.fi
+.EE
 .RE
 .
 .
@@ -1168,68 +1195,101 @@ to
 .
 .
 .\" ====================================================================
-.SS TrueType and other font formats
+.SS "TrueType and other font formats"
 .\" ====================================================================
 .
 TrueType fonts can be used with
-.B grops
-if converted first to
-.B "Type\~42"
-format, a special PostScript wrapper equivalent to the PFA format
-mentioned in
-.BR \%pfbtops (@MAN1EXT@).
+.I grops
+if converted first to Type\~42 format,
+a PostScript wrapper equivalent to the PFA format described in
+.IR \%pfbtops (@MAN1EXT@).
 .
-There are several different methods to generate a type42 wrapper and
-most of them involve the use of a PostScript interpreter such as
-Ghostscript \[en] see
-.BR gs (1).
+Several methods exist to generate a Type\~42 wrapper;
+some of them involve the use of a PostScript interpreter such as
+Ghostscript\[em]see
+.IR gs (1).
 .
 .
 .LP
-Yet, the easiest method involves the use of the application
-.BR ttftot42 (1).
+One approach is to use
+.UR https://fontforge.org/
+FontForge
+.UE ,
+a font editor that can convert most outline font formats.
 .
-This program uses
-.BR freetype (3)
-(version 1.3.1) to generate type42
-font wrappers and well-formed AFM files that can be fed to
-the
-.BR \%afmtodit (@MAN1EXT@)
-script to create appropriate metric files.
+Here's an example of using the Roboto Slab Serif font with
+.IR groff .
 .
-The resulting font wrappers should be added to the
-.I download
-file.
-.B ttftot42
-source code can be downloaded from
-.UR ftp://\:www.giga.or.at/\:pub/\:nih/\:ttftot42/
-ftp://\:www.giga.or.at/\:pub/\:nih/\:ttftot42/
-.UE .
+Several variables are used so that you can more easily adapt it into
+your own script.
+.
+.
+.RS 4
+.LP
+.EX
+MAP=@FONTDIR@/devps/generate/textmap
+TTF=/usr/share/fonts/truetype/roboto/slab/RobotoSlab\-Regular.ttf
+BASE=$(basename \[dq]$TTF\[dq])
+INT=${BASE%.ttf}
+PFA=$INT.pfa
+AFM=$INT.afm
+GFN=RSR
+DIR=$HOME/.local/groff/font
+mkdir -p \[dq]$DIR\[dq]/devps
+fontforge -lang=ff -c \[dq]Open(\[rs]\[dq]$TTF\[rs]\[dq]);\[rs]
+\tGenerate(\[rs]\[dq]$DIR/devps/$PFA\[rs]\[dq]);\[dq]
+afmtodit \[dq]$DIR/devps/$AFM\[dq] \[dq]$MAP\[dq] \
+\[dq]$DIR/devps/$GFN\[dq]
+printf \[dq]$BASE\[rs]t$PFA\[rs]n\[dq] >> \[dq]$DIR/devps/download\[dq]
+.EE
+.RE
 .
 .
 .LP
-Another solution for creating type42 wrappers is to use FontForge,
-available from
-.UR http://\:fontforge.sf.net
-http://\:fontforge.sf.net
-.UE .
-This font editor can convert most outline font formats.
+.I fontforge
+and
+.I afmtodit
+may generate warnings depending on the attributes of the font.
+.
+The test procedure is simple.
+.
+.
+.RS 4
+.LP
+.EX
+printf \[dq].ft RSR\[rs]nHello, world!\[rs]n\[dq] | groff -F \
+\[dq]$DIR\[dq] > hello.ps
+.EE
+.RE
+.
+.
+.LP
+Once you're satisifed that the font works,
+you may want to generate any available related styles
+(for instance,
+Roboto Slab
+also has \[lq]Bold\[rq],
+\[lq]Light\[rq],
+and
+\[lq]Thin\[rq]
+styles)
+and set up
+.I GROFF_FONT_PATH
+in your environment to include the directory you keep the generated
+fonts in so that you don't have to use the
+.B \-F
+option.
 .
 .
 .\" ====================================================================
-.SH "FONT INSTALLATION"
+.SH "Font Installation"
 .\" ====================================================================
 .
 This section gives a summary of the above explanations; it can serve
 as a step-by-step font installation guide for
 .BR grops .
 .
-.ds BU \[bu]\ \ \"
-.de LI
-.IP "" 4
-\h'-\w'\*[BU]'u'\*[BU]\c
-..
-.LI
+.IP \(bu
 Convert your font to something groff understands.
 .
 This is either a PostScript Type\~1 font in PFA format or a PostScript
@@ -1276,7 +1336,7 @@ For all other font formats use
 .B fontforge
 which can convert most outline font formats.
 .
-.LI
+.IP \(bu
 Convert the AFM file to a groff font description file with the
 .BR \%afmtodit (@MAN1EXT@)
 program.
@@ -1315,7 +1375,7 @@ and the groff font names are
 and
 .BR TBI .
 .
-.LI
+.IP \(bu
 Install both the groff font description files and the fonts in a
 .I devps
 subdirectory of the font path which groff finds.
@@ -1327,7 +1387,7 @@ for the actual value of the font path.
 Note that groff doesn't use the AFM files (but it is a good idea
 to store them anyway).
 .
-.LI
+.IP \(bu
 Register all fonts which must be downloaded to the printer in the
 .I devps/download
 file.
@@ -1356,7 +1416,7 @@ thus the following line should be added to
 .
 .
 .\" ====================================================================
-.SH OLD FONTS
+.SH "Old Fonts"
 .\" ====================================================================
 .
 groff versions 1.19.2 and earlier contain a slightly different set of
@@ -1392,7 +1452,7 @@ or add the directory to groff's font path environment variable
 .
 .
 .\" ====================================================================
-.SH ENVIRONMENT
+.SH Environment
 .\" ====================================================================
 .
 .TP
@@ -1418,9 +1478,9 @@ A list of directories in which to search for the
 directory in addition to the default ones.
 .
 See
-.BR @g@troff (@MAN1EXT@)
+.IR \%@g@troff (@MAN1EXT@)
 and
-.BR \%groff_font (@MAN5EXT@)
+.IR groff_font (@MAN5EXT@)
 for more details.
 .
 .
@@ -1431,7 +1491,7 @@ creation timestamp in place of the current time.
 .
 .
 .\" ====================================================================
-.SH FILES
+.SH Files
 .\" ====================================================================
 .
 .TP
@@ -1475,35 +1535,37 @@ PostScript printers (e.g., \[oq]eth\[cq] or \[oq]thorn\[cq]).
 .IR /tmp/grops XXXXXX
 Temporary file.
 See
-.BR groff (@MAN1EXT@)
+.IR groff (@MAN1EXT@)
 for details on the location of temporary files.
 .
 .
 .\" ====================================================================
-.SH "SEE ALSO"
+.SH "See also"
 .\" ====================================================================
 .
-.BR \%afmtodit (@MAN1EXT@),
-.BR groff (@MAN1EXT@),
-.BR @g@troff (@MAN1EXT@),
-.BR \%pfbtops (@MAN1EXT@),
-.BR \%groff_out (@MAN5EXT@),
-.BR \%groff_font (@MAN5EXT@),
-.BR \%groff_char (@MAN7EXT@),
-.BR \%groff_tmac (@MAN5EXT@)
-.
-.
-.LP
-.UR http://\:partners.adobe.com/\:public/\:developer/\:en/\:ps/\:5001.DSC_Spec.pdf
+.UR http://\:partners\:.adobe\:.com/\:public/\:developer/\:en/\:ps/\
+\:5001\:.DSC_Spec\:.pdf
 PostScript Language Document Structuring Conventions Specification
 .UE
 .
 .
+.LP
+.IR \%afmtodit (@MAN1EXT@),
+.IR groff (@MAN1EXT@),
+.IR \%@g@troff (@MAN1EXT@),
+.IR \%pfbtops (@MAN1EXT@),
+.IR groff_char (@MAN7EXT@),
+.IR groff_font (@MAN5EXT@),
+.IR groff_out (@MAN5EXT@),
+.IR groff_tmac (@MAN5EXT@)
+.
+.
 .\" Restore compatibility mode (for, e.g., Solaris 10/11).
-.cp \n[grops_C]
+.cp \n[*groff_grops_1_man_C]
 .
 .
 .\" Local Variables:
+.\" fill-column: 72
 .\" mode: nroff
 .\" End:
-.\" vim: set filetype=groff:
+.\" vim: set filetype=groff textwidth=72:

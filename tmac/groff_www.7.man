@@ -1,21 +1,13 @@
-.TH GROFF_WWW @MAN7EXT@ "@MDATE@" "groff @VERSION@"
-.SH NAME
-groff_www \- groff macros for authoring web pages
-.
-.\" User level guide to using the -mwww macroset
-.
-.
-.\" Save and disable compatibility mode (for, e.g., Solaris 10/11).
-.do nr groff_www_C \n[.C]
-.cp 0
-.do mso www.tmac
+.TH groff_www @MAN7EXT@ "@MDATE@" "groff @VERSION@"
+.SH Name
+groff_www \- GNU roff macros for authoring web pages
 .
 .
 .\" ====================================================================
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 2000-2018 Free Software Foundation, Inc.
+.\" Copyright (C) 2000-2020 Free Software Foundation, Inc.
 .\"
 .\" This file is part of groff, the GNU roff type-setting system.
 .\"
@@ -34,6 +26,12 @@ groff_www \- groff macros for authoring web pages
 .\" <http://www.gnu.org/licenses/>.
 .
 .
+.\" Save and disable compatibility mode (for, e.g., Solaris 10/11).
+.do nr *groff_groff_www_7_man_C \n[.cp]
+.cp 0
+.do mso www.tmac
+.
+.
 .\" we need the .LK here as we use it in the middle as an example --
 .\" once the user requests .LK then the automatic generation of links
 .\" at the top of the document is suppressed.
@@ -43,7 +41,7 @@ groff_www \- groff macros for authoring web pages
 .
 .
 .\" ====================================================================
-.SH SYNOPSIS
+.SH Synopsis
 .\" ====================================================================
 .
 .SY "groff \-m www"
@@ -51,21 +49,26 @@ groff_www \- groff macros for authoring web pages
 \&.\|.\|.\&]
 .RI [ input-file
 \&.\|.\|.\&]
+.YS
 .
 .
 .\" ====================================================================
-.SH DESCRIPTION
+.SH Description
 .\" ====================================================================
 .
-This manual page describes the GNU \-mwww macro package, which is part of
-the groff document formatting system.
+This manual page describes the GNU
+.I www
+macro package,
+which is part of the
+.I groff
+document formatting system.
 .
 The manual page is very a basic guide, and the HTML device driver
-.RB ( \%grohtml )
+.RI ( \%grohtml )
 has been completely rewritten but still remains as in an alpha state.
 .
-It has been included into the distribution so that a lot of people have a
-chance to test it.
+It has been included into the distribution so that a lot of people have
+a chance to test it.
 .
 Note that this macro file is automatically called (via the
 .I troffrc
@@ -77,7 +80,7 @@ or
 .
 .PP
 To see the hyperlinks in action, please format this man page with the
-.B \%grohtml
+.I \%grohtml
 device.
 .
 .
@@ -133,7 +136,7 @@ preprocessors is acceptable as input.
 .
 .
 .\" ====================================================================
-.SH REQUESTS
+.SH Requests
 .\" ====================================================================
 .
 .TP
@@ -145,7 +148,7 @@ A file is split whenever a \&.SH or \&.NH\ 1 is encountered.
 Its argument is the file stem name for future output files.
 .
 This option is equivalent to
-.BR \%grohtml 's
+.IR \%grohtml 's
 .B \-j
 option.
 .
@@ -154,7 +157,7 @@ option.
 Specify the cut off depth when generating links from section headings.
 .
 For example, a parameter of\~2 would cause
-.B \%grohtml
+.I \%grohtml
 to generate a list of links for
 .B .NH\ 1
 and
@@ -163,15 +166,19 @@ but not for
 .BR .NH\ 3 .
 .
 Whereas
+.
+.
 .RS
 .IP
-.nf
-.B .HX 0
-.fi
+.EX
+\&.HX 0
+.EE
 .RE
+.
+.
 .IP
 tells
-.B \%grohtml
+.I \%grohtml
 that no heading links should be created at all.
 .
 Another method for turning automatic headings off is by issuing the
@@ -182,8 +189,12 @@ to
 .
 .TP
 .B .BCL foreground background active not-visited visited
-This macro takes five parameters: foreground, background, active hypertext
-link, hypertext link not yet visited, and visited hypertext link colour.
+This macro takes five parameters:
+foreground,
+background,
+active hypertext link,
+hypertext link not yet visited,
+and visited hypertext link colour.
 .
 .TP
 .B .BGIMG imagefile
@@ -213,12 +224,12 @@ explicit breakpoints should be inserted with the
 escape.
 .
 Here is how to encode
-.UR http://\:foo.\:org/
+.UR http://\:foo\:.org/
 foo
 .UE :
 .RS
 .IP
-.B .URL http://\[rs]:foo.\[rs]:org/ "foo" :
+.B .URL http://\[rs]:foo\[rs]:.org/ "foo" :
 .RE
 .
 .IP
@@ -229,18 +240,21 @@ or
 it appears as:
 .RS
 .IP
-foo \[la]\f[CR]http://foo.org\f[]\[ra]:
+foo \[la]\f[CR]http://\:foo\:.org\f[]\[ra]:
 .RE
 .
 .IP
-The URL macro can be of any type; for example we can reference
-.UR pic.html
-Eric Raymond's pic guide
+The URL macro can be of any type;
+for example, we can reference
+.UR pic\:.html
+Eric Raymond's
+.I pic
+guide
 .UE
 by:
 .RS
 .IP
-.B .URL pic.html \[dq]Eric Raymond's pic guide\[dq]
+.B .URL pic\[rs]:.html \[dq]Eric Raymond\[aq]s pic guide\[dq]
 .RE
 .
 .TP
@@ -297,14 +311,14 @@ The second and the third parameter are optional.
 Hyphenation is disabled while printing the actual URL.
 .
 As an example, here is the location of the
-.UR ftp://\:ftp.gnu.org/
+.UR ftp://\:ftp\:.gnu\:.org/
 GNU FTP server
 .UE .
 .
 The macro example above can be specified as:
 .RS
 .IP
-.B .FTP ftp://\[rs]:ftp.gnu.org/ \[dq]GNU FTP server\[dq] .
+.B .FTP ftp://\[rs]:ftp\[rs]:.gnu\[rs]:.org/ \[dq]GNU FTP server\[dq] .
 .RE
 .
 .TP
@@ -323,19 +337,20 @@ since it is a local reference.
 .
 This link was achieved via placing a TAG in the URL description above;
 the source looks like this:
+.
+.
 .RS
 .IP
-.nf
-.ft B
+.EX
 \&.TP
 \&.B URL
 generates
 \&.TAG URL
 a URL using either two or three arguments.
 \&.\|.\|.
-.fi
-.ft P
+.EE
 .RE
+.
 .
 .TP
 .B .IMG [\-R|\-L|\-C] filename [width] [height]
@@ -420,14 +435,15 @@ If the width is absent it defaults to 1\~inch.
 If the height is absent it defaults to the width.
 .
 Example:
+.
+.
 .RS
 .IP
-.nf
-.ft B
+.EX
 \&.MPIMG \-L \-G 2c foo.png 3c 1.5c
-.ft P
-.fi
+.EE
 .RE
+.
 .
 .IP
 The height and width may also be given as percentages.
@@ -439,14 +455,15 @@ register and the height from the
 register.
 .
 For example:
+.
+.
 .RS
 .IP
-.nf
-.ft B
+.EX
 \&.MPIMG \-L \-G 2c foo.png 15%
-.ft P
-.fi
+.EE
 .RE
+.
 .
 .TP
 .B .HnS n
@@ -459,24 +476,23 @@ is specified by the first parameter.
 Use this macro if your headings contain URL, FTP or MTO macros.
 .
 Example:
+.
+.
 .RS
 .IP
-.nf
-.ft B
+.EX
 \&.HnS 1
 \&.HR
 GNU Troff
-\&.URL http://groff.ffii.org (Groff)
-\&\(em a
-\&.URL http://www.gnu.org/ GNU
+\&.URL https://\[rs]:www\[rs]:.gnu\[rs]:.org/\[rs]:software/\[rs]:groff/
+\&\[rs][em]a
+\&.URL http://www\[rs]:.gnu\[rs]:.org/ GNU
 \&project.
-\&Hosted by
-\&.URL http://ffii.org/ FFII .
 \&.HR
 \&.HnE
-.ft P
-.fi
+.EE
 .RE
+.
 .
 .IP
 In this case you might wish to disable automatic links to headings.
@@ -495,8 +511,9 @@ End heading.
 .TP
 .B .LK
 .TAG LK
-Force \%grohtml to place the automatically generated links at this
-position.
+Force
+.I \%grohtml
+to place the automatically generated links at this position.
 .
 If this manual page has been processed with
 .B \-Thtml
@@ -517,8 +534,9 @@ No effect for all other devices.
 .
 .TP
 .B .NHR
-Suppress generation of the top and bottom rules which \%grohtml emits
-by default.
+Suppress generation of the top and bottom rules which
+.I \%grohtml
+emits by default.
 .
 .TP
 .B .HTL
@@ -545,16 +563,18 @@ or
 .BR \-Txhtml .
 .
 Example:
+.
+.
 .RS
 .IP
-.nf
-.B ".HEAD" "\[dq]<link \[rs]"
-.B "  rel=\[dq]\[dq]icon\[dq]\[dq] \[rs]"
-.B "  type=\[dq]\[dq]image/png\[dq]\[dq] \[rs]"
-.B "  href=\[dq]\[dq]http://foo.org//bar.png\[dq]\[dq]/>\[dq]"
-.fi
-.ft P
+.EX
+\&.HEAD \[dq]<link \[rs]
+  rel=\[dq]\[dq]icon\[dq]\[dq] \[rs]
+  type=\[dq]\[dq]image/png\[dq]\[dq] \[rs]
+  href=\[dq]\[dq]http://foo.org//bar.png\[dq]\[dq]/>\[dq]
+.EE
 .RE
+.
 .
 .TP
 .B .HTML
@@ -573,15 +593,15 @@ higher-level macros.
 For example, the
 .B BGIMG
 macro is defined as
+.
+.
 .RS
 .IP
-.nf
-.ft B
+.EX
 \&.de BGIMG
 \&.   HTML <body background=\[rs]\[rs]$1>
 \&..
-.ft P
-.fi
+.EE
 .RE
 .
 .
@@ -647,27 +667,28 @@ Initialize default URL attributes to be used if this macro set is not
 used with the HTML device.
 .
 The macro set initializes itself with the following call
+.
+.
 .RS
 .IP
-.nf
-.ft B
+.EX
 \&.LINKSTYLE blue CR \e[la] \e[ra]
-.ft P
-.fi
+.EE
 .RE
+.
 .
 .IP
 but these values will be superseded by a user call to LINKSTYLE.
 .
 .
 .\" ====================================================================
-.SH SECTION HEADING LINKS
+.SH "Section Heading Links"
 .\" ====================================================================
 .
 By default
-.B \%grohtml
-generates links to all section headings and places these at the top of the
-HTML document.
+.I \%grohtml
+generates links to all section headings and places these at the top of
+the HTML document.
 .
 (See
 .UR #LK
@@ -677,7 +698,7 @@ for details of how to switch this off or alter the position).
 .
 .
 .\" ====================================================================
-.SH LIMITATIONS OF GROHTML
+.SH "Limitations of grohtml"
 .\" ====================================================================
 .
 .LP
@@ -686,46 +707,49 @@ information is currently rendered as a PNG image.
 .
 .
 .\" ====================================================================
-.SH FILES
+.SH Files
 .\" ====================================================================
 .
 .I @MACRODIR@/www.tmac
 .
 .
 .\" ====================================================================
-.SH AUTHORS
+.SH Authors
 .\" ====================================================================
+.
 The
 .I www
 macro package
 was written by
-.MT gaius@\:glam.ac.uk
+.MT gaius@\:glam\:.ac\:.uk
 Gaius Mulley
 .ME ,
 with additions by
-.MT wl@\:gnu.org
+.MT wl@\:gnu\:.org
 Werner Lemberg
 .ME
 and
-.MT groff\-bernd.warken\-72@\:web.de
+.MT groff\-bernd\:.warken\-72@\:web\:.de
 Bernd Warken
 .ME .
 .
 .
 .\" ====================================================================
-.SH "SEE ALSO"
+.SH "See also"
 .\" ====================================================================
-.BR groff (@MAN1EXT@),
-.BR @g@troff (@MAN1EXT@),
-.BR \%grohtml (@MAN1EXT@),
-.BR netpbm (1)
+.
+.IR groff (@MAN1EXT@),
+.IR \%@g@troff (@MAN1EXT@),
+.IR \%grohtml (@MAN1EXT@),
+.IR netpbm (1)
 .
 .
 .\" Restore compatibility mode (for, e.g., Solaris 10/11).
-.cp \n[groff_www_C]
+.cp \n[*groff_groff_www_7_man_C]
 .
 .
 .\" Local Variables:
+.\" fill-column: 72
 .\" mode: nroff
 .\" End:
-.\" vim: set filetype=groff:
+.\" vim: set filetype=groff textwidth=72:

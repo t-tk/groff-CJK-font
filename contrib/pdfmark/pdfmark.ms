@@ -1,11 +1,9 @@
 .ig
 pdfmark.ms
 
-File position: <groff-source>/contrib/pdfmark/pdfmark.ms
-
 This file is part of groff, the GNU roff type-setting system.
 
-Copyright (C) 2004-2018 Free Software Foundation, Inc.
+Copyright (C) 2004-2020 Free Software Foundation, Inc.
 written by Keith Marshall <keith.d.marshall@ntlworld.com>
 
 Permission is granted to copy, distribute and/or modify this document
@@ -246,7 +244,6 @@ for information and availability.
 Other tools employed, which should be readily available on
 .EM any
 Unix\(tm
-.LG
 or GNU/Linux system, are
 .CW sed ,
 .CW awk
@@ -274,7 +271,6 @@ POSIX
 .LG
 emulation environment and
 Unix\(tm
-.LG
 toolkit for 32\(hybit Microsoft\*(rg Windows\(tm platforms; see
 .pdfhref W http://cygwin.com
 for information and download.
@@ -283,7 +279,6 @@ or MSYS.\**
 .FS
 Another free, but minimal suite of common
 Unix\(tm
-.LG
 tools for 32\(hybit Microsoft\*(rg Windows\(tm, available for download from
 .pdfhref W -A ; http://www.mingw.org
 it
@@ -1196,7 +1191,6 @@ be used).
 It may be noted that this paradigm for specifying options
 is reminiscent of most
 Unix\(tm
-.LG
 shells; however, in the case of the
 .CW pdfhref
 macro, omission of the space separating an option flag from its argument is

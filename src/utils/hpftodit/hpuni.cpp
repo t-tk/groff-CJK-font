@@ -1,5 +1,5 @@
 // -*- C++ -*-
-/* Copyright (C) 2003-2018 Free Software Foundation, Inc.
+/* Copyright (C) 2003-2020 Free Software Foundation, Inc.
      Written by Jeff Conrad (jeff_conrad@msn.com)
 
 This file is part of groff.

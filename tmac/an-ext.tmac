@@ -1,6 +1,6 @@
 .\" an-ext.tmac
 .\"
-.\" Copyright (C) 2007-2018 Free Software Foundation, Inc.
+.\" Copyright (C) 2007-2020 Free Software Foundation, Inc.
 .\"
 .\" Written by Eric S. Raymond <esr@thyrsus.com>
 .\"            Werner Lemberg <wl@gnu.org>
@@ -96,7 +96,6 @@
 .\" Start URL.
 .de UR
 .  ds m1 \\$1\"
-.  nh
 .  if \\n(mH \{\
 .    \" Start diversion in a new environment.
 .    do ev URL-div
@@ -125,17 +124,19 @@
 .      do HTML-NS "<a href=""\\*(m1"">\\*(m1</a>"
 \&\\$*\"
 .  \}
-.  el \
-\\*(la\\*(m1\\*(ra\\$*\"
-.
-.  hy \\n(HY
+.  el \{\
+.    nh
+\\*(la\\*(m1\\*(ra\c
+.    ie \n(.g \&\\$*\"
+.    el \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9\"
+.    hy \\n(HY
+.  \}
 ..
 .
 .
 .\" Start email address.
 .de MT
 .  ds m1 \\$1\"
-.  nh
 .  if \\n(mH \{\
 .    \" Start diversion in a new environment.
 .    do ev URL-div
@@ -164,10 +165,13 @@
 .      do HTML-NS "<a href=""mailto:\\*(m1"">\\*(m1</a>"
 \&\\$*\"
 .  \}
-.  el \
-\\*(la\\*(m1\\*(ra\\$*\"
-.
-.  hy \\n(HY
+.  el \{\
+.    nh
+\\*(la\\*(m1\\*(ra\c
+.    ie \n(.g \&\\$*\"
+.    el \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9\"
+.    hy \\n(HY
+.  \}
 ..
 .
 .
@@ -183,10 +187,12 @@
 .de EX
 .  do ds mF \\n[.fam]
 .  nr mE \\n(.f
+.  nr sP \\n(PD \" Save paragraph distance.
+.  nr PD 1v
 .  nf
 .  nh
 .  do fam C
-.  ft CW
+.  ft R
 ..
 .
 .
@@ -194,6 +200,7 @@
 .de EE
 .  do fam \\*(mF
 .  ft \\n(mE
+.  nr PD \\n(sP \" Restore paragraph distance.
 .  fi
 .  hy \\n(HY
 ..
@@ -209,10 +216,6 @@
 .de DE
 .  \" XXX to be written
 ..
-.
-.\" ====================================================================
-.\" Editor settings
-.\" ====================================================================
 .
 .\" Local Variables:
 .\" mode: nroff

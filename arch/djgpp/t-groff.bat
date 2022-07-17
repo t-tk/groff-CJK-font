@@ -1,4 +1,4 @@
-Rem Copyright (C) 2000-2018 Free Software Foundation, Inc.
+Rem Copyright (C) 2000-2020 Free Software Foundation, Inc.
 Rem
 Rem This file is part of groff.
 Rem

@@ -2,7 +2,7 @@
 <!--
 This file is part of groff, the GNU roff type-setting system.
 
-Copyright (C) 2004-2018 Free Software Foundation, Inc.
+Copyright (C) 2004-2020 Free Software Foundation, Inc.
 Written by Peter Schaffter (peter@schaffter.ca).
 
 Permission is granted to copy, distribute and/or modify this document
@@ -51,6 +51,9 @@ FDL in the main directory of the groff source package.
     <li><a href="#psselect"><kbd>psselect</kbd></a></li>
   </ul></li>
   <li><a href="#toc">The TOC macro</a></li>
+  <ul style="margin-left: -.5em; list-style-type: disc;">
+  	<li><a href="#toc-heading">TOC_HEADING</a>
+  </ul></li>
   <li><a href="#toc-control-top">Control macros for tables of contents</a>
   <ul style="margin-left: -.5em; list-style-type: disc;">
     <li><a href="#index-toc-control">Table of contents control macros</a></li>
@@ -192,7 +195,7 @@ AUTO_RELOCATE_TOC usage is described in the manual,
 <p>
 In order to take advantage of automatic table of contents
 repositioning, you must use
-<a href="using.html#pdfmom" style="font-weight: bold">pdfmom</a>.
+<a href="using.html#pdfmom" style="font-weight: bold">pdfmom</a>
 with groff&#8217;s native PDF driver (ie without the
 <strong>-Tps</strong> flag).  Files that need to be processed with
 the <strong>-Tps</strong> flag require you to reposition the table
@@ -203,7 +206,7 @@ below.
 <div class="box-tip">
 <p class="tip">
 <span class="note">Note:</span>
-Note: <kbd>.AUTO_RELOCATE_TOC</kbd> must come before
+<kbd>AUTO_RELOCATE_TOC</kbd> must come before
 <a href="docprocessing.html#start">START</a>.
 </p>
 </div>
@@ -332,6 +335,39 @@ or
 </span>
 </p>
 </div>
+
+<div class="macro-id-overline">
+<h3 class="macro-id">TOC heading</h3>
+</div>
+
+<div id="toc-heading" class="box-macro-args">
+Macro: <b>TOC_HEADING</b> <kbd class="macro-args">&quot;&lt;single line TOC heading&gt;&quot;</kbd> 
+</div>
+<p class="requires">
+&bull;&nbsp;Argument must be enclosed in double-quotes
+</p>
+
+<p>
+You may sometimes want to insert a line of text into the table of
+contents without it referring to a page number, for example to
+identify a &#8220;Part I&#8221; and a &#8220;Part II&#8221;.
+</p>
+
+<p>
+Placed before any instance of the
+<a href="docprocessing.html#start">START</a>
+macro, TOC_HEADING inserts its text into the table of contents
+before the next section title or heading.  A modest amount of
+whitespace is introduced above and beneath to distinguish it easily
+from table of contents entries.
+</p>
+
+<p>
+The appearance of the heading may be controlled with
+the macro 
+<a href="docprocessing.html#toc-heading-style">TOC_HEADING_STYLE</a>.
+</p>
+
 
 <div class="rule-short"><hr/></div>
 
@@ -528,8 +564,8 @@ immediately prior to <kbd>.TOC</kbd>.
 A special macro
 <kbd><a href="#toc-pagenum-style">TOC_PAGENUM_STYLE</a></kbd>
 controls the style of table of contents pagination (ie the actual
-table of contents pages' numbers, not the page number references of
-entries).
+table of contents pages&#8217; numbers, not the page number
+references of entries).
 </p>
 
 <!-- -PAGINATE_TOC- -->
@@ -1068,10 +1104,17 @@ Macro: <b>SPACE_TOC_ITEMS</b></kbd>
 <p>
 If you&#8217;d like mom to add a small amount of space between table
 of contents entry levels, use <kbd>.SPACE_TOC_ITEMS</kbd>.  Mom will
-visually group entry levels in a way that's pleasing to the eye.
-The only catch to this macro is that the bottom margins of table of
-contents pages may not align perfectly.
+visually group entry levels in a way that&#8217;s pleasing to the
+eye.  The only catch to this macro is that the bottom margins of
+table of contents pages may not align perfectly.
 </p>
+
+<p>
+Please note that
+<kbd>SPACE_TOC_ITEMS</kbd> is only available with
+<a href="docprocessing.html#printstyle">PRINTSTYLE TYPESET</a>.
+</p>
+
 
 <!-- -TOC_PADDING- -->
 

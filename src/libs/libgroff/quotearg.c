@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2018 Free Software Foundation, Inc.
+/* Copyright (C) 2004-2020 Free Software Foundation, Inc.
      Written by:  Jeff Conrad    (jeff_conrad@msn.com)
        and        Keith Marshall (keith.d.marshall@ntlworld.com)
 

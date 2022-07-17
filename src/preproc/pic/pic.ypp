@@ -1,4 +1,4 @@
-/* Copyright (C) 1989-2018 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
 This file is part of groff.
@@ -1905,10 +1905,8 @@ char *do_sprintf(const char *form, const double *v, int nv)
 	break;
       }
       if (*form == '%') {
-	one_format += *form++;
-	one_format += '\0';
-	snprintf(sprintf_buf, sizeof(sprintf_buf),
-		 "%s", one_format.contents());
+	form++;
+	snprintf(sprintf_buf, sizeof(sprintf_buf), "%%");
       }
       else {
 	if (i >= nv) {

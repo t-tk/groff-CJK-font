@@ -2,7 +2,7 @@
 <!--
 This file is part of groff, the GNU roff type-setting system.
 
-Copyright (C) 2004-2018 Free Software Foundation, Inc.
+Copyright (C) 2004-2020 Free Software Foundation, Inc.
 Written by Peter Schaffter (peter@schaffter.ca).
 
 Permission is granted to copy, distribute and/or modify this document
@@ -187,7 +187,7 @@ recommended.
 <div class="box-macro-args">
 Macro: <b>PDF_IMAGE</b> <kbd class="macro-args">[ -L | -C | -R | -I &lt;indent&gt; ] \
 <br/>
-&lt;image-file.pdf&gt; &lt;width&gt; &lt;height&gt; [ SCALE &lt;factor&gt; ] \
+&lt;pdf image&gt; &lt;width&gt; &lt;height&gt; [ SCALE &lt;factor&gt; ] \
 <br/>
 [ ADJUST +|-&lt;vertical adjustment&gt; ] [ NO_SHIM ] [ NO_FLEX ] \
 <br/>
@@ -212,8 +212,10 @@ require a
 <div class="box-tip">
 <p class="tip">
 <span class="note">Note:</span>
-Arguments may be broken into several lines using the
-&#8220;line-continued&#8221; backslash (<b>\</b>), as shown above.
+Mom files with embedded PDF images must be processed with
+pdfmom&nbsp;doc.mom&nbsp;&gt;&nbsp;doc.pdf.  Arguments may be broken
+into several lines using the &#8220;line-continued&#8221; backslash
+(<b>\</b>), as shown above.
 </p>
 </div>
 
@@ -223,7 +225,7 @@ Unlike
 which it resembles, PDF_IMAGE requires that the pdf image&#8217;s
 dimensions (the bounding box,
 <a href="#bounding-box">see below</a>)
-be supplied each time it&#8217;s called.
+be supplied each time it&#8217;s called.</p>
 </p>
 
 <p>
@@ -273,7 +275,7 @@ order, although it&#8217;s best to put <kbd>CAPTION</kbd>,
 <kbd>SHORT_CAPTION</kbd>, and <kbd>LABEL</kbd> last.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'SCALE'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">SCALE</h5>
 
 <p>
 <kbd>SCALE</kbd> allows you to scale the image by
@@ -283,7 +285,7 @@ scales the image to 50 percent of its original size.  No percent
 sign or unit of measure should be appended.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'ADJUST'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">ADJUST</h5>
 
 <p>
 <kbd>ADJUST</kbd> lets you raise (<kbd>+</kbd>) or lower (<kbd>-</kbd>) the image
@@ -309,7 +311,7 @@ with PDF_IMAGE&#8217;s ADJUST argument.
 </p>
 </div>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'NO_SHIM'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">NO_SHIM</h5>
 
 <p>
 <kbd>NO_SHIM</kbd> instructs mom not to apply
@@ -327,7 +329,7 @@ image on the page should be shimmed, ie should not be given the
 <kbd>NO_SHIM</kbd> argument.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'NO_FLEX'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">NO_FLEX</h5>
 
 <p>
 <kbd>NO_FLEX</kbd> instructs mom not to apply
@@ -340,7 +342,7 @@ page.  If there are no others, the final image should be
 flex-spaced, ie not given the <kbd>NO_FLEX</kbd> argument.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'FRAME'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">FRAME</h5>
 
 <p>
 <kbd>FRAME</kbd> instructs mom to put a frame around the image.
@@ -348,7 +350,7 @@ Parameters for the frame are set with
 <a href="#pdf-image-frame">PDF_IMAGE_FRAME</a>.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'CAPTION'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">CAPTION</h5>
 
 <p>
 <kbd>CAPTION</kbd> allows you to give the image a caption.  By
@@ -360,7 +362,7 @@ in
 The text of the caption must be surrounded by double-quotes.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'SHORT_CAPTION'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">SHORT_CAPTION</h5>
 
 <p>
 <kbd>SHORT_CAPTION</kbd> allows you to trim long captions for
@@ -368,7 +370,7 @@ inclusion in the List of Figures.  The text you supply, surrounded
 by double-quotes, is what will appear in the List.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'LABEL'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">LABEL</h5>
 
 <p>
 <kbd>LABEL</kbd>, if given, appears beneath the image.  The text you
@@ -379,13 +381,18 @@ an auto-labelling facility for images (see
 which, if enabled, overrides the <kbd>LABEL</kbd> argument.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'TARGET'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">TARGET</h5>
 
 <p>
 <kbd>TARGET</kbd> followed by a unique name surrounded by
 double-quotes creates a PDF target for the image so that it may be
 linked to from other places in the file (with PDF_LINK; see
 <a href="version-2.html#mom-pdf">Producing PDFs with groff and mom</a>).
+</p>
+
+<p>
+<b><i>Please note:</b> The following functionality is available
+only with groff 1.22.4 or later.</i>
 </p>
 
 <p>
@@ -407,15 +414,6 @@ anywhere in running text would result in a pdf link that reads
 &#8220;Figure 3&#8221;.  If chapter numbers are being prefixed to
 labels, the same string in, say, chapter 5 would produce the pdf
 link &#8220;Figure 5.3&#8221;.
-</p>
-
-<p>
-Remember that mom files with embedded PDF images must be processed
-with
-<br/>
-<span class="pre-in-pp">
- pdfmom doc.mom &gt; doc.pdf
-</span>
 </p>
 
 <div class="box-tip">
@@ -736,7 +734,7 @@ whatever you want the float to contain.  When you&#8217;re done,
 invoke <kbd>.FLOAT&nbsp;OFF</kbd> (or <kbd>QUIT, END, X</kbd>, etc).
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'ADJUST'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">ADJUST</h5>
 
 <p>
 The optional <kbd>ADJUST</kbd> argument tells mom to raise
@@ -759,7 +757,7 @@ a following page but respected for subsequent deferred floats
 output immediately afterward.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'FORCE'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">FORCE</h5>
 
 <p>
 The <kbd>FORCE</kbd> argument instructs mom to output the float
@@ -776,7 +774,7 @@ has been deferred to a subsequent page, insert <kbd>\!.bp</kbd>
 immediately before terminating the float.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'SPAN'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">SPAN</h5>
 
 <p>
 The <kbd>SPAN</kbd> argument tells mom that a float, if deferred,
@@ -786,7 +784,7 @@ a warning should this occur.  Unboxed tables, on the other hand, are
 acceptable within floats that are given the <kbd>SPAN</kbd> argument.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'INDENT'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">INDENT</h5>
 
 <p>
 <kbd>INDENT</kbd> allows you to indent a float from the left margin
@@ -795,22 +793,22 @@ by a specified value.  The value must have a
 appended to it.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'CENTER'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">CENTER</h5>
 
 <p>
 <kbd>CENTER</kbd> instructs mom to center a float if it is not
 already centered by default.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'RIGHT'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">RIGHT</h5>
 
 <p>
 <kbd>RIGHT</kbd> instructs mom to place a float a the right of the
-page; the longest line in the float will be flush with the page's
-right margin.
+page; the longest line in the float will be flush with the
+page&#8217;s right margin.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'NO_SHIM'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">NO_SHIM</h5>
 
 <p>
 <kbd>NO_SHIM</kbd> instructs mom not to apply
@@ -828,7 +826,7 @@ float on the page should be shimmed, ie should not be given the
 <kbd>NO_SHIM</kbd> argument.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'NO_FLEX'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">NO_FLEX</h5>
 
 <p>
 <kbd>NO_FLEX</kbd> instructs mom not to apply
@@ -841,7 +839,7 @@ page.  If there are no others, the final float should be
 flex-spaced, ie not given the <kbd>NO_FLEX</kbd> argument.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'TARGET'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">TARGET</h5>
 
 <p>
 <kbd>TARGET</kbd> followed by a unique name surrounded by
@@ -1459,7 +1457,7 @@ in any order, although it is advisable to put <kbd>CAPTION</kbd>,
 <kbd>SHORT_CAPTION</kbd>, and/or <kbd>LABEL</kbd> last.
 </p>
 
-<h5 id="h" class="docs" style="margin-top: 1em; text-transform: none">'H'</h5>
+<h5 id="h" class="docs" style="margin-top: 1em; text-transform: none">H</h5>
 
 <p>
 With the <b>H</b> argument, a table will span as many pages as
@@ -1501,7 +1499,7 @@ circumstances under which it fails, whereas <kbd>.TS</kbd> without
 </p>
 </div>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'BOXED'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">BOXED</h5>
 
 <p>
 If a table is to be boxed (ie <kbd>tbl</kbd> is given the flags
@@ -1519,7 +1517,7 @@ If a table is to be boxed (ie <kbd>tbl</kbd> is given the flags
 </span>
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'CENTER'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">CENTER</h5>
 
 <p>
 If a table is to be centered on the page, (ie <kbd>tbl</kbd> is
@@ -1542,17 +1540,17 @@ with a running header.
 </span>
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'NEEDS'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">NEEDS</h5>
 
 <p>
 If a table is not inside a float and you pass <kbd>.TS </kbd> the
 <kbd>H</kbd> argument (which you should; see the tip
 <a href="#h-tip">here</a>),
-mom begins output immediately where the table occurs in the input
-file <i>if there is enough room on the output page for the table
-header plus at least one row of table data</i>.  If there isn't
-enough room, mom breaks to a new page before beginning the table,
-leaving a gap in
+mom begins output immediately where the table occurs in the
+input file <i>if there is enough room on the output page for the
+table header plus at least one row of table data</i>.  If there
+isn&#8217;t enough room, mom breaks to a new page before beginning
+the table, leaving a gap in
 <a href="definitions.html#running">running text</a>
 at the bottom of the previous page.  If, for aesthetic reasons,
 you would prefer that mom require more than one row of table data
@@ -1561,7 +1559,7 @@ number with the <kbd>NEEDS</kbd> argument, followed by the desired
 number of rows.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'ADJUST'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">ADJUST</h5>
 
 <p>
 <kbd>ADJUST</kbd> lets you raise (<kbd>+</kbd>) or lower
@@ -1571,7 +1569,7 @@ is useful for achieving good optical centering between surrounding
 blocks of type.  A unit of measure is required.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'NO_SHIM'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">NO_SHIM</h5>
 
 <p>
 <kbd>NO_SHIM</kbd> instructs mom not to apply
@@ -1589,7 +1587,7 @@ table on the page should be shimmed, ie should not be given the
 <kbd>NO_SHIM</kbd> argument.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'NO_FLEX'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">NO_FLEX</h5>
 
 <p>
 <kbd>NO_FLEX</kbd> instructs mom not to apply
@@ -1602,7 +1600,7 @@ page.  If there are no others, the final table should be
 flex-spaced, ie not given the <kbd>NO_FLEX</kbd> argument.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'CAPTION'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">CAPTION</h5>
 
 <p>
 <kbd>CAPTION</kbd> allows you to give the table a caption.  By
@@ -1621,7 +1619,7 @@ of
 <a href="#th">TH</a>.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'SHORT_CAPTION'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">SHORT_CAPTION</h5>
 
 <p>
 <kbd>SHORT_CAPTION</kbd> allows you to trim long captions for
@@ -1629,7 +1627,7 @@ inclusion in the List of Tables.  The text you supply, surrounded
 by double-quotes, is what will appear in the List.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'LABEL'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">LABEL</h5>
 
 <p>
 <kbd>LABEL</kbd>, if given, appears beneath the table.  The text you
@@ -1640,13 +1638,18 @@ an auto-labelling facility for tables (see
 which, if enabled, overrides the <kbd>LABEL</kbd> argument.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'TARGET'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">TARGET</h5>
 
 <p>
 <kbd>TARGET</kbd> followed by a unique name surrounded by
 double-quotes creates a PDF target for the table so that it may be
 linked to from other places in the file (with PDF_LINK; see
 <a href="version-2.html#mom-pdf">Producing PDFs with groff and mom</a>).
+</p>
+
+<p>
+<b><i>Please note:</b> The following functionality is available
+only with groff 1.22.4 or later.</i>
 </p>
 
 <p>
@@ -1831,7 +1834,7 @@ requested height.  In the case of two non-zero arguments being
 given, only the height scaling is applied.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'ADJUST'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">ADJUST</h5>
 
 <p>
 <kbd>ADJUST</kbd> lets you raise (<kbd>+</kbd>) or lower
@@ -1842,7 +1845,7 @@ optical centering between surrounding blocks of type.  A unit of
 measure is required.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'NO_SHIM'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">NO_SHIM</h5>
 
 <p>
 <kbd>NO_SHIM</kbd> instructs mom not to apply
@@ -1860,7 +1863,7 @@ diagram on the page should be shimmed, ie should not be given the
 <kbd>NO_SHIM</kbd> argument.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'NO_FLEX'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">NO_FLEX</h5>
 
 <p>
 <kbd>NO_FLEX</kbd> instructs mom not to apply
@@ -1873,7 +1876,7 @@ on the page.  If there are no others, the final diagram should be
 flex-spaced, ie not given the <kbd>NO_FLEX</kbd> argument.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'CAPTION'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">CAPTION</h5>
 
 <p>
 <kbd>CAPTION</kbd> allows you to give the diagram a caption.  By
@@ -1885,7 +1888,7 @@ in
 The text of the caption must be surrounded by double-quotes.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'SHORT_CAPTION'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">SHORT_CAPTION</h5>
 
 <p>
 <kbd>SHORT_CAPTION</kbd> allows you to trim long captions for
@@ -1893,7 +1896,7 @@ inclusion in the List of Figures.  The text you supply, surrounded
 by double-quotes, is what will appear in the List.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'LABEL'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">LABEL</h5>
 
 <p>
 <kbd>LABEL</kbd>, if given, appears beneath the diagram.  The text you
@@ -1904,13 +1907,18 @@ an auto-labelling facility for diagrams (see
 which, if enabled, overrides the <kbd>LABEL</kbd> argument.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'TARGET'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">TARGET</h5>
 
 <p>
 <kbd>TARGET</kbd> followed by a unique name surrounded by
 double-quotes creates a PDF target for the diagram so that it may be
 linked to from other places in the file (with PDF_LINK; see
 <a href="version-2.html#mom-pdf">Producing PDFs with groff and mom</a>).
+</p>
+
+<p>
+<b><i>Please note:</b> The following functionality is available
+only with groff 1.22.4 or later.</i>
 </p>
 
 <p>
@@ -2111,7 +2119,7 @@ if <kbd>-L</kbd> or <kbd>-I</kbd> are passed as arguments to
 <kbd>.EQ</kbd>.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'ADJUST'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">ADJUST</h5>
 
 <p>
 <kbd>ADJUST</kbd> lets you raise (<kbd>+</kbd>) or lower
@@ -2122,7 +2130,7 @@ optical centering between surrounding blocks of type.  A unit of
 measure is required.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'NO_SHIM'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">NO_SHIM</h5>
 
 <p>
 <kbd>NO_SHIM</kbd> instructs mom not to apply
@@ -2140,7 +2148,7 @@ equation on the page should be shimmed, ie should not be given the
 <kbd>NO_SHIM</kbd> argument.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'NO_FLEX'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">NO_FLEX</h5>
 
 <p>
 <kbd>NO_FLEX</kbd> instructs mom not to apply
@@ -2154,14 +2162,14 @@ flex-spaced, ie not given the <kbd>NO_FLEX</kbd> argument.
 </p>
 
 </p>
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'CAPTION'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">CAPTION</h5>
 
 <p>
 <kbd>CAPTION</kbd> allows you to give the equation a caption.  
 Equation captions always appear beneath the equation.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'SHORT_CAPTION'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">SHORT_CAPTION</h5>
 
 <p>
 <kbd>SHORT_CAPTION</kbd> allows you to trim long captions for
@@ -2169,7 +2177,7 @@ inclusion in the List of Equations.  The text you supply, surrounded
 by double-quotes, is what will appear in the List.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'LABEL'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">LABEL</h5>
 
 <p>
 <kbd>LABEL</kbd>, if given, appears on the same baseline as the last line of the
@@ -2182,7 +2190,7 @@ Equations.  Mom provides an auto-labelling facility for equations (see
 which, if enabled, overrides the <kbd>LABEL</kbd> argument.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'SHIFT_LABEL'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">SHIFT_LABEL</h5>
 
 <p>
 <kbd>SHIFT_LABEL</kbd> allows you to raise (<kbd>-</kbd>) or lower
@@ -2193,13 +2201,18 @@ with the last line.  Assuming a three-line equation,
 one line, thus centering it vertically on the equation.
 </p>
 
-<h5 class="docs" style="margin-top: 1em; text-transform: none">'TARGET'</h5>
+<h5 class="docs" style="margin-top: 1em; text-transform: none">TARGET</h5>
 
 <p>
 <kbd>TARGET</kbd> followed by a unique name surrounded by
 double-quotes creates a PDF target for the equation so that it may
 be linked to from other places in the file (with PDF_LINK; see
 <a href="version-2.html#mom-pdf">Producing PDFs with groff and mom</a>).
+</p>
+
+<p>
+<b><i>Please note:</b> The following functionality is available
+only with groff 1.22.4 or later.</i>
 </p>
 
 <p>
@@ -2420,9 +2433,9 @@ For the purposes of labelling, mom treats
 <a href="docprocessing.html#doctype">DOCTYPE&nbsp;DEFAULT</a>
 as if it were <b>DOCTYPE&nbsp;CHAPTER</b>, hence, with
 <kbd>PREFIX_CHAPTER</kbd>, each collated <b>DEFAULT</b>
-doctype's prefixed &#8220;chapter&#8221; number is incremented
-and the label number itself reset to &#8220;1&#8221;.  If
-you do not give <kbd>PREFIX_CHAPTER</kbd>, the label number
+doctype&#8217;s prefixed &#8220;chapter&#8221; number is
+incremented and the label number itself reset to &#8220;1&#8221;.
+If you do not give <kbd>PREFIX_CHAPTER</kbd>, the label number
 is <i>not</i> reset automatically.  To reset it, invoke
 <kbd>.AUTOLABEL_&lt;type&gt;</kbd> after each
 <a href="docprocessing.html#collate">COLLATE</a>.
@@ -2498,8 +2511,8 @@ would disable captions after labels for pdf images only.
 <p>
 If
 <a href="#mla">MLA</a>
-is enabled, there's no need to invoke <kbd>CAPTION_AFTER_LABEL</kbd>
-as this is implied.
+is enabled, there&#8217;s no need to invoke
+<kbd>CAPTION_AFTER_LABEL</kbd> as this is implied.
 </p>
 
 <div class="box-tip">
@@ -2751,8 +2764,8 @@ to the end of your input file.
 </p>
 
 <p>
-Also like the Table of Contents, entries in the Lists' output are
-clickable PDF links when a document is viewed at the screen.
+Also like the Table of Contents, entries in the Lists&#8217; output
+are clickable PDF links when a document is viewed at the screen.
 </p>
 
 <h3 id="lists-placement" class="docs">Placement of Lists</h3>

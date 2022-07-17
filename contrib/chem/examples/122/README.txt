@@ -24,29 +24,12 @@ example.
 
 You can view the graphical display of the examples by calling
 
-    groffer <file>
-
-'groffer' calls 'chem' automatically.
-
-If you want to transform example files to a different format use the
-'roff2*' programs:
-
-'roff2dvi' prints dvi format to standard output,
-'roff2html' generates html output,
-'roff2pdf' outputs pdf mode,
-'roff2ps' produces PostScript output,
-'roff2text' generates text output in the groff device 'latin1',
-'roff2x' prints the output  in  the  groff  device  X  that  is
-         suitable  for programs  like 'gxditview' or 'xditview'.
-
-To get a suitable 'groff' output run
-
     @g@chem <file> | groff -p ...
 
 
 ####### License
 
-Copyright (C) 2006-2018 Free Software Foundation, Inc.
+Copyright (C) 2006-2020 Free Software Foundation, Inc.
 Written by Bernd Warken <groff-bernd.warken-72@web.de>.
 
 This file is part of 'chem', which is part of 'groff'.
@@ -67,7 +50,7 @@ The GPL2 license text is available in the internet at
 <http://www.gnu.org/licenses/gpl-2.0.html>.
 
 
-####### Emacs settings
+##### Editor settings
 
 Local Variables:
 mode: text

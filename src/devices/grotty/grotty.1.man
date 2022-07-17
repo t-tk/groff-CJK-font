@@ -1,13 +1,13 @@
-.TH GROTTY @MAN1EXT@ "@MDATE@" "groff @VERSION@"
-.SH NAME
-grotty \- groff driver for typewriter-like devices
+.TH grotty @MAN1EXT@ "@MDATE@" "groff @VERSION@"
+.SH Name
+grotty \- groff output driver for typewriter-like (terminal) devices
 .
 .
 .\" ====================================================================
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 1989-2018 Free Software Foundation, Inc.
+.\" Copyright (C) 1989-2020 Free Software Foundation, Inc.
 .\"
 .\" Permission is granted to make and distribute verbatim copies of this
 .\" manual provided the copyright notice and this permission notice are
@@ -26,182 +26,274 @@ grotty \- groff driver for typewriter-like devices
 .
 .
 .\" Save and disable compatibility mode (for, e.g., Solaris 10/11).
-.do nr grotty_C \n[.C]
+.do nr *groff_grotty_1_man_C \n[.cp]
 .cp 0
 .
 .
 .\" ====================================================================
-.SH SYNOPSIS
+.SH Synopsis
 .\" ====================================================================
 .
 .SY grotty
-.OP \-bBcdfhioruUv
+.OP \-dfho
+.RB [ \-i | \-r ]
 .OP \-F dir
 .RI [ file
 \&.\|.\|.\&]
 .YS
 .
 .
+.SY "grotty \-c"
+.OP \-bBdfhouU
+.OP \-F dir
+.RI [ file
+\&.\|.\|.\&]
+.YS
+.
+.
+.SY grotty
+.B \-\-help
+.YS
+.
+.
+.SY grotty
+.B \-v
+.
+.SY grotty
+.B \-\-version
+.YS
+.
+.
 .\" ====================================================================
-.SH DESCRIPTION
+.SH Description
 .\" ====================================================================
 .
-.B grotty
-translates the output of GNU
-.B troff
-into a form suitable for typewriter-like devices.
+The GNU
+.I roff
+TTY
+(\[lq]Teletype\[rq])
+output driver translates the output of
+.IR \%@g@troff (@MAN1EXT@)
+into a form suitable for typewriter-like devices,
+including terminal emulators.
 .
-Normally
-.B grotty
-should be invoked by using the
-.B groff
-command with a
+Normally,
+.I grotty
+is invoked by
+.IR groff (@MAN1EXT@)
+when the latter is given one of the
 .BR \-Tascii ,
 .B \-Tlatin1
 or
 .B \-Tutf8
-option on ASCII based systems, and with
+options on systems using ISO character encoding standards,
+or with
 .B \-Tcp1047
-and
+or
 .B \-Tutf8
-on EBCDIC based hosts.
+on EBCDIC-based hosts.
 .
-If no files are given,
-.B grotty
-reads the standard input.
+If no
+.I file
+arguments are given,
+or if
+.I file
+is \[lq]\-\[rq],
+.I grotty
+reads the standard input stream.
 .
-A filename of
-.B \-
-also causes
-.B grotty
-to read the standard input.
-.
-Output is written to the standard output.
+Output is written to the standard output stream.
 .
 .
 .LP
 By default,
-.B grotty
-emits SGR escape sequences (from ISO 6429, also called ANSI color
-escapes) to change text attributes (bold, italic, colors).
+.I grotty
+emits SGR escape sequences
+(from ISO\~6429,
+popularly called \[lq]ANSI escapes\[rq])
+to change text attributes
+(bold, italic, underline, reverse-video, and colors).
 .
-This makes it possible to have eight different background and
-foreground colors; additionally, bold and italic attributes can be
-used \f[BI]at the same time\f[] (by using the BI font).
-.
-.
-.LP
-The following colors are defined in
-.BR tty.tmac :
-black, white, red, green, blue, yellow, magenta, cyan.
-.
-Unknown colors are mapped to the default color (which is dependent on
-the settings of the terminal; in most cases, this is black for the
-foreground and white for the background).
+Devices supporting the appropriate sequences can view
+.I roff
+documents using eight different background and foreground colors.
 .
 .
 .LP
-Use the
+In keeping with long-standing practice and the rarity of terminals,
+hardware or emulated,
+that support oblique or italic fonts,
+italicized text is represented with underlining by default\[em]but see
+the
+.B \-i
+option below.
+.
+.
+.LP
+Following ISO\~6429,
+the following colors are defined in
+.IR tty.tmac :
+black, white, red, green, blue, yellow, magenta, and cyan.
+.
+Unrecognized colors are mapped to the default color,
+which is dependent on the settings of the terminal.
+.
+.
+.\" ====================================================================
+.SS "SGR support in pagers"
+.\" ====================================================================
+.
+When paging
+.IR grotty 's
+output with
+.IR less (1),
+the latter program must be instructed to pass SGR sequences through to
+the device;
+its
+.B \-R
+option is one way to achieve this.
+.
+Consequently,
+programs like
+.IR man (1)
+which page
+.I roff
+documents with
+.I less
+must call it with an appopriate option.
+.
+.
+.\" ====================================================================
+.SS "Legacy output format"
+.\" ====================================================================
+.
+The
 .B \-c
-switch to revert to the old behaviour, printing a bold character
+option tells
+.I grotty
+to use an output format compatible with paper terminals,
+like the Teletype machines for which
+.I roff
+and
+.I nroff
+were first developed but which are no longer in wide use.
+.
+SGR escape sequences are not emitted.
+.
+Instead,
+.I grotty
+overstrikes,
+representing a bold character
 .I c
 with the sequence
-.RI \[lq] c
-BACKSPACE
+.RI \[lq] c\~\c
+BACKSPACE\~\c
 .IR c \[rq]
-and an italic character
+an italic character
 .I c
-by the sequence
-.RB \[lq] _
-BACKSPACE
+with the sequence
+.RB \[lq] _\~\c
+BACKSPACE\~\c
+.IR c \[rq],
+and bold italics with
+.RB \[lq] _\~\c
+BACKSPACE\~\c
+.I c
+BACKSPACE\~\c
 .IR c \[rq].
+Furthermore, color output is disabled.
 .
-At the same time, color output is disabled.
-.
-The same effect can be achieved by setting either the
+The same effect can be achieved either by setting the
 .I GROFF_NO_SGR
-environment variable or using the \[oq]sgr\[cq] X command (see below).
+environment variable or by using a
+.I groff
+escape sequence within the document;
+see subsection \[lq]Device control commands\[rq],
+below.
 .
 .
 .LP
-For SGR support, it is necessary to use the
-.B \-R
-option of
-.BR less (1)
-to disable the interpretation of
-.BR grotty 's
-old output format.
+The legacy output format can be rendered on a video terminal
+(or emulator)
+by piping
+.IR grotty 's
+output through
+.IR ul (1),
+.\" from bsdmainutils 11.1.2+b1 (on Debian Buster)
+which may render bold italics as reverse video.
 .
-Consequently, all programs which use
-.B less
-as the pager program have to pass this option to it.
-.
-For
-.BR man (1)
-in particular, either add
-.B \-R
-to the
-.I PAGER
-environment variable, e.g.\&
-.
-.RS
-.LP
-.B PAGER="/usr/bin/less \-R"
-.br
-.B export PAGER
-.RE
-.LP
-.
-or use the
-.B \-P
-option of
-.B man
-to set the pager executable and its options, or modify the
-configuration file of
-.B man
-in a similar fashion.
-.
-Note that with some
-.BR man (1)
-versions, you have to use the
-.I \%MANPAGER
-environment variable instead.
-.
-.
-.LP
-.BR grotty 's
-old output format can be displayed on a terminal
-by piping through
-.BR ul (1).
-Pagers such as
-.BR more (1)
-or
-.BR less (1)
-are also able to display these sequences.
-Use either
-.B \-B
-or
-.B \-U
-when piping into
-.BR less (1);
-use
+.\" 'more' from util-linux 2.33.1 (on Debian Buster) neither renders
+.\" double-struck characters as bold nor supports -b, but does render
+.\" SGR sequences (including color) with no flags required.
+Some implementations of
+.IR more (1)
+are also able to display these sequences;
+you may wish to experiment with that command's
 .B \-b
-when piping into
-.BR more (1).
-There is no need to filter the output through
-.BR col (1)
-since
-.B grotty
+option.
+.
+.\" Version 487 of...
+.I less
+renders legacy bold and italics without requiring options.
+.
+In contrast to the terminal output drivers of some other
+.I roff
+implementations,
+.I grotty
 never outputs reverse line feeds.
 .
+There is therefore no need to filter its output through
+.IR col (1).
+.
+.
+.\" ====================================================================
+.SS "Device control commands"
+.\" ====================================================================
+.
+.I grotty
+understands a single device control function produced using the
+.I roff
+.B \[rs]X
+escape sequence in a document.
+.
+.
+.TP
+.BR "\[rs]X\[aq]tty: sgr " [\c
+.IR n ]\c
+.B \[aq]
+.
+If
+.I n
+is non-zero or missing, enable SGR sequences
+(this is the default);
+otherwise,
+use the legacy output format.
+.
+.
+.\" ====================================================================
+.SS "Device description files"
+.\" ====================================================================
 .
 .LP
-The font description file may contain a command
+If
+.I DESC
+file for the character encoding contains the keyword
+.RB \[lq] unicode \[rq],
+.I grotty
+emits Unicode characters in UTF-8 encoding.
 .
-.IP
-.BI internalname\  n
+Otherwise, it emits characters in a single-byte encoding depending on
+the data in the font description files.
+.
+See
+.IR groff_font (@MAN5EXT@)
+for more details.
+.
+.
 .LP
-.
+A font description file may contain a command
+.RB \[lq] internalname\~\c
+.IR n \[rq]
 where
 .I n
 is a decimal integer.
@@ -213,36 +305,29 @@ then the font is treated as an italic font;
 if the 02 bit is set,
 then it is treated as a bold font.
 .
-The code field in the font description field gives the code which is
-used to output the character.
-.
-This code can also be used in the
-.B \[rs]N
-escape sequence in
-.BR troff .
-.
-.
-.LP
-If the
-.I DESC
-file contains the keyword
-.BR unicode ,
-.B grotty
-emits Unicode characters in UTF-8 encoding.
-.
-Otherwise, it emits characters in a single-byte encoding depending on
-the data in the font description files.
-.
-See the
-.BR groff_font (@MAN5EXT@)
-man page for more details.
+.\" The following seems to say nothing that is not true of font
+.\" description files in general; if so, it belongs in groff_font(5).
+.\"The code field in the font description field gives the code which is
+.\"used to output the character.
+.\".
+.\"This code can also be used in the
+.\".I groff
+.\".B \[rs]N
+.\"escape sequence in a document.
 .
 .
 .\" ====================================================================
-.SH OPTIONS
+.SH Options
 .\" ====================================================================
 .
-Whitespace is permitted between a command-line option and its argument.
+.B \-\-help
+displays a usage message,
+while
+.B \-v
+and
+.B \-\-version
+show version information;
+all exit afterward.
 .
 .
 .TP
@@ -253,6 +338,7 @@ Ignored if
 .B \-c
 isn't used.
 .
+.
 .TP
 .B \-B
 Use only overstriking for bold-italic characters.
@@ -260,36 +346,43 @@ Ignored if
 .B \-c
 isn't used.
 .
+.
 .TP
 .B \-c
 Use
-.BR grotty 's
-old output format (see above).
-This also disables color output.
+.IR grotty 's
+legacy output format
+(see subsection \[lq]Legacy output format\[rq] above).
+.
 .
 .TP
 .B \-d
 Ignore all
 .B \[rs]D
-commands.
+.I roff
+escapes
+(draw commands).
 .
-Without this
-.B grotty
+By default,
+.I grotty
 renders
-.B \[rs]D'l\|.\|.\|.\&'
+.BR \[rs]D\[aq]l \|.\|.\|.\& \[aq]
 commands that have at least one zero argument
 (and so are either horizontal or vertical)
-using
+using Unicode box drawing characters
+(for the \[lq]utf8\[rq] device)
+or the
 .BR \- ,
 .BR | ,
 and
 .B +
-characters.
+characters
+(for all other devices).
 .
 In a similar way,
-.B grotty
+.I grotty
 handles
-.B \[rs]D'p\|.\|.\|.\&'
+.BR \[rs]D\[aq]p \|.\|.\|.\& \[aq]
 commands which consist entirely of horizontal and vertical lines.
 .
 .
@@ -300,50 +393,68 @@ Use form feeds in the output.
 A form feed is output at the end of each page that has no output on
 its last line.
 .
+.
 .TP
-.BI \-F dir
+.BI \-F\~ dir
 Prepend directory
 .RI dir /dev name
 to the search path for font and device description files;
 .I name
-is the name of the device, usually
+describes the output device's character encoding,
+one of
 .BR ascii ,
 .BR latin1 ,
 .BR utf8 ,
 or
 .BR cp1047 .
 .
+.
 .TP
 .B \-h
-Use horizontal tabs in the output.
+Use literal horizontal tab characters in the output.
 .
 Tabs are assumed to be set every 8 columns.
 .
+.
 .TP
 .B \-i
-Use escape sequences to set the italic text attribute instead of the
-underline attribute for italic fonts (\[oq]I\[cq] and \[oq]BI\[cq]).
+Render italic-styled text
+(fonts \[lq]I\[rq] and \[lq]BI\[rq])
+with the SGR attribute for italic text
+rather than underlined text.
 .
-Note that most terminals (including xterm) don't support this.
+Note that many terminals don't support this attribute;
+however,
+.IR xterm (1),
+since patch\~#314 (2014-12-28),
+does.
 .
 Ignored if
 .B \-c
-is active.
+is also specified.
+.
 .
 .TP
 .B \-o
-Suppress overstriking (other than for bold or underlined characters in
-case the old output format has been activated with
-.BR \-c ).
+Suppress overstriking
+(other than for bold and/or underlined characters when the legacy output
+format is in use).
+.
 .
 .TP
 .B \-r
-Use escape sequences to set the reverse text attribute instead of the
-underline attribute for italic fonts (\[oq]I\[cq] and \[oq]BI\[cq]).
+Render italic-styled text
+(fonts \[lq]I\[rq] and \[lq]BI\[rq])
+with the SGR attribute for reverse-video text
+.\" ECMA-48, 2nd edition (1979) calls it "negative image".
+rather than underlined text.
 .
 Ignored if
 .B \-c
-is active.
+or
+.B \-i
+is also specified.
+.
 .
 .TP
 .B \-u
@@ -353,6 +464,7 @@ Ignored if
 .B \-c
 isn't used.
 .
+.
 .TP
 .B \-U
 Use only underlining for bold-italic characters.
@@ -361,40 +473,10 @@ Ignored if
 .B \-c
 isn't used.
 .
-.TP
-.B \-v
-Print the version number.
-.
 .
 .\" ====================================================================
-.SH USAGE
+.SH Environment
 .\" ====================================================================
-.
-.B grotty
-understands a single X command produced using the
-.B \[rs]X
-escape sequence.
-.
-.TP
-.BI \[rs]X'tty:\ sgr\  n '
-.
-If
-.I n
-is non-zero or missing, enable SGR output (this is the default),
-otherwise use the old drawing scheme for bold and underline.
-.
-.
-.\" ====================================================================
-.SH ENVIRONMENT
-.\" ====================================================================
-.
-.TP
-.I GROFF_NO_SGR
-If set, the old drawing scheme for bold and underline (using the
-backspace character) is active.
-.
-Colors are disabled.
-.
 .
 .TP
 .I GROFF_FONT_PATH
@@ -403,93 +485,96 @@ A list of directories in which to search for the
 directory in addition to the default ones.
 .
 See
-.BR @g@troff (@MAN1EXT@)
+.IR \%@g@troff (@MAN1EXT@)
 and
-.BR \%groff_font (@MAN5EXT@)
+.IR groff_font (@MAN5EXT@)
 for more details.
 .
 .
+.TP
+.I GROFF_NO_SGR
+If set,
+.IR grotty 's
+legacy output format is used;
+see subsection \[lq]Legacy output format\[rq] above.
+.
+.
 .\" ====================================================================
-.SH FILES
+.SH Files
 .\" ====================================================================
 .
 .TP
 .I @FONTDIR@/devascii/DESC
-Device description file for the
-.B ascii
-device.
+Device description file for the \[lq]ascii\[rq] device.
+.
 .
 .TP
 .IR @FONTDIR@/devascii/ F
 Font description file for font
 .I F
-of the
-.B ascii
-device.
+of the \[lq]ascii\[rq] device.
 .
-.TP
-.I @FONTDIR@/devlatin1/DESC
-Device description file for the
-.B latin1
-device.
-.
-.TP
-.IR @FONTDIR@/devlatin1/ F
-Font description file for font
-.I F
-of the
-.B latin1
-device.
-.
-.TP
-.I @FONTDIR@/devutf8/DESC
-Device description file for the
-.B utf8
-device.
-.
-.TP
-.IR @FONTDIR@/devutf8/ F
-Font description file for font
-.I F
-of the
-.B utf8
-device.
 .
 .TP
 .I @FONTDIR@/devcp1047/DESC
-Device description file for the
-.B cp1047
-device.
+Device description file for the \[lq]cp1047\[rq] device.
+.
 .
 .TP
 .IR @FONTDIR@/devcp1047/ F
 Font description file for font
 .I F
-of the
-.B cp1047
-device.
+of the \[lq]cp1047\[rq] device.
+.
+.
+.TP
+.I @FONTDIR@/devlatin1/DESC
+Device description file for the \[lq]latin1\[rq] device.
+.
+.
+.TP
+.IR @FONTDIR@/devlatin1/ F
+Font description file for font
+.I F
+of the \[lq]latin1\[rq] device.
+.
+.
+.TP
+.I @FONTDIR@/devutf8/DESC
+Device description file for the \[lq]utf8\[rq] device.
+.
+.
+.TP
+.IR @FONTDIR@/devutf8/ F
+Font description file for font
+.I F
+of the \[lq]utf8\[rq] device.
+.
 .
 .TP
 .I @MACRODIR@/tty.tmac
 Macros for use with
-.BR grotty .
+.IR grotty .
+.
 .
 .TP
 .I @MACRODIR@/tty\-char.tmac
 Additional character definitions for use with
-.BR grotty .
+.IR grotty .
 .
-.LP
-Note that on EBCDIC hosts, only files for the
-.B cp1047
-device is installed.
+.
+.\" The following no longer seems to be true; an inspection of the
+.\" font/*/dev*.am files suggests no evidence of it, at any rate.
+.\".LP
+.\"Note that on EBCDIC hosts,
+.\"only files for the \[lq]cp1047\[rq] device are installed.
 .
 .
 .\" ====================================================================
-.SH BUGS
+.SH Bugs
 .\" ====================================================================
 .
-.B grotty
+.I grotty
 is intended only for simple documents.
 .
 .
@@ -498,45 +583,148 @@ There is no support for fractional horizontal or vertical motions.
 .
 .
 .LP
-There is no support for
+There is no support for the
+.I roff
 .B \[rs]D
-commands other than horizontal and vertical lines.
+escape sequence (draw command) other than horizontal and vertical lines.
 .
 .
 .LP
-Characters above the first line (i.e.\& with a vertical position
-of\~0) cannot be printed.
+Characters above the first line
+(i.e., with a vertical position of\~0)
+cannot be printed.
 .
 .
 .LP
 Color handling differs from
-.BR grops (@MAN1EXT@).
+.IR grops (@MAN1EXT@).
+.
+The
+.I groff
 .B \[rs]M
-doesn't set the fill color for closed graphic objects (which
-.B grotty
-doesn't support anyway) but changes the background color of the
-character cell, affecting all subsequent operations.
+escape sequence doesn't set the fill color for closed graphic objects
+(which
+.I grotty
+doesn't support anyway)
+but instead changes the background color of the character cell,
+affecting all subsequent operations.
 .
 .
 .\" ====================================================================
-.SH "SEE ALSO"
+.SH Example
 .\" ====================================================================
-.BR groff (@MAN1EXT@),
-.BR @g@troff (@MAN1EXT@),
-.BR groff_out (@MAN5EXT@),
-.BR groff_font (@MAN5EXT@),
-.BR groff_char (@MAN7EXT@),
-.BR ul (1),
-.BR more (1),
-.BR man (1),
-.BR less (1)
+.
+The following
+.I groff
+document exercises several features,
+not all of which may be supported by a given output device:
+(1)\~bold style;
+(2)\~italic (underline) style;
+(3)\~bold-italic style;
+(4)\~character composition by overstriking (\[lq]co\[:o]perate\[rq]);
+(5)\~foreground color;
+(6)\~background color; and
+(7)\~horizontal and vertical line-drawing.
+.
+.
+.LP
+.RS
+.EX
+You might see \ef[B]bold\ef[] and \ef[I]italic\ef[].
+Some people see \ef[BI]both\ef[].
+If the output device does (not) co\ez\e[ad]operate,
+you might see \em[red]red\em[].
+Black on cyan can have a \eM[cyan]\em[black]prominent\em[]\eM[]
+\eD\[aq]l 1i 0\[aq]\eD\[aq]l 0 2i\[aq]\eD\[aq]l 1i 0\[aq] look.
+\&.\e" If in nroff mode, end page now.
+\&.if n .pl \en[nl]u
+.EE
+.RE
+.
+.
+.LP
+Compare and contrast the output of the following:
+.
+.
+.LP
+.RS
+.EX
+$ \c
+.B nroff \c
+.I file
+$ \c
+.B groff \-T ascii \c
+.I file
+$ \c
+.B groff \-T utf8 \-Z \c
+.I file \c
+.B | grotty \-i
+$ \c
+.B groff \-T utf8 \-Z \c
+.I file \c
+.B | grotty \-c | ul
+.EE
+.RE
+.
+.
+.\" I wish this went without saying...
+.LP
+Note that the example file above is a \[lq]raw\[rq]
+.I groff
+document,
+not a man page.
+.
+.\" Yes, using \f[BI] here is slightly hypocritical.
+Use of color escapes in man pages is \f[BI]strongly discouraged\f[].
+.
+Some implementations of
+.IR man (1)
+.\" ...like man-db 2.8.5-2 on Debian Buster...
+completely disable them.
+.
+See subsection \[lq]Portability\[rq] of
+.IR groff_man_style (@MAN7EXT@)
+for guidance on writing man pages that are viewable by as many readers
+as possible.
+.
+.
+.\" ====================================================================
+.SH "See also"
+.\" ====================================================================
+.
+\[lq]Control Functions for Coded Character Sets\[rq]
+(ECMA-48)
+5th\~edition,
+Ecma International,
+June\~1991.
+.
+A gratis version of ISO\~6429,
+this document includes a normative description of SGR escape sequences.
+.
+Available at
+.UR http://\:www\:.ecma\-international\:.org/\:publications/\:files/\:\
+ECMA\-ST/\:Ecma\-048\:.pdf
+.UE .
+.
+.
+.LP
+.IR groff (@MAN1EXT@),
+.IR \%@g@troff (@MAN1EXT@),
+.IR groff_out (@MAN5EXT@),
+.IR groff_font (@MAN5EXT@),
+.IR groff_char (@MAN7EXT@),
+.IR ul (1),
+.IR more (1),
+.IR less (1),
+.IR man (1)
 .
 .
 .\" Restore compatibility mode (for, e.g., Solaris 10/11).
-.cp \n[grotty_C]
+.cp \n[*groff_grotty_1_man_C]
 .
 .
 .\" Local Variables:
+.\" fill-column: 72
 .\" mode: nroff
 .\" End:
-.\" vim: set filetype=groff:
+.\" vim: set filetype=groff textwidth=72:

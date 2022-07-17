@@ -2,7 +2,7 @@
 
 /* <groff_src_dir>/src/libs/libgroff/color.cpp
 
-Copyright (C) 2001-2018 Free Software Foundation, Inc.
+Copyright (C) 2001-2020 Free Software Foundation, Inc.
     Written by Gaius Mulley <gaius@glam.ac.uk>
 
 This file is part of groff.

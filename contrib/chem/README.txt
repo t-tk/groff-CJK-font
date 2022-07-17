@@ -24,7 +24,7 @@ are written in the 'chem' language.  The file names end with .chem.
 
 ####### License
 
-Copyright (C) 2006-2018 Free Software Foundation, Inc.
+Copyright (C) 2006-2020 Free Software Foundation, Inc.
 Written by Bernd Warken <groff-bernd.warken-72@web.de>.
 
 This file is part of 'chem', which is part of 'groff'.
@@ -42,7 +42,9 @@ The GPL2 license text is available in the internet at
 <http://www.gnu.org/licenses/gpl-2.0.html>.
 
 
-####### Emacs settings
+##### Editor settings
 Local Variables:
+fill-column: 72
 mode: text
 End:
+vim: set textwidth=72:

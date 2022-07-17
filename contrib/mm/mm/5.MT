@@ -1,7 +1,7 @@
 .\" -*- nroff -*-
 .ig
 
-Copyright (C) 1991-2018 Free Software Foundation, Inc.
+Copyright (C) 1991-2020 Free Software Foundation, Inc.
 mgm is written by Jörgen Hägg <jh@axis.com>
 
 mgm is free software; you can redistribute it and/or modify it under

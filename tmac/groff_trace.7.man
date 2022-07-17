@@ -1,21 +1,13 @@
-.TH GROFF_TRACE @MAN7EXT@ "@MDATE@" "groff @VERSION@"
-.SH NAME
-groff_trace \- groff macro package trace.tmac
-.
-.\" groff_trace.7
-.\" File position: <groff-source>/tmac/groff_trace.man
-.
-.
-.\" Save and disable compatibility mode (for, e.g., Solaris 10/11).
-.do nr groff_trace_C \n[.C]
-.cp 0
+.TH groff_trace @MAN7EXT@ "@MDATE@" "groff @VERSION@"
+.SH Name
+groff_trace \- GNU roff macros for debugging groff documents
 .
 .
 .\" ====================================================================
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 2002-2018 Free Software Foundation, Inc.
+.\" Copyright (C) 2002-2020 Free Software Foundation, Inc.
 .\"
 .\" This file is part of groff, the GNU roff type-setting system.
 .\"
@@ -29,8 +21,13 @@ groff_trace \- groff macro package trace.tmac
 .\" called FDL in the main directory of the groff source package.
 .
 .
+.\" Save and disable compatibility mode (for, e.g., Solaris 10/11).
+.do nr *groff_groff_trace_7_man_C \n[.cp]
+.cp 0
+.
+.
 .\" ====================================================================
-.SH SYNOPSIS
+.SH Synopsis
 .\" ====================================================================
 .
 .SY "groff \-m trace"
@@ -42,14 +39,15 @@ groff_trace \- groff macro package trace.tmac
 .
 .
 .\" ====================================================================
-.SH DESCRIPTION
+.SH Description
 .\" ====================================================================
 .
 The
 .I trace
 macro package of
-.BR groff (@MAN1EXT@)
-can be a valuable tool for debugging documents written in the roff
+.IR groff (@MAN1EXT@)
+can be a valuable tool for debugging documents written in the
+.I roff
 formatting language.
 .
 A call stack trace is protocolled on standard error, this is, a
@@ -62,10 +60,6 @@ This greatly eases to track down an error in some macro.
 This tracing process is activated by specifying the groff or troff
 command-line option
 .BR \-m\ trace .
-.
-This works also with the
-.BR groffer (@MAN1EXT@)
-viewer program.
 .
 A finer control can be obtained by including the macro file within the
 document by the groff macro call
@@ -100,7 +94,7 @@ modified such that they display diagnostic messages.
 .
 .
 .\" ====================================================================
-.SH EXAMPLES
+.SH Example
 .\" ====================================================================
 .
 In the following examples, a roff fragment is fed into groff via
@@ -116,7 +110,9 @@ corresponding example.
 .
 .
 .\" ====================================================================
-.SS "Command line option"
+.SS "Command-line option"
+.\" ====================================================================
+.
 Example:
 .
 .RS
@@ -128,7 +124,7 @@ Example:
 > .test_macro
 > .test_macro some dummy arguments
 > \[aq] | groff \-m trace > /dev/null
-
+.P
 *** .de test_macro
 *** de trace enter: .test_macro
 *** trace exit: .test_macro
@@ -144,6 +140,8 @@ The entry and the exit of each macro call is displayed on the terminal
 .
 .\" ====================================================================
 .SS "Nested macro calls"
+.\" ====================================================================
+.
 Example:
 .
 .RS
@@ -157,7 +155,7 @@ Example:
 > ..
 > .parent
 > \[aq] | groff \-m trace > /dev/null
-
+.P
 *** .de child
 *** .de parent
 *** de trace enter: .parent
@@ -175,6 +173,8 @@ This powerful feature can help to tack down quite complex call stacks.
 .
 .\" ====================================================================
 .SS "Activating with .mso"
+.\" ====================================================================
+.
 Example:
 .
 .RS
@@ -190,7 +190,7 @@ Example:
 > .after
 > .before
 > \[aq] | groff > /dev/null
-
+.P
 *** de trace enter: .after
 *** trace exit: .after
 .EE
@@ -209,7 +209,7 @@ is fully protocolled.
 .
 .
 .\" ====================================================================
-.SH PROBLEMS
+.SH Problems
 .\" ====================================================================
 .
 Because
@@ -249,22 +249,22 @@ example
 .
 .
 .\" ====================================================================
-.SH FILES
+.SH Files
 .\" ====================================================================
 .
 The
 .I trace
 macros are kept in the file
-.B trace.tmac
+.I trace.tmac
 located in the
 .IR "tmac directory" ;
 see
-.BR groff_tmac (@MAN5EXT@)
+.IR groff_tmac (@MAN5EXT@)
 for details.
 .
 .
 .\" ====================================================================
-.SH ENVIRONMENT
+.SH Environment
 .\" ====================================================================
 .
 .TP
@@ -276,7 +276,7 @@ for details.
 .
 .
 .\" ====================================================================
-.SH AUTHORS
+.SH Authors
 .\" ====================================================================
 .
 The
@@ -284,13 +284,13 @@ The
 macro packages was written by James Clark.
 .
 This document was written by
-.MT groff\-bernd.warken\-72@\:web.de
+.MT groff\-bernd\:.warken\-72@\:web\:.de
 Bernd Warken
 .ME .
 .
 .
 .\" ====================================================================
-.SH "SEE ALSO"
+.SH "See also"
 .\" ====================================================================
 .
 .IR "Groff: The GNU Implementation of troff" ,
@@ -306,28 +306,29 @@ You can browse it interactively with \[lq]info groff\[rq].
 .BR groff (@MAN1EXT@)
 An overview of the groff system.
 .
+.
 .TP
 .BR troff (@MAN1EXT@)
 For details on option
 .BR \-m .
 .
-.TP
-.BR groffer (@MAN1EXT@)
-A viewer program for all kinds of roff documents.
 .
 .TP
 .BR groff_tmac (@MAN5EXT@)
 A general description of groff macro packages.
 .
+.
 .TP
 .BR groff (@MAN7EXT@)
 A short reference for the groff formatting language.
 .
+.
 .\" Restore compatibility mode (for, e.g., Solaris 10/11).
-.cp \n[groff_trace_C]
+.cp \n[*groff_groff_trace_7_man_C]
 .
 .
 .\" Local Variables:
+.\" fill-column: 72
 .\" mode: nroff
 .\" End:
-.\" vim: set filetype=groff:
+.\" vim: set filetype=groff textwidth=72:

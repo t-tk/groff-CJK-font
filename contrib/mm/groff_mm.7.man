@@ -1,19 +1,14 @@
 '\" t
-.TH GROFF_MM @MAN7EXT@ "@MDATE@" "groff @VERSION@"
-.SH NAME
+.TH groff_mm @MAN7EXT@ "@MDATE@" "groff @VERSION@"
+.SH Name
 groff_mm \- memorandum macros for GNU roff
-.
-.
-.\" Save and disable compatibility mode (for, e.g., Solaris 10/11).
-.do nr groff_mm_C \n[.C]
-.cp 0
 .
 .
 .\" ====================================================================
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 1989-2018 Free Software Foundation, Inc.
+.\" Copyright (C) 1989-2020 Free Software Foundation, Inc.
 .\"
 .\" Permission is granted to make and distribute verbatim copies of this
 .\" manual provided the copyright notice and this permission notice are
@@ -31,8 +26,13 @@ groff_mm \- memorandum macros for GNU roff
 .\" instead of in the original English.
 .
 .
+.\" Save and disable compatibility mode (for, e.g., Solaris 10/11).
+.do nr *groff_groff_mm_7_man_C \n[.cp]
+.cp 0
+.
+.
 .\" ====================================================================
-.SH SYNOPSIS
+.SH Synopsis
 .\" ====================================================================
 .
 .SY "groff \-m@TMAC_M_PREFIX@m"
@@ -40,6 +40,7 @@ groff_mm \- memorandum macros for GNU roff
 \&.\|.\|.\&]
 .RI [ file
 \&.\|.\|.\&]
+.
 .SY "groff \-m m@TMAC_M_PREFIX@m"
 .RI [ option
 \&.\|.\|.\&]
@@ -49,31 +50,40 @@ groff_mm \- memorandum macros for GNU roff
 .
 .
 .\" ====================================================================
-.SH DESCRIPTION
+.SH Description
 .\" ====================================================================
 .
-The groff mm macros are intended to be compatible with the DWB mm macros
-with the following limitations:
+The
+.IR groff (@MAN7EXT@)
+.I mm
+macros are intended to be compatible with the DWB
+.I mm
+macros with the following limitations.
 .
-.TP
-.B \(bu
+.
+.IP \[bu]
 No Bell Labs localisms are implemented.
 .
-.TP
-.B \(bu
-The macros OK and PM are not implemented.
 .
-.TP
-.B \(bu
-groff mm does not support cut marks.
+.IP \[bu]
+The macros
+.B OK
+and
+.B PM
+are not implemented.
+.
+.
+.IP \[bu]
+.I groff mm
+does not support cut marks.
 .
 .
 .LP
-.B m@TMAC_M_PREFIX@m
+.I m@TMAC_M_PREFIX@m
 is intended to support easy localization.
 .
 Use
-.B m@TMAC_M_PREFIX@mse
+.I m@TMAC_M_PREFIX@mse
 as an example how to adapt the output format to a national standard.
 .
 Localized strings are collected in the file
@@ -84,18 +94,23 @@ denotes the two-letter code for the
 .IR language ,
 as defined in the ISO 639 standard.
 .
-For Swedish, this is \[oq]sv.tmac\[cq] \[en] not \[oq]se\[cq], which
-is the ISO 3166 two-letter code for the
-.I country
-(as used for the output format localization).
+For Swedish,
+this is
+.I sv.tmac;
+\[lq]sv\[rq],
+not
+\[lq]se\[rq].
+.
+The ISO 639 language code,
+not the ISO 3166 territory code,
+is used.
 .
 .
-.\"########################################################################
 .LP
 A file called
 .I locale
 or
-.RI country _locale
+.RI territory _locale
 is read after the initialization of the global variables.
 .
 It is therefore possible to localize the macros with a different company
@@ -103,7 +118,8 @@ name and so on.
 .
 .
 .LP
-In this manual, square brackets are used to show optional arguments.
+In this manual,
+square brackets are used to show optional arguments.
 .
 .
 .\" ====================================================================
@@ -114,7 +130,8 @@ Many macros can be controlled by number registers and strings.
 .
 A number register is assigned with the
 .B nr
-command:
+request.
+.
 .
 .RS
 .LP
@@ -142,8 +159,10 @@ or
 .
 .
 .LP
-Strings are defined with
-.BR ds .
+Strings are defined with the
+.B ds
+request.
+.
 .
 .RS
 .LP
@@ -382,7 +401,7 @@ otherwise it is printed on page\~1 without a cover sheet.
 T}
 1@Abstract is only printed on the cover sheet (\fBMT 4\fP only).
 2@T{
-Abstract is printed only on the cover sheet (other than \fBMT 4\fP only).
+Abstract is printed only on the cover sheet (if not \fBMT 4\fP).
 The cover sheet is printed without a need for \fBCS\fP.
 T}
 .TE
@@ -415,7 +434,16 @@ must appear just after each
 The title shows up after the name in the signature block.
 .
 .TP
-.BI AU\  "\fR[\fPname \fR[\fPinitials \fR[\fPloc \fR[\fPdept \fR[\fPext \fR[\fProom \fR[\fParg \fR[\fParg \fR[\fParg\fR]]]]]]]]]\fP"
+.B AU\~\c
+.RI [ name\~\c
+.RI [ initials\~\c
+.RI [ loc\~\c
+.RI [ dept\~\c
+.RI [ ext\~\c
+.RI [ room\~\c
+.RI [ arg1\~\c
+.RI [ arg2\~\c
+.RI [ arg3 ]]]]]]]]]
 Author information.
 .
 Specifies the author of the memo or paper, and is printed on the cover
@@ -448,7 +476,10 @@ Letter signature.
 Generates a line with place for signature.
 .
 .TP
-.BI B\  "\fR[\fPbold-text \fR[\fPprev-font-text \fR[\fPbold \fR[.\|.\|.]]]]\fP"
+.B B\~\c
+.RI [ bold-text\~\c
+.RI [ prev-font-text\~\c
+.RI [ bold-text\~ .\|.\|.\&]]]
 Begin boldface.
 .
 No limit on the number of arguments.
@@ -494,7 +525,8 @@ list item (see
 .BR LI ).
 .
 .I text-indent
-overrides the default indentation of the list items set by number register
+overrides the default indentation of the list items set by number
+register
 .BR Pi .
 .
 A third argument prohibits printing of a blank line before each item.
@@ -559,7 +591,7 @@ Always use this order of the cover macros:
 .
 .RS
 .IP
-.nf
+.EX
 \&.COVER
 \&.TL
 \&.AF
@@ -568,7 +600,7 @@ Always use this order of the cover macros:
 \&.AS
 \&.AE
 \&.COVEND
-.fi
+.EE
 .RE
 .
 .IP
@@ -597,7 +629,9 @@ or
 .BI DF\  "\fR[\fPformat \fR[\fPfill \fR[\fPrindent\fR]]]\fP"
 Begin floating display (no nesting allowed).
 .
-A floating display is saved in a queue and is printed in the order entered.
+A floating display is saved in a queue and is printed in the order
+entered.
+.
 .IR Format ,
 .IR fill ,
 and
@@ -920,7 +954,7 @@ Equation start.
 .
 .BR EQ / EN
 are the delimiters for equations written for
-.BR @g@eqn (@MAN1EXT@).
+.IR \%@g@eqn (@MAN1EXT@).
 .
 .BR EQ / EN
 must be inside of a
@@ -928,7 +962,7 @@ must be inside of a
 pair, except if
 .B EQ
 is used to set options for
-.B @g@eqn
+.I \%@g@eqn
 only.
 .
 The
@@ -1692,10 +1726,10 @@ redirected into file
 .
 Requires two passes with groff;
 this is handled by a separate program called
-.BR mmroff (@MAN1EXT@).
+.IR mmroff (@MAN1EXT@).
 .
 This program exists because
-.BR groff (@MAN1EXT@)
+.IR groff (@MAN1EXT@)
 by default deactivates the unsafe operations that are required by
 .BR INITR .
 .
@@ -2053,7 +2087,9 @@ See also string variable
 T}
 RN@T{
 Reference notation.
-Prints \[oq]In reference to:\[cq] and the argument two lines below the date line.
+Prints \[oq]In reference to:\[cq] and the argument two lines below the
+date line.
+.
 See also string variable
 .BR LetRN .
 T}
@@ -2065,7 +2101,9 @@ See also string variable
 T}
 SA@T{
 Salutation.
-Prints \[cq]To Whom It May Concern:\[cq] or the argument if it was present.
+Prints \[cq]To Whom It May Concern:\[cq] or the argument if it was
+present.
+.
 The salutation is printed two lines below the inside address.
 See also string variable
 .BR LetSA .
@@ -2348,7 +2386,7 @@ Set line length, page length, and/or page offset.
 This macro can be used for special formatting,
 like letter heads and other.
 .
-It is normally the first command in a file,
+It is normally the first macro call in a file,
 though it is not necessary.
 .
 .B PGFORM
@@ -2380,7 +2418,7 @@ on the first page.
 Include a PostScript file in the document.
 .
 The macro depends on
-.BR mmroff (@MAN1EXT@)
+.IR mmroff (@MAN1EXT@)
 and
 .BR INITR .
 .
@@ -2409,7 +2447,7 @@ can also be given to resize the picture.
 Picture end.
 .
 Ends a picture for
-.BR @g@pic (@MAN1EXT@).
+.IR \%@g@pic (@MAN1EXT@).
 .
 .TP
 .BI PF\  \fR[\fParg\fR]\fP
@@ -2435,7 +2473,7 @@ The argument should be specified as
 .
 .RS
 .IP
-.RI \[dq]' left-part ' center-part ' right-part '\[dq]
+.RI \[dq]\[aq] left-part \[aq] center-part \[aq] right-part \[aq]\[dq]
 .RE
 .
 .IP
@@ -2454,7 +2492,7 @@ The default argument is
 .
 .RS
 .IP
-\[dq]''- % -''\[dq]
+\[dq]\[aq]\[aq]- % -\[aq]\[aq]\[dq]
 .RE
 .
 .IP
@@ -2469,7 +2507,7 @@ This macro defines string
 Picture start (from pic).
 .
 Begins a picture for
-.BR @g@pic (@MAN1EXT@).
+.IR \%@g@pic (@MAN1EXT@).
 .
 .TP
 .B PX
@@ -2911,7 +2949,8 @@ This macro is called instead of the normal page header.
 .
 It is possible to get complete control over the header.
 .
-Note that the header and the footer are printed in a separate environment.
+Note that the header and the footer are printed in a separate
+environment.
 .
 Line length is preserved, though.
 .
@@ -2935,7 +2974,7 @@ TPoh@argument of \fBOH\fP
 Table start.
 .
 This is the start of a table specification to
-.BR @g@tbl (@MAN1EXT@).
+.IR \%@g@tbl (@MAN1EXT@).
 .
 .B TS
 ends with
@@ -3005,7 +3044,7 @@ This adds four digit-sized spaces in the beginning of each line.
 Finer control is available with the string variable
 .BR Verbnm .
 It contains all arguments to the
-.BR troff (@MAN1EXT@)
+.IR \%@g@troff (@MAN1EXT@)
 command
 .BR .nm ,
 normally \[oq]1\[cq].
@@ -3361,7 +3400,7 @@ Argument to
 .B .nm
 in the
 .B .VERBON
-command.
+macro.
 .
 Default is\~1.
 .
@@ -3492,7 +3531,7 @@ See\~\c
 .B Hc
 Heading centering level.
 .
-A number in the range 0 to 14, with a default value value of\~0.
+A number in the range 0 to 14, with a default value of\~0.
 .
 See\~\c
 .BR .H .
@@ -3691,7 +3730,8 @@ T}
 3@\[oq]section-page\[cq] numbering style enabled.
 4@page header is removed on the first page.
 5@T{
-\[oq]section-page\[cq] and \[oq]section-figure\[cq] numbering style enabled.
+\[oq]section-page\[cq] and \[oq]section-figure\[cq] numbering style
+enabled.
 T}
 .TE
 .RE
@@ -3860,16 +3900,17 @@ Always\~1.
 .
 .
 .\" ====================================================================
-.SH INTERNALS
+.SH Internals
 .\" ====================================================================
 .
-The letter macros are using different submacros depending on the
+The letter macros use different submacros depending on the
 letter type.
 .
 The name of the submacro has the letter type as suffix.
 .
-It is therefore possible to define other letter types, either in the
-national macro-file, or as local additions.
+It is therefore possible to define other letter types,
+either in the territory-specific macro file,
+or as local additions.
 .
 .B .LT
 sets the number variables
@@ -3945,7 +3986,7 @@ then assigns the argument to the string variable
 .
 .
 .\" ====================================================================
-.SH FILES
+.SH Files
 .\" ====================================================================
 .
 .TP
@@ -3959,37 +4000,37 @@ then assigns the argument to the string variable
 .
 .
 .\" ====================================================================
-.SH AUTHORS
+.SH Authors
 .\" ====================================================================
+.
 The GNU version of the
 .I mm
 macro package was written by
-.MT jh@\:axis.se
+.MT jh@\:axis\:.se
 J\[:o]rgen H\[:a]gg
 .ME
 of Lund, Sweden.
 .
 .
-.na
 .\" ====================================================================
-.SH "SEE ALSO"
+.SH "See also"
 .\" ====================================================================
 .
-.BR groff (@MAN1EXT@),
-.BR @g@troff (@MAN1EXT@),
-.BR @g@tbl (@MAN1EXT@),
-.BR @g@pic (@MAN1EXT@),
-.BR @g@eqn (@MAN1EXT@)
+.IR groff (@MAN1EXT@),
+.IR \%@g@troff (@MAN1EXT@),
+.IR \%@g@tbl (@MAN1EXT@),
+.IR \%@g@pic (@MAN1EXT@),
+.IR \%@g@eqn (@MAN1EXT@)
 .br
-.BR groff_mmse (@MAN7EXT@)
+.IR groff_mmse (@MAN7EXT@)
 .
 .
 .\" Restore compatibility mode (for, e.g., Solaris 10/11).
-.cp \n[groff_mm_C]
+.cp \n[*groff_groff_mm_7_man_C]
 .
 .
 .\" Local Variables:
+.\" fill-column: 72
 .\" mode: nroff
-.\" coding: latin-1
 .\" End:
-.\" vim:set filetype=groff:
+.\" vim: set filetype=groff textwidth=72:

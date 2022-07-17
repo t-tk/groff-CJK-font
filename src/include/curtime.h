@@ -1,4 +1,4 @@
-/* Copyright (C) 2015-2018 Free Software Foundation, Inc.
+/* Copyright (C) 2015-2020 Free Software Foundation, Inc.
 
 This file is part of groff.
 
@@ -14,6 +14,10 @@ for more details.
 
 The GNU General Public License version 2 (GPL2) is available in the
 internet at <http://www.gnu.org/licenses/gpl-2.0.txt>. */
+
+#ifndef LONG_FOR_TIME_T
+#include <time.h>
+#endif
 
 #ifdef LONG_FOR_TIME_T
 long

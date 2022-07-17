@@ -1,6 +1,4 @@
-# Location: <groff-source>/font/devps/generate/Makefile
-#
-# Copyright (C) 1989-2018 Free Software Foundation, Inc.
+# Copyright (C) 1989-2020 Free Software Foundation, Inc.
 #      Written by James Clark (jjc@jclark.com)
 #
 # This file is part of groff.
@@ -301,10 +299,6 @@ extraclean: realclean
 
 .PHONY: all clean realclean extraclean
 
-########################################################################
-# Editor settings
-########################################################################
-#
 # Local Variables:
 # mode: makefile
 # fill-column: 72

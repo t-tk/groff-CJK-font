@@ -1,5 +1,5 @@
 // -*- C++ -*-
-/* Copyright (C) 2005-2018 Free Software Foundation, Inc.
+/* Copyright (C) 2005-2020 Free Software Foundation, Inc.
      Written by Werner Lemberg (wl@gnu.org)
 
 This file is part of groff.
@@ -965,8 +965,6 @@ get_variable_value_pair(char *d1, char **variable, char **value)
 // Note that null bytes in the data are skipped before applying
 // the algorithm.  This should work even with files encoded as
 // UTF-16 or UTF-32 (or its siblings) in most cases.
-//
-// XXX Add support for tag at the end of buffer.
 // ---------------------------------------------------------
 char *
 check_coding_tag(FILE *fp, string &data)
@@ -1080,6 +1078,7 @@ do_file(const char *filename)
 {
   FILE *fp;
   string BOM, data;
+
   if (strcmp(filename, "-")) {
     if (debug_flag)
       fprintf(stderr, "file '%s':\n", filename);
@@ -1120,8 +1119,9 @@ do_file(const char *filename)
     char *file_encoding = check_coding_tag(fp, data);
     if (!file_encoding) {
       if (debug_flag)
-	fprintf(stderr, "  no encoding tag\n");
-      file_encoding = detect_file_encoding(fp);
+	fprintf(stderr, "  no coding tag\n");
+      if (strcmp(filename, "-"))
+         file_encoding = detect_file_encoding(fp);
       if (!file_encoding) {
         if (debug_flag)
           fprintf(stderr, "  could not detect encoding with uchardet\n");
@@ -1132,7 +1132,7 @@ do_file(const char *filename)
     }
     else
       if (debug_flag)
-	fprintf(stderr, "  file encoding: '%s'\n", file_encoding);
+	fprintf(stderr, "  coding tag: '%s'\n", file_encoding);
     encoding = file_encoding;
   }
   strncpy(encoding_string, encoding, MAX_VAR_LEN - 1);

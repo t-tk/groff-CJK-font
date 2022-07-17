@@ -30,13 +30,8 @@ our $Legalese;
   use constant LICENSE => q*
 glilypond - integrate 'lilypond' into 'groff' files
 
-Source file position: '<groff-source>/contrib/glilypond/glilypond.pl'
-Installed position: '<prefix>/bin/glilypond'
-
-Copyright (C) 2013-2018 Free Software Foundation, Inc.
+Copyright (C) 2013-2020 Free Software Foundation, Inc.
   Written by Bernd Warken <groff-bernd.warken-72@web.de>
-
-Last update: 10 Sep 2015
 
 This file is part of 'GNU groff'.
 
@@ -756,8 +751,8 @@ END {
 
 
 1;
-########################################################################
-### Emacs settings
 # Local Variables:
+# fill-column: 72
 # mode: CPerl
 # End:
+# vim: set autoindent textwidth=72:

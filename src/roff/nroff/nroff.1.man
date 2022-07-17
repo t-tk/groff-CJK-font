@@ -1,13 +1,13 @@
-.TH @G@NROFF @MAN1EXT@ "@MDATE@" "groff @VERSION@"
-.SH NAME
-@g@nroff \- use groff to format documents for TTY devices
+.TH @g@nroff @MAN1EXT@ "@MDATE@" "groff @VERSION@"
+.SH Name
+@g@nroff \- format documents with groff for TTY (terminal) devices
 .
 .
 .\" ====================================================================
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 1989-2018 Free Software Foundation, Inc.
+.\" Copyright (C) 1989-2020 Free Software Foundation, Inc.
 .\"
 .\" Permission is granted to make and distribute verbatim copies of this
 .\" manual provided the copyright notice and this permission notice are
@@ -25,20 +25,25 @@
 .\" instead of in the original English.
 .
 .
+.\" Save and disable compatibility mode (for, e.g., Solaris 10/11).
+.do nr *groff_nroff_1_man_C \n[.cp]
+.cp 0
+.
+.
 .\" ====================================================================
-.SH SYNOPSIS
+.SH Synopsis
 .\" ====================================================================
 .
 .SY @g@nroff
-.RB [ \-CchipStUv ]
+.RB [ \-cCEhipStUV ]
 [\c
 .BI \-d cs\c
 ]
 [\c
-.BI \-M dir\c
+.BI \-m name\c
 ]
 [\c
-.BI \-m name\c
+.BI \-M dir\c
 ]
 [\c
 .BI \-n num\c
@@ -47,54 +52,60 @@
 .BI \-o list\c
 ]
 [\c
+.BI \-P post-proc-option\c
+]
+[\c
 .BI \-r cn\c
 ]
 [\c
 .BI \-T name\c
 ]
 [\c
-.BI \-W warning\c
+.BI \-w warning\c
 ]
 [\c
-.BI \-w warning\c
+.BI \-W warning\c
 ]
 .RI [ file
 \&.\|.\|.\&]
 .YS
 .
+.
 .SY @g@nroff
 .B \-\-help
 .YS
 .
+.
 .SY @g@nroff
 .B \-v
+.
 .SY @g@nroff
 .B \-\-version
 .YS
 .
+.
 .\" ====================================================================
-.SH DESCRIPTION
+.SH Description
 .\" ====================================================================
 .
-.I @g@nroff
+.I \%@g@nroff
 formats documents written in the
 .IR roff (@MAN7EXT@)
 language for typewriter-like devices such as terminal emulators.
 .
-.P
 GNU
-.I @g@nroff
-emulates the traditional Unix
-.I nroff
+.I nroff \" GNU
+emulates the AT&T
+.I nroff \" AT&T
 command using
 .IR groff (@MAN1EXT@).
 .
-.I @g@nroff
+.I \%@g@nroff
 generates output via
 .IR grotty (@MAN1EXT@),
 .IR groff 's
-TTY output device,
-which needs to know the character encoding scheme used by the terminal.
+terminal output driver,
+which needs to know the character encoding scheme used by the device.
 .
 Consequently,
 acceptable arguments to the
@@ -111,16 +122,17 @@ If neither the
 .I \%GROFF_TYPESETTER
 environment variable nor the
 .B \-T
-command-line option (which overrides the environment variable)
+command-line option
+(which overrides the environment variable)
 specifies a (valid) device,
-.I @g@nroff
+.I \%@g@nroff
 consults the locale to select an appropriate output device.
 .
 It first tries the
 .IR locale (1)
 program,
 then checks several locale-related environment variables;
-see \(lqENVIRONMENT\(rq, below.
+see section \[lq]Environment\[rq], below.
 .
 If all of the foregoing fail,
 .B \-Tascii
@@ -128,56 +140,66 @@ is implied.
 .
 .
 .P
-Whitespace is not permitted between an option and its argument.
+Whitespace is
+.I not
+permitted between an option and its argument.
 .
 The
-.B \-h
-and
-.B \-c
-options
-are equivalent to
-.IR grotty 's
-options
-.B \-h
-(using tabs in the output) and
-.B \-c
-(using the old output scheme instead of SGR escape sequences).
-.
-The
-.BR \-d ,
 .BR \-C ,
+.BR \-d ,
+.BR \-E ,
 .BR \-i ,
-.BR \-M ,
 .BR \-m ,
+.BR \-M ,
 .BR \-n ,
 .BR \-o ,
+.BR \-P ,
 .BR \-r ,
 .BR \-w ,
 and
 .B \-W
 options have the effect described in
-.IR @g@troff (@MAN1EXT@).
+.IR \%@g@troff (@MAN1EXT@).
+.
+.B \-c
+and
+.B \-h
+are equivalent to
+.RB \[lq] \-P\-c \[rq]
+and
+.RB \[lq] \-P\-h \[rq],
+respectively.
 .
 In addition,
-.I @g@nroff
-ignores
+this implementation ignores the AT&T
+.I nroff \" AT&T
+options
 .BR \-e ,
 .BR \-q ,
 and
 .B \-s
 (which are not implemented in
-.IR @g@troff ).
+.IR groff ).
 .
 The options
 .B \-p
 (pic),
 .B \-t
-(tbl),
+.RB ( tbl ),
 .B \-S
-(safer), and
+(safer),
+and
 .B \-U
 (unsafe) are passed to
 .IR groff .
+.
+.B \-V
+causes
+.I \%@g@nroff
+to display the constructed
+.I groff
+command on the standard output,
+but does not execute it.
 .
 .B \-v
 and
@@ -190,14 +212,8 @@ all exit afterward.
 .
 .
 .\" ====================================================================
-.SH ENVIRONMENT
+.SH Environment
 .\" ====================================================================
-.
-.TP
-.I GROFF_TYPESETTER
-specifies the default output device for
-.IR groff .
-.
 .
 .TP
 .I GROFF_BIN_PATH
@@ -207,8 +223,14 @@ executable before searching in
 .IR PATH .
 .
 If unset,
-.I @BINDIR@
+.I \%@BINDIR@
 is used.
+.
+.
+.TP
+.I GROFF_TYPESETTER
+specifies the default output device for
+.IR groff .
 .
 .
 .TP
@@ -219,37 +241,54 @@ is used.
 .I LANG
 .TQ
 .I LESSCHARSET
-are pattern-matched in this order for standard character encodings
-supported by
+are pattern-matched in this order for contents matching standard
+character encodings supported by
 .I groff
 in the event no
 .B \-T
 option is given and
-.I GROFF_TYPESETTER
+.I \%GROFF_TYPESETTER
 is unset.
 .
 .
 .\" ====================================================================
-.SH NOTES
+.SH Notes
 .\" ====================================================================
 .
+.P
+Pager programs like
+.IR more (1)
+and
+.IR less (1)
+may require command-line options to correctly handle some output
+sequences;
+see
+.IR \%grotty (@MAN1EXT@).
+.
+.
+.P
 Character definitions in the file
-.I @MACRODIR@/\:tty\-char.tmac
+.I \%@MACRODIR@/\:tty\-char\:.tmac
 are loaded to replace unrepresentable glyphs.
 .
 .
 .\" ====================================================================
-.SH "SEE ALSO"
+.SH "See also"
 .\" ====================================================================
 .
 .IR groff (@MAN1EXT@),
-.IR @g@troff (@MAN1EXT@),
+.IR \%@g@troff (@MAN1EXT@),
 .IR grotty (@MAN1EXT@),
 .IR locale (1),
 .IR roff (@MAN7EXT@)
 .
 .
+.\" Restore compatibility mode (for, e.g., Solaris 10/11).
+.cp \n[*groff_nroff_1_man_C]
+.
+.
 .\" Local Variables:
+.\" fill-column: 72
 .\" mode: nroff
 .\" End:
-.\" vim: set filetype=groff:
+.\" vim: set filetype=groff textwidth=72:

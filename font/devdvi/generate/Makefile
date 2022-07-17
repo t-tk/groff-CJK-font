@@ -1,8 +1,6 @@
 # Makefile for 'font devdvi/generate'
 #
-# File position: <groff-source>/font/devdvi/generate/Makefile
-#
-# Copyright (C) 1989-2018 Free Software Foundation, Inc.
+# Copyright (C) 1989-2020 Free Software Foundation, Inc.
 #      Written by James Clark (jjc@jclark.com)
 #
 # This file is part of groff.
@@ -206,10 +204,8 @@ extraclean: realclean
 
 .PHONY: clean realclean extraclean all
 
-########################################################################
-# Emacs settings
-########################################################################
-#
 # Local Variables:
 # mode: makefile
+# fill-column: 72
 # End:
+# vim: set textwidth=72:

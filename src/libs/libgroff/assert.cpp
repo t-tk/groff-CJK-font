@@ -1,4 +1,4 @@
-/* Copyright (C) 1989-2018 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
 This file is part of groff.
@@ -16,18 +16,23 @@ for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "assert.h"
 
 extern "C" const char *program_name;
 
-void assertion_failed(int lineno, const char *filename)
+void assertion_failed(int lineno, const char *filename,
+                      const char *function, const char *msg)
 {
   if (program_name != 0)
     fprintf(stderr, "%s: ", program_name);
-  fprintf(stderr, "Failed assertion at line %d, file '%s'.\n",
-	  lineno, filename);
+  fprintf(stderr, "%s:%d: %s(): assertion failed: '%s'\n", filename,
+	  lineno, function, msg);
   fflush(stderr);
   abort();
 }
