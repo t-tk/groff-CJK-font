@@ -12,6 +12,7 @@ in order to better support CJK fonts.
 ### Contents
 
 The original groff 1.22.4 sources by GNU are tagged as "groff-1.22.4".
+The original groff 1.23.0.rc1 sources by GNU are tagged as "groff-1.23.0.rc1".
 The current sources are patched ones.
 
 # patch for grops
