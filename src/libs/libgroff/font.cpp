@@ -962,7 +962,12 @@ int font::load(int *not_found, int head_only)
     else if (strcmp(p, "special") == 0) {
       special = 1;
     }
+#ifdef ENABLE_UCSRANGE
+    else if (strcmp(p, "kernpairs") != 0 && strcmp(p, "charset") != 0 &&
+             strcmp(p, "charset-range") != 0) {
+#else
     else if (strcmp(p, "kernpairs") != 0 && strcmp(p, "charset") != 0) {
+#endif
       char *command = p;
       p = strtok(0, "\n");
       handle_unknown_font_command(command, trim_arg(p), t.path, t.lineno);
@@ -1011,13 +1016,12 @@ int font::load(int *not_found, int head_only)
 	  add_kern(g1, g2, n);
 	}
       }
-      else if (strcmp(command, "charset") == 0) {
+#ifdef ENABLE_UCSRANGE
+      else if (strcmp(command, "charset-range") == 0) {
 	if (head_only)
 	  return 1;
 	had_charset = 1;
-#ifdef ENABLE_UCSRANGE
 	int had_range = 0;
-#endif
 	glyph *last_glyph = NULL;
 	for (;;) {
 	  if (!t.next()) {
@@ -1032,25 +1036,10 @@ int font::load(int *not_found, int head_only)
 	    command = nm;
 	    break;
 	  }
-#ifdef ENABLE_UCSRANGE
 	  int start_code = 0;
 	  int end_code = 0;
 	  int nrange = sscanf(nm, "u%X..u%X", &start_code, &end_code);
-#endif
-	  if (p[0] == '"') {
-	    if (last_glyph == NULL) {
-	      t.error("first charset entry is duplicate");
-	      return 0;
-	    }
-	    if (strcmp(nm, "---") == 0) {
-	      t.error("unnamed character cannot be duplicate");
-	      return 0;
-	    }
-	    glyph *g = name_to_glyph(nm);
-	    copy_entry(g, last_glyph);
-	  }
-#ifdef ENABLE_UCSRANGE
-	  else if (nrange == 2) {
+	  if (nrange == 2) {
 	    had_range = 1;
 	    font_char_metric *wcp = new font_char_metric;
 	    wcp->code = start_code;
@@ -1096,7 +1085,43 @@ int font::load(int *not_found, int head_only)
 	    wch = wcp;
 	    p = NULL;
 	  }
+	}
+	if (!had_range) {
+	  t.error("I didn't seem to find any characters");
+	  return 0;
+	}
+      }
 #endif
+      else if (strcmp(command, "charset") == 0) {
+	if (head_only)
+	  return 1;
+	had_charset = 1;
+	glyph *last_glyph = NULL;
+	for (;;) {
+	  if (!t.next()) {
+	    command = 0;
+	    break;
+	  }
+	  char *nm = strtok(t.buf, WS);
+	  if (nm == 0)
+	    continue;			// I dont think this should happen
+	  p = strtok(0, WS);
+	  if (p == 0) {
+	    command = nm;
+	    break;
+	  }
+	  if (p[0] == '"') {
+	    if (last_glyph == NULL) {
+	      t.error("first charset entry is duplicate");
+	      return 0;
+	    }
+	    if (strcmp(nm, "---") == 0) {
+	      t.error("unnamed character cannot be duplicate");
+	      return 0;
+	    }
+	    glyph *g = name_to_glyph(nm);
+	    copy_entry(g, last_glyph);
+	  }
 	  else {
 	    font_char_metric metric;
 	    metric.height = 0;
@@ -1164,11 +1189,7 @@ int font::load(int *not_found, int head_only)
 	    }
 	  }
 	}
-#ifdef ENABLE_UCSRANGE
-	if (!had_range && last_glyph == NULL) {
-#else
 	if (last_glyph == NULL) {
-#endif
 	  t.error("I didn't seem to find any characters");
 	  return 0;
 	}
