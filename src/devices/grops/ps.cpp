@@ -200,12 +200,12 @@ ps_output &ps_output::put_delimiter(char c)
   return *this;
 }
 
-ps_output &ps_output::put_string(const CHAR *s, int n, int is_utf16)
+ps_output &ps_output::put_string(const wchar_t *s, int n, int is_utf16)
 {
   int len = 0;
   int i;
   for (i = 0; i < n; i++) {
-    CHAR c = s[i];
+    wchar_t c = s[i];
     if (is_utf16) {
       len = (i+1)*4;
     } else if (is_ascii(c) && csprint(c)) {
@@ -534,7 +534,7 @@ class ps_printer : public printer {
   int paper_length;
   int equalise_spaces;
   enum { SBUF_SIZE = 256 };
-  CHAR sbuf[SBUF_SIZE];
+  wchar_t sbuf[SBUF_SIZE];
   int sbuf_len;
   int sbuf_start_hpos;
   int sbuf_vpos;
@@ -568,7 +568,7 @@ class ps_printer : public printer {
   void set_style(const style &);
   void set_space_code(unsigned char);
   int set_encoding_index(ps_font *);
-  subencoding *set_subencoding(font *, glyph *, CHAR *);
+  subencoding *set_subencoding(font *, glyph *, wchar_t *);
   char *get_subfont(subencoding *, const char *);
   void do_exec(char *, const environment *);
   void do_import(char *, const environment *);
@@ -662,7 +662,7 @@ int ps_printer::set_encoding_index(ps_font *f)
 }
 
 subencoding *ps_printer::set_subencoding(font *f, glyph *g,
-					 CHAR *code)
+					 wchar_t *code)
 {
   unsigned int idx = f->get_code(g);
   const char *psname = f->get_internal_name();
@@ -711,7 +711,7 @@ void ps_printer::set_char(glyph *g, font *f, const environment *env, int w,
 {
   if (g == space_glyph || invis_count > 0)
     return;
-  CHAR code[2];
+  wchar_t code[2];
   subencoding *sub = set_subencoding(f, g, code);
   style sty(f, sub, env->size, env->height, env->slant);
   if (sty.slant != 0) {
