@@ -26,6 +26,7 @@ http://savannah.gnu.org/bugs/?group=groff.
 .\"------------
 .nr cov*mt0-ind 1.1c
 .de cov@print-title
+.if !d cov*title .@error title (.TL) not defined!
 .B
 .ll 9c
 .fi

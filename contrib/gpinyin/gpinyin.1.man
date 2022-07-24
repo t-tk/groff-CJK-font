@@ -70,11 +70,14 @@ that facilitates use of Hanyu Pinyin in
 .IR groff (@MAN7EXT@)
 files.
 .
-Pinyin is a method for writing the Chinese language with the Latin
-alphabet.
+Pinyin is a method for writing the Mandarin Chinese language with the
+Latin alphabet.
 .
-The Chinese language consists of more than four hundred syllables,
-each with one of five different tones.
+Mandarin consists of more than four hundred base syllables,
+each spoken with one of five different tones.
+.
+Changing the tone applied to the syllable generally alters the meaning
+of the word it forms.
 .
 In Pinyin,
 a syllable is written in the Latin alphabet and a numeric tone indicator
@@ -84,15 +87,19 @@ can be appended to each syllable.
 .P
 Each
 .I input-file
-is a file name or the hyphen-minus character \[lq]\-\[rq] to indicate
-that the standard input stream should be read.
+is a file name or the character
+.RB \[lq] \- \[rq]
+to indicate that the standard input stream should be read.
 .
 As usual,
-the argument \[lq]\-\-\[rq] can be used in order to force interpretation
-of all remaining arguments as file names,
+the argument
+.RB \[lq] \-\- \[rq]
+can be used in order to force interpretation of all remaining arguments
+as file names,
 even if an
 .I input-file
-argument begins with the hyphen-minus character.
+argument begins with a
+.RB \[lq] \- \[rq].
 .
 .B \-h
 and
@@ -146,8 +153,6 @@ or
 .\" ====================================================================
 .SS Syllables
 .\" ====================================================================
-.
-The phonetic Chinese language comprises about four hundred syllables.
 .
 In Pinyin,
 each syllable is represented by one to six letters drawn from the
@@ -209,24 +214,46 @@ The tone numbers 0 and 5 are synonymous.
 .
 .
 .P
-The following table summarizes the tones.
-.
-Some output devices will not be able to render every output example.
+.nr gpinyin*do-table 0
+.if t .nr gpinyin*do-table 1
+.if n .if '\*[.T]'utf8' .nr gpinyin*do-table 1
+.\" XXX: One hack necessitates another; since our table is conditional,
+.\" we need to save the input line counter.
+.nr gpinyin*.c \n[.c]
+.ie \n[gpinyin*do-table] \{\
+The tones are written as follows.
 .
 .
 .P
+.\" XXX: This is so gross.  Why can't grops and gropdf figure this out?
+.if t .ds a- \za\[a-]
+.if n .ds a- \[a a-]
+.if t .ds a< \za\[ah]
+.if n .ds a< \[a ah]
 .if t .ne 8 \" Try to keep the table on one page for printed output.
 .TS
 l l l l l.
 Tone	Description	Diacritic	Example Input	Example Output
 _
-first	flat	\[a-]	ma1	m\[u0061_0304]
-second	rising	\[aa]	ma2	m\[u0061_0301]
-third	falling-rising	\[ah]	ma3	m\[u0061_030C]
-fourth	falling	\[ga]	ma4	m\[u0061_0300]
+first	flat	\[a-]	ma1	m\*[a-]
+second	rising	\[aa]	ma2	m\[a aa]
+third	falling-rising	\[ah]	ma3	m\*[a<]
+fourth	falling	\[ga]	ma4	m\[a ga]
 fifth	neutral	(none)	ma0	ma
 \^	\^	\^	ma5	\^
 .TE
+.\}
+.lf (\n[gpinyin*.c] + 25) \" XXX part 2: Restore input line counter.
+.el \{\
+[The tone mark table is omitted from this rendering of the man page
+because the selected output device \[lq]\*[.T]\[rq] lacks the character
+repertoire to display it.
+.
+Try another output device.]
+.\}
+.rm a-
+.rm a<
+.rr gpinyin*do-table
 .
 .
 .P
@@ -310,6 +337,9 @@ are comprehensive references covering the language elements of GNU
 and the available glyph repertoire,
 respectively.
 .
+.
+.\" Clean up.
+.rm TeX
 .
 .\" Restore compatibility mode (for, e.g., Solaris 10/11).
 .cp \n[*groff_gpinyin_1_man_C]

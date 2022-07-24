@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 2000-2020 Free Software Foundation, Inc.
  * Written by Gaius Mulley (gaius@glam.ac.uk).
  *
@@ -1551,15 +1550,21 @@ static char_buffer inputFile;
 
 static void usage(FILE *stream)
 {
-  fprintf(stream,
-    "\n"
-    "This program is not intended to be called stand-alone;\n"
-    "it is part of the groff pipeline to produce HTML output.\n"
-    "\n"
-    "If there is ever the need to call it manually (e.g., for\n"
-    "debugging purposes), add command-line option '-V' while calling\n"
-    "the 'groff' program to see which arguments are passed to it.\n"
-    "\n");
+  fprintf(stream, "usage: %s [-epV] [-a ANTI-ALIASING-TEXT-BITS]"
+	  " [-D IMAGE-DIRECTORY] [-F FONT-DIRECTORY]"
+	  " [-g ANTI-ALIASING-GRAPHICS-BITS] [-i RESOLUTION]"
+	  " [-I IMAGE-STEM] [-o IMAGE-VERTICAL-OFFSET]"
+	  " [-x HTML-DIALECT] [FILE ...]\n"
+	  "usage: %s -v\n"
+	  "\n"
+	  "This program is not intended to be called stand-alone;\n"
+	  "it is part of the groff pipeline to produce HTML output.\n"
+	  "\n"
+	  "If there is ever the need to call it manually (e.g., for\n"
+	  "debugging purposes), add command-line option '-V' while\n"
+	  "calling the 'groff' program to see which arguments are\n"
+	  "passed to it.\n"
+	  "\n", program_name, program_name);
 }
 
 /*
@@ -1582,8 +1587,8 @@ static int scanArguments(int argc, char **argv)
     { "version", no_argument, 0, 'v' },
     { NULL, 0, 0, 0 }
   };
-  while ((c = getopt_long(argc, argv, "+a:bdD:eF:g:hi:I:j:lno:prs:S:vVx:y",
-			  long_options, NULL))
+  while ((c = getopt_long(argc, argv,
+	  "+a:bCdD:eF:g:Ghi:I:j:lno:prs:S:vVx:y", long_options, NULL))
 	 != EOF)
     switch(c) {
     case 'a':
@@ -1596,6 +1601,9 @@ static int scanArguments(int argc, char **argv)
       break;
     case 'b':
       // handled by post-grohtml (set background color to white)
+      break;
+    case 'C':
+      // handled by post-grohtml (don't write Creator HTML comment)
       break;
     case 'd':
 #if defined(DEBUGGING)
@@ -1619,8 +1627,11 @@ static int scanArguments(int argc, char **argv)
 	exit(1);
       }
       break;
+    case 'G':
+      // handled by post-grohtml (don't write CreationDate HTML comment)
+      break;
     case 'h':
-      // handled by post-grohtml
+      // handled by post-grohtml (write headings with font size changes)
       break;
     case 'i':
       image_res = atoi(optarg);
@@ -1665,7 +1676,7 @@ static int scanArguments(int argc, char **argv)
       else if (strcmp(optarg, "4") == 0)
 	dialect = html4;
       else
-	printf("unsupported html dialect %s (defaulting to html4)\n", optarg);
+	warning("unsupported HTML dialect: '%1'", optarg);
       break;
     case 'y':
       // handled by post-grohtml (create groff signature)
@@ -1775,13 +1786,13 @@ int main(int argc, char **argv)
   exit(1);
 #endif /* CAPTURE_MODE */
   device = "html";
+  i = scanArguments(argc, argv);
   if (!font::load_desc())
     fatal("cannot find devhtml/DESC exiting");
   image_gen = font::image_generator;
   if (image_gen == NULL || (strcmp(image_gen, "") == 0))
     fatal("devhtml/DESC must set the image_generator field, exiting");
   postscriptRes = get_resolution();
-  i = scanArguments(argc, argv);
   setupAntiAlias();
   checkImageDir();
   makeFileName();
@@ -1832,3 +1843,9 @@ static int do_file(const char *filename)
   current_filename = NULL;
   return 1;
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

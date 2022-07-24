@@ -203,19 +203,19 @@ Use
 .I fam
 as the default font family.
 .
+.
 .TP
 .BI \-F dir
-Search in directory (or directory path)
+Search in directory
 .I dir
-for subdirectories
-.IR dev name
-.RI ( name
-is the name of the device) and there for the
-.I DESC
-file and font files.
+for the selected output device's directory of device and font
+description files.
 .
-.I dir
-is scanned before all other font directories.
+See the description of
+.I GROFF_FONT_PATH
+in section \[lq]Environment\[rq] below for the default search locations
+and ordering.
+.
 .
 .TP
 .B \-i
@@ -226,12 +226,13 @@ processed.
 .BI \-I\~ dir
 Search
 .I dir
-for files
+for input files
 (those on the command line,
 those named in
-.B .psbb
+.BR .psbb ,
+.BR .so ,
 and
-.B .so
+.B .soquiet
 requests,
 and
 those named in
@@ -263,31 +264,36 @@ file name.
 .
 .TP
 .BI \-m name
-Read in the file
-.RI name .tmac .
+Process
+.RI name .tmac
+before any input files.
 .
-If it isn't found, try
+If
+.RI name .tmac
+is not found,
 .IR tmac. name
-instead.
+is attempted.
 .
-It will be first searched for in directories given with the
-.B \-M
-command-line option, then in directories given in the
+.I name
+(in both arrangements)
+is presumed to be a macro file;
+see the description of
 .I GROFF_TMAC_PATH
-environment variable, then in the current directory (only if in unsafe
-mode), the home directory,
-.IR @SYSTEMMACRODIR@ ,
-.IR @LOCALMACRODIR@ ,
-and
-.IR @MACRODIR@ .
+in section \[lq]Environment\[rq] below for the default search locations
+and ordering.
+.
 .
 .TP
 .BI \-M dir
-Search directory (or directory path)
+Search directory
 .I dir
 for macro files.
 .
-This is scanned before all other macro directories.
+See the description of
+.I GROFF_TMAC_PATH
+in section \[lq]Environment\[rq] below for the default search locations
+and ordering.
+.
 .
 .TP
 .BI \-n num
@@ -355,23 +361,25 @@ for a more detailed description.
 .
 .TP
 .B \-U
-Unsafe mode;
-enables the
+Operate in
+.IR "unsafe mode" ,
+which enables the
 .BR .open ,
 .BR .opena ,
+.BR .pi ,
 .BR .pso ,
-.BR .sy ,
 and
-.B .pi
+.B .sy
 requests.
 .
-For security reasons,
-these potentially dangerous requests are disabled otherwise.
+These requests are disabled by default because they allow an untrusted
+input document to write to arbitrary file names and run arbitrary
+commands.
 .
-It will also add the current directory to the macro search path;
-see
+This option also adds the current directory to the macro search path;
+see the
 .B \-m
-above.
+option above.
 .
 .
 .TP
@@ -447,12 +455,16 @@ _
 .nr x \w'\fBright-brace'+1n+\w'00000'u
 .ta \nxuR
 .
+.
 .TP \nxu+3n
 .BR break "\t4"
-In fill mode, lines which could not be broken so that their length was
-less than the line length.
+When filling is enabled,
+a line could not be broken such that its length was less than the output
+line length
+.BR \[rs]n[.l] .
 .
 This is enabled by default.
+.
 .
 .TP
 .BR char "\t1"
@@ -627,39 +639,61 @@ All warnings.
 .SH Environment
 .\" ====================================================================
 .
-.TP
+.I GROFF_FONT_PATH
+and
 .I GROFF_TMAC_PATH
-A colon separated list of directories in which to search for
-macro files.
+each accept a search path of directories;
+that is,
+a list of directory names separated by the system's path component
+separator character.
 .
-.I \%@g@troff
-will scan directories given in the
-.B \-M
-option before these, and in standard directories (current directory if
-in unsafe mode, home directory,
-.IR @SYSTEMMACRODIR@ ,
-.IR @LOCALMACRODIR@ ,
-.IR @MACRODIR@ )
-after these.
+On Unix systems,
+this character is a colon (:);
+on Windows systems,
+it is a semicolon (;).
 .
-.TP
-.I GROFF_TYPESETTER
-Default device.
 .
 .TP
 .I GROFF_FONT_PATH
-A colon separated list of directories in which to search for the
-.IR dev name
-directory.
+A list of directories in which to seek the selected output device's
+directory of device and font description files.
 .
 .I \%@g@troff
-will scan directories given in the
+will scan directories given as arguments to any specified
 .B \-F
-option before these, and in standard directories
-.RI ( @LOCALFONTDIR@ ,
-.IR @FONTDIR@ ,
-.IR @LEGACYFONTDIR@ )
-after these.
+options before these,
+then in a site-specific directory
+.RI ( @LOCALFONTDIR@ ),
+a standard location
+.RI ( @FONTDIR@ ),
+and a compatibility directory
+.RI ( @LEGACYFONTDIR@ )
+after them.
+.
+.
+.TP
+.I GROFF_TMAC_PATH
+A list of directories in which to search for macro files.
+.
+.I \%@g@troff
+will scan directories given as arguments to any specified
+.B \-M
+options before these,
+then the current directory
+(only if in unsafe mode),
+the user's home directory,
+a platform-specific directory
+.RI ( @SYSTEMMACRODIR@ ),
+a site-specific directory
+.RI ( @LOCALMACRODIR@ ),
+and a standard location
+.RI ( @MACRODIR@ )
+after them.
+.
+.
+.TP
+.I GROFF_TYPESETTER
+Default output device.
 .
 .
 .TP

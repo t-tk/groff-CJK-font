@@ -67,33 +67,55 @@ font description files from X11 fonts.
 .
 Each line in
 .I font-map
-consists of a
+consists of a series of lines of paired
 .I groff
-font name and an X font name as a X Logical Font Description (XLFD)
-pattern,
-separated by whitespace.
+font names and X font names as X Logical Font Description (XLFD)
+patterns,
+with the pair members separated by spaces and/or tabs.
 .
-Example:
+For example,
+an input
+.I font-map
+file consisting of the line
 .
-.
-.PP
 .RS
 .EX
 TB \-adobe\-times\-bold\-r\-normal\-\-*\-*\-*\-*\-p\-*\-iso8859\-1
 .EE
 .RE
 .
+maps the XLFD on the right to the
+.I groff
+font name
+.BR TB ,
+conventionally \[lq]Times bold\[rq].
+.
 .
 .PP
-The wildcards in the patterns are filled with the arguments to the
+.I xtotroff
+opens a connection to the running X server to query its font catalog,
+and aborts if it cannot.
+.
+If necessary,
+the wildcards in the XLFD patterns are populated with the arguments to
+the
 .B \-r
 and
 .B \-s
-switches.
+options.
 .
 If a font name is still ambiguous,
 .I xtotroff
 aborts.
+.
+For each successful mapping,
+.I xtotroff
+creates a
+.I groff
+font description file in the current working directory named for each
+.I groff
+font,
+and reports the mapping to the standard output stream.
 .
 .
 .\" ====================================================================
@@ -142,9 +164,19 @@ The only supported font encodings are \[lq]iso8859\-1\[rq] and
 .SH "See also"
 .\" ====================================================================
 .
+.UR https://\:www\:.x\:.org/\:releases/\:X11R7.6/\:doc/\:xorg\-docs/\
+\:specs/\:XLFD/xlfd\:.html
+\[lq]X Logical Font Description Conventions\[rq]
+.UE ,
+by Jim Flowers and Stephen Gildea.
+.
+.
+.PP
+.IR X (7),
 .IR groff (@MAN1EXT@),
 .IR gxditview (@MAN1EXT@),
-.IR troff (@MAN1EXT@)
+.IR troff (@MAN1EXT@),
+.IR groff_font (@MAN5EXT@)
 .
 .
 .\" Restore compatibility mode (for, e.g., Solaris 10/11).

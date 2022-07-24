@@ -52,15 +52,18 @@
 .  do if d an-end \
 .    do an-end
 .
-.  do ch an-header   \" remove trap set by an-old.tmac
-.  do ch an-footer   \" remove trap set by an-old.tmac
-.  do ch an-p-footer \" remove trap set by an-old.tmac
+.  \" Remove traps planted by an-old.tmac.
+.  do ch an-header
+.  do ch an-break-body-text
+.  do ch an-footer
 .
 .  do als em andoc-em
 .  do als bp andoc-bp
 .  do als ne andoc-ne
-.  do rm Dd          \" disable load-only-once, see doc.tmac
+.  do blm            \" no blank line trap
+.  do lsm            \" no leading space trap
 .
+.  do rm Dd          \" force reinitialization of doc.tmac
 .  do mso doc.tmac
 .
 .  do als TH reload-man
@@ -69,22 +72,20 @@
 ..
 .
 .de reload-man
-.  do cp \n(.C       \" restore original compatibility mode
-.
 .  \" Flush any partially collected output line and write page footer in
 .  \" continuous rendering mode.
 .  do if d doc-end-macro \
 .    do doc-end-macro
 .
-.  do ch doc-header  \" remove trap set by mdoc/doc-{n,dit}roff
-.  do ch doc-footer  \" remove trap set by mdoc/doc-{n,dit}roff
+.  \" Remove traps planted by mdoc/doc-{n,dit}roff.
+.  do ch doc-header
+.  do ch doc-footer
 .
 .  do als em andoc-em
 .  do als bp andoc-bp
-.  do rm RI          \" disable load-only-once, see an-old.tmac
-.  do blm            \" no blank line macro
-.  do rm TH
+.  do blm            \" no blank line trap
 .
+.  do rm TH          \" force reinitialization of an-old.tmac
 .  do mso an-old.tmac
 .
 .  do als Dd reload-doc

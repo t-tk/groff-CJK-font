@@ -8,7 +8,7 @@ groff_char \- GNU roff special character and glyph repertoire
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 1989-2020 Free Software Foundation, Inc.
+.\" Copyright (C) 1989-2021 Free Software Foundation, Inc.
 .\"
 .\" This file is part of groff (GNU roff), which is a free software
 .\" project.
@@ -81,6 +81,10 @@ encoded an acute accent and
 .B \e(sc
 a section sign.
 .
+(Characters that don't require an escape sequence for their expression,
+like \[lq]a\[rq],
+are termed \[lq]ordinary\[rq].)
+.
 .
 .P
 As in other respects,
@@ -118,28 +122,32 @@ The driver used in generation of this page was \[lq]\*[.T]\[rq].
 .
 .
 .P
-A few escape sequences that are not special character escapes also
-produce glyphs;
+A few escape sequences that are not
+.I groff
+special characters also produce glyphs;
 these exist for syntactical or historical reasons.
 .
-They include
-.BR \e\e ,
 .BR \e\[aq] ,
 .BR \e\[ga] ,
 .BR \e\- ,
+and
+.B \e_
+are translated on input to the special characters
+.BR \e[aq] ,
+.BR \e[ga] ,
+.BR \e[-] ,
+and
+.BR \e[ul] ,
+respectively.
+.
+Others include
+.BR \e\e ,
 .B \e.\&
 (backslash-dot),
 and
 .BR \ee ;
 see
 .IR groff (@MAN7EXT@).
-.
-Of these,
-only
-.B \e\-
-is also available as a special character of the same name,
-in the form
-.BR \e[\-] .
 .
 A small number of special characters represent glyphs that are not
 encoded in Unicode;
@@ -154,7 +162,7 @@ In
 .IR groff ,
 you can test output driver support for any character
 (ordinary or special)
-with the conditional
+with the conditional expression operator
 .RB \[lq] c \[rq].
 .
 .RS
@@ -226,7 +234,9 @@ which is one reason it does not support UTF-8 natively.
 .\" ====================================================================
 .
 The ninety-four characters catalogued above,
-plus the space and the newline,
+plus the space,
+tab,
+and newline,
 form the fundamental character
 set for
 .I groff
@@ -354,7 +364,7 @@ Keycap	Appearance and meaning	Special character and meaning
 _
 "	" neutral double quote	\f[B]\[rs][dq]\f[] neutral double quote
 \[aq]	\[cq] closing single quote	\f[B]\[rs][aq]\f[] neutral apostrophe
-\-	- hyphen	\f[B]\[rs]\-\f[] or \f[B]\[rs][\-]\f[] hyphen-minus
+\-	- hyphen	\f[B]\[rs]\-\f[] or \f[B]\[rs][\-]\f[] minus sign
 \[rs]	(escape character)	\f[B]\[rs]e\f[] or \f[B]\[rs][rs]\f[] reverse solidus
 \[ha]	\[u02C6] modifier circumflex	\f[B]\[rs](ha\f[] circumflex/caret/\[lq]hat\[rq]
 \[ga]	\[oq] single opening quote	\f[B]\[rs](ga\f[] grave accent
@@ -378,12 +388,14 @@ dashes of varying widths.
 .
 For best results in
 .IR groff ,
-use the character in input without an escape
+use the
+.RB \[lq] \- \[rq]
+character in input without an escape
 .I only
 to mean a hyphen,
 as in the phrase \[lq]long-term\[rq].
 .
-For a minus sign in running prose or a Unix command-line option dash,
+For a minus sign in running text or a Unix command-line option dash,
 use
 .B \[rs]\-
 (or
@@ -392,10 +404,17 @@ in
 .I groff
 if you find it helps the clarity of the source document).
 .
+(Another minus sign,
+for use in mathematical equations,
+is available as
+.BR \[rs][mi] ).
+.
 AT&T
 .I troff
 supported em-dashes as
-.BR \[rs](em .
+.BR \[rs](em ,
+as does
+.IR groff .
 .
 .
 .P
@@ -546,7 +565,7 @@ l2 l1 l l2 l1 l.
 \[aa]	\e[aa]	acute accent	\[~a]	\e[\[ti]a]	a tilde
 \[mc]	\e[mc]	micro sign	\[:a]	\e[:a]	a dieresis
 \[ps]	\e[ps]	pilcrow sign	\[oa]	\e[oa]	a ring
-\[pc]	\e[pc]	centered period	\[ae]	\e[ae]	a+e combined
+\[pc]	\e[pc]	centered period	\[ae]	\e[ae]	ae ligature
 \[ac]	\e[ac]	cedilla accent	\[,c]	\e[,c]	c cedilla
 \[S1]	\e[S1]	superscript one	\[`e]	\e[\[ga]e]	e grave
 \[Om]	\e[Om]	masculine ordinal indicator	\['e]	\e[\[aq]e]	e acute
@@ -561,7 +580,7 @@ l2 l1 l l2 l1 l.
 \[~A]	\e[\[ti]A]	A tilde	\[`o]	\e[\[ga]o]	o grave
 \[:A]	\e[:A]	A dieresis	\['o]	\e[\[aq]o]	o acute
 \[oA]	\e[oA]	A ring	\[^o]	\e[\[ha]o	o circumflex
-\[AE]	\e[AE]	A+E combined	\[~o]	\e[\[ti]o]	o tilde
+\[AE]	\e[AE]	AE ligature	\[~o]	\e[\[ti]o]	o tilde
 \[,C]	\e[,C]	C cedilla	\[:o]	\e[:o]	o dieresis
 \[`E]	\e[\[ga]E]	E grave	\[di]	\e[di]	division sign
 \['E]	\e[\[aq]E]	E acute	\[/o]	\e[/o]	o slash
@@ -642,7 +661,7 @@ the uninterpreted leader escape sequence.
 By default,
 .I groff
 defines a single glyph name of length one,
-namely the hyphen-minus,
+namely the minus sign,
 which can be accessed as either
 .B \[rs]\-
 or
@@ -845,7 +864,7 @@ font
 Often,
 such glyphs have metrics which look incongruous in normal text.
 .
-A few which are not uncommon in running prose have \[lq]text
+A few which are not uncommon in running text have \[lq]text
 variants\[rq],
 which should work better in that context.
 .
@@ -900,7 +919,6 @@ _
 \[rs]	\e[rs]	u005C	reverse solidus
 \[rB]	\e[rB]	u005D	right square bracket
 \[ha]	\e[ha]	u005E	circumflex, caret, \[lq]hat\[rq] +
-\[ul]	\e[ul]	u005F	underscore, low line +
 \[lC]	\e[lC]	u007B	left brace
 |	|	u007C	bar
 \[ba]	\e[ba]	u007C	bar
@@ -976,7 +994,7 @@ _
 .
 All of these glyphs can be composed using combining glyph names as
 described in subsection \[lq]Special character escape forms\[rq] above;
-the names below can be thought of short aliases for convenience.
+the names below can be thought of convenient short aliases.
 .
 .TS
 l l l lx.
@@ -1135,7 +1153,8 @@ _
 On typestter devices,
 the bracket extensions are font-invariant glyphs;
 that is,
-they are rendered the same way regardless of font.
+they are rendered the same way regardless of font
+(with a drawing escape sequence).
 .
 On terminals,
 they are
@@ -1245,35 +1264,35 @@ _
 \[braceex]	\e[braceex]	u23AA	brace vertical extension
 
 \[bracketlefttp]	\e[bracketlefttp]	u23A1	left square bracket top
-\[bracketleftbt]	\e[bracketleftbt]	u23A3	left square bracket bottom
 \[bracketleftex]	\e[bracketleftex]	u23A2	left square bracket extension
+\[bracketleftbt]	\e[bracketleftbt]	u23A3	left square bracket bottom
 
 \[bracketrighttp]	\e[bracketrighttp]	u23A4	right square bracket top
-\[bracketrightbt]	\e[bracketrightbt]	u23A6	right square bracket bottom
 \[bracketrightex]	\e[bracketrightex]	u23A5	right square bracket extension
+\[bracketrightbt]	\e[bracketrightbt]	u23A6	right square bracket bottom
 
 \[lt]	\e[lt]	u23A7	left brace top +
-\[bracelefttp]	\e[bracelefttp]	u23A7	left brace top
 \[lk]	\e[lk]	u23A8	left brace middle +
-\[braceleftmid]	\e[braceleftmid]	u23A8	left brace middle
 \[lb]	\e[lb]	u23A9	left brace bottom +
+\[bracelefttp]	\e[bracelefttp]	u23A7	left brace top
+\[braceleftmid]	\e[braceleftmid]	u23A8	left brace middle
 \[braceleftbt]	\e[braceleftbt]	u23A9	left brace bottom
 \[braceleftex]	\e[braceleftex]	u23AA	left brace extension
 
 \[rt]	\e[rt]	u23AB	right brace top +
-\[bracerighttp]	\e[bracerighttp]	u23AB	right brace top
 \[rk]	\e[rk]	u23AC	right brace middle +
-\[bracerightmid]	\e[bracerightmid]	u23AC	right brace middle
 \[rb]	\e[rb]	u23AD	right brace bottom +
+\[bracerighttp]	\e[bracerighttp]	u23AB	right brace top
+\[bracerightmid]	\e[bracerightmid]	u23AC	right brace middle
 \[bracerightbt]	\e[bracerightbt]	u23AD	right brace bottom
 \[bracerightex]	\e[bracerightex]	u23AA	right brace extension
 
 \[parenlefttp]	\e[parenlefttp]	u239B	left parenthesis top
-\[parenleftbt]	\e[parenleftbt]	u239D	left parenthesis bottom
 \[parenleftex]	\e[parenleftex]	u239C	left parenthesis extension
+\[parenleftbt]	\e[parenleftbt]	u239D	left parenthesis bottom
 \[parenrighttp]	\e[parenrighttp]	u239E	right parenthesis top
-\[parenrightbt]	\e[parenrightbt]	u23A0	right parenthesis bottom
 \[parenrightex]	\e[parenrightex]	u239F	right parenthesis extension
+\[parenrightbt]	\e[parenrightbt]	u23A0	right parenthesis bottom
 .TE
 .
 .
@@ -1322,28 +1341,27 @@ The Unicode-derived names of these three glyphs are approximations.
 .
 .
 .P
-.B \[rs][rn]
-also serves in AT&T
-.I troff
-as the horizontal extension of the radical
-(square root)
-sign.
+The input character
+.B _
+always accesses the underscore glyph in a font;
+.\" unless one isn't available, but this seems to be only a theoretical
+.\" concern--what font doesn't support every ASCII codepoint these days?
+.BR \[rs][ul] ,
+by contrast,
+may be font-invariant on typesetter devices.
 .
+.
+.P
 The baseline rule
 .B \[rs][ru]
 is a font-invariant glyph,
 namely a rule of one-half em.
 .
-In
-.IR groff ,
-use
-.B \[rs][radicalex]
-(see subsection \[lq]Mathematical symbols\[rq] below)
-instead of
-.BR \[rs][rn] ,
-for continuation of radical signs
-(e.g.,
-square roots).
+.
+.P
+.B \[rs][rn]
+also appears in subsection \[lq]Mathematical symbols\[rq] below.
+.
 .
 .TS
 l l l lx.
@@ -1352,9 +1370,9 @@ _
 |	|	u007C	bar
 \[ba]	\e[ba]	u007C	bar
 \[br]	\e[br]	u2502	box rule +
-\[ul]	\&_	u005F	underscore, low line +
+\&_	\&_	u005F	underscore, low line +
 \[ul]	\e[ul]	u005F	underscore, low line +
-\[rn]	\e[rn]	u203E	overline +
+\[rn]	\e[rn]	u203E	radical extension, overline +
 \[ru]	\e[ru]	---	baseline rule +
 \[bb]	\e[bb]	u00A6	broken bar
 \[sl]	/	u002F	slash, solidus +
@@ -1497,6 +1515,31 @@ and equals signs.
 Whether these variants differ in appearance or spacing will depend on
 the device and font selected.
 .
+.P
+In AT&T
+.IR troff ,
+.B \[rs](rn
+served as the horizontal extension of the radical
+(square root)
+sign,
+.BR \[rs](sr .
+.
+In
+.IR groff ,
+you can use
+.B \[rs][radicalex]
+instead of
+.B \[rs][rn]
+for continuation of the radical sign
+.BR \[rs][sr] ;
+these have text metrics.
+.
+.B \[rs][sqrt]
+and
+.B \[rs][sqrtex]
+are their counterparts with mathematical spacing.
+.
+.
 .TS
 l l l lx.
 Output	Input	Unicode	Notes
@@ -1567,8 +1610,9 @@ _
 \[coproduct]	\e[coproduct]	u2210	coproduct ***
 \[gr]	\e[gr]	u2207	gradient +
 \[sr]	\e[sr]	u221A	radical sign, square root +
-\[sqrt]	\e[sqrt]	u221A	radical sign, square root
-\[radicalex]	\e[radicalex]	---	radical extension ***
+\[rn]	\e[rn]	u203E	radical extension, overline +
+\[radicalex]	\e[radicalex]	---	radical extension
+\[sqrt]	\e[sqrt]	u221A	radical sign, square root ***
 \[sqrtex]	\e[sqrtex]	---	radical extension ***
 
 \[lc]	\e[lc]	u2308	left ceiling +
@@ -1746,6 +1790,12 @@ The Unicode Standard
 by Tuomas Salste documents the inherent ambiguity and configurability
 (in terms of variable code points)
 of the ASCII encoding standard.
+.
+.
+.P
+.IR groff_rfc1345 (@MAN7EXT@)
+describes an alternative set of special character glyph names,
+which extends and in some cases overrides the definitions listed above.
 .
 .
 .P

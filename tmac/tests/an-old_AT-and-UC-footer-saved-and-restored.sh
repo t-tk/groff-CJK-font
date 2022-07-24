@@ -50,54 +50,55 @@ EXAMPLE_UCB_PAGE='.TH ucb 1 2020-01-16 "groff test suite"
 ucb \- blow up Death Star'
 
 # We turn off continuous rendering (-rcR=0) so that the page footers are
-# visible in nroff mode.  We turn on continuous numbering so we can tell
+# numbered.  We turn on continuous page numbering (-rC1) so we can tell
 # that the footers are on the expected pages.
-
-OUTPUT=$(printf "%s\n" \
+INPUT=$(printf "%s\n" \
     "$EXAMPLE_ATT_PAGE" \
     "$EXAMPLE_FSF_PAGE" \
     "$EXAMPLE_WFJ_PAGE" \
     "$EXAMPLE_GNU_PAGE" \
     "$EXAMPLE_UCB_PAGE" \
     "$EXAMPLE_GNU_PAGE" \
-    | "$groff" -Tascii -P-cbou -man -rC1 -rcR=0)
+)
+
+OUTPUT=$(echo "$INPUT" | "$groff" -Tascii -P-cbou -man -rcR=0 -rC1)
 
 FAIL=
 
 if ! echo "$OUTPUT" | grep -qE '7th Edition +2020-01-16 +1'
 then
     FAIL=yes
-    echo "att (.AT) test failed" >&2
+    echo "AT&T (.AT) footer test failed" >&2
 fi
 
 if ! echo "$OUTPUT" | grep -qE 'groff test suite +2020-01-16 +2'
 then
     FAIL=yes
-    echo "FSF test failed" >&2
+    echo "FSF test footer failed" >&2
 fi
 
 if ! echo "$OUTPUT" | grep -qE '3rd Berkeley Distribution +2020-01-16 +3'
 then
     FAIL=yes
-    echo "WFJ (.UC) test failed" >&2
+    echo "WFJ (.UC) footer test failed" >&2
 fi
 
 if ! echo "$OUTPUT" | grep -qE 'groff test suite +2020-01-16 +4'
 then
     FAIL=yes
-    echo "1st GNU test failed" >&2
+    echo "1st GNU footer test failed" >&2
 fi
 
 if ! echo "$OUTPUT" | grep -qE '4.4 Berkeley Distribution +2020-01-16 +5'
 then
     FAIL=yes
-    echo "UCB (.UC) test failed" >&2
+    echo "UCB (.UC) footer test failed" >&2
 fi
 
 if ! echo "$OUTPUT" | grep -qE 'groff test suite +2020-01-16 +6'
 then
     FAIL=yes
-    echo "2nd GNU test failed" >&2
+    echo "2nd GNU footer test failed" >&2
 fi
 
 test -z "$FAIL"

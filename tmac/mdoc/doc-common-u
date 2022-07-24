@@ -934,8 +934,10 @@
 .de doc-header
 .  ev doc-env-dh
 .  doc-setup-page-layout
-.  if !\n[cR] \
+.  if !\n[cR] \{\
+.    \" Re-use doc-header-space between page top and header.
 .    sp \n[doc-header-space]u
+.  \}
 .  nr doc-reg-dh \w'\*[doc-caption-font]\*[doc-header-string]\f[]'
 .  nr doc-reg-dh1 \w'\*[doc-caption-font2]\*[doc-volume]\f[]'
 .  if (\n[doc-reg-dh] + \n[doc-reg-dh1] + \n[doc-reg-dh] >= \n[.lt]) \{\
@@ -955,8 +957,10 @@
 .  tl \*[doc-caption-font]\*[doc-header-string]\f[]\*[doc-caption-font2]\*[doc-volume]\f[]\*[doc-caption-font]\*[doc-header-string]\f[]
 .  ie !\n[cR] \
 .    sp \n[doc-header-space]u
-.  el \
-.    sp 1v
+.  el \{\
+.    pl +3v
+.    sp 3v
+.  \}
 .  ev
 .  ns
 ..
@@ -1017,14 +1021,12 @@
 .  \" footer.  So we fudge the page length to make sure that the last
 .  \" page is never ejected until we want it to be.
 .
-.  if \n[cR] \
-.    pl +3v
 .  fl
-.
 .  doc-check-depth
 .
 .  if \n[cR] \{\
-.    sp
+.    pl +3v
+.    sp 3v
 .    tl \*[doc-caption-font]\*[doc-operating-system]\f[]\*[doc-caption-font2]\*[doc-date-string]\f[]\*[doc-caption-font]\*[doc-operating-system]\f[]
 .    \" suppress empty lines after the footer
 .    pl \n[nl]u

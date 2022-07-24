@@ -72,10 +72,10 @@ do
     -[eq] | -s*)
       # ignore these options
       ;;
-    -[dmMnoPrTwW])
+    -[dKmMnoPrTwW])
       echo "$prog: option '$1' requires an argument" >&2
       exit 1 ;;
-    -[bCEipStUz] | -[dMmrnoPwW]*)
+    -[bCEikpStUz] | -[dKMmrnoPwW]*)
       opts="$opts $1" ;;
     -T*)
       Topt=$1 ;;
@@ -93,8 +93,9 @@ do
       echo "GNU nroff (groff) version @VERSION@"
       opts="$opts $1" ;;
     --help)
+      # Wrap usage message at 80 columns.
       cat <<EOF
-usage: nroff [-bcCEhipStUVz] [-dCS] [-mNAME] [-MDIR] [-nNUM] [-oLIST]
+usage: nroff [-bcCEhikpStUVz] [-dCS] [-Karg] [-mNAME] [-MDIR] [-nNUM] [-oLIST]
              [-Popt ...] [-rCN] [-Tname] [-wNAME] [-WNAME] [FILE ...]
 EOF
       exit 0 ;;

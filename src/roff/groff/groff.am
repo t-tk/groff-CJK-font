@@ -34,17 +34,16 @@ groff_SOURCES = \
 src/roff/groff/groff.$(OBJEXT): defs.h
 man1_MANS += src/roff/groff/groff.1
 EXTRA_DIST += src/roff/groff/groff.1.man
-GROFF_OPTS_OUTPUT = \
-  groff_opts_no_arg.txt \
-  groff_opts_with_arg.txt
-groffoptsdir = $(libprogramdir)
-groffopts_DATA = $(GROFF_OPTS_OUTPUT)
 
 groff_TESTS = \
   src/roff/groff/tests/adjustment_works.sh \
   src/roff/groff/tests/do_not_loop_infinitely_when_breaking_cjk.sh \
   src/roff/groff/tests/dot-cp_register_works.sh \
+  src/roff/groff/tests/dot-nm_register_works.sh \
+  src/roff/groff/tests/localization_works.sh \
+  src/roff/groff/tests/msoquiet_works.sh \
   src/roff/groff/tests/on_latin1_device_oq_is_0x27.sh \
+  src/roff/groff/tests/output_driver_C_and_G_options_work.sh \
   src/roff/groff/tests/recognize_end_of_sentence.sh \
   src/roff/groff/tests/regression_savannah_56555.sh \
   src/roff/groff/tests/regression_savannah_58153.sh \
@@ -52,6 +51,7 @@ groff_TESTS = \
   src/roff/groff/tests/regression_savannah_58337.sh \
   src/roff/groff/tests/regression_savannah_59202.sh \
   src/roff/groff/tests/smoke-test_html_device.sh \
+  src/roff/groff/tests/soquiet_works.sh \
   src/roff/groff/tests/string_case_xform_errors.sh \
   src/roff/groff/tests/string_case_xform_requests.sh \
   src/roff/groff/tests/string_case_xform_unicode_escape.sh \
@@ -62,24 +62,6 @@ EXTRA_DIST += $(groff_TESTS)
 groff_XFAIL_TESTS = \
   src/roff/groff/tests/string_case_xform_unicode_escape.sh
 XFAIL_TESTS += $(groff_XFAIL_TESTS)
-
-MOSTLYCLEANFILES += groff_opts.tmp $(GROFF_OPTS_OUTPUT)
-
-groff_opts.tmp: src/roff/groff/groff.cpp
-	@$(GREP) -e ':.*:.*:' $? | sed -e 's/[ \t",]//g' > $@
-	@echo -n 'groff options: '
-	@cat $@
-
-groff_opts_no_arg.txt: groff_opts.tmp
-	@sed -e 's/[a-zA-Z]://g' $? > $@
-	@echo -n 'no arg: '
-	@cat $@
-
-groff_opts_with_arg.txt: groff_opts_no_arg.txt
-	@rm -f $@
-	@sed "s/[`cat $?`:]//g" groff_opts.tmp > $@
-	@echo -n 'with arg: '
-	@cat $@
 
 
 # Local Variables:

@@ -141,7 +141,7 @@ my %tones1_Unicode =
    'I' => q(\\[u012A]),
    'O' => q(\\[u014C]),
    'U' => q(\\[u016A]),
-   'Ü' => q(\\[u016A]),
+   'Ü' => q(\\[u01D5]),
    'a' => q(\\[u0101]),
    'e' => q(\\[u0113]),
    'i' => q(\\[u012B]),
@@ -218,7 +218,7 @@ my %tones2_glyphs =
    'U' => q(\\['U]),
    'a' => q(\\['a]),
    'e' => q(\\['e]),
-   'i' => q(\\['i]),
+   '\\[.i]' => q(\\['i]),
    'o' => q(\\['o]),
    'u' => q(\\['u]),
   );
@@ -232,7 +232,7 @@ my %tones4_glyphs =
    'U' => q(\\[`U]),
    'a' => q(\\[`a]),
    'e' => q(\\[`e]),
-   'i' => q(\\[`i]),
+   '\\[.i]' => q(\\[`i]),
    'o' => q(\\[`o]),
    'u' => q(\\[`u]),
   );
@@ -388,7 +388,7 @@ sub handle_word {
     next unless ( %outsyll );
     for my $roff ( @roffs ) {
       my $out = $outsyll{$roff};
-      $out = '\\[aq]' . $out if ( $out && $out =~ /^[aeo]/ );
+      $out = '\\[cq]' . $out if ( $out && $out =~ /^[aeo]/ );
       $outword{$roff} .= $out;
 #&err('handle_word ' . $roff . ': ' . $outword{$roff});
     }
@@ -502,15 +502,16 @@ sub vowel_n {	# Unicode for nroff
   return '' unless ( $vowel );
 
   if ( $tone == 1 ) {		# macron
-    $vowel = $tones1_Unicode{$vowel};
+    $vowel_with_tone = $tones1_Unicode{$vowel};
   } elsif ( $tone == 2 ) {	# acute
-    $vowel = $tones2_Unicode{$vowel};
+    $vowel_with_tone = $tones2_Unicode{$vowel};
   } elsif ( $tone == 3 ) {	# caron
-    $vowel = $tones3_Unicode{$vowel};
+    $vowel_with_tone = $tones3_Unicode{$vowel};
   } elsif ( $tone == 4 ) {	# grave
-    $vowel = $tones4_Unicode{$vowel};
+    $vowel_with_tone = $tones4_Unicode{$vowel};
   }
-  return $vowel;
+  $vowel_with_tone or warn "failed to apply tone $tone to vowel $vowel";
+  return $vowel_with_tone;
 } # vowel_nr()
 
 
@@ -524,8 +525,15 @@ sub vowel_t {	# named glyphs for troff
 
   # \o'\s-2\[:u]\s0\[a-]'
   if ( $vowel =~ /[üÜ]/ ) {
-    my $smaller = 2;
-    $vowel = q(\\o'\\s-) . $smaller . q(\\[:u]\\s0) .
+    my $ue, $smaller;
+    if ($vowel eq 'ü') {
+      $ue = q(\\[:u]);
+      $smaller = 2;
+    } else {
+      $ue = q(\\[:U]);
+      $smaller = 4;
+    }
+    $vowel = q(\\o'\\s-) . $smaller . $ue . q(\\s0) .
       $accents[$tone] . q(');
     return $vowel;
   }
@@ -533,15 +541,16 @@ sub vowel_t {	# named glyphs for troff
   $vowel = q(\\[.i]) if ( $vowel eq 'i' );
 
   if ( $tone == 1 ) {		# macron
-    $vowel = q(\\o') . $vowel . $accents[$tone] . q(');
+    $vowel_with_tone = q(\\o') . $vowel . $accents[$tone] . q(');
   } elsif ( $tone == 2 ) {	# acute
-    $vowel = $tones2_glyphs{$vowel};
+    $vowel_with_tone = $tones2_glyphs{$vowel};
   } elsif ( $tone == 3 ) {	# caron
-    $vowel = q(\\o') . $vowel . $accents[$tone] . q(');
+    $vowel_with_tone = q(\\o') . $vowel . $accents[$tone] . q(');
   } elsif ( $tone == 4 ) {	# grave
-    $vowel = $tones4_glyphs{$vowel};
+    $vowel_with_tone = $tones4_glyphs{$vowel};
   }
-  return $vowel;
+  $vowel_with_tone or warn "failed to apply tone $tone to vowel $vowel";
+  return $vowel_with_tone;
 } # vowel_t()
 
 

@@ -99,19 +99,39 @@ after these commands, otherwise the position is not changed.
 .SH Description
 .\" ====================================================================
 .
-This manual page describes the
-.I intermediate output
-format of the GNU
-.BR roff (@MAN7EXT@)
-text processing system
-.BR groff (@MAN1EXT@).
+The fundamental operation of the
+.IR \%@g@troff (@MAN1EXT@)
+formatter is the translation of the
+.IR groff (@MAN7EXT@)
+input language into a device-independent form,
+described here,
+primarily concerned with what has to be written or drawn at specific
+positions on the output device.
 .
-This output is produced by a run of the GNU
-.BR @g@troff (@MAN1EXT@)
-program.
+This language is simple and imperative.
 .
-It contains already all device-specific information, but it is not yet
-fed into a device postprocessor program.
+In the following discussion,
+the term
+.I command
+always refers to this intermediate output language,
+and never to the
+.IR groff (@MAN7EXT@)
+language intended for direct use by document authors.
+.
+Intermediate output commands comprise several categories:
+glyph output;
+font,
+color,
+and text size selection;
+motion of the printing position;
+page advancement;
+drawing of geometric primitives;
+and device control commands,
+a catch-all for operations not easily classified as any of the
+foregoing,
+such as directives to start and stop output,
+identify the intended output device,
+or place URL hyperlinks in supported output formats.
 .
 .
 .P
@@ -196,7 +216,7 @@ still supported, but not used any longer by
 .
 .
 .\" ====================================================================
-.SH "Language Concepts"
+.SH "Language concepts"
 .\" ====================================================================
 .
 During the run of
@@ -448,7 +468,7 @@ is done relative to the current location within this page.
 .
 .
 .\" ====================================================================
-.SH "Command Reference"
+.SH "Command reference"
 .\" ====================================================================
 .
 This section describes all
@@ -1603,11 +1623,11 @@ s10
 .I # initial positioning on the page
 V40
 H0
-.I # write text \[oq]hell\[cq]
+.I # write text \[aq]hell\[aq]
 thell
 .I # inform about a space, and do it by a horizontal jump
 wh24
-.I # write text \[oq]world\[cq]
+.I # write text \[aq]world\[aq]
 tworld
 .I # announce line break, but do nothing because ...
 n40 0

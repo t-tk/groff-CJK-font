@@ -213,7 +213,8 @@ Firstly, we see how to invoke three object types; ellipses, arrows, and
 boxes.
 We see how to declare text lines to go within an object (and that text
 can have font changes in it).
-We see how to change the line style of an object from solid to dashed.
+We see how to change the line style of an object from solid (the
+default) to dashed.
 And we see that a box can be made wider than its default size to
 accommodate more text (we'll discuss this facility in detail in the next
 section).
@@ -824,10 +825,6 @@ changing this.
 The invisible attribute does not affect the filling of objects.
 Any text associated with a filled object is added after the object has
 been filled, so that the text is not obscured by the filling.
-.PP
-The closed-object modifier \fBsolid\fP is equivalent to \fBfill\fP
-with the darkest fill value (DWB \fBpic\fP had this capability but
-mentioned it only in a reference section).
 .
 .NH 2
 Colored Objects
@@ -2212,7 +2209,8 @@ bugs, but point size and font changes are usually safe.
 Point sizes and font changes are also safe within text strings, as
 long as they are undone before the end of string.
 .PP
-The state of \fB[gt]roff\fP's fill mode is preserved across pictures.
+The enablement of output line filling by \fB[gt]roff\fP is preserved
+across pictures.
 .
 .NH 2
 PIC and EQN
@@ -2899,8 +2897,8 @@ direction on the block's bounding box.
   chop [<expr>]         \fR# chop end(s) of segment\fP
   '->' | '<-' | '<->'   \fR# decorate with arrows\fP
   invis[ible]           \fR# make primitive invisible\fP
-  solid                 \fR# make closed figure solid\fP
-  fill[ed] [<expr>]     \fR# set fill density for figure\fP
+  solid                 \fR# set solid line style\fP
+  fill[ed] [<expr>]     \fR# fill closed figure with optional density\fP
   xscaled <expr>        \fR# slant box into x direction\fP
   yscaled <expr>        \fR# slant box into y direction\fP
   colo[u]r[ed] TEXT     \fR# set fill and outline color for figure\fP

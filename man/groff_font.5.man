@@ -31,41 +31,68 @@ groff_font \- GNU roff device and font description files
 .SH Description
 .\" ====================================================================
 .
-.\" BEGIN Keep parallel with groff.texi node "Font Files".
+.\" BEGIN Keep parallel with groff.texi node "Device and Font Files".
 The
 .I groff
-font format is a rough superset of the AT&T
-device-independent
-.I troff \" generic
-font format.
+font and output device description formats are slight
+extensions of those used by AT&T device-independent
+.IR troff . \" AT&T
 .
 In distinction to the AT&T implementation,
 .I groff
 lacks a binary format;
 all files are text files.
+.
 (Plan\~9
 .I troff \" Plan 9
-has also abandoned the binary format.}
+has also abandoned the binary format.)
 .
-The font files for device
+The device and font description files for a device
 .I name
-are stored in a directory
+are stored in a directory called
 .IR dev name.
 .
-There are two types of file:
-a device description file called
-.I DESC
-and for each
-.RI font \~F ,
-a font file called\~F.
+The device description file is called
+.IR DESC ,
+and,
+for each
+.RI font\~ f
+supported by the device,
+a font file
+.RI called\~\[lq] f \[rq],
+where
+.IR f \~is
+usually an abbreviation of a font's name and/or style.
 .
-These are text files;
-unlike the ditroff font format,
-there is no associated binary format.
+For example,
+the
+.B ps
+(PostScript)
+device has
+.I groff
+font description files for Times roman
+.RB ( TR )
+and Zapf Chancery Medium italic
+.RB ( ZCMI ),
+among many others,
+while the
+.B utf8
+device
+(for terminal emulators)
+has only font descriptions for the roman,
+italic,
+bold,
+and bold-italic styles
+.RB ( R ,
+.BR I ,
+.BR B ,
+and
+.BR BI ,
+respectively).
 .
 .
 .\" ====================================================================
-.SS "DESC file format"
+.SS "\f[I]DESC\f[] file format"
 .\" ====================================================================
 .
 The
@@ -719,7 +746,7 @@ the space between them should be increased by\~\c
 .
 Most entries in kernpairs section have a negative value for\~\c
 .IR n .
-.\" END Keep parallel with groff.texi node "Font Files".
+.\" END Keep parallel with groff.texi node "Device and Font Files".
 .
 .
 .\" ====================================================================

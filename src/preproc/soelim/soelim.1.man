@@ -71,34 +71,48 @@
 .SH Description
 .\" ====================================================================
 .
+GNU
+.I soelim \" GNU
+is a preprocessor for the
+.IR groff (@MAN7EXT@)
+document formatting system.
+.
 .I \%@g@soelim
-replaces lines of the form
+works as a filter to eliminate source requests in
+.IR roff (@MAN7EXT@)
+input files;
+that is,
+it replaces lines of the form
 .RB \[lq] .so
 .IR macro-file \[rq]
-within each
+within each text
 .I input-file
 with the contents of
 .IR macro-file ,
 recursively.
 .
-It is useful if files included with
-.B .so
-need to be preprocessed.
+By default,
+it writes
+.B .lf
+requests as well to record the name and line number of each
+.I input-file
+and
+.IR macro-file ,
+so that any diagnostics produced by later processing can be accurately
+traced to the original input.
 .
-Output is written to the standard output stream.
-.
-Normally,
-.I \%@g@soelim
-should be invoked with
-.IR groff 's
-.B \-s
-option.
+Options allow this information to be suppressed
+.RB ( \-r )
+or supplied in \*[tx] comments instead
+.RB ( \-t ).
 .
 In the absence of
 .I input-file
 arguments,
-.I soelim
+.I \%@g@soelim
 reads the standard input stream.
+.
+Output is written to the standard output stream.
 .
 .
 .PP
@@ -120,31 +134,79 @@ Any other escape sequence in
 .IR macro-file ,
 including
 .RB \[lq] \[rs][rs] \[rq],
-makes
+prevents
 .I \%@g@soelim
-ignore the whole line.
+from replacing the source request.
 .
 .
 .PP
-There must be no whitespace between the leading dot and the two
-characters \[lq]s\[rq] and \[lq]o\[rq].
-.
-Otherwise,
-only
-.I groff
-will interpret the
-.B .so
-request;
+The dot must be at the beginning of a line and must be followed by
+.RB \[lq] so \[rq]
+without intervening spaces or tabs for
 .I \%@g@soelim
-will ignore it
-(but see the
+to handle it.
+.
+This convention allows source requests to be \[lq]protected\[rq] from
+processing by
+.IR \%@g@soelim ,
+for instance as part of macro definitions or
+.B .if
+requests.
+.
+.
+.PP
+There must also be at least one space between
+.RB \[lq] so \[rq]
+and its
+.I macro-file
+argument.
+.
+The
 .B \-C
-option below).
+option overrides this requirement.
 .
 .
 .PP
-The normal processing sequence of
-.I groff
+The foregoing is the limit of
+.IR \%@g@soelim 's
+understanding of
+.I roff
+languages;
+it does not,
+for example,
+replace the input line
+.
+.RS
+.EX
+\&.if 1 .so otherfile
+.EE
+.RE
+.
+with the contents of
+.IR otherfile .
+.
+With its
+.B \-r
+option,
+therefore,
+.I \%@g@soelim
+can be used to process text files in general,
+to flatten a tree of input documents.
+.
+.
+.PP
+.I soelim \" generic
+was designed to handle situations where the target of a
+.I roff \" generic
+source request requires a preprocessor such as
+.IR \%@g@eqn (@MAN1EXT@),
+.IR \%@g@pic (@MAN1EXT@),
+.IR \%@g@refer (@MAN1EXT@),
+or
+.IR \%@g@tbl (@MAN1EXT@).
+.
+The usual processing sequence of
+.IR groff (@MAN1EXT@)
 is as follows.
 .
 .\" Does this groff installation use a command prefix?  In installed
@@ -236,8 +298,13 @@ it must already be read
 .I before
 the input file passes through the preprocessor.
 .
-.I \%@g@soelim
+.IR \%@g@soelim ,
+normally invoked via
+.IR groff 's
+.B \-s
+option,
 handles this.
+.
 .
 .PP
 .ie t \{\
@@ -323,7 +390,6 @@ add
 .RB \[lq] \-I\~.\& \[rq]
 at the appropriate place.
 .
-.IP
 No directory search is performed for files with an absolute file name.
 .
 .
@@ -332,11 +398,7 @@ No directory search is performed for files with an absolute file name.
 Write files \[lq]raw\[rq];
 do not add
 .B .lf
-requests
-(for general use,
-with
-.RI non- groff
-files).
+requests.
 .
 .
 .TP
@@ -349,11 +411,20 @@ rather than
 requests for the same purpose.
 .
 .
+.PP
+If both
+.B \-r
+and
+.B \-t
+are given,
+the last one specified controls.
+.
+.
 .\" ====================================================================
 .SH "See also"
 .\" ====================================================================
 .
-.BR groff (@MAN1EXT@)
+.IR groff (@MAN1EXT@)
 .
 .
 .\" Restore compatibility mode (for, e.g., Solaris 10/11).

@@ -38,6 +38,7 @@
 .  do ftr CR R
 .  do ftr CI I
 .  do ftr CB B
+.  do ftr CBI BI
 .\}
 .
 .\" groff has glyph entities for angle brackets.
@@ -98,8 +99,8 @@
 .  ds m1 \\$1\"
 .  if \\n(mH \{\
 .    \" Start diversion in a new environment.
-.    do ev URL-div
-.    do di URL-div
+.    do ev link-text-env
+.    do di link-text-div
 .  \}
 ..
 .
@@ -113,15 +114,15 @@
 .
 .    \" Has there been one or more input lines for the link text?
 .    ie \\n(dn \{\
-.      do HTML-NS "<a href=""\\*(m1"">"
+\X^html:<a href="\\*(m1">^\c
 .      \" Yes, strip off final newline of diversion and emit it.
-.      do chop URL-div
-.      do URL-div
+.      do chop link-text-div
+.      do link-text-div
 \c
-.      do HTML-NS </a>
+\X^html:</a>^\c
 .    \}
 .    el \
-.      do HTML-NS "<a href=""\\*(m1"">\\*(m1</a>"
+\X^html:<a href="\\*(m1">\\*(m1</a>^\c
 \&\\$*\"
 .  \}
 .  el \{\
@@ -139,8 +140,8 @@
 .  ds m1 \\$1\"
 .  if \\n(mH \{\
 .    \" Start diversion in a new environment.
-.    do ev URL-div
-.    do di URL-div
+.    do ev link-text-env
+.    do di link-text-div
 .  \}
 ..
 .
@@ -154,15 +155,15 @@
 .
 .    \" Has there been one or more input lines for the link text?
 .    ie \\n(dn \{\
-.      do HTML-NS "<a href=""mailto:\\*(m1"">"
+\X^html:<a href="mailto:\\*(m1">^\c
 .      \" Yes, strip off final newline of diversion and emit it.
-.      do chop URL-div
-.      do URL-div
+.      do chop link-text-div
+.      do link-text-div
 \c
-.      do HTML-NS </a>
+\X^html:</a>^\c
 .    \}
 .    el \
-.      do HTML-NS "<a href=""mailto:\\*(m1"">\\*(m1</a>"
+\X^html:<a href="mailto:\\*(m1">\\*(m1</a>^\c
 \&\\$*\"
 .  \}
 .  el \{\
@@ -191,8 +192,13 @@
 .  nr PD 1v
 .  nf
 .  nh
-.  do fam C
-.  ft R
+.  \" Work around Savannah #59522.
+.  ie !'\\*[.T]'dvi' \{\
+.    do fam C
+.    ft R
+.  \}
+.  el \
+.    ft CW
 ..
 .
 .

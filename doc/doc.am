@@ -142,10 +142,13 @@ SUFFIXES += .me .ms .ps .html .txt .texi .dvi .pdf .xhtml
 	$(GROFF_V)$(MKDIR_P) `dirname $@` \
 	&& $(DOC_GROFF) -Tps -ms -mwww >$@
 
-$(PROCESSEDEXAMPLEFILES): $(bin_PROGRAMS) $(prefixexecbin_PROGRAMS) gnu.eps
-$(PROCESSEDEXAMPLEFILES): $(dist_devpsfont_DATA) $(nodist_devpsfont_DATA) $(hdtbltmac_DATA)
-$(PROCESSEDEXAMPLEFILES): $(dist_tmac_DATA) $(nodist_tmac_DATA)
-$(PROCESSEDDOCFILES): $(bin_PROGRAMS) $(prefixexecbin_PROGRAMS) gnu.eps
+$(PROCESSEDEXAMPLEFILES) $(PROCESSEDDOCFILES): \
+  $(bin_PROGRAMS) \
+  $(prefixexecbin_PROGRAMS) \
+  gnu.eps \
+  $(dist_devpsfont_DATA) $(nodist_devpsfont_DATA) \
+  $(hdtbltmac_DATA) \
+  $(dist_tmac_DATA) $(nodist_tmac_DATA)
 
 doc/pic.html: tmac/www.tmac
 doc/pic.html: $(bin_PROGRAMS) $(prefixexecbin_PROGRAMS)

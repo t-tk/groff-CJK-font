@@ -1602,7 +1602,7 @@ do_file(const char *filename)
     if (pr == 0) {		// note: 'pr' initialized after prologue
       device = tmp_dev;
       if (!font::load_desc())
-	fatal("couldn't load DESC file, can't continue");
+	fatal("cannot load description of '%1' device", tmp_dev);
     }
     else {
       if (device == 0 || strcmp(device, tmp_dev) != 0)

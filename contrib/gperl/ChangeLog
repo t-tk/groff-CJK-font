@@ -1,3 +1,31 @@
+2021-01-06  Colin Watson <cjwatson@debian.org>
+
+	* gperl.pl: Avoid Perl's unsafe "<>" operator.
+
+	The "<>" operator is implemented using the two-argument form of
+	"open", which interprets magic such as pipe characters, allowing
+	execution of arbitrary commands which is unlikely to be
+	expected.  Perl >= 5.22 has a "<<>>" operator which avoids this,
+	but also forbids the use of "-" to mean the standard input,
+	which is a facility that the affected groff programs document.
+
+	ARGV::readonly would probably also fix this, but I fundamentally
+	dislike the approach of escaping data in preparation for a
+	language facility to unescape it, especially when the required
+	escaping is as non-obvious as it is here.  (For the same reason,
+	I prefer to use subprocess invocation facilities that allow
+	passing the argument list as a list rather than as a string to
+	be interpreted by the shell.)  So I've abandoned this dubious
+	convenience and changed the affected programs to iterate over
+	command-line arguments manually using the three-argument form of
+	open.
+
+	Fixes <https://savannah.gnu.org/bugs/?55557>.
+
+2020-04-22  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* gperl.1.man: Delete references to groffer.
+
 2018-02-28  Werner LEMBERG  <wl@gnu.org>
 
 	* gperl.am (gperl): Use $(AM_V_GEN) to silence file generation.

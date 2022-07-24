@@ -19,11 +19,6 @@
 
 grog_srcdir = $(top_srcdir)/src/roff/grog
 bin_SCRIPTS += grog
-GROG = src/roff/grog/subs.pl
-
-# grog_dir is defined by a m4 macro
-grogdir = $(grog_dir)
-dist_grog_DATA = $(GROG)
 man1_MANS += src/roff/grog/grog.1
 EXTRA_DIST += \
   src/roff/grog/grog.1.man \
@@ -31,7 +26,7 @@ EXTRA_DIST += \
 
 # Perl version works for all parts of 'groff'.
 
-grog: $(grog_srcdir)/grog.pl $(GROG) $(SH_DEPS_SED_SCRIPT)
+grog: $(grog_srcdir)/grog.pl $(SH_DEPS_SED_SCRIPT)
 	$(AM_V_GEN)$(RM) $@ \
 	&& sed -f "$(SH_DEPS_SED_SCRIPT)" \
 	       -e "1s|^\(#! \).*perl|\\1$(PERL)|" \
@@ -40,7 +35,6 @@ grog: $(grog_srcdir)/grog.pl $(GROG) $(SH_DEPS_SED_SCRIPT)
 	       -e "s|[@]libdir[@]|$(DESTDIR)$(libdir)|g" \
 	       -e "s|[@]EGREP[@]|$(EGREP)|g" \
 	       -e "s|[@]VERSION[@]|$(VERSION)|" \
-	       -e "s|[@]grog_dir[@]|$(grog_dir)|" \
 	       -e "$(SH_SCRIPT_SED_CMD)" \
 	       $(grog_srcdir)/grog.pl \
 	       >$@ \

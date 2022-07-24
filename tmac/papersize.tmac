@@ -15,7 +15,7 @@
 .\" '-l' to override the default paper length and orientation as set in
 .\" the driver specific DESC file.
 .\"
-.\" For example, use the following for PS output on A4 paper in
+.\" For example, use the following for PostScript output on A4 paper in
 .\" landscape orientation:
 .\"
 .\"   groff -Tps -dpaper=a4l -P-pa4 -P-l -ms foo.ms > foo.ps
@@ -106,6 +106,8 @@
 .  ds paper-dl-length 22c
 .  ds paper-dl-width 11c
 .
+.  \" Save the input parameter for a later diagnostic.
+.  ds paper-arg \*[paper]\"
 .  \" We assume that letters a-z and A-Z aren't mapped during start-up.
 .  tr AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz
 .  di lowercase
@@ -150,7 +152,7 @@
 .    nr paper-w 1
 .
 .  ie \n[paper-w] \
-.    tm warning: Unknown paper size '\*[paper]'
+.    tm papersize.tmac: warning: unrecognized paper size '\*[paper-arg]'
 .  el \
 .    if !r LL \
 .      nr LL \n[.l]u  \" for ms, mdoc, man

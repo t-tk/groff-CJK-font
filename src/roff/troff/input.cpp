@@ -5855,7 +5855,7 @@ void if_request()
 void else_request()
 {
   if (if_else_stack.is_empty()) {
-    warning(WARN_EL, "unbalanced .el request");
+    warning(WARN_EL, "unbalanced 'el' request");
     skip_alternative();
   }
   else {
@@ -5905,7 +5905,7 @@ void while_request()
     }
   }
   if (level != 0)
-    error("unbalanced \\{ \\}");
+    error("unbalanced brace escape sequences");
   else {
     while_depth++;
     input_stack::add_boundary();
@@ -5956,9 +5956,7 @@ void while_continue_request()
   }
 }
 
-// .so
-
-void source()
+void do_source(bool quietly)
 {
   symbol nm = get_long_name(1);
   if (nm.is_null())
@@ -5971,9 +5969,27 @@ void source()
     if (fp)
       input_stack::push(new file_iterator(fp, nm.contents()));
     else
-      error("can't open '%1': %2", nm.contents(), strerror(errno));
+      // Suppress diagnostic only if we're operating quietly and it's an
+      // expected problem.
+      if (!(quietly && (ENOENT == errno)))
+	error("can't open '%1': %2", nm.contents(), strerror(errno));
     tok.next();
   }
+}
+
+// .so
+
+void source()
+{
+  do_source(false /* not quietly*/ );
+}
+
+// .soquiet: like .so, but silently ignore files that can't be opened
+// due to their nonexistence
+
+void source_quietly()
+{
+  do_source(true /* quietly */ );
 }
 
 // like .so but use popen()
@@ -5981,7 +5997,7 @@ void source()
 void pipe_source()
 {
   if (!unsafe_flag) {
-    error(".pso request not allowed in safer mode");
+    error("'pso' request not allowed in safer mode");
     skip_line();
   }
   else {
@@ -6731,7 +6747,7 @@ void do_open(int append)
 void open_request()
 {
   if (!unsafe_flag) {
-    error(".open request not allowed in safer mode");
+    error("'open' request not allowed in safer mode");
     skip_line();
   }
   else
@@ -6741,7 +6757,7 @@ void open_request()
 void opena_request()
 {
   if (!unsafe_flag) {
-    error(".opena request not allowed in safer mode");
+    error("'opena' request not allowed in safer mode");
     skip_line();
   }
   else
@@ -7533,7 +7549,7 @@ char *read_string()
 void pipe_output()
 {
   if (!unsafe_flag) {
-    error(".pi request not allowed in safer mode");
+    error("'pi' request not allowed in safer mode");
     skip_line();
   }
   else {
@@ -7570,7 +7586,7 @@ static int system_status;
 void system_request()
 {
   if (!unsafe_flag) {
-    error(".sy request not allowed in safer mode");
+    error("'sy' request not allowed in safer mode");
     skip_line();
   }
   else {
@@ -7727,17 +7743,21 @@ static void parse_output_page_list(char *p)
 
 static FILE *open_mac_file(const char *mac, char **path)
 {
-  // Try first FOOBAR.tmac, then tmac.FOOBAR
+  // Try `mac`.tmac first, then tmac.`mac`.  Expect ENOENT errors.
   char *s1 = new char[strlen(mac)+strlen(MACRO_POSTFIX)+1];
   strcpy(s1, mac);
   strcat(s1, MACRO_POSTFIX);
   FILE *fp = mac_path->open_file(s1, path);
+  if (!fp && ENOENT != errno)
+    error("can't open macro file '%1': %2", s1, strerror(errno));
   a_delete s1;
   if (!fp) {
     char *s2 = new char[strlen(mac)+strlen(MACRO_PREFIX)+1];
     strcpy(s2, MACRO_PREFIX);
     strcat(s2, mac);
     fp = mac_path->open_file(s2, path);
+  if (!fp && ENOENT != errno)
+      error("can't open macro file '%1': %2", s2, strerror(errno));
     a_delete s2;
   }
   return fp;
@@ -7748,7 +7768,7 @@ static void process_macro_file(const char *mac)
   char *path;
   FILE *fp = open_mac_file(mac, &path);
   if (!fp)
-    fatal("can't find macro file %1", mac);
+    fatal("unable to open macro file for -m argument '%1'", mac);
   const char *s = symbol(path).contents();
   free(path);
   input_stack::push(new file_iterator(fp, s));
@@ -7771,7 +7791,7 @@ static void process_startup_file(const char *filename)
   mac_path = orig_mac_path;
 }
 
-void macro_source()
+void do_macro_source(bool quietly)
 {
   symbol nm = get_long_name(1);
   if (nm.is_null())
@@ -7781,9 +7801,10 @@ void macro_source()
       tok.next();
     char *path;
     FILE *fp = mac_path->open_file(nm.contents(), &path);
-    // .mso doesn't (and cannot) go through open_mac_file, so we
-    // need to do it here manually: If we have tmac.FOOBAR, try
-    // FOOBAR.tmac and vice versa
+    // .mso cannot go through open_mac_file, which handles the -m option
+    // and expects only an identifier like "s" or "an", not a file name.
+    // We need to do it here manually: If we have tmac.FOOBAR, try
+    // FOOBAR.tmac and vice versa.
     if (!fp) {
       const char *fn = nm.contents();
       size_t fnlen = strlen(fn);
@@ -7810,9 +7831,28 @@ void macro_source()
       free(path);
     }
     else
-      warning(WARN_FILE, "can't find macro file '%1'", nm.contents());
+      // Suppress diagnostic only if we're operating quietly and it's an
+      // expected problem.
+      if (!quietly && (ENOENT == errno))
+	warning(WARN_FILE, "can't open macro file '%1': %2",
+		nm.contents(), strerror(errno));
     tok.next();
   }
+}
+
+// .mso
+
+void macro_source()
+{
+  do_macro_source(false /* not quietly (if WARN_FILE enabled) */ );
+}
+
+// .msoquiet: like .mso, but silently ignore files that can't be opened
+// due to their nonexistence
+
+void macro_source_quietly()
+{
+  do_macro_source(true /* quietly */ );
 }
 
 static void process_input_file(const char *name)
@@ -8275,6 +8315,7 @@ void init_input_requests()
   init_request("lf", line_file);
   init_request("lsm", leading_spaces_macro);
   init_request("mso", macro_source);
+  init_request("msoquiet", macro_source_quietly);
   init_request("nop", nop_request);
   init_request("nroff", nroff_request);
   init_request("nx", next_file);
@@ -8296,6 +8337,7 @@ void init_input_requests()
   init_request("schar", define_special_character);
   init_request("shift", shift);
   init_request("so", source);
+  init_request("soquiet", source_quietly);
   init_request("spreadwarn", spreadwarn_request);
   init_request("stringdown", stringdown_request);
   init_request("stringup", stringup_request);

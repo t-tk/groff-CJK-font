@@ -200,7 +200,6 @@ localtmacdir=$(dataprogramdir)/site-tmac
 # gxditview.
 
 # glilypond_dir
-# grog_dir
 # gpinyin_dir
 
 # `tmacpath' says where to look for macro files.
@@ -319,7 +318,7 @@ man7dir=$(manroot)/man$(man7ext)
 # make_uninstall_infodoc
 
 # The configure script checks whether all necessary utility programs for
-# grohtml are available -- only then we can build the HTML documentation.
+# grohtml are available -- only then can we build the HTML documentation.
 # make_htmldoc
 # make_install_htmldoc
 # make_uninstall_htmldoc
@@ -329,7 +328,7 @@ man7dir=$(manroot)/man$(man7ext)
 # make_uninstall_htmlexamples
 
 # The configure script also checks whether all necessary utility programs
-# for pdfroff are available -- only then we can build PDF documentation.
+# for pdfroff are available -- only then can we build PDF documentation.
 # make_pdfdoc
 # make_install_pdfdoc
 # make_uninstall_pdfdoc
@@ -344,7 +343,7 @@ man7dir=$(manroot)/man$(man7ext)
 # make_install_otherdoc
 # make_uninstall_otherdoc
 
-# `examples' -- a generic switch, but the generated examples are furtherly
+# `examples' -- a generic switch, but the generated examples are further
 # subdivided to catch HTML and PDF production availability.
 # make_examples
 # make_install_examples
@@ -576,7 +575,7 @@ AM_TESTS_ENVIRONMENT = \
 # This is done by the m4 macro GROFF_G that checks for the presence of
 # GNU Troff built-in \n[.g] macro. If a Unix Troff binary was
 # detected, the following programs and scripts names will have a 'g'
-# prefix: chem, tbl, eqn, neqn, pic, soleimm grn, refer, lookbib,
+# prefix: chem, tbl, eqn, neqn, pic, soelim, grn, refer, lookbib,
 # troff, nroff. Also, PROG_PREFIX will be set to 'g' in the generated
 # header defs.h so that these programs could be called correctly.
 #
@@ -587,9 +586,9 @@ NAMEPREFIX=$(g)
 prefixexecbin_PROGRAMS =
 prefixexecbin_SCRIPTS =
 if USEPROGRAMPREFIX
-# We use datadir because the uninstall rule for the PROGRAMS attempt
+# We use datadir because the uninstall rule for the PROGRAMS attempts
 # to cd into prefixexecbindir, and thus if prefixexecbindir is removed
-# two consecutive uninstall would fail
+# two consecutive uninstalls would fail
 prefixexecbindir = $(datadir)
 else
 prefixexecbindir = $(bindir)
@@ -658,6 +657,7 @@ include $(top_srcdir)/contrib/mm/mm.am
 include $(top_srcdir)/contrib/mom/mom.am
 include $(top_srcdir)/contrib/pdfmark/pdfmark.am
 include $(top_srcdir)/contrib/pic2graph/pic2graph.am
+include $(top_srcdir)/contrib/rfc1345/rfc1345.am
 include $(top_srcdir)/doc/doc.am
 include $(top_srcdir)/font/devX100/devX100.am
 include $(top_srcdir)/font/devX100-12/devX100-12.am
@@ -715,8 +715,8 @@ include $(top_srcdir)/tmac/tmac.am
 # make all or make check before all other targets. However, if another
 # target is built from a clean build tree, (for example make groff)
 # the files in BUILT_SOURCES will not be built first. That is why
-# additional dependencies where added in the .am files that lists
-# objects that use defs (for exmaple in groff.am:
+# additional dependencies were added in the .am files that list
+# objects that use defs (for example in groff.am:
 # src/roff/groff/groff.$(OBJEXT): defs.h)
 BUILT_SOURCES += defs.h
 
@@ -793,9 +793,6 @@ uninstall_groffdirs:
 	    rmdir $(DESTDIR)$(localfontdir); \
 	  fi; \
 	  rmdir $(DESTDIR)$(dataprogramdir); \
-	fi
-	if test -d $(DESTDIR)$(grog_dir); then \
-	  rmdir $(DESTDIR)$(grog_dir); \
 	fi
 	if test -d $(DESTDIR)$(libprogramdir); then \
 	  if test -d $(DESTDIR)$(systemtmacdir); then \
@@ -880,7 +877,7 @@ MOSTLYCLEANFILES += $(prefixexecbin_SCRIPTS) $(bin_SCRIPTS) \
 # because a command substitution is being nested inside yet another
 # invocation of sed.
 #
-# * For this target; no assurances about the good behavior of unusual
+# * For this target, no assurances about the good behavior of unusual
 #   characters in Makefile variables in other aspects of the groff build
 #   are offered.
 makevarescape=$(top_srcdir)/makevarescape.sed

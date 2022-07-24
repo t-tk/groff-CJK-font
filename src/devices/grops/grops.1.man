@@ -305,7 +305,7 @@ file; it accepts the same arguments as the
 command.
 .
 See
-.B groff_font (@MAN5EXT@)
+.IR groff_font (@MAN5EXT@)
 for details.
 .
 .TP
@@ -1235,8 +1235,8 @@ PFA=$INT.pfa
 AFM=$INT.afm
 GFN=RSR
 DIR=$HOME/.local/groff/font
-mkdir -p \[dq]$DIR\[dq]/devps
-fontforge -lang=ff -c \[dq]Open(\[rs]\[dq]$TTF\[rs]\[dq]);\[rs]
+mkdir \-p \[dq]$DIR\[dq]/devps
+fontforge \-lang=ff \-c \[dq]Open(\[rs]\[dq]$TTF\[rs]\[dq]);\[rs]
 \tGenerate(\[rs]\[dq]$DIR/devps/$PFA\[rs]\[dq]);\[dq]
 afmtodit \[dq]$DIR/devps/$AFM\[dq] \[dq]$MAP\[dq] \
 \[dq]$DIR/devps/$GFN\[dq]
@@ -1257,7 +1257,7 @@ The test procedure is simple.
 .RS 4
 .LP
 .EX
-printf \[dq].ft RSR\[rs]nHello, world!\[rs]n\[dq] | groff -F \
+printf \[dq].ft RSR\[rs]nHello, world!\[rs]n\[dq] | groff \-F \
 \[dq]$DIR\[dq] > hello.ps
 .EE
 .RE
@@ -1282,7 +1282,7 @@ option.
 .
 .
 .\" ====================================================================
-.SH "Font Installation"
+.SH "Font installation"
 .\" ====================================================================
 .
 This section summarizes the above explanations; it can serve as a
@@ -1416,7 +1416,7 @@ thus the following line should be added to
 .
 .
 .\" ====================================================================
-.SH "Old Fonts"
+.SH "Old fonts"
 .\" ====================================================================
 .
 groff versions 1.19.2 and earlier contain a slightly different set of
@@ -1456,6 +1456,17 @@ or add the directory to groff's font path environment variable
 .\" ====================================================================
 .
 .TP
+.I GROFF_FONT_PATH
+A list of directories in which to seek the selected output device's
+directory of device and font description files.
+.
+See
+.IR \%@g@troff (@MAN1EXT@)
+and
+.IR \%groff_font (@MAN5EXT@).
+.
+.
+.TP
 .I GROPS_PROLOGUE
 If this is set to
 .IR foo ,
@@ -1469,19 +1480,6 @@ uses the file
 The option
 .B \-P
 overrides this environment variable.
-.
-.
-.TP
-.I GROFF_FONT_PATH
-A list of directories in which to search for the
-.IR dev name
-directory in addition to the default ones.
-.
-See
-.IR \%@g@troff (@MAN1EXT@)
-and
-.IR groff_font (@MAN5EXT@)
-for more details.
 .
 .
 .TP

@@ -985,8 +985,38 @@ instead of the standard call to the
 macro.
 .
 .
+.LP
+Using
+.I tbl
+macros within conditional input
+(that is,
+contingent upon an
+.BR .if ,
+.BR .ie ,
+.BR .el ,
+or
+.B .while
+request)
+can result in misleading line numbers in subsequent diagnostics.
+.
+.I tbl
+unconditionally injects its output into the source document,
+but the conditional branch containing it may not be taken,
+and if it is not,
+the
+.B .lf
+requests that
+.I tbl
+injects to restore the source line number cannot take effect.
+.
+Consider copying the input line counter register
+.B .c
+and restoring its value at a convenient location after applicable
+arithmetic.
+.
+.
 .\" ====================================================================
-.SS "Interaction with \%@g@eqn"
+.SS "Interaction with \f[I]\%@g@eqn\f[]"
 .\" ====================================================================
 .
 .IR \%@g@tbl (@MAN1EXT@)
@@ -997,7 +1027,7 @@ automatically takes care of the correct order of preprocessors).
 .
 .
 .\" ====================================================================
-.SS "GNU tbl enhancements"
+.SS "GNU \f[I]tbl\f[] enhancements"
 .\" ====================================================================
 .
 There is no limit on the number of columns in a table,
@@ -1033,7 +1063,7 @@ you should avoid using any names beginning with
 .
 .
 .\" ====================================================================
-.SS "GNU tbl within macros"
+.SS "Using GNU \f[I]tbl\f[] within macros"
 .\" ====================================================================
 .
 Since
@@ -1226,7 +1256,7 @@ note that such columns usually don't work with terminal devices.
 .
 .
 .\" ====================================================================
-.SH "Simple Examples"
+.SH Examples
 .\" ====================================================================
 .
 A simple table definition follows.
