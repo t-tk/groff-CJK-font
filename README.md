@@ -38,6 +38,7 @@ It supports font definition by a range of unicode code points.
 - font/devps/KOG
 
 # test samples
+- src/roff/groff/tests/smoke-test_ps_device.sh
 - tests/*
 
 
