@@ -5214,6 +5214,7 @@ groff_TESTS = \
   src/roff/groff/tests/regression_savannah_58337.sh \
   src/roff/groff/tests/regression_savannah_59202.sh \
   src/roff/groff/tests/smoke-test_html_device.sh \
+  src/roff/groff/tests/smoke-test_ps_device.sh \
   src/roff/groff/tests/string_case_xform_errors.sh \
   src/roff/groff/tests/string_case_xform_requests.sh \
   src/roff/groff/tests/string_case_xform_unicode_escape.sh \
@@ -9513,6 +9514,13 @@ src/roff/groff/tests/smoke-test_html_device.sh.log: src/roff/groff/tests/smoke-t
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
+src/roff/groff/tests/smoke-test_ps_device.sh.log: src/roff/groff/tests/smoke-test_ps_device.sh
+	@p='src/roff/groff/tests/smoke-test_ps_device.sh'; \
+	b='src/roff/groff/tests/smoke-test_ps_device.sh'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 src/roff/groff/tests/string_case_xform_errors.sh.log: src/roff/groff/tests/string_case_xform_errors.sh
 	@p='src/roff/groff/tests/string_case_xform_errors.sh'; \
 	b='src/roff/groff/tests/string_case_xform_errors.sh'; \
@@ -10023,8 +10031,8 @@ maintainer-clean-generic:
 	-rm -f src/preproc/refer/label.cpp
 	-rm -f src/preproc/refer/label.hpp
 	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
-@BUILD_INFODOC_FALSE@install-html-local:
 @BUILD_INFODOC_FALSE@install-pdf-local:
+@BUILD_INFODOC_FALSE@install-html-local:
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
