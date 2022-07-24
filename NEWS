@@ -1,4 +1,4 @@
-    Copyright (C) 1992-2020 Free Software Foundation, Inc.
+    Copyright (C) 1992-2021 Free Software Foundation, Inc.
 
     Copying and distribution of this file, with or without modification,
     are permitted in any medium without royalty provided the copyright
@@ -13,14 +13,39 @@ VERSION 1.23.0
 troff
 -----
 
+o The groff locale (the default input language) is now determined using
+  the system locale.  The LC_ALL and LANG environment variables are
+  checked, in that order.  If set, the value's first two characters
+  determine the groff locale.  If these variables are not set, if the
+  first one found is set to "C", or if no groff localization file exists
+  for the language, groff falls back to English, loading en.tmac.
+
+  Those who want groff's default locale to differ from LC_ALL/LANG
+  should edit the troffrc file to source the appropriate groff locale
+  macro file (cs.tmac, de.tmac, den.tmac, fr.tmac, ja.tmac, sv.tmac,
+  zh.tmac).
+
+  The default hyphenation mode (as used by the .hy request) for users of
+  English is thus changed from "1", which was inappropriate for the
+  TeX-based hyphenation patterns groff has used since at least 1991, to
+  "4".  However, invoking .hy without an argument remains synonymous
+  with ".hy 1".
+
 o A new read-only register ".cp" is implemented.  Within a .do request,
   "\n[.cp]" holds the saved value of compatibility mode.  See
   groff_diff(7) or the groff Texinfo manual for rationale, use case, and
   example.
 
+o A new read-only register ".nm" is implemented.  It reports the
+  enablement status of output line numbering (caused by the .nm
+  request) irrespective of the temporary suspension of numbering with
+  the .nn request.  This register was introduced because there was no
+  way to introspect its state, tbl(1) needs to be able to do so, and the
+  writable line number register \n[ln] is not a reliable proxy for it.
+
 o Point-size escapes of the form '\sNN', where NN is in the range 10-39,
   are now recognized only in compatibility mode (groff -C); when
-  encountered, an error diagnostic is emitted.  In normal mode, \sN is
+  encountered, an error diagnostic is emitted.  Otherwise, \sN is
   interpreted as setting the point size to the single-digit value N,
   which ends the escape.  This change eliminates a quirk in the language
   grammar that dates back to the mid-1970s (AT&T troff by Ossanna) but
@@ -47,6 +72,10 @@ o Point-size escapes of the form '\sNN', where NN is in the range 10-39,
   advanced usage) are expected to be able to cope; ask the development
   team for support if you need it.
 
+o New requests 'soquiet' and 'msoquiet' are available.  They operate as
+  'so' and 'mso', respectively, except that they do not emit a warning
+  diagnostic if the file name argument does not exist.
+
 o New requests 'stringdown' and 'stringup' are available.  These change
   the string named in their argument by replacing each of its bytes with
   its lowercase or uppercase version (if any), respectively.  groff
@@ -72,15 +101,20 @@ o The new option -V emits the constructed groff command that nroff would
   this is a historical deficiency of the Bourne shell family not yet
   corrected by the POSIX standard.
 
-o nroff now recognizes the -b, -E, and -z options and passes them
-  through to troff.
+o nroff now recognizes the -b, -E, -k, -K, and -z options and passes
+  them through to troff.
 
 Macro Packages
 --------------
 
+o The new rfc1345 macro package, contributed by Dorai Sitaram, defines
+  special character glyph names implementing RFC 1345 mnemonics (plus
+  some additions from Vim, which itself uses RFC 1345 for its digraphs).
+  It is documented in the groff_rfc1345(7) man page.
+
 o The an (man) macro package supports a new AD string to put the default
   adjustment mode under user control.  The default is 'b' (adjust lines
-  to both margins) as has been the Unix man practice since 1979.
+  to both margins) as has been the Unix man(7) default since 1979.
 
 o The an (man) and doc (mdoc) macro packages support new CS and CT
   registers to control rendering of man page section headings and titles
@@ -102,8 +136,8 @@ o The an (man) macro package no longer honors an .ll request to set the
   (mandoc, Heirloom Doctools troff).
 
 o The groff_man(7) man page documenting the groff implementation of the
-  man macro package has been split into two pages.  The original page
-  remains as a terser reference for experienced users.  A new page,
+  an (man) macro package has been split into two pages.  The original
+  page remains as a terser reference for experienced users.  A new page,
   groff_man_style(7), is a tutorial and style guide containing the same
   material supplemented with explanations, examples, and advice for the
   reader who is not an expert in *roff systems or in writing man pages.
@@ -113,20 +147,38 @@ o The doc (mdoc) macro package now honors the HY register as the an
   furthermore recognizes but ignores the AD string (see above) for
   compatibility with an (man).
 
-o The s (ms) macro package has changed the default footnote line length
-  (\n[FL]) from 5/6ths of the text line length (\n[LL]) to 11/12ths for
-  better compatibility with ms documents prepared with AT&T ms or its
-  descendant implementations in Heirloom Doctools and neatroff.
+o The m (mm) macro package now requires a title to be declared when
+  memorandum type 5 is used (.MT 5), just as type 4 has since groff 1.10
+  (November 1995).
+
+o The m (mm) and s (ms) macro packages no longer manipulate the warning
+  level.  If you want all warnings on, use the ".warn" request with no
+  arguments in your document or pass "-w w" to groff (see troff(1) or
+  the groff Texinfo manual for more on warnings).
+
+o The s (ms) macro package supports a new string, FR, which defines the
+  ratio of the footnote line length to the current line length.  The
+  default expression is "11/12", 11/12ths of the normal line length,
+  adopted for better compatibility with ms documents prepared with AT&T
+  ms or its descendant implementations in Heirloom Doctools and
+  neatroff.  This is a change from previous groff releases, which used a
+  ratio of 5/6ths.
+
+  You may wish to set the FR string to 1 to align with contemporary
+  typesetting practices.  In Version 7 Unix ms, its descendants, and
+  groff prior to this release, an FL register was used for the line
+  length in footnotes; however, setting this register at document
+  initialization time had no effect on the footnote line length in
+  multi-column arrangements.
+
+  FR should be used in preference to the old FL register in contemporary
+  documents; see the groff Texinfo manual or the "Using groff with the
+  ms macros" document, also part of this release.
 
 o The s (ms) macro package has added strings, \*< and \*>, to perform
   subscripting within a paragraph.  They work analogously to the \*{ and
   \*} superscripting strings that have been present in groff ms since
   1991 or earlier.
-
-o The s (ms) macro package no longer manipulates the warning level.  If
-  you want all warnings on, use the ".warn" request with no arguments in
-  your ms document or pass "-w w" to groff (see troff(1) or the groff
-  Texinfo manual for more on warnings).
 
 grotty
 ------
@@ -156,9 +208,10 @@ o The semantics of the environment variable SOURCE_DATE_EPOCH (support
   the current time (or SOURCE_DATE_EPOCH) as a local time.  While a
   convenient and defensible choice for reproducible build efforts, it
   runs against the grain of user expectations.  Systems programmers like
-  monotonically increasing clocks; the broader user base usually prefers
-  a clock that follows an applicable civil calendar.  Users of
-  SOURCE_DATE_EPOCH may also wish to set the TZ environment variable.
+  time-zone invariant, monotonically increasing clocks; the broader
+  user base usually prefers a clock that follows an applicable civil
+  calendar.  Users of SOURCE_DATE_EPOCH may also wish to set the TZ
+  environment variable.
 
 o groffer has been deleted from the distribution.
 
@@ -906,8 +959,8 @@ Troff
 o Two new read-only, string-valued registers `.m' and `.M' return the
   name of the current drawing and background color, respectively.
 
-o New read-only register `.U' which is set to 1 if in safer mode and set
-  to 0 if in unsafe mode.
+o New read-only register `.U' which is set to 1 if in unsafe mode, and 0
+  otherwise.
 
 o An input encoding file for latin-5 (a.k.a. ISO 8859-9) has been added.
   Example use:

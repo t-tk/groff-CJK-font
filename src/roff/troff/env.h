@@ -281,6 +281,7 @@ public:
   hunits get_digit_width();
   int get_font() { return fontno; };	// .f
   int get_zoom();			// .zoom
+  int get_numbering_nodes();		// .nm
   font_family *get_family() { return family; }
   int get_bold();			// .b
   int get_adjust_mode();		// .j

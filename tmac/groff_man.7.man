@@ -9,7 +9,7 @@ groff_man \- compose manual pages with GNU roff
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 1999-2018, 2020 Free Software Foundation, Inc.
+.\" Copyright (C) 1999-2018, 2020-2021 Free Software Foundation, Inc.
 .\"
 .\" Permission is granted to make and distribute verbatim copies of this
 .\" manual provided the copyright notice and this permission notice are
@@ -307,6 +307,13 @@ and,
 on typesetter devices,
 slightly larger than the base point size.
 .
+If the heading font
+.B \[rs]*[HF]
+is bold,
+use of an italic style in
+.I heading-text
+is mapped to the bold-italic style if available in the font family.
+.
 Additionally,
 the left margin and indentation affecting subsequent text are reset to
 their default values.
@@ -367,6 +374,13 @@ is given no arguments,
 is set in bold
 (or the font specified by the string
 .BR HF ).
+.
+If the heading font
+.B \[rs]*[HF]
+is bold,
+use of an italic style in
+.I heading-text
+is mapped to the bold-italic style if available in the font family.
 .
 Additionally,
 the left margin and indentation affecting subsequent text are reset to
@@ -866,6 +880,8 @@ Unlike the above font style macros,
 the font style alternation macros below accept only arguments on the
 same line as the macro call.
 .
+Italic corrections are applied as appropriate.
+.
 If space is required within one of the arguments,
 first consider whether the same result could be achieved with as much
 clarity by using the single-style macros on separate input lines.
@@ -1117,7 +1133,7 @@ When a preprocessor like
 or
 .I \%@g@eqn
 is needed,
-a hint can be given to the man page formatter by making the first line
+a hint can be given to the man page librarian by making the first line
 of a man page look like this:
 .
 .
@@ -1192,16 +1208,19 @@ Because these macros are hooks for
 internals,
 man pages have no reason to call them.
 .
+A macro definition for these hooks typically consists of a \[lq].tl\[rq]
+request.
+.
 .
 .TP
 .B .BT
-Set the page footer
+Set the page footer text
 (\(lqbottom trap\(rq).
 .
 .
 .TP
 .B .PT
-Set the page header
+Set the page header text
 (\(lqpage trap\(rq).
 .
 .
@@ -1568,6 +1587,11 @@ relative to the bottom of the page if negative or top if positive,
 to
 .IR footer-distance .
 .
+At twice this distance,
+the page text is broken before writing the footer.
+.
+Ignored if continuous rendering is enabled.
+.
 The default is \-0.5i.
 .
 .
@@ -1847,7 +1871,7 @@ are preprocessors used with man pages.
 .
 .PP
 .IR man (1)
-describes the man page formatter on your system.
+describes the man page librarian on your system.
 .
 .
 .PP

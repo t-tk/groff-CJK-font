@@ -1293,8 +1293,8 @@ Two new read-only, string-valued registers `.m' and `.M' return the
 name of the current drawing and background color, respectively.
 
 .LI
-New read-only register `.U' which is set to\~1 if in safer mode and set
-to\~0 if in unsafe mode.
+New read-only register `.U' which is set to\~1 if in unsafe mode and
+0\~otherwise.
 
 .LI
 An input encoding file for \%latin-5 (a.k.a.\& ISO \%8859-9) has been

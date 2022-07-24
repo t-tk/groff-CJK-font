@@ -20,7 +20,7 @@ for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-Version 2.4-4_d
+Version 2.4-4_e
 ---------------
 Antoine de St-Exupéry asserted that elegance in engineering is
 achieved not when there is nothing left to add, but when there is
@@ -54,7 +54,7 @@ extensions, and float management).
 .if (\n[.x]\n[.y] < 118) \
 .   ab [mom]: You need GNU troff version 1.18 or higher to run this version of mom.
 \# Mom version
-.ds version 2.4-4_d
+.ds version 2.4-4_e
 .if dVERSION \{\
 .   ab [mom]: Version \*[version]
 .\}
@@ -4179,7 +4179,10 @@ y\R'#DESCENDER \\n[.cdp]'
 \#
 .MAC PRINTSTYLE END
 .    if !\\n[#COLLATE]=1 \{\
-.       if !d$PAPER .PAPER LETTER
+.       if !d$PAPER \{\
+.          PAGELENGTH 11i
+.          PAGEWIDTH  8.5i
+.       \}
 .       if '\\$1'TYPEWRITE' \{\
 .          nr #PRINT_STYLE 1
 .          if !\\n[#DOC_TYPE]=4 \{\
@@ -5758,6 +5761,13 @@ SMALLCAPS takes precedence.
 \#   $REVISION_STRING are in the COPYSTYLE macro.
 \#
 .MAC DEFAULTS END
+.    if !\\n[#DOC_TYPE]=5 \{\
+.       ie !d $PAPER \{\
+.          PAGEWIDITH \\n[#PAGE_WIDTH]u
+.          PAGELENGTH \\n[.p]u
+.       \}
+.       el .PAPER \\*[$PAPER]
+.    \}
 .    if !\\n[#DOC_TYPE] .DOCTYPE DEFAULT
 .    if !r #CH_NUM .nr #CH_NUM 1 
 .    ie \\n[#PAGENUM_STYLE_SET] .PAGENUM_STYLE \\*[$PAGENUM_STYLE]

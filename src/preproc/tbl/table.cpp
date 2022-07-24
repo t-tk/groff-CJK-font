@@ -1,4 +1,4 @@
-/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2021 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
 This file is part of groff.
@@ -63,6 +63,11 @@ const int DEFAULT_COLUMN_SEPARATION = 3;
 #define ROW_MAX_LINE_REG PREFIX "lnmx"
 #define REPEATED_NM_SET_MACRO PREFIX "rlns"
 #define REPEATED_NM_SUS_MACRO PREFIX "rlnx"
+#define SAVED_HYPHENATION_MODE_REG PREFIX "hyphmode"
+#define SAVED_HYPHENATION_LANG_NAME PREFIX "hyphlang"
+#define SAVED_HYPHENATION_MAX_LINES_REG PREFIX "hyphmaxlines"
+#define SAVED_HYPHENATION_MARGIN_REG PREFIX "hyphmargin"
+#define SAVED_HYPHENATION_SPACE_REG PREFIX "hyphspace"
 
 // this must be one character
 #define COMPATIBLE_REG PREFIX "c"
@@ -1771,6 +1776,11 @@ void table::init_output()
 	 ".in \\n[.i]u\n"
 	 ".ll \\n[.l]u\n"
 	 ".ls \\n[.L]\n"
+	 ".hy \\\\n[" SAVED_HYPHENATION_MODE_REG "]\n"
+	 ".hla \\\\*[" SAVED_HYPHENATION_LANG_NAME "]\n"
+	 ".hlm \\\\n[" SAVED_HYPHENATION_MAX_LINES_REG "]\n"
+	 ".hym \\\\n[" SAVED_HYPHENATION_MARGIN_REG "]\n"
+	 ".hys \\\\n[" SAVED_HYPHENATION_SPACE_REG "]\n"
 	 ".ad \\n[.j]\n"
 	 ".ie \\n[.u] .fi\n"
 	 ".el .nf\n"
@@ -1782,6 +1792,11 @@ void table::init_output()
 	 ".nr " SAVED_SIZE_REG " \\n[.s]\n"
 	 ".nr " SAVED_FILL_REG " \\n[.u]\n"
 	 ".ds " SAVED_TABS_NAME " \\n[.tabs]\n"
+	 ".nr " SAVED_HYPHENATION_MODE_REG " \\n[.hy]\n"
+	 ".ds " SAVED_HYPHENATION_LANG_NAME " \\n[.hla]\n"
+	 ".nr " SAVED_HYPHENATION_MAX_LINES_REG " (\\n[.hlm])\n"
+	 ".nr " SAVED_HYPHENATION_MARGIN_REG " \\n[.hym]\n"
+	 ".nr " SAVED_HYPHENATION_SPACE_REG " \\n[.hys]\n"
 	 ".nr T. 0\n"
 	 ".nr " CURRENT_ROW_REG " 0-1\n"
 	 ".nr " LAST_PASSED_ROW_REG " 0-1\n"
@@ -1803,7 +1818,7 @@ void table::init_output()
 	 ".ie !'\\n(.z'' \\{.nm\n"
 	 "\\!." REPEATED_NM_SET_MACRO " \"\\$1\"\n"
 	 ".\\}\n"
-	 ".el .if \\n[ln] \\{\\\n"
+	 ".el .if \\n[.nm] .if \\n[ln] \\{\\\n"
 	 ".if '\\$1'd' .nr " ROW_START_LINE_REG " \\n[ln]\n"
 	 ".if '\\$1's' .nm \\n[" ROW_START_LINE_REG "]\n"
 	 ".if '\\$1'm' .nr " ROW_MAX_LINE_REG " \\n[ln]>?\\n[" ROW_MAX_LINE_REG "]\n"
@@ -1813,7 +1828,7 @@ void table::init_output()
 	 ".ie !'\\n(.z'' \\{.nm\n"
 	 "\\!." REPEATED_NM_SUS_MACRO " \"\\$1\"\n"
 	 ".\\}\n"
-	 ".el .if \\n[ln] \\{\\\n"
+	 ".el .if \\n[.nm] .if \\n[ln] \\{\\\n"
 	 ".ie '\\$1's' \\{\\\n"
 	 ".nr " ROW_SAVE_LINE_REG " \\n(ln<?\\n[" ROW_MAX_LINE_REG "]\n"
 	 ".nm +0 \\n[ln]+42\n"
@@ -1863,12 +1878,12 @@ void table::init_output()
 	   ".  tm1 \" table row will not fit on page \\n%\n"
 	   ".\\}\n"
 	   ".nf\n"
-	   ".if \\n[ln] .nm \\n[ln]\n"
+	   ".if \\n[.nm] .if \\n[ln] .nm \\n[ln]\n"
 	   ".nr " ROW_MAX_LINE_REG " \\n[ln]\n"
 	   ".ls 1\n"
 	   "." SECTION_DIVERSION_NAME "\n"
 	   ".ls\n"
-	   ".if \\n[ln] .nm\n"
+	   ".if \\n[.nm] .if \\n[ln] .nm\n"
 	   ".rm " SECTION_DIVERSION_NAME "\n"
 	   ".\\}\n"
 	   "..\n"
@@ -1898,12 +1913,12 @@ void table::init_output()
 	   ".in 0\n"
 	   ".ls 1\n"
 	   ".nf\n"
-	   ".if \\n[ln] .nm \\n[ln]\n"
+	   ".if \\n[.nm] .if \\n[ln] .nm \\n[ln]\n"
 	   "." TABLE_DIVERSION_NAME "\n"
 	   ".\\}\n"
 	   ".rm " TABLE_DIVERSION_NAME "\n"
 	   ".\\}\n"
-	   ".if \\n[ln] \\{.nm\n"
+	   ".if \\n[.nm] .if \\n[ln] \\{.nm\n"
 	   ".nr ln \\n[" ROW_MAX_LINE_REG "]\n"
 	   ".\\}\n"
 	   "..\n");
@@ -2903,7 +2918,7 @@ void table::do_row(int r)
     if (!(flags & NOKEEP) && row_ends_section(r))
       prints(".if \\n[" USE_KEEPS_REG "] ." RELEASE_MACRO_NAME "\n");
   }
-  prints(".if \\n[ln] .nr ln \\n[" ROW_MAX_LINE_REG "]\n");
+  prints(".if \\n[.nm] .if \\n[ln] .nr ln \\n[" ROW_MAX_LINE_REG "]\n");
 }
 
 void table::do_top()
@@ -2963,7 +2978,7 @@ void table::do_bottom()
   if (!(flags & NOKEEP) && (flags & (BOX | DOUBLEBOX | ALLBOX)))
     prints("." TABLE_RELEASE_MACRO_NAME "\n");
   else
-    prints(".if \\n[ln] \\{.nm\n"
+    prints(".if \\n[.nm] .if \\n[ln] \\{.nm\n"
 	   ".nr ln \\n[" ROW_MAX_LINE_REG "]\n"
 	   ".\\}\n");
   if (flags & DOUBLEBOX)

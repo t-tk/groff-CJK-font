@@ -3151,6 +3151,11 @@ int environment::get_zoom()
   return env_get_zoom(this);
 }
 
+int environment::get_numbering_nodes()
+{
+  return (curenv->numbering_nodes ? 1 : 0);
+}
+
 const char *environment::get_font_family_string()
 {
   return family->nm.contents();
@@ -3488,6 +3493,7 @@ void init_env_requests()
   init_string_env_reg(".M", get_fill_color_string);
   init_string_env_reg(".m", get_glyph_color_string);
   init_hunits_env_reg(".n", get_prev_text_length);
+  init_int_env_reg(".nm", get_numbering_nodes);
   init_int_env_reg(".ps", get_point_size);
   init_int_env_reg(".psr", get_requested_point_size);
   init_vunits_env_reg(".pvs", get_post_vertical_spacing);

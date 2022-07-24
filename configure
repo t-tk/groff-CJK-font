@@ -1502,7 +1502,6 @@ PACKAGE_NAME
 PATH_SEPARATOR
 SHELL
 referdir
-grog_dir
 gpinyin_dir
 glilypond_dir
 libprogramdir
@@ -19310,8 +19309,6 @@ glilypond_dir=$libprogramdir/glilypond
 
 gpinyin_dir=$libprogramdir/gpinyin
 
-grog_dir=$libprogramdir/grog
-
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for a sed that does not truncate output" >&5
 $as_echo_n "checking for a sed that does not truncate output... " >&6; }
 if ${ac_cv_path_SED+:} false; then :
@@ -23561,6 +23558,27 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
+ac_fn_c_check_decl "$LINENO" "strsignal" "ac_cv_have_decl_strsignal" "$ac_includes_default"
+if test "x$ac_cv_have_decl_strsignal" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_STRSIGNAL $ac_have_decl
+_ACEOF
+ac_fn_c_check_decl "$LINENO" "getc_unlocked" "ac_cv_have_decl_getc_unlocked" "$ac_includes_default"
+if test "x$ac_cv_have_decl_getc_unlocked" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_GETC_UNLOCKED $ac_have_decl
+_ACEOF
+
 ac_fn_c_check_decl "$LINENO" "sys_siglist" "ac_cv_have_decl_sys_siglist" "$ac_includes_default"
 if test "x$ac_cv_have_decl_sys_siglist" = xyes; then :
   ac_have_decl=1
@@ -24364,16 +24382,14 @@ fi
 
      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: missing program$plural:
 
-  The program$plural
-     $missing
-  cannot be found in the PATH.
+  The program$plural $missing cannot be found in the PATH.
+
   Consequently, groff's HTML backend (grohtml) will not work properly$docnote
      " >&5
 $as_echo "$as_me: WARNING: missing program$plural:
 
-  The program$plural
-     $missing
-  cannot be found in the PATH.
+  The program$plural $missing cannot be found in the PATH.
+
   Consequently, groff's HTML backend (grohtml) will not work properly$docnote
      " >&2;}
      doc_dist_target_ok=no
@@ -24539,11 +24555,13 @@ make_pdfdoc=
      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: missing program$plural:
 
   The program$plural $missing cannot be found in the PATH.
+
   Consequently, groff's PDF formatter (pdfroff) will not work properly$docnote
      " >&5
 $as_echo "$as_me: WARNING: missing program$plural:
 
   The program$plural $missing cannot be found in the PATH.
+
   Consequently, groff's PDF formatter (pdfroff) will not work properly$docnote
      " >&2;}
      doc_dist_target_ok=no
@@ -24696,6 +24714,63 @@ test -n "$BASH_PROG" || BASH_PROG="no"
   fi
 
 
+  if test "$GHOSTSCRIPT" != "missing"
+  then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gs version with good left sidebearing handling" >&5
+$as_echo_n "checking for gs version with good left sidebearing handling... " >&6; }
+    ghostscript_notice=
+    GHOSTSCRIPT_VERSION_GOOD=
+    GHOSTSCRIPT_V_STRING=`"$GHOSTSCRIPT" -v | sed 1q`
+    # Get first word.
+    GHOSTSCRIPT_WORDS=`echo "$GHOSTSCRIPT_V_STRING" | cut -d\  -f1-`
+
+    # If the first word is "GPL", discard it.
+    if expr "$GHOSTSCRIPT_WORDS" : "GPL" > /dev/null
+    then
+      GHOSTSCRIPT_WORDS=`echo "$GHOSTSCRIPT_WORDS" | cut -d\  -f2-`
+    fi
+
+    # Only do a version check if the program calls itself Ghostscript.
+    if expr "$GHOSTSCRIPT_WORDS" : "Ghostscript" > /dev/null
+    then
+      GHOSTSCRIPT_VERSION_GOOD=no
+      GHOSTSCRIPT_VERSION=`echo "$GHOSTSCRIPT_WORDS" | cut -d\  -f2`
+      GHOSTSCRIPT_MAJOR=`echo "$GHOSTSCRIPT_VERSION" | cut -d. -f1`
+      GHOSTSCRIPT_MINOR=`echo "$GHOSTSCRIPT_VERSION" | cut -d. -f2`
+
+      if test "$GHOSTSCRIPT_MAJOR" -lt 9
+      then
+        GHOSTSCRIPT_VERSION_GOOD=yes
+      elif test "$GHOSTSCRIPT_MAJOR" -ge 10
+      then
+        GHOSTSCRIPT_VERSION_GOOD=yes
+      elif test "$GHOSTSCRIPT_MINOR" -ge 54
+      then
+        GHOSTSCRIPT_VERSION_GOOD=yes
+      fi
+    fi
+
+    if test "$GHOSTSCRIPT_VERSION_GOOD" = "yes"
+    then
+      GHOSTSCRIPT_VERSION="$GHOSTSCRIPT_VERSION (good)"
+    elif test "$GHOSTSCRIPT_VERSION_GOOD" = "no"
+    then
+      GHOSTSCRIPT_VERSION="$GHOSTSCRIPT_VERSION (buggy)"
+      ghostscript_notice="Buggy version of Ghostscript detected."
+    else
+      ghostscript_notice="Unable to determine version of Ghostscript."
+    fi
+
+    if test -n "$GHOSTSCRIPT_VERSION"
+    then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: got $GHOSTSCRIPT_VERSION" >&5
+$as_echo "got $GHOSTSCRIPT_VERSION" >&6; }
+    else
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: unable to determine" >&5
+$as_echo "unable to determine" >&6; }
+    fi
+  fi
+
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether we are using the GNU C Library >= 2.1 or uClibc" >&5
 $as_echo_n "checking whether we are using the GNU C Library >= 2.1 or uClibc... " >&6; }
 if ${ac_cv_gnu_library_2_1+:} false; then :
@@ -24743,14 +24818,14 @@ $as_echo "$ac_cv_gnu_library_2_1" >&6; }
 
 # checks for presence of URW fonts (requires ghostscript, which is
 # checked in GROFF_HTML_PROGRAMS
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether URW fonts in pfb format are available" >&5
-$as_echo_n "checking whether URW fonts in pfb format are available... " >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for URW fonts in Type 1/PFB format" >&5
+$as_echo_n "checking for URW fonts in Type 1/PFB format... " >&6; }
 
 
    groff_have_urw_fonts=no
    if test "$AWK" = "missing" -o "$GHOSTSCRIPT" = "missing"; then
-     { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: awk and gs are required, can't look for URW fonts" >&5
-$as_echo "$as_me: WARNING: awk and gs are required, can't look for URW fonts" >&2;}
+     { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: awk and gs are required; can't look for URW fonts" >&5
+$as_echo "$as_me: WARNING: awk and gs are required; can't look for URW fonts" >&2;}
    else
      _list_paths=`$GHOSTSCRIPT -h | $AWK 'BEGIN { found = 0 } /Search path:/ { found = 1 } /^ *\// { print $'0' }'| tr : ' '`
      _list_paths="$_list_paths /usr/share/fonts/type1/gsfonts/ \
@@ -24759,12 +24834,18 @@ $as_echo "$as_me: WARNING: awk and gs are required, can't look for URW fonts" >&
        _list_paths="$ _list_paths $urwfontsdir"
      fi
      for k in $_list_paths; do
-       if test -f $k/a010013l.pfb; then
-         { $as_echo "$as_me:${as_lineno-$LINENO}: result: found in $k" >&5
+       for _font_file in \
+         URWGothic-Book.t1 \
+         URWGothic-Book.pfb \
+         URWGothicL-Book.pfb \
+         a010013l.pfb; do
+         if test -f $k/$_font_file; then
+           { $as_echo "$as_me:${as_lineno-$LINENO}: result: found in $k" >&5
 $as_echo "found in $k" >&6; }
-         groff_have_urw_fonts=yes
-         break
-       fi
+           groff_have_urw_fonts=yes
+           break 2
+         fi
+       done
      done
    fi
    if test $groff_have_urw_fonts = no; then
@@ -26600,51 +26681,95 @@ $as_echo "$as_me:
    fi
 if test "$groff_have_urw_fonts" = no; then
   { $as_echo "$as_me:${as_lineno-$LINENO}:
-  No URW fonts in .pfb format were found on your system, URW fonts
-  generation for 'devpdf' will not work properly.  These fonts can be
-  downloaded here:
+  No URW fonts in Type 1/PFB format were found on your system; URW font
+  generation for groff's 'gropdf' output driver will not work properly.
+  You can obtain the URW base 35 fonts from their GitHub project.
 
-    http://downloads.ghostscript.com/public/fonts/urw-base35-v1.10.zip
+  As of this writing (2021-05-15), you can find them in the 'fonts'
+  directory of the following archives (choose one).
 
-  By default groff will search these fonts in the paths given by \`gs
-  -h' and in these 2 default directories:
-  '/usr/share/fonts/type1/gsfonts/' and
-  '/opt/local/share/fonts/urw-fonts/' (paths used by
-  font/devpdf/Foundry.in).  You can also pass the option
-  '--with-urw-fonts-dir=DIR' to 'configure' to set a custom path.  You
-  would need to re-run the 'configure' script after installing these
-  fonts.
+    https://github.com/ArtifexSoftware/urw-base35-fonts/archive/refs/
+      tags/20200910.zip
+    https://github.com/ArtifexSoftware/urw-base35-fonts/archive/refs/
+      tags/20200910.tar.gz
 
+  You may wish to check for a newer release.
+
+    https://github.com/ArtifexSoftware/urw-base35-fonts/releases
+
+  By default, groff will look for these fonts in the search path shown
+  by the 'gs -h' command (if available) and in the two directories
+    /usr/share/fonts/type1/gsfonts/
+  and
+    /opt/local/share/fonts/urw-fonts/
+  (these locations are specified in font/devpdf/Foundry.in).  You will
+  need to re-run the 'configure' script after installing these fonts.
+
+  Alternatively, you can pass the option '--with-urw-fonts-dir=DIR'
+  to 'configure' to look for them in the directory DIR you specify.
   " >&5
 $as_echo "$as_me:
-  No URW fonts in .pfb format were found on your system, URW fonts
-  generation for 'devpdf' will not work properly.  These fonts can be
-  downloaded here:
+  No URW fonts in Type 1/PFB format were found on your system; URW font
+  generation for groff's 'gropdf' output driver will not work properly.
+  You can obtain the URW base 35 fonts from their GitHub project.
 
-    http://downloads.ghostscript.com/public/fonts/urw-base35-v1.10.zip
+  As of this writing (2021-05-15), you can find them in the 'fonts'
+  directory of the following archives (choose one).
 
-  By default groff will search these fonts in the paths given by \`gs
-  -h' and in these 2 default directories:
-  '/usr/share/fonts/type1/gsfonts/' and
-  '/opt/local/share/fonts/urw-fonts/' (paths used by
-  font/devpdf/Foundry.in).  You can also pass the option
-  '--with-urw-fonts-dir=DIR' to 'configure' to set a custom path.  You
-  would need to re-run the 'configure' script after installing these
-  fonts.
+    https://github.com/ArtifexSoftware/urw-base35-fonts/archive/refs/
+      tags/20200910.zip
+    https://github.com/ArtifexSoftware/urw-base35-fonts/archive/refs/
+      tags/20200910.tar.gz
 
+  You may wish to check for a newer release.
+
+    https://github.com/ArtifexSoftware/urw-base35-fonts/releases
+
+  By default, groff will look for these fonts in the search path shown
+  by the 'gs -h' command (if available) and in the two directories
+    /usr/share/fonts/type1/gsfonts/
+  and
+    /opt/local/share/fonts/urw-fonts/
+  (these locations are specified in font/devpdf/Foundry.in).  You will
+  need to re-run the 'configure' script after installing these fonts.
+
+  Alternatively, you can pass the option '--with-urw-fonts-dir=DIR'
+  to 'configure' to look for them in the directory DIR you specify.
   " >&6;}
   fi
 
 if test "x$groff_have_uchardet" = "xno" -a "x$with_uchardet" != "xno"; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING:
-  uchardet library was not found; preprocessor 'preconv', which uses it to detect
-  the input file encoding, might not work properly (to check how and in which
-  order 'preconv' tries to determine the file encoding, see its man page).
+  uchardet library was not found; preprocessor 'preconv' will skip
+  this method of attempting to determine the input encoding.  (To
+  check how and in what order 'preconv' tries to determine the
+  encoding, see its man page.)
   " >&5
 $as_echo "$as_me: WARNING:
-  uchardet library was not found; preprocessor 'preconv', which uses it to detect
-  the input file encoding, might not work properly (to check how and in which
-  order 'preconv' tries to determine the file encoding, see its man page).
+  uchardet library was not found; preprocessor 'preconv' will skip
+  this method of attempting to determine the input encoding.  (To
+  check how and in what order 'preconv' tries to determine the
+  encoding, see its man page.)
   " >&2;}
   fi
 
+
+  if test -n "$ghostscript_notice"
+    then
+     { $as_echo "$as_me:${as_lineno-$LINENO}: $ghostscript_notice
+
+  Ghostscript versions 9.00 <= x < 9.54 suffer from a rendering glitch
+  that affects the AT&T troff (and groff) special character \(lh; see
+  <https://bugs.ghostscript.com/show_bug.cgi?id=703187>.  If your
+  version of Ghostscript has not been patched to fix this problem, you
+  may need to work around it in groff documents you render for the
+  PostScript (and, for tbl(1) tables, HTML) output devices." >&5
+$as_echo "$as_me: $ghostscript_notice
+
+  Ghostscript versions 9.00 <= x < 9.54 suffer from a rendering glitch
+  that affects the AT&T troff (and groff) special character \(lh; see
+  <https://bugs.ghostscript.com/show_bug.cgi?id=703187>.  If your
+  version of Ghostscript has not been patched to fix this problem, you
+  may need to work around it in groff documents you render for the
+  PostScript (and, for tbl(1) tables, HTML) output devices." >&6;}
+  fi

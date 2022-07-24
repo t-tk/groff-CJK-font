@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (C) 2020 Free Software Foundation, Inc.
+# Copyright (C) 2021 Free Software Foundation, Inc.
 #
 # This file is part of groff.
 #
@@ -20,12 +20,18 @@
 
 groff="${abs_top_builddir:-.}/test-groff"
 
-# Regression-test Savannah #59179.
+# Regression-test Savannah #59823.
 #
-# Don't lose track of the page number if we're continuously rendering
-# _and_ we've been given a page-letter suffixing threshold.
+# Ensure retention of superfluous but fossilized register PN.
 
-printf ".TH foo 1\n" | "$groff" -Tascii -P-cbou -rX1 -man \
-    | tail -n 1 | grep -Eq '^[[:space:]]+1$'
+EXAMPLE=\
+'.bp 2
+.LP
+This is page \\n[PN].
+'
+
+echo "$EXAMPLE" \
+    | "$groff" -Tascii -P-cbou -ms \
+    | grep -Fqx 'This is page 2.'
 
 # vim:set ai et sw=4 ts=4 tw=72:

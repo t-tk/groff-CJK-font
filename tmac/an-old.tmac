@@ -1,6 +1,6 @@
 .\" an-old.tmac
 .\"
-.\" Copyright (C) 1989-2020 Free Software Foundation, Inc.
+.\" Copyright (C) 1989-2021 Free Software Foundation, Inc.
 .\"      Written by James Clark (jjc@jclark.com)
 .\"
 .\" This file is part of groff.
@@ -20,27 +20,32 @@
 .\" <http://www.gnu.org/licenses/>.
 .
 .
-.\" The file man.local is loaded at the end.  Put local additions there.
-.\" If you need to add things to TH, use '.am1 TH'.
+.\" Put local additions in the file man.local, loaded near the end of
+.\" this file.  If you need to add things to TH, use '.am1 TH'.
 .
 .if !\n(.g \
 .  ab groff man macros require groff extensions; aborting
 .
-.do if d RI .nx
-.
-.do mso devtag.tmac
+.do if d TH .nx
 .
 .do nr *groff_an-old_tmac_C \n[.cp]
 .cp 0
 .
+.\" Package-internal names start with "an-" and are subject to change.
+.
 .\" Define a string for use in diagnostic messages.
 .ds an-old an-old.tmac\"
 .
+.\" We use the .stringup request from groff 1.23, but nothing breaks if
+.\" it is undefined; the output is unchanged in appearance from earlier
+.\" releases.
 .if (\n[.x]\n[.y] < 118) \{\
 .  ds an-msg \*[an-old]: groff man macros require groff 1.18 or later,\"
 .  as an-msg " but found groff \n[.x].\n[.y]; aborting\"
 .  ab \*[an-msg]
 .\}
+.
+.\" === Define macros. ===
 .
 .de an-warn
 .  tm \*[an-old]:\\n[.F]:\\n[.c]: warning: \\$*
@@ -51,13 +56,24 @@
 .    tm \*[an-old]:\\n[.F]:\\n[.c]: style: \\$*
 ..
 .
-.nr need_eo_h 0
-.nr need_col2 0
+.de an-deprecation-warn
+.  if (\\n[CHECKSTYLE] > 1) \
+.    an-style-warn use of deprecated macro: .\\$0
+..
 .
-.nr an-first 1
+.de an-blank-line-trap
+.  if (\\n[CHECKSTYLE] > 2) \
+.    an-style-warn blank line in input
+.  sp
+..
 .
-.nr an-html 0
-.if '\*[.T]'html' .nr an-html 1
+.de an-leading-space-trap
+.  if (\\n[CHECKSTYLE] > 2) \
+.    if \\n[.u] \
+.      an-style-warn \\n[lsn] leading space(s) on input line
+.  br
+.  nop \h'\\n[lss]u'\c
+..
 .
 .\" Define alternate requests to handle continuous rendering.
 .\"
@@ -65,31 +81,40 @@
 .\" increased to the necessary amount (this is needed for tables).
 .de an-ne
 .  ie \\n[.$] \
-.    nr an-need (v;\\$*)
+.    nr an-amount (v;\\$*)
 .  el \
-.    nr an-need 1v
-.  if (\\n[an-need] >= \\n[.t]) \
-.    pl +(\\n[an-need]u - \\n[.t]u + 1v)
+.    nr an-amount 1v
+.  if (\\n[an-amount] >= \\n[.t]) \
+.    pl +(\\n[an-amount]u - \\n[.t]u + 1v)
+.  rr an-amount
 ..
 .
-.\" This .bp replacement adjusts the page length to the current position
-.\" so that no empty lines are inserted.
+.\" This .bp replacement for continuous rendering mode draws a
+.\" horizontal line after each document if there is more than one, and
+.\" adjusts the page length to the current position so that no empty
+.\" lines are inserted.
 .de an-bp
-.  br
+.  ie \\n[an-do-draw-line-after-document] \{\
+.    pl +1v
+.    nf
+.    ti 0
+\D'l \\n[LL]u 0'
+.    fi
+.  \}
+.  el \
+.    nr an-do-draw-line-after-document 1
 .  pl \\n[nl]u
-.  an-real-bp \\$*
 ..
 .
 .\" We need an end macro for continuous rendering as well, to flush any
 .\" pending output line and write the footer for the final man page
 .\" rendered.
 .de1 an-end
-.  nr % 1
-.  pl +4v
 .  fl
-.  sp 3
-.  an-p-footer
-.  pl \\n[nl]u
+.  pl +3v
+.  sp 3v
+.  an-footer
+.  bp
 ..
 .
 .\" Move macros into place for continuous rendering.
@@ -101,29 +126,53 @@
 .  em an-end
 ..
 .
-.de an-set-margin
-.  nr an-level 1
+.de an-reset-tab-stops
+.  ta T .5i
+..
+.
+.de an-reset-paragraph-spacing
+.  ie \\n[.$] .nr PD (v;\\$1)
+.  el         .nr PD (.4v >? \n[.V])
+..
+.
+.de an-reset-margin-and-inset-level
+.  nr an-inset-level 1
 .  nr an-margin \\n[IN]
 .  nr an-saved-margin1 \\n[IN]
 .  nr an-prevailing-indent \\n[IN]
 .  nr an-saved-prevailing-indent1 \\n[IN]
 ..
 .
-.ds an-extra1 \" empty
-.ds an-extra2 \" empty
-.ds an-extra3 \" empty
+.\" Cause a page transition to a new man(7) document.  Clear the page
+.\" header trap so it is not sprung with stale information.  Update the
+.\" page number depending on the C (continuous page numbering) register.
+.de an-start-new-document
+.  ch an-header
+.  ie \\n[C] .bp (\\n[%] + 1)
+.  el        .bp 1
+..
 .
 .\" .TH title section extra1 extra2 extra3
 .de1 TH
 .  if ((\\n[.$] < 2) : (\\n[.$] > 5)) \
 .    an-style-warn .\\$0 expects 2 to 5 arguments, got \\n[.$]
-.  if \\n[an-html] \{\
+.
+.  blm an-blank-line-trap
+.  lsm an-leading-space-trap
+.
+.  \" If batch processing (rendering multiple) man page documents, we
+.  \" must handle the end of a previous document.
+.  if !\\n[an-is-first-page-of-document] \{\
+.    ie \\n[cR] .an-end
+.    el         .an-start-new-document
+.    nr an-is-first-page-of-document 1
+.  \}
+.
+.  if \\n[an-is-output-html] \{\
 .    DEVTAG-TL
 .    nop \\$1
 .    DEVTAG-EO-TL
 .  \}
-.
-.  DT
 .
 .  nr PS    10z \" default point size
 .  nr PS-SS 10z
@@ -157,13 +206,14 @@
 .  ll \\n[LL]u
 .  ss 12
 .
-.  PD
-.  an-set-margin
+.  an-reset-tab-stops
+.  an-reset-paragraph-spacing
+.  an-reset-margin-and-inset-level
 .
-.  nr an-tag-sep 1n
-.  nr an-no-space-flag 0
-.  nr an-break-flag 0
-.  nr an-div? 0
+.  nr an-tag-separation 1n
+.  nr an-need-no-space-mode 0
+.  nr an-need-break 0
+.  nr an-is-in-diversion 0
 .
 .  ds an-title "\\$1\"
 .  if \\n[CT] .stringup an-title
@@ -182,22 +232,44 @@
 .  el                  .ds an-extra3 \" empty
 .  \}\}\}\}\}\}\}\}\}\}
 .
-.  ie \\n[cR] \
-.    an-header
-.  el \{\
-.    wh 0 an-header
-.    wh -1i an-footer
-.    wh \\n[FT]u an-p-footer
+.  ds an-extra1 "\\$3\"
+.  ie (\\n[.$] > 3)    .ds an-extra2 "\\$4\"
+.  el                  .ds an-extra2 \" empty; but .AT/.UC can override
 .
-.    if \\n[nl] \{\
-.      ie \\n[C] .bp (\\n[%] + 1)
-.      el        .bp 1
+.  if '\\*[an-extra1]'' \{\
+.    ds an-msg .\\$0 missing third argument; suggest document\"
+.    as an-msg " modification date in ISO 8601 format (YYYY-MM-DD)\"
+.    an-style-warn \\*[an-msg]
+.    rm an-msg
+.  \}
+.
+.  if '\\*[an-extra2]'' \{\
+.    ds an-msg .\\$0 missing fourth argument; suggest package/project\"
+.    \" Yes, that's one double quote, then three, then two.
+.    as an-msg " name and version (e.g., """groff 1.23.0"")\"
+.    an-style-warn \\*[an-msg]
+.    rm an-msg
+.  \}
+.
+.  if '\\*[an-extra3]'' \{\
+.    ds an-msg .\\$0 missing fifth argument and second argument '\\$2'\"
+.    as an-msg " not a recognized manual section; specify volume title\"
+.    an-style-warn \\*[an-msg]
+.    rm an-msg
+.  \}
+.
+.  an-header
+.
+.  if !\\n[cR] \{\
+.    ie r FT .nr an-footer-location \\n[FT]
+.    el      .nr an-footer-location (-.5i)
+.    wh 0 an-header
+.    wh (2u * \\n[an-footer-location]u) an-break-body-text
+.    wh \\n[an-footer-location]u an-footer
 .    \}
 .  \}
 .
-.  ds an-extra1 "\\$3\"
-.  ie (\\n[.$] > 3)    .ds an-extra2 "\\$4\"
-.  el                  .ds an-extra2 \" empty
+.  nr an-is-first-page-of-document 0
 ..
 .
 .\" BSD compatibility macros: .AT and .UC
@@ -222,150 +294,192 @@
 ..
 .
 .de1 DT
-.  ta T .5i \" This sets tabs every .5 inches
+\\*[an-deprecation-warn]\\
+.  an-reset-tab-stops
 ..
 .
 .de1 PD
-.  ie \\n[.$] .nr PD (v;\\$1)
-.  el         .nr PD (.4v >? \n[.V])
+\\*[an-deprecation-warn]\\
+\\*[an-reset-paragraph-spacing]\\
 ..
 .
 .\" Redefine these to customize the header & footer
 .
 .de1 PT
-.  tl '\\*[an-title](\\*[an-section])'\\*[an-extra3]'\
-\\*[an-title](\\*[an-section])'
+.  tl '\\*[an-pageref]'\\*[an-extra3]'\\*[an-pageref]'
 ..
 .
 .de1 BT
 .  if r ps4html \
 .    return
 .  ie \\n[D] \{\
-.    if o .tl '\\*[an-extra2]'\\*[an-extra1]'\\*[an-page-string]'
-.    if e .tl '\\*[an-page-string]'\\*[an-extra1]'\\*[an-extra2]'
+.    if o .tl '\\*[an-extra2]'\\*[an-extra1]'\\*[an-outer-footer-text]'
+.    if e .tl '\\*[an-outer-footer-text]'\\*[an-extra1]'\\*[an-extra2]'
 .  \}
 .  el \
-.    tl '\\*[an-extra2]'\\*[an-extra1]'\\*[an-page-string]'
+.    tl '\\*[an-extra2]'\\*[an-extra1]'\\*[an-outer-footer-text]'
+..
+.
+.\" Abbreviate the page title if it's too long for the header.  Leaves
+.\" string an-pageref defined for use in .PT and .an-footer.  Also
+.\" leaves an-title-abbv for possible use by .PT and .BT re-definers.
+.de1 an-abbreviate-title
+.  ds an-title-abbv \\*[an-title]\"
+.  ds an-title-string \\*[an-title]\"
+.  ds an-ellipsis \|.\|.\|.\|\"
+.  ds an-pageref \\*[an-title-abbv](\\*[an-section])\"
+.  nr an-header-width \\w'\\*[an-pageref]\\*[an-extra3]\\*[an-pageref]'
+.  while (\\n[an-header-width] >= \\n[.lt]) \{\
+.    \" The page title is too long; trim some bits out of the middle.
+.    length an-title-length \\*[an-title-string]
+.    \" roff division rounds integers toward zero.  Remove an additional
+.    \" character on each side of the midpoint to account for the
+.    \" ellipsis we add later.
+.    nr an-mark1 (\\n[an-title-length] / 2 - 2)
+.    nr an-mark2 (\\n[an-title-length] / 2 + 2)
+.    ds an-prefix \\*[an-title-string]\"
+.    ds an-suffix \\*[an-title-string]\"
+.    \" Use extremum operators to ensure that the first and last
+.    \" characters of the title remain intact (in cases of pathological
+.    \" shortening).
+.    substring an-prefix 0 (\\n[an-mark1] >? 1)
+.    substring an-suffix (\\n[an-mark2] <? (\\n[an-title-length] - 1) -1
+.    ds an-title-string \\*[an-prefix]\\*[an-suffix]\"
+.    ds an-title-abbv \\*[an-prefix]\\*[an-ellipsis]\\*[an-suffix]\"
+.    \" Measure the string again and give up if we made no progress.
+.    length an-title-new-length \\*[an-title-string]
+.    ie (\\n[an-title-new-length] >= \\n[an-title-length]) \
+.      break
+.    ds an-pageref \\*[an-title-abbv](\\*[an-section])\"
+.    nr an-header-width \
+       \\w'\\*[an-pageref]\\*[an-extra3]\\*[an-pageref]'
+.  \}
+.  rr an-title-length-prev
+.  rr an-mark1
+.  rr an-mark2
+.  rm an-prefix
+.  rm an-suffix
+.  rm an-title-string
+.  rr an-title-length
+.  rr an-header-width
+.  rm an-ellipsis
 ..
 .
 .de1 an-header
-.  if \\n[cR] \{\
-.    ie \\n[an-first] \
-.      nr an-first 0
-.    el \
-.      sp .5i
-.  \}
-.  ev an-1
+.  ev an-env
 .  ps \\n[PS]u
 .  vs \\n[VS]u
 .  lt \\n[LT]u
-.  ie \\n[an-html] \
-.    tl ''''
-.  el \{\
+.  an-abbreviate-title
+.  if !\\n[an-is-output-html] \{\
 .    if !\\n[cR] \
 .      sp .5i
+.    if \\n[cR] \
+.      pl +1v
 .    PT
 .    ie !\\n[cR] \
 .      sp |1i
-.    el \
-.      sp .5i
+.    el \{\
+.      pl +3v
+.      sp 3v
+.    \}
 .  \}
 .  ev
 .  ns
 ..
 .
-.de1 an-footer
+.\" Schedule a page break when the next output line is written (not
+.\" called if continuously rendering).
+.de1 an-break-body-text
 '  bp
 ..
 .
-.af an-page-letter a
-.
-.de1 an-p-footer
-.  ev an-1
+.de1 an-footer
+.  ev an-env
 .  ps \\n[PS]u
 .  vs \\n[VS]u
 .  lt \\n[LT]u
-.  ie \\n[an-html] \{\
-.    ds an-page-string \" empty
-.    ds an-extra1 \" empty
-.    ds an-extra2 \" empty
-.  \}
-.  el \{\
-.    ie r X \{\
-.      ie (\\n[%] > \\n[X]) \{\
-.        nr an-page-letter (\\n[%] - \\n[X])
-.        ds an-page-string \\n[X]\\n[an-page-letter]\"
-.      \}
-.      el \
-.        ds an-page-string \\n[%]\"
-.    \}
+.  if !\\n[an-is-output-html] \{\
+.    ie \\n[cR] \
+.      ds an-outer-footer-text "\\*[an-pageref]\"
 .    el \{\
-.      ie \\n[cR] \
-.        ds an-page-string "\\*[an-title](\\*[an-section])\"
-.      el \
-.        ds an-page-string \\n[%]\"
+.      ds an-outer-footer-text \\n[%]\"
+.      if r X \{\
+.        if (\\n[%] > \\n[X]) \{\
+.          nr an-page-letter (\\n[%] - \\n[X])
+.          ds an-outer-footer-text \\n[X]\\n[an-page-letter]\"
+.        \}
+.      \}
 .    \}
+.    if \\n[cR] \
+.      pl +1v
+.    BT
 .  \}
-.  BT
 .  ev
 ..
 .
 .de1 SH
 .  sp \\n[PD]u
-.  an-set-margin
+.  an-reset-margin-and-inset-level
 .  fi
 .  in \\n[an-margin]u
 .  ti 0
 .  nr need_eo_h 1
-.  DEVTAG-NH \\n[an-level]
-.  itc 1 an-trap
-.  nr an-no-space-flag 1
-.  nr an-break-flag 1
+.  DEVTAG-SH 1
+.  itc 1 an-input-trap
+.  nr an-need-no-space-mode 1
+.  nr an-need-break 1
 .  ps \\n[PS-SH]u
 .  ft \\*[HF]
+.  if \\n[an-HF-remap-I-style] .ftr I \\*[an-heading-family]BI
 .  ne (2v + 1u)
 .  if \\n[.$] \{\
 .    ds an-section-heading \\$*\"
 .    if \\n[CS] .stringup an-section-heading
 \&\\*[an-section-heading]
 .  \}
+.  if \\n[an-HF-remap-I-style] .ftr I I
 ..
 .
 .de1 SS
 .  sp \\n[PD]u
-.  an-set-margin
+.  an-reset-margin-and-inset-level
 .  fi
 .  in \\n[IN]u
 .  ti \\n[SN]u
-.  itc 1 an-trap
-.  nr an-no-space-flag 1
-.  nr an-break-flag 1
+.  nr need_eo_h 1
+.  DEVTAG-SH 2
+.  itc 1 an-input-trap
+.  nr an-need-no-space-mode 1
+.  nr an-need-break 1
 .  ps \\n[PS-SS]u
 .  ft \\*[HF]
+.  if \\n[an-HF-remap-I-style] .ftr I \\*[an-heading-family]BI
 .  ne (2v + 1u)
 .  if \\n[.$] \&\\$*
+.  if \\n[an-HF-remap-I-style] .ftr I I
 ..
 .
 .de1 B
-.  itc 1 an-trap
+.  itc 1 an-input-trap
 .  ft B
 .  if \\n[.$] \&\\$*
 ..
 .
 .de1 I
-.  itc 1 an-trap
+.  itc 1 an-input-trap
 .  ft I
 .  if \\n[.$] \,\\$*\/
 ..
 .
 .de1 SM
-.  itc 1 an-trap
+.  itc 1 an-input-trap
 .  ps -1
 .  if \\n[.$] \&\\$*
 ..
 .
 .de1 SB
-.  itc 1 an-trap
+.  itc 1 an-input-trap
 .  ps -1
 .  ft B
 .  if \\n[.$] \&\\$*
@@ -374,16 +488,16 @@
 .de1 TP
 .  sp \\n[PD]u
 .  if \\n[.$] .nr an-prevailing-indent (n;\\$1)
-.  itc 1 an-trap
+.  itc 1 an-input-trap
 .  in 0
-.  if !\\n[an-div?] \{\
+.  if !\\n[an-is-in-diversion] \{\
 .    ll -\\n[an-margin]u
 .    di an-div
 .  \}
-.  nr an-div? 1
+.  nr an-is-in-diversion 1
 ..
 .
-.de1 an-trap
+.de1 an-input-trap
 .  if \\n[need_eo_h]>0 .DEVTAG-EO-H
 .  nr need_eo_h 0
 .  if \\n[need_col2]>0 .DEVTAG-COL 2
@@ -391,21 +505,21 @@
 .  ft R
 .  ps \\n[PS]u
 .  vs \\n[VS]u
-.  if \\n[an-break-flag] \{\
+.  if \\n[an-need-break] \{\
 .    br
-.    nr an-break-flag 0
+.    nr an-need-break 0
 .  \}
-.  if \\n[an-no-space-flag] \{\
+.  if \\n[an-need-no-space-mode] \{\
 .    ns
-.    nr an-no-space-flag 0
+.    nr an-need-no-space-mode 0
 .  \}
-.  if \\n[an-div?] .an-do-tag
+.  if \\n[an-is-in-diversion] .an-write-paragraph-tag
 ..
 .
-.de an-do-tag
+.de an-write-paragraph-tag
 .  br
 .  di
-.  nr an-div? 0
+.  nr an-is-in-diversion 0
 .  ll
 .  \" We must emit the diversion in a separate environment to assure
 .  \" that a possible margin character is printed correctly.
@@ -414,7 +528,7 @@
 .  mc
 .  nf
 .  in \\n[an-margin]u
-.  ie (\\n[dl] + \\n[an-tag-sep] > \\n[an-prevailing-indent]) \{\
+.  ie (\\n[dl] + \\n[an-tag-separation] > \\n[an-prevailing-indent]) \{\
 .    ne (2v + 1u)
 .    an-div
 .    ev
@@ -478,113 +592,156 @@
 .  ns
 ..
 .
-.de1 RI
-.  if (\\n[.$] < 2) \
-.    an-style-warn .\\$0 expects at least 2 arguments, got \\n[.$]
-.  if \\n[.$] \{\
-.    ds an-result \&\f[R]\\$1\"
-.    shift
-.    while (\\n[.$] >= 2) \{\
-.      as an-result \,\f[I]\\$1\f[R]\/\\$2\"
-.      shift 2
-.    \}
-.    if \\n[.$] .as an-result \,\f[I]\\$1\"
-\\*[an-result]
-.    ft R
-.  \}
-..
+.\" === Define alternating font macros. ===
+.\"
+.\" Implementation notes:
+.\"
+.\" We always emit a non-printing input break \& before the first
+.\" argument.  This is necessary only when the calling man page is in
+.\" compatibility mode; it works around the surprising AT&T semantics of
+.\" \f escapes at the beginning of an input line.  See "Implementation
+.\" differences" in groff_diff(7) or the groff Texinfo manual.
+.\"
+.\" The italic correction escapes can be visually confusing.  We apply
+.\" the following rules, always on the same input line.
+.\"   (1) Before any italic argument, emit a left italic correction \,
+.\"       before switching to the italic style.
+.\"   (2) After any italic argument, emit an italic correction \/
+.\"       before switching to another style.
+.\" It is true that these macros cannot know what style is used in the
+.\" input stream before or after they are called.  We can make
+.\" assumptions based on pragmatics.  In most cases, the caller will not
+.\" precede a call to one of these macros with \c, or add it to the
+.\" final argument given to one of these calls; when \c is absent, what
+.\" is adjacent must be a word space or output line boundary, so italic
+.\" corrections don't matter.  If \c _is_ used by the caller, we can
+.\" assume that the adjacent glyphs before an IB or IR call, or the
+.\" following ones after a BI or RI call, will not be italic (and thus
+.\" will benefit from the italic correction we provide); otherwise the
+.\" caller would simply have added the relevant characters to the
+.\" arguments of the macro call.
+.\"
 .
-.de1 IR
-.  if (\\n[.$] < 2) \
-.    an-style-warn .\\$0 expects at least 2 arguments, got \\n[.$]
-.  if \\n[.$] \{\
-.    ds an-result \&\f[I]\,\\$1\f[R]\"
-.    shift
-.    while (\\n[.$] >= 2) \{\
-.      as an-result \/\\$1\f[I]\,\\$2\f[R]\"
-.      shift 2
-.    \}
-.    if \\n[.$] .as an-result \/\\$1\"
-\\*[an-result]
-.    ft R
-.  \}
-..
-.
-.de1 IB
-.  if (\\n[.$] < 2) \
-.    an-style-warn .\\$0 expects at least 2 arguments, got \\n[.$]
-.  if \\n[.$] \{\
-.    ds an-result \&\f[I]\,\\$1\"
-.    shift
-.    while (\\n[.$] >= 2) \{\
-.      as an-result \/\f[B]\\$1\f[I]\,\\$2\"
-.      shift 2
-.    \}
-.    if \\n[.$] .as an-result \/\f[B]\\$1\"
-\\*[an-result]
-.    ft R
-.  \}
-..
-.
+.\" Set each argument in bold and italics, alternately.
 .de1 BI
 .  if (\\n[.$] < 2) \
 .    an-style-warn .\\$0 expects at least 2 arguments, got \\n[.$]
 .  if \\n[.$] \{\
-.    ds an-result \&\f[B]\\$1\"
-.    shift
+.    ds an-result \&\"
 .    while (\\n[.$] >= 2) \{\
-.      as an-result \,\f[I]\\$1\f[B]\/\\$2\"
+.      as an-result \f[B]\\$1\,\f[I]\\$2\/\"
 .      shift 2
 .    \}
-.    if \\n[.$] .as an-result \,\f[I]\\$1\"
+.    if \\n[.$] .as an-result \f[B]\\$1\"
 \\*[an-result]
+.    rm an-result
 .    ft R
 .  \}
 ..
 .
-.de1 RB
-.  if (\\n[.$] < 2) \
-.    an-style-warn .\\$0 expects at least 2 arguments, got \\n[.$]
-.  ds an-result \&\"
-.  while (\\n[.$] >= 2) \{\
-.    as an-result \f[R]\\$1\f[B]\\$2\"
-.    shift 2
-.  \}
-.  if \\n[.$] .as an-result \f[R]\\$1\"
-\\*[an-result]
-.  ft R
-..
-.
+.\" Set each argument in bold and roman, alternately.
 .de1 BR
 .  if (\\n[.$] < 2) \
 .    an-style-warn .\\$0 expects at least 2 arguments, got \\n[.$]
-.  ds an-result \&\"
-.  while (\\n[.$] >= 2) \{\
-.    as an-result \f[B]\\$1\f[R]\\$2\"
-.    shift 2
-.  \}
-.  if \\n[.$] .as an-result \f[B]\\$1\"
+.  if \\n[.$] \{\
+.    ds an-result \&\"
+.    while (\\n[.$] >= 2) \{\
+.      as an-result \f[B]\\$1\f[R]\\$2\"
+.      shift 2
+.    \}
+.    if \\n[.$] .as an-result \f[B]\\$1\"
 \\*[an-result]
-.  ft R
+.    rm an-result
+.    ft R
+.  \}
+..
+.
+.\" Set each argument in italics and bold, alternately.
+.de1 IB
+.  if (\\n[.$] < 2) \
+.    an-style-warn .\\$0 expects at least 2 arguments, got \\n[.$]
+.  if \\n[.$] \{\
+.    ds an-result \&\"
+.    while (\\n[.$] >= 2) \{\
+.      as an-result \,\f[I]\\$1\/\f[B]\\$2\"
+.      shift 2
+.    \}
+.    if \\n[.$] .as an-result \,\f[I]\\$1\/\"
+\\*[an-result]
+.    rm an-result
+.    ft R
+.  \}
+..
+.
+.\" Set each argument in italics and roman, alternately.
+.de1 IR
+.  if (\\n[.$] < 2) \
+.    an-style-warn .\\$0 expects at least 2 arguments, got \\n[.$]
+.  if \\n[.$] \{\
+.    ds an-result \&\"
+.    while (\\n[.$] >= 2) \{\
+.      as an-result \,\f[I]\\$1\/\f[R]\\$2\"
+.      shift 2
+.    \}
+.    if \\n[.$] .as an-result \,\f[I]\\$1\/\"
+\\*[an-result]
+.    rm an-result
+.    ft R
+.  \}
+..
+.
+.\" Set each argument in roman and bold, alternately.
+.de1 RB
+.  if (\\n[.$] < 2) \
+.    an-style-warn .\\$0 expects at least 2 arguments, got \\n[.$]
+.  if \\n[.$] \{\
+.    ds an-result \&\"
+.    while (\\n[.$] >= 2) \{\
+.      as an-result \f[R]\\$1\f[B]\\$2\"
+.      shift 2
+.    \}
+.    if \\n[.$] .as an-result \f[R]\\$1\"
+\\*[an-result]
+.    rm an-result
+.    ft R
+.  \}
+..
+.
+.\" Set each argument in roman and italics, alternately.
+.de1 RI
+.  if (\\n[.$] < 2) \
+.    an-style-warn .\\$0 expects at least 2 arguments, got \\n[.$]
+.  if \\n[.$] \{\
+.    ds an-result \&\"
+.    while (\\n[.$] >= 2) \{\
+.      as an-result \f[R]\\$1\,\f[I]\\$2\/\"
+.      shift 2
+.    \}
+.    if \\n[.$] .as an-result \f[R]\\$1\"
+\\*[an-result]
+.    rm an-result
+.    ft R
+.  \}
 ..
 .
 .de1 RS
-.  nr an-saved-margin\\n[an-level] \\n[an-margin]
-.  nr an-saved-prevailing-indent\\n[an-level] \\n[an-prevailing-indent]
+.  nr an-saved-margin\\n[an-inset-level] \\n[an-margin]
+.  nr an-saved-prevailing-indent\\n[an-inset-level] \
+     \\n[an-prevailing-indent]
 .  ie \\n[.$] .nr an-margin +(n;\\$1)
 .  el         .nr an-margin +\\n[an-prevailing-indent]
 .  in \\n[an-margin]u
 .  nr an-prevailing-indent \\n[IN]
-.  nr an-level +1
+.  nr an-inset-level +1
 ..
 .
 .de1 RE
 .  ie \\n[.$] .nr an-RE-requested-level \\$1
-.  el         .nr an-RE-requested-level (\\n[an-level] - 1)
+.  el         .nr an-RE-requested-level (\\n[an-inset-level] - 1)
 .  ie \\n[.$] \{\
-.    if (\\n[an-RE-requested-level] = \\n[an-level]) \
-.      ds an-RE-problem redundant; already at level \\n[an-level]\"
-.    if (\\n[an-RE-requested-level] > \\n[an-level]) \
+.    if (\\n[an-RE-requested-level] = \\n[an-inset-level]) \
+.      ds an-RE-problem already at level \\n[an-inset-level]\"
+.    if (\\n[an-RE-requested-level] > \\n[an-inset-level]) \
 .      ds an-RE-problem too large\"
 .    if (\\n[an-RE-requested-level] < 1) \
 .      ds an-RE-problem too small\"
@@ -594,11 +751,12 @@
 .  \}
 .  el .if !(\\n[an-RE-requested-level]) .an-style-warn unbalanced .\\$0
 .  rr an-RE-requested-level
-.  ie \\n[.$] .nr an-level ((;\\$1) <? \\n[an-level])
-.  el         .nr an-level -1
-.  nr an-level (1 >? \\n[an-level])
-.  nr an-margin \\n[an-saved-margin\\n[an-level]]
-.  nr an-prevailing-indent \\n[an-saved-prevailing-indent\\n[an-level]]
+.  ie \\n[.$] .nr an-inset-level ((;\\$1) <? \\n[an-inset-level])
+.  el         .nr an-inset-level -1
+.  nr an-inset-level (1 >? \\n[an-inset-level])
+.  nr an-margin \\n[an-saved-margin\\n[an-inset-level]]
+.  nr an-prevailing-indent \
+     \\n[an-saved-prevailing-indent\\n[an-inset-level]]
 .  in \\n[an-margin]u
 ..
 .
@@ -611,7 +769,7 @@
 .  el \
 .    nr 3usekeeps 1
 .  sp \\n[PD]u
-.  if \\n[an-html] \{\
+.  if \\n[an-is-output-html] \{\
 .    nr an-TS-ll \\n[.l]
 .    ll 1000n
 .  \}
@@ -623,13 +781,13 @@
 .
 .de1 TE
 .  HTML-IMAGE-END
-.  if \\n[an-html] \
+.  if \\n[an-is-output-html] \
 .    ll \\n[an-TS-ll]u
 ..
 .
 .\" dummy equation delimiters
 .de1 EQ
-.  if \\n[an-html] \{\
+.  if \\n[an-is-output-html] \{\
 .    nr an-EQ-ll \\n[.l]
 .    ll 1000n
 .  \}
@@ -637,7 +795,7 @@
 ..
 .de1 EN
 .  HTML-IMAGE-END
-.  if \\n[an-html] \
+.  if \\n[an-is-output-html] \
 .    ll \\n[an-EQ-ll]u
 ..
 .
@@ -658,6 +816,8 @@
 .  \}
 ..
 .
+.\" === Define strings. ===
+.\"
 .\" These strings must work in compatibility mode also.
 .
 .ds S \s'\\n(PSu'\"
@@ -668,13 +828,26 @@
 .ie c\[rq] .ds rq \(rq\"
 .el        .ds rq ""\"
 .
-.\" For UTF-8, map the hyphen-minus to itself to facilitate copy and
-.\" paste of code examples, file names, and URLs embedding it.
+.\" === Define/remap characters. ===
 .
+.\" For UTF-8, map the minus sign to the hyphen-minus to facilitate
+.\" copy and paste of code examples, file names, and URLs embedding it.
 .if '\*[.T]'utf8' \{\
 .  char \- \N'45'
 .  char  - \N'45'
 .\}
+.
+.\" === Initialize. ===
+.
+.mso devtag.tmac
+.nr need_eo_h 0 \" need to mark end of a heading?
+.nr need_col2 0 \" need two-column layout?
+.
+.nr an-do-draw-line-after-document 0
+.nr an-is-first-page-of-document 1
+.
+.nr an-is-output-html 0
+.if '\*[.T]'html' .nr an-is-output-html 1
 .
 .\" Load man macro extensions.
 .mso an-ext.tmac
@@ -707,11 +880,11 @@
 .  nr C 0
 .el \
 .  if !\n[C] \
-.    if \n[an-html] \{\
+.    if \n[an-is-output-html] \{\
 .       tm \*[an-old]: ignoring continuous page numbering in HTML output
 .       nr C 1
 .    \}
-.if \n[an-html] \
+.if \n[an-is-output-html] \
 .  nr C 1
 .if r ps4html \
 .  nr C 1
@@ -733,14 +906,41 @@
 .  nr D 0
 .el \
 .  if \n[D] \
-.    if \n[an-html] \{\
+.    if \n[an-is-output-html] \{\
 .       tm \*[an-old]: ignoring double-sided layout in HTML output
 .       nr D 0
 .    \}
 .
 .\" footer distance
-.if !r FT \
-.  nr FT (-.5i)
+.\"
+.\" Unlike most of these parameters, we do not set a default for FT; the
+.\" TH macro places page location traps only if not continuously
+.\" rendering.
+.\"
+.if r FT \{\
+.  \" Validate it. Continuous rendering ignores FT.  Measuring a footer
+.  \" distance from the page top isn't done.  A footer distance of over
+.  \" half the page length is unlikely.  A footer distance of less than
+.  \" one line height is too.
+.  ie \n[cR] \
+.    ds an-msg footer distance when continuously rendering\"
+.  el \{\
+.    ie (\n[FT] : (\n[FT] = 0)) \
+.      ds an-msg non-negative footer distance: \n[FT]u\"
+.    el \{\
+.      ie (-(\n[FT]) > (\n[.p] / 2)) \
+.        ds an-msg implausibly large footer distance: \n[FT]u\"
+.      el \
+.        if ((v;\n[FT]) < 1v) \
+.          ds an-msg implausibly small footer distance: \n[FT]u\"
+.    \}
+.  \}
+.  if d an-msg \{\
+.    tm \*[an-old]: ignoring \*[an-msg]
+.    rr FT
+.    rm an-msg
+.  \}
+.\}
 .
 .\" hyphenation mode
 .if !r HY \{\
@@ -754,7 +954,7 @@
 .\" standard indentation
 .if !r IN \{\
 .  \" We must select an integer indentation value for nroff; see comment
-.  \" in an-do-tag.
+.  \" in an-write-paragraph-tag.
 .  ie t \
 .    nr IN 7.2n
 .  el \
@@ -778,16 +978,23 @@
 .\" starting page number
 .\"
 .\" Unlike most of these parameters, we do not set a default for P;
-.\" groff supplies a default starting page number (1).  Also, when
-.\" rendering for the HTML output device, page numbers are concealed and
-.\" used for internal purposes like image embedding.
+.\" groff supplies a default starting page number (1).  When rendering
+.\" for the HTML output device, page numbers are concealed and used for
+.\" internal purposes like image embedding.  Page numbers are not
+.\" rendered at all in continuous rendering mode.
 .\"
-.if r P \
-.  if \n[an-html] \
-.    if !(\n[P] = 1) \{\
-.       tm \*[an-old]: ignoring starting page number in HTML output
-.       rr P
-.    \}
+.if r P \{\
+.  if \n[an-is-output-html] \
+.    if !(\n[P] = 1) \
+.      ds an-msg in HTML output\"
+.  if \n[cR] \
+.    ds an-msg when continuously rendering
+.\}
+.if d an-msg \{
+.  tm \*[an-old]: ignoring starting page number \*[an-msg]
+.  rr P
+.  rm an-msg
+.\}
 .
 .if !r ps4html \
 .  if r P \
@@ -809,12 +1016,21 @@
 .\" page number after which to apply letter suffixes
 .\"
 .\" Unlike most of these parameters, we do not set a default for X; only
-.\" the macro an-p-footer uses it.
-.if r X \
-.  if \n[an-html] \{\
-.     tm \*[an-old]: ignoring page letter suffixing in HTML output
-.     rr X
-.  \}
+.\" the macro an-footer uses it.  Page numbers are not rendered at all
+.\" in continuous rendering mode.
+.\"
+.if r X \{\
+.  af an-page-letter a
+.  if \n[an-is-output-html] \
+.    ds an-msg in HTML output\"
+.  if \n[cR] \
+.    ds an-msg when continuously rendering
+.\}
+.if d an-msg \{
+.  tm \*[an-old]: ignoring page number suffix \*[an-msg]
+.  rr X
+.  rm an-msg
+.\}
 .
 .\" adjustment mode
 .if !d AD \
@@ -823,6 +1039,21 @@
 .\" (sub)section heading font
 .if !d HF \
 .  ds HF B\"
+.
+.\" If HF is a bold style, use bold italics for italics in headings.
+.ds an-heading-style \*[HF]\"
+.substring an-heading-style -1 -1
+.ds an-heading-family \" empty
+.length an-HF-length \*[HF]
+.if (\n[an-HF-length] > 1) \{
+.  as an-heading-family \*[HF]\"
+.  substring an-heading-family 0 -2
+.\}
+.if '\*[an-heading-style]'B' \
+.  if F \*[an-heading-family]BI \
+.    nr an-HF-remap-I-style 1
+.rr an-HF-length
+.rm an-heading-style
 .
 .if \n[cR] \
 .  an-set-up-continuous-rendering

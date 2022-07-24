@@ -25,10 +25,12 @@ Extern names	module@name
 Env.var		environ:name
 Index		array!index
 ..
-.if !\n(.g .ab These mm macros require groff.
+.if !\n(.g \
+.  ab groff mm macros require groff extensions; aborting
 .do if d PH .nx
-.if \n(.C .ab The groff mm macros do not work in compatibility mode.
-.if (\n[.warn] == 65543) .warn
+.if \n(.C \
+.  ab groff mm macros do not work in compatibility mode; aborting
+.ds @mm m.tmac\"
 .mso devtag.tmac
 .\" ######## init #######
 .\"	Contents level [0:14], contents saved if heading level <= Cl
@@ -375,15 +377,15 @@ Index		array!index
 .vs \\n[@vs]u
 ..
 .de @warning
-'tm WARNING:(\\n[.F]) input line \\n[.c]:\\$*
+'tm \\*[@mm]:\\n[.F]:\\n[.c]: warning: \\$*
 .if \\n[D] .backtrace
 ..
 .de @error
 'tm ******************
-'tm ERROR:(\\n[.F]) input line \\n[.c]:\\$*
+'tm \\*[@mm]:\\n[.F]:\\n[.c]: error: \\$*
 .if \\n[D] .backtrace
 'tm ******************
-.ab "Input aborted, syntax error"
+.ab \\*[@mm]: syntax error; aborting
 ..
 .de misc@toupper
 .tr aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ
@@ -927,10 +929,10 @@ in=\\n[.i] fi=\\n[.u] .d=\\n[.d] nl=\\n[nl] pg=\\n[%]
 .\" ######## module uni #################
 .\" unimplemented macros
 .de OK
-'tm "OK: not implemented"
+.@warning OK: not implemented
 ..
 .de PM
-'tm "PM: not implemented"
+.@warning PM: not implemented
 ..
 .\" ######## module hd #################
 .\" support for usermacro
@@ -2975,7 +2977,8 @@ in=\\n[.i] fi=\\n[.u] .d=\\n[.d] nl=\\n[nl] pg=\\n[%]
 .\"	indent stored in cov*abs-ind
 .\" number of authors stored in cov*au
 .\" author(s) stored in cov*au!x!y
-.\" author(s) title stored in cov*at!x!y
+.\" number of authors' titles strored in cov*at!x
+.\" title(s) of author(s) stored in cov*at!x!y
 .\" 	x is the author-index [1-cov*au], y is the argument-index [1-9].
 .\" author(s) firm stored in cov*firm
 .\" new date (if .ND exists) is stored in cov*new-date
@@ -3019,6 +3022,7 @@ in=\\n[.i] fi=\\n[.u] .d=\\n[.d] nl=\\n[nl] pg=\\n[%]
 .\" Must appear directly after .AU
 .de AT
 .if \\n[.$]<1 .@error "AT: no arguments"
+.nr cov*at!\\n[cov*au] \\n[.$]
 .nr cov*i 0 1
 .while \\n[.$]>=\\n+[cov*i] \{\
 .	ds cov*at!\\n[cov*au]!\\n[cov*i] "\\$[\\n[cov*i]]
@@ -3304,18 +3308,23 @@ in=\\n[.i] fi=\\n[.u] .d=\\n[.d] nl=\\n[nl] pg=\\n[%]
 .nr let*i 0 1
 .while \\n+[let*i]<=\\n[cov*au] \{\
 .	if \\n[let*i]>1 .as let*tmp /
-.	as let*tmp \\*[cov*au!\\n[let*k]!2]
+.	as let*tmp \\*[cov*au!\\n[let*i]!2]
 .\}
 .if !''\\$1' .as let*tmp -\\$1
 .in (u;\\n[.l]/2)
 .nf
 .nr let*i 0 1
 .while \\n+[let*i]<=\\n[cov*au] \{\
+.	ne 3v+\\n[cov*at!\\n[let*i]]v
 .	SP 3v
 .	if \\n[let*i]=\\n[let*k] \{\
 \Z'\h'-(u;\\n[.l]/2)'\\*[let*tmp]'\c
 .	\}
 \\*[cov*au!\\n[let*i]!1]
+.	nr let*j 0 1
+.	while \\n+[let*j]<=\\n[cov*at!\\n[let*i]] \{\
+\\*[cov*at!\\n[let*i]!\\n[let*j]]
+.	\}
 .\}
 .fi
 .in
@@ -3428,12 +3437,14 @@ in=\\n[.i] fi=\\n[.u] .d=\\n[.d] nl=\\n[nl] pg=\\n[%]
 .nf
 .if \\$3=1 .sp
 .sp
-.misc@toupper "\\$1, \\$2"
+.ie '\\$2'' .misc@toupper "\\$1"
+.el         .misc@toupper "\\$1, \\$2"
 .if \\$4 .sp
 .if \w'\\$5'&\\$4 \\$5
 .fi
 ..
 .de let@fc_SP
+.\" Simplified letters have no formal closing, just space before SG.
 .sp 2
 ..
 .\"--------------------------------------
@@ -3486,7 +3497,7 @@ in=\\n[.i] fi=\\n[.u] .d=\\n[.d] nl=\\n[nl] pg=\\n[%]
 .if d let*lo-SJ \{\
 .	ie '\\*[let*type]'SP' \{\
 .		sp 2
-.		misc@toupper \\*[let*lo-SJ]
+.		misc@toupper "\\*[let*lo-SJ]"
 .		sp
 .	\}
 .	el \{\

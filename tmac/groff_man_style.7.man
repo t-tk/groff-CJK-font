@@ -9,7 +9,7 @@ groff_man_style \- GNU roff man page tutorial and style guide
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 1999-2018, 2020 Free Software Foundation, Inc.
+.\" Copyright (C) 1999-2018, 2020-2021 Free Software Foundation, Inc.
 .\"
 .\" Permission is granted to make and distribute verbatim copies of this
 .\" manual provided the copyright notice and this permission notice are
@@ -383,6 +383,13 @@ and,
 on typesetter devices,
 slightly larger than the base point size.
 .
+If the heading font
+.B \[rs]*[HF]
+is bold,
+use of an italic style in
+.I heading-text
+is mapped to the bold-italic style if available in the font family.
+.
 Additionally,
 the left margin and indentation affecting subsequent text are reset to
 their default values.
@@ -441,6 +448,13 @@ is given no arguments,
 is set in bold
 (or the font specified by the string
 .BR HF ).
+.
+If the heading font
+.B \[rs]*[HF]
+is bold,
+use of an italic style in
+.I heading-text
+is mapped to the bold-italic style if available in the font family.
 .
 Additionally,
 the left margin and indentation affecting subsequent text are reset to
@@ -962,8 +976,8 @@ repeated arbitrarily.
 .
 .
 .IP
-Authors of man pages should note the use of the non-printing input break
-escape sequence
+Authors of man pages should note the non-printing input break escape
+sequence
 .B \e&
 preceding the ellipsis,
 which prevents it from being misinterpreted as an invalid control line,
@@ -1331,8 +1345,8 @@ set in roman.
 .
 .
 .PP
-Be frugal with the use of italics for emphasis,
-and particularly with the use of bold.
+Be frugal with italics for emphasis,
+and particularly with bold.
 .
 Brief runs of literal text,
 such as references to individual characters or short strings,
@@ -1351,6 +1365,8 @@ escapes in subsection \(lqPortability\(rq below.
 Unlike the above font style macros,
 the font style alternation macros below accept only arguments on the
 same line as the macro call.
+.
+Italic corrections are applied as appropriate.
 .
 If space is required within one of the arguments,
 first consider whether the same result could be achieved with as much
@@ -1625,7 +1641,7 @@ Now we have created a relative inset
 (in other words,
 moved the left margin)
 with
-.BR .RS
+.B .RS
 and started another block paragraph with
 .BR .PP .
 .
@@ -1856,7 +1872,7 @@ When a preprocessor like
 or
 .I \%@g@eqn
 is needed,
-a hint can be given to the man page formatter by making the first line
+a hint can be given to the man page librarian by making the first line
 of a man page look like this:
 .
 .
@@ -2222,14 +2238,14 @@ the end of an input line is treated like a space;
 .\" end-of-sentence detection is performed, and...
 an output line
 .I may
-be broken there\" in fill mode
+be broken there\" if filling enabled
 (if not,
 an adjustable space is inserted)
 and
 .I will
 be broken there in
 .BR .EX / .EE
-examples.)\" i.e., no-fill mode
+examples.)\" i.e., when filling is disabled
 .
 Anything after
 .B \ec
@@ -2437,16 +2453,19 @@ Because these macros are hooks for
 internals,
 man pages have no reason to call them.
 .
+A macro definition for these hooks typically consists of a \[lq].tl\[rq]
+request.
+.
 .
 .TP
 .B .BT
-Set the page footer
+Set the page footer text
 (\(lqbottom trap\(rq).
 .
 .
 .TP
 .B .PT
-Set the page header
+Set the page header text
 (\(lqpage trap\(rq).
 .
 .
@@ -2813,6 +2832,11 @@ relative to the bottom of the page if negative or top if positive,
 to
 .IR footer-distance .
 .
+At twice this distance,
+the page text is broken before writing the footer.
+.
+Ignored if continuous rendering is enabled.
+.
 The default is \-0.5i.
 .
 .
@@ -3075,27 +3099,21 @@ or to permit their override with a user-specific
 .I man.local
 file.
 .
-One way to achieve the latter is by placing the following at the end of
+This can be done by placing one or both of following at the end of
 .IR \%@LOCALMACRODIR@/\:\%man\:\%.local .
 .
 .RS
 .RS
 .EX
-\&.so \eV[HOME]/.man.local
+\&.soquiet \eV[XDG_CONFIG_HOME]/man.local
+\&.soquiet \eV[HOME]/.man.local
 .EE
 .RE
 .
-The above request will produce a warning if
-.RI \%$HOME /\:\%man.local
-does not exist;
-you may wish to include one in
-.I \%/\:\%etc/\:\%skel
-or an equivalent account configuration system.
-.
-Furthermore,
+However,
 a security-sandboxed
 .IR man (1) \" such as man-db 2.8.5
-program may lack permission to open the file.
+program may lack permission to open such files.
 .RE
 .
 .
@@ -3298,7 +3316,7 @@ are preprocessors used with man pages.
 .
 .PP
 .IR man (1)
-describes the man page formatter on your system.
+describes the man page librarian on your system.
 .
 .
 .PP

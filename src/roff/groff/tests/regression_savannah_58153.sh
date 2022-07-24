@@ -22,7 +22,7 @@ groff="${abs_top_builddir:-.}/test-groff"
 
 # Ensure that we get backtrace output across file and pipe boundaries.
 # Savannah #58153.
-OUT=$("$groff" -U 2>&1 >/dev/null <<EOF
+OUT=$("$groff" -b -ww -U 2>&1 >/dev/null <<EOF
 .pso printf '\\\s[-20]\\\n'
 EOF
 )

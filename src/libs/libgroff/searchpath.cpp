@@ -126,14 +126,18 @@ FILE *search_path::open_file(const char *name, char **pathp)
     fprintf(stderr, "trying '%s'\n", path);
 #endif
     FILE *fp = fopen(path, "r");
+    int err = errno;
     if (fp) {
       if (pathp)
 	*pathp = path;
-      else
+      else {
 	free(path);
+	errno = err;
+      }
       return fp;
     }
     free(path);
+    errno = err;
     if (*end == '\0')
       break;
     p = end + 1;
@@ -183,20 +187,20 @@ FILE *search_path::open_file_cautious(const char *name, char **pathp,
     fprintf(stderr, "trying '%s'\n", path);
 #endif
     FILE *fp = fopen(path, mode);
+    int err = errno;
     if (fp) {
       if (pathp)
 	*pathp = path;
-      else
+      else {
 	free(path);
+	errno = err;
+      }
       return fp;
     }
-    int err = errno;
     free(path);
+    errno = err;
     if (err != ENOENT)
-    {
-      errno = err;
       return 0;
-    }
     if (*end == '\0')
       break;
     p = end + 1;
@@ -204,3 +208,9 @@ FILE *search_path::open_file_cautious(const char *name, char **pathp,
   errno = ENOENT;
   return 0;
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

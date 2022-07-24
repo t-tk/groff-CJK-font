@@ -781,9 +781,11 @@ char **possible_command::get_argv()
 void synopsis(FILE *stream)
 {
   fprintf(stream,
-"usage: %s [-abceghijklpstvzCEGNRSUVXZ] [-dcs] [-ffam] [-mname] [-nnum]\n"
-"       [-olist] [-rcn] [-wname] [-Darg] [-Fdir] [-Idir] [-Karg] [-Larg]\n"
-"       [-Mdir] [-Parg] [-Tdev] [-Wname] [files...]\n",
+"usage: %1$s [-abceghijklpstvzCEGNRSUVXZ] [-dCS] [-Denc] [-fFAM]"
+" [-Fdir] [-Idir] [-Kenc] [-Larg] [-mNAME] [-Mdir] [-nNUM] [-oLIST]"
+" [-Parg] [-rCN] [-Tdev] [-wNAME] [-Wname] [FILE ...]\n"
+"usage: %1$s -h\n"
+"usage: %1$s --help\n",
 	  program_name);
 }
 
@@ -791,49 +793,52 @@ void help()
 {
   synopsis(stdout);
   fputs("\n"
-"-h\tprint this message\n"
-"-v\tprint version number\n"
-"-e\tpreprocess with eqn\n"
-"-g\tpreprocess with grn\n"
-"-j\tpreprocess with chem\n"
-"-k\tpreprocess with preconv\n"
-"-p\tpreprocess with pic\n"
-"-s\tpreprocess with soelim\n"
-"-t\tpreprocess with tbl\n"
-"-G\tpreprocess with grap\n"
-"-J\tpreprocess with gideal\n"
-"-R\tpreprocess with refer\n"
-"-a\tproduce ASCII description of output\n"
+"-a\tproduce approximate description of output\n"
 "-b\tprint backtraces with errors or warnings\n"
 "-c\tdisable color output\n"
-"-dcs\tdefine a string c as s\n"
-"-ffam\tuse fam as the default font family\n"
-"-i\tread standard input after named input files\n"
-"-l\tspool the output\n"
-"-mname\tread macros tmac.name\n"
-"-nnum\tnumber first page n\n"
-"-olist\toutput only pages in list\n"
-"-rcn\tdefine a number register c as n\n"
-"-wname\tenable warning name\n"
-"-z\tsuppress formatted output\n"
 "-C\tenable compatibility mode\n"
-"-Darg\tuse arg as default input encoding.  Implies -k\n"
-"-E\tinhibit all errors\n"
-"-Fdir\tsearch dir for device directories\n"
-"-Idir\tsearch dir for soelim, troff, and grops.  Implies -s\n"
-"-Karg\tuse arg as input encoding.  Implies -k\n"
-"-Larg\tpass arg to the spooler\n"
-"-Mdir\tsearch dir for macro files\n"
+"-d CS\tdefine string C as S\n"
+"-d C=S\tdefine string C as S; C can be multiple characters\n"
+"-D ENC\tfall back to ENC as default input encoding; implies -k\n"
+"-e\tpreprocess with eqn\n"
+"-E\tsuppress error diagnostics\n"
+"-f FAM\tuse FAM as the default font family\n"
+"-F DIR\tsearch DIR for device and font description files\n"
+"-g\tpreprocess with grn\n"
+"-G\tpreprocess with grap\n"
+"-h\toutput this usage message and exit\n"
+"-i\tread standard input after all FILEs\n"
+"-I DIR\tsearch DIR for input files; implies -s\n"
+"-j\tpreprocess with chem\n"
+"-J\tpreprocess with gideal\n"
+"-k\tpreprocess with preconv\n"
+"-K ENC\tuse ENC as input encoding; implies -k\n"
+"-l\tspool the output\n"
+"-L ARG\tpass ARG to the print spooler\n"
+"-m NAME\tread macro file NAME.tmac\n"
+"-M DIR\tsearch DIR for macro files\n"
 "-N\tdon't allow newlines within eqn delimiters\n"
-"-Parg\tpass arg to the postprocessor\n"
+"-n NUM\tnumber first page NUM\n"
+"-o LIST\toutput only page in LIST (\"1\"; \"2,4\"; \"3,7-11\")\n"
+"-p\tpreprocess with pic\n"
+"-P ARG\tpass ARG to the postprocessor\n"
+"-r CN\tdefine register C as N\n"
+"-r C=N\tdefine register C as N; C can be multiple characters\n"
+"-R\tpreprocess with refer\n"
+"-s\tpreprocess with soelim\n"
 "-S\tenable safer mode (the default)\n"
-"-Tdev\tuse device dev\n"
+"-t\tpreprocess with tbl\n"
+"-T DEV\tprepare output for device DEV\n"
 "-U\tenable unsafe mode\n"
-"-V\tprint commands on stdout instead of running them\n"
-"-Wname\tinhibit warning name\n"
-"-X\tuse X11 previewer rather than usual postprocessor\n"
+"-v\toutput version information and pass -v to commands to be run\n"
+"-V\twrite commands to standard output instead of running them\n"
+"-w NAME\tenable warning type NAME\n"
+"-W NAME\tinhibit warning type NAME\n"
+"-X\trun gxditview previewer instead of normal postprocessor\n"
+"-z\tsuppress formatted output\n"
 "-Z\tdon't postprocess\n"
-"\n",
+"\n"
+"See groff(1) for details.\n",
 	stdout);
   exit(0);
 }
@@ -841,7 +846,6 @@ void help()
 void usage(FILE *stream)
 {
   synopsis(stream);
-  fprintf(stream, "%s -h gives more help\n", program_name);
 }
 
 extern "C" {
