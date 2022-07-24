@@ -166,8 +166,8 @@ while (<AFM>) {
 		$depth{$n} = -$lly;
 		$left_side_bearing{$n} = -$llx;
 		$right_side_bearing{$n} = $urx - $w;
-#		while ((my $lig, my $glyph2) = each %ligs) {
-#		    $ligatures{$lig} = $n . " " . $glyph2;
+#		foreach my $lig (sort keys %ligs) {
+#		    $ligatures{$lig} = $n . " " . $ligs{$lig};
 #		}
 	    }
 	}
@@ -269,7 +269,7 @@ $italic_angle = $opt_a if $opt_a;
 if (!$opt_x) {
     my %mapped;
     my $i = ($#encoding > 256) ? ($#encoding + 1) : 256;
-    while (my $ch = each %width) {
+    foreach my $ch (sort keys %width) {
 	# add unencoded characters
 	if (!$in_encoding{$ch}) {
 	    $encoding[$i] = $ch;
@@ -409,9 +409,9 @@ my %default_ligatures = (
   "ffl", "ff l",
 );
 
-while (my ($lig, $components) = each %default_ligatures) {
+foreach my $lig (sort keys %default_ligatures) {
     if (defined $width{$lig} && !defined $ligatures{$lig}) {
-	$ligatures{$lig} = $components;
+	$ligatures{$lig} = $default_ligatures{$lig};
     }
 }
 
@@ -458,7 +458,7 @@ if ($opt_e) {
 
 if (!$opt_n && %ligatures) {
     print("ligatures");
-    while (my $lig = each %ligatures) {
+    foreach my $lig (sort keys %ligatures) {
 	print(" $lig");
     }
     print(" 0\n");

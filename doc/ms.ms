@@ -108,11 +108,11 @@ Unit	Description
 _
 i	inches
 c	centimeters
-p	points (about 1/72")
+p	points (1/72\[sd])
 v	line height
 n	width of a letter ``n'' in the current font
 m	width of a letter ``M'' in the current font
-P	pica (1/6")
+P	pica (1/6\[sd])
 .TE
 .LP
 You set number registers by using the
@@ -220,47 +220,80 @@ body text.
 .\" ------------------------
 .if t .bp
 .NH 1
-Document control registers
+Document control settings
 .XS
-Document control registers
+Document control settings
 .XE
 .LP
-The following table lists the document control
-number registers.
+The following table lists document control registers and strings.
+.
 For the sake of consistency,
 set registers related to margins at the beginning of your document,
 or just after the
 .CW .RP
 macro.
+.
 You can set other registers later in your document,
 but you should keep them together at the beginning
 to make them easy to find and edit as necessary.
 .TS H
 box expand;
 cb | cb cb cb cb
-l | afCW l l l .
-Type	Register	Definition	Effective	Default
+l | afCW l l lfCW .
+Type	Parameter	Definition	Effective	Default
 _
 .TH
-Margins	PO	Page offset (left margin)	next page	1i
-\^	LL	Line length	next \(pp	6i
-\^	LT	Header/footer (title) length	next \(pp	6i
-\^	HM	Top (header) margin	next page	1i
-\^	FM	Bottom (footer) margin	next page	1i
+Margins	\[rs]n[PO]	Page offset (left margin)	next page	1i
+\^	\[rs]n[LL]	Line length	next \(pp	6i
+\^	\[rs]n[LT]	Header/footer (title) length	next \(pp	6i
+\^	\[rs]n[HM]	Top (header) margin	next page	1i
+\^	\[rs]n[FM]	Bottom (footer) margin	next page	1i
 _
-Text	PS	Point size	next \(pp	10p
-\^	VS	Line spacing (leading)	next \(pp	12p
+Text	\[rs]n[PS]	Point size	next \(pp	10p
+\^	\[rs]n[VS]	Line spacing (leading)	next \(pp	12p
+\^	\[rs]*[FAM]	Font family	next \(pp	12p
 _
-Paragraphs	PI	Initial indent	next \(pp	5n
-\^	PD	Space between paragraphs	next \(pp	0.3v
-\^	QI	Quoted paragraph indent	next \(pp	5n
+Paragraphs	\[rs]n[PI]	Initial indent	next \(pp	5n
+\^	\[rs]n[PD]	Space between paragraphs	next \(pp	0.3v
+\^	\[rs]n[QI]	Quoted paragraph indent	next \(pp	5n
 _
-Footnotes	FL	Footnote length	next footnote	LL*5/6
-\^	FI	Footnote indent	next footnote	2n
-\^	FF	Footnote format	next footnote	0
+Footnotes	\[rs]*[FR]	Footnote length ratio	next footnote	11/12
+\^	\[rs]n[FI]	Footnote indent	next footnote	2n
+\^	\[rs]n[FF]	Footnote format	next footnote	0
 _
-Other	MINGW	Minimum width between columns	next page	2n
+Other	\[rs]n[MINGW]	Minimum width between columns	next page	2n
 .TE
+.
+.PP
+The default footnote line length is 11/12ths of the normal line length
+for compatibility with the expectations of historical
+.I ms
+documents;
+you may wish to set
+.CW \[rs]*[FR]
+to
+.CW 1
+to suit contemporary typesetting practices.
+.
+In the past,\**
+.FS
+in Version 7 Unix
+.I ms ,
+its descendants,
+and GNU
+.I ms
+prior to
+.I groff
+version 1.23.0
+.FE
+an
+.CW FL
+register was used for the line length in footnotes;
+however,
+setting this register had no effect on the footnote line length in
+multi-column environments.
+.
+.
 .\" ------------------------
 .bp
 .NH 1

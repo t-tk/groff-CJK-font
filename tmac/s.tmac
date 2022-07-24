@@ -2,7 +2,7 @@
 
 s.tmac
 
-Copyright (C) 1989-2020 Free Software Foundation, Inc.
+Copyright (C) 1989-2021 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
 This file is part of groff.
@@ -532,7 +532,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .DEVTAG ".mc \\n[pg@ncols] \\n[pg@colw] \\n[pg*gutw]"
 .ns
 .nr pg*col-num 0
-.nr pg@fn-colw \\n[pg@colw]*5/6
+.nr pg@fn-colw \\n[pg@colw]*\\*[FR]
 .par@reset
 .mk pg*col-top
 ..
@@ -1094,7 +1094,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .\" happens when the first page begins
 .de par@init
 .if !rLT .nr LT \\n[LL]
-.if !rFL .nr FL \\n[LL]*5/6
+.if !rFL .nr FL \\n[LL]*\\*[FR]
 .if !rVS \{\
 .	ie (\\n[PS] >= 1000) \
 .		nr VS (\\n[PS] + 2000)
@@ -1278,13 +1278,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .nr par*saved-font \\n[.f]
 .nr par*saved-size \\n[.s]z
 .nr par*saved-ss \\n[.ss]
+.nr par*saved-sss \\n[.sss]
 .ds par*saved-fam \\n[.fam]
 .ev par
 .nf
 .TA
 .ft \\n[par*saved-font]
 .ps \\n[par*saved-size]u
-.ss \\n[par*saved-ss]
+.ss \\n[par*saved-ss] \\n[par*saved-sss]
 .fam \\*[par*saved-fam]
 ..
 .de par*pop-tag-env
@@ -1519,6 +1520,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .ds par@sub-end \v'+.1m\s0-.3m'
 .als > par@sub-end
 .\" footnote paragraphs
+.\" FR is the ratio of footnote (horizontal) length to the line length
+.ds FR 11/12
 .\" FF is the footnote format
 .nr FF 0
 .\" This can be redefined. It gets a second argument of 'no' if the

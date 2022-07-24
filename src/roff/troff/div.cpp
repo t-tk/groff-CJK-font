@@ -523,7 +523,7 @@ void top_level_diversion::remove_trap_at(vunits pos)
       return;
     }
 }
-      
+
 void top_level_diversion::change_trap(symbol nam, vunits pos)
 {
   for (trap *p = page_trap_list; p; p = p->next)
@@ -531,6 +531,8 @@ void top_level_diversion::change_trap(symbol nam, vunits pos)
       p->position = pos;
       return;
     }
+  warning(WARN_MAC, "cannot move unplanted trap macro '%1'",
+	  nam.contents());
 }
 
 void top_level_diversion::print_traps()

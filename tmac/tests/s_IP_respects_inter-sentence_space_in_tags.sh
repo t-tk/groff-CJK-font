@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (C) 2019-2020 Free Software Foundation, Inc.
+# Copyright (C) 2020 Free Software Foundation, Inc.
 #
 # This file is part of groff.
 #
@@ -20,23 +20,21 @@
 
 groff="${abs_top_builddir:-.}/test-groff"
 
-# The following is what we expect in the future when we support Unicode
-# case transformations.
-expected="attaché ATTACHÉ"
+# Regression-test Savannah #59742.
+#
+# Ensure that a non-default inter-sentence space setting is respected
+# inside a multi-sentence tag to an indented paragraph.
 
-# For now, we expect problems like this:
-# troff: backtrace: '<standard input>':4: string 'attache'
-# troff: backtrace: file '<standard input>':5
-# troff: <standard input>:5: warning: can't find special character
-#     'U0065_0301'
+EXAMPLE=\
+'.ss 12 24
+.LP
+Foo.  Bar.
+.IP "Baz.  Qux."
+Foo.  Bar.
+'
 
-actual=$("$groff" -Tutf8 2>&1 <<EOF
-.pl 1v
-.ds attache attach\\[u0065_0301]\\\"
-\\*[attache]
-.stringup attache
-\\*[attache]
-EOF
-)
+echo "$EXAMPLE" \
+    | "$groff" -Tascii -P-cbou -ms \
+    | grep -qx 'Baz\.   Qux\.' # 3 spaces.
 
-echo "$actual" | grep -Fqx "$expected"
+# vim:set ai et sw=4 ts=4 tw=72:

@@ -20,7 +20,7 @@ for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-Version 2.4-4_c
+Version 2.4-4_d
 ---------------
 Antoine de St-Exupéry asserted that elegance in engineering is
 achieved not when there is nothing left to add, but when there is
@@ -54,7 +54,7 @@ extensions, and float management).
 .if (\n[.x]\n[.y] < 118) \
 .   ab [mom]: You need GNU troff version 1.18 or higher to run this version of mom.
 \# Mom version
-.ds version 2.4-4_c
+.ds version 2.4-4_d
 .if dVERSION \{\
 .   ab [mom]: Version \*[version]
 .\}
@@ -1976,7 +1976,7 @@ end
 .    ds $SAVED_SS_VAR \\*[$SS_VAR]
 .    ie '\\$1'' \{\
 .       nr #UNDERLINE_ON 1
-.       ss \\n[.ss] (\\n[.ss]-\\n[.ss])
+.       ss \\n[.ss] 0
 .       ie !n .nop \X'ps: exec \\n[_w] \\n[_d] decorline'\c
 .       el .cu 1000
 .    \}
@@ -2001,7 +2001,7 @@ end
 .MAC UL END
 \c
 .    ds $SAVED_SS_VAR \\*[$SS_VAR]
-.    ss \\n[.ss] (\\n[.ss]-\\n[.ss])
+.    ss \\n[.ss] 0
 .    ie !'\\n[.z]'' \{\
 \c
 .       ie !n \{\
@@ -3326,7 +3326,7 @@ end
 \#
 .MAC SS END
 .    ds $SS_VAR \\$1
-.    ie '\\$1'0' .ss \\n[.ss] (\\n[.ss]-\\n[.ss])
+.    ie '\\$1'0' .ss \\n[.ss] 0
 .    el \{\
 .       ie '\\$1'DEFAULT' .ss \\n[.ss]
 .       el                .ss \\n[.ss] \\*[$SS_VAR]
@@ -20977,10 +20977,10 @@ does not fit on page \\n[pgnum]\\*[col-num].
 .       if !\\n[pgnum] .nr pgnum \\n%+\\n[#PAGE_NUM_ADJ]
 .       br
 .       if \\n[.u] .nr fill 1
-.       na
 .       rr float*eqn
 .       if '\\n[.z]'FLOAT*DIV' .nr float*eqn 1
 .       nr eqn*restore-adj \\n[.j]
+.       na
 .       if !\\n[continued] \{\
 .          PDF_TARGET eqn:\\n+[lists*target]
 .          rr eqn*type

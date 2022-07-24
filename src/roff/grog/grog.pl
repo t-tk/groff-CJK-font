@@ -52,12 +52,12 @@ if ($before_make) { # before installation
   $grog_dir = '.';
   my $top = $grog_source_dir . '/../../../';
   open FILE, '<', $top . 'VERSION' ||
-    die 'Could not open top file VERSION.';
+    die 'grog: could not open file "VERSION"';
   my $version = <FILE>;
   chomp $version;
   close FILE;
   open FILE, '<', $top . 'REVISION' ||
-    die 'Could not open top file REVISION.';
+    die 'grog: could not open file "REVISION"';
   my $revision = <FILE>;
   chomp $revision;
   $at_at{'GROFF_VERSION'} = $version . '.' . $revision;
@@ -67,7 +67,8 @@ if ($before_make) { # before installation
   $grog_dir = '@grog_dir@';
 } # before make
 
-die "$grog_dir is not an existing directory;" unless -d $grog_dir;
+die 'grog: "' . $grog_dir . '" does not exist or is not a directory'
+  unless -d $grog_dir;
 
 
 #############

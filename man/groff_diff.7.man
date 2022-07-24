@@ -1141,8 +1141,8 @@ option of
 .
 .TP
 .BR .blm\~ [\c
-.IR macro ]
-Set a blank line trap.
+.IR name ]
+Set a blank line macro (trap).
 .
 If a blank line macro is thus defined,
 .I groff
@@ -1151,8 +1151,11 @@ executes
 when a blank line is encountered in the input file,
 instead of the usual behavior.
 .
+A line consisting only of spaces is also treated as blank and subject to
+this trap.
+.
 If no argument is supplied,
-the default blank line behavior is (re-)asserted.
+the default blank line behavior is (re-)established.
 .
 .
 .TP
@@ -2444,12 +2447,13 @@ zero, emitting a warning of type \[lq]range\[rq].
 .
 .
 .TP
-.BI .itc\~ n\~macro
-Variant of
-.B .it
-for which a line interrupted with
+.BI .itc\~ n\~name
+As
+.BR .it ,
+but a line interrupted with
 .B \[rs]c
 is not counted as an input line.
+.
 .
 .TP
 .BI .kern\~ n
@@ -2537,18 +2541,34 @@ read-only number register
 .B \[rs]n[.linetabs]
 is set to\~1 if in line-tabs mode, and 0 otherwise.
 .
+.
 .TP
-.BI .lsm\~ xx
-Set the leading spaces macro to
-.IR xx .
-If there are leading spaces in an input line, it is invoked instead of
-the usual troff behaviour; the leading spaces are removed.
-Registers
-.B \[rs]n[lsn]
-and
-.B \[rs]n[lss]
-hold the number of removed leading spaces and the corresponding
-horizontal space, respectively.
+.BR .lsm\~ [\c
+.IR name ]
+Set the leading space macro (trap) to
+.IR name .
+.
+If there are leading space characters on an input line,
+.I name
+is invoked in lieu of the usual
+.I roff
+behavior;
+the leading spaces are removed.
+.
+The count of leading spaces on an input line is stored in
+.BR \[rs]n[lsn] ,
+and the amount of corresponding horizontal motion in
+.BR \[rs]n[lss] ,
+irrespective of whether a leading space trap is set.
+.
+When it is,
+the leading spaces are removed from the input line,
+and no motion is produced before calling
+.IR name .
+.
+If no argument is supplied,
+the default leading space behavior is (re-)established.
+.
 .
 .TP
 .BI .mso\~ file
@@ -3393,7 +3413,7 @@ and the latter enables hyphenation after the first character in a word.
 .
 .
 .TP
-.BI .ss\~ "word-space-size sentence-space-size"
+.BI .ss\~ "word-space-size additional-sentence-space-size"
 A second argument to the
 .B .ss
 request determines the additional inter-sentence spacing used in fill
@@ -3419,6 +3439,7 @@ instead,
 the values of minimal inter-word and additional inter-sentence spacing
 are rounded down to the nearest multiple of\~12.
 .
+.
 .IP
 Additional inter-sentence spacing is used only in fill mode,
 and only if the output line is not full when the end of a sentence
@@ -3434,20 +3455,6 @@ then the second space becomes an inter-sentence space in the output.
 Additional inter-sentence space is not adjusted,
 but the inter-word space that always precedes it may be.
 .
-.IP
-If a second argument is never given to the
-.B .ss
-request,
-.I groff
-separates sentences as
-.RI AT&T\~ troff
-does.
-.
-In
-.IR groff ,
-as in
-.RI AT&T\~ troff ,
-you should always follow a sentence with either a newline or two spaces.
 .
 .IP
 A related application of the
@@ -3471,6 +3478,7 @@ large spaces between each.
 .RE
 .RE
 .
+.
 .IP
 The result has obvious inter-sentence spacing.
 .RS
@@ -3482,6 +3490,7 @@ known for other work.
 .EE
 .RE
 .RE
+.
 .
 .TP
 .BR .ta\~ [[\c
@@ -3926,14 +3935,16 @@ Initialized at start-up.
 .B \[rs]n[hp]
 The current horizontal position at input line.
 .
+.
 .TP
 .B \[rs]n[lsn]
 .TQ
 .B \[rs]n[lss]
-If there are leading spaces in an input line, these registers
-hold the number of leading spaces and the corresponding horizontal
-space,
+If there are leading spaces on an input line,
+these registers hold the count of leading spaces and the amount of
+corresponding horizontal motion,
 respectively.
+.
 .
 .TP
 .B \[rs]n[minutes]
@@ -4514,6 +4525,56 @@ The first three output commands are guaranteed to be:
 .
 .
 .\" ====================================================================
+.SH Debugging
+.\" ====================================================================
+.
+In addition to AT&T
+.I troff
+debugging features,
+.I groff
+emits more error diagnostics when syntactical or semantic nonsense is
+encountered and supports several categories of warning;
+the output of these can be selectively suppressed with
+.B .warn
+(and see the
+.BR -E ,
+.BR -w ,
+and
+.B -W
+options of
+.IR \%@g@troff (@MAN1EXT@)).
+.
+Backtraces can be automatically produced when errors or warnings occur
+(the
+.B \-b
+option of
+.IR \%@g@troff (@MAN1EXT@))
+or generated on demand
+.RB ( .backtrace ).
+.
+.
+.P
+.I groff
+also adds more flexible diagnostic output requests
+.RB ( .tmc
+and
+.BR .tm1 ).
+.
+More aspects of formatter state can be examined with requests that write
+lists of
+defined macros,
+strings,
+diversions,
+and boxes
+.RB ( .pm );
+environments
+.RB ( .pev ),
+and page location traps
+.RB ( .ptr )
+to the standard error stream.
+.
+.
+.\" ====================================================================
 .SH "Implementation Differences"
 .\" ====================================================================
 .
@@ -4687,6 +4748,22 @@ at the end.
 As in the C language,
 we all have to share one big name space,
 so choose a register name that is unlikely to collide with other uses.
+.
+.
+.P
+AT&T
+.I troff
+and other implementations handle
+.B .lf
+differently.
+.
+For them,
+its
+.I line
+argument changes the line number of the
+.I current
+line.
+.
 .
 .P
 Normally,
@@ -4968,6 +5045,18 @@ See subsection \[lq]Escape sequences\[rq] above and sections
 the
 .I groff
 Texinfo manual.
+.
+.
+.P
+In the somewhat pathological case where a diversion exists containing a
+partially-collected line and a partially-collected line at the top-level
+diversion has never existed,
+AT&T
+.I troff
+will output the
+partially-collected line at the end of input;
+.I groff
+will not.
 .
 .
 .\" ====================================================================

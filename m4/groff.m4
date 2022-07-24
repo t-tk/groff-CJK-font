@@ -1659,9 +1659,10 @@ might not work properly])
 AC_DEFUN([GROFF_UCHARDET_CHECK],
   [if test "x$groff_have_uchardet" = "xno" -a "x$with_uchardet" != "xno"; then
   AC_MSG_WARN([
-  uchardet library was not found; preprocessor 'preconv', which uses it to detect
-  the input file encoding, might not work properly (to check how and in which
-  order 'preconv' tries to determine the file encoding, see its man page).
+  uchardet library was not found; preprocessor 'preconv' will skip
+  this method of attempting to determine the input encoding.  (To
+  check how and in what order 'preconv' tries to determine the
+  encoding, see its man page.)
   ])
   fi
   ])

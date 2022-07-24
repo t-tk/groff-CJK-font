@@ -46,6 +46,11 @@
 .  tm \*[an-old]:\\n[.F]:\\n[.c]: warning: \\$*
 ..
 .
+.de an-style-warn
+.  if \\n[CHECKSTYLE] \
+.    tm \*[an-old]:\\n[.F]:\\n[.c]: style: \\$*
+..
+.
 .nr need_eo_h 0
 .nr need_col2 0
 .
@@ -110,6 +115,8 @@
 .
 .\" .TH title section extra1 extra2 extra3
 .de1 TH
+.  if ((\\n[.$] < 2) : (\\n[.$] > 5)) \
+.    an-style-warn .\\$0 expects 2 to 5 arguments, got \\n[.$]
 .  if \\n[an-html] \{\
 .    DEVTAG-TL
 .    nop \\$1
@@ -472,6 +479,8 @@
 ..
 .
 .de1 RI
+.  if (\\n[.$] < 2) \
+.    an-style-warn .\\$0 expects at least 2 arguments, got \\n[.$]
 .  if \\n[.$] \{\
 .    ds an-result \&\f[R]\\$1\"
 .    shift
@@ -486,6 +495,8 @@
 ..
 .
 .de1 IR
+.  if (\\n[.$] < 2) \
+.    an-style-warn .\\$0 expects at least 2 arguments, got \\n[.$]
 .  if \\n[.$] \{\
 .    ds an-result \&\f[I]\,\\$1\f[R]\"
 .    shift
@@ -500,6 +511,8 @@
 ..
 .
 .de1 IB
+.  if (\\n[.$] < 2) \
+.    an-style-warn .\\$0 expects at least 2 arguments, got \\n[.$]
 .  if \\n[.$] \{\
 .    ds an-result \&\f[I]\,\\$1\"
 .    shift
@@ -514,6 +527,8 @@
 ..
 .
 .de1 BI
+.  if (\\n[.$] < 2) \
+.    an-style-warn .\\$0 expects at least 2 arguments, got \\n[.$]
 .  if \\n[.$] \{\
 .    ds an-result \&\f[B]\\$1\"
 .    shift
@@ -528,6 +543,8 @@
 ..
 .
 .de1 RB
+.  if (\\n[.$] < 2) \
+.    an-style-warn .\\$0 expects at least 2 arguments, got \\n[.$]
 .  ds an-result \&\"
 .  while (\\n[.$] >= 2) \{\
 .    as an-result \f[R]\\$1\f[B]\\$2\"
@@ -539,6 +556,8 @@
 ..
 .
 .de1 BR
+.  if (\\n[.$] < 2) \
+.    an-style-warn .\\$0 expects at least 2 arguments, got \\n[.$]
 .  ds an-result \&\"
 .  while (\\n[.$] >= 2) \{\
 .    as an-result \f[B]\\$1\f[R]\\$2\"
@@ -560,6 +579,21 @@
 ..
 .
 .de1 RE
+.  ie \\n[.$] .nr an-RE-requested-level \\$1
+.  el         .nr an-RE-requested-level (\\n[an-level] - 1)
+.  ie \\n[.$] \{\
+.    if (\\n[an-RE-requested-level] = \\n[an-level]) \
+.      ds an-RE-problem redundant; already at level \\n[an-level]\"
+.    if (\\n[an-RE-requested-level] > \\n[an-level]) \
+.      ds an-RE-problem too large\"
+.    if (\\n[an-RE-requested-level] < 1) \
+.      ds an-RE-problem too small\"
+.    if d an-RE-problem \
+.      an-style-warn argument """\\$1""" to .\\$0 \\*[an-RE-problem]
+.    rm an-RE-problem
+.  \}
+.  el .if !(\\n[an-RE-requested-level]) .an-style-warn unbalanced .\\$0
+.  rr an-RE-requested-level
 .  ie \\n[.$] .nr an-level ((;\\$1) <? \\n[an-level])
 .  el         .nr an-level -1
 .  nr an-level (1 >? \\n[an-level])
@@ -681,6 +715,10 @@
 .  nr C 1
 .if r ps4html \
 .  nr C 1
+.
+.\" emit diagnostics for man page style problems
+.if !r CHECKSTYLE \
+.  nr CHECKSTYLE 0
 .
 .\" full capitalization of section headings
 .if !r CS \

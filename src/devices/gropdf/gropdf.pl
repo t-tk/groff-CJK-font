@@ -378,7 +378,7 @@ my $info=BuildObj(++$objct,\%info);
 
 PutObj($objct);
 
-foreach my $fontno (keys %fontlst)
+foreach my $fontno (sort keys %fontlst)
 {
     my $o=$fontlst{$fontno}->{FNT};
 
@@ -847,7 +847,7 @@ sub do_x
 		    my @xwds=split(' ',"<< $1 >>");
 		    my $docinfo=ParsePDFValue(\@xwds);
 
-		    foreach my $k (keys %{$docinfo})
+		    foreach my $k (sort keys %{$docinfo})
 		    {
 			$info{$k}=$docinfo->{$k} if $k ne 'Producer';
 		    }
@@ -857,7 +857,7 @@ sub do_x
 		    my @xwds=split(' ',"<< $1 >>");
 		    my $docview=ParsePDFValue(\@xwds);
 
-		    foreach my $k (keys %{$docview})
+		    foreach my $k (sort keys %{$docview})
 		    {
 			$cat->{$k}=$docview->{$k} if !exists($cat->{$k});
 		    }
@@ -1708,7 +1708,7 @@ sub MapInsHash
     my $val=shift;
 
 
-    foreach my $k (keys(%{$val}))
+    foreach my $k (sort keys(%{$val}))
     {
 	MapInsValue($pdf,$o,$k,$insmap,$parent,$val->{$k}) if $k ne 'Contents';
     }

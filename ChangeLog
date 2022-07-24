@@ -1,10 +1,577 @@
+2021-01-30  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/tmac.am ($(TMACSTRIPFILES)):
+	($(TMACMDOCSTRIPFILES)): Remove unidiomatic for loop which
+	frustrated parallel make operation.
+
+	Thanks to an anonymous contributor for the report and patch.
+
+	Fixes <https://savannah.gnu.org/bugs/?59958>.
+
+2021-01-29  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* doc/ms.ms (Document control settings): Document old FAM string
+	and new FR string.
+
+2021-01-29  T. Kurt Bond <tkurtbond@gmail.com>
+
+	[ms]: Add new string FR to hold an expression for computing the
+	footnote length relative to the line length, consistently for
+	single- and multi-column modes, which \n[FL] has never done.
+
+	* tmac/s.tmac: Initialize FR string to "11/12".
+	(@MC): Compute footnote column width using \*[FR] instead of a
+	hard-coded "11/12" expression.
+	(par@init): Compute default \n[FL] using \*[FR] instead of a
+	hard-coded "11/12" expression.
+
+	* doc/groff.texi (Macro Packages/ms/Document control settings):
+	* tmac/groff_ms.7.man (Usage/Document control registers):
+	Document it.
+
+	Fixes <https://savannah.gnu.org/bugs/?59605>.
+
+2021-01-25  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/roff/troff/env.cpp: Add ADJUST_MAX enumeration constant to
+	record maximum valid numerical adjustment mode.
+	(adjust): Verify numeric argument against ADJUST_MAX instead of
+	a numeric literal.  Ignore excessively large values instead of
+	setting adjustment mode to "right".  Update warning diagnostic.
+
+2021-01-25  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	Add regression test for .ad and .na requests.
+
+	* src/roff/groff/tests/adjustment_works.sh: Do it.
+	* src/roff/groff/groff.am (groff_TESTS): Run test.
+
+2021-01-24  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* doc/groff.texi (Manipulating Filling and Adjustment):
+	* man/groff.7 (Requests/Request short reference): Clarify
+	behavior of ".na" and ".ad l".
+
+	Thanks to Bjarni Ingi Gislason for pointing out the potential
+	for confusion and for his careful review of the new text.
+
+	Fixes <https://savannah.gnu.org/bugs/?59795>.
+
+2021-01-20  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/roff/grog/grog.pl: Report program name in fatal error
+	diagnostics.  Also drop sentence-ending punctuation since Perl
+	supplies additional information.
+
+	Continues the long process of fixing Savannah #52463.
+
+2021-01-19  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/an-old.tmac (RE): Style-warn if macro arguments are out
+	of range or redundant.
+
+	Fixes <https://savannah.gnu.org/bugs/?55320>.
+
+2021-01-15  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	Improve style of troffrc{,-end} files.  Follow established
+	idioms and make them consistent with each other.
+
+	* tmac/troffrc:
+	* tmac/troffrc-end:
+	  - Identify files in header comments as part of GNU troff.
+
+	* tmac/troffrc:
+	  - Clarify purpose of .do request.
+	  - Identify .X (set by groff -X) as a register, not a string.
+	  - Remove temporary registers one per line to make
+	    synchronization with foregoing logic easier.  Fixes name
+	    space management nits: an undefined string troffrc!Xps was
+	    being removed, and troffrc!{ascii,latin1,utf8,cp1047} were
+	    not being removed despite being defined.
+
+	* tmac/troffrc-end:
+	  - Clarify that file is read after -m file arguments (not "all
+	    macro sets", which can be loaded with .mso after this file
+	    is processed).
+	  - Advise usage of .do for groff extensions.
+	  - Line-break one-off conditionals as troffrc does.
+	  - Add empty string comment to empty string definitions.
+
+2021-01-14  Dave Kemper <saint.snit@gmail.com>
+
+	Commit 87edb525, from 2003, added character U+2026 (HORIZONTAL
+	ELLIPSIS) to most base groff fonts, but there has been no
+	kerning information for this character.  To produce consistent
+	typography, it should be kerned the same way as the period,
+	which is in 818 kern pairs across all the devps fonts.
+
+	Apply the following shell command to the groff description files
+	of the PostScript fonts.
+
+	  for file in font/devps/*[A-Z]
+	    do sed -Ei\~ 's/(.*)(^| )\. (.*)/&\n\1\2u2026 \3/' $file
+	  done
+
+	* font/devps/AB:
+	* font/devps/ABI:
+	* font/devps/AI:
+	* font/devps/AR:
+	* font/devps/BMB:
+	* font/devps/BMBI:
+	* font/devps/BMI:
+	* font/devps/BMR:
+	* font/devps/HB:
+	* font/devps/HBI:
+	* font/devps/HI:
+	* font/devps/HNB:
+	* font/devps/HNBI:
+	* font/devps/HNI:
+	* font/devps/HNR:
+	* font/devps/HR:
+	* font/devps/NB:
+	* font/devps/NBI:
+	* font/devps/NI:
+	* font/devps/NR:
+	* font/devps/PB:
+	* font/devps/PBI:
+	* font/devps/PI:
+	* font/devps/PR:
+	* font/devps/TB:
+	* font/devps/TBI:
+	* font/devps/TI:
+	* font/devps/TR:
+	* font/devps/ZCMI: Apply above script.
+
+	Fixes <https://savannah.gnu.org/bugs/?58897>.  However, this
+	will need to be done again if afmtodit is used to regenerate the
+	above files, or afmtodit will need to be modified to add this
+	kerning information itself.
+
+2021-01-12  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/libs/libgroff/relocate.cpp (set_current_prefix) [WIN32]:
+	Move declaration of `pathextstr` to lie within preprocessor
+	conditional, since it is dereferenced only there.
+
+2021-01-10  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	Add support for strsignal().
+
+	POSIX.1-2008 added strsignal() to the C library and recommended
+	its use over sys_siglist[], but groff's pipeline management
+	hadn't been updated in that respect since that time.
+
+	* configure.ac: Check for strsignal().
+	* src/roff/groff/pipeline.c (xstrsignal): Return strsignal() if
+	it is defined.
+
+	Thanks to an anonymous contributor for the report and the patch.
+
+	Fixes <https://savannah.gnu.org/bugs/?59835>.
+
+2021-01-06  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/libs/libgroff/relocate.cpp (relocatep): Add assertion to
+	identify logic error if `curr_prefix` is unexpectedly a null
+	pointer.
+	(set_current_prefix) [_WIN32]: Allocate memory from heap for
+	`curr_prefix` only on Windows; on other systems, this file's
+	searchpath() is used to populate `curr_prefix`, and that
+	function (except on Windows) performs its own allocation.  Fixes
+	memory leak noted by Ingo Schwarze.
+	(set_current_prefix) [!_WIN32]: Move logic attempting to set
+	`curr_prefix` by calling searchpathext() from here...
+	[WIN32]: ...to here.  The PATHEXT environment variable has
+	semantics only under Windows, not POSIX systems, so the
+	placement of this code seemed erroneous.
+
+	See <https://savannah.gnu.org/bugs/?55475>.
+
+2021-01-06  Colin Watson <cjwatson@debian.org>
+
+	* contrib/glilypond/glilypond.pl:
+	* contrib/gperl/gperl.pl:
+	* contrib/gpinyin/gpinyin.pl:
+	* tmac/hyphenex.pl: Avoid Perl's unsafe "<>" operator.
+
+	The "<>" operator is implemented using the two-argument form of
+	"open", which interprets magic such as pipe characters, allowing
+	execution of arbitrary commands which is unlikely to be
+	expected.  Perl >= 5.22 has a "<<>>" operator which avoids this,
+	but also forbids the use of "-" to mean the standard input,
+	which is a facility that the affected groff programs document.
+
+	ARGV::readonly would probably also fix this, but I fundamentally
+	dislike the approach of escaping data in preparation for a
+	language facility to unescape it, especially when the required
+	escaping is as non-obvious as it is here.  (For the same reason,
+	I prefer to use subprocess invocation facilities that allow
+	passing the argument list as a list rather than as a string to
+	be interpreted by the shell.)  So I've abandoned this dubious
+	convenience and changed the affected programs to iterate over
+	command-line arguments manually using the three-argument form of
+	open.
+
+	glilypond doesn't need the initial unshift since that's already
+	handled in contrib/glilypond/args.pl.
+
+	Fixes <https://savannah.gnu.org/bugs/?55557>.
+
+2021-01-06  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/s.tmac: Set footnote line length in multi-column
+	environments to 11/12ths of the text line length for consistency
+	with earlier change to FL register default.
+
+	Thanks to T. Kurt Bond for bringing this issue to my attention.
+
+2021-01-04  John Gardner <gardnerjohng@gmail.com>
+
+	* tmac/strip.sed: Escape '.' wildcard when matching lines using
+	.as and .ds requests.
+
+	Fixes <https://savannah.gnu.org/bugs/?59498>.
+
+2021-01-04  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	Document use of SOURCE_DATE_EPOCH and TZ.
+
+	The semantics of SOURCE_DATE_EPOCH to groff were not established
+	with respect to time zone selection, prompting divergent
+	interpretations; Debian and distributions derived from it have
+	for several years patched groff to implicitly use UTC as the
+	time zone when interpreting the current time (or
+	SOURCE_DATE_EPOCH) as a local time.  While a convenient and
+	defensible choice for reproducible build efforts[1], it runs
+	against the grain of user expectations.  Systems programmers
+	like monotonically increasing clocks; the broader user base
+	usually prefers a clock that follows an applicable civil
+	calendar.  To the latter audience, a difference between
+	  $ date "+%Y-%M-%d %H:%m:%S"
+	and
+	  $ groff <<EOF
+	  .af year 0000
+	  .af mo 00
+	  .af dy 00
+	  .af hours 00
+	  .af minutes 00
+	  .af seconds 00
+	  .tm \n[year]-\n[mo]-\n[dy] \n[hours]:\n[minutes]:\n[seconds]
+	  EOF
+	is difficult to explain.
+
+	* doc/groff.texi (Environment):
+	* src/devices/grohtml/grohtml.1.man (Environment):
+	* src/devices/gropdf/gropdf.1.man (Environment):
+	* src/devices/grops/grops.1.man (Environment):
+	* src/roff/groff/groff.1.man (Environment):
+	* src/roff/troff/troff.1.man (Environment): Expand description
+	of use of SOURCE_DATE_EPOCH to note that it converts the time
+	{as seconds since the Epoch} to local time, which motivates
+	documentation of the TZ environment variable.  Explain what the
+	time stamps are used for: troff merely stores the human-readable
+	time components in registers; the grohtml, gropdf, and grops
+	output drivers write the information to the output in comments.
+
+	Fixes <https://savannah.gnu.org/bugs/?57218>.
+
+	[1] https://reproducible-builds.org/docs/source-date-epoch/
+
+2020-12-25  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* doc/doc.am (.texi.dvi): Call texi2dvi with FORCE_SOURCE_DATE=1
+	in the environment, avoiding an embedded timestamp in the
+	generated groff.dvi file, which frustrated reproducible builds.
+	Thanks to Werner Lemberg for the suggestion.
+
+	* src/roff/groff/tests/string_case_xform_unicode_escape.sh: Fix
+	test to no longer use Bash process substitution, resulting in
+	nondeterministic file descriptor numbers appearing in test logs,
+	frustrating reproducible builds.
+
+	* contrib/pdfmark/pdfmark.am (PDFROFF): Call pdfroff without
+	`--keep-temporary-files` option.  Temporary directories are
+	created with mktemp(1) and files with an embedded process
+	identifier, which frustrates reproducible builds.
+
+	See <https://savannah.gnu.org/bugs/?57218>.
+
+2020-12-21  Dorai Sitaram <ds26gte@yahoo.com>
+
+	* tmac/s.tmac (@IP): Handle inter-sentence space correctly in
+	paragraph tags by copying \n[.sss] from the enclosing
+	environment to that used to format the paragraph tag.
+
+	Fixes <https://savannah.gnu.org/bugs/?59742>.
+
+2020-12-21  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	Add regression test for Savannah #59742.
+
+	* tmac/tests/s_IP_respects_inter-sentence_space_in_tags.sh: Do
+	it.
+	* tmac/tmac.am (tmac_TESTS): Run it.
+
+2020-12-21  Bjarni Ingi Gislason <bjarniig@rhi.hi.is>
+
+	* src/utils/addftinfo/addftinfo.cpp (usage): Use size_t for loop
+	index when iterating over a count of size_t items.  Quiets
+	signedness mismatch compiler warning.
+
+	Fixes <https://savannah.gnu.org/bugs/?59583>.
+
+2020-12-20  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/doc.tmac-u (Mt): Emit a usage diagnostic and return if
+	called with no arguments.  This introduces an incompatiblility
+	with mandoc(1), but the existing behavior (print an italicized
+	tilde, because Mt is implemented as a wrapper around Pa, which
+	prints pathnames) made no sense.
+
+2020-12-20  Colin Watson <cjwatson@debian.org>
+
+	* src/devices/gropdf/gropdf.pl:
+	* src/utils/afmtodit/afmtodit.pl: Sort Perl hash keys.  Hash
+	iteration order may differ between runs, which makes builds
+	harder to reproduce.  Sort hash keys in gropdf and afmtodit
+	output to avoid this.
+
+2020-12-20  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* doc/ms.ms (Basic Information): Tweak unit definitions.  groff
+	defines a typesetter's point as precisely 1/72 inches.  Also use
+	the correct symbol for inch units--strictly, it's the same as
+	that for "seconds" as in subdivisions of the degree, and not a
+	typographical quote of any sort.
+
+	Fixes <https://savannah.gnu.org/bugs/?59463>.
+
+2020-12-20  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[ms]: Set footnote line length to AT&T default.
+
+	groff ms has since its initial implementation used a default
+	footnote line length of 5/6ths of the text line length; this may
+	correspond to an early AT&T ms default (perhaps documented in
+	the 1974 version of the M. E. Lesk paper, "Typing Documents on
+	the UNIX System"[1], published by the ACM).  However, as early
+	as V6 Unix (1975), AT&T ms actually used a footnote line length
+	of 11/12ths of the text line length instead[2].
+
+	Heirloom Doctools and neatroff ms also use this default.
+
+	* tmac/s.tmac: Set default footnote line length to 11/12ths of
+	the text line length.
+
+	* doc/groff.texi (ms Document Control Settings):
+	* doc/ms.ms (Document control registers): Document new default.
+
+	[1] https://www.troff.org/using-ms.pdf
+	[2] https://minnie.tuhs.org/cgi-bin/utree.pl?file=V6/usr/lib/tmac.s
+
+2020-12-09  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	Lower new unplanted trap error to 'mac' warning.
+
+	* src/roff/troff/div.cpp (top_level_diversion::change_trap):
+	Change error upon invalid attempt to move an unplanted trap into
+	a warning of type 'mac'.
+
+	* doc/groff.texi (Warnings):
+	* src/roff/troff/troff.1.man (Warnings): Recast description of
+	'mac' warning type to include the above scenario.
+
+	Thanks to Bjarni Ingi Gislason for reporting the diagnostic
+	arising in real life, and to Peter Schaffter for the discussion
+	and recommendation.  Some bike sheds get painted quickly!
+
+	Fixes <https://savannah.gnu.org/bugs/?59573>.
+
+2020-12-05  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/groff_mdoc.7.man: Tweak mandatory macro explanations.
+
+	Update descriptions and template of .Dd, .Dt, .Os usage to
+	reflect recent changes and recommended conventions.
+
+	Thanks to Ingo Schwarze, Colin Watson, and Alan D. Salewski for
+	the discussion, and Florent Rougon and Robert Bihlmeyer (many
+	years ago) for the original report.
+
+	Fixes <https://bugs.debian.org/284002>.
+
+2020-12-01  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/utils/xtotroff/xtotroff.c (MapFont): Avoid writing past
+	the end of a static buffer.  Problem found and patch supplied by
+	Bjarni Ingi Gislason.  I tweaked it to comment it differently
+	{in case the buffer ever needs to grow, but the prospects of
+	future X11 server-side font rendering development seem dim} and
+	use snprintf() instead of retaining the existing sprintf().
+
+	Fixes <https://savannah.gnu.org/bugs/?55257>.
+
+2020-12-01  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/utils/xtotroff/xtotroff.c (CanonicalizeFontName,
+	FontNamesAmbiguous, MapFont, main): Format diagnostic messages
+	more consistently with GNU Coding Standards.  Prefix with name
+	of complaining command.  Put argument literals in quotation
+	marks.  Put each messge on one line only.
+
+2020-11-28  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* doc/groff.texi (Parameters): Fix error in example.  Arguments
+	to .als were in the wrong order (.als is not ln(1)).  Also mark
+	output to the standard error stream using the @error Texinfo
+	command instead of @result.
+
+	Thanks to Dorai Sitaram for finding this error.
+
+	Fixes <https://savannah.gnu.org/bugs/?59566>.
+
+2020-11-28  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* doc/groff.texi (Debugging): Update with a more helpful
+	introduction, summarizing available procedures.  Mention
+	backtracing since it is much more useful now (post-groff
+	1.22.4.)
+
+	* man/groff.7 (Debugging): Add new section summarizing
+	material added to our Texinfo manual.
+
+	* man/groff_diff.7.man (Debugging): Add new section describing
+	groff extensions.
+
+2020-11-22  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* doc/groff.texi (Traps): Update.  Organize subsubsections "Page
+	Location Traps" and "Diversion Traps" under new subsection node
+	"Vertical Position Traps" to make the conceptual organization
+	more clear.  Define and discuss trap visibility earlier.
+	Document unit used for page location trap reporting.  Introduce
+	analogy of .wh and .ch requests as queue operations.  Document
+	what happens when the same macro is planted as a trap in
+	multiple locations; supply example.  Supply example of .itc
+	usage.  Consistently refer to an end-of-input macro as such, to
+	contrast it with the "end macro" that be used with, e.g., .de
+	and .ig requests.
+
+	* man/groff.7 (Traps): Add new section summarizing
+	language feature.
+
+2020-11-18  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/mdoc/doc-common-u (doc-footer): When performing
+	double-sided page layout, set page number on outside of _recto_
+	{odd-numbered} pages, as is conventional and for consistency
+	with man(7).
+
+	* tmac/groff_mdoc.7.man
+	(Formatting with groff, troff, and nroff): Document what
+	double-sided layout (not "printing") means.  Also correct
+	description of continuous rendering, which implied that page
+	headers and footers were not written at all, and used an
+	incorrect groff driver name.
+
+	Fixes <https://bugs.debian.org/919890>.  Also see:
+	https://lists.gnu.org/archive/html/groff/2019-01/msg00021.html
+	Thanks to Ralph Corderoy for the discussion.
+
+	* tmac/tests/doc-D_places_page_numbers_correctly.sh: Test it.
+	* tmac/tmac.am (tmac_TESTS): Run test.
+
+2020-11-18  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/mdoc/doc-common-u (doc-header): Fix infinite loop when
+	attempting to trim header string (like "FTP(1)") to fit when the
+	available title length won't allow even extreme shortening.
+	Measure the string before and after calling .substring on it,
+	and break out of loop if it didn't get shorter.
+
+	Problem dates back to at least
+	ed63b0ae76a611b581601a1afc192f6a7367be6f (7 July 2002), possibly
+	as far as the Great Mdoc Rewrite of
+	058f72af832fc68488d33cd09ec819e5c560fa09 (23 March 2001).
+
+	One can never check loop invariants too many times...
+
+	Fixes <https://bugs.debian.org/411227>.
+
+	* tmac/tests/\
+	doc-do_not_loop_infinitely_when_shortening_headers.sh: Test it.
+	* tmac/tmac.am (tmac_TESTS): Run test.
+
+2020-11-18  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/roff/nroff/nroff.sh: Recognize -b and -z options and pass
+	them through to troff.  Document them in usage message.
+	* src/roff/nroff/nroff.1.man: Document new -b and -z options.
+
+2020-11-17  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/roff/troff/div.cpp (top_level_diversion::change_trap):
+	Emit error diagnostic if an attempt is made to move an unplanted
+	macro.  This could have been a warning, as it's pretty harmless
+	{though possibly a big surprise to anyone who was wondering why
+	their .ch was a no-op}, but there's no good warning category for
+	this kind of problem and I am not about to start a bike shed
+	discussion about it right now.
+
+2020-11-15  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* doc/groff.texi: Update.  Add introductory material.  Rewrite
+	the first section of the "gtroff Reference" chapter of our
+	Texinfo manual.  It is written as an introduction for readers
+	who want to go straight to "raw" troff without knowing much or
+	anything about existing macro packages.  Thanks to Dave Kemper
+	and John Gardner for feedback and support.
+
+	Clarify whitespace usage.  "Whitespace" is defined in this
+	manual as "spaces, tabs, and newlines".  Say only "spaces and
+	tabs" when newlines should not be included.
+
+	Rename "Font Files" to "Device and Font Files".
+
+	Rename "Manipulating Filling and Adjusting" to "Manipulating
+	Filling and Adjustment".
+
+	Update discussion of "copy mode".  Rename from "copy-in mode",
+	which I don't think eludicdated anything; is there a "copy-out
+	mode"?  Rename nodes accordingly.  Attempt to explain more
+	clearly.  Recast to shift emphasis to what _isn't_ merely copied
+	in copy mode, since that is what seems to cause confusion among
+	the inexperienced.
+
+	Update "Conditionals and Loops".  Add introductory paragraph.
+	Add nodes/subsections "if-then" and "Conditional Blocks".  Add
+	subsection "Conditional Blocks" to explain the behavior of the
+	\{ and \} escapes much more precisely.  I don't think this
+	syntactical area is well understood.  Supply examples.
+
+2020-11-14  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	Add style checks to man(7) macro package.
+
+	Not otherwise documented yet; experimental--subject to change.
+
+	* tmac/an-old.tmac: Initialize CHECKSTYLE to false if not
+	already set.
+	(an-style-warn): New macro emits diagnostic of type "style" when
+	called if CHECKSTYLE register is true.
+	(TH): Call an-style-warn if fewer than two or more than five
+	arguments are seen.
+	(RI, IR, IB, BI, RB, BR): Call an-style-warn if fewer than two
+	arguments are seen.
+
 2020-11-11  Bertrand Garrigues <bertrand.garrigues@laposte.net>
 
-	Update copyright
+	Update copyright.
 
-	* update-copyright.sh: use gnulib's 'update-copyright' script.  Pass
-	this script in directories 'arch', 'contrib', 'font', 'man', 'tmac',
-	'src' and on a list of extra files.
+	* update-copyright.sh: use gnulib's 'update-copyright' script.
+	Pass this script in directories 'arch', 'contrib', 'font',
+	'man', 'tmac', 'src' and on a list of extra files.
 
 	* FOR-RELEASE: mention this point.
 
@@ -86,8 +653,8 @@
 	* tmac/mdoc/doc-ditroff-u:
 	* tmac/mdoc/doc-nroff-u: Recognize but ignore the groff_man(7)
 	string HF and registers FT, IN, P, SN, and X (by initializing
-	them empty or  zero if they are not set).  This reserves them
-	so that they don't become used for divergent purposes.  man(1)
+	them empty or zero if they are not set).  This reserves them so
+	that they don't become used for divergent purposes.  man(1)
 	programs set these and other parameters already handled (like
 	LL) to configure page rendering, and it would break the
 	macro-package agnosticism afforded by andoc.tmac to expose
@@ -112,6 +679,10 @@
 	* tmac/groff_mdoc.7.man (Predefined strings): Fix error; the
 	\*[Lq] and \*[Rq] strings degrade to neutral double quotes (")
 	on "nroff" devices (-Tascii and -Tlatin1), not "``" and "''".
+
+2020-10-31  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/s.tmac (ds*end!0): Improve diagnostic to mention .RD.
 
 2020-10-30  G. Branden Robinson <g.branden.robinson@gmail.com>
 
@@ -341,6 +912,33 @@
 
 	Continues the long process of fixing Savannah #52463.
 
+2020-10-17  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/an-old.tmac: Add fallback for lq, rq strings.
+
+	Define \*(lq and \*(rq as '"' if the output device has no \(lq
+	or \(rq special character escapes defined (respectively).
+
+	This is a bit belt-and-suspenders for groff since our output
+	devices all guarantee availability of these glyphs, but if this
+	macro file gets used with other implementations (and if they
+	support the 'c' conditional), it should prevent the strings from
+	producing empty output.
+
+	Man page writers should simply use \(lq and \(rq unless they are
+	aiming for pathological levels of portability (e.g., composing
+	man pages today for consumption on simulators of 1980s Unix
+	systems).
+
+2020-10-16  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/an-old.tmac: Define an-end with .de1.  We need to define
+	an-end with de1 (execute macro with compatibility mode off)
+	because, as of 37b4180a27a6eeaea429e40ec278abefcda7f3a7 (11
+	October), it can now be called from a trap executing in a
+	context whence compatibility mode might be on (namely,
+	"reload-doc" in andoc.tmac).
+
 2020-10-16  G. Branden Robinson <g.branden.robinson@gmail.com>
 
 	* src/preproc/eqn/main.cpp (main):
@@ -362,6 +960,23 @@
 	only to "dubious syntax in numeric expressions", which was not
 	the case.  Instead it was being used only for poor construction
 	of character classes with the .class request.
+
+2020-10-16  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/preproc/tbl/main.cpp (main): Stop ignoring -T.  GNU tbl
+	was undocumentedly ignoring the -T option; apparently IRIX tbl
+	implemented it, something on the system called tbl with that
+	option (I'm guessing IRIX's man(1)) and its users spammed James
+	Clark with bug reports.  We can probably weather the volume of
+	such spurious reports from IRIX users today.
+
+2020-10-16  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/preproc/tbl/main.cpp (main): Clarify fatal diagnostic in
+	generated document by informing the user that the program is
+	aborting, and also that it is groff extensions that are required
+	rather than GNU troff per se (since Heirloom Doctools troff
+	claims groff extension support via the .g register).
 
 2020-10-14  Ingo Schwarze <schwarze@openbsd.org>
 
@@ -568,12 +1183,12 @@
 	(table::compute_expand_width):
 	(table::compute_separation_factor): Use consistent format for
 	diagnostic messages.
-	+ Do not spread a single diagnostic across multiple lines.
-	+ Report messages in GNU Coding Standards format, that is:
-	+ Report the name of the file the problem is in...
-	+ ...then the line number...
-	+ ...then the diagnostic severity level...
-	+ ...then the specific problem.
+	  - Do not spread a single diagnostic across multiple lines.
+	  - Report messages in GNU Coding Standards format, that is:
+	  - Report the name of the file the problem is in...
+	  - ...then the line number...
+	  - ...then the diagnostic severity level...
+	  - ...then the specific problem.
 
 2020-09-26  G. Branden Robinson <g.branden.robinson@gmail.com>
 
@@ -809,6 +1424,27 @@
 	* tmac/tests/doc-accept-mixed-case-section-headings.sh: Test it.
 	* tmac/tmac.am (tmac_TESTS): Run test.
 	* tmac/tests/doc-smoke-test.sh: Use mixed-case section headings.
+
+2020-09-03  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* makevarescape.sed: Use \[] form of special character escapes.
+
+	The only man page we have that doesn't turn compatibility mode
+	off (neqn) also doesn't use any sed-substituted patterns where
+	characters replaced by a \[] special character escape form are
+	likely to be used.
+
+	The @g@ command prefix is the main avenue for intrusion of such
+	escapes, but I think it improbable that many people are going to
+	include apostrophes, double quotes, carets, grave accents, or
+	tildes in the command prefix; some or all of these will pick
+	fights with the shell and require quoting that we don't
+	represent in man page text anyway.
+
+	On top of that, neqn is largely a stub page.
+
+	If it's a problem, a better fix than reverting this is to make
+	neqn switch out of compatibility mode like our other man pages.
 
 2020-09-03  G. Branden Robinson <g.branden.robinson@gmail.com>
 

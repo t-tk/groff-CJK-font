@@ -8,7 +8,7 @@ groff_ms \- GNU roff manuscript macro package for formatting documents
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 1989-2020 Free Software Foundation, Inc.
+.\" Copyright (C) 1989-2021 Free Software Foundation, Inc.
 .\"
 .\" Permission is granted to make and distribute verbatim copies of this
 .\" manual provided the copyright notice and this permission notice are
@@ -237,15 +237,23 @@ cb   cb cb cb
 lfCR l  l  l.
 Reg.	Definition	Effective	Default
 _
-FL	Footnote length	next footnote	\[rs]n[LL]*5/6
+FL	Footnote length	T{
+next footnote; not effective in multicolumn mode
+T}	\[rs]n[LL]*\[rs]*[FR]
 FI	Footnote indent	next footnote	2n
 FF	Footnote format	next footnote	0
 FPS	Point size	next footnote	\[rs]n[PS]\-2
 FVS	Vert.\& spacing	next footnote	\[rs]n[FPS]+2
 FPD	Para.\& spacing	next footnote	\[rs]n[PD]/2
+FR	Footnote ratio	T{
+before first paragraph, or before each .MC
+T}	11/12
 _
 .TE
 .RE
+.LP
+Note that \f[CW]FR\fP is a string variable and should be set with  the
+\fBds\fP request.
 .
 .LP
 .ne 6

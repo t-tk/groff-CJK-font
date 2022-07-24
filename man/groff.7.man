@@ -76,7 +76,10 @@ groff \- GNU roff language reference
 .
 .\" reference of a request
 .de request
-.  BR \\$*
+.  ie (\\n[.$] < 2) \
+.    B \\$*
+.  el \
+.    BR \\$*
 ..
 .
 .\" ========= numerical elements =========
@@ -158,7 +161,10 @@ groff \- GNU roff language reference
 .\" Result  : prints \name, where 'name' is in B, 'punct' in R
 .\"
 .de esc
-.  BR "\e\\$1" \\$2
+.  ie (\\n[.$] < 2) \
+.    B "\e\\$1"
+.  el \
+.    BR "\e\\$1" \\$2
 ..
 .\" ====================================================================
 .\" .escarg name arg [punct]
@@ -208,7 +214,10 @@ groff \- GNU roff language reference
 .\" reference of a register, without decoration
 .de register
 .  Text register
-.  BR \\$*
+.  ie (\\n[.$] < 2) \
+.    B \\$*
+.  el \
+.    BR \\$*
 ..
 .
 .\" end of macro definitions
@@ -1164,15 +1173,23 @@ Print
 .I string
 on standard error, exit program.
 .
-.TPx
-.REQ .ad
-Begin line adjustment for output lines in current adjust mode.
 .
 .TPx
-.REQ .ad "c"
-Start line adjustment in mode
+.REQ .ad
+Enable output line adjustment in current mode
+.RB ( \[rs]n[.j] ).
+.
+.
+.TPx
+.REQ .ad c
+Adjust output lines in mode
 .I c
-(\f[CI]c\/\f[]\f[CR]\|\^\[eq]\|l,r,c,b,n\f[]).
+.RI ( c =\c
+.BR b , c , l , n , r ).
+.
+Sets
+.BR \[rs]n[.j] .
+.
 .
 .TPx
 .REQ .af "register c"
@@ -1323,16 +1340,19 @@ Embolden Special Font
 when current font is
 .IR font .
 .
+.
 .TPx
 .REQ .blm
 Unset blank line macro (trap).
 .
 Restore default handling of blank lines.
 .
+.
 .TPx
-.REQ .blm macro
-Set blank line trap to
-.IR macro .
+.REQ .blm name
+Set blank line macro (trap) to
+.IR name .
+.
 .
 .TPx
 .REQ .box
@@ -1420,13 +1440,17 @@ to characters
 .IR c2 ,
 and so on.
 .
+.
 .TPx
-.REQ .ch "trap N"
-Change
-.I trap
-location
-to
-.IR N .
+.REQ .ch "name N"
+Change location of page location trap by moving macro
+.I name
+to new location
+.IR N ,
+or by unplanting it altogether if
+.I N
+absent.
+.
 .
 .TPx
 .REQ .char "c anything"
@@ -1661,10 +1685,10 @@ Clear diversion trap.
 .
 .
 .TPx
-.REQ .dt "N trap"
+.REQ .dt "N name"
 Set diversion trap to
 macro
-.I trap
+.I name
 at position
 .I N
 (default scaling indicator\~\c
@@ -1696,11 +1720,13 @@ Else part for if-else (\c
 .request .ie )
 request.
 .
+.
 .TPx
-.REQ .em "macro"
-The
-.I macro
-is run after the end of input.
+.REQ .em name
+Invoke macro
+.I name
+after the end of input.
+.
 .
 .TPx
 .REQ .eo
@@ -2010,18 +2036,24 @@ Change indentation according to
 (default scaling indicator\~\c
 .scaleindicator m ).
 .
-.TPx
-.REQ .it "N trap"
-Set an input-line count trap for the next
-.I N
-lines.
 .
 .TPx
-.REQ .itc "N trap"
-Same as
-.request .it
+.REQ .it "n name"
+Set an input line trap,
+calling macro
+.IR name ,
+after the next
+.IR n\~ lines
+lines of text input have been read.
+.
+.
+.TPx
+.REQ .itc "n name"
+As
+.request .it ,
 but don't count lines interrupted with
 .esc c .
+.
 .
 .TPx
 .REQ .kern
@@ -2033,14 +2065,19 @@ If
 .I n
 is zero, disable pairwise kerning, otherwise enable it.
 .
+.
 .TPx
 .REQ .lc
 Remove leader repetition glyph.
 .
+.
 .TPx
 .REQ .lc "c"
-Set leader repetition glyph to\~\c
-.IR c .
+Set leader repetition glyph
+.RI to\~ c
+(default:
+.RB \[lq] . \[rq]).
+.
 .
 .TPx
 .REQ .length "reg anything"
@@ -2091,14 +2128,19 @@ Set line length according to
 default scaling indicator\~\c
 .scaleindicator m ).
 .
-.TPx
-.REQ .lsm
-Unset the leading spaces macro.
 .
 .TPx
-.REQ .lsm "macro"
-Set the leading spaces macro to
-.IR macro .
+.REQ .lsm
+Unset the leading space macro (trap).
+.
+Restore default handling of lines with leading spaces.
+.
+.
+.TPx
+.REQ .lsm name
+Set the leading space macro (trap) to
+.IR name .
+.
 .
 .TPx
 .REQ .ls
@@ -2152,9 +2194,11 @@ except that
 .I file
 is searched in the tmac directories.
 .
+.
 .TPx
 .REQ .na
-No output-line adjusting.
+Disable line adjustment.
+.
 .
 .TPx
 .REQ .ne
@@ -2284,9 +2328,8 @@ Pipe output to
 .REQ .pl
 Set page length to default
 .scalednumber 11 i .
-The current page length is stored in
-.register .p\c
-\&.
+The current page length is stored in register
+.BR .p .
 .
 .TPx
 .REQ .pl "\[+-]N"
@@ -2320,9 +2363,8 @@ on stderr.
 .REQ .po
 Change to previous page offset.
 .
-The current page offset is available in
-.register .o\c
-\&.
+The current page offset is available in register
+.BR .o .
 .
 .TPx
 .REQ .po "\[+-]N"
@@ -2354,10 +2396,12 @@ This behaves like the
 request except that input comes from the standard output of
 .IR command .
 .
+.
 .TPx
 .REQ .ptr
-Print the names and positions of all traps (not including input line
-traps and diversion traps) on stderr.
+Report names and positions of all page location traps to the standard
+error stream.
+.
 .
 .TPx
 .REQ .pvs
@@ -2631,13 +2675,18 @@ increments from 0, 1, 2, \&.\|.\|.\& to infinity.
 .\".REQ .tas
 .\"Save tab positions internally.
 .
+.
 .TPx
 .REQ .tc
 Remove tab repetition glyph.
+.
+.
 .TPx
 .REQ .tc "c"
-Set tab repetition glyph to\~\c
-.IR c .
+Set tab repetition glyph
+.RI to\~ c
+(default: none).
+.
 .
 .TPx
 .REQ .ti "\[+-]N"
@@ -2735,11 +2784,17 @@ input lines.
 Unformat space characters and tabs in
 .IR diversion ,
 preserving font information.
+.
+.
 .TPx
-.REQ .vpt "n"
-Enable vertical position traps if
-.I n
-is non-zero, disable them otherwise.
+.REQ .vpt
+Enable vertical position traps.
+.
+.
+.TPx
+.B .vpt 0
+Disable vertical position traps.
+.
 .
 .TPx
 .REQ .vs
@@ -2766,14 +2821,28 @@ Set warnings code to
 Set scaling indicator used in warnings to
 .IR si .
 .
-.TPx
-.REQ .wh "N"
-Remove (first) trap at position
-.IR N .
 .
 .TPx
-.REQ .wh "N trap"
-Set location trap; negative means from page bottom.
+.REQ .wh N
+Remove active trap at vertical position
+.IR N ;
+a negative value is measured upward from page bottom.
+.
+.
+.TPx
+.REQ .wh "N name"
+Plant trap,
+calling macro
+.I name
+when page location
+.I N
+is reached or passed;
+a negative value is measured upward from page bottom.
+.
+Any active trap already present at
+.I N
+is replaced.
+.
 .
 .TPx
 .REQ .while "cond anything"
@@ -3635,6 +3704,95 @@ character maps to itself.
 .
 .
 .\" ====================================================================
+.SS Identifiers
+.\" ====================================================================
+.
+An identifier is a label for an object of syntactical importance like
+a register,
+a name
+(macro,
+string,
+diversion,
+or box),
+an environment,
+a font,
+a style,
+or a glyph,
+comprising a sequence of one or more characters with the following
+exceptions.
+.
+.
+.IP \[bu]
+Spaces,
+tabs,
+or newlines.
+.
+.
+.IP \[bu]
+Invalid input characters;
+these are certain control characters
+(from the sets \[lq]C0 Controls\[rq] and \[lq]C1 Controls\[rq] as
+Unicode describes them).
+.
+When
+.I \%@g@troff
+encounters one in an identifier,
+it produces a warning diagnostic of type
+.RB \[lq] input \[rq]
+(see section \[lq]Warnings\[rq] in
+.IR \%@g@troff (@MAN1EXT@)).
+.
+.
+.IP
+On a machine using the ISO 646,
+8859,
+or 10646 character encodings,
+invalid input characters are
+.BR 0x00 ,
+.BR 0x08 ,
+.BR 0x0B ,
+.BR 0x0D \[en] 0x1F ,
+and
+.BR 0x80 \[en] 0x9F .
+.
+.
+.IP
+On an EBCDIC host,
+they are
+.BR 0x00 \[en] 0x01 ,
+.BR 0x08 ,
+.BR 0x09 ,
+.BR 0x0B ,
+.BR 0x0D \[en] 0x14 ,
+.BR 0x17 \[en] 0x1F ,
+and
+.BR 0x30 \[en] 0x3F .
+.
+.
+.IP
+Some of these code points are used by
+.I \%@g@troff
+internally,
+making it non-trivial to extend the program to cover Unicode or other
+character encodings that use characters from these ranges.
+.
+(Consider what happens when a C1 control
+.BR 0x80 \[en] 0x9F
+is necessary as a continuation byte in a UTF-8 sequence.}
+.
+.
+.IP
+Invalid characters are removed during parsing;
+an identifier
+.RB \[lq] foo \[rq],
+followed by an invalid character,
+followed by
+.RB \[lq] bar \[rq]
+is treated as
+.RB \[lq] foobar \[rq] .
+.
+.
+.\" ====================================================================
 .SS "Special characters"
 .\" ====================================================================
 .
@@ -3972,8 +4130,7 @@ Likewise,
 the
 .request .as1
 request is similar to
-.request .as\c
-,
+.BR .as ,
 but compatibility mode is switched off when the appended portion of the
 string is later interpolated.
 .
@@ -4177,9 +4334,8 @@ the center of an accent over that glyph should be placed.
 .
 .TPx
 .REG .d
-Current vertical place in current diversion; equal to
-.register nl\c
-\&.
+Current vertical place in current diversion; equal to register
+.BR nl .
 .
 .TPx
 .REG .ev
@@ -4326,9 +4482,8 @@ The amount of space that was needed in the last
 .request .ne
 request that caused a trap to be sprung.
 .
-Useful in conjunction with
-.register .trunc\c
-\&.
+Useful in conjunction with register
+.BR .trunc .
 .
 .TPx
 .REG .ns
@@ -4415,9 +4570,11 @@ of the current font.
 .REG .sty
 The current font style (string-valued).
 .
+.
 .TPx
 .REG .t
-Vertical distance to the next trap.
+Distance to the next vertical position trap.
+.
 .
 .TPx
 .REG .T
@@ -4463,9 +4620,11 @@ Current vertical line spacing.
 .REG .V
 Number of basic units per vertical unit of output device resolution.
 .
+.
 .TPx
 .REG .vpt
 1\~if vertical position traps are enabled, 0\~otherwise.
+.
 .
 .TPx
 .REG .w
@@ -4564,14 +4723,17 @@ image (set by
 .REG ln
 Output line number.
 .
+.
 .TPx
 .REG lsn
-The number of leading spaces of an input line.
+The count of leading spaces on an input line.
+.
 .
 .TPx
 .REG lss
-The horizontal space corresponding to the leading spaces of an input
-line.
+The amount of horizontal space corresponding to the leading spaces
+on an input line.
+.
 .
 .TPx
 .REG minutes
@@ -4598,22 +4760,20 @@ Vertical position of last printed text base-line.
 These four registers mark the top left and bottom right hand corners of
 a box which encompasses all written glyphs.
 They are reset to \-1 by
-.escarg O 0
+.B \[rs]O0
 or
-.escarg O 1 .
+.BR \[rs]O1 .
 .
 .TPx
 .REG rsb
-Like
-.register sb\c
-,
+Like register
+.BR sb ,
 but takes account of the heights and depths of glyphs.
 .
 .TPx
 .REG rst
-Like
-.register st\c
-,
+Like register
+.BR st ,
 but takes account of the heights and depths of glyphs.
 .
 .TPx
@@ -4797,7 +4957,7 @@ values 4 and\~16,
 and values 8 and\~32.
 .
 As noted,
-it is superfluous to add\~1 to any nonzero even number.
+it is superfluous to add\~1 to any nonzero even mode.
 .
 .
 .P
@@ -4827,6 +4987,64 @@ See
 or the
 .I groff
 Texinfo manual for further details.
+.
+.
+.\" ====================================================================
+.SH Traps
+.\" ====================================================================
+.
+.I Traps
+are locations in the output,
+or conditions on the input that,
+when reached or fulfilled,
+cause a specified macro to be called.
+.
+These traps can occur at a given location on the page
+.RB ( .wh ,\~ .ch );
+at a given location in the current diversion
+.RB ( .dt )\[em]together,
+these are known as
+vertical position traps,
+which can be disabled and re-enabled
+.RB ( .vpt );
+at a blank line
+.RB ( .blm );
+at a line with leading space characters
+.RB ( .lsm );
+after a certain number of input lines
+.RB ( .it ,\~ .itc );
+or at the end of input
+.RB ( .em ).
+.
+Macros invoked by traps have no arguments.
+.
+Setting a trap is also called
+.IR planting .
+.
+It is also said that a trap is
+.I sprung
+if the associated macro is executed.
+.
+.
+.P
+Registers associated with trap management include
+vertical position trap enablement status
+.RB ( \[rs]n[.vpt] ),
+distance to the next trap
+.RB ( \[rs]n[.t] ),
+amount of needed
+.RB ( .ne -requested )
+space that caused the most recent vertical position trap to be sprung
+.RB ( \[rs]n[.ne] ),
+amount of needed space truncated from the amount requested
+.RB ( \[rs]n[.trunc] ),
+page ejection status
+.RB ( \[rs]n[.pe] ),
+and
+leading space count
+.RB ( \[rs]n[.lsn] )
+with its corresponding amount of motion
+.RB ( \[rs]n[.lss] ).
 .
 .
 .\" ====================================================================
@@ -5070,6 +5288,74 @@ CSTR\~#54 are documented in
 provides an AT&T compatibility mode;
 see
 .IR groff (@MAN1EXT@).
+.
+.
+.\" ====================================================================
+.SH Debugging
+.\" ====================================================================
+.
+.I groff
+is not the easiest language to debug,
+in part thanks to its design features of recursive interpolation and
+multi-stage pipeline processing.
+.
+Nevertheless there exist several features useful for troubleshooting.
+.
+.
+.P
+Preprocessors use the
+.B .lf
+request to preserve the identity of the line numbers and names of input
+files.
+.
+.I groff
+emits a variety of error diagnostics and supports several categories of
+warning;
+the output of these can be selectively suppressed with
+.B .warn
+(and see the
+.BR -E ,
+.BR -w ,
+and
+.B -W
+options of
+.IR \%@g@troff (@MAN1EXT@)).
+.
+Backtraces can be automatically produced when errors or warnings occur
+(the
+.B \-b
+option of
+.IR \%@g@troff (@MAN1EXT@))
+or generated on demand
+.RB ( .backtrace ).
+.
+.BR .tm ,
+.BR .tmc ,
+and
+.B .tm1
+can be used to emit customized diagnostic messages or for
+instrumentation while troubleshooting.
+.
+.B .ex
+and
+.B .ab
+cause early termination with successful and error exit codes
+respectively,
+to halt further processing when continuing would be fruitless.
+.
+The state of the formatter can be examined with requests that write
+lists of defined macros,
+strings,
+diversions,
+and boxes
+.RB ( .pm );
+environments
+.RB ( .pev ),
+registers
+.RB ( .pnr ),
+and page location traps
+.RB ( .ptr )
+to the standard error stream.
 .
 .
 .\" ====================================================================
