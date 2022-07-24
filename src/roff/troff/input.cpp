@@ -8168,7 +8168,6 @@ static void init_registers()
   time_t
 #endif /* not LONG_FOR_TIME_T */
     t = current_time();
-  // Use struct here to work around misfeature in old versions of g++.
   struct tm *tt = localtime(&t);
   set_number_reg("seconds", int(tt->tm_sec));
   set_number_reg("minutes", int(tt->tm_min));

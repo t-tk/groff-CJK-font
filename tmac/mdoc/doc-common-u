@@ -928,6 +928,8 @@
 .\" NS local variables:
 .\" NS   doc-reg-dh
 .\" NS   doc-reg-dh1
+.\" NS   doc-hs-len
+.\" NS   doc-hs-len-prev
 .
 .de doc-header
 .  ev doc-env-dh
@@ -938,9 +940,16 @@
 .  nr doc-reg-dh1 \w'\*[doc-caption-font2]\*[doc-volume]\f[]'
 .  if (\n[doc-reg-dh] + \n[doc-reg-dh1] + \n[doc-reg-dh] >= \n[.lt]) \{\
 .    while (\n[doc-reg-dh] + \n[doc-reg-dh1] + \n[doc-reg-dh] >= \n[.lt]) \{\
+.      length doc-hs-len-prev \*[doc-header-string]
 .      substring doc-header-string 0 -2
+.      length doc-hs-len \*[doc-header-string]
 .      nr doc-reg-dh \w'\*[doc-caption-font]\*[doc-header-string]\|.\|.\|.\f[]'
+.      \" If header string didn't actually get shorter, stop trying.
+.      if (\n[doc-hs-len-prev] <= \n[doc-hs-len]) \
+.        break
 .    \}
+.    rr doc-hs-len
+.    rr doc-hs-len-prev
 .    as doc-header-string "\|.\|.\|.
 .  \}
 .  tl \*[doc-caption-font]\*[doc-header-string]\f[]\*[doc-caption-font2]\*[doc-volume]\f[]\*[doc-caption-font]\*[doc-header-string]\f[]
@@ -964,7 +973,7 @@
 .    doc-setup-page-layout
 .    sp \n[doc-footer-space]u
 .    ie \n[D] \{\
-.      ie o \
+.      ie e \
 .        tl %\*[doc-caption-font2]\*[doc-date-string]\f[]\*[doc-caption-font]\*[doc-operating-system]\f[]
 .      el \
 .        tl \*[doc-caption-font]\*[doc-operating-system]\f[]\*[doc-caption-font2]\*[doc-date-string]\f[]%

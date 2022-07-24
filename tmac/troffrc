@@ -1,4 +1,6 @@
-.\" Startup file for troff.
+.\" startup file for GNU troff
+.\"
+.\" Use .do for any groff extensions so that this file works with -C.
 .
 .\" This is tested by pic.
 .nr 0p 0
@@ -9,9 +11,8 @@
 .\" Load generic fallback mappings.
 .do mso fallbacks.tmac
 .
-.\" Use .do here, so that it works with -C.
-.\" The groff command defines the .X string if the -X option was given.
-.do ie r.X \
+.\" The groff command defines the .X register if -X was given.
+.do ie r .X \
 .	do ds troffrc!ps Xps.tmac
 .el \
 .	do ds troffrc!ps ps.tmac
@@ -30,8 +31,21 @@
 .do ds troffrc!html html.tmac
 .do if d troffrc!\*[.T] \
 .	do mso \*[troffrc!\*[.T]]
-.do rm troffrc!ps troffrc!Xps troffrc!dvi troffrc!X75 troffrc!X75-12 \
-troffrc!X100 troffrc!X100-12 troffrc!lj4 troff!lbp troffrc!html troffrc!pdf
+.do rm \
+troffrc!ps \
+troffrc!pdf \
+troffrc!dvi \
+troffrc!X75 \
+troffrc!X75-12 \
+troffrc!X100 \
+troffrc!X100-12 \
+troffrc!ascii \
+troffrc!latin1 \
+troffrc!utf8 \
+troffrc!cp1047 \
+troffrc!lj4 \
+troffrc!lbp \
+troffrc!html
 .
 .\" Test whether we work under EBCDIC and map the no-breakable space
 .\" character accordingly.

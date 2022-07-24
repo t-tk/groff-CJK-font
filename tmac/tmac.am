@@ -175,8 +175,11 @@ tmac_TESTS = \
   tmac/tests/andoc-flush-between-packages.sh \
   tmac/tests/doc-CS_works.sh \
   tmac/tests/doc-CT_works.sh \
+  tmac/tests/doc-D_places_page_numbers_correctly.sh \
   tmac/tests/doc-accept-mixed-case-section-headings.sh \
+  tmac/tests/doc-do_not_loop_infinitely_when_shortening_headers.sh \
   tmac/tests/doc-smoke-test.sh \
+  tmac/tests/s_IP_respects_inter-sentence_space_in_tags.sh \
   tmac/tests/s_R-handles-its-arguments.sh \
   tmac/tests/s_TC-works-with-percent-in-custom-titles.sh
 TESTS += $(tmac_TESTS)
@@ -188,17 +191,13 @@ tmac_XFAIL_TESTS = \
 XFAIL_TESTS += $(tmac_XFAIL_TESTS)
 
 $(TMACSTRIPFILES): $(TMACUNSTRIPFILES)
-	for f in $(TMACSTRIPFILES); do \
-	   sed -f $(tmac_srcdir)/strip.sed $(top_srcdir)/$$f-u \
-	     > $(top_builddir)/$$f; \
-	done
+	sed -f $(tmac_srcdir)/strip.sed $(top_srcdir)/$@-u \
+	    > $(top_builddir)/$@
 
 $(TMACMDOCSTRIPFILES): $(TMACMDOCUNSTRIPFILES)
 	$(MKDIR_P) $(top_builddir)/tmac/mdoc
-	for f in $(TMACMDOCSTRIPFILES); do \
-	   sed -f $(tmac_srcdir)/strip.sed $(top_srcdir)/$$f-u \
-	     > $(top_builddir)/$$f; \
-	done
+	sed -f $(tmac_srcdir)/strip.sed $(top_srcdir)/$@-u \
+	    > $(top_builddir)/$@
 
 tmac/www.tmac: tmac/www.tmac.in
 	$(MKDIR_P) $(top_builddir)/tmac

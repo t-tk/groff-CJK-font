@@ -10,7 +10,7 @@
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 1989-2020 Free Software Foundation, Inc.
+.\" Copyright (C) 1989-2021 Free Software Foundation, Inc.
 .\"
 .\" Permission is granted to make and distribute verbatim copies of this
 .\" manual provided the copyright notice and this permission notice are
@@ -125,14 +125,18 @@ must always be finished by a
 .TP
 .I Table format specification
 .
-This part must be given, it is not optional.
+The table format specification is mandatory;
+it determines the number of columns in the table.
 .
-It determines the number of columns (cells) of the table.
+Each cell in a column is classified by being
+centered,
+left-aligned,
+numeric
+(aligned to a decimal point),
+and so on.
 .
-Moreover each cell is classified by being central, left adjusted, or
-numerical, etc.
-.
-This specification can have several lines, but must be finished by a
+This specification can have several lines,
+but must be finished by a
 .B dot .
 at the end of the last line.
 .
@@ -142,10 +146,9 @@ but that's optional.
 .
 .
 .P
-Cells are separated by a tab character by default.
+Cells in table data are separated by a tab character by default.
 .
-That can be changed by the
-.I global option
+That can be changed by the global option
 .BI tab( c )\c
 ,
 where
@@ -880,42 +883,73 @@ field immediately above spans downward over this row.
 A text block can be used to enter data as a single entry which would
 be too long as a simple string between tabs.
 .
-It is started with \[oq]T{\[cq] and closed with \[oq]T}\[cq].
+It is started with
+.RB \[lq] T{ \[rq]
+at the end of a line
+and finished with
+.RB \[lq] T} \[rq]
+at the start of a line.
 .
-The former must end a line, and the latter must start a line, probably
-followed by other data columns (separated with tabs or the character
-given with the
-.B tab
-global option).
+Further column data can follow the end of a text block on the same line.
 .
 .
 .LP
-By default, the text block is formatted with the settings which were
-active before entering the table, possibly overridden by the
-.BR m ,
-.BR v ,
+Text blocks are formatted as was the text prior to the table,
+modified as applicable by column specifiers.
+.
+Specifically,
+the key characters
+.RB \[lq] a \[rq],
+.RB \[lq] c \[rq],
+.RB \[lq] l \[rq],
+.RB \[lq] n \[rq],
 and
-.B w
-tbl specifiers.
+.RB \[lq] s \[rq]
+determine a text block's
+.I alignment
+within its cell,
+but not its
+.IR adjustment .
+.
+You can add an
+.B .na
+or
+.B .ad
+request to the beginning of a text block to alter its adjustment
+distinctly from other text in the document.
 .
 .
 .LP
-If either \[oq]w\[cq] or \[oq]x\[cq] specifiers are not given for
+If
+.RB \[lq] w \[rq]
+or
+.RB \[lq] x \[rq]
+column specifiers are not given for
 .I all
-columns of a text block span, the default length of the text block (to
-be more precise, the line length used to process the text block
-diversion) is computed as L\[tmu]C/(N+1), where \[oq]L\[cq] is the
-current line length, \[oq]C\[cq] the number of columns spanned by the
-text block, and \[oq]N\[cq] the total number of columns in the table.
+columns of a text block span,
+the default length of the text block
+(to be more precise,
+the line length used to process the text block diversion)
+is computed as
+.IR L \[tmu] C /( N +1),
+where
+.I L
+is the current line length,
+.I C
+the number of columns spanned by the text block,
+and
+.I N
+the total number of columns in the table.
 .
-Note, however, that the actual diversion width as returned in register
-.B \[rs]n[dl]
-is used eventually as the text block width.
-.
-If necessary, you can also control the text block width with a direct
-insertion of a
+If necessary,
+you can also control the text block width by inserting an
 .B .ll
-request right after \[oq]T{\[cq].
+request right after
+.RB \[lq] T{ \[rq].
+.
+Because a diversion is used to format the text block,
+its width is subsequently available in the register
+.B \[rs]n[dl] .
 .
 .
 .\" ====================================================================

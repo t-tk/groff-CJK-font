@@ -136,7 +136,7 @@ static void usage(FILE *stream)
 {
   fprintf(stream, "usage: %s", program_name);
   size_t len = sizeof(param_table)/sizeof(param_table[0]);
-  for (int i = 0; i < len; i++)
+  for (size_t i = 0; i < len; i++)
     fprintf(stream, " [-%s N]", param_table[i].name);
   fprintf(stream, " RESOLUTION UNIT-WIDTH FONT\n");
   fprintf(stream, "usage: %s -v\n", program_name);

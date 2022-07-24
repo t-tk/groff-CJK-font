@@ -138,6 +138,7 @@ AC_REPLACE_FUNCS([fmod getcwd putenv strcasecmp \
 LIBS="$saved_libs"
 AC_CHECK_FUNCS([gettimeofday isatty kill rename setlocale strsep])
 GROFF_MKSTEMP
+AC_CHECK_DECLS([strsignal, getc_unlocked])
 AC_CHECK_DECLS([sys_siglist, getc_unlocked])
 AM_LANGINFO_CODESET
 

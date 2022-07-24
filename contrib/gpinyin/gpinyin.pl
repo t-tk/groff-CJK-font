@@ -123,53 +123,63 @@ my @output_t =	# troff
    '.el \\{\\',
   );
 
-foreach (<>) {	# get line from input
-  chomp;
-  s/\s+$//;		# remove final spaces
-# &err('gpinyin: ' . $_);
-
-  my $line = $_;	# with starting blanks
-
-  # .pinyin start or begin line
-  if ( $line =~ /^[.']\s*pinyin\s+(start|begin)$/ ) {
-    if ( $pinyin_mode ) {
-      # '.pinyin' was started twice, ignore
-      &err( q['.pinyin' starter was run several times] );
-    } else {	# new pinyin start
-      $pinyin_mode = 1;
-    }
+unshift @ARGV, '-' unless @ARGV;
+foreach my $filename (@ARGV) {
+  my $input;
+  if ($filename eq '-') {
+    $input = \*STDIN;
+  } elsif (not open $input, '<', $filename) {
+    warn $!;
     next;
   }
+  while (<$input>) {
+    chomp;
+    s/\s+$//;		# remove final spaces
+#   &err('gpinyin: ' . $_);
 
-  # .pinyin stop or end line
-  if ( $line =~ /^[.']\s*pinyin\s+(stop|end)$/ ) {
-    if ( $pinyin_mode ) {		# normal stop
-      $pinyin_mode = 0;
-      &finish_pinyin_mode( \@output_n, \@output_t );
-    } else {	# ignore
-      &err( 'gpinyin: there was a .pinyin stop without ' .
-	'being in pinyin mode' );
+    my $line = $_;	# with starting blanks
+
+    # .pinyin start or begin line
+    if ( $line =~ /^[.']\s*pinyin\s+(start|begin)$/ ) {
+      if ( $pinyin_mode ) {
+        # '.pinyin' was started twice, ignore
+        &err( q['.pinyin' starter was run several times] );
+      } else {	# new pinyin start
+        $pinyin_mode = 1;
+      }
+      next;
+    }
+
+    # .pinyin stop or end line
+    if ( $line =~ /^[.']\s*pinyin\s+(stop|end)$/ ) {
+      if ( $pinyin_mode ) {		# normal stop
+        $pinyin_mode = 0;
+        &finish_pinyin_mode( \@output_n, \@output_t );
+      } else {	# ignore
+        &err( 'gpinyin: there was a .pinyin stop without ' .
+          'being in pinyin mode' );
+      }
+      next;
+    }
+
+    # now not a .pinyin line
+
+
+    if ( $pinyin_mode ) {	# within Pinyin
+      my $starting_blanks = '';
+      $starting_blanks = $1 if ( s/^(s+)// );	# handle starting spaces
+
+      my %outline = &handle_line($starting_blanks, $line);
+#     &err('gpinyin outline n: ' . $outline{'n'} );
+#     &err('gpinyin outline t: ' . $outline{'t'} );
+      push @output_n, $outline{'n'};
+      push @output_t, $outline{'t'};
+    } else {	# normal roff line, not within Pinyin
+      print $line;
     }
     next;
-  }
-
-  # now not a .pinyin line
-
-
-  if ( $pinyin_mode ) {	# within Pinyin
-    my $starting_blanks = '';
-    $starting_blanks = $1 if ( s/^(s+)// );	# handle starting spaces
-
-    my %outline = &handle_line($starting_blanks, $line);
-#&err('gpinyin outline n: ' . $outline{'n'} );
-#&err('gpinyin outline t: ' . $outline{'t'} );
-    push @output_n, $outline{'n'};
-    push @output_t, $outline{'t'};
-  } else {	# normal roff line, not within Pinyin
-    print $line;
-  }
-  next;
-}	# end of input line
+  }	# end of input line
+}
 
 
 ########################################################################

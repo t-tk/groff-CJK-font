@@ -21,6 +21,7 @@
 #include <errno.h>
 #include <stdlib.h>
 
+#include "assert.h"
 #include "defs.h"
 #include "posix.h"
 #include "nonposix.h"
@@ -158,20 +159,18 @@ char *msw2posixpath(char *path)
 // Compute the current prefix.
 void set_current_prefix()
 {
-  char *pathextstr;
-  curr_prefix = new char[path_name_max()];
   // Obtain the full path of the current binary;
   // using GetModuleFileName on MS-Windows,
   // and searching along PATH on other systems.
 #ifdef _WIN32
+  char *pathextstr;
+  curr_prefix = new char[path_name_max()];
   int len = GetModuleFileName(0, curr_prefix, path_name_max());
   if (len)
     len = GetShortPathName(curr_prefix, curr_prefix, path_name_max());
 # if DEBUG
   fprintf(stderr, "curr_prefix: %s\n", curr_prefix);
 # endif /* DEBUG */
-#else /* !_WIN32 */
-  curr_prefix = searchpath(program_name, getenv("PATH"));
   if (!curr_prefix && !strchr(program_name, '.')) {	// try with extensions
     pathextstr = strsave(getenv("PATHEXT"));
     if (!pathextstr)
@@ -179,6 +178,8 @@ void set_current_prefix()
     curr_prefix = searchpathext(program_name, pathextstr, getenv("PATH"));
     a_delete pathextstr;
   }
+#else /* !_WIN32 */
+  curr_prefix = searchpath(program_name, getenv("PATH"));
   if (!curr_prefix)
     return;
 #endif /* !_WIN32 */
@@ -212,6 +213,7 @@ char *relocatep(const char *path)
   size_t relative_path_len = strlen(relative_path);
   char *relocated_path = (char *)malloc(curr_prefix_len
 					+ relative_path_len + 1);
+  assert(0 != curr_prefix);
   strcpy(relocated_path, curr_prefix);
   strcat(relocated_path, relative_path);
 #if DEBUG

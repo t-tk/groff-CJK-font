@@ -570,10 +570,15 @@ static const char *xstrsignal(int n)
   static char buf[sizeof("Signal ") + 1 + sizeof(int) * 3];
 
 #ifdef NSIG
+#if HAVE_DECL_STRSIGNAL
+  if (n >= 0 && n < NSIG && strsignal(n) != 0)
+    return strsignal(n);
+#else
 #if HAVE_DECL_SYS_SIGLIST
   if (n >= 0 && n < NSIG && sys_siglist[n] != 0)
     return sys_siglist[n];
 #endif /* HAVE_DECL_SYS_SIGLIST */
+#endif /* HAVE_DECL_STRSIGNAL */
 #endif /* NSIG */
   sprintf(buf, "Signal %d", n);
   return buf;

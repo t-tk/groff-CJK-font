@@ -72,7 +72,8 @@ o The new option -V emits the constructed groff command that nroff would
   this is a historical deficiency of the Bourne shell family not yet
   corrected by the POSIX standard.
 
-o nroff now recognizes the -E option and passes it through to troff.
+o nroff now recognizes the -b, -E, and -z options and passes them
+  through to troff.
 
 Macro Packages
 --------------
@@ -112,6 +113,11 @@ o The doc (mdoc) macro package now honors the HY register as the an
   furthermore recognizes but ignores the AD string (see above) for
   compatibility with an (man).
 
+o The s (ms) macro package has changed the default footnote line length
+  (\n[FL]) from 5/6ths of the text line length (\n[LL]) to 11/12ths for
+  better compatibility with ms documents prepared with AT&T ms or its
+  descendant implementations in Heirloom Doctools and neatroff.
+
 o The s (ms) macro package has added strings, \*< and \*>, to perform
   subscripting within a paragraph.  They work analogously to the \*{ and
   \*} superscripting strings that have been present in groff ms since
@@ -141,6 +147,18 @@ o On the Latin-1 output device ("groff -T latin1") the output glyph
 
 Miscellaneous
 -------------
+
+o The semantics of the environment variable SOURCE_DATE_EPOCH (support
+  for which was added in 1.22.4) to groff were not established with
+  respect to time zone selection, prompting divergent interpretations;
+  Debian and distributions derived from it have for several years
+  patched groff to implicitly use UTC as the time zone when interpreting
+  the current time (or SOURCE_DATE_EPOCH) as a local time.  While a
+  convenient and defensible choice for reproducible build efforts, it
+  runs against the grain of user expectations.  Systems programmers like
+  monotonically increasing clocks; the broader user base usually prefers
+  a clock that follows an applicable civil calendar.  Users of
+  SOURCE_DATE_EPOCH may also wish to set the TZ environment variable.
 
 o groffer has been deleted from the distribution.
 
@@ -178,7 +196,7 @@ o PDFPIC has been corrected so the behaviour is the same whether you use
   can set an environment variable "export GROFF_PDFPIC_NOSPACE=1" which
   will restore the previous behaviour for all runs.
 
-  Note that this change has no effect if you were using .PDFPIC with the
+  This change has no effect if you were using .PDFPIC with the
   PostScript driver--only if you used it with the PDF driver.
 
 Gropdf

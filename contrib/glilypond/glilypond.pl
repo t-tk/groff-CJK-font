@@ -560,73 +560,81 @@ our $Read =
     ); # end definition %lilypond_args
 
 
- LILYPOND: foreach (<>) {
-    chomp;
-    my $line = $_;
-
-
-    # now the lines with '.lilypond ...'
-
-    if ( /
-	   ^
-	   [.']
-	   \s*
-	   lilypond
-	   (
-	     .*
-	   )
-	   $
-	 /x ) { # .lilypond ...
-      my $args = $1;
-      $args =~ s/
-		  ^
-		  \s*
-		//x;
-      $args =~ s/
-		  \s*
-		  $
-		//x;
-      $args =~ s/
-		  ^
-		  (
-		    \S*
-		  )
-		  \s*
-		//x;
-      my $arg1 = $1; # 'start', 'end' or 'include'
-      $args =~ s/["'`]//g;
-      my $arg2 = $args; # file argument for '.lilypond include'
-
-      if ( exists $lilypond_args{$arg1} ) {
-	$lilypond_args{$arg1}->($arg2);
-	next;
-      } else {
-	# not a suitable argument of '.lilypond'
-	$stderr->print( "Unknown command: '$arg1' '$arg2':  '$line'" );
-      }
-
-      next LILYPOND;
-    } # end if for .lilypond
-
-
-    if ( $lilypond_mode ) { # do lilypond-mode
-      # see '.lilypond start'
-      $ly->print( $line );
-      next LILYPOND;
-    } # do lilypond-mode
-
-    # unknown line without lilypond
-    unless ( /
-	       ^
-	       [.']
-	       \s*
-	       lilypond
-	     /x ) { # not a '.lilypond' line
-      $out->print($line);
-      next LILYPOND;
+ LILYPOND: foreach my $filename (@ARGV) {
+    my $input;
+    if ($filename eq '-') {
+      $input = \*STDIN;
+    } elsif (not open $input, '<', $filename) {
+      warn $!;
+      next;
     }
+    while (<$input>) {
+      chomp;
+      my $line = $_;
 
-  } # end foreach <>
+
+      # now the lines with '.lilypond ...'
+
+      if ( /
+	     ^
+	     [.']
+	     \s*
+	     lilypond
+	     (
+	       .*
+	     )
+	     $
+	   /x ) { # .lilypond ...
+	my $args = $1;
+	$args =~ s/
+		    ^
+		    \s*
+		  //x;
+	$args =~ s/
+		    \s*
+		    $
+		  //x;
+	$args =~ s/
+		    ^
+		    (
+		      \S*
+		    )
+		    \s*
+		  //x;
+	my $arg1 = $1; # 'start', 'end' or 'include'
+	$args =~ s/["'`]//g;
+	my $arg2 = $args; # file argument for '.lilypond include'
+
+	if ( exists $lilypond_args{$arg1} ) {
+	  $lilypond_args{$arg1}->($arg2);
+	  next;
+	} else {
+	  # not a suitable argument of '.lilypond'
+	  $stderr->print( "Unknown command: '$arg1' '$arg2':  '$line'" );
+	}
+
+	next LILYPOND;
+      } # end if for .lilypond
+
+
+      if ( $lilypond_mode ) { # do lilypond-mode
+	# see '.lilypond start'
+	$ly->print( $line );
+	next LILYPOND;
+      } # do lilypond-mode
+
+      # unknown line without lilypond
+      unless ( /
+		 ^
+		 [.']
+		 \s*
+		 lilypond
+	       /x ) { # not a '.lilypond' line
+	$out->print($line);
+	next LILYPOND;
+      }
+    } # end while <$input>
+  } # end foreach $filename
 } # end Read
 
 

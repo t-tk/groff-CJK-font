@@ -35,7 +35,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
 symbol default_family("T");
 
-enum { ADJUST_LEFT = 0, ADJUST_BOTH = 1, ADJUST_CENTER = 3, ADJUST_RIGHT = 5 };
+enum { ADJUST_LEFT = 0,
+  ADJUST_BOTH = 1,
+  ADJUST_CENTER = 3,
+  ADJUST_RIGHT = 5,
+  ADJUST_MAX = 5,
+};
 
 enum {
   // Not all combinations are valid; see hyphenate_request() below.
@@ -1297,8 +1302,8 @@ void space_size()
       curenv->space_size = n;
     if (has_arg() && get_integer(&n))
       if (n < 0)
-	warning(WARN_RANGE, "negative sentence space size ignored:"
-		" '%1'", n);
+	warning(WARN_RANGE, "negative sentence space size ignored: "
+		"'%1'", n);
       else
 	curenv->sentence_space_size = n;
     else
@@ -2523,10 +2528,9 @@ void adjust()
       if (get_integer(&n)) {
 	if (n < 0)
 	  warning(WARN_RANGE, "negative adjustment mode");
-	else if (n > 5) {
-	  curenv->adjust_mode = 5;
-	  warning(WARN_RANGE, "adjustment mode '%1' out of range", n);
-	}
+	else if (n > ADJUST_MAX)
+	  warning(WARN_RANGE, "out-of-range adjustment mode ignored: "
+		  "%1", n);
 	else
 	  curenv->adjust_mode = n;
       }
