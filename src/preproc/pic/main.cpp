@@ -621,7 +621,8 @@ int main(int argc, char **argv)
   {
     out = make_troff_output();
     printf(".do if !dPS .ds PS\n"
-	   ".do if !dPE .ds PE\n");
+	   ".do if !dPE .ds PE\n"
+	   ".do if !dPF .ds PF\n");
   }
 #ifdef FIG_SUPPORT
   if (whole_file_flag) {

@@ -35,14 +35,22 @@ addftinfo \- add font metrics to troff fonts for use with groff
 .\" ====================================================================
 .
 .SY addftinfo
-.OP \-asc\-height n
-.OP \-body\-depth n
-.OP \-body\-height n
-.OP \-cap\-height n
-.OP \-comma\-depth n
-.OP \-desc\-depth n
-.OP \-fig\-height n
-.OP \-x\-height n
+.RB [ \-asc\-height\~\c
+.IR n ]
+.RB [ \-body\-depth\~\c
+.IR n ]
+.RB [ \-body\-height\~\c
+.IR n ]
+.RB [ \-cap\-height\~\c
+.IR n ]
+.RB [ \-comma\-depth\~\c
+.IR n ]
+.RB [ \-desc\-depth\~\c
+.IR n ]
+.RB [ \-fig\-height\~\c
+.IR n ]
+.RB [ \-x\-height\~\c
+.IR n ]
 .I resolution
 .I unit-width
 .I font
@@ -69,14 +77,15 @@ addftinfo \- add font metrics to troff fonts for use with groff
 .I addftinfo
 reads an
 .RI AT&T \~troff
-font file
+font description file
 .IR font ,
 adds additional font metric information required by
-.IR groff ,
+.\" We need the "GNU" below because the @g@ prefix might be empty.
+.RI GNU \~\%@g@troff (@MAN1EXT@),
 and writes the combined result to the standard output.
 .
-The information added is guessed using some parametric information about
-the font and assumptions about the traditional
+The information added is derived from the font's existing parameters and
+assumptions about traditional
 .I troff
 names for characters.
 .
@@ -97,7 +106,8 @@ if
 .I font
 ends with
 .RB \[lq] I \[rq],
-the font is assumed to be italic.
+the font is assumed to be oblique
+(or italic).
 .
 .
 .\" ====================================================================
@@ -114,11 +124,11 @@ show version information;
 all exit afterward.
 .
 .
-.LP
-All other options change one of the parameters that are used to derive
-the heights and depths.
+.P
+All other options change parameters that are used to derive the heights
+and depths.
 .
-Like the existing quantities in the font file,
+Like the existing quantities in the font description file,
 each
 .RI value\~ n
 is in
@@ -129,55 +139,59 @@ for a font whose point size is
 .
 .TP
 .BI \-asc\-height \~n
-The height of characters with ascenders,
-such as \[lq]b\[rq], \[lq]d\[rq], or \[lq]l\[rq].
+height of characters with ascenders,
+such as \[lq]b\[rq],
+\[lq]d\[rq],
+or \[lq]l\[rq]
 .
 .
 .TP
 .BI \-body\-depth \~n
-The depth of characters such as parentheses.
+depth of characters such as parentheses
 .
 .
 .TP
 .BI \-body\-height \~n
-The height of characters such as parentheses.
+height of characters such as parentheses
 .
 .
 .TP
 .BI \-cap\-height \~n
-The height of uppercase letters such as \[lq]A\[rq].
+height of uppercase letters such as \[lq]A\[rq]
 .
 .
 .TP
 .BI \-comma\-depth \~n
-The depth of a comma.
+depth of a comma
 .
 .
 .TP
 .BI \-desc\-depth \~n
-The depth of characters with descenders,
-such as \[lq]p\[rq], \[lq]q\[rq], or \[lq]y\[rq].
+depth of characters with descenders,
+such as \[lq]p\[rq],
+\[lq]q\[rq],
+or \[lq]y\[rq]
 .
 .
 .TP
 .B \-fig\-height
-The height of figures (digits, numerals).
+height of figures (numerals)
 .
 .
 .TP
 .BI \-x\-height \~n
-The height of lowercase letters without ascenders such as \[lq]x\[rq].
+height of lowercase letters without ascenders such as \[lq]x\[rq]
 .
 .
-.LP
+.P
 .I addftinfo
-makes no attempt to use the specified parameters to guess the
-unspecified parameters.
+makes no attempt to use the specified parameters to infer unspecified
+parameters.
 .
 If a parameter is not specified,
 the default will be used.
 .
-The defaults are chosen to have reasonable values for a Times font.
+The defaults are chosen to produce reasonable values for a Times font.
 .
 .
 .\" ====================================================================
@@ -191,6 +205,7 @@ The defaults are chosen to have reasonable values for a Times font.
 .
 .\" Restore compatibility mode (for, e.g., Solaris 10/11).
 .cp \n[*groff_addftinfo_1_man_C]
+.do rr *groff_addftinfo_1_man_C
 .
 .
 .\" Local Variables:

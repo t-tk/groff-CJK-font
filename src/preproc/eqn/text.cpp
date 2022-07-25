@@ -705,7 +705,7 @@ void set_char_type(const char *type, char *ch)
   int ft = lookup_font_type(type);
   if (st < 0 && ft < 0) {
     error("bad character type '%1'", type);
-    a_delete ch;
+    delete[] ch;
     return;
   }
   box *b = split_text(ch);

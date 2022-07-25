@@ -92,186 +92,238 @@ respectively).
 .
 .
 .\" ====================================================================
-.SS "\f[I]DESC\f[] file format"
+.SH "\f[I]DESC\f[] file format"
 .\" ====================================================================
 .
 The
 .I DESC
 file can contain the following types of line as shown below.
 .
-Later entries in the file override previous values.
+Except
+for the
+.B charset
+directive,
+which must come last
+(if at all),
+the order of the lines is not important.
 .
-.LP
+Later entries in the file,
+however,
+override previous values.
+.
 Empty lines are ignored.
+.
 .
 .TP
 .B charset
-This line and everything following in the file are ignored.
+This line and everything following it in the file are ignored.
 .
-It is allowed for the sake of backwards compatibility.
+It is recognized for compatibility with other
+.I troff \" generic
+implementations.
+.
+In GNU
+.IR troff , \" GNU
+character set repertoire is described on a per-font basis.
+.
 .
 .TP
-.BI "family " fam
+.BI family\~ fam
 The default font family is
 .IR fam .
 .
+.
 .TP
-.BI "fonts " "n F1 F2 F3 \|.\|.\|.\| Fn"
+.BI fonts\~ "n F1"\~\c
+.RI .\|.\|.\&\~ Fn
 Fonts
 .IR F1 ", \|.\|.\|., " Fn
 are mounted in the font positions
 .IR m "\|+\|1, \|.\|.\|., " m \|+\| n
 where
 .I m
-is the number of styles.
+is the number of
+.B styles
+(see below).
 .
-This command may extend over more than one line.
+This directive may extend over more than one line.
 .
-A font name of\~\c
-.B 0
-causes no font to be mounted on the corresponding font position.
+A font name of
+.RB of\~ 0
+causes no font to be mounted at the corresponding position.
+.
 .
 .TP
-.BI "hor " n
+.BI hor\~ n
 The horizontal resolution is
-.IR n \~\c
-machine units.
+.IR n \~basic
+units.
+.
+All horizontal quantities are rounded to multiples of this value.
+.
 .
 .TP
-.BI image_generator\~  string
-Specify the program used to generate PNG images from PostScript input;
-needed for
-.B \%grohtml
-only.
+.BI image_generator\~ program
+Use
+.I program
+to generate PNG images from PostScript input.
 .
-Under GNU/Linux this is usually
-.IR gs (1)
+Under GNU/Linux,
+this is usually
+.IR gs (1),
 but under other systems
 (notably Cygwin)
 it might be set to another name.
 .
+The
+.IR \%grohtml (@MAN1EXT@)
+driver uses this directive.
+.
 .
 .TP
 .BI paperlength\~ n
-The physical vertical dimension of the output medium in machine units.
+The vertical dimension of the physical output medium is
+.IR n \~basic
+units.
 .
-This isn't used by
-.I \%@g@troff
-itself,
-but by output devices.
-.
-Deprecated.
-.
-Use
+Deprecated:
+use
 .B papersize
 instead.
 .
 .
 .TP
-.BI papersize\~ string
-Select a paper size.
+.BI papersize\~ format-or-dimension-pair-or-file-name
+Set the dimensions of the physical output medium according to the
+argument,
+which is either
+a standard paper format,
+a pair of dimensions,
+or the name of a plain text file containing either of the foregoing.
 .
-Valid values for
-.I string
-are the ISO paper types
+Recognized paper formats are the ISO and DIN formats
 .BR A0 \[en] A7 ,
 .BR B0 \[en] B7 ,
 .BR C0 \[en] C7 ,
-.BR D0 \[en] D7 ,
-.BR DL ,
-and the U.S.\& paper types
+and
+.BR D0 \[en] D7 ;
+.\" XXX: tmac/papersize.tmac does not support [ABCD]7.
+the U.S.\& formats
 .BR letter ,
 .BR legal ,
 .BR tabloid ,
 .BR ledger ,
 .BR statement ,
-.BR executive ,
-.BR com10 ,
 and
-.BR monarch .
+.BR executive ;
+and the envelope formats
+.BR com10 ,
+.BR monarch ,
+and
+.BR DL .
 .
-Case is not significant for
-.I string
-if it holds predefined paper types.
+Case is not significant for the argument if it holds predefined paper
+types.
 .
+.
+.IP
 Alternatively,
-.I string
-can be a file name
-(e.g.,
-.IR /etc/papersize );
-if the file can be opened,
-.I groff
-reads the first line and tests for the above paper sizes.
-.
-Finally,
-.I string
-can be a custom paper size in the format
+the argument can be a custom paper size in the format
 .IB length , width
-(no spaces before and after the comma).
+(with no spaces before or after the comma).
 .
 Both
 .I length
 and
 .I width
 must have a unit appended;
-valid values are \[oq]i\[cq] for inches,
-\[oq]c\[cq] for centimeters,
-\[oq]p\[cq] for points,
-and \[oq]P\[cq] for picas.
+valid units are
+.RB \[lq] i \[rq]
+for inches,
+.RB \[lq] c \[rq]
+for centimeters,
+.RB \[lq] p \[rq]
+for points,
+and
+.RB \[lq] P \[rq]
+for picas.
 .
 Example:
-.BR 12c,235p .
+.RB \[lq] 12c,235p \[rq].
 .
-An argument which starts with a digit is always treated as a custom
-paper format.
+An argument that starts with a digit is always treated as a custom paper
+format.
 .
-.B papersize
-sets both the vertical and horizontal dimension of the output medium.
+.
+.IP
+Finally,
+the argument can be a file name
+(e.g.,
+.IR /etc/papersize );
+if the file can be opened,
+.I \%@g@troff
+reads the first line and attempts to match the above forms.
+.
+No comment syntax is supported.
+.
 .
 .IP
 More than one argument can be specified;
-.I groff
+.I \%@g@troff
 scans from left to right and uses the first valid paper specification.
 .
 .
 .TP
 .BI paperwidth\~ n
-The physical horizontal dimension of the output medium in machine units.
+The horizontal dimension of the physical output medium is
+.IR n \~basic
+units.
 .
-Deprecated.
-.
-Use
+Deprecated:
+use
 .B papersize
 instead.
-.
-This isn't used by
-.I \%@g@troff
-itself,
-but by output devices.
 .
 .
 .TP
 .B pass_filenames
-Make troff tell the driver the source file name being processed.
+Direct
+.I \%@g@troff
+to emit the name of the source file being processed.
 .
-This is achieved by another tcommand:
-.BR F \~\c
-.IR filename .
+This is achieved with the intermediate output command
+.RB \[lq] "x F" \[rq].
+.
+The
+.I \%grohtml
+driver uses this directive.
+.
 .
 .TP
-.BI "postpro " program
+.BI postpro\~ program
 Use
 .I program
 as the postprocessor.
 .
+.
 .TP
-.BI "prepro " program
-Call
+.BI prepro\~ program
+Use
 .I program
 as a preprocessor.
 .
+Currently,
+this keyword is used only when
+.I \%@g@troff
+is directed to use the
+.B html
+or
+.B xhtml
+output devices.
+.
+.
 .TP
-.BI "print "  program
+.BI print\~  program
 Use
 .I program
 as the spooler program for printing.
@@ -285,71 +337,71 @@ options of
 .I groff
 are ignored.
 .
+.
 .TP
-.BI "res " n
-There are
+.BI res\~ n
+The device has
 .I n
-machine units per inch.
+basic units per inch.
+.
 .
 .TP
-.BI "sizes " "s1 s2 \|.\|.\|.\| sn " 0
-This means that the device has fonts at
+.BI sizes\~ s1\~\c
+.RI .\|.\|.\&\~ sn\~\c
+.B 0
+The device has fonts at
 .IR s1 ,
-.IR s2 ", \|.\|.\|., " sn
-scaled points.
+\&.\|.\|.,
+.I sn
+scaled points
+(see below).
 .
-The list of sizes must be terminated by a
-.BR 0 .
+The list of sizes must be terminated by
+.RB a\~ 0 .
 .
 Each
 .I si
 can also be a range of sizes
-.IR m \(en n .
+.IR m \[en] n .
 .
 The list can extend over more than one line.
 .
-.TP
-.BI "sizescale " n
-The scale factor for point sizes.
-.
-By default this has a value of 1.
-.
-One
-.I
-scaled point
-is equal to
-one
-.RI point\|/\| n .
-.
-The arguments to the
-.B unitwidth
-and
-.B sizes
-commands are given in scaled points.
 .
 .TP
-.BI "styles " "S1 S2 \|.\|.\|.\| Sm"
+.BI sizescale\~ n
+Set the scale factor for point sizes to one divided
+.RI by\~ n .
+.
+The default
+.RB is\~ 1 .
+.
+.
+.TP
+.BI styles\~ S1\~\c
+.RI .\|.\|.\&\~ Sm
 The first
 .I m
 font positions are associated with styles
-.IR S1 ", \|.\|.\|., " Sm .
+.IR S1 ,
+\&.\|.\|.,
+.IR Sm .
+.
 .
 .TP
 .B tcommand
-This means that the postprocessor can handle the
+The postprocessor can handle the
 .B t
-and\~\c
-.B u
-output commands.
+.RB and\~ u
+intermediate output commands.
+.
 .
 .TP
 .B unicode
-Indicate that the output device supports the complete Unicode
-repertoire.
+The output device supports the complete Unicode repertoire.
 .
-Useful only for devices which produce
-.I character entities
-instead of glyphs.
+This directive is useful only for devices which produce character
+entities instead of glyphs.
+.
 .
 .IP
 If
@@ -371,85 +423,171 @@ characters or add new mappings
 (normally for composite characters).
 .
 .IP
-This is used for
-.BR \-Tutf8 ,
-.BR \-Thtml ,
+The
+.BR utf8 ,
+.BR html ,
 and
-.BR \-Txhtml .
+.B xhtml
+output devices use this directive.
+.
 .
 .TP
-.BI "unitwidth " n
-Quantities in the font files are given in machine units
-for fonts whose point size is
-.IR n \~\c
-scaled points.
+.BI unitwidth\~ n
+Quantities in the font files are given in basic units for fonts whose
+point size is
+.IR n \~scaled
+points.
+.
 .
 .TP
 .B unscaled_charwidths
 Make the font handling module always return unscaled glyph widths.
 .
-Needed for the
-.B \%grohtml
-device.
+The
+.I \%grohtml
+driver uses this directive.
+.
 .
 .TP
 .B use_charnames_in_special
-This command indicates that troff should encode named glyphs inside
-special commands.
+This directive indicates that
+.I \%@g@troff
+should encode named glyphs inside special commands.
+.
+The
+.I \%grohtml
+driver uses this directive.
+.
 .
 .TP
-.BI "vert " n
+.BI vert\~ n
 The vertical resolution is
-.IR n \~\c
-machine units.
+.IR n \~basic
+units.
 .
-.LP
+.
+.P
+.I \%@g@troff
+recognizes but ignores the directives
+.BR spare1 ,
+.BR spare2 ,
+and
+.BR biggestfont .
+.
+.
+.P
 The
 .BR res ,
 .BR unitwidth ,
 .BR fonts ,
 and
 .B sizes
-lines are compulsory.
+lines are mandatory.
 .
-Not all commands in the
-.I DESC
-file are used by
+Directives not listed above are ignored by
 .I \%@g@troff
-itself;
-some of the keywords
-(or even additional ones)
-are used by postprocessors to store arbitrary information about the
-device.
+but may be used by postprocessors to store arbitrary information about
+a device in the
+.I DESC
+file.
 .
-.LP
-Here a list of obsolete keywords which are recognized by
+.
+.\" ====================================================================
+.SH "Font description file format"
+.\" ====================================================================
+.
+On typesetting output devices,
+each font is typically available at multiple sizes.
+.
+While paper size measurements in the device description file are in
+absolute units,
+measurements applicable to fonts must be proportional to the type size.
+.
 .I groff
-but completely ignored:
-.BR spare1 ,
-.BR spare2 ,
-.BR biggestfont .
+achieves this using the precedent set by AT&T device-independent
+.IR troff : \" AT&T
+one size of a font is chosen as a norm,
+and all other sizes are scaled linearly relative to that basis.
+.
+The \[lq]unit width\[rq] is the number of basic units per point.
 .
 .
-.\" ====================================================================
-.SS "Font file format"
-.\" ====================================================================
+.P
+For instance,
+.IR groff 's
+.B lbp
+device uses a
+.B unitwidth
+of\~800.
 .
-A font file has two sections;
-empty lines are ignored in both of them.
+In its Times roman font
+.RB (\[lq] TR \[rq]),
+its
+.B spacewidth
+is\~833;
+this is also the width of its comma,
+period,
+centered period,
+and mathematical asterisk,
+while its \[lq]M\[rq] is 2963 basic units.
 .
-.LP
+Thus,
+an \[lq]M\[rq] on the
+.B lbp
+device is 2,963 basic units wide at a notional type size of 800\~points.
+.
+(800-point type is not practical for most purposes,
+but using it enables the quantities in the font description files to be
+expressed as integers.)
+.
+.
+.P
+A font description file has two sections;
+empty lines are ignored in both.
+.
 The first section is a sequence of lines each containing a sequence of
-blank delimited words;
+space-delimited words;
 the first word in the line is a key,
-and
-subsequent words give a value for that key.
+and subsequent words associate a value with that key.
+.
 .
 .TP
-.BI "ligatures " "lig1 lig2 \|.\|.\|.\| lign \fR[" 0 \fR]
+.BI name\~ F
+The name of the font
+.RI is\~ F .
+.
+.
+.TP
+.BI spacewidth\~  n
+The width of a normal,
+unadjusted space is
+.IR n \~basic
+units at a type size of
+.IR unit-width \~points.
+.
+.
+.P
+The above directives are mandatory;
+the remaining ones in the first section are optional.
+.
+.
+.TP
+.BI slant\~ n
+The glyphs of the font have a slant of
+.IR n \~degrees,
+where a positive
+.I n
+slants in the direction of text flow.
+.
+.
+.TP
+.BI ligatures\~ lig1\~\c
+.RI .\|.\|.\&\~ lign\~\c
+.RB [ 0 ]
 Glyphs
 .IR lig1 ,
-.IR lig2 ", \|.\|.\|., " lign
+\&.\|.\|.,
+.I lign
 are ligatures;
 possible ligatures are
 .BR ff ,
@@ -459,30 +597,14 @@ possible ligatures are
 and
 .BR ffl .
 .
-For backwards compatibility,
-the list of ligatures may be terminated
-with a\~\c
-.BR 0 .
+For compatibility with other
+.I troff
+implementations,
+the list of ligatures may be terminated with
+.RB a\~ 0 .
 .
-The list of ligatures may not extend over more than one line.
+The list of ligatures must not extend over more than one line.
 .
-.TP
-.BI "name " F
-The name of the font is\~\c
-.IR F .
-.
-.TP
-.BI "slant " n
-The glyphs of the font have a slant of
-.IR n \~\c
-degrees.
-.
-(Positive means forward.)
-.
-.TP
-.BI "spacewidth "  n
-The normal width of a space is\~\c
-.IR n .
 .
 .TP
 .B special
@@ -492,46 +614,53 @@ this means that when a glyph is requested that is not present in
 the current font,
 it is searched for in any special fonts that are mounted.
 .
-.LP
-Other commands are ignored by
+.
+.P
+Other directives are ignored by
 .I \%@g@troff
 but may be used by postprocessors to store arbitrary information
-about the font in the font file.
+about the font in the file.
 .
-.LP
-The first section can contain comments which start with the
+.
+.P
+The first section can contain comments,
+which start with the
 .B #
 character and extend to the end of a line.
 .
-.LP
+.
+.P
 The second section contains one or two subsections.
 .
 It must contain a
-.I charset
+.B charset
 subsection
 and it may also contain a
-.I kernpairs
+.B kernpairs
 subsection.
 .
-These subsections can appear in any order.
+These subsections can appear in either order.
 .
-Each subsection starts with a word on a line by itself.
+Each subsection starts with a directive on a line by itself.
 .
-.LP
-The word
+.
+.P
+The directive
 .B charset
 starts the charset subsection.
 .
+(This keyword is a misnomer since it starts an ordered list of glyphs,
+not characters.)
+.
 The
 .B charset
-line is followed by a sequence of lines.
+line is followed by a sequence of lines,
+each with information about one glyph.
 .
-Each line gives information for one glyph.
+A line comprises a number of fields separated by spaces or tabs.
 .
-A line comprises a number of fields separated
-by blanks or tabs.
+The format is as follows.
 .
-The format is
 .
 .IP
 .I name metrics type code
@@ -539,119 +668,57 @@ The format is
 .RB [ \-\-
 .IR comment ]
 .
-.LP
+.
+.P
 .I name
 identifies the glyph:
 if
 .I name
-is a single glyph
-.I c
-then it corresponds to the groff input character
-.IR c ;
-if it is of the form
-.BI \[rs] c
-where c is a single character,
-then it corresponds to the special character
-.BI \[rs][ c ]\fR;
-otherwise it corresponds to the groff input character
-.BI \[rs][ name ]\fR.
+is a single
+.RI character\~ c ,
+it corresponds to the
+.I troff \" generic
+input
+.RI character\~ c .
 .
-If it is exactly two characters
-.I xx
-it can be entered as
-.BI \[rs]( xx\fR.
+Otherwise,
+it must be of the form
+.BI \[rs] name
+where
+.I name
+is at least one character;
+it then corresponds to the
+.I groff
+special character escape sequence
+.BI \[rs][ name ]\c
+\&,
+or the one-sixth and one-twelfth unbreakable space escape sequences,
+\[rs]| and \[rs]\[ha]
+(\[lq]thin\[rq] and \[lq]hair\[rq] spaces,
+respectively).
 .
-Note that single-letter special characters can't be accessed as
-.BI \[rs] c\fR;
-the only exception is \[oq]\[rs]\-\[cq] which is identical to
-\[oq]\[rs][\-]\[cq].
-.
-The name
-.B \-\-\-
-is special and indicates that the glyph is unnamed;
-such glyphs can only be used by means of the
+A name consisting of three minus signs,
+.RB \[lq] \-\-\- \[rq],
+indicates that the glyph is unnamed:
+such glyphs can only be accessed by means of the
 .B \[rs]N
 escape sequence in
 .IR troff . \" generic; \N is portable
 .
-.LP
-The
-.I type
-field gives the glyph type:
-.
-.TP
-1
-means the glyph has a descender,
-for example,
-\[oq]p\[cq];
-.
-.TP
-2
-means the glyph has an ascender,
-for example,
-\[oq]b\[cq];
-.
-.TP
-3
-means the glyph has both an ascender and a descender,
-for example,
-\[oq](\[cq].
-.
-.LP
-The
-.I code
-field gives the code which the postprocessor uses to print the glyph.
-.
-The glyph can also be input to groff using this code by means of the
-.B \[rs]N
-escape sequence.
-.
-The code can be any integer.
-.
-If it starts with a\~\c
-.B 0
-it is interpreted as octal;
-if it starts with
-.B 0x
-or
-.B 0X
-it is interpreted as hexadecimal.
-.
-Note,
-however,
-that the
-.B \[rs]N
-escape sequence only accepts a decimal integer.
+A special character named
+.RB \[lq] \-\-\- \[rq]
+can still be defined using
+.B .char
+and similar requests.
 .
 .
-.LP
-The
-.I entity_name
-field defines a string identifying the glyph which the postprocessor
-uses to print that glyph.
-.
-This field is optional and is used by
-.I grops
-to build sub-encoding arrays for PostScript fonts containing more than
-256 glyphs.
-.
-(It was formerly used for
-.IR \%grohtml 's
-entity names,
-but for efficiency reasons these data are now compiled directly into
-.IR \%grohtml .)
-.
-.
-.LP
-Anything on the line after the encoding field or \[oq]\-\-\[cq] are
-ignored.
-.
-.LP
-The
+.P
+The form of the
 .I metrics
-field has the form
+field is as follows
 (on one line;
-it may be broken here for the sake of readability):
+it may be broken here for the sake of readability).
+.
 .
 .IP
 .I width\/\c
@@ -661,21 +728,24 @@ it may be broken here for the sake of readability):
 .RI [\fB, \:\%left-italic-correction\/\c
 .RI [\fB, \:\%subscript-correction ]]]]]
 .
-.LP
+.
+.P
 There must not be any spaces between these subfields.
 .
-Missing subfields are assumed to be\~0.
+Missing subfields are assumed to
+.RB be\~ 0 .
 .
 The subfields are all decimal integers.
 .
 Since there is no associated binary format,
-these values are not required to fit into a variable of type
+these values are not required to fit into the C language data type
 .B char
-as they are in ditroff.
+as they are in AT&T device-independent
+.IR troff . \" AT&T
 .
 The
 .I width
-subfields gives the width of the glyph.
+subfield gives the width of the glyph.
 .
 The
 .I height
@@ -695,57 +765,147 @@ if a glyph does not extend below the baseline,
 it should be given a zero depth,
 rather than a negative depth.
 .
+Italic corrections are relevant to glyphs in italic or oblique styles.
+.
 The
 .I italic-correction
-subfield gives the amount of space that should be added after the
-glyph when it is immediately to be followed by a glyph
-from a roman font.
+subfield gives the amount of space that should be added after the glyph
+when it is to be followed immediately by a glyph from an upright style.
 .
 The
 .I left-italic-correction
-subfield gives the amount of space that should be added before the
-glyph when it is immediately to be preceded by a glyph
-from a roman font.
+subfield gives the amount of space that should be added before the glyph
+when it is to be preceded immediately by a glyph from an upright style.
 .
 The
 .I subscript-correction
-gives the amount of space that should be added after a glyph
-before adding a subscript.
+gives the amount of space that should be added after a glyph before
+adding a subscript.
 .
 This should be less than the italic correction.
 .
-.LP
-A line in the charset section can also have the format
+.
+.P
+The
+.I type
+field gives a featural description of the glyph.
+.
+.
+.TP
+1
+means the glyph has a descender
+(for example,
+\[lq]p\[rq]);
+.
+.
+.TP
+2
+means the glyph has an ascender
+(for example,
+\[lq]b\[rq]);
+and
+.
+.
+.TP
+3
+means the glyph has both an ascender and a descender
+(for example,
+this is true of parentheses in some fonts).
+.
+.
+.P
+The
+.I code
+field gives a numeric identifier that the postprocessor uses to render
+the glyph.
+.
+The glyph can be specified to
+.I troff \" generic
+using this code by means of the
+.B \[rs]N
+escape sequence.
+.
+The code can be any integer
+(that is,
+any integer parsable by the C standard library's
+.IR strtol (3)
+function).
+.
+.
+.P
+The
+.I entity_name
+field defines an identifier for the glyph that the postprocessor
+uses to print the
+.I \%@g@troff
+glyph
+.IR name .
+.
+This field is optional;
+it was introduced so that the
+.I \%grohtml
+output driver could encode its character set.
+.
+For example,
+the glyph
+.B \[rs][Po]
+is represented by
+.RB \[lq] &pound; \[rq]
+in HTML 4.0.
+.
+For efficiency,
+these data are now compiled directly into
+.IR \%grohtml .
+.
+.I grops
+uses the field to build sub-encoding arrays for PostScript fonts
+containing more than 256 glyphs.
+.
+.
+.P
+Anything on the line after the encoding field or
+.RB \[lq] \-\- \[rq]
+is ignored.
+.
+.
+.P
+A line in the charset section can also have the following format.
+.
 .
 .IP
-.I name \fB\[dq]
+.IB name\~ \[dq]
 .
-.LP
-This indicates that
+.
+.P
+This notation indicates that
 .I name
-is just another name for the glyph mentioned in the
-preceding line.
+is another name for the glyph mentioned in the preceding line.
 .
-.LP
+Such aliases can be chained.
+.
+.
+.P
 The word
 .B kernpairs
 starts the kernpairs section.
 .
-This contains a sequence of lines of the form:
+It contains a sequence of lines formatted as follows.
+.
 .
 .IP
 .I c1 c2 n
 .
-.LP
-This means that when glyph
-.I c1
-appears next to glyph
-.I c2
-the space between them should be increased by\~\c
-.IR n .
 .
-Most entries in kernpairs section have a negative value for\~\c
-.IR n .
+.P
+The foregoing means that when glyph
+.I c1
+is typeset immediately before
+.IR c2 ,
+the space between them should be increased
+.RI by\~ n .
+.
+Most kerning pairs should have a negative value
+.RI for\~ n .
 .\" END Keep parallel with groff.texi node "Device and Font Files".
 .
 .
@@ -755,14 +915,16 @@ Most entries in kernpairs section have a negative value for\~\c
 .
 .TP
 .IR @FONTDIR@/dev name /DESC
-Device description file for device
+describes the output device
 .IR name .
+.
 .
 .TP
 .IR @FONTDIR@/dev name / F
-Font file for font\~\c
-.I F
-of device
+describes the font known to
+.I \%@g@troff
+.RI as\~ F
+on device
 .IR name .
 .
 .
@@ -779,7 +941,7 @@ manual.
 You can browse it interactively with \[lq]info groff\[rq].
 .
 .
-.LP
+.P
 \[lq]Troff User's Manual\[rq]
 by Joseph F.\& Ossanna,
 1976
@@ -796,7 +958,7 @@ documentation as
 .RI \[lq]AT&T\~ troff \[rq].
 .
 .
-.LP
+.P
 \[lq]A Typesetter-independent TROFF\[rq]
 by Brian W.\& Kernighan,
 1982,
@@ -806,8 +968,8 @@ device and font description file formats
 and device-independent output format.
 .
 .
-.LP
-Section \[lq]See Also\[rq] of
+.P
+Section \[lq]See also\[rq] of
 .IR groff (@MAN1EXT@)
 lists utilities available for preparing font files in a variety of
 formats for use with
@@ -815,15 +977,15 @@ formats for use with
 output drivers.
 .
 .
-.LP
+.P
 .IR groff_out (@MAN5EXT@),
 .IR \%@g@troff (@MAN1EXT@),
-.IR \%addftinfo (@MAN1EXT@),
-.IR \%afmtodit (@MAN1EXT@)
+.IR \%addftinfo (@MAN1EXT@)
 .
 .
 .\" Restore compatibility mode (for, e.g., Solaris 10/11).
 .cp \n[*groff_groff_font_5_man_C]
+.do rr *groff_groff_font_5_man_C
 .
 .
 .\" Local Variables:

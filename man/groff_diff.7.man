@@ -77,7 +77,7 @@ features identifiers of arbitrary length,
 supports non-integral point sizes,
 adds new escapes and requests,
 provides new conditional tests,
-recognizes additional scale indicators and numerical operators,
+recognizes additional scaling indicators and numerical operators,
 and extends the function of some escapes and requests already present in
 .RI AT&T\~ troff .
 .
@@ -109,7 +109,7 @@ within can be of arbitrary length.
 .
 .
 .\" ====================================================================
-.SS "Fractional point sizes and new scale indicators"
+.SS "Fractional point sizes and new scaling indicators"
 .\" ====================================================================
 .
 A
@@ -133,7 +133,7 @@ Requests and escapes in
 interpret arguments that represent a point size as being in units of
 scaled points;
 that is,
-they evaluate such arguments using an implied default scale indicator
+they evaluate such arguments using an implied default scaling indicator
 .RB of\~\[lq] z \[rq].
 .
 Arguments treated in this way comprise those to the escapes
@@ -181,7 +181,7 @@ returns the point size in scaled points.
 .P
 It makes no sense to use the
 .RB \[lq] z \[rq]\~scale
-indicator in a numeric expression whose default scale indicator is
+indicator in a numeric expression whose default scaling indicator is
 neither
 .RB \[lq] u \[rq]
 .RB nor\~\[lq] z \[rq],
@@ -193,7 +193,7 @@ Similarly,
 it is nonsensical to use a scaling indicator other
 .RB than\~\[lq] z \[rq]
 .RB or\~\[lq] u \[rq]
-in a numeric expression whose default scale indicator
+in a numeric expression whose default scaling indicator
 .RB is\~\[lq] z \[rq],
 so
 .I groff
@@ -201,7 +201,7 @@ disallows this as well.
 .
 .
 .P
-Another new scale indicator,
+Another new scaling indicator,
 .RB \[lq] s \[rq],
 multiplies by the number of basic units in a scaled point.
 .
@@ -215,7 +215,7 @@ Do not confuse the
 .RB \[lq] s \[rq]
 and
 .RB \[lq] z \[rq]
-scale indicators.
+scaling indicators.
 .
 .
 .P
@@ -276,7 +276,7 @@ ignore scaling indicators in the evaluation
 .
 .
 .\" ====================================================================
-.SS Conditions
+.SS Conditional expressions
 .\" ====================================================================
 .
 More conditions can be tested with the
@@ -306,9 +306,13 @@ or
 .BR ] ;
 .BI \[rs]N\[aq] xxx\c
 .BR \[aq] ;
-or has been defined by the
-.B .char
-request.
+or has been defined by any of the
+.BR .char ,
+.BR .fchar ,
+.BR .fschar ,
+or
+.B .schar
+requests.
 .
 .
 .TP
@@ -490,14 +494,18 @@ i.e., to return to the previous font.
 .BI \[rs]F[ fam ]
 Change font family.
 .
-This is the same as the
+See the
 .B .fam
-request.
+request below.
 .
 .B \[rs]F[]
-switches back to the previous font family (note that
+switches to the previous font family,
+or to the default family if there is none.
+.
 .B \[rs]FP
-won't work; it selects font family \[oq]P\[cq] instead).
+won't do this;
+it selects font family \[lq]P\[rq] instead.
+.
 .
 .TP
 .BI \[rs]k( rg
@@ -658,8 +666,8 @@ Set the point size to
 .I n
 scaled points;
 .I n
-is a numeric expression with a default scale indicator of\~\c
-.BR z .
+is a numeric expression with a default scaling indicator
+.RB of\~\[lq] z \[rq].
 .
 .TP
 .BI \[rs]V x
@@ -943,10 +951,7 @@ inter-word space when a line is adjusted.
 .
 To mitigate risks from untrusted input documents,
 the
-.BR open ,
-.BR opena ,
-.BR pi ,
-.BR pso ,
+.B pi
 and
 .B sy
 requests are disabled by default.
@@ -954,7 +959,14 @@ requests are disabled by default.
 .IR \%@g@troff (@MAN1EXT@)'s
 .B \-U
 option enables the formatter's \[lq]unsafe mode\[rq],
-restoring their function.
+restoring their function
+(and enabling additional
+.I groff
+extension requests,
+.BR open ,
+.BR opena ,
+and
+.BR pso ).
 .
 .
 .\" ====================================================================
@@ -1058,7 +1070,8 @@ Append to macro indirectly.
 .
 See the
 .B dei
-request below for more information.
+request below.
+.
 .
 .TP
 .BI .ami1\~ xx\~yy
@@ -1099,7 +1112,7 @@ and
 .I Unformat
 the diversion
 .I div
-in a way such that Unicode basic Latin (ASCI) characters,
+in a way such that Unicode basic Latin (ASCII) characters,
 characters translated with the
 .B .trin
 request,
@@ -1141,22 +1154,19 @@ to\~1.
 .
 .IP
 .B .asciify
-cannot return all items in a diversion back to their source equivalent;
+cannot return all items in a diversion to their source equivalent:
 nodes such as those produced by
 .BR \[rs]N[ .\|.\|.\& ]
 will remain nodes,
 so the result cannot be guaranteed to be a pure string.
 .
+See section \[lq]Copy mode\[rq] in
+.IR groff (@MAN7EXT@).
 .
-.IP
-Glyph information
-(font,
-point size,
-etc.)
-is not preserved;
+Glyph parameters such as the type face and size are not preserved;
 use
 .B .unformat
-instead to achieve that.
+to achieve that.
 .
 .
 .TP
@@ -1201,9 +1211,9 @@ respectively,
 with the exception that any pending output line does not become part of
 the diversion
 (i.e.,
-the diversion always starts with a new line)
+a box diversion always starts on a new output line)
 but is restored after ending the diversion,
-discarding any partially collected line pending in the diversion.
+discarding any partially collected line in the diversion.
 .
 .
 .TP
@@ -1753,11 +1763,11 @@ internally multiplied by\~257), the latter in the range 0\[en]65535.
 .
 Examples: #FFC0CB (pink), ##ffff0000ffff (magenta).
 .
-A new scaling indicator\~\c
-.B f
-has been introduced which multiplies its value by\~65536; this makes
-it convenient to specify color components as fractions in the range 0
-to\~1.
+A new scaling indicator,
+.RB \[lq] f \[rq]\~has
+has been introduced which multiplies its value by\~65536;
+this makes it convenient to specify color components as fractions in the
+range 0 to\~1.
 .
 Example:
 .
@@ -1801,37 +1811,27 @@ but compatibility mode is switched off during execution.
 .
 On entry, the current compatibility mode is saved and restored at exit.
 .
-.TP
-.BI .dei\~ xx\~yy
-Define macro indirectly.
-.
-The following example
-.
-.RS
-.IP
-.ne 2v+\n(.Vu
-.EX
-\&.ds xx aa
-\&.ds yy bb
-\&.dei xx yy
-.EE
-.RE
-.
-.IP
-is equivalent to
-.
-.RS
-.IP
-.EX
-\&.de aa bb
-.EE
-.RE
 .
 .TP
-.BI .dei1\~ xx\~yy
-Similar to the
-.B dei
-request but compatibility mode is switched off during execution.
+.BI .dei\~ xx\~\c
+.RI [ yy ]
+Define macro indirectly,
+with the name of the macro to be defined in string
+.I xx
+and the name of the end macro terminating its definition in string
+.IR yy .
+.
+.
+.TP
+.BI .dei1\~ xx\~\c
+.RI [ yy ]
+As
+.BR .dei ,
+but compatibility mode is switched off when the definition of the
+macro named in the string
+.I xx
+is executed.
+.
 .
 .TP
 .BI .device\~ anything
@@ -1862,24 +1862,28 @@ or macro
 with compatibility mode disabled.
 .
 Note that compatibility mode is restored
-(if and only if it was active)
+(only if it was active)
 when the
 .I expansion
 of
 .I name
 is interpreted;
 that is,
-the restored compatibility state applies to the contents of the macro
-(string, \&.\|.\|.\&)
+the restored compatibility state applies to the contents of the macro,
+string,
+or diversion
 .I name
-as well as file or pipe data read if
+as well as data read from files or pipes if
 .I name
-is the
-.BR .so ,
-.BR .mso ,
+is any of the
+.BR so ,
+.BR soquiet ,
+.BR mso ,
+.BR msoquiet ,
 or
-.B .pso
-request.
+.B pso
+requests.
+.
 .
 .IP
 For example,
@@ -1916,13 +1920,13 @@ FOO groff FOO compatibility c1 \[ti]
 as output.
 .RE \" this "extra" RE avoids indentation of the remaining paragraphs
 .
+.
 .TP
 .BI .ds1\~ "name string"
 Similar to
 .BR .ds ,
 but compatibility mode is switched off when the string is later
 interpolated.
-but compatibility mode is switched off during expansion.
 .
 To be more precise,
 a \[lq]compatibility save\[rq] token is inserted at the beginning of the
@@ -1931,40 +1935,93 @@ and a \[lq]compatibility restore\[rq] token at the end.
 .
 .
 .TP
-.B .ecs
-Save current escape character.
-.
-.TP
 .B .ecr
-Restore escape character saved with
-.BR ecs .
-Without a previous call to
+Restore the escape character saved with
 .BR ecs ,
-.RB \[oq] \[rs] \[cq]
-will be the new escape character.
+or set escape character to
+.RB \[lq] \[rs] \[rq]
+if none has been saved.
+.
 .
 .TP
-.BI .evc\~ xx
-Copy the contents of environment
-.I xx
+.B .ecs
+Save the current escape character.
+.
+.
+.TP
+.BI .evc\~ environment
+Copy the contents of
+.I environment
 to the current environment.
 .
-No pushing or popping of environments is done.
+.
+.IP
+The following environment data are not copied:
+.
+.
+.RS
+.IP \[bu]
+a partially collected line, if present;
+.
+.
+.IP \[bu]
+the interruption status of the previous input line
+(due to use of the
+.B \[rs]c
+escape sequence);
+.
+.
+.IP \[bu]
+the count of remaining lines to center,
+to right-justify,
+or to underline
+(with or without underlined spaces;
+all set to zero);
+.
+.
+.IP \[bu]
+the activation status of temporary indentation;
+.
+.
+.IP \[bu]
+input traps and their associated data;
+.
+.
+.IP \[bu]
+the activation status of line numbering
+(which can be reactivated with
+.RB \[lq] .nm\~+0 \[rq]);
+and
+.
+.
+.IP \[bu]
+the count of consecutive hyphenated lines
+(set to zero).
+.RE
+.
 .
 .TP
-.BI .fam\~ xx
-Set the current font family to
-.IR xx .
-The current font family is part of the current environment.
-If
-.I xx
-is missing, switch back to previous font family.
+.BR .fam\~ [\c
+.IR family ]
+Set the font family to
+.IR family .
 .
-The value at start-up is \[oq]T\[cq].
+If no argument is given,
+switch to the previous font family,
+or the default family if there is none.
 .
-See the description of the
-.B sty
-request for more information on font families.
+Use
+.RB \[lq] \[rs]F[] \[rq]
+to do this with an escape sequence;
+.RB \[lq] \[rs]FP \[rq]
+selects font family \[lq]P\[rq] instead.
+.
+The initial font family is \[lq]T\[rq] (Times),
+but can be overridden by the output device\[em]see
+.IR groff_font (@MAN5EXT@)).
+.
+The current font family is associated with the environment.
+.
 .
 .TP
 .BI .fchar\~ c\~string
@@ -2166,7 +2223,7 @@ or
 file;
 see the
 .B .hpf
-request above.
+request below.
 .
 .
 .IP
@@ -2311,19 +2368,11 @@ The
 .B .hpf
 request is usually invoked by a localization file loaded by the
 .I troffrc
-or
-.I troffrc\-end
 file.
 .
 By default,
 .I troffrc
-checks the environment variables
-.I LC_ALL
-and
-.I LANG
-(in that order)
-and attempts to load a localization file matching the first two
-characters of the variable's value.
+loads the localization file for English.
 .
 (As of
 .I groff
@@ -2347,12 +2396,6 @@ exist.)
 For Western languages,
 the localization file sets the hyphenation mode and loads hyphenation
 patterns and exceptions.
-.
-If the environment variables are not set,
-set to
-.RB \[lq] C \[rq],
-or a localization file for the locale does not exist,
-the English localization file is used.
 .
 .
 .IP
@@ -2711,10 +2754,12 @@ An initial double quote in
 .I string
 is stripped off to allow initial blanks.
 .
+.
 .TP
 .B .pev
-Print the current environment and each defined environment state on
-stderr.
+Report the state of the current environment followed by that of all
+other environments to the standard error stream.
+.
 .
 .TP
 .B .pnr
@@ -2761,8 +2806,8 @@ can affect the priority of subsequently planted traps.
 .BI .pvs \~\[+-]n
 Set the post-vertical line space to\~\c
 .IR n ;
-default scale indicator is\~\c
-.BR p .
+default scaling indicator
+.RB is\~\[lq] p \[rq].
 .
 This value is added to each line after it has been output.
 .
@@ -3279,35 +3324,26 @@ request.
 .
 .TP
 .BI .unformat\~ div
-\[lq]Unformat\[rq]
-the diversion
+Like
+.BR .asciify ,
+unformat the diversion
 .IR div .
 .
-In contrast to the
-.B .asciify
-request,
-which tries to convert formatted elements of the diversion back to input
-tokens as much as possible,
+However,
 .B .unformat
 handles only tabs and spaces between words,
 the latter usually arising from spaces or newlines in the input.
 .
 Tabs are treated as input tokens,
-and spaces become are stretchable again.
-.
-Note that the vertical size of lines is not preserved.
+and spaces become adjustable again.
 .
 The vertical sizes of lines are not preserved,
 but glyph information
-(font, font size, space width, etc.\&)
+(font,
+type size,
+space width,
+and so on)
 is retained.
-.
-.B .unformat
-can be useful in conjunction with the
-.B .box
-and
-.B .boxa
-requests.
 .
 .
 .TP
@@ -3505,20 +3541,6 @@ respectively:
 a \[lq]compatibility save\[rq] token is inserted at the beginning,
 and a \[lq]compatibility restore\[rq] token at the end,
 with compatibility mode switched on during execution.
-.
-.
-.TP
-.BI .ev\~ xx
-If
-.I xx
-is not a number, this switches to a named environment called
-.IR xx .
-The environment should be popped with a matching
-.B ev
-request without any arguments, just as for numbered environments.
-.
-There is no limit on the number of named environments; they are
-created the first time that they are referenced.
 .
 .
 .TP
@@ -4085,7 +4107,7 @@ predefines a string,
 containing the argument given to the
 .B \-T
 command-line option,
-namely the current output device
+namely the output device
 (for example,
 .B pdf
 or
@@ -4153,7 +4175,7 @@ between them.
 .
 .P
 In a string comparison in a condition,
-characters that appear at different input levels from the first
+characters that appear at different interpolation depths from the first
 delimiter character are not recognized as the second or third
 delimiters.
 .
@@ -4164,8 +4186,8 @@ request.
 In a
 .B \[rs]w
 escape sequence,
-a character that appears at a different input level from the starting
-delimiter character is not recognized as the closing delimiter
+a character that appears at a different interpolation depth from the
+starting delimiter character is not recognized as the closing delimiter
 character.
 .
 The same is true for
@@ -4182,24 +4204,24 @@ and
 .
 When decoding a macro or string argument that is delimited by double
 quotes,
-a character that appears at a different input level from the starting
-delimiter character is not recognized as the closing delimiter
+a character that appears at a different interpolation depth from the
+starting delimiter character is not recognized as the closing delimiter
 character.
 .
 The implementation of
 .B \[rs]$@
 ensures that the double quotes surrounding an argument appear at the
-same input level,
-which is differs from the input level of the argument itself.
+same interpolation depth,
+which is differs from the depth of the argument itself.
 .
 In a long escape name
 .B ]
 is not recognized as a closing delimiter except when it occurs at
-the same input level as the
+the same interpolation depth as the
 .RB opening\~ [ .
 .
 In compatibility mode,
-no attention is paid to the input level.
+no attention is paid to the interpolation depth.
 .
 .
 .P
@@ -4212,20 +4234,13 @@ request can map characters onto
 .
 .
 .P
-The space width emitted by the
+A font can control the widths of spaces
+emitted by the
 .B \[rs]|
 and
-.B \[rs]^
-escape sequences can be controlled on a per-font basis.
-.
-If there is a glyph named
-.B \[rs]|
-or
-.BR \[rs]\[ha] ,
-respectively
-(note the leading backslash),
-defined in the current font file,
-use this glyph's width instead of the default value.
+.B \[rs]\[ha]
+escape sequences by defining glyphs of these names
+(including the leading backslash).
 .
 .
 .P
@@ -4838,6 +4853,7 @@ followed by
 .RS
 .EX
 \&.cp \[rs]n[_my_saved_C]
+\&.do rr _my_saved_C
 .EE
 .RE
 at the end.
@@ -4884,9 +4900,24 @@ line.
 .
 .
 .P
+AT&T
+.I troff
+had only environments named
+.RB \[lq] 0 \[rq],
+.RB \[lq] 1 \[rq],
+and
+.RB \[lq] 2 \[rq].
+.
+In GNU
+.IR troff ,
+any number of environments may exist,
+using any valid identifiers for their names.
+.
+.
+.P
 Normally,
 .I groff
-preserves the input level in delimited arguments,
+preserves the interpolation depth in delimited arguments,
 but not in compatibility mode.
 .
 For example,
@@ -4912,8 +4943,8 @@ the escapes
 .BR \[rs]s ,
 and
 .B \[rs]S
-are transparent for recognizing the beginning of a line only in
-compatibility mode.
+are transparent for the purpose of recognizing a control character at
+the beginning of a line only in compatibility mode.
 .
 For example,
 this code produces bold output in both cases,
@@ -5011,15 +5042,15 @@ In
 .RI AT&T\~ troff
 the
 .B .ps
-request ignores scale indicators and thus
+request ignores scaling indicators and thus
 .RB \[lq] .ps\~10u \[rq]
 sets the point size to 10\~points,
 whereas in
 .I groff
 it sets the point size to 10\~scaled points.
 .
-See subsection \[lq]Fractional point sizes and new scale indicators\[rq]
-above.
+See subsection \[lq]Fractional point sizes and new scaling
+indicators\[rq] above.
 .
 .
 .P
@@ -5290,6 +5321,7 @@ and device-independent output format.
 .
 .\" Restore compatibility mode (for, e.g., Solaris 10/11).
 .cp \n[*groff_groff_diff_7_man_C]
+.do rr *groff_groff_diff_7_man_C
 .
 .
 .\" Local Variables:

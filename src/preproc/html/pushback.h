@@ -30,7 +30,6 @@ class pushBackBuffer
  private:
   char       *charStack;
   int         stackPtr;   /* index to push back stack        */
-  int         debug;
   int         verbose;
   int         eofFound;
   char       *fileName;

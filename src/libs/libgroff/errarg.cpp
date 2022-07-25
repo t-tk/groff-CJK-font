@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
@@ -68,7 +67,7 @@ extern "C" {
   const char *i_to_a(int);
   const char *ui_to_a(unsigned int);
 }
-	    
+
 void errarg::print() const
 {
   switch (type) {
@@ -94,7 +93,7 @@ void errarg::print() const
 
 errarg empty_errarg;
 
-void errprint(const char *format, 
+void errprint(const char *format,
 	      const errarg &arg1,
 	      const errarg &arg2,
 	      const errarg &arg3)
@@ -121,10 +120,16 @@ void errprint(const char *format,
 	arg3.print();
 	break;
       default:
-	assert(0);
+	assert(0 == "unsupported argument conversion (not in [%123])");
       }
     }
     else
       putc(c, stderr);
   }
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

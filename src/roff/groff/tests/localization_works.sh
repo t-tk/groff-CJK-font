@@ -22,71 +22,40 @@ groff="${abs_top_builddir:-.}/test-groff"
 
 set -e
 
-export LC_ALL LANG
-
 DOC='\*[locale]'
 
-# Test fallback/conflicting cases.
-
-echo "testing that LC_ALL= LANG= loads English localization" >&2
-LC_ALL=
-LANG=
+echo "testing default localization (English)" >&2
 OUTPUT=$(echo "$DOC" | "$groff" -Tascii)
 echo "$OUTPUT" | grep -qx english
 
-echo "testing that LC_ALL=en_US loads English localization" >&2
-LC_ALL=en_US
-LANG=
-OUTPUT=$(echo "$DOC" | "$groff" -Tascii)
-echo "$OUTPUT" | grep -qx english
-
-echo "testing that LC_ALL=en_US LANG=fr_FR loads English localization" \
-  >&2
-LC_ALL=en_US
-LANG=fr_FR
-OUTPUT=$(echo "$DOC" | "$groff" -Tascii)
-echo "$OUTPUT" | grep -qx english
-
-# Test straightforward cases.
-
-echo "testing that LC_ALL= LANG=cs_CZ loads Czech localization" >&2
-LC_ALL=
-LANG=cs_CZ
-OUTPUT=$(echo "$DOC" | "$groff" -Tascii)
+echo "testing Czech localization" >&2
+OUTPUT=$(echo "$DOC" | "$groff" -Tascii -m cs)
 echo "$OUTPUT" | grep -qx czech
 
-echo "testing that LC_ALL= LANG=de_DE loads German localization" >&2
-LC_ALL=
-LANG=de_DE
-OUTPUT=$(echo "$DOC" | "$groff" -Tascii)
+echo "testing German localization" >&2
+OUTPUT=$(echo "$DOC" | "$groff" -Tascii -m de)
 echo "$OUTPUT" | grep -qx german
 
-echo "testing that LC_ALL= LANG=en_US loads English localization" >&2
-LC_ALL=
-LANG=en_US
-OUTPUT=$(echo "$DOC" | "$groff" -Tascii)
+echo "testing English localization" >&2
+OUTPUT=$(echo "$DOC" | "$groff" -Tascii -m en)
 echo "$OUTPUT" | grep -qx english
 
-echo "testing that LC_ALL= LANG=fr_FR loads French localization" >&2
-LC_ALL=
-LANG=fr_FR
-OUTPUT=$(echo "$DOC" | "$groff" -Tascii)
+echo "testing French localization" >&2
+OUTPUT=$(echo "$DOC" | "$groff" -Tascii -m fr)
 echo "$OUTPUT" | grep -qx french
 
-echo "testing that LC_ALL= LANG=ja_JP loads Japanese localization" >&2
-LC_ALL=
-LANG=ja_JP
-OUTPUT=$(echo "$DOC" | "$groff" -Tascii)
+echo "testing Italian localization" >&2
+OUTPUT=$(echo "$DOC" | "$groff" -Tascii -m it)
+echo "$OUTPUT" | grep -qx italian
+
+echo "testing Japanese localization" >&2
+OUTPUT=$(echo "$DOC" | "$groff" -Tascii -m ja)
 echo "$OUTPUT" | grep -qx japanese
 
-echo "testing that LC_ALL= LANG=sv_SE loads Swedish localization" >&2
-LC_ALL=
-LANG=sv_SE
-OUTPUT=$(echo "$DOC" | "$groff" -Tascii)
+echo "testing Swedish localization" >&2
+OUTPUT=$(echo "$DOC" | "$groff" -Tascii -m sv)
 echo "$OUTPUT" | grep -qx swedish
 
-echo "testing that LC_ALL= LANG=zh_ZH loads Chinese localization" >&2
-LC_ALL=
-LANG=zh_ZH
-OUTPUT=$(echo "$DOC" | "$groff" -Tascii)
+echo "testing Chinese localization" >&2
+OUTPUT=$(echo "$DOC" | "$groff" -Tascii -m zh)
 echo "$OUTPUT" | grep -qx chinese

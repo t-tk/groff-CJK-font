@@ -1,21 +1,22 @@
-/* Copyright (C) 2000-2020 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2021 Free Software Foundation, Inc.
  * Written by Gaius Mulley (gaius@glam.ac.uk).
  *
  * This file is part of groff.
  *
- * groff is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free
- * Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * groff is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or (at
+ * your option) any later version.
  *
- * groff is distributed in the hope that it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * groff is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
  * for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with groff; see the file COPYING.  If not, write to the Free Software
- * Foundation, 51 Franklin St - Fifth Floor, Boston, MA 02110-1301, USA. 
+ * You should have received a copy of the GNU General Public License
+ * along with groff; see the file COPYING.  If not, write to the Free
+ * Software Foundation, 51 Franklin St - Fifth Floor, Boston, MA
+ * 02110-1301, USA.
  */
 
 #define PREHTMLC
@@ -132,8 +133,8 @@
 
 #ifdef DEBUGGING
 // For a DEBUGGING version, we need some additional macros,
-// to direct the captured debug mode output to appropriately named files
-// in the specified DEBUG_FILE_DIR.
+// to direct the captured debugging mode output to appropriately named
+// files in the specified DEBUG_FILE_DIR.
 
 # define DEBUG_TEXT(text) #text
 # define DEBUG_NAME(text) DEBUG_TEXT(text)
@@ -148,7 +149,7 @@ extern "C" const char *Version_string;
 
 #define DEFAULT_LINE_LENGTH 7	// inches wide
 #define DEFAULT_IMAGE_RES 100	// number of pixels per inch resolution
-#define IMAGE_BOARDER_PIXELS 0
+#define IMAGE_BORDER_PIXELS 0
 #define INLINE_LEADER_CHAR '\\'
 
 // Don't use colour names here!  Otherwise there is a dependency on
@@ -204,7 +205,7 @@ static int show_progress = FALSE;	// should we display page numbers as
 					// they are processed?
 static int currentPageNo = -1;		// current image page number
 #if defined(DEBUGGING)
-static int debug = FALSE;
+static int debugging = FALSE;
 static char *troffFileName = NULL;	// output of pre-html output which
 					// is sent to troff -Tps
 static char *htmlFileName = NULL;	// output of pre-html output which
@@ -215,6 +216,9 @@ static int eqn_flag = FALSE;            // must we preprocess via eqn?
 static char *linebuf = NULL;		// for scanning devps/DESC
 static int linebufsize = 0;
 static const char *image_gen = NULL;    // the 'gs' program
+
+static const char devhtml_desc[] = "devhtml/DESC";
+static const char devps_desc[] = "devps/DESC";
 
 const char *const FONT_ENV_VAR = "GROFF_FONT_PATH";
 static search_path font_path(FONT_ENV_VAR, FONTPATH, 0, 0);
@@ -272,7 +276,7 @@ int get_line(FILE *f)
       char *old_linebuf = linebuf;
       linebuf = new char[linebufsize * 2];
       memcpy(linebuf, old_linebuf, linebufsize);
-      a_delete old_linebuf;
+      delete[] old_linebuf;
       linebufsize *= 2;
     }
     linebuf[i++] = c;
@@ -286,27 +290,66 @@ int get_line(FILE *f)
 }
 
 /*
- *  get_resolution - Return the postscript resolution from devps/DESC.
+ *  get_resolution - Return the PostScript device resolution.
  */
 
 static unsigned int get_resolution(void)
 {
   char *pathp;
   FILE *f;
-  unsigned int res;
-  f = font_path.open_file("devps/DESC", &pathp);
+  unsigned int res = 0;
+  f = font_path.open_file(devps_desc, &pathp);
+  if (0 == f)
+    fatal("cannot open file '%1'", devps_desc);
   free(pathp);
-  if (f == 0)
-    fatal("can't open devps/DESC");
+  // XXX: We should break out of this loop if we hit a "charset" line.
+  // "This line and everything following it in the file are ignored."
+  // (groff_font(5))
+  while (get_line(f))
+    (void) sscanf(linebuf, "res %u", &res);
+  fclose(f);
+  return res;
+}
+
+
+/*
+ *  get_image_generator - Return the declared program from the HTML
+ *                        device description.
+ */
+
+static char *get_image_generator(void)
+{
+  char *pathp;
+  FILE *f;
+  char *generator = 0;
+  const char keyword[] = "image_generator";
+  const size_t keyword_len = strlen(keyword);
+  f = font_path.open_file(devhtml_desc, &pathp);
+  if (0 == f)
+    fatal("cannot open file '%1'", devhtml_desc);
+  free(pathp);
+  // XXX: We should break out of this loop if we hit a "charset" line.
+  // "This line and everything following it in the file are ignored."
+  // (groff_font(5))
   while (get_line(f)) {
-    int n = sscanf(linebuf, "res %u", &res);
-    if (n >= 1) {
-      fclose(f);
-      return res;
+    char *cursor = linebuf;
+    size_t limit = strlen(linebuf);
+    char *end = linebuf + limit;
+    if (0 == (strncmp(linebuf, keyword, keyword_len))) {
+      cursor += keyword_len;
+      // At least one space or tab is required.
+      if(!(' ' == *cursor) || ('\t' == *cursor))
+	continue;
+      cursor++;
+      while((cursor < end) && (' ' == *cursor) || ('\t' == *cursor))
+	cursor++;
+      if (cursor == end)
+	continue;
+      generator = cursor;
     }
   }
-  fatal("can't find 'res' keyword in devps/DESC");
-  return 0;
+  fclose(f);
+  return generator;
 }
 
 /*
@@ -316,35 +359,27 @@ static unsigned int get_resolution(void)
 void html_system(const char *s, int redirect_stdout)
 {
 #if defined(DEBUGGING)
-  if (debug) {
+  if (debugging) {
     fprintf(stderr, "executing: ");
     fwrite(s, sizeof(char), strlen(s), stderr);
     fflush(stderr);
   }
 #endif
   {
-    // Redirect standard error to the null device.  This is more
-    // portable than using "2> /dev/null", since it doesn't require a
-    // Unixy shell.
-    int save_stderr = dup(2);
-    int save_stdout = dup(1);
+    int saved_stdout = dup(1);
     int fdnull = open(NULL_DEV, O_WRONLY|O_BINARY, 0666);
-    if (save_stderr > 2 && fdnull > 2)
-      dup2(fdnull, 2);
-    if (redirect_stdout && save_stdout > 1 && fdnull > 1)
+    if (redirect_stdout && saved_stdout > 1 && fdnull > 1)
       dup2(fdnull, 1);
     if (fdnull >= 0)
       close(fdnull);
     int status = system(s);
-    dup2(save_stderr, 2);
     if (redirect_stdout)
-      dup2(save_stdout, 1);
+      dup2(saved_stdout, 1);
     if (status == -1)
       fprintf(stderr, "Calling '%s' failed\n", s);
     else if (status)
       fprintf(stderr, "Calling '%s' returned status %d\n", s, status);
-    close(save_stderr);
-    close(save_stdout);
+    close(saved_stdout);
   }
 }
 
@@ -537,20 +572,22 @@ static void makeFileName(void)
   }
 
   if (image_template == NULL)
-    macroset_template = make_message("%sgrohtml-%d", image_dir,
+    macroset_template = make_message("%sgrohtml-%d-", image_dir,
 				     (int)getpid());
   else
-    macroset_template = make_message("%s%s", image_dir, image_template);
+    macroset_template = make_message("%s%s-", image_dir,
+				     image_template);
 
   if (macroset_template == NULL)
     sys_fatal("make_message");
 
   image_template =
-    (char *)malloc(strlen("-%d") + strlen(macroset_template) + 1);
+    (char *)malloc(strlen("%d") + strlen(macroset_template) + 1);
   if (image_template == NULL)
     sys_fatal("malloc");
   strcpy(image_template, macroset_template);
-  strcat(image_template, "-%d");
+  // Keep this format string synced with troff:suppress_node::tprint().
+  strcat(image_template, "%d");
 }
 
 /*
@@ -923,7 +960,7 @@ int imageList::createPage(int pageno)
   }
 
 #if defined(DEBUGGING)
-  if (debug)
+  if (debugging)
     fprintf(stderr, "creating page %d\n", pageno);
 #endif
 
@@ -934,6 +971,7 @@ int imageList::createPage(int pageno)
     sys_fatal("make_message");
   html_system(s, 1);
 
+  assert(strlen(image_gen) > 0);
   s = make_message("echo showpage | "
 		   "%s%s -q -dBATCH -dSAFER "
 		   "-dDEVICEHEIGHTPOINTS=792 "
@@ -1007,23 +1045,25 @@ void imageList::createImage(imageItem *i)
   if (i->X1 != -1) {
     char *s;
     int x1 = max(min(i->X1, i->X2) * image_res / postscriptRes
-		   - IMAGE_BOARDER_PIXELS,
+		   - IMAGE_BORDER_PIXELS,
 		 0);
     int y1 = max(image_res * vertical_offset / 72
 		   + min(i->Y1, i->Y2) * image_res / postscriptRes
-		   - IMAGE_BOARDER_PIXELS,
+		   - IMAGE_BORDER_PIXELS,
 		 0);
     int x2 = max(i->X1, i->X2) * image_res / postscriptRes
-	     + IMAGE_BOARDER_PIXELS;
+	     + IMAGE_BORDER_PIXELS;
     int y2 = image_res * vertical_offset / 72
 	     + max(i->Y1, i->Y2) * image_res / postscriptRes
-	     + 1 + IMAGE_BOARDER_PIXELS;
+	     + 1 + IMAGE_BORDER_PIXELS;
     if (createPage(i->pageNo) == 0) {
       s = make_message("pnmcut%s %d %d %d %d < %s "
-		       "| pnmcrop -quiet | pnmtopng%s %s > %s\n",
+		       "| pnmcrop%s -quiet | pnmtopng%s -quiet %s"
+		       "> %s\n",
 		       EXE_EXT,
 		       x1, y1, x2 - x1 + 1, y2 - y1 + 1,
 		       imagePageName,
+		       EXE_EXT,
 		       EXE_EXT,
 		       TRANSPARENT,
 		       i->imageName);
@@ -1040,7 +1080,7 @@ void imageList::createImage(imageItem *i)
 #if defined(DEBUGGING)
   }
   else {
-    if (debug) {
+    if (debugging) {
       fprintf(stderr, "ignoring image as x1 coord is -1\n");
       fflush(stderr);
     }
@@ -1284,7 +1324,7 @@ void dump_args(int argc, char *argv[])
 
 void print_args(int argc, char *argv[])
 {
-  if (debug) {
+  if (debugging) {
     fprintf(stderr, "executing: ");
     for (int i = 0; i < argc; i++)
       fprintf(stderr, "%s ", argv[i]);
@@ -1486,7 +1526,7 @@ int char_buffer::do_html(int argc, char *argv[])
 #if defined(DEBUGGING)
 # define HTML_DEBUG_STREAM  OUTPUT_STREAM(htmlFileName)
   // slight security risk so only enabled if compiled with defined(DEBUGGING)
-  if (debug) {
+  if (debugging) {
     int saved_stdout = save_and_redirect(STDOUT_FILENO, HTML_DEBUG_STREAM);
     emit_troff_output(DEVICE_FORMAT(HTML_OUTPUT_FILTER));
     set_redirection(STDOUT_FILENO, saved_stdout);
@@ -1532,7 +1572,7 @@ int char_buffer::do_image(int argc, char *argv[])
 #if defined(DEBUGGING)
 # define IMAGE_DEBUG_STREAM  OUTPUT_STREAM(troffFileName)
   // slight security risk so only enabled if compiled with defined(DEBUGGING)
-  if (debug) {
+  if (debugging) {
     int saved_stdout = save_and_redirect(STDOUT_FILENO, IMAGE_DEBUG_STREAM);
     emit_troff_output(DEVICE_FORMAT(IMAGE_OUTPUT_FILTER));
     set_redirection(STDOUT_FILENO, saved_stdout);
@@ -1607,7 +1647,7 @@ static int scanArguments(int argc, char **argv)
       break;
     case 'd':
 #if defined(DEBUGGING)
-      debug = TRUE;
+      debugging = TRUE;
 #endif
       break;
     case 'D':
@@ -1701,7 +1741,7 @@ static int scanArguments(int argc, char **argv)
       return i;
     i++;
   }
-  a_delete troff_name;
+  delete[] troff_name;
 
   return argc;
 }
@@ -1787,12 +1827,14 @@ int main(int argc, char **argv)
 #endif /* CAPTURE_MODE */
   device = "html";
   i = scanArguments(argc, argv);
-  if (!font::load_desc())
-    fatal("cannot find devhtml/DESC exiting");
-  image_gen = font::image_generator;
-  if (image_gen == NULL || (strcmp(image_gen, "") == 0))
-    fatal("devhtml/DESC must set the image_generator field, exiting");
+  image_gen = strsave(get_image_generator());
+  if (0 == image_gen)
+    fatal("'image_generator' directive not found in file '%1'",
+	  devhtml_desc);
   postscriptRes = get_resolution();
+  if (postscriptRes < 1) // TODO: what's a more sane minimum value?
+    fatal("'res' directive missing or invalid in file '%1'",
+	  devps_desc);
   setupAntiAlias();
   checkImageDir();
   makeFileName();

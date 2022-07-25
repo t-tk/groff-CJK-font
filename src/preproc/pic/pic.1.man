@@ -52,17 +52,15 @@
 .\" ====================================================================
 .
 .SY @g@pic
-.OP \-nCSU
-.RI [ file
-\&.\|.\|.\&]
+.RB [ \-nCSU ]
+.RI [ file\~ .\|.\|.]
 .YS
 .
 .
 .SY @g@pic
 .B \-t
-.OP \-czCSU
-.RI [ file
-\&.\|.\|.\&]
+.RB [ \-czCSU ]
+.RI [ file\~ .\|.\|.]
 .YS
 .
 .
@@ -83,36 +81,66 @@
 .SH Description
 .\" ====================================================================
 .
-This manual page describes the GNU version of
-.IR pic , \" GNU
-which is part of the
-.I groff
+The GNU implementation of
+.I pic \" generic
+is part of the
+.IR groff (@MAN1EXT@)
 document formatting system.
 .
 .I \%@g@pic
-compiles descriptions of pictures embedded within
+is a
+.IR \%@g@troff (@MAN1EXT@)
+preprocessor that compiles descriptions of diagrammatic pictures
+embedded in
 .I troff \" generic
-or \*[tx] input files into commands that are understood by \*[tx] or
-.IR troff .
+or \*[tx] input files into the language understood by \*[tx] or
+.IR troff . \" generic
 .
-Each picture starts with a line beginning with
+It copies the contents of each
+.I file
+to the standard output stream,
+except that lines between
 .B .PS
-and ends with a line beginning with
-.BR .PE .
-.
-Anything outside of
-.B .PS
-and
+and either
 .B .PE
-is passed through without change.
+or
+.B .PF
+are interpreted as picture descriptions.
+.
+Ending a
+.I \%@g@pic
+picture with
+.B .PE
+leaves the page position at the bottom of the picture;
+ending it with
+.B .PF
+leaves the position at the top.
+.
+Normally,
+.I \%@g@pic
+is not executed directly by the user,
+but invoked by specifying the
+.B \-p
+option to
+.IR groff (@MAN1EXT@).
+.
+If no
+.I file
+operands are given on the command line,
+or if
+.I file
+is
+.RB \[lq] \- \[rq],
+the standard input stream is read.
 .
 .
 .LP
 It is the user's responsibility to provide appropriate definitions
 of the
-.B PS
+.BR PS ,
+.BR PE ,
 and
-.B PE
+.B PF
 macros.
 .
 When the macro package being used does not supply such definitions
@@ -120,9 +148,8 @@ When the macro package being used does not supply such definitions
 old versions of \-ms),
 appropriate definitions can be
 obtained with
-.BR \-mpic :
+.BR \-mpic ;
 these will center each picture.
-.
 .
 .
 .\" ====================================================================
@@ -178,9 +205,10 @@ variable.
 .TP
 .B \-C
 Recognize
-.B .PS
+.BR .PS ,
+.BR .PE ,
 and
-.B .PE
+.B .PF
 even when followed by a character other than space or newline.
 .
 .
@@ -699,15 +727,15 @@ the following:
 .RS
 .IP
 .EX
-\&.PS
-x = 3
-y = 3
-[
-  x := 5
-  y = 5
-]
-print x " " y
-\&.PE
+.B .PS
+.B x = 3
+.B y = 3
+.B [
+.B   x := 5
+.B   y = 5
+.B ]
+.B print x " " y
+.B .PE
 .EE
 .RE
 .
@@ -1246,15 +1274,14 @@ are coincident.
 .LP
 In places where
 .IB n th
-is allowed
-.BI \[oq] expr \[cq]th
+is allowed,
+.BI \[aq] expr th\[aq]
 is also allowed.
 .
-.B \[cq]th
-is a single token: no space is allowed between the
-.B \[cq]
-and the
-.BR th .
+.RB \[lq] \[aq]th \[lq]
+is a single token:
+no space is allowed between the apostrophe and the
+.RB \[lq] th \[rq].
 .
 .
 For example,
@@ -1418,9 +1445,10 @@ package.
 .TP
 .I @MACRODIR@/pic.tmac
 Example definitions of the
-.B PS
+.BR PS ,
+.BR PE ,
 and
-.B PE
+.B PF
 macros.
 .
 .
@@ -1509,6 +1537,7 @@ W.\& Richard Stevens,
 .
 .\" Restore compatibility mode (for, e.g., Solaris 10/11).
 .cp \n[*groff_pic_1_man_C]
+.do rr *groff_pic_1_man_C
 .
 .
 .\" Local Variables:

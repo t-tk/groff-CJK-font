@@ -1,8 +1,8 @@
 /* Last non-groff version: hpoint.c  1.1  84/10/08 */
 
 /*
- * This file contains routines for manipulating the point data structures
- * for the gremlin picture editor.
+ * This file contains routines for manipulating the point data
+ * structures for the gremlin picture editor.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -12,6 +12,8 @@
 #include <stdlib.h>
 #include "gprint.h"
 
+/* imports from main.cpp */
+extern void *grnmalloc(size_t size, const char *what);
 
 /*
  * Return pointer to empty point list.
@@ -24,23 +26,23 @@ PTInit()
 
 
 /*
- * This routine creates a new point with coordinates x and y and links it
- * into the pointlist.
+ * This routine creates a new point with coordinates x and y and links
+ * it into the point list.
  */
 POINT *
 PTMakePoint(double x,
 	    double y,
 	    POINT **pplist)
 {
-  register POINT *pt;
+  POINT *pt;
 
   if (Nullpoint(pt = *pplist)) {	/* empty list */
-    *pplist = (POINT *) malloc(sizeof(POINT));
+    *pplist = (POINT *) grnmalloc(sizeof(POINT), "initial point");
     pt = *pplist;
   } else {
     while (!Nullpoint(pt->nextpt))
       pt = pt->nextpt;
-    pt->nextpt = (POINT *) malloc(sizeof(POINT));
+    pt->nextpt = (POINT *) grnmalloc(sizeof(POINT), "subsequent point");
     pt = pt->nextpt;
   }
 
@@ -50,4 +52,8 @@ PTMakePoint(double x,
   return (pt);
 }				/* end PTMakePoint */
 
-/* EOF */
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

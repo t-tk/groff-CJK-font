@@ -2,14 +2,14 @@
 .ig
 
 Copyright (C) 1991-2020 Free Software Foundation, Inc.
-mgm is written by Jörgen Hägg <jh@axis.com>
+mm is written by Jörgen Hägg <jh@axis.com>
 
-mgm is free software; you can redistribute it and/or modify it under
+mm is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free
 Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-mgm is distributed in the hope that it will be useful, but WITHOUT ANY
+mm is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 for more details.
@@ -25,42 +25,50 @@ http://savannah.gnu.org/bugs/?group=groff.
 .\" Cover sheet. Mostly like ms cover.
 .\"------------
 .de cov@print-title
-.in 0
-.misc@ev-keep cov*ev
-.init@reset
-.ad c
-.hy 0
-.fi
-.B
-.cov*title
-.br
-.ad b
-.R
-.ev
+.ie !d cov*title .@error COVEND: no title (TL) defined
+.el \{
+.	in 0
+.	misc@ev-keep cov*ev
+.	init@reset
+.	ad c
+.	hy 0
+.	fi
+.	B
+.	cov*title
+.	br
+.	ad b
+.	R
+.	ev
+.\}
 ..
 .\"------------
 .de cov@print-authors
-.SP
-.nr cov*i 0 1
-.while \\n+[cov*i]<=\\n[cov*au] \{\
-.	ce
-\fI\\*[cov*au!\\n[cov*i]!1]\fP
-.	nr cov*j 0 1
-.	while \\n+[cov*j]<=9 \{\
-.		if d cov*at!\\n[cov*i]!\\n[cov*j] \{\
-.			if \w'\\*[cov*at!\\n[cov*i]!\\n[cov*j]]' \{\
-.				ce
-\s-1\\*[cov*at!\\n[cov*i]!\\n[cov*j]]\s0
-.			.\}
+.ie !\\n[cov*au] .@error COVEND: no authors (AU) defined
+.el \{
+.	SP
+.	nr cov*i 0 1
+.	while \\n+[cov*i]<=\\n[cov*au] \{\
+.		ds cov*aname \\*[cov*au!\\n[cov*i]!1]
+.		ce
+.		nop \fI\\*[cov*aname]\fP
+.		nr cov*j 0 1
+.		while \\n+[cov*j]<=\\n[cov*at!\\n[cov*i]] \{\
+.			ds cov*atitle \\*[cov*at!\\n[cov*i]!\\n[cov*j]]
+.			ce
+.			nop \s-1\\*[cov*atitle]\s0
 .		\}
+.		rm cov*atitle
 .	\}
+.	rm cov*aname
 .\}
 ..
 .\"------------
 .de cov@print-firm
-.SP .5
-.ce
-\\*[cov*firm]
+.if d cov*firm \{\
+.	SP .5
+.	ce
+.	nop \\*[cov*firm]
+.\}
 ..
 .\"------------
 .de cov@print-abstract
@@ -89,7 +97,8 @@ http://savannah.gnu.org/bugs/?group=groff.
 .\"-----------------
 .de COVEND
 .br
-.if d cov*default-firm .if !d cov*firm .ds cov*firm \\*[cov*default-firm]
+.if d cov*default-firm \
+.	if !d cov*firm .ds cov*firm \\*[cov*default-firm]
 .sp |4.2c
 .cov@print-title
 .cov@print-authors
@@ -99,8 +108,14 @@ http://savannah.gnu.org/bugs/?group=groff.
 .pg@enable-top-trap
 .bp 1
 .pg@enable-trap
-.if d cov*abs-arg .if \\n[cov*abs-arg] \{\
+.if r cov*abs-arg .if \\n[cov*abs-arg] \{\
 .	cov@print-abstract ABSTRACT
 .	SP 2
 .\}
 ..
+.
+.\" Local Variables:
+.\" mode: nroff
+.\" fill-column: 72
+.\" End:
+.\" vim: set filetype=groff textwidth=72:

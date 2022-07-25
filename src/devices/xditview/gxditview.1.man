@@ -40,11 +40,16 @@ gxditview \- display groff intermediate output files in X11
 .
 .SY gxditview
 .RI [ X-toolkit-option \~.\|.\|.\&]
-.OP \-backingStore backing-store-type
-.OP \-filename string
-.OP \-page n
-.OP \-printCommand string
-.OP \-resolution res
+.RB [ \-backingStore\~\c
+.IR backing-store-type ]
+.RB [ \-filename\~\c
+.IR string ]
+.RB [ \-page\~\c
+.IR n ]
+.RB [ \-printCommand\~\c
+.IR string ]
+.RB [ \-resolution\~\c
+.IR res ]
 .I file
 .YS
 .
@@ -142,32 +147,23 @@ generates the intermediate output for this device and calls
 .I gxditview
 automatically for viewing.
 .
-For example,
-the following command views this man page with a base point size of 12.
 .
+.P
+.B \-X
+produces good results only with
+.BR \-Tps ,
+.BR \-TX75 ,
+.BR \-TX75\-12 ,
+.BR \-TX100 ,
+and
+.BR \-TX100\-12 .
 .
-.PP
-.RS
-.EX
-groff \-TX100\-12 \-man gxditview.1
-.EE
-.RE
-.
-.
-.PP
-The quality of the result depends mainly on the chosen point size and
-display resolution;
-for rapid previewing,
-however,
-something like
-.
-.RS
-.EX
-.RI "groff \-X \-P\-resolution \-P100\~" document
-.EE
-.RE
-.
-yields acceptable results.
+The default resolution for previewing
+.B \-Tps
+output is 75\|dpi;
+this can be changed with the
+.B \-resolution
+option.
 .
 .
 .PP
@@ -601,6 +597,37 @@ for more.
 .
 .
 .\" ====================================================================
+.SH Examples
+.\" ====================================================================
+.
+The following command views this man page with a base point size of 12.
+.
+.
+.RS
+.P
+.EX
+groff \-TX100\-12 \-man gxditview.1
+.EE
+.RE
+.
+.
+.P
+The quality of the result depends mainly on the chosen point size and
+display resolution;
+for rapid previewing,
+however,
+something like
+.
+.RS
+.EX
+.RI "groff \-X \-P\-resolution \-P100\~" document
+.EE
+.RE
+.
+yields acceptable results.
+.
+.
+.\" ====================================================================
 .SH Authors
 .\" ====================================================================
 .
@@ -649,6 +676,7 @@ by Jim Flowers and Stephen Gildea.
 .
 .\" Restore compatibility mode (for, e.g., Solaris 10/11).
 .cp \n[*groff_gxditview_1_man_C]
+.do rr *groff_gxditview_1_man_C
 .
 .
 .\" Local Variables:

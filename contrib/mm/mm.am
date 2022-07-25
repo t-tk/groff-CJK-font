@@ -48,11 +48,6 @@ MMEXAMPLEFILES=\
 mmexampledir=$(exampledir)/mm
 dist_mmexample_DATA = $(MMEXAMPLEFILES)
 
-# Local configuration files with default values.
-MMLOCALE = \
-  locale \
-  se_locale
-
 EXTRA_DIST += \
   contrib/mm/ChangeLog \
   contrib/mm/examples \
@@ -68,7 +63,8 @@ EXTRA_DIST += \
 mm_TESTS = \
   contrib/mm/tests/LT_SP_AU_without_AT_works.sh \
   contrib/mm/tests/LT_SP_multi-word_LO_SJ_works.sh \
-  contrib/mm/tests/MT_5_includes_AT_in_SG.sh
+  contrib/mm/tests/MT_5_includes_AT_in_SG.sh \
+  contrib/mm/tests/ms_cover_sheet_robust_to_missing_AF.sh
 TESTS += $(mm_TESTS)
 EXTRA_DIST += $(mm_TESTS)
 
@@ -78,8 +74,7 @@ mmroff: $(mm_srcdir)/mmroff.pl
 	    >$@ \
 	&& chmod +x $@
 
-# Special installation rules for m.tmac, mse.tmac, mmse.tmac, mm.tmac
-# and MMLOCALE
+# special installation rules for m.tmac, mse.tmac, mmse.tmac, mm.tmac
 install-data-local: install_mm
 install_mm:
 	-test -d $(DESTDIR)$(tmacdir) || $(mkinstalldirs) $(DESTDIR)$(tmacdir)
@@ -94,19 +89,11 @@ install_mm:
 	  $(mm_srcdir)/mmse.tmac > $(DESTDIR)$(tmacdir)/$(tmac_m_prefix)mmse.tmac
 	@$(SED) -e "s;^.mso m.tmac;.mso $(tmac_m_prefix)m.tmac;g" \
 	  $(mm_srcdir)/mm.tmac > $(DESTDIR)$(tmacdir)/$(tmac_m_prefix)mm.tmac
-	@for f in $(MMLOCALE); do \
-	  test -f $(DESTDIR)$(tmacdir)/mm/$$f \
-	    || touch $(DESTDIR)$(tmacdir)/mm/$$f; \
-	done
 uninstall-local: uninstall_mm
 uninstall_mm:
 	if test -d $(DESTDIR)$(mmexampledir); then \
 	  rmdir $(DESTDIR)$(mmexampledir); \
 	fi
-	-for f in $(MMLOCALE); do \
-	  test -s $(DESTDIR)$(tmacdir)/mm/$$f \
-	    || $(RM) $(DESTDIR)$(tmacdir)/mm/$$f; \
-	done
 	$(RM) $(DESTDIR)$(tmacdir)/tmac.$(tmac_m_prefix)m
 	$(RM) $(DESTDIR)$(tmacdir)/$(tmac_m_prefix)m.tmac
 	$(RM) $(DESTDIR)$(tmacdir)/$(tmac_m_prefix)mm.tmac

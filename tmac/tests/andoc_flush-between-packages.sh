@@ -49,7 +49,7 @@ man\-flush-test2 \- a second sanity test for groff_man(7)
 This supernumerary loquacious sentence should end up with a
 partially-collected output line.'
 
-OUTPUT=$(printf "%s\n" "$EXAMPLE" | "$groff" -Tascii -P-cbou -man)
+OUTPUT=$(printf "%s\n" "$EXAMPLE" | "$groff" -Tascii -P-cbou -mandoc)
 
 FAIL=
 

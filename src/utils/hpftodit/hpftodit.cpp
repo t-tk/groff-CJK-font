@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 1994-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
@@ -179,7 +178,7 @@ struct name_list {
   char *name;
   name_list *next;
   name_list(const char *s, name_list *p) : name(strsave(s)), next(p) { }
-  ~name_list() { a_delete name; }
+  ~name_list() { delete[] name; }
 };
 
 struct symbol_set {
@@ -1256,17 +1255,19 @@ dump_symbols(int tfm_type)
 static char *
 show_symset(unsigned int symset)
 {
-   static char symset_str[8];
-
-   sprintf(symset_str, "%d%c", symset / 32, (symset & 31) + 64);
-   return symset_str;
+  // A 64-bit unsigned int produces up to 20 decimal digits.
+  assert(sizeof(unsigned int) <= 8);
+  static char symset_str[22]; // 20 digits + symset char + \0
+  sprintf(symset_str, "%u%c", symset / 32, (symset & 31) + 64);
+  return symset_str;
 }
 
 static char *
 hp_msl_to_ucode_name(int msl)
 {
-  char codestr[8];
-
+  // A 64-bit signed int produces up to 19 decimal digits plus a sign.
+  assert(sizeof(int) <= 8);
+  char codestr[21]; // 19 digits + possible sign + \0
   sprintf(codestr, "%d", msl);
   const char *ustr = hp_msl_to_unicode_code(codestr);
   if (ustr == NULL)
@@ -1285,15 +1286,17 @@ hp_msl_to_ucode_name(int msl)
       ustr = uname_decomposed + 1;
   }
   char *value = new char[strlen(ustr) + 1];
-  sprintf(value, equal(ustr, UNNAMED) ? ustr : "u%s", ustr);
+  sprintf(value, equal(ustr, UNNAMED) ? UNNAMED : "u%s", ustr);
   return value;
 }
 
 static char *
 unicode_to_ucode_name(int ucode)
 {
+  // A 64-bit signed int produces up to 16 hexadecimal digits.
+  assert(sizeof(int) <= 8);
   const char *ustr;
-  char codestr[8];
+  char codestr[17]; // 16 hex digits + \0
 
   // don't allow PUA code points as Unicode names
   if (ucode >= 0xE000 && ucode <= 0xF8FF)
@@ -1309,7 +1312,7 @@ unicode_to_ucode_name(int ucode)
       ustr = uname_decomposed + 1;
   }
   char *value = new char[strlen(ustr) + 1];
-  sprintf(value, equal(ustr, UNNAMED) ? ustr : "u%s", ustr);
+  sprintf(value, equal(ustr, UNNAMED) ? UNNAMED : "u%s", ustr);
   return value;
 }
 
@@ -1416,7 +1419,7 @@ read_map(const char *file, const int tfm_type)
       charcode_name_table = new name_list *[charcode_name_table_size];
       if (old_table) {
 	memcpy(charcode_name_table, old_table, old_size*sizeof(name_list *));
-	a_delete old_table;
+	delete[] old_table;
       }
       for (size_t i = old_size; i < charcode_name_table_size; i++)
 	charcode_name_table[i] = NULL;
@@ -1451,3 +1454,9 @@ xbasename(const char *s)
     }
   return b ? b + 1 : s;
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

@@ -28,10 +28,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .
 .\" See if already loaded.
 .if r GS .nx
-.mso devtag.tmac
 .nr GS 1
-.nr need_eo_h 0
-.nr need_eo_tl 0
+.
+.mso devtag.tmac
+.nr s@devtag-needs-end-of-heading 0
+.nr s@devtag-needs-end-of-title 0
 .
 .\" Define a string for use in diagnostic messages.
 .ds @s s.tmac\"
@@ -287,6 +288,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .als MC @MC
 .als EQ @EQ
 .als EN @EN
+.als PS @PS
 .als TS @TS
 .als AB cov*err-not-after-ab
 .als AU par@AU
@@ -691,11 +693,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .nr fn*open 0
 .\" Handle initialition tasks deferred until par module is set up.
 .de fn@init
-.ie t .als fn@sup-start par@sup-start
-.el .ds fn@sup-start [
-.ie t .als fn@sup-end par@sup-end
-.el .ds fn@sup-end ]
-.ds * \E*[fn@sup-start]\En+[fn*text-num]\E*[fn@sup-end]
+.ie t .als fn@mark-start par@sup-start
+.el .ds fn@mark-start [
+.ie t .als fn@mark-end par@sup-end
+.el .ds fn@mark-end ]
+.ds * \E*[fn@mark-start]\En+[fn*text-num]\E*[fn@mark-end]
 ..
 .\" normal FS
 .de @FS
@@ -1206,23 +1208,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .\" par@reset
 .de par@reset
 .br
-.if \\n[need_eo_tl]>0 .DEVTAG-EO-TL
-.nr need_eo_tl 0
-.if \\n[need_eo_h]>0 .DEVTAG-EO-H
-.nr need_eo_h 0
+.if \\n[s@devtag-needs-end-of-title] .DEVTAG-EO-TL
+.nr s@devtag-needs-end-of-title 0
+.if \\n[s@devtag-needs-end-of-heading] .DEVTAG-EO-H
+.nr s@devtag-needs-end-of-heading 0
 .ce 0
 .rj 0
 .ul 0
 .fi
-.ie \\n[pg@ncols]>1 \{\
-.	ll (u;\\n[\\n[.ev]:MCLL]-\\n[\\n[.ev]:ri]-\\n[\\n[.ev]:pri])
-.	lt \\n[\\n[.ev]:MCLT]u
-.\}
-.el \{\
-.	ll (u;\\n[\\n[.ev]:LL]-\\n[\\n[.ev]:ri]-\\n[\\n[.ev]:pri])
-.	lt \\n[\\n[.ev]:LT]u
-.\}
-.in (u;\\n[\\n[.ev]:li]+\\n[\\n[.ev]:pli])
 .ft 1
 .ie '\\n[.ev]'fn' .fam \\*[fn@font-family]
 .el .fam \\*[FAM]
@@ -1235,6 +1228,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .el \
 .	par*vs \\n[\\n[.ev]:VS]
 .ls 1
+.if !'\\$1'' .nr \\n[.ev]:pli (n;\\$1)
+.if !'\\$2'' .nr \\n[.ev]:pri (n;\\$2)
+.ie \\n[pg@ncols]>1 \{\
+.	ll (u;\\n[\\n[.ev]:MCLL]-\\n[\\n[.ev]:ri]-\\n[\\n[.ev]:pri])
+.	lt \\n[\\n[.ev]:MCLT]u
+.\}
+.el \{\
+.	ll (u;\\n[\\n[.ev]:LL]-\\n[\\n[.ev]:ri]-\\n[\\n[.ev]:pri])
+.	lt \\n[\\n[.ev]:LT]u
+.\}
+.in (u;\\n[\\n[.ev]:li]+\\n[\\n[.ev]:pli])
 .TA
 .hy \\n[HY]
 ..
@@ -1249,9 +1253,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .
 .de par*start
 .ds@auto-end
-.nr \\n[.ev]:pli \\$1
-.nr \\n[.ev]:pri \\$2
-.par@reset
+.par@reset \\$1 \\$2
 .sp \\n[\\n[.ev]:PD]u
 .ne \\n[PORPHANS]v+\\n(.Vu
 ..
@@ -1259,7 +1261,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .nr \\n[.ev]:ai \\n[\\n[.ev]:PI]
 .nr \\n[.ev]:pli 0
 .nr \\n[.ev]:pri 0
-.par@reset
+.par@reset 0 0
 ..
 .als @RT par@finish
 .\" normal LP
@@ -1274,15 +1276,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ..
 .de @QP
 .nr \\n[.ev]:ai \\n[\\n[.ev]:PI]
-.par*start \\n[QI] \\n[QI]
+.par*start \\n[QI]u \\n[QI]u
 ..
 .de @XP
-.par*start \\n[\\n[.ev]:PI] 0
+.par*start \\n[\\n[.ev]:PI]u 0
 .ti -\\n[\\n[.ev]:PI]u
 ..
 .de @IP
-.if \\n[.$]>1 .nr \\n[.ev]:ai (n;\\$2)
-.par*start \\n[\\n[.ev]:ai] 0
+.ie \\n[.$]>1 \{\
+.par*start \\$2 0
+.nr \\n[.ev]:ai \\n[\\n[.ev]:pli]
+.\}
+.el .par*start \\n[\\n[.ev]:ai]u 0
 .if !'\\$1'' \{\
 .	\" Divert the label so as to freeze any spaces.
 .	di par*label
@@ -1476,7 +1481,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .  if 0\\$1>0 .nr sh*psincr (\\n[GROWPS]-0\\$1)*\\n[PSINCR]
 .  SH-NO-TAG
 .  DEVTAG-SH 1
-.  if '\*(.T'html' .nr need_eo_h 1
+.  if '\*(.T'html' .nr s@devtag-needs-end-of-heading 1
 ..
 .\" TL, AU, and AI are aliased to these in cov*ab-init.
 .de par@TL
@@ -1487,7 +1492,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .vs +3p
 .ce 9999
 .DEVTAG-TL
-.nr need_eo_tl 1
+.nr s@devtag-needs-end-of-title 1
 ..
 .de par@AU
 .par@finish
@@ -1585,7 +1590,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ..
 .de par*fp!0
 .@PP
-\&\\*[fn@sup-start]\\$1\\*[fn@sup-end]\ \c
+\&\\*[fn@mark-start]\\$1\\*[fn@mark-end]\ \c
 ..
 .de par*fp!0-no
 .@PP
@@ -1679,7 +1684,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .nr sh*psincr (\\n[GROWPS]-\\n[nh*hl])*\\n[PSINCR]
 .SH-NO-TAG
 .DEVTAG-NH "\\$1"
-.  if '\*(.T'html' .nr need_eo_h 1
+.  if '\*(.T'html' .nr s@devtag-needs-end-of-heading 1
 \\*[SN-STYLE]
 ..
 .\" ****************************
@@ -1760,6 +1765,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .de EN
 ..
 .de @EQ
+.if \\n[tbl@within-table] \
+.	@error .EQ is not allowed within a .TS/.TE table
 .br
 .ds eqn*num "\\$2
 .ie '\\$1'L' .nr eqn*type 0
@@ -1850,14 +1857,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .\" ******** module tbl ********
 .\" ****************************
 .\" Tbl support.
+.nr tbl@within-table 0
 .nr tbl*have-header 0
 .\" This gets called if TS occurs before the first paragraph.
 .de TS
 .LP
-.\" cov*ab-init aliases TS to @TS
+.\" cov*ab-init, called by LP, aliases TS to @TS.
 \\*[TS]\\
 ..
 .de @TS
+.nr tbl@within-table 1
 .sp \\n[DD]u
 .if '\\$1'H' \{\
 .	ds tbl*stem .TS H table inside\"
@@ -1920,6 +1929,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .	ll \\n[tbl*ll]u
 .\" reset tabs
 .TA
+.nr tbl@within-table 0
 ..
 .de tbl@bottom-hook
 .if \\n[tbl*have-header] \{\
@@ -1933,8 +1943,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .\" ******** module pic ********
 .\" ****************************
 .\" Pic support.
-.\" PS height width
+.\" This gets called if PS occurs before the first paragraph.
 .de PS
+.LP
+.\" cov*ab-init, called by LP, aliases PS to @PS.
+\\*[PS]\\
+..
+.\" @PS height width
+.de @PS
 .br
 .sp \\n[DD]u
 .ie \\n[.$]<2 .@error bad arguments to .PS (not preprocessed with pic?)

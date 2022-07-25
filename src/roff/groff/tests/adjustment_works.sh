@@ -52,7 +52,7 @@ foo bar\p'
 OUTPUT=$(echo "$DOC" | "$groff" -Tascii)
 B='foo   bar' # 3 spaces
 L='foo bar' # left or off
-C=' foo bar' # trailing space truncated by output driver
+C=' foo bar' # trailing space truncated
 R='  foo bar' # 2 leading spaces
 
 echo "verifying default adjustment mode 'b'" >&2

@@ -1555,8 +1555,8 @@ copy_thru_input::copy_thru_input(const char *b, const char *u)
 
 copy_thru_input::~copy_thru_input()
 {
-  a_delete body;
-  a_delete until;
+  delete[] body;
+  delete[] until;
 }
 
 int copy_thru_input::get()

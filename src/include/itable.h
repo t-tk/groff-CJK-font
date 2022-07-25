@@ -19,14 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
 #include <assert.h>
 
-// name2(a,b) concatenates two C identifiers.
-#ifdef TRADITIONAL_CPP
-# define name2(a,b) a/**/b
-#else /* not TRADITIONAL_CPP */
-# define name2(a,b) name2x(a,b)
-# define name2x(a,b) a ## b
-#endif /* not TRADITIONAL_CPP */
-
 // 'class ITABLE(T)' is the type of a hash table mapping an integer (int >= 0)
 // to an object of type T.
 //
@@ -38,9 +30,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 //
 // Nowadays one would use templates for this; this code predates the addition
 // of templates to C++.
-#define ITABLE(T) name2(T,_itable)
-#define IASSOC(T) name2(T,_iassoc)
-#define ITABLE_ITERATOR(T) name2(T,_itable_iterator)
+#define ITABLE(T) T ## _itable
+#define IASSOC(T) T ## _iassoc
+#define ITABLE_ITERATOR(T) T ## _itable_iterator
 
 // ptable.h declares this too
 #ifndef NEXT_PTABLE_SIZE_DEFINED
@@ -118,8 +110,8 @@ ITABLE(T)::ITABLE(T)()							      \
 ITABLE(T)::~ITABLE(T)()							      \
 {									      \
   for (unsigned i = 0; i < size; i++)					      \
-    a_delete v[i].val;							      \
-  a_delete v;								      \
+    delete[] v[i].val;							      \
+  delete[] v;								      \
 }									      \
 									      \
 void ITABLE(T)::define(int key, T *val)					      \
@@ -131,7 +123,7 @@ void ITABLE(T)::define(int key, T *val)					      \
        v[n].key >= 0;							      \
        n = (n == 0 ? size - 1 : n - 1))					      \
     if (v[n].key == key) {						      \
-      a_delete v[n].val;						      \
+      delete[] v[n].val;						      \
       v[n].val = val;							      \
       return;								      \
     }									      \
@@ -158,7 +150,7 @@ void ITABLE(T)::define(int key, T *val)					      \
 	 v[n].key >= 0;							      \
 	 n = (n == 0 ? size - 1 : n - 1))				      \
       ;									      \
-    a_delete oldv;							      \
+    delete[] oldv;							      \
   }									      \
   v[n].key = key;							      \
   v[n].val = val;							      \

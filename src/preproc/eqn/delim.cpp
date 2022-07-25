@@ -176,11 +176,11 @@ public:
 box *make_delim_box(char *l, box *pp, char *r)
 {
   if (l != 0 && *l == '\0') {
-    a_delete l;
+    delete[] l;
     l = 0;
   }
   if (r != 0 && *r == '\0') {
-    a_delete r;
+    delete[] r;
     r = 0;
   }
   return new delim_box(l, pp, r);
@@ -193,8 +193,8 @@ delim_box::delim_box(char *l, box *pp, char *r)
 
 delim_box::~delim_box()
 {
-  a_delete left;
-  a_delete right;
+  delete[] left;
+  delete[] right;
   delete p;
 }
 
@@ -314,9 +314,14 @@ static void define_extensible_string(char *delim, int uid,
 	 "\\{",
 	 current_roman_font, d->small, axis_height,
 	 current_roman_font, d->small);
-	 
+
   char buf[256];
+// The format string in the sprintf below comes from a struct
+// initializer above, and is not subject to external influence.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
   sprintf(buf, d->chain_format, "\\\\n[" INDEX_REG "]");
+#pragma GCC diagnostic pop
   printf(".nr " INDEX_REG " 0\n"
 	 ".de " TEMP_MACRO "\n"
 	 ".ie c%s \\{\\\n"

@@ -75,7 +75,7 @@ void *dictionary::lookup(symbol s, void *v)
     for (i = 0; i < old_size; i++)
       if (old_table[i].v != 0)
 	(void)lookup(old_table[i].s, old_table[i].v);
-    a_delete old_table;
+    delete[] old_table;
   }
   return 0;
 }

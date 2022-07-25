@@ -259,8 +259,8 @@ void resource_manager::document_setup(ps_output &out)
 	*tail[i] = resource_list;
 	resource_list = head[i];
       }
-    a_delete head;
-    a_delete tail;
+    delete[] head;
+    delete[] tail;
     // check it
     for (r = resource_list; r; r = r->next)
       if (r->next)
@@ -354,7 +354,7 @@ void resource_manager::supply_resource(resource *r, int rank, FILE *outfp,
       fp = font::open_file(r->filename, &path);
       if (!fp) {
 	error("can't find '%1'", r->filename);
-	a_delete r->filename;
+	delete[] r->filename;
 	r->filename = 0;
       }
     }
@@ -363,7 +363,7 @@ void resource_manager::supply_resource(resource *r, int rank, FILE *outfp,
       fp = include_search_path.open_file_cautious(r->filename);
       if (!fp) {
 	error("can't open '%1': %2", r->filename, strerror(errno));
-	a_delete r->filename;
+	delete[] r->filename;
 	r->filename = 0;
       }
       else

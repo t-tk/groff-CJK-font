@@ -13,23 +13,24 @@ VERSION 1.23.0
 troff
 -----
 
-o The groff locale (the default input language) is now determined using
-  the system locale.  The LC_ALL and LANG environment variables are
-  checked, in that order.  If set, the value's first two characters
-  determine the groff locale.  If these variables are not set, if the
-  first one found is set to "C", or if no groff localization file exists
-  for the language, groff falls back to English, loading en.tmac.
-
-  Those who want groff's default locale to differ from LC_ALL/LANG
-  should edit the troffrc file to source the appropriate groff locale
-  macro file (cs.tmac, de.tmac, den.tmac, fr.tmac, ja.tmac, sv.tmac,
-  zh.tmac).
+o English localization has been split into a dedicated macro file,
+  en.tmac, for better parallelism with other localization files and to
+  improve support for multilingual documents.  Those who want a
+  different default input language should edit the troffrc file to
+  source the desired groff locale macro file (cs.tmac, de.tmac,
+  den.tmac, fr.tmac, it.tmac, ja.tmac, sv.tmac, or zh.tmac) instead of
+  en.tmac.
 
   The default hyphenation mode (as used by the .hy request) for users of
-  English is thus changed from "1", which was inappropriate for the
+  English has changed from "1", which was inappropriate for the
   TeX-based hyphenation patterns groff has used since at least 1991, to
   "4".  However, invoking .hy without an argument remains synonymous
   with ".hy 1".
+
+o The hyphenation patterns for English have been updated using the
+  `hyph-en-us.tex` patterns file from the TeX hyph-utf8 project.  The
+  new patterns likely _will_ change the automatic hyphenation break
+  points of your English documents.
 
 o A new read-only register ".cp" is implemented.  Within a .do request,
   "\n[.cp]" holds the saved value of compatibility mode.  See
@@ -91,8 +92,8 @@ o The new option -P takes an argument to pass to the output driver
   (always grotty(1)).  "-P-i" directs the terminal device to display
   real italic (oblique) characters instead of underlining: it is up to
   your terminal (emulator) to support italics (xterm does since patch
-  #314 [2014-12-28]).  "-P-c" and "-P-h" can now be used instead of "-c"
-  and "-h"; the latter pair may eventually be deprecated and repurposed.
+  #314 [2014-12-28]).  "-P-h" can now be used instead of "-h"; the
+  latter may eventually be deprecated and repurposed.
 
 o The new option -V emits the constructed groff command that nroff would
   run to standard output instead of executing it.  Arguments to nroff
@@ -102,7 +103,10 @@ o The new option -V emits the constructed groff command that nroff would
   corrected by the POSIX standard.
 
 o nroff now recognizes the -b, -E, -k, -K, and -z options and passes
-  them through to troff.
+  them through to groff.
+
+o nroff now supports whitespace between option flag letters and option
+  arguments, like groff and troff themselves.
 
 Macro Packages
 --------------
@@ -112,6 +116,17 @@ o The new rfc1345 macro package, contributed by Dorai Sitaram, defines
   some additions from Vim, which itself uses RFC 1345 for its digraphs).
   It is documented in the groff_rfc1345(7) man page.
 
+o Part of the an (man) macro package has been renamed from "an-old.tmac"
+  to "an.tmac", replacing a file that sourced the "andoc.tmac" wrapper.
+  This means that the "-man" argument to groff (or nroff, or troff) will
+  no longer load the andoc wrapper, and not successfully format mdoc(7)
+  man pages.  If you are not sure which macro package a given man page
+  uses, or you wish to batch-process a series of man pages written
+  variously in the man and mdoc formats, be sure to call the formatter
+  with the "-mandoc" option explicitly, as "-man" will no longer do
+  this.  The man-db man(1) implementation has, since 2001, used
+  "-mandoc" preferentially if available when man-db is configured.
+
 o The an (man) macro package supports a new AD string to put the default
   adjustment mode under user control.  The default is 'b' (adjust lines
   to both margins) as has been the Unix man(7) default since 1979.
@@ -120,7 +135,7 @@ o The an (man) and doc (mdoc) macro packages support new CS and CT
   registers to control rendering of man page section headings and titles
   (seen in the page header), respectively, in full capitals.  These
   default off (with no visible effect on pages which already fully
-  capitalize these strings in man page sources).  The rationale is to
+  capitalize such text in man page sources).  The rationale is to
   encourage man page authors to preserve case distinction information in
   (or restore it to) their titles and section headings, while giving
   users (including system administrators, distributors, integrators, and
@@ -156,6 +171,9 @@ o The m (mm) and s (ms) macro packages no longer manipulate the warning
   arguments in your document or pass "-w w" to groff (see troff(1) or
   the groff Texinfo manual for more on warnings).
 
+o The m (mm) and s (ms) macro packages' "R" macros now work analogously
+  to their "B" and "I" macros instead of ignoring their arguments.
+
 o The s (ms) macro package supports a new string, FR, which defines the
   ratio of the footnote line length to the current line length.  The
   default expression is "11/12", 11/12ths of the normal line length,
@@ -176,9 +194,8 @@ o The s (ms) macro package supports a new string, FR, which defines the
   ms macros" document, also part of this release.
 
 o The s (ms) macro package has added strings, \*< and \*>, to perform
-  subscripting within a paragraph.  They work analogously to the \*{ and
-  \*} superscripting strings that have been present in groff ms since
-  1991 or earlier.
+  subscripting.  They work analogously to the \*{ and \*} superscripting
+  strings that have been present in groff ms since 1991 or earlier.
 
 grotty
 ------
@@ -200,6 +217,10 @@ o On the Latin-1 output device ("groff -T latin1") the output glyph
 Miscellaneous
 -------------
 
+o Italian language input documents are now supported, including
+  hyphenation patterns from the hyph-utf8 project and localized strings
+  for the ms, me, mm, and mom packages.  Thanks to Edmond Orignac.
+
 o The semantics of the environment variable SOURCE_DATE_EPOCH (support
   for which was added in 1.22.4) to groff were not established with
   respect to time zone selection, prompting divergent interpretations;
@@ -208,12 +229,15 @@ o The semantics of the environment variable SOURCE_DATE_EPOCH (support
   the current time (or SOURCE_DATE_EPOCH) as a local time.  While a
   convenient and defensible choice for reproducible build efforts, it
   runs against the grain of user expectations.  Systems programmers like
-  time-zone invariant, monotonically increasing clocks; the broader
+  time zone-invariant, monotonically increasing clocks; the broader
   user base usually prefers a clock that follows an applicable civil
   calendar.  Users of SOURCE_DATE_EPOCH may also wish to set the TZ
   environment variable.
 
 o groffer has been deleted from the distribution.
+
+o grog no longer supports the "--warnings" option; the one diagnostic
+  message that it enabled has been removed.
 
 
 VERSION 1.22.4
@@ -2177,7 +2201,7 @@ Previously, the text after \fP appeared as bold.
 
 The `substring' request is not new, but hasn't been documented before.
 
-The predefined `.T' string register (which holds the current output
+The predefined `.T' string register (which holds the name of the output
 device) is not new, but hasn't been documented before.
 
 A new request `length' computes the length of a string and returns it in
@@ -2764,7 +2788,7 @@ Troff
 -----
 
 In long escape names the closing ] is now required to be at the same
-input level as the opening [.
+interpolation depth as the opening [.
 
 The \A'S' escape sequence returns 1 or 0 according as S is or is not
 suitable for use as a name.
@@ -2828,7 +2852,7 @@ VERSION 1.01
 
 The groff command now understands the gtroff `-a' and `-i' options.
 
-With the `m' and `n' scale indicators, the scale factor is rounded
+With the `m' and `n' scaling indicators, the scale factor is rounded
 horizontally before being applied.  This makes (almost) no difference
 for devices with `hor' equal to 1, but it makes groff with -Tascii or
 -Tlatin1 behave more like nroff in its treatment of these scale

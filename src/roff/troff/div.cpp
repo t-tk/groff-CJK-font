@@ -892,7 +892,7 @@ void diversion_trap()
 
 void change_trap()
 {
-  symbol s = get_name(1);
+  symbol s = get_name(true /* required */);
   if (!s.is_null()) {
     vunits x;
     if (has_arg() && get_vunits(&x, 'v'))
@@ -956,14 +956,14 @@ void vertical_position_traps()
 
 class page_offset_reg : public reg {
 public:
-  int get_value(units *);
+  bool get_value(units *);
   const char *get_string();
 };
-  
-int page_offset_reg::get_value(units *res)
+
+bool page_offset_reg::get_value(units *res)
 {
   *res = topdiv->get_page_offset().to_units();
-  return 1;
+  return true;
 }
 
 const char *page_offset_reg::get_string()
@@ -973,14 +973,14 @@ const char *page_offset_reg::get_string()
 
 class page_length_reg : public reg {
 public:
-  int get_value(units *);
+  bool get_value(units *);
   const char *get_string();
 };
-  
-int page_length_reg::get_value(units *res)
+
+bool page_length_reg::get_value(units *res)
 {
   *res = topdiv->get_page_length().to_units();
-  return 1;
+  return true;
 }
 
 const char *page_length_reg::get_string()
@@ -990,17 +990,17 @@ const char *page_length_reg::get_string()
 
 class vertical_position_reg : public reg {
 public:
-  int get_value(units *);
+  bool get_value(units *);
   const char *get_string();
 };
-  
-int vertical_position_reg::get_value(units *res)
+
+bool vertical_position_reg::get_value(units *res)
 {
   if (curdiv == topdiv && topdiv->before_first_page)
     *res = -1;
   else
     *res = curdiv->get_vertical_position().to_units();
-  return 1;
+  return true;
 }
 
 const char *vertical_position_reg::get_string()
@@ -1013,14 +1013,14 @@ const char *vertical_position_reg::get_string()
 
 class high_water_mark_reg : public reg {
 public:
-  int get_value(units *);
+  bool get_value(units *);
   const char *get_string();
 };
-  
-int high_water_mark_reg::get_value(units *res)
+
+bool high_water_mark_reg::get_value(units *res)
 {
   *res = curdiv->get_high_water_mark().to_units();
-  return 1;
+  return true;
 }
 
 const char *high_water_mark_reg::get_string()
@@ -1030,14 +1030,14 @@ const char *high_water_mark_reg::get_string()
 
 class distance_to_next_trap_reg : public reg {
 public:
-  int get_value(units *);
+  bool get_value(units *);
   const char *get_string();
 };
-  
-int distance_to_next_trap_reg::get_value(units *res)
+
+bool distance_to_next_trap_reg::get_value(units *res)
 {
   *res = curdiv->distance_to_next_trap().to_units();
-  return 1;
+  return true;
 }
 
 const char *distance_to_next_trap_reg::get_string()
@@ -1058,7 +1058,7 @@ const char *diversion_name_reg::get_string()
 class page_number_reg : public general_reg {
 public:
   page_number_reg();
-  int get_value(units *);
+  bool get_value(units *);
   void set_value(units);
 };
 
@@ -1071,10 +1071,10 @@ void page_number_reg::set_value(units n)
   topdiv->set_page_number(n);
 }
 
-int page_number_reg::get_value(units *res)
+bool page_number_reg::get_value(units *res)
 {
   *res = topdiv->get_page_number();
-  return 1;
+  return true;
 }
 
 class next_page_number_reg : public reg {
@@ -1139,14 +1139,14 @@ void nl_reg::set_value(units n)
 
 class no_space_mode_reg : public reg {
 public:
-  int get_value(units *);
+  bool get_value(units *);
   const char *get_string();
 };
 
-int no_space_mode_reg::get_value(units *val)
+bool no_space_mode_reg::get_value(units *val)
 {
   *val = curdiv->no_space_mode;
-  return 1;
+  return true;
 }
 
 const char *no_space_mode_reg::get_string()

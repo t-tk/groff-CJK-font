@@ -1,14 +1,14 @@
 '\" t
 .TH @g@troff @MAN1EXT@ "@MDATE@" "groff @VERSION@"
 .SH Name
-@g@troff \- GNU troff document formatter
+@g@troff \- GNU roff typesetter and document formatter
 .
 .
 .\" ====================================================================
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 1989-2020 Free Software Foundation, Inc.
+.\" Copyright (C) 1989-2021 Free Software Foundation, Inc.
 .\"
 .\" This file is part of groff, the GNU roff type-setting system.
 .\"
@@ -32,21 +32,38 @@
 .\" ====================================================================
 .
 .SY @g@troff
-.OP \-abcizCERU
-.OP \-d cs
-.OP \-f fam
-.OP \-F dir
-.OP \-I dir
-.OP \-m name
-.OP \-M dir
-.OP \-n num
-.OP \-o list
-.OP \-r cn
-.OP \-T name
-.OP \-w name
-.OP \-W name
-.RI [ file
-\&.\|.\|.\&]
+.RB [ \-abcCEiRUz ]
+.RB [ \-d\~\c
+.IR cs ]
+.RB [ \-d\~\c
+.IB name =\c
+.IR string ]
+.RB [ \-f\~\c
+.IR  fam ]
+.RB [ \-F\~\c
+.IR  dir ]
+.RB [ \-I\~\c
+.IR  dir ]
+.RB [ \-m\~\c
+.IR  name ]
+.RB [ \-M\~\c
+.IR  dir ]
+.RB [ \-n\~\c
+.IR  num ]
+.RB [ \-o\~\c
+.IR  list ]
+.RB [ \-r\~\c
+.IR  cn ]
+.RB [ \-r\~\c
+.IB reg =\c
+.IR expr ]
+.RB [ \-T\~\c
+.IR  dev ]
+.RB [ \-w\~\c
+.IR  name ]
+.RB [ \-W\~\c
+.IR  name ]
+.RI [ file\~ .\|.\|.]
 .YS
 .
 .
@@ -67,25 +84,34 @@
 .SH Description
 .\" ====================================================================
 .
-This manual page describes the GNU version of
-.BR troff .
+The GNU version of
+.I troff \" generic
+is the heart of the
+.I groff
+document formatting system.
 .
-It is part of the groff document formatting system.
+.I \%@g@troff
+is the
+.I groff
+system's formatter,
+the program that transforms
+.I roff
+language input into a device-independent output format.
 .
-It is functionally compatible with Unix troff, but has many
-extensions, see
-.BR \%groff_diff (@MAN7EXT@).
+It is functionally compatible with the AT&T
+.I troff \" AT&T
+typesetter and features numerous extensions.
 .
-Usually it should be invoked using the
-.BR groff (@MAN1EXT@)
-command which will also run preprocessors and postprocessors in the
-appropriate order and with the appropriate options.
+Many people prefer to use the
+.IR groff (@MAN1EXT@)
+command,
+a front end which also runs preprocessors and output drivers in the
+appropriate order and with appropriate options.
 .
 .
 .\" ====================================================================
 .SH Options
 .\" ====================================================================
-.
 .
 .TP
 .B \-a
@@ -142,46 +168,57 @@ output are subject to change.
 .
 .TP
 .B \-b
-Print a backtrace with each warning or error message.
-.
-This backtrace should help track down the cause of the error.
-.
-The line numbers given in the backtrace may not always be correct,
-for
+Write a backtrace reporting the state of
 .IR \%@g@troff 's
-idea of line numbers gets confused by
-.B .as
-or
-.B .am
-requests.
+input parser to the standard error stream with each diagnostic message.
+.
+The line numbers given in the backtrace might not always be correct,
+because
+.IR \%@g@troff 's
+idea of line numbers can be confused by requests that append to strings
+or macros.
 .
 .
 .TP
 .B \-c
-Disable color output;
-also disable SGR escape output to
-.IR grotty (@MAN1EXT@)
-devices.
+Start with color output disabled.
 .
 .
 .TP
 .B \-C
-Enable compatibility mode;
-implies \-c.
+Enable AT&T
+.I troff \" AT&T
+compatibility mode;
+implies
+.BR \-c .
 .
 .
 .TP
-.BI \-d cs
+.BI \-d\~ cs
 .TQ
-.BI \-d name = s
+.BI \-d\~ name = string
 Define
-.I c
+.I roff
+.RI string\~ c
 or
 .I name
-to be a string
-.IR s ;
+.RI as\~ s
+or
+.IR string ;
 .I c
-must be a one letter name.
+must be a one-character name.
+.
+Due to
+.IR getopt_long (3)
+limitations,
+.IR c\~ cannot
+be and
+.I name
+cannot contain an equals sign,
+even though that is a valid character in a
+.I roff
+identifier.
+.
 .
 .TP
 .B \-E
@@ -191,21 +228,23 @@ error messages;
 implies
 .B \-Ww.
 .
-Note that this doesn't suppress messages sent to the standard error
-stream by documents or macro packages using
+This option does
+.I not
+suppress messages sent to the standard error stream by documents or
+macro packages using
 .B .tm
 or related requests.
 .
 .
 .TP
-.BI \-f fam
+.BI \-f\~ fam
 Use
 .I fam
 as the default font family.
 .
 .
 .TP
-.BI \-F dir
+.BI \-F\~ dir
 Search in directory
 .I dir
 for the selected output device's directory of device and font
@@ -219,8 +258,9 @@ and ordering.
 .
 .TP
 .B \-i
-Read the standard input after all the named input files have been
+Read the standard input stream after all named input files have been
 processed.
+.
 .
 .TP
 .BI \-I\~ dir
@@ -240,7 +280,7 @@ those named in
 .RB \[lq] "\[rs]X\[aq]ps: file\[aq]" \[rq],
 and
 .RB \[lq] "\[rs]X\[aq]pdf: pdfpic\[aq]" \[rq]
-escapes).
+escape sequences).
 .
 This option may be specified more than once;
 the directories are then searched in the order specified.
@@ -263,7 +303,7 @@ file name.
 .
 .
 .TP
-.BI \-m name
+.BI \-m\~ name
 Process
 .RI name .tmac
 before any input files.
@@ -284,7 +324,7 @@ and ordering.
 .
 .
 .TP
-.BI \-M dir
+.BI \-M\~ dir
 Search directory
 .I dir
 for macro files.
@@ -296,12 +336,13 @@ and ordering.
 .
 .
 .TP
-.BI \-n num
+.BI \-n\~ num
 Number the first page
 .IR num .
 .
+.
 .TP
-.BI \-o list
+.BI \-o\~ list
 Output only pages in
 .IR list ,
 which is a comma-separated list of page ranges;
@@ -309,36 +350,52 @@ which is a comma-separated list of page ranges;
 means print page
 .IR n ,
 .IB m \- n
-means print every page between
-.I m
-and
+means print every page
+.RI between\~ m
+.RI and\~ n ,
 .IR n ,
 .BI \- n
-means print every page up to
-.IR n ,
+means print every page up
+.RI to\~ n ,
+and
 .IB n \-
 means print every page from
-.IR n .
+.IR n \~on.
 .
 .I \%@g@troff
-will exit after printing the last page in the list.
+stops processing and exits after formatting the last page enumerated in
+.IR list .
+.
 .
 .TP
-.BI \-r cn
+.BI \-r\~ cn
 .TQ
-.BI \-r name = n
-Set number register
-.I c
-or
-.I name
-to
-.IR n ;
-.I c
-must be a one character name;
-.I n
-can be any
+.BI \-r\~ reg = n
+Define
 .I roff
-numeric expression.
+.RI register\~ c
+or
+.I reg
+as
+.I groff
+numeric
+.RI expression\~ n
+or
+.IR expr ;
+.IR c \~must
+be a one-character name.
+.
+Due to
+.IR getopt_long (3)
+limitations,
+.IR c\~ cannot
+be and
+.I reg
+cannot contain an equals sign,
+even though that is a valid character in a
+.I roff
+identifier.
+.
 .
 .TP
 .B \-R
@@ -349,14 +406,13 @@ and
 .
 .
 .TP
-.BI \-T name
+.BI \-T\~ dev
 Prepare output for device
-.IR name ,
-rather than the default
+.IR dev ,
+rather than the default,
 .RB \[lq] @DEVICE@ \[rq];
 see
-.IR groff (@MAN1EXT@)
-for a more detailed description.
+.IR groff (@MAN1EXT@).
 .
 .
 .TP
@@ -383,30 +439,18 @@ option above.
 .
 .
 .TP
-.BI \-w name
-Enable warning
-.IR  name .
-.
-Available warnings are described in section \(lqWarnings\(rq below.
-.
-To enable most useful warnings use
-.B \-w
-.BR all .
-To enable absolutely all warnings use
-.B \-w w
-instead.
-Multiple
-.B \-w
-options are allowed.
-.
-.TP
-.BI \-W name
-Inhibit warning
+.BI \-w\~ name
+.TQ
+.BI \-W\~ name
+Enable
+.RB ( \-w )
+or inhibit
+.RB ( \-W )
+emission of warnings in category
 .IR name .
 .
-Multiple
-.B \-W
-options are allowed.
+See section \[lq]Warnings\[rq] below.
+.
 .
 .TP
 .B \-z
@@ -417,26 +461,36 @@ Suppress formatted output.
 .SH Warnings
 .\" ====================================================================
 .
-The warnings that can be given by
+.\" BEGIN Keep parallel with groff.texi node "Warnings".
+.\" Caveat: the Texinfo manual sorts them by number, not name.
+Warning diagnostics emitted by
 .I \%@g@troff
-are divided into the following categories.
+are divided into named,
+numbered categories.
 .
-The name associated with each warning is used by the
+The name associated with each warning category is used by the
 .B \-w
 and
 .B \-W
-options; the number is used by the
+options.
+.
+Each category is also assigned a power of two;
+the sum of enabled category codes is used by the
 .B warn
-request, and by the
+request and the
 .B .warn
-register; it is always a power of 2 to allow bitwise composition.
+register.
+.
+Warnings of each category are produced under the following
+circumstances.
+.
 .
 .P
 .TS
 tab(@), center, box;
 c c c | c c c
 r rI lB | r rI lB.
-Bit@Code@Warning@Bit@Code@Warning
+Bit@Code@Category@Bit@Code@Category
 _
 0@1@char@10@1024@reg
 1@2@number@11@2048@tab
@@ -451,6 +505,7 @@ _
 @@@20@1048576@file
 .TE
 .
+.
 .P
 .nr x \w'\fBright-brace'+1n+\w'00000'u
 .ta \nxuR
@@ -463,82 +518,97 @@ a line could not be broken such that its length was less than the output
 line length
 .BR \[rs]n[.l] .
 .
-This is enabled by default.
+This category is enabled by default.
 .
 .
 .TP
 .BR char "\t1"
-Non-existent characters.
+An undefined glyph was requested for output.
 .
-This is enabled by default.
+.RB (\[lq] char \[rq]
+is a misnomer since it reports missing glyphs\[em]there are no
+\[lq]missing\[rq] input characters,
+only invalid ones.)
+.
+This category is enabled by default.
+.
 .
 .TP
 .BR color "\t524288"
-Color-related warnings.
+An undefined color was dereferenced,
+an attempt was made to define a color using an unrecognized color space,
+an invalid component in a color definition was encountered,
+or an attempt was made to redefine the default color.
+.
 .
 .TP
 .BR delim "\t8"
-Missing or mismatched closing delimiters.
+The closing delimiter in an escape sequence was missing or mismatched.
+.
 .
 .TP
 .BR di "\t256"
-Use of
-.B di
+A
+.BR di ,
+.BR da ,
+.BR box ,
 or
-.B da
-without an argument when there is no current diversion.
+.B boxa
+request was invoked without an argument when there was no current
+diversion.
+.
 .
 .TP
 .BR el "\t16"
-Use of the
+The
 .B el
-request with no matching
+request was encountered with no prior corresponding
 .B ie
 request.
 .
+.
 .TP
 .BR escape "\t32768"
-Unrecognized escape sequences.
+An unsupported escape sequence was encountered.
 .
-When an unrecognized escape sequence is encountered, the escape
-character is ignored.
 .
 .TP
 .BR file "\t1048576"
-Indicates a missing file for the
-.B mso
-request.
+An attempt was made to load a file that does not exist.
 .
-Enabled by default.
+This category is enabled by default.
+.
 .
 .TP
 .BR font "\t131072"
-Non-existent fonts.
+A non-existent font was dereferenced.
 .
-This is enabled by default.
+This category is enabled by default.
+.
 .
 .TP
 .BR ig "\t262144"
-Invalid escapes in text ignored with the
+An invalid escape sequence occurred in input ignored using the
 .B ig
 request.
 .
-These are conditions that are errors when they do not occur in ignored
-text.
+This warning category diagnoses a condition that is an error when it
+occurs in non-ignored input.
+.
 .
 .TP
 .BR input "\t16384"
-Invalid input characters.
+An invalid character occurred on the input stream.
+.
 .
 .TP
 .BR mac "\t512"
 An undefined string,
 macro,
-diversion,
-or box was used.
+or diversion was used.
 .
 When such an object is dereferenced,
-an empty object of that name is automatically created.
+an empty one of that name and type is automatically created.
 .
 So,
 in most cases,
@@ -557,82 +627,108 @@ so it is not created if it does not exist.
 .
 .TP
 .BR missing "\t8192"
-Requests that are missing non-optional arguments.
+A request was invoked with a mandatory argument absent.
+.
 .
 .TP
 .BR number "\t2"
-Invalid numeric expressions.
+An invalid numeric expression was encountered.
 .
-This is enabled by default.
+This category is enabled by default.
+.
 .
 .TP
 .BR range "\t64"
-Out of range arguments.
+A numeric expression was out of range for its context.
+.
 .
 .TP
 .BR reg "\t1024"
-Use of undefined number registers.
+An undefined register was used.
 .
-When an undefined number register is used, that register is
-automatically defined to have a value of\~0.
+When an undefined register is dereferenced,
+it is automatically defined with a value of\~0.
 .
-So, in most cases, at most one warning will be given for use of a
-particular name.
+So, in most cases, at most one warning is given for each name.
+.
 .
 .TP
 .BR right-brace "\t4096"
-Use of
-.B \(rs}
-where a number was expected.
+A right brace escape sequence
+.B \[rs]}
+was encountered where a number was expected.
+.
 .
 .TP
 .BR scale "\t32"
-Meaningless scaling indicators.
+An inappropriate scaling indicator was used in a numeric expression.
+.
 .
 .TP
 .BR space "\t65536"
-Missing space between a request or macro and its argument.
+A space was missing between a request or macro and its argument.
 .
-This warning will be given when an undefined name longer than two
-characters is encountered, and the first two characters of the name
-make a defined name.
+This warning is produced when an undefined name longer than two
+characters is encountered and the first two characters of the name
+constitute a defined name.
 .
-The request or macro will not be invoked.
+No request is invoked,
+no macro called,
+and an empty macro is not defined.
 .
-When this warning is given, no macro is automatically defined.
+This category is enabled by default.
 .
-This is enabled by default.
+It never occurs in compatibility mode.
 .
-This warning will never occur in compatibility mode.
 .
 .TP
 .BR syntax "\t128"
-Invalid syntax.
+A self-contradictory hyphenation mode was requested;
+an empty or incomplete numeric expression was encountered;
+an operand to a numeric operator was missing;
+an attempt was made to define a recursive,
+empty,
+or nonsensical character class;
+or a
+.I groff
+extension conditional expression operator was used while in
+compatibility mode.
+.
 .
 .TP
 .BR tab "\t2048"
-Inappropriate use of a tab character.
+A tab character was encountered where a number was expected,
+or appeared in an unquoted macro argument.
 .
-Either use of a tab character where a number was expected, or use of tab
-character in an unquoted macro argument.
 .
 .P
-There are also names that can be used to refer to groups of warnings:
+Two warning names group other warning categories for convenience.
+.
 .
 .TP
 .B all
-All warnings except
+All warning categories except
 .BR di ,
 .BR mac ,
 and
 .BR reg .
 .
-It is intended that this covers all warnings that are useful with
-traditional macro packages.
+This shorthand is intended to produce all warnings that are useful with
+macro packages written for AT&T
+.I troff \" AT&T
+and its descendants,
+which have less fastidious diagnostics than GNU
+.IR troff . \" GNU
+.
 .
 .TP
 .B w
-All warnings.
+All warning categories.
+.
+Authors of documents and macro packages targeting
+.I groff
+are encouraged to use this setting.
+.\" END Keep parallel with groff.texi node "Warnings".
 .
 .
 .\" ====================================================================
@@ -693,7 +789,16 @@ after them.
 .
 .TP
 .I GROFF_TYPESETTER
-Default output device.
+Set the default output device.
+.
+If empty or not set,
+.RB \[lq] @DEVICE@ \[rq]
+is used.
+.
+The
+.B \-T
+option overrides
+.IR GROFF_TYPESETTER .
 .
 .
 .TP
@@ -724,40 +829,51 @@ see
 .
 .TP
 .I @MACRODIR@/troffrc
-Initialization file (called before any other macro package).
+is an initialization macro file loaded before any macro packages
+specified with
+.B \-m
+options.
+.
 .
 .TP
 .I @MACRODIR@/troffrc\-end
-Initialization file (called after any other macro package).
+is an initialization macro file loaded after all macro packages
+specified with
+.B \-m
+options.
+.
 .
 .TP
 .IR @MACRODIR@/ name .tmac
 .TQ
 .IR @MACRODIR@/tmac. name
-Macro files
+are macro files distributed with
+.IR groff .
+.
 .
 .TP
 .IR @FONTDIR@/dev name /DESC
-Device description file for device
+describes the output device
 .IR name .
+.
 .
 .TP
 .IR @FONTDIR@/dev name / F
-Font file for font
+describes the font
 .I F
 of device
 .IR name .
 .
 .
 .P
-Note that
 .I troffrc
 and
 .I troffrc\-end
-are searched for neither in the current nor the home directory by
-default for security reasons (even if the
+are sought neither in the current nor the home directory by default for
+security reasons,
+even if the
 .B \-U
-option is given).
+option is specified.
 .
 Use the
 .B \-M
@@ -775,13 +891,16 @@ The GNU version of
 .I troff \" generic
 was originally written by James Clark;
 he also wrote the original version of this document,
-which was modified by
+which was updated by
 .MT wl@\:gnu\:.org
 Werner Lemberg
-.ME
-and
+.ME ,
 .MT groff\-bernd\:.warken\-72@\:web\:.de
 Bernd Warken
+.ME ,
+and
+.MT g.branden\:.robinson@\:gmail\:.com
+G.\& Branden Robinson
 .ME .
 .
 .
@@ -789,61 +908,81 @@ Bernd Warken
 .SH "See also"
 .\" ====================================================================
 .
-.TP
-.BR groff (@MAN1EXT@)
-The main program of the
-.I groff
-system, a wrapper around
-.IR @g@troff .
-.
-.
-.TP
-.BR groff (@MAN7EXT@)
-A description of the
-.I groff
-language, including a short but complete reference of all predefined
-requests, registers, and escapes of plain
-.IR groff .
-.
-From the command line, this is called by
-.RS
-.IP
-.B man 7 groff
-.RE
-.
-.TP
-.IR groff_diff (@MAN7EXT@)
-The differences of the
-.I groff
-language and the
-.I classical troff
-language.
-.
-Currently, this is the most actual document of the
-.I groff
-system.
-.
-.TP
-.IR roff (@MAN7EXT@)
-An overview over
-.I groff
-and other
-.I roff
-systems, including pointers to further related documentation.
-.
-.
-.P
 .IR "Groff: The GNU Implementation of troff" ,
 by Trent A.\& Fisher and Werner Lemberg,
 is the primary
 .I groff
 manual.
 .
-You can browse it interactively with \(lqinfo groff\(rq.
+You can browse it interactively with \[lq]info groff\[rq].
+.
+.
+.TP
+.IR groff (@MAN1EXT@)
+offers an overview of the GNU
+.I roff
+system
+and describes its front end executable.
+.
+.
+.TP
+.IR groff (@MAN7EXT@)
+details the
+.I groff
+language,
+including a short but complete reference of all predefined requests,
+registers,
+and escape sequences.
+.
+.
+.TP
+.IR groff_char (@MAN7EXT@)
+explains the syntax of
+.I groff
+special character escape sequences,
+and lists all special characters predefined by the language.
+.
+.
+.TP
+.IR groff_diff (@MAN7EXT@)
+enumerates the differences between
+AT&T device-independent
+.I troff \" AT&T
+and
+.IR groff .
+.
+.
+.TP
+.IR groff_font (@MAN5EXT@)
+covers the format of
+.I groff
+device and font description files.
+.
+.
+.TP
+.IR groff_out (@MAN5EXT@)
+describes the format of
+.IR \%@g@troff 's
+output.
+.
+.
+.TP
+.IR groff_tmac (@MAN5EXT@)
+includes information about macro files that ship with
+.IR groff .
+.
+.
+.TP
+.IR roff (@MAN7EXT@)
+supplies background on
+.I roff
+systems in general,
+including pointers to further related documentation.
 .
 .
 .\" Restore compatibility mode (for, e.g., Solaris 10/11).
 .cp \n[*groff_troff_1_man_C]
+.do rr *groff_troff_1_man_C
 .
 .
 .\" Local Variables:

@@ -1,14 +1,14 @@
 .ig
 
 Copyright (C) 1991-2020 Free Software Foundation, Inc.
-mgm is written by Jörgen Hägg <jh@axis.com>
+mm is written by Jörgen Hägg <jh@axis.com>
 
-mgm is free software; you can redistribute it and/or modify it under
+mm is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free
 Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-mgm is distributed in the hope that it will be useful, but WITHOUT ANY
+mm is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 for more details.
@@ -27,10 +27,20 @@ Index		array!index
 ..
 .if !\n(.g \
 .  ab groff mm macros require groff extensions; aborting
-.do if d PH .nx
+.
 .if \n(.C \
 .  ab groff mm macros do not work in compatibility mode; aborting
+.
 .ds @mm m.tmac\"
+.
+.if (\n[.x]\n[.y] < 123) \{\
+.  ds mm-msg \*[@mm]: groff mm macros require groff 1.23 or later,\"
+.  as mm-msg " but found groff \n[.x].\n[.y]; aborting\"
+.  ab \*[mm-msg]
+.\}
+.
+.if d PH .nx
+.
 .mso devtag.tmac
 .\" ######## init #######
 .\"	Contents level [0:14], contents saved if heading level <= Cl
@@ -360,10 +370,9 @@ Index		array!index
 .\"
 .\"---------------------------------------------
 .\" set local variables.
-.ie d @country .mso mm/\*[@country]_locale
-.el .mso mm/locale
+.ie d @country .msoquiet mm/\*[@country]_locale
+.el .msoquiet mm/locale
 .\"---------------------------------------------
-.if \n[D] .tm Groff mm, version \*[RE].
 .\" ####### module init ######
 .\"	reset all things
 .de init@reset
@@ -880,12 +889,12 @@ in=\\n[.i] fi=\\n[.u] .d=\\n[.d] nl=\\n[nl] pg=\\n[%]
 .\}
 ..
 .\" external picture
-.\" -L	left adjust
+.\" -L	left align
 .de EPIC
 .if \\n[.$]<2 .@error "EPIC: Not enough arguments"
 .nr pict*adj 0		\" centered
 .if '\\$1'-L' \{\
-.	shift 1		\" left adjust
+.	shift 1		\" left align
 .	nr pict*adj 1
 .\}
 .if \\n[nl]<0 \&
@@ -2321,7 +2330,7 @@ in=\\n[.i] fi=\\n[.u] .d=\\n[.d] nl=\\n[nl] pg=\\n[%]
 .el .LB 0\\$1 0\\$2 0 -1 \& 0 1
 ..
 .\" ####### module tbl #######################################
-.\" This module is copied from groff_ms and modified for mgm.
+.\" This module is copied from groff_ms and modified for mm.
 .\" Yes, it does not resemble the original anymore :-).
 .\" Don't know if I missed something important.
 .\" Groff_ms is written by James Clark.
@@ -2719,10 +2728,6 @@ in=\\n[.i] fi=\\n[.u] .d=\\n[.d] nl=\\n[nl] pg=\\n[%]
 ..
 .\"########################### module fnt ############################
 .\" some font macros.
-.de R
-.ft 1
-.ul 0
-..
 .\"-----------
 .de fnt@switch
 .ul 0
@@ -2745,6 +2750,10 @@ in=\\n[.i] fi=\\n[.u] .d=\\n[.d] nl=\\n[nl] pg=\\n[%]
 .de I
 .ie \\n[.$] .fnt@switch \f2 \f[\\n[.f]] \\$@
 .el .ft 2
+..
+.de R
+.ie \\n[.$] .fnt@switch \f1 \f[\\n[.f]] \\$@
+.el .ft 1
 ..
 .de IB
 .if \\n[.$] .fnt@switch \f2 \f3 \\$@
@@ -3003,23 +3012,27 @@ in=\\n[.i] fi=\\n[.u] .d=\\n[.d] nl=\\n[nl] pg=\\n[%]
 .\" .AU name [initials [loc [dept [ext [room [arg [arg [arg]]]]]]]]
 .de AU
 .cov@title-end
-.pg@disable-top-trap
-.nr cov*au +1
-.nr cov*i 0 1
-.ds cov*au!\\n[cov*au]!1
-.while \\n[.$]>=\\n+[cov*i] \{\
-.	ds cov*au!\\n[cov*au]!\\n[cov*i] "\\$[\\n[cov*i]]
-.\}
-.if (\\n[.$]>=3)&(\w@\\$3@) \{\
-.	if d cov*location-\\$3] \{\
-.		ds cov*au!3!\\n[cov*au] \\*[cov*location-\\$3]
+.ie !\\n[.$] .@error AU: no arguments
+.el \{\
+.	pg@disable-top-trap
+.	nr cov*au +1
+.	nr cov*at!\\n[cov*au] 0 \" no titles for this author yet
+.	nr cov*i 0 1
+.	ds cov*au!\\n[cov*au]!1
+.	while \\n[.$]>=\\n+[cov*i] \{\
+.		ds cov*au!\\n[cov*au]!\\n[cov*i] "\\$[\\n[cov*i]]
+.	\}
+.	if (\\n[.$]>=3)&(\w@\\$3@) \{\
+.		if d cov*location-\\$3] \{\
+.			ds cov*au!3!\\n[cov*au] \\*[cov*location-\\$3]
+.		\}
 .	\}
 .\}
 ..
 .\"-------------------
-.\" .AT title1 [title2 [... [title9] ]]]]
-.\" Well, thats all that COVEND look for.
-.\" Must appear directly after .AU
+.\" .AT title [...]
+.\" Any quantity of titles may be declared.
+.\" Must be called directly after the corresponding .AU.
 .de AT
 .if \\n[.$]<1 .@error "AT: no arguments"
 .nr cov*at!\\n[cov*au] \\n[.$]
@@ -3094,7 +3107,7 @@ in=\\n[.i] fi=\\n[.u] .d=\\n[.d] nl=\\n[nl] pg=\\n[%]
 .	el .ds cov*mt-type 6
 .\}
 .el .ds cov*mt-type 1
-.ds cov*mt-addresse "\\$2
+.ds cov*mt-addressee "\\$2
 .ds cov*mt-type-text "\\$1
 .ie d @country .ds cov*str mm/\\*[@country]_
 .el .ds cov*str mm/

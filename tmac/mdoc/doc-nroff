@@ -30,11 +30,7 @@
 .\" SUCH DAMAGE.
 .\"
 .\"     @(#)doc-nroff	8.1 (Berkeley) 06/08/93
-.\"
-.\"     %beginstrip%
 .
-.
-.eo
 .
 .\" Use -rCS=1 to force capitalization of section headings.
 .if !r CS .nr CS 0
@@ -50,7 +46,6 @@
 .
 .\" \n[HY] is recognized for groff_man(7) compatibility, particuarly via
 .\" andoc.tmac and man(1); see \n[doc-hyphen-flags] in doc-common.
-.ec
 .if !r HY \{\
 .  \" No page breaks occur in continuous rendering.
 .  ie \n[cR] \
@@ -58,7 +53,12 @@
 .  el \
 .    nr HY 6
 .\}
-.eo
+.
+.\" If continuous rendering, tell tbl not to use keeps.
+.ie \n[cR] \
+.  nr 3usekeeps 0
+.el \
+.  nr 3usekeeps 1
 .
 .\" the following switch is ignored in nroff mode
 .nr S 10
@@ -103,10 +103,8 @@
 .nr doc-subheader-indent .5i
 .nr doc-paragraph-space 1v
 .
-.ec
 .nr doc-digit-width \w'\0\0'u
 .nr doc-fixed-width \w'0'
-.eo
 .
 .
 .\" NS doc-header-space global register
@@ -133,6 +131,7 @@
 .\" NS modifies:
 .\" NS   doc-display-vertical
 .
+.eo
 .de doc-setup-page-layout
 .  ie r LL \
 .    ll \n[LL]u
@@ -150,8 +149,6 @@
 .  ad l
 .  na
 ..
-.
-.
 .ec
 .
 .ds doc-left-singlequote \[oq]
@@ -189,8 +186,6 @@
 .  ds If infinity
 .\}
 .
-.eo
-.
 .
 .\" NS doc-header-string global string
 .\" NS   the final string used for the manual page header
@@ -204,6 +199,7 @@
 .\" NS modifies:
 .\" NS   doc-header-string
 .
+.eo
 .de doc-setup-header
 .  ds doc-header-string "\*[doc-document-title]
 .  if !"\*[doc-section]"Null" \
@@ -218,6 +214,7 @@
 .
 .  e@ doc-end-macro
 ..
+.ec
 .
 .
 .\" NS doc-get-width macro
@@ -227,6 +224,7 @@
 .\" NS modifies:
 .\" NS   doc-width
 .
+.eo
 .de doc-get-width
 .  nr doc-width \w\$1
 .  ie (\n[doc-width] >= \n[doc-fixed-width]) \{\
@@ -238,6 +236,7 @@
 .  el \
 .    nr doc-width 0
 ..
+.ec
 .
 .
 .\" NS doc-get-arg-width macro
@@ -247,6 +246,7 @@
 .\" NS modifies:
 .\" NS   doc-width
 .
+.eo
 .de doc-get-arg-width
 .  nr doc-width \w\*[doc-arg\$1]
 .  ie (\n[doc-width] >= \n[doc-fixed-width]) \{\
@@ -258,6 +258,7 @@
 .  el \
 .    nr doc-width 0
 ..
+.ec
 .
 .
 .\" NS Ql user macro
@@ -270,6 +271,7 @@
 .\" NS
 .\" NS width register 'Ql' set in doc-common
 .
+.eo
 .de Ql
 .  if !\n[doc-arg-limit] \{\
 .    ie \n[.$] \
@@ -283,9 +285,8 @@
 .
 .  doc-enclose-string \$@
 ..
-.
-.
 .ec
+.
 .
 .\" Local Variables:
 .\" mode: nroff

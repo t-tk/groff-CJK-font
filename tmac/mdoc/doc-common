@@ -30,8 +30,6 @@
 .\" SUCH DAMAGE.
 .\"
 .\"     @(#)doc-common	8.1 (Berkeley) 06/08/93
-.\"
-.\"     %beginstrip%
 .
 .
 .\" Macro Identifiers.  For each user macro a corresponding register
@@ -178,9 +176,6 @@
 .ds doc-soft-space " \"
 .ds doc-hard-space \~
 .ds doc-tab \t
-.
-.
-.eo
 .
 .
 .\" punctuation values (suffix=3, prefix=4)
@@ -344,6 +339,7 @@
 .ds doc-volume-as-xen          xen
 .ds doc-volume-as-zaurus       zaurus
 .
+.eo
 .de Dt
 .  \" reset default arguments
 .  ds doc-document-title UNTITLED
@@ -398,6 +394,7 @@
 .      bp
 .    \}
 ..
+.ec
 .
 .
 .\" NS doc-default-operating-system global string
@@ -822,6 +819,7 @@
 .ds doc-operating-system-DragonFly-5.6.1  5.6.1
 .ds doc-operating-system-DragonFly-5.6.2  5.6.2
 .
+.eo
 .de Os
 .  ds doc-command-name
 .
@@ -888,6 +886,7 @@
 .      as doc-operating-system " \$2
 .  \}\}\}\}\}\}\}\}
 ..
+.ec
 .
 .
 .\" NS doc-date-string global string
@@ -905,11 +904,13 @@
 .\" NS
 .\" NS width register 'Dd' set above
 .
+.eo
 .de Dd
 .  ds doc-command-name
 .  ie "\$1"$Mdocdate:"  .ds doc-date-string \$2\~\$3, \$4
 .  el                   .ds doc-date-string \$*
 ..
+.ec
 .
 .
 .\" NS doc-hyphen-flags global register
@@ -917,9 +918,7 @@
 .\" NS
 .\" NS override this in 'mdoc.local', if necessary.
 .
-.ec
 .nr doc-hyphen-flags \n[HY]
-.eo
 .
 .
 .\" NS doc-header macro
@@ -931,6 +930,7 @@
 .\" NS   doc-hs-len
 .\" NS   doc-hs-len-prev
 .
+.eo
 .de doc-header
 .  ev doc-env-dh
 .  doc-setup-page-layout
@@ -958,17 +958,19 @@
 .  ie !\n[cR] \
 .    sp \n[doc-header-space]u
 .  el \{\
-.    pl +3v
-.    sp 3v
+.    pl +1v
+.    sp 1v
 .  \}
 .  ev
 .  ns
 ..
+.ec
 .
 .
 .\" NS doc-footer macro
 .\" NS   print page footer
 .
+.eo
 .de doc-footer
 .  ie \n[cR] \
 .    br
@@ -988,11 +990,13 @@
 .    ev
 .  \}
 ..
+.ec
 .
 .
 .\" NS doc-check-depth macro
 .\" NS   check paired macros
 .
+.eo
 .de doc-check-depth
 .  if \n[doc-list-depth] \{\
 .    tm mdoc warning: A .Bl directive has no matching .El (#\n[.c])
@@ -1007,11 +1011,13 @@
 .    nr doc-fontmode-depth 0
 .  \}
 ..
+.ec
 .
 .
 .\" NS doc-end-macro macro
 .\" NS   finish output
 .
+.eo
 .de doc-end-macro
 .  \" We may still have a partial line in the environment.  If this is
 .  \" the case, and we happen to be on the last line of the page, the
@@ -1025,24 +1031,27 @@
 .  doc-check-depth
 .
 .  if \n[cR] \{\
-.    pl +3v
-.    sp 3v
+.    pl +1v
+.    sp 1v
 .    tl \*[doc-caption-font]\*[doc-operating-system]\f[]\*[doc-caption-font2]\*[doc-date-string]\f[]\*[doc-caption-font]\*[doc-operating-system]\f[]
 .    \" suppress empty lines after the footer
 .    pl \n[nl]u
 .  \}
 ..
+.ec
 .
 .
 .\" NS doc-paragraph macro
 .\" NS   insert a paragraph
 .
+.eo
 .de doc-paragraph
 .  sp \n[doc-paragraph-space]u
 .  if !\n[cR] \
 .    ne 2
 .  ns
 ..
+.ec
 .
 .
 .\" NS Pp user macro (not parsed, not callable)
@@ -1061,24 +1070,32 @@
 .als Lp doc-paragraph
 .
 .
+.eo
 .de LP
 .  tm Not a \-mdoc command: .LP (#\n[.c])
 ..
+.ec
 .
 .
+.eo
 .de PP
 .  tm Not a \-mdoc command: .PP (#\n[.c])
 ..
+.ec
 .
 .
+.eo
 .de pp
 .  tm Not a \-mdoc command: .pp (#\n[.c])
 ..
+.ec
 .
 .
+.eo
 .de SH
 .  tm Not a \-mdoc command: .SH (#\n[.c])
 ..
+.ec
 .
 .
 .\" NS Nd user macro (not parsed, not callable)
@@ -1086,9 +1103,11 @@
 .\" NS
 .\" NS width register 'Nd' set above
 .
+.eo
 .de Nd
 .  nop \[em] \$*
 ..
+.ec
 .
 .
 .\" NS doc-in-synopsis-section global register (bool)
@@ -1127,9 +1146,11 @@
 .\" NS local variables:
 .\" NS   doc-str-dfp
 .
+.eo
 .de doc-first-parameter
 .  ds doc-str-dfp "\$1
 ..
+.ec
 .
 .
 .\" NS doc-prepare-section-heading macro
@@ -1141,6 +1162,7 @@
 .\" NS   doc-str-tmp2
 .\" NS   doc-tmp-strlen
 .
+.eo
 .de doc-prepare-section-heading
 .  ds doc-str-tmp1 "\$*
 .  ds doc-str-tmp2 "\$*
@@ -1158,6 +1180,7 @@
 .  rm doc-str-tmp2
 .  rr doc-tmp-strlen
 ..
+.ec
 .
 .
 .\" NS Sh user macro (not callable)
@@ -1191,6 +1214,7 @@
 .ds doc-section-files       Files\"
 .ds doc-section-authors     Authors\"
 .
+.eo
 .de Sh
 .  \" Tell doc-print-recursive whether to force capitalization.
 .  nr doc-do-capitalize \n[CS]
@@ -1303,6 +1327,7 @@
 .  \" Don't let doc-print-recursive force caps on anything else.
 .  nr doc-do-capitalize 0
 ..
+.ec
 .
 .
 .\" NS Ss user macro (not callable)
@@ -1314,6 +1339,7 @@
 .\" NS
 .\" NS width register 'Ss' set above
 .
+.eo
 .de Ss
 .  ie \n[doc-arg-limit] \{\
 .    \" we only allow 'Ss' within 'Ss'; it will change the font back to
@@ -1369,6 +1395,7 @@
 .    doc-check-depth
 .  \}
 ..
+.ec
 .
 .
 .\" NS Rd macro (not parsed, not callable)
@@ -1377,6 +1404,7 @@
 .\" NS local variables:
 .\" NS   doc-reg-Rd
 .
+.eo
 .de Rd
 .  tm MDOC GLOBAL REGISTER DUMP
 .  tm doc-macro-name == '\*[doc-macro-name]'
@@ -1514,9 +1542,8 @@
 .
 .  tm END OF GLOBAL REGISTER DUMP
 ..
-.
-.
 .ec
+.
 .
 .\" Local Variables:
 .\" mode: nroff

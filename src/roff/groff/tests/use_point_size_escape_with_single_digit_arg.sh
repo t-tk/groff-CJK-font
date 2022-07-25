@@ -19,6 +19,7 @@
 #
 
 groff="${abs_top_builddir:-.}/test-groff"
+export GROFF_TYPESETTER=
 
 # The vertical space is so that the 36-point 'A' won't be truncated by
 # the top of the page.  That could be confusing and misleading to anyone

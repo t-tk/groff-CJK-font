@@ -41,11 +41,11 @@ const char *font::papersize = 0;
 int font::biggestfont = 0;
 int font::spare2 = 0;
 int font::sizescale = 1;
-int font::tcommand = 0;
-int font::pass_filenames = 0;
-int font::unscaled_charwidths = 0;
-int font::use_charnames_in_special = 0;
-int font::is_unicode = 0;
+bool font::has_tcommand = false;
+bool font::pass_filenames = false;
+bool font::use_unscaled_charwidths = false;
+bool font::use_charnames_in_special = false;
+bool font::is_unicode = false;
 const char *font::image_generator = NULL;
 const char **font::font_name_table = 0;
 int *font::sizes = 0;
@@ -63,6 +63,12 @@ FILE *font::open_file(const char *nm, char **pathp)
   char *filename = new char[strlen(nm) + strlen(device) + 5];
   sprintf(filename, "dev%s/%s", device, nm);
   FILE *fp = font_path.open_file(filename, pathp);
-  a_delete filename;
+  delete[] filename;
   return fp;
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

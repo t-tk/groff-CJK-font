@@ -93,12 +93,12 @@ temp_init::temp_init()
   tmpfile_prefix = new char[tmpfile_prefix_len + 1];
   strcpy(tmpfile_prefix, tem2);
   strcat(tmpfile_prefix, tem3);
-  a_delete tem2;
+  delete[] tem2;
 }
 
 temp_init::~temp_init()
 {
-  a_delete tmpfile_prefix;
+  delete[] tmpfile_prefix;
 }
 
 /*
@@ -149,7 +149,7 @@ xtmpfile_list_init::~xtmpfile_list_init()
       error("cannot unlink '%1': %2", x->fname, strerror(errno));
     xtmpfile_list *tmp = x;
     x = x->next;
-    a_delete tmp->fname;
+    delete[] tmp->fname;
     delete tmp;
   }
 }
@@ -183,6 +183,6 @@ FILE *xtmpfile(char **namep,
   if (namep)
     *namep = templ;
   else
-    a_delete templ;
+    delete[] templ;
   return fp;
 }

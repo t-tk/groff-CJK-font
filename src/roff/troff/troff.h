@@ -42,7 +42,7 @@ extern int suppress_output_flag;
 extern int color_flag;
 extern int is_html;
 
-extern int tcommand_flag;
+extern bool device_has_tcommand;
 extern int vresolution;
 extern int hresolution;
 extern int sizescale;
@@ -89,3 +89,9 @@ int output_warning(warning_type, const char *,
 		   const errarg & = empty_errarg,
 		   const errarg & = empty_errarg,
 		   const errarg & = empty_errarg);
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

@@ -34,7 +34,7 @@ int vresolution = 1;
 int units_per_inch;
 int sizescale;
 
-static int parse_expr(units *v, int scale_indicator,
+static int parse_expr(units *v, int scaling_indicator,
 		      int parenthesised, int rigid = 0);
 static int start_number();
 
@@ -236,13 +236,13 @@ enum { OP_LEQ = 'L', OP_GEQ = 'G', OP_MAX = 'X', OP_MIN = 'N' };
 
 #define SCALE_INDICATOR_CHARS "icfPmnpuvMsz"
 
-static int parse_term(units *v, int scale_indicator,
+static int parse_term(units *v, int scaling_indicator,
 		      int parenthesised, int rigid);
 
-static int parse_expr(units *v, int scale_indicator,
+static int parse_expr(units *v, int scaling_indicator,
 		      int parenthesised, int rigid)
 {
-  int result = parse_term(v, scale_indicator, parenthesised, rigid);
+  int result = parse_term(v, scaling_indicator, parenthesised, rigid);
   while (result) {
     if (parenthesised)
       tok.skip();
@@ -288,7 +288,7 @@ static int parse_expr(units *v, int scale_indicator,
       return result;
     }
     units v2;
-    if (!parse_term(&v2, scale_indicator, parenthesised, rigid))
+    if (!parse_term(&v2, scaling_indicator, parenthesised, rigid))
       return 0;
     int overflow = 0;
     switch (op) {
@@ -395,7 +395,7 @@ static int parse_expr(units *v, int scale_indicator,
   return result;
 }
 
-static int parse_term(units *v, int scale_indicator,
+static int parse_term(units *v, int scaling_indicator,
 		      int parenthesised, int rigid)
 {
   int negative = 0;
@@ -416,10 +416,10 @@ static int parse_term(units *v, int scale_indicator,
     // | is not restricted to the outermost level
     // tbl uses this
     tok.next();
-    if (!parse_term(v, scale_indicator, parenthesised, rigid))
+    if (!parse_term(v, scaling_indicator, parenthesised, rigid))
       return 0;
     int tem;
-    tem = (scale_indicator == 'v'
+    tem = (scaling_indicator == 'v'
 	   ? curdiv->get_vertical_position().to_units()
 	   : curenv->get_input_line_position().to_units());
     if (tem >= 0) {
@@ -458,19 +458,19 @@ static int parse_term(units *v, int scale_indicator,
       tok.next();
       if (tok.ch() == ';') {
 	tok.next();
-	scale_indicator = c;
+	scaling_indicator = c;
       }
       else {
-	error("expected ';' after scale-indicator (got %1)",
+	error("expected ';' after scaling indicator (got %1)",
 	      tok.description());
 	return 0;
       }
     }
     else if (c == ';') {
-      scale_indicator = 0;
+      scaling_indicator = 0;
       tok.next();
     }
-    if (!parse_expr(v, scale_indicator, 1, rigid))
+    if (!parse_expr(v, scaling_indicator, 1, rigid))
       return 0;
     tok.skip();
     if (tok.ch() != ')') {
@@ -525,7 +525,7 @@ static int parse_term(units *v, int scale_indicator,
   case '>':
   case '<':
   case '=':
-    warning(WARN_SYNTAX, "empty left operand");
+    warning(WARN_SYNTAX, "empty left operand to '%1' operator", c);
     *v = 0;
     return rigid ? 0 : 1;
   default:
@@ -549,34 +549,34 @@ static int parse_term(units *v, int scale_indicator,
       tok.next();
     }
   }
-  int si = scale_indicator;
+  int si = scaling_indicator;
   int do_next = 0;
   if ((c = tok.ch()) != 0 && strchr(SCALE_INDICATOR_CHARS, c) != 0) {
-    switch (scale_indicator) {
+    switch (scaling_indicator) {
+    case 0:
+      warning(WARN_SCALE, "scaling indicator invalid in context");
+      break;
     case 'z':
       if (c != 'u' && c != 'z') {
-	warning(WARN_SCALE,
-		"only 'z' and 'u' scale indicators valid in this context");
+	warning(WARN_SCALE, "'%1' scaling indicator invalid in context;"
+		" convert to 'z' or 'u'", c);
 	break;
       }
       si = c;
-      break;
-    case 0:
-      warning(WARN_SCALE, "scale indicator invalid in this context");
       break;
     case 'u':
       si = c;
       break;
     default:
       if (c == 'z') {
-	warning(WARN_SCALE, "'z' scale indicator invalid in this context");
+	warning(WARN_SCALE, "'z' scaling indicator invalid in context");
 	break;
       }
       si = c;
       break;
     }
-    // Don't do tok.next() here because the next token might be \s, which
-    // would affect the interpretation of m.
+    // Don't do tok.next() here because the next token might be \s,
+    // which would affect the interpretation of m.
     do_next = 1;
   }
   switch (si) {

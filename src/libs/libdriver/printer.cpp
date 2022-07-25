@@ -84,7 +84,7 @@ printer::printer()
 
 printer::~printer()
 {
-  a_delete font_table;
+  delete[] font_table;
   while (font_list) {
     font_pointer_list *tem = font_list;
     font_list = font_list->next;
@@ -119,7 +119,7 @@ void printer::load_font(int n, const char *nm)
 	font_table[i] = old_font_table[i];
       for (i = old_nfonts; i < nfonts; i++)
 	font_table[i] = 0;
-      a_delete old_font_table;
+      delete[] old_font_table;
     }
   }
   font *f = find_font(nm);

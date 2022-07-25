@@ -402,7 +402,7 @@ file_input::file_input(FILE *f, const char *fn, input *p)
 
 file_input::~file_input()
 {
-  a_delete filename;
+  delete[] filename;
   fclose(fp);
 }
 
@@ -542,8 +542,8 @@ argument_macro_input::argument_macro_input(const char *body, int ac,
 argument_macro_input::~argument_macro_input()
 {
   for (int i = 0; i < argc; i++)
-    a_delete argv[i];
-  a_delete s;
+    delete[] argv[i];
+  delete[] s;
 }
 
 int argument_macro_input::get()

@@ -240,7 +240,7 @@ int tty_printer::tty_color(unsigned int r,
     tty_colors.define(s, i);
   }
   *idx = *i;
-  a_delete s;
+  delete[] s;
   return unknown_color;
 }
 
@@ -273,7 +273,7 @@ tty_printer::tty_printer() : cached_v(0)
 
 tty_printer::~tty_printer()
 {
-  a_delete lines;
+  delete[] lines;
 }
 
 void tty_printer::make_underline(int w)
@@ -326,7 +326,7 @@ schar tty_printer::color_to_idx(color *col)
   if (tty_color(r, g, b, &idx)) {
     char *s = col->print_color();
     error("Unknown color (%1) mapped to default", s);
-    a_delete s;
+    delete[] s;
   }
   return idx;
 }
@@ -370,7 +370,7 @@ void tty_printer::add_char(output_character c, int w,
       memcpy(lines, old_lines, nlines * sizeof(tty_glyph *));
       for (int i = nlines; i <= vpos; i++)
 	lines[i] = 0;
-      a_delete old_lines;
+      delete[] old_lines;
       nlines = vpos + 1;
     }
     // Note that the first output line corresponds to groff

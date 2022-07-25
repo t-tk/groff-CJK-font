@@ -70,7 +70,7 @@ document wishing to use a macro package can load it with the
 .P
 Each macro package stores its macro,
 string,
-and register definition in one or more
+and register definitions in one or more
 .I tmac
 files.
 .
@@ -98,10 +98,7 @@ document,
 a macro package can use the
 .RB \[lq] so \[rq]
 request (\[lq]source\[rq]) to load further files relative to its own
-location,
-ignoring the
-.I tmac
-directory search process.
+location.
 .
 .
 .\" ====================================================================
@@ -148,9 +145,15 @@ documents.
 .\" ====================================================================
 .
 .TP
+.I an
+.TQ
 .I man
-This is the classical macro package for Unix manual pages
-(man\~pages); it is quite handy and easy to use; see
+.I an
+is used to compose man pages in the format originating in Version\~7
+Unix (1979).
+.
+It has a small macro interface and is widely used;
+see
 .IR groff_man (@MAN7EXT@).
 .
 .
@@ -158,22 +161,43 @@ This is the classical macro package for Unix manual pages
 .I doc
 .TQ
 .I mdoc
-An alternative macro package for man\~pages mainly used in BSD
-systems; it provides many new features, but it is not the standard for
-man\~pages; see
+.I doc
+is used to compose man pages in the format originating in 4.3BSD-Reno
+(1990).
+.
+It provides many more features than
+.IR an ,
+but is also larger,
+more complex,
+and not as widely adopted;
+see
 .IR groff_mdoc (@MAN7EXT@).
 .
 .
+.P
+Because readers of man pages often do not know in advance which macros
+are used to format a given document,
+a wrapper is available.
+.
+.
 .TP
-.I andoc
+.I \%andoc
 .TQ
 .I mandoc
-Use this file if you don't know whether the
-.B man
-macros or the
-.B mdoc
-package should be used.
-Multiple man pages (in either format) can be handled.
+This macro file,
+specific to
+.IR groff ,
+recognizes whether a document uses
+.I man
+or
+.I mdoc
+format and loads the corresponding macro package.
+.
+Multiple man pages,
+in either format,
+can be handled;
+.I \%andoc
+reloads each macro package as necessary.
 .
 .
 .\" ====================================================================
@@ -225,73 +249,134 @@ macro package; see
 .
 .
 .\" ====================================================================
-.SS "Language-specific packages"
+.SS "Localization packages"
 .\" ====================================================================
+.
+.P
+For Western languages,
+the localization file sets the hyphenation mode and loads hyphenation
+patterns and exceptions.
+.
+Localization files can also adjust the date format and provide
+translations of strings used by some of the full-service macro packages;
+alter the input encoding
+(see the next section);
+and change the amount of inter-sentence space.
+.
+By default,
+.I troffrc
+loads the localization file for English.
+.
+.
+.P
+As of
+.I groff
+1.23.0,
+the following localization files exist.
+.
 .
 .TP
 .I cs
-This file adds support for Czech localization, including the main macro
-packages (me, mom, mm, and ms).
+Czech;
+localizes
+.IR me ,
+.IR mm ,
+.IR mom ,
+and
+.IR ms .
 .
-.IP
-Note that
-.I cs.tmac
-sets the input encoding to latin-2.
+Sets the input encoding to Latin-2 by loading
+.IR latin2.tmac .
 .
 .
 .TP
 .I de
 .TQ
 .I den
-German localization support, including the main macro packages (me, mom,
-mm, and ms).
+German;
+localizes
+.IR me ,
+.IR mm ,
+.IR mom ,
+and
+.IR ms .
+.
+Sets the input encoding to Latin-1 by loading
+.IR latin1.tmac .
+.
 .
 .IP
 .I de.tmac
-selects hyphenation patterns for traditional orthography, and
+selects hyphenation patterns for traditional orthography,
+and
 .I den.tmac
 does the same for the new orthography
-(\[oq]Recht\%schreib\%reform\[cq]).
+(\[lq]Recht\%schreib\%reform\[rq]).
 .
-It should be the last macro package on the command line.
+.
+.TP
+.I en
+English.
 .
 .
 .TP
 .I fr
-This file adds support for French localization, including the main macro
-packages (me, mom, mm, and ms).
+French;
+localizes
+.IR me ,
+.IR mm ,
+.IR mom ,
+and
+.IR ms .
+.
+Sets the input encoding to Latin-9 by loading
+.IR latin9.tmac .
 .
 .
-Example:
-.RS
-.IP
-.EX
-\fIsh#\fP groff \-ms \-mfr foo.ms > foo.ps
-.EE
-.RE
+.TP
+.I it
+Italian;
+localizes
+.IR me ,
+.IR mm ,
+.IR mom ,
+and
+.IR ms .
 .
-.IP
-Note that
-.I fr.tmac
-sets the input encoding to latin-9 to get proper support of the
-\[oq]oe\[cq] ligature.
+.
+.TP
+.I ja
+Japanese.
 .
 .
 .TP
 .I sv
-Swedish localization support, including the me, mom, and ms macro
-packages.
+Swedish;
+localizes
+.IR me ,
+.IR mm ,
+.IR mom ,
+and
+.IR ms .
 .
-Swedish for the mm macros is handled separately; see
+Sets the input encoding to Latin-1 by loading
+.IR latin1.tmac .
+.
+Some of the localization of the
+.I mm
+package is handled separately;
+see
 .IR groff_mmse (@MAN7EXT@).
 .
-It should be the last macro package on the command line.
+.
+.TP
+.I zh
+Chinese.
 .
 .
 .\" ====================================================================
 .SS "Input encodings"
 .\" ====================================================================
-.
 .
 .TP
 .I latin1
@@ -346,12 +431,15 @@ fonts which contain the necessary glyphs.
 .
 .
 .\" ====================================================================
-.SS "Special packages"
+.SS "Auxiliary packages"
 .\" ====================================================================
 .
 The macro packages in this section are not intended for stand-alone
-usage, but can add special functionality to any other macro package
-or to plain groff.
+use,
+but can add functionality to any other macro package or to plain
+(or \[lq]raw\[rq])
+.I groff
+documents.
 .
 .
 .TP
@@ -395,14 +483,11 @@ See
 .I papersize
 This macro file is normally loaded at start-up by the
 .I troffrc
-file,
-so it is seldom necessary to call it explicitly.
+file.
 .
 It provides an interface to set the paper size on the command line with
 the option
-.BI \%\-dpaper= size
-to
-.I groff
+.BI "\-d \%paper=" size
 or
 .IR \%@g@troff .
 .
@@ -414,6 +499,7 @@ are the ISO and DIN formats
 \[lq]C0\[en]C6\[rq],
 and
 \[lq]D0\[en]D6\[rq];
+.\" XXX: src/libs/libgroff/paper.cpp also supports [ABCD]7.
 the U.S.\& formats
 \[lq]letter\[rq],
 \[lq]legal\[rq],
@@ -426,7 +512,7 @@ and the envelope formats
 \[lq]com10\[rq],
 \[lq]monarch\[rq],
 and
-\[lq]dl\[rq].
+\[lq]DL\[rq].
 .
 All formats,
 even those for envelopes,
@@ -436,7 +522,7 @@ with their longer dimension as the length.
 Appending \[lq]l\[rq] (ell) to any of these denotes landscape
 orientation instead.
 .
-An output driver typically requires command-line switches
+An output device typically requires command-line options
 .B \-p
 and
 .B \-l
@@ -748,7 +834,9 @@ in the form
 In modern operating systems, the type of a file is specified as a
 postfix, the file name extension.
 .
-Again, groff copes with this situation by searching both
+Again,
+.I groff
+copes with this situation by searching for both
 .IB anything .tmac
 and
 .BI tmac. anything
@@ -984,111 +1072,6 @@ see
 .
 .
 .\" ====================================================================
-.SS "Copy mode"
-.\" ====================================================================
-.
-When
-.I groff
-processes certain requests,
-most importantly those which define a macro,
-string,
-or diversion,
-it does so in
-.IR "copy mode" :
-it copies the characters of the definition into a dedicated storage
-region,
-interpolating the escape sequences
-.BR \[rs]n ,
-.BR \[rs]$ ,
-and
-.BR \[rs]* ,
-intepreting
-.B \[rs]\[rs]
-and
-.BI \[rs] newline
-immediately,
-and storing all other escape sequences in an encoded form.
-.
-.
-.P
-In this phase, groff interprets all backslashes; that means that all
-escape sequences in the macro body are interpreted and replaced by
-their value.
-.
-For constant expressions, this is wanted, but strings and registers
-that might change between calls of the macro must be protected from
-being evaluated.
-.
-This is most easily done by doubling the backslash that introduces the
-escape sequence.
-.
-This doubling is most important for the positional parameters.
-.
-For example, the following macro prints information on its arguments:
-.
-.
-.IP
-.ds @1 \[rs]f[I]\[rs]\[rs]$0\[rs]f[]\"
-.ds @2 arguments:\"
-.EX
-\&.ds midpart was called with the following
-\&.de print_args
-\&\*[@1]\ \[rs]*[midpart]\ \[rs]\[rs]n[.$]\ \*[@2]
-\&\[rs]\[rs]$*
-\&..
-.EE
-.rm @1
-.rm @2
-.
-.
-.P
-When calling this macro by
-.
-.IP
-.EX
-\&.print_args arg1 arg2
-.EE
-.
-.P
-the following text is printed:
-.
-.IP
-.EX
-\&\f[CI]print_args\f[] was called with the following 2 arguments: arg1 arg2
-.EE
-.
-.
-.P
-Let's analyze each backslash in the macro definition.
-.
-As the positional parameters and the number of arguments change
-with each call of the macro their leading backslash must be doubled,
-which results in
-.RI \[rs]\[rs] $*
-and
-.RI \[rs]\[rs] [.$] .
-The same applies to the macro name because it could be called with an
-alias, so
-.RI \[rs]\[rs] $0 .
-.
-.
-.P
-On the other hand,
-.I midpart
-is a constant string, it does not change, so no doubling for
-.RI \[rs] *[midpart] .
-The
-.RI \[rs] f
-escape sequences are predefined groff elements for setting the font
-within the text.
-.
-Of course, this behavior does not change, so no doubling with
-.RI \[rs] f[I]
-and
-.RI \[rs] f[] .
-.
-.
-.\" ====================================================================
 .SS "Draft mode"
 .\" ====================================================================
 .
@@ -1316,6 +1299,7 @@ summarizes the language recognized by GNU
 .
 .\" Restore compatibility mode (for, e.g., Solaris 10/11).
 .cp \n[*groff_groff_tmac_5_man_C]
+.do rr *groff_groff_tmac_5_man_C
 .
 .
 .\" Local Variables:

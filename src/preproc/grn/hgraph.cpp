@@ -1,7 +1,7 @@
 /* Last non-groff version: hgraph.c  1.14 (Berkeley) 84/11/27
  *
- * This file contains the graphics routines for converting gremlin pictures
- * to troff input.
+ * This file contains the graphics routines for converting gremlin
+ * pictures to troff input.
  */
 
 #include "lib.h"
@@ -14,7 +14,8 @@
 #define PointsPerInterval 64
 #define pi		3.14159265358979324
 #define twopi		(2.0 * pi)
-#define len(a, b)	groff_hypot((double)(b.x-a.x), (double)(b.y-a.y))
+#define len(a, b)	groff_hypot((double)(b.x-a.x), \
+			            (double)(b.y-a.y))
 
 
 extern int dotshifter;		/* for the length of dotted curves */
@@ -23,7 +24,7 @@ extern int style[];		/* line and character styles */
 extern double thick[];
 extern char *tfont[];
 extern int tsize[];
-extern int stipple_index[];	/* stipple font index for stipples 0 - 16 */
+extern int stipple_index[];	/* stipple font idx for stipples 0-16 */
 extern char *stipple;		/* stipple type (cf or ug) */
 
 
@@ -48,7 +49,7 @@ extern double adj4;
 extern int res;
 
 void HGSetFont(int font, int size);
-void HGPutText(int justify, POINT pnt, register char *string);
+void HGPutText(int justify, POINT pnt, char *string);
 void HGSetBrush(int mode);
 void tmove2(int px, int py);
 void doarc(POINT cp, POINT sp, int angle);
@@ -58,10 +59,10 @@ void drawwig(POINT * ptr, int type);
 void HGtline(int x1, int y1);
 void deltax(double x);
 void deltay(double y);
-void HGArc(register int cx, register int cy, int px, int py, int angle);
-void picurve(register int *x, register int *y, int npts);
+void HGArc(int cx, int cy, int px, int py, int angle);
+void picurve(int *x, int *y, int npts);
 void HGCurve(int *x, int *y, int numpoints);
-void Paramaterize(int x[], int y[], double h[], int n);
+void Parameterize(int x[], int y[], double h[], int n);
 void PeriodicSpline(double h[], int z[],
 		    double dz[], double d2z[], double d3z[],
 		    int npoints);
@@ -71,22 +72,22 @@ void NaturalEndSpline(double h[], int z[],
 
 
 
-/*----------------------------------------------------------------------------*
+/*--------------------------------------------------------------------*
  | Routine:	HGPrintElt (element_pointer, baseline)
  |
  | Results:	Examines a picture element and calls the appropriate
- |		routine(s) to print them according to their type.  After the
- |		picture is drawn, current position is (lastx, lasty).
- *----------------------------------------------------------------------------*/
+ |		routine(s) to print them according to their type.  After
+ |		the picture is drawn, current position is (lastx,lasty).
+ *--------------------------------------------------------------------*/
 
 void
 HGPrintElt(ELT *element,
 	   int /* baseline */)
 {
-  register POINT *p1;
-  register POINT *p2;
-  register int length;
-  register int graylevel;
+  POINT *p1;
+  POINT *p2;
+  int length;
+  int graylevel;
 
   if (!DBNullelt(element) && !Nullpoint((p1 = element->ptlist))) {
     /* p1 always has first point */
@@ -153,11 +154,11 @@ HGPrintElt(ELT *element,
 	  /* brushf = style of outline; size = color of fill:
 	   * on first pass (polyfill=FILL), do the interior using 'P'
 	   *    unless size=0
-	   * on second pass (polyfill=OUTLINE), do the outline using a series
-	   *    of vectors. It might make more sense to use \D'p ...',
-	   *    but there is no uniform way to specify a 'fill character'
-	   *    that prints as 'no fill' on all output devices (and
-	   *    stipple fonts).
+	   * on second pass (polyfill=OUTLINE), do the outline using a
+	   *    series of vectors. It might make more sense to use \D'p
+	   *    ...', but there is no uniform way to specify a 'fill
+	   *    character' that prints as 'no fill' on all output
+	   *    devices (and stipple fonts).
 	   * If polyfill=BOTH, just use the \D'p ...' command.
 	   */
 	  double firstx = p1->x;
@@ -168,7 +169,8 @@ HGPrintElt(ELT *element,
 
 	  if (polyfill == FILL || polyfill == BOTH) {
 	    /* do the interior */
-	    char command = (polyfill == BOTH && element->brushf) ? 'p' : 'P';
+	    char command = (polyfill == BOTH && element->brushf)
+			   ? 'p' : 'P';
 
 	    /* include outline, if there is one and */
 	    /* the -p flag was set                  */
@@ -264,21 +266,21 @@ HGPrintElt(ELT *element,
 }				/* end PrintElt */
 
 
-/*----------------------------------------------------------------------------*
+/*---------------------------------------------------------------------*
  | Routine:	HGPutText (justification, position_point, string)
  |
  | Results:	Given the justification, a point to position with, and a
  |		string to put, HGPutText first sends the string into a
  |		diversion, moves to the positioning point, then outputs
- |		local vertical and horizontal motions as needed to justify
- |		the text.  After all motions are done, the diversion is
- |		printed out.
- *----------------------------------------------------------------------------*/
+ |		local vertical and horizontal motions as needed to
+ |		justify the text.  After all motions are done, the
+ |		diversion is printed out.
+ *--------------------------------------------------------------------*/
 
 void
 HGPutText(int justify,
 	  POINT pnt,
-	  register char *string)
+	  char *string)
 {
   int savelasty = lasty;	/* vertical motion for text is to be */
 				/* ignored.  Save current y here     */
@@ -298,8 +300,8 @@ HGPutText(int justify,
   tmove(&pnt);			/* move to positioning point */
 
   switch (justify) {
-    /* local vertical motions                                            */
-    /* (the numbers here are used to be somewhat compatible with gprint) */
+    /* local vertical motions--the numbers here are used to be
+       somewhat compatible with gprint */
   case CENTLEFT:
   case CENTCENT:
   case CENTRIGHT:
@@ -328,18 +330,18 @@ HGPutText(int justify,
 
   printf("\\&\\*(g9\n");	/* now print the text. */
   printf(".sp |\\n(g8u\n");	/* restore vertical position */
-  lasty = savelasty;		/* vertical position restored to where it */
-  lastx = xleft;		/* was before text, also horizontal is at */
-				/* left                                   */
+  lasty = savelasty;		/* vertical position restored to */
+  lastx = xleft;		/* where it was before text, also */
+				/* horizontal is at left */
 }				/* end HGPutText */
 
 
-/*----------------------------------------------------------------------------*
+/*--------------------------------------------------------------------*
  | Routine:	doarc (center_point, start_point, angle)
  |
  | Results:	Produces either drawarc command or a drawcircle command
  |		depending on the angle needed to draw through.
- *----------------------------------------------------------------------------*/
+ *--------------------------------------------------------------------*/
 
 void
 doarc(POINT cp,
@@ -355,14 +357,14 @@ doarc(POINT cp,
 }
 
 
-/*----------------------------------------------------------------------------*
+/*--------------------------------------------------------------------*
  | Routine:	HGSetFont (font_number, Point_size)
  |
- | Results:	ALWAYS outputs a .ft and .ps directive to troff.  This is
- |		done because someone may change stuff inside a text string. 
- |		Changes thickness back to default thickness.  Default
- |		thickness depends on font and pointsize.
- *----------------------------------------------------------------------------*/
+ | Results:	ALWAYS outputs a .ft and .ps directive to troff.  This
+ |		is done because someone may change stuff inside a text
+ |		string.  Changes thickness back to default thickness.
+ |		Default thickness depends on font and point size.
+ *--------------------------------------------------------------------*/
 
 void
 HGSetFont(int font,
@@ -374,20 +376,20 @@ HGSetFont(int font,
 }
 
 
-/*----------------------------------------------------------------------------*
+/*--------------------------------------------------------------------*
  | Routine:	HGSetBrush (line_mode)
  |
- | Results:	Generates the troff commands to set up the line width and
- |		style of subsequent lines.  Does nothing if no change is
- |              needed.
+ | Results:	Generates the troff commands to set up the line width
+ |		and style of subsequent lines.  Does nothing if no
+ |		change is needed.
  |
- | Side Efct:	Sets 'linmode' and 'linethicknes'.
- *----------------------------------------------------------------------------*/
+ | Side Efct:	Sets 'linmode' and 'linethickness'.
+ *--------------------------------------------------------------------*/
 
 void
 HGSetBrush(int mode)
 {
-  register int printed = 0;
+  int printed = 0;
 
   if (linmod != style[--mode]) {
     /* Groff doesn't understand \Ds, so we take it out */
@@ -405,60 +407,61 @@ HGSetBrush(int mode)
 }
 
 
-/*----------------------------------------------------------------------------*
+/*--------------------------------------------------------------------*
  | Routine:	deltax (x_destination)
  |
  | Results:	Scales and outputs a number for delta x (with a leading
  |		space) given 'lastx' and x_destination.
  |
  | Side Efct:	Resets 'lastx' to x_destination.
- *----------------------------------------------------------------------------*/
+ *--------------------------------------------------------------------*/
 
 void
 deltax(double x)
 {
-  register int ix = (int) (x * troffscale);
+  int ix = (int) (x * troffscale);
 
   printf(" %du", ix - lastx);
   lastx = ix;
 }
 
 
-/*----------------------------------------------------------------------------*
+/*--------------------------------------------------------------------*
  | Routine:	deltay (y_destination)
  |
  | Results:	Scales and outputs a number for delta y (with a leading
  |		space) given 'lastyline' and y_destination.
  |
- | Side Efct:	Resets 'lastyline' to y_destination.  Since 'line' vertical
- |		motions don't affect 'page' ones, 'lasty' isn't updated.
- *----------------------------------------------------------------------------*/
+ | Side Efct:	Resets 'lastyline' to y_destination.  Since 'line'
+ |		vertical motions don't affect 'page' ones, 'lasty' isn't
+ |		updated.
+ *--------------------------------------------------------------------*/
 
 void
 deltay(double y)
 {
-  register int iy = (int) (y * troffscale);
+  int iy = (int) (y * troffscale);
 
   printf(" %du", iy - lastyline);
   lastyline = iy;
 }
 
 
-/*----------------------------------------------------------------------------*
+/*--------------------------------------------------------------------*
  | Routine:	tmove2 (px, py)
  |
- | Results:	Produces horizontal and vertical moves for troff given the
- |		pair of points to move to and knowing the current position. 
- |		Also puts out a horizontal move to start the line.  This is
- |		a variation without the .sp command.
- *----------------------------------------------------------------------------*/
+ | Results:	Produces horizontal and vertical moves for troff given
+ |		the pair of points to move to and knowing the current
+ |		position.  Also puts out a horizontal move to start the
+ |		line.  This is a variation without the .sp command.
+ *--------------------------------------------------------------------*/
 
 void
 tmove2(int px,
        int py)
 {
-  register int dx;
-  register int dy;
+  int dx;
+  int dy;
 
   if ((dy = py - lasty)) {
     printf("\\v'%du'", dy);
@@ -471,22 +474,22 @@ tmove2(int px,
 }
 
 
-/*----------------------------------------------------------------------------*
+/*--------------------------------------------------------------------*
  | Routine:	tmove (point_pointer)
  |
- | Results:	Produces horizontal and vertical moves for troff given the
- |		pointer of a point to move to and knowing the current
- |		position.  Also puts out a horizontal move to start the
- |		line.
- *----------------------------------------------------------------------------*/
+ | Results:	Produces horizontal and vertical moves for troff given
+ |		the pointer of a point to move to and knowing the
+ |		current position.  Also puts out a horizontal move to
+ |		start the line.
+ *--------------------------------------------------------------------*/
 
 void
 tmove(POINT * ptr)
 {
-  register int ix = (int) (ptr->x * troffscale);
-  register int iy = (int) (ptr->y * troffscale);
-  register int dx;
-  register int dy;
+  int ix = (int) (ptr->x * troffscale);
+  int iy = (int) (ptr->y * troffscale);
+  int dx;
+  int dy;
 
   if ((dy = iy - lasty)) {
     printf(".sp %du\n", dy);
@@ -499,14 +502,16 @@ tmove(POINT * ptr)
 }
 
 
-/*----------------------------------------------------------------------------*
+/*--------------------------------------------------------------------*
  | Routine:	cr ( )
  |
- | Results:	Ends off an input line.  '.sp -1' is also added to counteract
- |		the vertical move done at the end of text lines.
+ | Results:	Ends off an input line.  '.sp -1' is also added to
+ |		counteract the vertical move done at the end of text
+ |		lines.
  |
- | Side Efct:	Sets 'lastx' to 'xleft' for troff's return to left margin.
- *----------------------------------------------------------------------------*/
+ | Side Efct:	Sets 'lastx' to 'xleft' for troff's return to left
+ |		margin.
+ *--------------------------------------------------------------------*/
 
 void
 cr()
@@ -516,11 +521,11 @@ cr()
 }
 
 
-/*----------------------------------------------------------------------------*
+/*--------------------------------------------------------------------*
  | Routine:	line ( )
  |
  | Results:	Draws a single solid line to (x,y).
- *----------------------------------------------------------------------------*/
+ *--------------------------------------------------------------------*/
 
 void
 line(int px,
@@ -534,20 +539,20 @@ line(int px,
 }
 
 
-/*----------------------------------------------------------------------------
+/*--------------------------------------------------------------------*
  | Routine:	drawwig (ptr, type)
  |
- | Results:	The point sequence found in the structure pointed by ptr is
- |		placed in integer arrays for further manipulation by the
- |		existing routing.  With the corresponding type parameter,
- |		either picurve or HGCurve are called.
- *----------------------------------------------------------------------------*/
+ | Results:	The point sequence found in the structure pointed by ptr
+ |		is placed in integer arrays for further manipulation by
+ |		the existing routing.  With the corresponding type
+ |		parameter, either picurve or HGCurve are called.
+ *--------------------------------------------------------------------*/
 
 void
 drawwig(POINT * ptr,
 	int type)
 {
-  register int npts;			/* point list index */
+  int npts;			/* point list index */
   int x[MAXPOINTS], y[MAXPOINTS];	/* point list */
 
   for (npts = 1; !Nullpoint(ptr); ptr = PTNextPoint(ptr), npts++) {
@@ -563,31 +568,32 @@ drawwig(POINT * ptr,
 }
 
 
-/*----------------------------------------------------------------------------
+/*--------------------------------------------------------------------*
  | Routine:	HGArc (xcenter, ycenter, xstart, ystart, angle)
  |
- | Results:	This routine plots an arc centered about (cx, cy) counter
- |		clockwise starting from the point (px, py) through 'angle'
- |		degrees.  If angle is 0, a full circle is drawn.  It does so
- |		by creating a draw-path around the arc whose density of
- |		points depends on the size of the arc.
- *----------------------------------------------------------------------------*/
+ | Results:	This routine plots an arc centered about (cx, cy)
+ |		counter-clockwise starting from the point (px, py)
+ |		through 'angle' degrees.  If angle is 0, a full circle
+ |		is drawn.  It does so by creating a draw-path around the
+ |		arc whose density of points depends on the size of the
+ |		arc.
+ *--------------------------------------------------------------------*/
 
 void
-HGArc(register int cx,
-      register int cy,
+HGArc(int cx,
+      int cy,
       int px,
       int py,
       int angle)
 {
   double xs, ys, resolution, fullcircle;
   int m;
-  register int mask;
-  register int extent;
-  register int nx;
-  register int ny;
-  register int length;
-  register double epsilon;
+  int mask;
+  int extent;
+  int nx;
+  int ny;
+  int length;
+  double epsilon;
 
   xs = px - cx;
   ys = py - cy;
@@ -596,7 +602,7 @@ HGArc(register int cx,
 
   resolution = (1.0 + groff_hypot(xs, ys) / res) * PointsPerInterval;
   /* mask = (1 << (int) log10(resolution + 1.0)) - 1; */
-  (void) frexp(resolution, &m);		/* A bit more elegant than log10 */
+  (void) frexp(resolution, &m);		/* more elegant than log10 */
   for (mask = 1; mask < m; mask = mask << 1);
   mask -= 1;
 
@@ -624,24 +630,24 @@ HGArc(register int cx,
 }				/* end HGArc */
 
 
-/*----------------------------------------------------------------------------
+/*--------------------------------------------------------------------*
  | Routine:	picurve (xpoints, ypoints, num_of_points)
  |
- | Results:	Draws a curve delimited by (not through) the line segments
- |		traced by (xpoints, ypoints) point list.  This is the 'Pic'
- |		style curve.
- *----------------------------------------------------------------------------*/
+ | Results:	Draws a curve delimited by (not through) the line
+ |		segments traced by (xpoints, ypoints) point list.  This
+ |		is the 'Pic'-style curve.
+ *--------------------------------------------------------------------*/
 
 void
-picurve(register int *x,
-	register int *y,
+picurve(int *x,
+	int *y,
 	int npts)
 {
-  register int nseg;		/* effective resolution for each curve */
-  register int xp;		/* current point (and temporary) */
-  register int yp;
-  int pxp, pyp;			/* previous point (to make lines from) */
-  int i;			/* inner curve segment traverser */
+  int nseg;		/* effective resolution for each curve */
+  int xp;		/* current point (and temporary) */
+  int yp;
+  int pxp, pyp;		/* previous point (to make lines from) */
+  int i;		/* inner curve segment traverser */
   int length = 0;
   double w;			/* position factor */
   double t1, t2, t3;		/* calculation temps */
@@ -671,7 +677,8 @@ picurve(register int *x,
 				/* 'nseg' is the number of line    */
 				/* segments that will be drawn for */
 				/* each curve segment.             */
-    nseg = (int) ((double) (nseg + (int) groff_hypot((double) xp, (double) yp)) /
+    nseg = (int) ((double) (nseg + (int) groff_hypot((double) xp,
+						     (double) yp)) /
 		  res * PointsPerInterval);
 
     for (i = 1; i < nseg; i++) {
@@ -692,15 +699,15 @@ picurve(register int *x,
 }
 
 
-/*----------------------------------------------------------------------------
+/*--------------------------------------------------------------------*
  | Routine:	HGCurve(xpoints, ypoints, num_points)
  |
  | Results:	This routine generates a smooth curve through a set of
- |		points.  The method used is the parametric spline curve on
- |		unit knot mesh described in 'Spline Curve Techniques' by
- |		Patrick Baudelaire, Robert Flegal, and Robert Sproull --
- |		Xerox Parc.
- *----------------------------------------------------------------------------*/
+ |		points.  The method used is the parametric spline curve
+ |		on unit knot mesh described in 'Spline Curve Techniques'
+ |		by Patrick Baudelaire, Robert Flegal, and Robert Sproull
+ |		-- Xerox Parc.
+ *--------------------------------------------------------------------*/
 
 void
 HGCurve(int *x,
@@ -710,10 +717,10 @@ HGCurve(int *x,
   double h[MAXPOINTS], dx[MAXPOINTS], dy[MAXPOINTS];
   double d2x[MAXPOINTS], d2y[MAXPOINTS], d3x[MAXPOINTS], d3y[MAXPOINTS];
   double t, t2, t3;
-  register int j;
-  register int k;
-  register int nx;
-  register int ny;
+  int j;
+  int k;
+  int nx;
+  int ny;
   int lx, ly;
   int length = 0;
 
@@ -722,10 +729,10 @@ HGCurve(int *x,
   tmove2(lx, ly);
 
   /*
-   * Solve for derivatives of the curve at each point separately for x and y
-   * (parametric).
+   * Solve for derivatives of the curve at each point separately for x
+   * and y (parametric).
    */
-  Paramaterize(x, y, h, numpoints);
+  Parameterize(x, y, h, numpoints);
 
   /* closed curve */
   if ((x[1] == x[numpoints]) && (y[1] == y[numpoints])) {
@@ -737,8 +744,8 @@ HGCurve(int *x,
   }
 
   /*
-   * generate the curve using the above information and PointsPerInterval
-   * vectors between each specified knot.
+   * Generate the curve using the above information and
+   * PointsPerInterval vectors between each specified knot.
    */
 
   for (j = 1; j < numpoints; ++j) {
@@ -760,26 +767,26 @@ HGCurve(int *x,
 }				/* end HGCurve */
 
 
-/*----------------------------------------------------------------------------
- | Routine:	Paramaterize (xpoints, ypoints, hparams, num_points)
+/*--------------------------------------------------------------------*
+ | Routine:	Parameterize (xpoints, ypoints, hparams, num_points)
  |
- | Results:	This routine calculates parameteric values for use in
+ | Results:	This routine calculates parametric values for use in
  |		calculating curves.  The parametric values are returned
  |		in the array h.  The values are an approximation of
  |		cumulative arc lengths of the curve (uses cord length).
  |		For additional information, see paper cited below.
- *----------------------------------------------------------------------------*/
+ *--------------------------------------------------------------------*/
 
 void
-Paramaterize(int x[],
+Parameterize(int x[],
 	     int y[],
 	     double h[],
 	     int n)
 {
-  register int dx;
-  register int dy;
-  register int i;
-  register int j;
+  int dx;
+  int dy;
+  int i;
+  int j;
   double u[MAXPOINTS];
 
   for (i = 1; i <= n; ++i) {
@@ -794,21 +801,21 @@ Paramaterize(int x[],
   }
   for (i = 1; i < n; ++i)
     h[i] = u[i + 1] - u[i];
-}				/* end Paramaterize */
+}				/* end Parameterize */
 
 
-/*----------------------------------------------------------------------------
+/*--------------------------------------------------------------------*
  | Routine:	PeriodicSpline (h, z, dz, d2z, d3z, npoints)
  |
- | Results:	This routine solves for the cubic polynomial to fit a spline
- |		curve to the points specified by the list of values.
- |		The Curve generated is periodic.  The algorithms for this
- |		curve are from the 'Spline Curve Techniques' paper cited
- |		above.
- *----------------------------------------------------------------------------*/
+ | Results:	This routine solves for the cubic polynomial to fit a
+ |		spline curve to the points specified by the list of
+ |		values.  The curve generated is periodic.  The
+ |		algorithms for this curve are from the 'Spline Curve
+ |		Techniques' paper cited above.
+ *--------------------------------------------------------------------*/
 
 void
-PeriodicSpline(double h[],	/* paramaterization  */
+PeriodicSpline(double h[],	/* parameterization  */
 	       int z[],		/* point list */
 	       double dz[],	/* to return the 1st derivative */
 	       double d2z[],	/* 2nd derivative */
@@ -870,14 +877,14 @@ PeriodicSpline(double h[],	/* paramaterization  */
 }				/* end PeriodicSpline */
 
 
-/*----------------------------------------------------------------------------
+/*--------------------------------------------------------------------
  | Routine:	NaturalEndSpline (h, z, dz, d2z, d3z, npoints)
  |
- | Results:	This routine solves for the cubic polynomial to fit a spline
- |		curve the points specified by the list of values.  The
- |		algorithms for this curve are from the 'Spline Curve
+ | Results:	This routine solves for the cubic polynomial to fit a
+ |		spline curve the points specified by the list of values.
+ |		The algorithms for this curve are from the 'Spline Curve
  |		Techniques' paper cited above.
- *----------------------------------------------------------------------------*/
+ *--------------------------------------------------------------------*/
 
 void
 NaturalEndSpline(double h[],	/* parameterization */
@@ -926,20 +933,20 @@ NaturalEndSpline(double h[],	/* parameterization */
 }				/* end NaturalEndSpline */
 
 
-/*----------------------------------------------------------------------------*
+/*--------------------------------------------------------------------*
  | Routine:	change (x_position, y_position, visible_flag)
  |
  | Results:	As HGtline passes from the invisible to visible (or vice
- |		versa) portion of a line, change is called to either draw
- |		the line, or initialize the beginning of the next one.
- |		Change calls line to draw segments if visible_flag is set
- |		(which means we're leaving a visible area).
- *----------------------------------------------------------------------------*/
+ |		versa) portion of a line, change is called to either
+ |		draw the line, or initialize the beginning of the next
+ |		one.  Change calls line to draw segments if visible_flag
+ |		is set (which means we're leaving a visible area).
+ *--------------------------------------------------------------------*/
 
 void
-change(register int x,
-       register int y,
-       register int vis)
+change(int x,
+       int y,
+       int vis)
 {
   static int length = 0;
 
@@ -949,35 +956,36 @@ change(register int x,
       length = 0;
       printf("\\\n");
     }
-  } else {			/* otherwise, we're entering one, remember */
-				/* beginning                               */
+  } else {			/* otherwise entering one; remember */
+				/* beginning                        */
     tmove2(x, y);
   }
 }
 
 
-/*----------------------------------------------------------------------------
+/*--------------------------------------------------------------------*
  | Routine:	HGtline (xstart, ystart, xend, yend)
  |
- | Results:	Draws a line from current position to (x1,y1) using line(x1,
- |		y1) to place individual segments of dotted or dashed lines.
- *----------------------------------------------------------------------------*/
+ | Results:	Draws a line from current position to (x1,y1) using
+ |		line(x1, y1) to place individual segments of dotted or
+ |		dashed lines.
+ *--------------------------------------------------------------------*/
 
 void
 HGtline(int x_1,
 	int y_1)
 {
-  register int x_0 = lastx;
-  register int y_0 = lasty;
-  register int dx;
-  register int dy;
-  register int oldcoord;
-  register int res1;
-  register int visible;
-  register int res2;
-  register int xinc;
-  register int yinc;
-  register int dotcounter;
+  int x_0 = lastx;
+  int y_0 = lasty;
+  int dx;
+  int dy;
+  int oldcoord;
+  int res1;
+  int visible;
+  int res2;
+  int xinc;
+  int yinc;
+  int dotcounter;
 
   if (linmod == SOLID) {
     line(x_1, y_1);
@@ -1045,4 +1053,8 @@ HGtline(int x_1,
     change(x_1, y_1, 0);
 }
 
-/* EOF */
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

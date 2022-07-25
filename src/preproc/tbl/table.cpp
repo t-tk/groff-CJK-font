@@ -642,7 +642,7 @@ block_entry::block_entry(const table *p, const entry_modifier *m, char *s)
 
 block_entry::~block_entry()
 {
-  a_delete contents;
+  delete[] contents;
 }
 
 void block_entry::position_vertically()
@@ -1262,20 +1262,20 @@ table::table(int nc, unsigned f, int ls, char dpc)
 table::~table()
 {
   for (int i = 0; i < nrows; i++) {
-    a_delete entry[i];
-    a_delete vline[i];
+    delete[] entry[i];
+    delete[] vline[i];
   }
-  a_delete entry;
-  a_delete vline;
+  delete[] entry;
+  delete[] vline;
   while (entry_list) {
     table_entry *tem = entry_list;
     entry_list = entry_list->next;
     delete tem;
   }
-  ad_delete(ncolumns) minimum_width;
-  a_delete column_separation;
-  a_delete equal;
-  a_delete expand;
+  delete[] minimum_width;
+  delete[] column_separation;
+  delete[] equal;
+  delete[] expand;
   while (stuff_list) {
     stuff *tem = stuff_list;
     stuff_list = stuff_list->next;
@@ -1286,7 +1286,7 @@ table::~table()
     vrule_list = vrule_list->next;
     delete tem;
   }
-  a_delete row_is_all_lines;
+  delete[] row_is_all_lines;
   while (span_list) {
     horizontal_span *tem = span_list;
     span_list = span_list->next;
@@ -1368,11 +1368,11 @@ void table::allocate(int r)
 	  allocated_rows = r + 1;
 	entry = new PPtable_entry[allocated_rows];
 	memcpy(entry, old_entry, sizeof(table_entry**)*old_allocated_rows);
-	a_delete old_entry;
+	delete[] old_entry;
 	char **old_vline = vline;
 	vline = new char*[allocated_rows];
 	memcpy(vline, old_vline, sizeof(char*)*old_allocated_rows);
-	a_delete old_vline;
+	delete[] old_vline;
       }
     }
     assert(allocated_rows > r);

@@ -91,12 +91,12 @@ As in other respects,
 .I groff
 has removed historical
 .I roff
-limitations on the lengths of special character escapes,
+limitations on the lengths of special character escape sequences,
 but recognizes and retains compatibility with the historical names.
 .
 .I groff
 expands the lexicon of glyphs available by name and permits users to
-define their own special character escapes with the
+define their own special character escape sequences with the
 .B .char
 request.
 .
@@ -303,8 +303,8 @@ with their typical keycap engravings,
 their glyph mappings and semantics in
 .I roff
 systems,
-and the escapes producing the Unicode basic Latin character they
-replace.
+and the escape sequences producing the Unicode basic Latin character
+they replace.
 .
 The first,
 the neutral double quote,
@@ -320,14 +320,15 @@ the user to master the quoting rules that AT&T
 required in that context.
 .
 Furthermore,
-not all of the special character escapes are portable to AT&T
+not all of the special character escape sequences are portable to AT&T
 .I troff
 and all of its descendants;
 these
 .I groff
 extensions are presented using its special character escape form
 .BR \[rs][] ,
-whereas portable special character escapes are shown in the traditional
+whereas portable special character escape sequences are shown in the
+traditional
 .B \[rs](
 form.
 .
@@ -352,7 +353,7 @@ this will
 .I not
 be the case on more-capable devices.
 .
-Review your document using as many different postprocessors as possible.
+Review your document using as many different output drivers as possible.
 .
 .\" XXX: move these to tty.tmac instead?
 .fchar \[u02C6] ^
@@ -427,8 +428,8 @@ single quotation mark or as a neutral single quote,
 depending on the capabilities of the output device.
 .
 By contrast,
-special character escapes should be used for quotation marks unless
-portability to limited or historical
+special character escape sequences should be used for quotation marks
+unless portability to limited or historical
 .I troff
 implementations is necessary;
 on those systems,
@@ -516,7 +517,7 @@ encodes the no-break space.
 .
 On input it is mapped to
 .BR \[rs]\[ti] ,
-the adjustable non-breaking space escape.
+the adjustable non-breaking space escape sequence.
 .
 .
 .TP
@@ -525,7 +526,7 @@ encodes the soft hyphen character.
 .
 On input it is mapped to
 .BR \[rs]% ,
-the hyphenation control escape.
+the hyphenation control escape sequence.
 .
 .
 .P
@@ -609,7 +610,7 @@ Code points and combining properties are determined by character
 encoding standards,
 whereas glyph names originated in AT&T
 .I troff \" AT&T
-special character escapes.
+special character escape sequences.
 .
 Glyph names are not limited to alphanumeric characters;
 any of the printable characters from the Unicode basic Latin repertoire
@@ -706,7 +707,7 @@ see
 .RI [ n\c
 .RI [ n ]]\c
 .B ]
-is a Unicode numeric special character escape.
+is a Unicode numeric special character escape sequence.
 .
 With this form,
 any Unicode point can be indicated using four to six hexadecimal digits,
@@ -744,9 +745,10 @@ and
 .RB \[lq]caf \[rs][u0065_0301] \[rq],
 as ways to input \[lq]caf\['e]\[rq].
 .
-(Due to its ISO Latin-1 and IBM code page 1047 compatibility,
+(Due to its legacy 8-bit encoding compatibility,
 at present it also accepts
-.RB \[lq]caf \[rs][u00E9] \[rq]).
+.RB \[lq]caf \[rs][u00E9] \[rq]
+on ISO Latin-1 systems.)
 .
 .
 .TP
@@ -755,7 +757,7 @@ at present it also accepts
 .I combining-component\c
 .RB ].\|.\|. ]
 constructs a composite glyph from Unicode numeric special character
-escapes.
+escape sequences.
 .
 The code points of the base glyph and the combining components are each
 expressed in hexadecimal,
@@ -860,7 +862,6 @@ font
 (see
 .IR groff_font (@MAN5EXT@)).
 .
-.
 Often,
 such glyphs have metrics which look incongruous in normal text.
 .
@@ -897,7 +898,7 @@ the
 .B \[rs][ba]
 and
 .B \[rs][or]
-escapes may render differently.
+escape sequences may render differently.
 .
 See subsection \[lq]Mathematical symbols\[rq] below for special variants
 of the plus,
@@ -994,7 +995,7 @@ _
 .
 All of these glyphs can be composed using combining glyph names as
 described in subsection \[lq]Special character escape forms\[rq] above;
-the names below can be thought of convenient short aliases.
+the names below can be thought of as convenient short aliases.
 .
 .TS
 l l l lx.
@@ -1226,7 +1227,7 @@ and
 .B \[rs](rf
 which provide the floor operator.
 .
-Some output postprocessors,
+Some output drivers,
 such as
 .IR grodvi (@MAN1EXT@),
 don't unify such glyphs.
@@ -1260,7 +1261,7 @@ _
 \[rC]	\e[rC]	u007D	right brace
 \[la]	\e[la]	u27E8	left angle bracket
 \[ra]	\e[ra]	u27E9	right angle bracket
-\[bv]	\e[bv]	u23AA	brace vertical extension *** +
+\[bv]	\e[bv]	u23AA	brace vertical extension + ***
 \[braceex]	\e[braceex]	u23AA	brace vertical extension
 
 \[bracketlefttp]	\e[bracketlefttp]	u23A1	left square bracket top
@@ -1556,9 +1557,9 @@ _
 \[S3]	\e[S3]	u00B3	superscript three
 
 +	+	u002B	plus
-\[pl]	\e[pl]	u002B	special variant of plus +
+\[pl]	\e[pl]	u002B	special variant of plus + ***
 \-	\e[\-]	u002D	minus
-\[mi]	\e[mi]	u2212	special variant of minus +
+\[mi]	\e[mi]	u2212	special variant of minus + ***
 \[-+]	\e[\-+]	u2213	minus-plus
 \[+-]	\e[+\-]	u00B1	plus-minus + ***
 \[t+-]	\e[t+\-]	u00B1	text variant of \f[B]\e[+\-]\f[]
@@ -1578,7 +1579,7 @@ _
 \[<<]	\e[<<]	u226A	much less than
 \[>>]	\e[>>]	u226B	much greater than
 \&=	\&=	u003D	equals
-\[eq]	\e[eq]	u003D	special variant of equals +
+\[eq]	\e[eq]	u003D	special variant of equals + ***
 \[!=]	\e[!=]	u003D_0338	not equals +
 \[==]	\e[==]	u2261	equivalent +
 \[ne]	\e[ne]	u2261_0338	not equivalent
@@ -1743,7 +1744,7 @@ by
 Eric S.\& Raymond
 .ME ,
 and largely rewritten by
-.MT g\:.branden\:.robinson@\:gmail\:.com
+.MT g.branden\:.robinson@\:gmail\:.com
 G.\& Branden Robinson
 .ME .
 .
@@ -1806,6 +1807,7 @@ which extends and in some cases overrides the definitions listed above.
 .
 .\" Restore compatibility mode (for, e.g., Solaris 10/11).
 .cp \n[*groff_groff_char_7_man_C]
+.do rr *groff_groff_char_7_man_C
 .
 .
 .\" Local Variables:

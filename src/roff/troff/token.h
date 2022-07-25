@@ -80,7 +80,7 @@ public:
   int tab();			// is the current token a tab?
   int leader();
   int backspace();
-  int delimiter(int warn = 0);	// is it suitable for use as a delimiter?
+  int delimiter(bool err = false);	// usable as a delimiter?
   int dummy();
   int transparent_dummy();
   int transparent();
@@ -92,7 +92,7 @@ public:
   int operator==(const token &); // need this for delimiters, and for conditions
   int operator!=(const token &); // ditto
   unsigned char ch();
-  charinfo *get_char(int required = 0);
+  charinfo *get_char(bool required = false);
   int add_to_node_list(node **);
   int title();
   void make_space();
@@ -105,8 +105,8 @@ public:
 
 extern token tok;		// the current token
 
-extern symbol get_name(int required = 0);
-extern symbol get_long_name(int required = 0);
+extern symbol get_name(bool required = false);
+extern symbol get_long_name(bool required = false);
 extern charinfo *get_optional_char();
 extern char *read_string();
 extern void check_missing_character();

@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 class reg : public object {
 public:
   virtual const char *get_string() = 0;
-  virtual int get_value(units *);
+  virtual bool get_value(units *);
   virtual void increment();
   virtual void decrement();
   virtual void set_increment(units);
@@ -52,7 +52,7 @@ public:
   void add_value(units);
 
   void set_value(units) = 0;
-  int get_value(units *) = 0;
+  bool get_value(units *) = 0;
 };
 
 class variable_reg : public general_reg {
@@ -60,7 +60,7 @@ class variable_reg : public general_reg {
 public:
   variable_reg(int *);
   void set_value(units);
-  int get_value(units *);
+  bool get_value(units *);
 };
 
 extern object_dictionary number_reg_dictionary;

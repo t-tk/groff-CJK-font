@@ -3,7 +3,7 @@
 #
 # Function: Format PDF Output from groff Markup
 #
-# Copyright (C) 2005-2020 Free Software Foundation, Inc.
+# Copyright (C) 2005-2021 Free Software Foundation, Inc.
 # Written by Keith Marshall (keith.d.marshall@ntlworld.com)
 # 
 # This file is part of groff.
@@ -570,7 +570,7 @@
 	*** FATAL INSTALLATION ERROR ***
 
 	'$CMD' requires a GhostScript interpreter to convert PostScript to PDF.
-	Since you do not appear to have one installed, '$CMD' connot continue.
+	You do not appear to have one installed; thus, '$CMD' cannot continue.
 
 	ETX
     exit 1
