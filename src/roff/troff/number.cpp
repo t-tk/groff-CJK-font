@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
@@ -26,8 +25,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 #include "token.h"
 #include "div.h"
 
-vunits V0;
-hunits H0;
+const vunits V0; // zero in vertical units
+const hunits H0; // zero in horizontal units
 
 int hresolution = 1;
 int vresolution = 1;
@@ -215,17 +214,17 @@ static incr_number_result get_incr_number(units *res, unsigned char si)
 
 static int start_number()
 {
-  while (tok.space())
+  while (tok.is_space())
     tok.next();
-  if (tok.newline()) {
+  if (tok.is_newline()) {
     warning(WARN_MISSING, "missing number");
     return 0;
   }
-  if (tok.tab()) {
+  if (tok.is_tab()) {
     warning(WARN_TAB, "tab character where number expected");
     return 0;
   }
-  if (tok.right_brace()) {
+  if (tok.is_right_brace()) {
     warning(WARN_RIGHT_BRACE, "'\\}' where number expected");
     return 0;
   }
@@ -400,7 +399,7 @@ static int parse_term(units *v, int scaling_indicator,
 {
   int negative = 0;
   for (;;)
-    if (parenthesised && tok.space())
+    if (parenthesised && tok.is_space())
       tok.next();
     else if (tok.ch() == '+')
       tok.next();
@@ -694,3 +693,9 @@ hunits::hunits(units x)
 	 ? -((-x + hresolution/2 - 1)/hresolution)
 	 : (x + hresolution/2 - 1)/hresolution);
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

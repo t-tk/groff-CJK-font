@@ -488,7 +488,13 @@ void environment::space(hunits space_width, hunits sentence_space_width)
   spread_flag = 0;
 }
 
-node *do_underline_special(int);
+static node *do_underline_special(bool do_underline_spaces)
+{
+  macro m;
+  m.append_str("x u ");
+  m.append(do_underline_spaces ? '1' : '0');
+  return new special_node(m, 1);
+}
 
 void environment::set_font(symbol nm)
 {
@@ -515,9 +521,9 @@ void environment::set_font(symbol nm)
   }
   if (underline_spaces && fontno != prev_fontno) {
     if (fontno == get_underline_fontno())
-      add_node(do_underline_special(1));
+      add_node(do_underline_special(true));
     if (prev_fontno == get_underline_fontno())
-      add_node(do_underline_special(0));
+      add_node(do_underline_special(false));
   }
 }
 
@@ -708,9 +714,10 @@ environment::environment(symbol nm)
   prev_family = family = lookup_family(default_family);
   prev_fontno = fontno = 1;
   if (!is_good_fontno(1))
-    fatal("font number 1 not a valid font");
+    fatal("font mounted at position 1 is not valid");
   if (family->make_definite(1) < 0)
-    fatal("invalid default family '%1'", default_family.contents());
+    fatal("invalid default font family '%1'",
+	  default_family.contents());
   prev_fontno = fontno;
 }
 
@@ -950,7 +957,7 @@ int environment::get_bold()
 hunits environment::get_digit_width()
 {
   return env_digit_width(this);
-} 
+}
 
 int environment::get_adjust_mode()
 {
@@ -1281,7 +1288,7 @@ void space_size()
 
 void fill()
 {
-  while (!tok.newline() && !tok.eof())
+  while (!tok.is_newline() && !tok.is_eof())
     tok.next();
   if (break_flag)
     curenv->do_break();
@@ -1291,7 +1298,7 @@ void fill()
 
 void no_fill()
 {
-  while (!tok.newline() && !tok.eof())
+  while (!tok.is_newline() && !tok.is_eof())
     tok.next();
   if (break_flag)
     curenv->do_break();
@@ -1307,7 +1314,7 @@ void center()
     n = 1;
   else if (n < 0)
     n = 0;
-  while (!tok.newline() && !tok.eof())
+  while (!tok.is_newline() && !tok.is_eof())
     tok.next();
   if (break_flag)
     curenv->do_break();
@@ -1324,7 +1331,7 @@ void right_justify()
     n = 1;
   else if (n < 0)
     n = 0;
-  while (!tok.newline() && !tok.eof())
+  while (!tok.is_newline() && !tok.is_eof())
     tok.next();
   if (break_flag)
     curenv->do_break();
@@ -1337,10 +1344,12 @@ void right_justify()
 void line_length()
 {
   hunits temp;
+  hunits minimum_length = font::hor;
   if (has_arg() && get_hunits(&temp, 'm', curenv->line_length)) {
-    if (temp < H0) {
-      warning(WARN_RANGE, "bad line length %1u", temp.to_units());
-      temp = H0;
+    if (temp < minimum_length) {
+      warning(WARN_RANGE, "invalid line length %1u rounded to device"
+			  " horizontal resolution", temp.to_units());
+      temp = minimum_length;
     }
   }
   else
@@ -1354,10 +1363,12 @@ void line_length()
 void title_length()
 {
   hunits temp;
+  hunits minimum_length = font::hor;
   if (has_arg() && get_hunits(&temp, 'm', curenv->title_length)) {
-    if (temp < H0) {
-      warning(WARN_RANGE, "bad title length %1u", temp.to_units());
-      temp = H0;
+    if (temp < minimum_length) {
+      warning(WARN_RANGE, "invalid title length %1u rounded to device"
+			  " horizontal resolution", temp.to_units());
+      temp = minimum_length;
     }
   }
   else
@@ -1427,7 +1438,7 @@ void indent()
   }
   else
     temp = curenv->prev_indent;
-  while (!tok.newline() && !tok.eof())
+  while (!tok.is_newline() && !tok.is_eof())
     tok.next();
   if (break_flag)
     curenv->do_break();
@@ -1444,7 +1455,7 @@ void temporary_indent()
   hunits temp;
   if (!get_hunits(&temp, 'm', curenv->get_indent()))
     err = 1;
-  while (!tok.newline() && !tok.eof())
+  while (!tok.is_newline() && !tok.is_eof())
     tok.next();
   if (break_flag)
     curenv->do_break();
@@ -1460,14 +1471,6 @@ void temporary_indent()
   tok.next();
 }
 
-node *do_underline_special(int underline_spaces)
-{
-  macro m;
-  m.append_str("x u ");
-  m.append(underline_spaces + '0');
-  return new special_node(m, 1);
-}
-
 void do_underline(int underline_spaces)
 {
   int n;
@@ -1479,7 +1482,7 @@ void do_underline(int underline_spaces)
       curenv->fontno = curenv->pre_underline_fontno;
       if (underline_spaces) {
 	curenv->underline_spaces = 0;
-	curenv->add_node(do_underline_special(0));
+	curenv->add_node(do_underline_special(false));
       }
     }
     curenv->underline_lines = 0;
@@ -1490,7 +1493,7 @@ void do_underline(int underline_spaces)
     curenv->fontno = get_underline_fontno();
     if (underline_spaces) {
       curenv->underline_spaces = 1;
-      curenv->add_node(do_underline_special(1));
+      curenv->add_node(do_underline_special(true));
     }
   }
   skip_line();
@@ -1532,7 +1535,7 @@ void no_break_control_char()
 
 void margin_character()
 {
-  while (tok.space())
+  while (tok.is_space())
     tok.next();
   charinfo *ci = tok.get_char();
   if (ci) {
@@ -1579,7 +1582,7 @@ void number_lines()
     curenv->numbering_nodes = nd;
     curenv->line_number_digit_width = env_digit_width(curenv);
     int n;
-    if (!tok.delimiter()) {
+    if (!tok.usable_as_delimiter()) {
       if (get_integer(&n, next_line_number)) {
 	next_line_number = n;
 	if (next_line_number < 0) {
@@ -1589,10 +1592,10 @@ void number_lines()
       }
     }
     else
-      while (!tok.space() && !tok.newline() && !tok.eof())
+      while (!tok.is_space() && !tok.is_newline() && !tok.is_eof())
 	tok.next();
     if (has_arg()) {
-      if (!tok.delimiter()) {
+      if (!tok.usable_as_delimiter()) {
 	if (get_integer(&n)) {
 	  if (n <= 0) {
 	    warning(WARN_RANGE, "negative or zero line number multiple");
@@ -1602,17 +1605,17 @@ void number_lines()
 	}
       }
       else
-	while (!tok.space() && !tok.newline() && !tok.eof())
+	while (!tok.is_space() && !tok.is_newline() && !tok.is_eof())
 	  tok.next();
       if (has_arg()) {
-	if (!tok.delimiter()) {
+	if (!tok.usable_as_delimiter()) {
 	  if (get_integer(&n))
 	    curenv->number_text_separation = n;
 	}
 	else
-	  while (!tok.space() && !tok.newline() && !tok.eof())
+	  while (!tok.is_space() && !tok.is_newline() && !tok.is_eof())
 	    tok.next();
-	if (has_arg() && !tok.delimiter() && get_integer(&n))
+	if (has_arg() && !tok.usable_as_delimiter() && get_integer(&n))
 	  curenv->line_number_indent = n;
       }
     }
@@ -1691,7 +1694,7 @@ void environment::newline()
       fontno = pre_underline_fontno;
       if (underline_spaces) {
 	underline_spaces = 0;
-	add_node(do_underline_special(0));
+	add_node(do_underline_special(false));
       }
     }
   }
@@ -2051,12 +2054,25 @@ static node *node_list_reverse(node *n)
 }
 
 static void distribute_space(node *n, int nspaces, hunits desired_space,
-			     int force_reverse = 0)
+			     bool force_reverse_node_list = false)
 {
-  static int reverse = 0;
-  if (force_reverse || reverse)
+  if (desired_space.is_zero() || nspaces == 0)
+    return;
+  assert(nspaces > 0);
+  // Negative desired space is conceivable if we implement "squeezing".
+  assert(desired_space > 0);
+  // Space cannot always be distributed evenly among all of the space
+  // nodes in the node list: there are limits to device resolution.  We
+  // add space until we run out, which might happen before the end of
+  // the line.  To achieve uniform typographical grayness and avoid
+  // rivers, we switch the end from which space is initially distributed
+  // with each line requiring it, unless compelled to reverse it.  The
+  // node list's natural ordering is in the direction of text flow, so
+  // we distribute space initially from the left, unlike AT&T troff.
+  static bool do_reverse_node_list = false;
+  if (force_reverse_node_list || do_reverse_node_list)
     n = node_list_reverse(n);
-  if (!force_reverse && nspaces > 0 && spread_limit >= 0
+  if (!force_reverse_node_list && spread_limit >= 0
       && desired_space.to_units() > 0) {
     hunits em = curenv->get_size();
     double Ems = (double)desired_space.to_units() / nspaces
@@ -2066,11 +2082,10 @@ static void distribute_space(node *n, int nspaces, hunits desired_space,
   }
   for (node *tem = n; tem; tem = tem->next)
     tem->spread_space(&nspaces, &desired_space);
-  if (force_reverse || reverse)
+  if (force_reverse_node_list || do_reverse_node_list)
     (void)node_list_reverse(n);
-  if (!force_reverse)
-    reverse = !reverse;
-  assert(desired_space.is_zero() && nspaces == 0);
+  if (!force_reverse_node_list)
+    do_reverse_node_list = !do_reverse_node_list;
 }
 
 void environment::possibly_break_line(int start_here, int forced)
@@ -2396,7 +2411,7 @@ int environment::is_empty()
 
 void do_break_request(int spread)
 {
-  while (!tok.newline() && !tok.eof())
+  while (!tok.is_newline() && !tok.is_eof())
     tok.next();
   if (break_flag)
     curenv->do_break(spread);
@@ -2470,7 +2485,7 @@ void title()
 		       curenv->total_post_vertical_spacing(), length_title);
   curenv->hyphen_line_count = 0;
   tok.next();
-}  
+}
 
 void adjust()
 {
@@ -2562,7 +2577,7 @@ tab::tab(hunits x, tab_type t) : next(0), pos(x), type(t)
 {
 }
 
-tab_stops::tab_stops(hunits distance, tab_type type) 
+tab_stops::tab_stops(hunits distance, tab_type type)
 : initial_list(0)
 {
   repeated_list = new tab(distance, type);
@@ -2580,7 +2595,8 @@ tab_type tab_stops::distance_to_next_tab(hunits curpos, hunits *distance)
   return distance_to_next_tab(curpos, distance, &nextpos);
 }
 
-tab_type tab_stops::distance_to_next_tab(hunits curpos, hunits *distance,
+tab_type tab_stops::distance_to_next_tab(hunits curpos,
+					 hunits *distance,
 					 hunits *nextpos)
 {
   hunits lastpos = 0;
@@ -2596,14 +2612,16 @@ tab_type tab_stops::distance_to_next_tab(hunits curpos, hunits *distance,
     return TAB_NONE;
   hunits base = lastpos;
   for (;;) {
-    for (tem = repeated_list; tem && tem->pos + base <= curpos; tem = tem->next)
+    for (tem = repeated_list; tem && tem->pos + base <= curpos;
+	 tem = tem->next)
       lastpos = tem->pos;
     if (tem) {
       *distance = tem->pos + base - curpos;
       *nextpos  = tem->pos + base;
       return tem->type;
     }
-    assert(lastpos > 0);
+    if (lastpos < 0)
+      lastpos = 0;
     base += lastpos;
   }
   return TAB_NONE;
@@ -2677,7 +2695,7 @@ tab_stops::tab_stops() : initial_list(0), repeated_list(0)
 {
 }
 
-tab_stops::tab_stops(const tab_stops &ts) 
+tab_stops::tab_stops(const tab_stops &ts)
 : initial_list(0), repeated_list(0)
 {
   tab **p = &initial_list;
@@ -2737,18 +2755,18 @@ void tab_stops::operator=(const tab_stops &ts)
     p = &(*p)->next;
   }
 }
-    
+
 void set_tabs()
 {
   hunits pos;
   hunits prev_pos = 0;
-  int first = 1;
-  int repeated = 0;
+  bool is_first_stop = true;
+  bool is_repeating_stop = false;
   tab_stops tabs;
   while (has_arg()) {
     if (tok.ch() == TAB_REPEAT_CHAR) {
       tok.next();
-      repeated = 1;
+      is_repeating_stop = true;
       prev_pos = 0;
     }
     if (!get_hunits(&pos, 'm', prev_pos))
@@ -2765,13 +2783,13 @@ void set_tabs()
     else if (tok.ch() == 'L') {
       tok.next();
     }
-    if (pos <= prev_pos && !first)
+    if (pos <= prev_pos && ((!is_first_stop) || is_repeating_stop))
       warning(WARN_RANGE,
 	      "positions of tab stops must be strictly increasing");
     else {
-      tabs.add_tab(pos, type, repeated);
+      tabs.add_tab(pos, type, is_repeating_stop);
       prev_pos = pos;
-      first = 0;
+      is_first_stop = false;
     }
   }
   curenv->tabs = tabs;
@@ -2943,16 +2961,18 @@ void environment::wrap_up_field()
     add_padding();
   hunits padding = field_distance - (get_text_length() - pre_field_width);
   if (current_tab && tab_field_spaces != 0) {
-    hunits tab_padding = scale(padding, 
-			       tab_field_spaces, 
+    hunits tab_padding = scale(padding,
+			       tab_field_spaces,
 			       field_spaces + tab_field_spaces);
     padding -= tab_padding;
-    distribute_space(tab_contents, tab_field_spaces, tab_padding, 1);
+    distribute_space(tab_contents, tab_field_spaces, tab_padding,
+		     true /* force reversal of node list */);
     tab_field_spaces = 0;
     tab_width += tab_padding;
   }
   if (field_spaces != 0) {
-    distribute_space(line, field_spaces, padding, 1);
+    distribute_space(line, field_spaces, padding,
+		     true /* force reversal of node list */);
     width_total += padding;
     if (current_tab) {
       // the start of the tab has been moved to the right by padding, so
@@ -3051,7 +3071,7 @@ const char *int_env_reg::get_string()
 {
   return i_to_a((curenv->*func)());
 }
- 
+
 vunits_env_reg::vunits_env_reg(VUNITS_FUNCP f) : func(f)
 {
 }
@@ -3548,11 +3568,12 @@ static void hyphen_word()
   unsigned char pos[WORD_MAX + 2];
   for (;;) {
     tok.skip();
-    if (tok.newline() || tok.eof())
+    if (tok.is_newline() || tok.is_eof())
       break;
     int i = 0;
     int npos = 0;
-    while (i < WORD_MAX && !tok.space() && !tok.newline() && !tok.eof()) {
+    while (i < WORD_MAX && !tok.is_space() && !tok.is_newline()
+	   && !tok.is_eof()) {
       charinfo *ci = tok.get_char(true /* required */);
       if (ci == 0) {
 	skip_line();
@@ -3592,7 +3613,7 @@ struct trie_node {
   trie_node(char, trie_node *);
 };
 
-trie_node::trie_node(char ch, trie_node *p) 
+trie_node::trie_node(char ch, trie_node *p)
 : c(ch), down(0), right(p), val(0)
 {
 }
@@ -4040,7 +4061,7 @@ void hyphenate(hyphen_list *h, unsigned flags)
   }
 }
 
-static void do_hyphenation_patterns_file(int append)
+static void do_hyphenation_patterns_file(bool append)
 {
   symbol name = get_long_name(true /* required */);
   if (!name.is_null()) {
@@ -4056,12 +4077,12 @@ static void do_hyphenation_patterns_file(int append)
 
 static void hyphenation_patterns_file()
 {
-  do_hyphenation_patterns_file(0);
+  do_hyphenation_patterns_file(false /* append */);
 }
 
 static void hyphenation_patterns_file_append()
 {
-  do_hyphenation_patterns_file(1);
+  do_hyphenation_patterns_file(true /* append */);
 }
 
 class hyphenation_language_reg : public reg {

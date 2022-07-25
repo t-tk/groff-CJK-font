@@ -78,10 +78,10 @@ int gen_tempname(char *tmpl, int dir)
   /* Get some more or less random data.  */
 #if HAVE_GETTIMEOFDAY
   timeval tv;
-  gettimeofday(&tv, NULL);
+  gettimeofday(&tv, 0);
   uint64_t random_time_bits = ((uint64_t)tv.tv_usec << 16) ^ tv.tv_sec;
 #else
-  uint64_t random_time_bits = time(NULL);
+  uint64_t random_time_bits = time(0);
 #endif
   value += random_time_bits ^ getpid();
 

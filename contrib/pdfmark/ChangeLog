@@ -1,3 +1,89 @@
+2021-09-18  Keith Marshall  <keith.d.marshall@ntlworld.com>
+
+	Factor a further unnecessary macro out of spdf.tmac
+
+	* spdf.tmac (XR): Remove it; relocate it to...
+	* pdfmark.ms (XR): ...here.
+
+2021-09-13  Keith Marshall  <keith.d.marshall@ntlworld.com>
+
+	Add comments to annotate locally-defined font change macros.
+
+	* pdfmark.ms (EM): Annotate this locally-defined emphasis macro...
+	(CWB, CWI, CWBI): ...these constant width font interpolation macros...
+	(=): ...and this locally-defined IP tag variant string.
+
+2021-09-13  Keith Marshall  <keith.d.marshall@ntlworld.com>
+
+	Update defunct internet URL references.
+
+	* pdfmark.ms (pdfmark-manual): Adobe moved the document (again);
+	update the document reference macro, to follow the URL relocation.
+	(www.mingw.org): The MinGW Project has relinquished this domain;
+	update the URL reference, to follow web-site relocation to...
+	(mingw.osdn.io): ...here.
+
+2021-09-13  Keith Marshall  <keith.d.marshall@ntlworld.com>
+
+	Factor document-specific bloat out of spdf.tmac
+
+	* spdf.tmac: Reorganize; add many comments.
+	(XN): Retained, but reimplemented, to serve as...
+	(XH, XN): ...both of these; add callback hooks for...
+	(XH-INIT, XN-INIT, XH-UPDATE-TOC): ...these; provide no-op stubs;
+	factor out TOC collection code, delegating to XH-UPDATE-TOC.
+	(opt*XN-N, opt*XN-S, opt*XN-X): Rename internal macros to...
+	(de spdf:XH-N, de spdf:XH-S, de spdf:XH-X): ...these, respectively.
+	(AN, @AN, IE, IS, LU, NN, PXREF, SAME-PAGE, XM): Delete; we do not
+	require these; if users do, they should define their own.
+	(pdf@toc): Delete internal macro; fold body into...
+	(TC): ...this.
+
+	* pdfmark.ms (XH-UPDATE-TOC): Implement callback; it is based on...
+	(XN): ...original implementation of this, factored out of spdf.tmac,
+	but with significant simplification, to remove unnecessary code.
+	(XNVS1, XNVS2, XNVS3): Tighten vertical spacing.
+
+2021-09-04  Keith Marshall  <keith.d.marshall@ntlworld.com>
+
+	Reduce potential for user-space exposure of "ms" internals.
+
+	* spdf.tmac (@NH): Append to s.tmac macro; assign...
+	(spdf:nh*hl): ...this new internal register; alias it to...
+	(.NH): ...this new public name, hence making it track...
+	(nh*hl): ...this s.tmac internal numeric register.
+	(XN): Use \n[.NH] instead of \n[nh*hl].
+
+2021-09-03  Keith Marshall  <keith.d.marshall@ntlworld.com>
+
+	Sanitize text for use in PDF document outlines.
+
+	* sanitize.tmac: New file; it implements...
+	(sanitize): ...this new macro; interprets its first argument as a
+	string name, and copies its remaining arguments to the named string,
+	discarding specific embedded troff escape sequences; currently...
+	(\F): ...only this is identified as "specifically discardable".
+
+	* pdfmark.am (TMACFILES): Add sanitize.tmac
+
+	* spdf.tmac (mso): Include sanitize.tmac
+	(xn*ref, xn*argc): Rename all occurrences...
+	(spdf:refname, spdf:argc): ...to these, respectively.
+	(XN): Stop inserting $* directly into PDF outlines; instead, use...
+	(spdf:bm.text): ...this new string; this is locally defined by...
+	(spdf:bm.define): ...this new macro; passed the original $* from
+	XN, this itself, is locally defined as a redirectable alias for...
+	(spdf:bm.basic): ...this new local macro; it simply copies $*,
+	passed from XN, to the string named by its first argument, (which is
+	always spdf:bm.text), so reproducing previous behaviour.
+	(opt*XN-S): New macro; defined for internal use only, it adds a "-S"
+	option to XN, such that, when specified, it temporarily redirects...
+	(spdf:bm.define): ...this macro mapping alias to...
+	(sanitize): ...this.
+
+	* pdfmark.ms (XN): Add "-S" option for all headings which include...
+	(\F[C]...\F[]): ...this escape sequence.
+
 2021-08-21  Keith Marshall  <keith.d.marshall@ntlworld.com>
 
 	Define, and use registered trade mark strings.

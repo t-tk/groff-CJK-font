@@ -41,6 +41,8 @@ my $groff_version = 'DEVELOPMENT';
 my @command = ();		# the constructed groff command
 my @requested_package = ();	# arguments to '-m' grog options
 my @inferred_preprocessor = ();	# preprocessors the document uses
+my @inferred_main_package = ();	# full-service package(s) detected
+my $selected_main_package;	# full-service package we go with
 my $do_run = 0;			# run generated 'groff' command
 my $use_compatibility_mode = 0;	# is -C being passed to groff?
 
@@ -54,8 +56,6 @@ my %user_macro;
 my %score = ();
 
 my @input_file;
-
-my $inferred_main_package = '';
 
 # .TH is both a man(7) macro and often used with tbl(1).  We expect to
 # find .TH in ms(7) documents only between .TS and .TE calls, and in
@@ -201,6 +201,15 @@ sub process_input {
 } # process_input()
 
 
+# Push item onto inferred full-service list only if not already present.
+sub push_main_package {
+  my $pkg = shift;
+  if (!grep(/^$pkg/, @inferred_main_package)) {
+    push @inferred_main_package, $pkg;
+  }
+} # push_main_package()
+
+
 sub do_line {
   my $command;			# request or macro name
   my $args;			# request or macro arguments
@@ -218,7 +227,7 @@ sub do_line {
 
   # Strip comments.
   $line =~ s/\\".*//;
-  $line =~ s/\\#.*//;
+  $line =~ s/\\#.*// unless $use_compatibility_mode;
 
   return unless ($line =~ /^[.']/);	# Ignore text lines.
 
@@ -286,11 +295,6 @@ sub do_line {
 
   $command = '' unless ($command);
   $args = '' unless ($args);
-
-  if ((!$have_seen_first_macro_call) && ($command eq 'TH')) {
-    # .TH as the first macro call in a document screams man(7).
-    $man_score += 100;
-  }
 
   ######################################################################
   # user-defined macros
@@ -363,18 +367,24 @@ sub do_line {
 
   # man and ms share too many macro names for the following approch to
   # be fruitful for many documents; see &infer_man_or_ms_package.
+  #
+  # We can put one thumb on the scale, however.
+  if ((!$have_seen_first_macro_call) && ($macro eq 'TH')) {
+    # TH as the first call in a document screams man(7).
+    $man_score += 100;
+  }
 
   ##########
   # mdoc
   if ($macro =~ /^Dd$/) {
-    $inferred_main_package = 'doc';
+    &push_main_package('doc');
     return;
   }
 
   ##########
   # old mdoc
   if ($macro =~ /^(Tp|Dp|De|Cx|Cl)$/) {
-    $inferred_main_package = 'doc-old';
+    &push_main_package('doc-old');
     return;
   }
 
@@ -386,7 +396,7 @@ sub do_line {
 		   n[12]|
 		   sh
 		  )$/x) {
-    $inferred_main_package = 'e';
+    &push_main_package('e');
     return;
   }
 
@@ -405,16 +415,16 @@ sub do_line {
 		  )$/x) {
     if ($macro =~ /^LO$/) {
       if ( $args =~ /^(DNAMN|MDAT|BIL|KOMP|DBET|BET|SIDOR)/ ) {
-	$inferred_main_package = 'mse';
+	&push_main_package('mse');
 	return;
       }
     } elsif ($macro =~ /^LT$/) {
       if ( $args =~ /^(SVV|SVH)/ ) {
-	$inferred_main_package = 'mse';
+	&push_main_package('mse');
 	return;
       }
     }
-    $inferred_main_package = 'm';
+    &push_main_package('m');
     return;
   }
 
@@ -451,7 +461,7 @@ sub do_line {
 		   TOC|
 		   T_MARGIN|
 		  )$/x) {
-    $inferred_main_package = 'om';
+    &push_main_package('om');
     return;
   }
 } # do_line()
@@ -548,16 +558,16 @@ sub infer_man_or_ms_package {
   } elsif ($ms_score == $man_score) {
     # If there was no TH call, it's not a (valid) man(7) document.
     if (!$score{'TH'}) {
-      $inferred_main_package = 's';
+      &push_main_package('s');
     } else {
       &warn("document ambiguous; disambiguate with -man or -ms option");
       $had_inference_problem = 1;
     }
     return 0;
   } elsif ($ms_score > $man_score) {
-    $inferred_main_package = 's';
+    &push_main_package('s');
   } else {
-    $inferred_main_package = 'an';
+    &push_main_package('an');
   }
 
   return 1;
@@ -589,27 +599,57 @@ sub construct_command {
     $_ = "'" . $_ . "'";
   }
 
-  my @msupp = ();
+  my $have_ambiguous_main_package = 0;
+  my $inferred_main_package_count = scalar @inferred_main_package;
 
-  # If a full-service package was explicitly requested, clear any
-  # inferred package (and warn if the inference differs from the
-  # request).  This also ensures that all -m arguments are placed in the
-  # same order that the user gave them; caveat dictator.
-  for my $pkg (@requested_package) {
-    if (grep(/$pkg/, @main_package)) {
-      if ($pkg ne $inferred_main_package) {
-	&warn("overriding inferred package '$inferred_main_package'"
-	      . " with requested package '$pkg'");
+  # Did we infer multiple full-service packages?
+  if ($inferred_main_package_count > 1) {
+    $have_ambiguous_main_package = 1;
+    # For each one the user explicitly requested...
+    for my $pkg (@requested_package) {
+      # ...did it resolve the ambiguity for us?
+      if (grep(/$pkg/, @inferred_main_package)) {
+	@inferred_main_package = ($pkg);
+	$have_ambiguous_main_package = 0;
+	last;
       }
-      $inferred_main_package = '';
     }
-    push @msupp, '-m' . $pkg;
+  } elsif ($inferred_main_package_count == 1) {
+    $selected_main_package = shift @inferred_main_package;
   }
 
-  push @m, '-m' . $inferred_main_package if ($inferred_main_package);
+  if ($have_ambiguous_main_package) {
+    # TODO: Alphabetical is probably not the best ordering here.  We
+    # should tally up scores on a per-package basis generally, not just
+    # for an and s.
+    for my $pkg (@main_package) {
+      if (grep(/$pkg/, @inferred_main_package)) {
+	$selected_main_package = $pkg;
+	&warn("document ambiguous (choosing '$selected_main_package'"
+	      . " from '@inferred_main_package'); disambiguate with -m"
+	      . " option");
+	$had_inference_problem = 1;
+	last;
+      }
+    }
+  }
 
-  push @command, @m, @msupp;
+  # If a full-service package was explicitly requested, warn if the
+  # inference differs from the request.  This also ensures that all -m
+  # arguments are placed in the same order that the user gave them;
+  # caveat dictator.
+  for my $pkg (@requested_package) {
+    if (grep(/$pkg/, @main_package)) {
+      if ($pkg ne $selected_main_package) {
+	&warn("overriding inferred package '$selected_main_package'"
+	      . " with requested package '$pkg'");
+	$selected_main_package = $pkg;
+      }
+    }
+  }
 
+  push @m, '-m' . $selected_main_package if ($selected_main_package);
+  push @command, @m;
   push(@command, @input_file) unless ($file_args_included);
 
   #########
@@ -658,7 +698,7 @@ sub version {
 my $in_unbuilt_source_tree = 0;
 {
   my $at = '@';
-  $in_unbuilt_source_tree = 1 if '@VERSION@' eq "${at}VERSION${at}";
+  $in_unbuilt_source_tree = 1 if ('@VERSION@' eq "${at}VERSION${at}");
 }
 
 $groff_version = '@VERSION@' unless ($in_unbuilt_source_tree);
@@ -668,7 +708,7 @@ $groff_version = '@VERSION@' unless ($in_unbuilt_source_tree);
 
 if ($have_any_valid_arguments) {
   &infer_preprocessors();
-  &infer_man_or_ms_package() unless ($inferred_main_package);
+  &infer_man_or_ms_package() if (scalar @inferred_main_package != 1);
   &construct_command();
 }
 

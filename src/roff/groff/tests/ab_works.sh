@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (C) 2020 Free Software Foundation, Inc.
+# Copyright (C) 2021 Free Software Foundation, Inc.
 #
 # This file is part of groff.
 #
@@ -20,10 +20,14 @@
 
 groff="${abs_top_builddir:-.}/test-groff"
 
-# troff should not segfault when its standard output is closed.
-# Savannah #59202.
+echo "verifying exit status of .ab request" >&2
+printf '.ab\n' | "$groff" -Tascii
+test $? -eq 1 || exit 1
 
-# If a core file already exists, it should be dealt with; skip test.
-test -e core && exit 77
-echo | "$groff" >&-
-! test -e core
+echo "verifying empty output of .ab request with no arguments" >&2
+OUT=$(printf '.ab\n' | "$groff" -Tascii 2>&1)
+test "$OUT" = "" || exit 1
+
+echo "verifying that arguments to .ab request go to stderr" >&2
+OUT=$(printf '.ab foo\n' | "$groff" -Tascii 2>&1 > /dev/null)
+test "$OUT" = "foo" || exit 1

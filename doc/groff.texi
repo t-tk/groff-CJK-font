@@ -424,7 +424,7 @@ developing GNU and promoting software freedom.''
 @title groff
 @subtitle The GNU implementation of @code{troff}
 @subtitle Edition 1.23.0
-@subtitle August 2021
+@subtitle September 2021
 @author by Trent A.@tie{}Fisher
 @author and Werner Lemberg
 
@@ -824,7 +824,7 @@ pictures (@code{ideal}).
 postprocessor to produce output for a particular device.  Currently,
 @code{groff} has postprocessors for PostScript devices, character
 terminals, X11 (for previewing), DVI, HP LaserJet@tie{}4 and Canon LBP
-printers (which use @acronym{CAPSL}), @acronym{HTML}, @acronym{XHTML},
+printers (which use @acronym{CaPSL}), @acronym{HTML}, @acronym{XHTML},
 and @acronym{PDF}.
 
 
@@ -1267,7 +1267,7 @@ code page 1047.
 For HP LaserJet4-compatible (or other PCL5-compatible) printers.
 
 @item lbp
-For Canon @acronym{CAPSL} printers (@w{LBP-4} and @w{LBP-8} series laser
+For Canon @acronym{CaPSL} printers (@w{LBP-4} and @w{LBP-8} series laser
 printers).
 
 @pindex pre-grohtml
@@ -5007,7 +5007,7 @@ Heywood Jabuzzoff
 @endExample
 
 In fact, the ending marker is itself the name of a macro that will be
-called if it is defined at the time the macro definition begins.
+called if it is defined by that time.
 
 @Example
 .de END
@@ -7131,7 +7131,7 @@ default.
 @item c
 @cindex centered text (filled)
 Center filled text.  Contrast with the @code{ce} request, which centers
-text without filling.
+text without filling it.
 
 @item l
 @cindex ragged-right text
@@ -7144,11 +7144,10 @@ Adjust text to the right margin, producing ragged-left text.
 @end table
 
 @var{mode} can also be a value previously stored in the @code{.j}
-register.
-
-Using @code{ad} without an argument is the same as @samp{.ad \n[.j]}.
-In particular, GNU @code{troff} adjusts lines in the same way it did
-before adjustment was disabled (with a call to @code{na}, say).
+register.  Using @code{ad} without an argument is the same as @samp{.ad
+\n[.j]}; unless filling is disabled, GNU @code{troff} resumes adjusting
+lines in the same way it did before adjustment was disabled by
+invocation of the @code{na} request.
 
 @Example
 .ll 48n
@@ -10691,34 +10690,33 @@ this.
 @Defesc {\\/, , , }
 @cindex italic correction (@code{\/})
 @cindex correction, italic (@code{\/})
-@cindex correction between italic and roman glyph (@code{\/}, @code{\,})
+@cindex correction between oblique and upright glyph (@code{\/}, @code{\,})
 @cindex roman glyph, correction after italic glyph (@code{\/})
-@cindex italic glyph, correction before roman glyph (@code{\/})
-@cindex glyph, italic correction (@code{\/})
-Apply an @dfn{italic correction}: increase the width of the preceding
-glyph so that the spacing between that glyph and the following glyph is
-correct if the following glyph is a roman glyph.  For example, if an
+@cindex upright glyph, correction after oblique glyph (@code{\/})
+Apply an @dfn{italic correction}:@: modify the spacing of the preceding
+glyph so that the distance between it and the following glyph is correct
+if the latter is of upright shape.  For example, if an
 italic@tie{}@samp{f} is immediately followed by a roman right
 parenthesis, then in many fonts the top right portion of
 the@tie{}@samp{f} overlaps the top left of the right parenthesis, which
-is ugly.  Use this escape sequence whenever an italic glyph is
-immediately followed by a roman glyph without any intervening space.
+is ugly.  Use this escape sequence whenever an oblique glyph is
+immediately followed by an upright glyph without any intervening space.
 @endDefesc
 
 @Defesc {\\\,, , , }
 @cindex left italic correction (@code{\,})
 @cindex correction, left italic (@code{\,})
-@cindex glyph, left italic correction (@code{\,})
+@cindex correction between upright and oblique glyph (@code{\/}, @code{\,})
 @cindex roman glyph, correction before italic glyph (@code{\,})
-@cindex italic glyph, correction after roman glyph (@code{\,})
-Apply a @dfn{left italic correction}: modify the spacing of the
-following glyph so that the spacing between that glyph and the preceding
-glyph is correct if the preceding glyph is a roman glyph.  For example,
+@cindex upright glyph, correction before oblique glyph (@code{\,})
+Apply a @dfn{left italic correction}:@: modify the spacing of the
+following glyph so that the distance between it and the preceding
+glyph is correct if the latter is of upright shape.  For example,
 if a roman left parenthesis is immediately followed by an
 italic@tie{}@samp{f}, then in many fonts the bottom left portion of
 the@tie{}@samp{f} overlaps the bottom of the left parenthesis, which is
-ugly.  Use this escape sequence whenever a roman glyph is immediately
-followed by an italic glyph without any intervening space.
+ugly.  Use this escape sequence whenever an upright glyph is followed
+immediately by an oblique glyph without any intervening space.
 @endDefesc
 
 @Defesc {\\&, , , }
@@ -11958,7 +11956,7 @@ Some remarks.
 @itemize @bullet
 @item
 The body of a @code{while} request is treated like the body of a
-@code{de} request: GNU @code{troff} temporarily stores it in a macro
+@code{de} request:@: GNU @code{troff} temporarily stores it in a macro
 that is deleted after the loop exits.  It can considerably slow down a
 macro if the body of the @code{while} request (within the macro) is
 large.  Each time the macro is executed, the @code{while} body is parsed
@@ -12046,9 +12044,9 @@ defined as empty.  @xref{Identifiers}.
 @Defreq {de, name [@Var{end}]}
 Define a macro @var{name}, replacing the definition of any existing
 request, macro, string, or diversion called @var{name}.  GNU
-@code{troff} enters ``copy mode'', storing subsequent input lines in an
-internal buffer.  If the optional second argument is not specified, the
-macro definition ends with the control line @samp{..} (two dots).
+@code{troff} enters ``copy mode'', storing subsequent input lines as the
+macro definition.  If the optional second argument is not specified, the
+definition ends with the control line @samp{..} (two dots).
 Alternatively, @var{end} identifies a macro whose call syntax ends the
 definition of @var{name}; @var{end} is then called normally.  Spaces or
 tabs are permitted after the control character in the line containing
@@ -12126,12 +12124,20 @@ clearer when we employ macro parameters and consider the behavior of
 copy mode in detail.
 @endDefreq
 
+@code{de} defines a macro that inherits the compatibility mode
+enablement status of its context (@pxref{Implementation Differences}).
+Often it is desirable to make a macro that uses @code{groff} features
+callable from contexts where compatibility mode is on; for instance,
+when writing extensions to a historical macro package.  To achieve this,
+compatibility mode needs to be switched off while such a macro is
+interpreted---without disturbing that state when it is finished.
+
 @Defreq {de1, name [@Var{end}]}
-The @code{de1} request defines a macro that executes with compatibility
-mode disabled (@pxref{Implementation Differences}).  On entry, the state
-of compatibility mode enablement is saved, and on exit it is restored.
-Observe the extra backlash before the interpolation of register
-@samp{xxx}; we'll explore this subject in @ref{Copy Mode}.
+The @code{de1} request defines a macro to be interpreted with
+compatibility mode disabled.  When @var{name} is called, compatibility
+mode enablement status is saved, and when @var{name} finishes, it is
+restored.  Observe the extra backlash before the interpolation of
+register @samp{xxx}; we'll explore this subject in @ref{Copy Mode}.
 
 @Example
 .nr xxx 12345
@@ -12153,9 +12159,9 @@ The value of xxx is \\n[xxx].
 
 @DefreqList {dei, name [@Var{end}]}
 @DefreqListEndx {dei1, name [@Var{end}]}
-The @code{dei} request defines a macro indirectly.  That is, it
-interpolates strings named @var{name} and @var{end} before performing
-the definition.
+The @code{dei} request defines a macro with its name and end
+macro indirected through strings.  That is, it interpolates strings
+named @var{name} and @var{end} before performing the definition.
 
 The following examples are equivalent.
 
@@ -12169,13 +12175,9 @@ The following examples are equivalent.
 .de aa bb
 @endExample
 
-The @code{dei1} request is similar to @code{dei}, but with compatibility
-mode switched off during execution of the defined macro.
-
-If compatibility mode is on, @code{de} and @code{dei} behave similarly
-to @code{de1} and @code{dei1}, respectively:@: a ``compatibility save''
-token is inserted at the beginning, and a ``compatibility restore''
-token at the end, with compatibility mode switched on during execution.
+The @code{dei1} request bears the same relationship to @code{dei} as
+@code{de1} does to @code{de}; it temporarily turns compatibility mode
+off when @var{name} is called.
 @endDefreq
 
 @DefreqList {am, name [@Var{end}]}
@@ -12197,10 +12199,8 @@ block paragraphs, add the necessary code to the existing macro.
 @endExample
 
 The other requests are analogous to their @samp{de} counterparts.  The
-@code{am1} request turns off compatibility mode while executing the
-appendment:@: a @dfn{compatibility save} input token is inserted before
-the appended input lines, and a @dfn{compatibility restore} input token
-after the end.  The @code{ami} request appends indirectly, meaning that
+@code{am1} request turns off compatibility mode during interpretation of
+the appendment.  The @code{ami} request appends indirectly, meaning that
 strings @var{name} and @var{end} are interpolated with the resulting
 names used before appending.  The @code{ami1} request is similar to
 @code{ami}, disabling compatibility mode during interpretation of the
@@ -12248,7 +12248,7 @@ Macro calls and string interpolations optionally accept a list of
 arguments; recall @ref{Request and Macro Arguments}.  At the time such
 an interpolation takes place, these @dfn{parameters} can be examined
 using a register and a variety of escape sequences starting with
-@code{\$}.
+@samp{\$}.
 
 @Defreg {.$}
 @cindex parameter count register (@code{.$})
@@ -12258,24 +12258,23 @@ read-only register.  The @code{shift} request can change its value.
 
 Any individual parameter can be accessed by its position in the list of
 arguments to the macro call, numbered from left to right starting at 1,
-with one of the following escapes.
+with one of the following escape sequences.
 
 @DefescList {\\$, , n, }
 @DefescItem {\\$, (, nn, }
 @DefescListEnd {\\$, [, nnn, ]}
-Interpolate the @var{n}@dmn{th}, @var{nn}@dmn{th}, or @var{nnn}@dmn{th}
-parameter.  The first form only accepts a single digit
-(1@leq{}@var{n}@leq{}9)), the second two digits
-(01@leq{}@var{nn}@leq{}99)), and the third any positive integer
-@var{nnn}.  Macros and strings can accept an unlimited number of
-parameters.
+Interpolate the @var{n}th, @var{nn}th, or @var{nnn}th parameter.  The
+first form only accepts a single digit (1@leq{}@var{n}@leq{}9)), the
+second two digits (01@leq{}@var{nn}@leq{}99)), and the third any
+positive integer @var{nnn}.  Macros and strings accept an unlimited
+number of parameters.
 @endDefesc
 
 @Defreq {shift, [@Var{n}]}
 Shift the parameters @var{n} places (1@tie{}by default).  This is a
 ``left shift'': what was parameter@tie{}@var{i} becomes parameter
-@math{@var{i}-@var{n}} and so on.  The parameters formerly in positions
-1 to@tie{}@var{n} are no longer available.  Shifting by a nonpositive
+@math{@var{i}-@var{n}}.  The parameters formerly in positions 1
+to@tie{}@var{n} are no longer available.  Shifting by a nonpositive
 amount performs no operation.  The register @code{.$} is adjusted
 accordingly.
 @endDefreq
@@ -12335,8 +12334,8 @@ which redefines some requests and macros for debugging purposes.
 @Defesc {\\$0, , , }
 @cindex macro name register (@code{\$0})
 @cindex @code{als} request, and @code{\$0}
-Interpolate the name by which the executing macro was called.  The
-@code{als} request can cause a macro to have more than one name.
+Interpolate the name by which the macro being interpreted was called.
+The @code{als} request can cause a macro to have more than one name.
 Applying string interpolation to a macro does not change this name.
 
 @Example
@@ -12401,10 +12400,10 @@ processed immediately upon recognition, can be termed
 @dfn{interpretation mode}.
 
 @Defesc {\\\\, , , }
-The escape character, @code{\} by default, escapes itself.  Thus you can
-control whether a given @code{\n}, @code{\g}, @code{\$}, @code{\*}, or
-@code{\V} escape sequence is interpreted at the time the macro
-containing it is defined, or later when the macro is
+The escape character, @code{\} by default, can escape a backslash.  This
+enables you to control whether a given @code{\n}, @code{\g}, @code{\$},
+@code{\*}, or @code{\V} escape sequence is interpreted at the time the
+macro containing it is defined, or later when the macro is
 called.@footnote{Compare this to the @code{\def} and @code{\edef}
 commands in @TeX{}.}
 
@@ -12451,7 +12450,7 @@ bar
 
 @noindent
 The first backslash is consumed while the macro is read, and the second
-is interpreted while executing macro @code{m1}.
+is interpreted when macro @code{m1} is called.
 @endDefesc
 
 @code{roff} documents should not use the @code{\\} or @code{\.}
@@ -12483,8 +12482,8 @@ This understeer is getting
 @endExample
 
 Each escape character is interpreted twice---once in copy mode, when the
-macro is defined, and once in interpretation mode, when it is executed.
-As seen above, this fact leads to exponential growth in the number of
+macro is defined, and once outside of it, when the macro is called.  As
+seen above, this fact leads to exponential growth in the number of
 escape characters required to delay interpolation of @code{\n},
 @code{\g}, @code{\$}, @code{\*}, and @code{\V} at each nesting level,
 which can be daunting.  GNU @code{troff} offers a solution.
@@ -12515,11 +12514,12 @@ use @code{\E} to keep @samp{..} from ending a macro definition
 prematurely.  If the multiplicity of backslashes complicates
 maintenance, use end macros.
 
-@code{\E} is also convenient to define strings that contain escape
+@code{\E} is also convenient to define strings containing escape
 sequences that need to work when used in copy mode (for example, as
-macro arguments) We might define strings to begin and end superscripting
+macro arguments), or which will be interpolated at varying macro nesting
+depths.  We might define strings to begin and end superscripting
 as follows.@footnote{These are lightly adapted from the @code{groff}
-implmentation of the @file{ms} macros.}
+implementation of the @file{ms} macros.}
 
 @Example
 .ds @{ \v'-.9m\s'\En[.s]*7u/10u'+.7m'
@@ -12545,12 +12545,9 @@ the use of an unusual escape character, @samp{-}.
 This result may surprise you; some people expect @samp{1} to be output
 since register @samp{a} has clearly been defined with that value.  What
 has happened?  The robotic replacement of @samp{\} with @samp{-} has led
-us astray.  As mentioned above, the leading escape character makes
-the following character ordinary.  Written with the default escape
-character, the sequence @samp{--} becomes @samp{\-}, which you may
-recognize as the special character escape sequence for the minus sign
-glyph.  Since the escape character followed by itself is a valid escape
-sequence, only @code{\E} yields the expected result.
+us astray.  You might recognize the sequence @samp{--} more readily with
+the default escape character as @samp{\-}, the special character escape
+sequence for the minus sign glyph.
 
 @Example
 .nr a 1
@@ -13232,7 +13229,7 @@ Setting a trap is also called @dfn{planting}.
 @cindex trap, springing
 @cindex springing a trap
 It is also said that a trap is @dfn{sprung} if the associated macro is
-executed.
+called.
 
 @menu
 * Vertical Position Traps::
@@ -13456,6 +13453,8 @@ baz
 .ch T 6i
 qux
 .sp 11i
+@endExample
+@Example
     @result{} foo
     @result{} Trap sprung at 240u.
     @result{} Trap sprung at 480u.
@@ -13475,7 +13474,7 @@ needed in the last @code{ne} request that caused a trap to be sprung;
 it is useful in conjunction with the @code{.trunc} register.  @xref{Page
 Control}.
 
-Since the @code{.ne} register is set only by traps it doesn't make much
+Since the @code{.ne} register is set only by traps, it doesn't make
 sense to use it outside of trap macros.
 @endDefreg
 
@@ -13490,8 +13489,8 @@ request.  In other words, at the point a trap is sprung, it
 represents the difference of what the vertical position would have
 been but for the trap, and what the vertical position actually is.
 
-Since the @code{.trunc} register is only set by traps it doesn't make
-much sense to use it outside of trap macros.
+Since the @code{.trunc} register is set only by traps, it doesn't make
+sense to use it outside of trap macros.
 @endDefreg
 
 @Defreg {.pe}
@@ -14357,41 +14356,40 @@ beginning of your document to control color output.
 Colors can be also turned off with the @option{-c} command-line option.
 @endDefreq
 
-@Defreq {defcolor, ident scheme color_components}
-Define color with name @var{ident}.  @var{scheme} can be one of the
-following values: @code{rgb} (three components), @code{cmy} (three
-components), @code{cmyk} (four components), and @code{gray} or
-@code{grey} (one component).
+@Defreq {defcolor, ident scheme color-component @dots{}}
+Define a color named @var{ident} for use with the @code{fcolor} and
+@code{gcolor} requests and the @code{\m} and @code{\M} escape sequences.
+@var{scheme} identifies a color space and determines the number of
+required @var{color-component}s; it must be one of @samp{rgb} (three
+components), @samp{cmy} (three components), @samp{cmyk} (four
+components), or @samp{gray} (one component). @samp{grey} is accepted as
+a synonym of @samp{gray}.  The color components can be encoded as a
+hexadecimal value starting with @samp{#} or @samp{##}.  The former
+indicates that each component is in the range 0--255 (0--FF), the latter
+the range 0--65535 (0--FFFF).
 
-@cindex default color
-@cindex color, default
-Color components can be given either as a hexadecimal string or as
-positive decimal integers in the range 0--65535.  A hexadecimal string
-contains all color components concatenated.  It must start with either
-@code{#} or @code{##}; the former specifies hex values in the range
-0--255 (which are internally multiplied by@tie{}257), the latter in the
-range 0--65535.  Examples: @code{#FFC0CB} (pink), @code{##ffff0000ffff}
-(magenta).  The default color name @c{default} can't be redefined; its
-value is device-specific (usually black).  It is possible that the
-default color for @code{\m} and @code{\M} is not identical.
+@Example
+.defcolor half gray #7f
+.defcolor pink rgb #FFC0CB
+.defcolor magenta rgb  ##ffff0000ffff
+@endExample
 
 @cindex @code{f} unit, and colors
 @cindex unit, @code{f}, and colors
-A new scaling indicator@tie{}@code{f} has been introduced, which
-multiplies its value by 65536; this makes it convenient to specify color
-components as fractions in the range 0 to@tie{}1 (1f equals 65536u).
-Example:
+Alternatively, each color component can be specified as a decimal
+fraction in the range 0--1, interpreted using a default scaling
+indicator of@tie{}@code{f}, which multiplies its value by 65536.
 
 @Example
+.defcolor gray50 rgb 0.5 0.5 0.5
 .defcolor darkgreen rgb 0.1f 0.5f 0.2f
 @endExample
 
-Note that @code{f} is the default scaling indicator for the
-@code{defcolor} request, thus the above statement is equivalent to
-
-@Example
-.defcolor darkgreen rgb 0.1 0.5 0.2
-@endExample
+@cindex default color
+@cindex color, default
+Each output device has a color named @samp{default} that cannot be
+redefined.  A device's default drawing and fill colors are not
+necessarily the same.
 @endDefreq
 
 @DefreqList {gcolor, [@Var{color}]}
@@ -15112,7 +15110,7 @@ the data flow.
 
 Macros, diversions, and strings collect elements in two chained lists: a
 list of input tokens that have been passed unprocessed, and a list of
-output nodes.  Consider the following the diversion.
+output nodes.  Consider the following diversion.
 
 @Example
 .di xxx
@@ -15193,7 +15191,7 @@ maps to the real glyph @samp{foo}.
 @cindex parameters, and compatibility mode
 @cindex macro arguments, and compatibility mode
 @cindex request arguments, and compatibility mode
-Macro and request arguments preserve the compatibility mode:
+Macro and request arguments preserve compatibility mode enablement.
 
 @Example
 .cp 1     \" switch to compatibility mode
@@ -15206,14 +15204,14 @@ Macro and request arguments preserve the compatibility mode:
 @endExample
 
 @noindent
-Since compatibility mode is on while @code{de} is called, the macro
-@code{xx} activates compatibility mode while executing.  Argument
+Since compatibility mode is enabled while @code{de} is invoked, the
+macro @code{xx} enables compatibility mode when it is called.  Argument
 @code{$1} can still be handled properly because it inherits the
-compatibility mode status which was active at the point where @code{xx}
-is called.
+compatibility mode enablement status that was active at the point where
+@code{xx} was called.
 
-After expansion of the parameters, the compatibility save and restore
-tokens are removed.
+After interpolation of the parameters, the compatibility save and
+restore tokens are removed.
 
 
 @c =====================================================================
@@ -15296,10 +15294,9 @@ newline (as is done in @code{tm} and @code{tm1}).
 
 @Defreq {ab, [@Var{string}]}
 @cindex aborting (@code{ab})
-Write @var{string} to the standard error stream (like @code{tm})and then
-abort GNU @code{troff}; that is, stop processing and terminate with a
-failure status.  With no argument, the message written is @samp{User
-Abort.}.
+Write @var{string} to the standard error stream (like @code{tm}) and
+then abort GNU @code{troff}; that is, stop processing and terminate with
+a failure status.
 @endDefreq
 
 @Defreq {ex, }
@@ -15905,6 +15902,12 @@ Fractional point sizes cause one noteworthy incompatibility.  In
 indicators and thus @samp{.ps 10u} sets the point size to
 10@tie{}points, whereas in GNU @code{troff} it sets the point size to
 10@tie{}scaled points.  @xref{Fractional Type Sizes}.
+
+@cindex @code{ab} request, incompatibilities with @acronym{AT&T} @code{troff}
+The @code{ab} request differs from @acronym{AT&T} @code{troff}:
+GNU @code{troff} writes no message to the standard error stream if no
+arguments are given, and it exits with a failure status instead of a
+successful one.
 
 @cindex @code{bp} request, incompatibilities with @acronym{AT&T} @code{troff}
 The @code{bp} request differs from @acronym{AT&T} @code{troff}:
@@ -16671,7 +16674,7 @@ offset (@var{dh},@var{dv}).
 
 The postprocessor @command{grolbp} translates the output from GNU
 @command{troff} into the @strong{LBP} output format suitable for
-printing on @strong{Canon CAPSL} printers.  It is fully documented on
+printing on Canon @acronym{CaPSL} printers.  It is fully documented in
 its man page, @cite{grolbp@r{(1)}}.
 
 @menu
@@ -17862,19 +17865,17 @@ italic, bold, and bold-italic styles (@file{R}, @file{I}, @file{B}, and
 @cindex format of font description file
 @pindex DESC@r{ file format}
 
-The @file{DESC} file can contain the following types of line.  Except
-for the @code{charset} directive, which must come last (if at all), the
-order of the lines is not important.  Later entries in the file,
-however, override previous values.  Empty lines are ignored.
+The @file{DESC} file contains a series of directives, one per line.
+Except for the @code{charset} directive, which must come last (if at
+all), the order of the lines is not important.  Later entries in the
+file, however, override previous values.
+@cindex comments in device description files
+@cindex device description files, comments
+@kindex #
+Comments start with the @samp{#} character and extend to the end of a
+line.  Empty lines are ignored.
 
 @table @code
-@item charset
-@kindex charset
-This line and everything following it in the file are ignored.  It is
-recognized for compatibility with other @code{troff} implementations.
-In GNU @code{troff}, character set repertoire is described on a
-per-font basis.
-
 @item family @var{fam}
 @kindex family
 The default font family is @var{fam}.
@@ -17932,7 +17933,8 @@ format.
 
 Finally, the argument can be a file name (e.g., @file{/etc/papersize});
 if the file can be opened, GNU @code{troff} reads the first line and
-attempts to match the above forms.  No comment syntax is supported.
+attempts to match either of the other forms.  No comment syntax is
+supported.
 
 More than one argument can be specified; GNU @code{troff} scans from
 left to right and uses the first valid paper specification.
@@ -18007,8 +18009,8 @@ directive.
 
 @item unitwidth @var{n}
 @kindex unitwidth
-Quantities in the font files are given in basic units for fonts whose
-point size is @var{n}@tie{}scaled points.
+Quantities in the font description files are in basic units for fonts
+whose point size is @var{n}@tie{}scaled points.
 
 @item unscaled_charwidths
 @kindex unscaled_charwidths
@@ -18027,6 +18029,13 @@ characters inside special commands; @xref{Postprocessor Access}.  The
 @cindex resolution, vertical
 The vertical resolution is @var{n}@tie{}basic units.  All vertical
 quantities are rounded to multiples of this value.
+
+@item charset
+@kindex charset
+This line and everything following it in the file are ignored.  It is
+recognized for compatibility with other @code{troff} implementations.
+In GNU @code{troff}, character set repertoire is described on a
+per-font basis.
 @end table
 
 @kindex spare1
@@ -18067,10 +18076,13 @@ wide at a notional type size of 800@tie{}points.@footnote{800-point type
 is not practical for most purposes, but using it enables the quantities
 in the font description files to be expressed as integers.}
 
-A font description file has two sections; empty lines are ignored in
-both.  The first section is a sequence of lines each containing a
-sequence of space-delimited words; the first word in the line is a key,
-and subsequent words associate a value with that key.
+A font description file has two sections.  The first is a sequence of
+directives;
+@cindex comments in font description files
+@cindex font description files, comments
+@kindex #
+it can contain comments, which start with the @samp{#} character and
+extend to the end of a line.  Empty lines are ignored in both sections.
 
 @table @code
 @item name @var{f}
@@ -18083,14 +18095,14 @@ The width of a normal, unadjusted space is @var{n}@tie{}basic units at
 a type size of @var{unit-width} points.
 @end table
 
-The above directives are mandatory; the remaining ones in the first
-section are optional.
+The directives above are mandatory in the first section; those below are
+optional.
 
 @table @code
 @item slant @var{n}
 @kindex slant
-The glyphs of the font have a slant of @var{n}@tie{}degrees, where a
-positive @var{n} slants in the direction of text flow.
+The font's glyphs have a slant of @var{n}@tie{}degrees; a positive
+@var{n} slants in the direction of text flow.
 
 @item ligatures @var{lig1} @r{@dots{}} @var{lign} @r{[}0@r{]}
 @kindex ligatures
@@ -18103,33 +18115,29 @@ must not extend over more than one line.
 @item special
 @cindex special fonts
 @kindex special
-The font is @dfn{special}; this means that when a glyph is requested
-that is not present in the current font, it is searched for in any
-special fonts that are mounted.
+The font is @dfn{special}: when a glyph is requested that is not present
+in the current font, it is sought in any mounted fonts that bear this
+property.
 @end table
 
-Other directives are ignored by GNU @code{troff} but may be used by
-postprocessors to store arbitrary information about the font in the
-file.
+Other directives in this section are ignored by GNU @code{troff}, but
+may be used by postprocessors to store arbitrary information about the
+font in the file.
 
-@cindex comments in font files
-@cindex font files, comments
-@kindex #
-The first section can contain comments, which start with the @samp{#}
-character and extend to the end of a line.
-
-The second section contains one or two subsections.  It must contain a
-@code{charset} subsection and it may also contain a @code{kernpairs}
-subsection.  These subsections can appear in either order.  Each
-subsection starts with a directive on a line by itself.
+The second section contains one or two subsections. These can appear in
+either order; the first one encountered commences the second section.
+Each starts with a directive on a line by itself.  A @code{charset}
+subsection is mandatory unless the associated @file{DESC} file contains
+the @code{unicode} directive.  Another subsection, @code{kernpairs},
+is optional.
 
 @kindex charset
 The directive @code{charset} starts the character set
-subsection.@footnote{This keyword is misnamed since it starts an ordered
-list of glyphs, not characters.}  The @code{charset} line is followed by
-a sequence of lines, each with information about one glyph.  A line
-comprises a number of fields separated by spaces or tabs.  The format is
-as follows.
+subsection.@footnote{For typesetter devices, this keyword is misnamed
+since it starts an ordered list of glyphs, not characters.}  The
+@code{charset} line is followed by a sequence of lines, each with
+information about one glyph.  A line comprises a number of fields
+separated by spaces or tabs.  The format is as follows.
 
 @quotation
 @var{name} @var{metrics} @var{type} @var{code} [@var{entity-name}]
@@ -18239,10 +18247,8 @@ driver could encode its character set.  For example, the glyph
 @samp{\[Po]} is represented by @samp{&pound;} in @acronym{HTML} 4.0.
 For efficiency, these data are now compiled directly into
 @code{grohtml}.  @code{grops} uses the field to build sub-encoding
-arrays for PostScript fonts containing more than 256 glyphs.
-
-Anything on the line after the @var{entity-name} field or @samp{--} is
-ignored.
+arrays for PostScript fonts containing more than 256 glyphs.  Anything
+on the line after the @var{entity-name} field or @samp{--} is ignored.
 
 A line in the @code{charset} section can also have the following format.
 

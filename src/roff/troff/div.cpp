@@ -48,7 +48,7 @@ static int vertical_position_traps_flag = 1;
 static vunits truncated_space;
 static vunits needed_space;
 
-diversion::diversion(symbol s) 
+diversion::diversion(symbol s)
 : prev(0), nm(s), vertical_position(V0), high_water_mark(V0),
   any_chars_added(0), no_space_mode(0), needs_push(0), saved_seen_break(0),
   saved_seen_space(0), saved_seen_eol(0), saved_suppress_next_eol(0),
@@ -151,7 +151,7 @@ void divert_append()
 {
   do_divert(1, 0);
 }
-  
+
 void box()
 {
   do_divert(0, 1);
@@ -342,7 +342,7 @@ trap *top_level_diversion::find_next_trap(vunits *next_trap_pos)
   for (trap *pt = page_trap_list; pt != 0; pt = pt->next)
     if (!pt->nm.is_null()) {
       if (pt->position >= V0) {
-	if (pt->position > vertical_position 
+	if (pt->position > vertical_position
 	    && pt->position < page_length
 	    && (next_trap == 0 || pt->position < *next_trap_pos)) {
 	  next_trap = pt;
@@ -378,7 +378,7 @@ void top_level_diversion::output(node *nd, int retain_size,
   no_space_mode = 0;
   vunits next_trap_pos;
   trap *next_trap = find_next_trap(&next_trap_pos);
-  if (before_first_page && begin_page()) 
+  if (before_first_page && begin_page())
     fatal("sorry, I didn't manage to begin the first page in time: use an explicit .br request");
   vertical_size v(vs, post_vs);
   for (node *tem = nd; tem != 0; tem = tem->next)
@@ -504,7 +504,7 @@ void top_level_diversion::add_trap(symbol nam, vunits pos)
   }
   else
     *p = new trap(nam, pos, 0);
-}  
+}
 
 void top_level_diversion::remove_trap(symbol nam)
 {
@@ -577,12 +577,12 @@ int top_level_diversion::begin_page(vunits n)
     if (page_count == last_page_count
 	? curenv->is_empty()
 	: (done_end_macro && (seen_last_page_ejector || began_page_in_end_macro)))
-      cleanup_and_exit(0);
+      cleanup_and_exit(EXIT_SUCCESS);
     if (!done_end_macro)
       began_page_in_end_macro = 1;
   }
   if (last_page_number > 0 && page_number == last_page_number)
-    cleanup_and_exit(0);
+    cleanup_and_exit(EXIT_SUCCESS);
   if (!the_output)
     init_output();
   ++page_count;
@@ -693,7 +693,7 @@ void begin_page()
   int n = 0;		/* pacify compiler */
   if (has_arg() && get_integer(&n, topdiv->get_page_number()))
     got_arg = 1;
-  while (!tok.newline() && !tok.eof())
+  while (!tok.is_newline() && !tok.is_eof())
     tok.next();
   if (curdiv == topdiv) {
     if (topdiv->before_first_page) {
@@ -772,14 +772,14 @@ void space_request()
   vunits n;
   if (!has_arg() || !get_vunits(&n, 'v'))
     n = curenv->get_vertical_spacing();
-  while (!tok.newline() && !tok.eof())
+  while (!tok.is_newline() && !tok.is_eof())
     tok.next();
   if (!unpostpone_traps() && !curdiv->no_space_mode)
     curdiv->space(n);
   else
     // The line might have had line spacing that was truncated.
     truncated_space += n;
-  
+
   tok.next();
 }
 
@@ -800,7 +800,7 @@ void need_space()
   vunits n;
   if (!has_arg() || !get_vunits(&n, 'v'))
     n = curenv->get_vertical_spacing();
-  while (!tok.newline() && !tok.eof())
+  while (!tok.is_newline() && !tok.is_eof())
     tok.next();
   curdiv->need(n);
   tok.next();
@@ -835,7 +835,7 @@ void save_vertical_space()
 
 void output_saved_vertical_space()
 {
-  while (!tok.newline() && !tok.eof())
+  while (!tok.is_newline() && !tok.is_eof())
     tok.next();
   if (saved_space > V0)
     curdiv->space(saved_space, 1);
@@ -845,7 +845,7 @@ void output_saved_vertical_space()
 
 void flush_output()
 {
-  while (!tok.newline() && !tok.eof())
+  while (!tok.is_newline() && !tok.is_eof())
     tok.next();
   if (break_flag)
     curenv->do_break();
@@ -1192,7 +1192,7 @@ void init_div_requests()
   number_reg_dictionary.define(".t", new distance_to_next_trap_reg);
   number_reg_dictionary.define(".trunc",
 			       new constant_vunits_reg(&truncated_space));
-  number_reg_dictionary.define(".vpt", 
+  number_reg_dictionary.define(".vpt",
 		       new constant_int_reg(&vertical_position_traps_flag));
   number_reg_dictionary.define(".z", new diversion_name_reg);
   number_reg_dictionary.define("dl", new variable_reg(&dl_reg_contents));

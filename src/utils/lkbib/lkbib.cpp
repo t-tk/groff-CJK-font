@@ -55,7 +55,7 @@ int main(int argc, char **argv)
 	 != EOF)
     switch (opt) {
     case 'V':
-      verify_flag = 1;
+      do_verify = true;
       break;
     case 'n':
       search_default = 0;

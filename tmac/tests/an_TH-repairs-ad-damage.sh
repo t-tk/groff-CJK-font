@@ -36,6 +36,6 @@ Innocent, unoffending man page enjoys adjustment to both margins.
 Innocent, unoffending man page enjoys adjustment to both margins.'
 
 OUTPUT=$(printf "%s\n" "$EXAMPLE" | "$groff" -Tascii -P-cbou -man)
-echo "$OUTPUT" | grep -qE 'margins\.   In' # three spaces
+echo "$OUTPUT" | grep -qE 'margins\.  In' # two spaces
 
 # vim:set ai et sw=4 ts=4 tw=72:

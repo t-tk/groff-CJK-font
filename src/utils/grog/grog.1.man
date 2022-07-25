@@ -81,7 +81,7 @@ command is normally written to the standard output stream.
 .
 With the option
 .BR \-\-run ,
-the generated command is written to the standard error stream and then
+the inferred command is written to the standard error stream and then
 executed.
 .
 .
@@ -105,7 +105,7 @@ all exit afterward.
 .B \-\-ligatures
 includes the arguments
 .B \-P\-y \-PU
-in the generated
+in the inferred
 .I groff
 command.
 .
@@ -140,9 +140,9 @@ command line.
 .\" ====================================================================
 .
 .I grog
-reads all
+reads each
 .I file
-operands in their entirety,
+operand,
 pattern-matching strings that are statistically likely to be
 characteristic of
 .IR roff (@MAN7EXT@)
@@ -191,9 +191,31 @@ Choices of
 .I groff
 options include
 .B \-C
-to enable compatibility mode and
+to enable AT&T
+.I troff
+compatibility mode and
 .B \-T
-to specify an output device other than the default.
+to select a non-default output device.
+.
+If the input is not encoded in US-ASCII,
+ISO 8859-1,
+or IBM code page 1047,
+specification of a
+.I groff
+option to run the
+.IR preconv (@MAN1EXT@)
+preprocessor is advised;
+see the
+.BR \-D ,
+.BR \-k ,
+and
+.B \-K
+options of
+.IR groff (@MAN1EXT@).
+.
+For UTF-8 input,
+.B \-k
+is a good choice.
 .
 .
 .P
@@ -213,8 +235,6 @@ unless it cannot correctly infer all of the
 .B \-m
 arguments a document requires.
 .
-.
-.P
 A
 .I roff
 document can also be written without recourse to any macro package.
@@ -235,10 +255,8 @@ option.
 .I grog
 presumes that the input does not change the escape,
 control,
-and no-break control characters.
+or no-break control characters.
 .
-.
-.P
 .I grog
 does not parse
 .I roff
@@ -275,10 +293,10 @@ from
 .
 Such constructions are regarded by
 .IR grog 's
-implementors as insufficiently common to cause many inference problems;
-further,
-preprocessors are typically even stricter when matching the macro calls
-they use to bracket the regions of an input file they textually replace.
+implementors as insufficiently common to cause many inference problems.
+.
+Preprocessors can be even stricter when matching macro calls that
+bracket the regions of an input file they replace.
 .
 .IR pic ,
 for example,
@@ -287,8 +305,7 @@ requires
 and
 .B PE
 calls to immediately follow the default control character at the
-beginning of a line,
-with no intervening spaces or tabs.
+beginning of a line.
 .
 .
 .P
@@ -399,11 +416,18 @@ if there were problems handling an option or operand.
 It otherwise exits with status
 .BR 0 .
 .
+(If the
+.B \-\-run
+option is specified,
+.IR groff 's
+exit status is discarded.)
+.
 Inferring no preprocessors or macro packages is not an error condition;
 a valid
 .I roff
-document need not use either,
-and even plain text is valid input,
+document need not use either.
+.
+Even plain text is valid input,
 if one is mindful of the syntax of the control and escape characters.
 .
 .
@@ -415,13 +439,13 @@ Running
 .
 .RS
 .EX
-.B grog meintro.me
+.B grog @DOCDIR@/meintro.me
 .EE
 .RE
 at the command line results in
 .RS
 .EX
-groff \-me meintro.me
+groff \-me @DOCDIR@/meintro.me
 .EE
 .RE
 .
@@ -437,7 +461,7 @@ The command
 .
 .RS
 .EX
-.B grog pic.ms
+.B grog @DOCDIR@/pic.ms
 .EE
 .RE
 .
@@ -445,7 +469,7 @@ outputs
 .
 .RS
 .EX
-groff \-t \-e \-p \-ms pic.ms
+groff \-e \-p \-t \-ms @DOCDIR@/pic.ms
 .EE
 .RE
 .
@@ -502,42 +526,51 @@ for
 .
 .
 .P
+Consider a file
+.IR \%doc/\:\%grnexampl.me ,
+which uses the
+.I \%@g@grn
+preprocessor to include a
+.IR \%gremlin (1)
+picture file in an
+.I me \" generic
+document.
+.
+Let's say we want to suppress color output,
+produce a DVI file,
+and get backtraces for any errors that
+.I \%@g@troff
+encounters.
+.
 The command
 .
 .RS
 .EX
-.B grog \-ksS \-Tdvi grnexmpl.g
+.B grog \-bc \-Idoc \-Tdvi doc/grnexmpl.me
 .EE
 .RE
 .
-contains several
-.I groff
-options that are passed through without interference from
-.IR grog .
-.
-These are the option cluster
-.B \-ksS
-and the typesetter option
-.B \-T
-with argument
-.BR dvi .
-.
-The output is
+is processed by
+.I grog
+into
 .
 .RS
 .EX
-groff \-ksS \-T dvi grnexmpl.g
+groff \-bc \-Idoc \-Tdvi \-e \-g \-me doc/grnexmpl.me
 .EE
 .RE
 .
-so no additional option was added by
-.IR grog .
+where we can see that
+.I grog
+has inferred the
+.I me \" generic
+macro package and the
+.I eqn \" generic
+preprocessor.
 .
-As no
-.B \-m
-option was inferred by
-.IR grog ,
-this file does not use a macro package.
+(The input file is located in
+.I @DOCDIR@
+if you'd like to try this example yourself.)
 .
 .
 .\" ====================================================================
@@ -545,13 +578,16 @@ this file does not use a macro package.
 .\" ====================================================================
 .
 .I grog
-was originally written by James Clark.
+was originally written in Bourne shell by James Clark.
 .
-The current Perl implementation was written by
+The current implementation in Perl was written by
 .MT groff\-bernd\:.warken\-72@\:web\:.de
 Bernd Warken
 .ME
-with contributions from Ralph Corderoy.
+and heavily revised by
+.MT g.branden\:.robinson@\:gmail\:.com
+G.\& Branden Robinson
+.ME .
 .
 .
 .\" ====================================================================

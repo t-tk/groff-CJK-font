@@ -44,7 +44,7 @@ public:
   friend inline int operator !=(const vunits&, const vunits&);
 };
 
-extern vunits V0;
+extern const vunits V0;
 
 
 class hunits {
@@ -73,7 +73,7 @@ public:
   friend inline int operator !=(const hunits&, const hunits&);
 };
 
-extern hunits H0;
+extern const hunits H0;
 
 extern int get_vunits(vunits *, unsigned char si);
 extern int get_hunits(hunits *, unsigned char si);

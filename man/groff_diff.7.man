@@ -662,12 +662,14 @@ This has the same effect as
 .BI \[rs]s\[aq] \[+-]n \[aq]
 .TQ
 .BI \[rs]s \[+-] \[aq] n \[aq]
-Set the point size to
+Set the type size to,
+or increment or decrement it by,
 .I n
 scaled points;
 .I n
 is a numeric expression with a default scaling indicator
 .RB of\~\[lq] z \[rq].
+.
 .
 .TP
 .BI \[rs]V x
@@ -678,9 +680,11 @@ is a numeric expression with a default scaling indicator
 Interpolate the contents of the environment variable
 .IR xxx ,
 as returned by
-.BR getenv (3).
+.IR getenv (3).
+.
 .B \[rs]V
-is interpreted in copy mode.
+is interpreted even in copy mode.
+.
 .
 .TP
 .BI \[rs]Y x
@@ -791,18 +795,16 @@ as arguments.
 .B \[rs]/
 Apply an
 .IR "italic correction" :
-increase the width of the preceding glyph so that the spacing between
-that glyph and the following glyph is correct if the following glyph is
-a roman glyph.
+modify the spacing of the preceding glyph so that the distance between
+it and the following glyph is correct if the latter is of upright shape.
 .
 For example,
 if an italic\~\[lq]f\[rq] is immediately followed by a roman right
 parenthesis,
 then in many fonts the top right portion of the\~\[lq]f\[rq] overlaps
-the top left of the right parenthesis\c
-.if t \{
-producing \f[I]f\f[R])\c\}
-, which is ugly.
+the top left of the right parenthesis,
+.if t producing \f[I]f\f[R]),
+which is ugly.
 .
 Inserting
 .B \[rs]/
@@ -815,40 +817,38 @@ between them
 .\}
 avoids this problem.
 .
-Use this escape sequence whenever an italic glyph is immediately
-followed by a roman glyph without any intervening space.
+Use this escape sequence whenever an oblique glyph is immediately
+followed by an upright glyph without any intervening space.
 .
 .
 .TP
 .B \[rs],
 Apply a
 .IR "left italic correction" :
-modify the spacing of the following glyph so that the spacing between
-that glyph and the preceding glyph is correct if the preceding glyph is
-a roman glyph.
+modify the spacing of the following glyph so that the distance between
+it and the preceding glyph is correct if the latter is of upright shape.
 .
 For example,
 if a roman left parenthesis is immediately followed by an
 italic\~\[lq]f\[rq],
 then in many fonts the bottom left portion of the\~\[lq]f\[rq] overlaps
-the bottom of the left parenthesis\c
-.if t \{
-producing \f[R](\f[I]f\f[R]\c\}
-, which is ugly.
+the bottom of the left parenthesis,
+.if t producing \f[R](\f[I]f\f[R],
+which is ugly.
 .
 Inserting
 .B \[rs],
 between them
 .if t \{\
 .  nop produces
-.  ie \n(.g \f[R](\,\f[I]f\f[R].
-.  el       \f[R](\^\f[I]f\f[R].
+.  ie \n(.g \f[R](\,\f[I]f\f[R]
+.  el       \f[R](\^\f[I]f\f[R]
 .  nop and
 .\}
 avoids this problem.
 .
-Use this escape sequence whenever a roman glyph is immediately followed
-by an italic glyph without any intervening space.
+Use this escape sequence whenever an upright glyph is followed
+immediately by an oblique glyph without any intervening space.
 .
 .
 .TP
@@ -1733,75 +1733,65 @@ it.
 In compatibility mode, long names are not recognized, and the
 incompatibilities caused by long names do not arise.
 .
+.
 .TP
-.BI .defcolor\~ xxx\~scheme\~color_components
-Define color
-.IR xxx .
+.B .defcolor\~\c
+.IR "ident scheme color-component\~" .\|.\|.
+Define a color named
+.I ident
+for use with the
+.B fcolor
+and
+.B gcolor
+requests and the
+.B \[rs]m
+and
+.B \[rs]M
+escape sequences.
+.
 .I scheme
-can be one of the following values:
-.B rgb
+identifies a color space and determines the number of required
+.IR color-component s;
+it must be one of
+.RB \[lq] rgb \[rq]
 (three components),
-.B cmy
+.RB \[lq] cmy \[rq]
 (three components),
-.B cmyk
-(four components), and
-.B gray
+.RB \[lq] cmyk \[rq]
+(four components),
 or
-.B grey
+.RB \[lq] gray \[rq]
 (one component).
 .
-Color components can be given either as a hexadecimal string or as
-positive decimal integers in the range 0\[en]65535.
+.RB \[lq] grey \[rq]
+is accepted as a synonym of
+.RB \[lq] gray \[rq].
 .
-A hexadecimal string contains all color components concatenated; it
-must start with either
+The color components can be encoded as a hexadecimal value starting
+with
 .B #
 or
 .BR ## .
-The former specifies hex values in the range 0\[en]255 (which are
-internally multiplied by\~257), the latter in the range 0\[en]65535.
 .
-Examples: #FFC0CB (pink), ##ffff0000ffff (magenta).
+The former indicates that each component is in the range 0\[en]255
+(0\[en]FF),
+the latter the range 0\[en]65535 (0\[en]FFFF).
 .
-A new scaling indicator,
-.RB \[lq] f \[rq]\~has
-has been introduced which multiplies its value by\~65536;
-this makes it convenient to specify color components as fractions in the
-range 0 to\~1.
+Alternatively,
+each color component can be specified as a decimal fraction in the range
+0\[en]1,
+interpreted using a default scaling indicator
+.RB of\~\[lq] f \[rq],
+which multiplies its value by 65536.
 .
-Example:
-.
-.RS
-.IP
-.EX
-\&.defcolor darkgreen rgb 0.1f 0.5f 0.2f
-.EE
-.RE
 .
 .IP
-Note that
-.B f
-is the default scaling indicator for the
-.B defcolor
-request, thus the above statement is equivalent to
+Each output device has a color named
+.RB \[lq] default \[rq]
+that cannot be redefined.
 .
-.RS
-.IP
-.EX
-\&.defcolor darkgreen rgb 0.1 0.5 0.2
-.EE
-.RE
+A device's default drawing and fill colors are not necessarily the same.
 .
-.IP
-The color named
-.B default
-(which is device-specific) can't be redefined.
-.
-It is possible that the default color for
-.B \[rs]M
-and
-.B \[rs]m
-is not the same.
 .
 .TP
 .BI .de1\~ xx\~yy
@@ -2763,21 +2753,28 @@ other environments to the standard error stream.
 .
 .TP
 .B .pnr
-Print the names and contents of all currently defined number registers
-on stderr.
+Write the names and values of all currently defined registers to the
+standard error stream.
+.
 .
 .TP
 .BI .psbb \~filename
 Get the bounding box of a PostScript image
 .IR filename .
 .
-This file must conform to Adobe's Document Structuring
-Conventions; the command looks for a
+This file must conform to Adobe's Document Structuring Conventions;
+the request attempts to extract the bounding box values from a
 .B \%%%BoundingBox
-comment to extract the bounding box values.
+comment.
 .
-After a successful call, the coordinates (in PostScript units) of the
-lower left and upper right corner can be found in the registers
+After invocation,
+the
+.I x
+and
+.I y
+coordinates
+(in PostScript units)
+of the lower left and upper right corners can be found in the registers
 .BR \[rs]n[llx] ,
 .BR \[rs]n[lly] ,
 .BR \[rs]n[urx] ,
@@ -2785,7 +2782,9 @@ and
 .BR \[rs]n[ury] ,
 respectively.
 .
-If some error has occurred, the four registers are set to zero.
+If an error occurs,
+these four registers are set to zero.
+.
 .
 .TP
 .BI .pso \~command
@@ -5051,6 +5050,18 @@ it sets the point size to 10\~scaled points.
 .
 See subsection \[lq]Fractional point sizes and new scaling
 indicators\[rq] above.
+.
+.
+.P
+The
+.B .ab
+request differs from AT&T
+.IR troff : \" AT&T
+GNU
+.I troff \" GNU
+writes no message to the standard error stream if no arguments are
+given,
+and it exits with a failure status instead of a successful one.
 .
 .
 .P

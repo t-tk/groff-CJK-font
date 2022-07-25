@@ -56,7 +56,7 @@ int main(int argc, char **argv)
   while ((opt = getopt_long(argc, argv, "vVi:t:", long_options, NULL)) != EOF)
     switch (opt) {
     case 'V':
-      verify_flag = 1;
+      do_verify = true;
       break;
     case 'i':
       linear_ignore_fields = optarg;
