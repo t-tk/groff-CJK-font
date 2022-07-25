@@ -11,8 +11,8 @@
 # Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# groff is distributed in the hope that it will be useful, but WITHOUT ANY
-# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# groff is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 # FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 # for more details.
 #
@@ -28,17 +28,19 @@ DOC_GROFF_ONLY=\
   GROFF_COMMAND_PREFIX= \
   GROFF_BIN_PATH="$(GROFF_BIN_PATH)" \
   $(GROFFBIN) -I$(abs_top_builddir) -M $(doc_srcdir) \
-	$(TFLAG) $(FFLAG) -Upet -ww 
+	$(TFLAG) $(FFLAG) -pet -ww -b
 
-DOC_GROFF = $(DOC_SED) $< | $(DOC_GROFF_ONLY)
+DOC_GROFF = $(DOC_SED) -e '1i\
+.lf 1 $<' $< | $(DOC_GROFF_ONLY)
 
 # Other doc, installed in $(docdir)
 if BUILD_OTHERDOC
 # Files located in the source tree
 DOCFILES= \
-  doc/meref.me \
+  doc/me-revisions \
   doc/meintro.me \
   doc/meintro_fr.me \
+  doc/meref.me \
   doc/ms.ms \
   doc/pic.ms
 # Files generated in the build tree
@@ -157,7 +159,8 @@ doc/pic.html: $(dist_devpsfont_DATA) $(nodist_devpsfont_DATA)
 doc/pic.html: $(doc_srcdir)/pic.ms $(devhtmlfont_DATA)
 	$(GROFF_V)$(MKDIR_P) $(doc_builddir) \
 	&& cd $(doc_builddir) \
-	&& $(DOC_SED) $(doc_srcdir)/pic.ms \
+	&& $(DOC_SED) -e '1i\
+.lf 1 $(doc_srcdir)/pic.ms' $(doc_srcdir)/pic.ms \
 	   | $(DOC_GROFF_ONLY) -P-p -P-Ipic -P-D$(imagedir) -P-jpic \
 	                       -Thtml -ms > pic.html
 
@@ -172,7 +175,8 @@ doc/webpage.html: $(dist_devpsfont_DATA) $(nodist_devpsfont_DATA)
 doc/webpage.html: $(doc_srcdir)/webpage.ms gnu.eps $(doc_srcdir)/groff.css
 	$(GROFF_V)$(MKDIR_P) doc \
 	&& cd $(doc_builddir) \
-	&& $(DOC_SED) $(doc_srcdir)/webpage.ms \
+	&& $(DOC_SED) -e '1i\
+.lf 1 $(doc_srcdir)/webpage.ms' $(doc_srcdir)/webpage.ms \
 	   | $(DOC_GROFF_ONLY) -P-jwebpage -P-nrpb -P-Iwebpage \
 	                       -P-D$(imagedir) -Thtml -ms > webpage.html
 

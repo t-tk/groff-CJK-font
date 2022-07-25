@@ -35,6 +35,12 @@ extern void warning_with_file_and_line(const char *filename, int lineno,
 				     const errarg &arg2 = empty_errarg,
 				     const errarg &arg3 = empty_errarg);
 
+extern void debug_with_file_and_line(const char *filename, int lineno,
+				     const char *format,
+				     const errarg &arg1 = empty_errarg,
+				     const errarg &arg2 = empty_errarg,
+				     const errarg &arg3 = empty_errarg);
+
 extern void fatal(const char *,
 		  const errarg &arg1 = empty_errarg,
 		  const errarg &arg2 = empty_errarg,
@@ -49,6 +55,11 @@ extern void warning(const char *,
 		    const errarg &arg1 = empty_errarg,
 		    const errarg &arg2 = empty_errarg,
 		    const errarg &arg3 = empty_errarg);
+
+extern void debug(const char *,
+		  const errarg &arg1 = empty_errarg,
+		  const errarg &arg2 = empty_errarg,
+		  const errarg &arg3 = empty_errarg);
 
 
 extern "C" const char *program_name;

@@ -37,16 +37,12 @@ groff_man \- compose manual pages with GNU roff
 .\" ====================================================================
 .
 .SY "groff \-man"
-.RI [ option
-\&.\|.\|.\&]
-.RI [ input-file
-\&.\|.\|.\&]
+.RI [ option\~ .\|.\|.\&]
+.RI [ file\~ .\|.\|.]
 .
 .SY "groff \-m man"
-.RI [ option
-\&.\|.\|.\&]
-.RI [ input-file
-\&.\|.\|.\&]
+.RI [ option\~ .\|.\|.\&]
+.RI [ file\~ .\|.\|.]
 .YS
 .
 .
@@ -54,25 +50,27 @@ groff_man \- compose manual pages with GNU roff
 .SH Description
 .\" ====================================================================
 .
-The
+The GNU implementation of the
 .I man
-macro package for
+macro package is part of the
 .I groff
-is used to produce manual pages
+document formatting system.
+.
+It is used to produce manual pages
 .\" We use an unbreakable space \~ here to keep the phrase intact for
 .\" its introduction; in subsequent discussion, that is not important.
 (\(lqman\~pages\(rq)
 like the one you are reading.
 .
 .
-.PP
+.P
 This document presents the macros thematically;
 for those needing only a quick reference,
 the following table lists them alphabetically,
 with cross-references to appropriate subsections below.
 .
 .
-.PP
+.P
 Man page authors and maintainers who are not already experienced
 .I groff
 users should consult
@@ -87,7 +85,7 @@ and not the full breadth of the
 typesetting system.
 .
 .
-.PP
+.P
 .TS
 l l l.
 Macro	Meaning	Subsection
@@ -127,7 +125,7 @@ _
 .TE
 .
 .
-.PP
+.P
 Macros whose use we discourage
 .RB ( .AT ,
 .BR .DT ,
@@ -152,7 +150,7 @@ and
 are grouped together.
 .
 .
-.PP
+.P
 An empty macro argument can be specified with a pair of double-quotes
 (\(lq""\(rq),
 but the
@@ -321,7 +319,7 @@ their default values.
 Text on input lines after
 .I heading-text
 is set as an ordinary paragraph
-.RB ( .PP ).
+.RB ( .P ).
 .
 .
 .IP
@@ -360,7 +358,7 @@ Set
 .I subheading-text
 as a subsection heading indented between a section heading and an
 ordinary paragraph
-.RB ( .PP ).
+.RB ( .P ).
 .
 See subsection \(lqHorizontal and vertical spacing\(rq below for the
 indentation amount.
@@ -389,7 +387,7 @@ their default values.
 Text on input lines after
 .I subheading-text
 is set as an ordinary paragraph
-.RB ( .PP ).
+.RB ( .P ).
 .
 .
 .TP
@@ -400,20 +398,17 @@ Begin and end example.
 .
 After
 .BR .EX ,
-filling and hyphenation are disabled and a constant-width (monospaced)
-font is selected.
+filling is disabled and a constant-width (monospaced) font is selected.
 .
 Calling
 .B .EE
-enables filling and
-restores the previous font
-and initial hyphenation mode.
+enables filling and restores the previous font.
 .
 .
 .IP
 .\" Also see subsection "History" below...
 These macros are extensions,
-introduced in Version\~9 Unix,
+introduced in Version\~9 Research Unix,
 to the original
 .I man
 package.
@@ -476,7 +471,7 @@ move the left margin one level back.
 .\" ====================================================================
 .
 An ordinary paragraph
-.RB ( .PP )
+.RB ( .P )
 is set without a first-line indentation at the current left margin,
 which by default is indented from the leftmost position of the output
 device.
@@ -519,11 +514,11 @@ see subsection \(lqFont style macros\(rq below.
 .
 .
 .TP
+.B .P
+.TQ
 .B .LP
 .TQ
 .B .PP
-.TQ
-.B .P
 Begin a new paragraph;
 these macros are synonymous.
 .
@@ -631,8 +626,16 @@ with command-line options of some formats indicated by
 .BR .OP .
 .
 .
-.PP
-These macros are GNU extensions not defined on systems running
+.P
+These macros are extensions
+.RB ( .OP
+from Documenter's Workbench
+.IR troff ,
+.B .SY
+and
+.B .YS
+from GNU)
+not defined on systems running
 AT&T,
 Plan\~9,
 or
@@ -705,7 +708,7 @@ and URL hyperlinks with
 .BR .UR / .UE .
 .
 .
-.PP
+.P
 These macros are GNU extensions not defined on systems running
 AT&T,
 Plan\~9,
@@ -817,7 +820,7 @@ set their odd- and even-numbered arguments in alternating styles,
 with no space separating them.
 .
 .
-.PP
+.P
 The default point size and family for typesetter devices is 10-point
 Times,
 except on the
@@ -875,7 +878,7 @@ If the macro is given no arguments,
 the text of the next input line is set smaller and in bold.
 .
 .
-.PP
+.P
 Unlike the above font style macros,
 the font style alternation macros below accept only arguments on the
 same line as the macro call.
@@ -951,9 +954,9 @@ argument accepted by
 .BR .TP ,
 and the deprecated
 .B .HP
-is a number plus an optional scale indicator.
+is a number plus an optional scaling indicator.
 .
-If no scale indicator is given,
+If no scaling indicator is given,
 the
 .I man
 package assumes \(lqn\(rq.
@@ -972,7 +975,7 @@ or
 .BR .SH ,
 .BR .SS ,
 or
-.B .PP
+.B .P
 or its synonyms is called;
 these clear the indentation entirely.
 .
@@ -987,9 +990,9 @@ or
 is called.
 .
 .
-.PP
+.P
 The indentation amount exhibited by ordinary paragraphs set with
-.B .PP
+.B .P
 (and its synonyms)
 not within an
 .BR .RS / .RE
@@ -1025,12 +1028,12 @@ However,
 the HTML output device ignores indentation completely.
 .
 .
-.PP
+.P
 The following macros break the output line and insert vertical space:
 .BR .SH ,
 .BR .SS ,
 .BR .TP ,
-.B .PP
+.B .P
 (and its synonyms),
 .BR .IP ,
 and the deprecated
@@ -1137,7 +1140,7 @@ a hint can be given to the man page librarian by making the first line
 of a man page look like this:
 .
 .
-.PP
+.P
 .RS
 .BI "\(aq\e\(dq " word
 .\" AT&T: .BI "'\e"" " word
@@ -1145,7 +1148,7 @@ of a man page look like this:
 .RE
 .
 .
-.PP
+.P
 The line starts with an apostrophe (\(aq),
 not a dot,
 and a single space character follows the double quote.
@@ -1167,7 +1170,7 @@ program can use this information to automatically call the required
 preprocessor(s) in the right order.
 .
 .
-.PP
+.P
 The usual
 .I tbl
 and
@@ -1338,7 +1341,7 @@ Define the vertical space between paragraphs or (sub)sections.
 The optional argument
 .I vertical-space
 specifies the amount;
-the default scale indicator is \(lqv\(rq.
+the default scaling indicator is \(lqv\(rq.
 .
 Without an argument,
 the spacing is reset to its default value;
@@ -1485,13 +1488,11 @@ SunOS\~4.0 (1988) may have been the first to support
 The following
 .I groff
 options set registers
-(with the
-.B \-r
-option)
+(with
+.BR \-r )
 and strings
-(with the
-.B \-d
-option)
+(with
+.BR \-d )
 recognized and used by the
 .I man
 macro package.
@@ -1507,10 +1508,10 @@ for adjustment to both margins
 (the default),
 or
 .RB \[lq] l \[rq]
-for left adjustment
+for left alignment
 (ragged right margin).
 .
-Any valid parameter to
+Any valid argument to
 .IR groff 's
 \[lq].ad\[rq] request may be used.
 .
@@ -1541,7 +1542,9 @@ Number output pages continuously.
 .
 If multiple man pages are processed,
 number the output pages in strictly increasing sequence,
-rather than resetting the page number to\~1 at each new man page.
+rather than resetting the page number to\~1 at each new
+.I man
+document.
 .
 .
 .TP
@@ -1602,7 +1605,7 @@ the default is
 .RB \(lq B \(rq
 (bold).
 .
-Any valid parameter to
+Any valid argument to
 .IR groff 's
 \[lq].ft\[rq] request may be used.
 .
@@ -1625,11 +1628,15 @@ The default is\~4 if continuous rendering is enabled
 above),
 and\~6 otherwise.
 .
+Any valid argument to
+.IR groff 's
+\[lq].hy\[rq] request may be used.
+.
 .
 .TP
 .BI \-rIN= standard-indent
 Set the amount of indentation used for ordinary paragraphs
-.RB ( .PP
+.RB ( .P
 and its synonyms)
 and the default indentation amount used by
 .BR .IP ,
@@ -1699,7 +1706,7 @@ default.
 .TP
 .BI \-rX p
 After
-.RI page " p" ,
+.RI page\~ p ,
 number pages as
 .IR p a,
 .IR p b,
@@ -1717,11 +1724,14 @@ The register tracking the suffixed page letter uses format \(lqa\(rq
 .\" ====================================================================
 .
 .TP
-.I \%@MACRODIR@/\:man\:.tmac
-.TQ
 .I \%@MACRODIR@/\:an\:.tmac
-These are wrapper files to call
-.IR andoc.tmac .
+Most
+.I man
+macros are contained in this file.
+.
+It also loads the extensions from
+.I an\-ext.tmac
+(see below).
 .
 .
 .TP
@@ -1741,30 +1751,20 @@ or
 respectively,
 as their first macro.
 .
-Because the wrappers above load this file,
-a
+A
 .I man
 program or user typing,
 for example,
-\(lqgroff \-man page.1\(rq,
+\(lqgroff \-mandoc page.1\(rq,
 need not know which package the file
 .I page.1
 uses.
 .
 Multiple man pages,
 in either format,
-can be handled.
-.
-.
-.TP
-.I \%@MACRODIR@/\:an\-old\:.tmac
-Most
-.I man
-macros are contained in this file.
-.
-It also loads the extensions from
-.I an\-ext.tmac
-(see below).
+can be handled;
+.I \%andoc
+reloads each macro package as necessary.
 .
 .
 .TP
@@ -1811,6 +1811,18 @@ implementations that may give up their scan for indexing material early.
 .
 .
 .TP
+.I \%@MACRODIR@/\:man\:.tmac
+This is a wrapper that loads
+.IR an.tmac .
+.
+.
+.TP
+.I \%@MACRODIR@/\:mandoc\:.tmac
+This is a wrapper that loads
+.IR \%andoc.tmac .
+.
+.
+.TP
 .I \%@LOCALMACRODIR@/\:\%man\:\%.local
 Put local changes and customizations into this file.
 .
@@ -1831,7 +1843,7 @@ using them when he edited the first volume of the Version 7 Unix manual,
 a compilation of all man pages supplied by the system.
 .
 .
-.PP
+.P
 The GNU version of the
 .I man
 macro package was written by James Clark and contributors.
@@ -1846,14 +1858,16 @@ Eric S.\& Raymond
 .ME .
 .
 .
-.PP
+.P
 This document was originally written for the Debian GNU/Linux system by
 .MT sgk@\:debian\:.org
 Susan G.\& Kleinmann
 .ME .
 .
-It was corrected and updated by Werner Lemberg and G.\& Branden
-Robinson.
+It was corrected and updated by Werner Lemberg and
+.MT g.branden\:.robinson@\:gmail\:.com
+G.\& Branden Robinson
+.ME .
 .
 The extension macros were documented by Eric S.\& Raymond.
 .
@@ -1869,19 +1883,19 @@ and
 are preprocessors used with man pages.
 .
 .
-.PP
+.P
 .IR man (1)
 describes the man page librarian on your system.
 .
 .
-.PP
+.P
 .IR groff_mdoc (@MAN7EXT@)
 describes the
 .I groff
 version of the BSD-originated alternative macro package for man pages.
 .
 .
-.PP
+.P
 .IR groff_man_style (@MAN7EXT@),
 .IR groff (@MAN7EXT@),
 .IR groff_char (@MAN7EXT@),
@@ -1890,6 +1904,7 @@ version of the BSD-originated alternative macro package for man pages.
 .
 .\" Restore compatibility mode (for, e.g., Solaris 10/11).
 .cp \n[*groff_groff_man_7_man_C]
+.do rr *groff_groff_man_7_man_C
 .
 .
 .\" Local Variables:

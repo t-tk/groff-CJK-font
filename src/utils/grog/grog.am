@@ -1,0 +1,48 @@
+# Copyright (C) 1993-2021 Free Software Foundation, Inc.
+#
+# This file is part of groff.
+#
+# groff is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation, either version 3 of the License, or (at your
+# option) any later version.
+#
+# groff is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+grog_srcdir = $(top_srcdir)/src/utils/grog
+bin_SCRIPTS += grog
+man1_MANS += src/utils/grog/grog.1
+EXTRA_DIST += \
+  src/utils/grog/grog.1.man \
+  src/utils/grog/grog.pl
+
+grog: $(grog_srcdir)/grog.pl $(SH_DEPS_SED_SCRIPT)
+	$(AM_V_GEN)$(RM) $@ \
+	&& sed -f "$(SH_DEPS_SED_SCRIPT)" \
+	       -e "1s|^\(#! \).*perl|\\1$(PERL)|" \
+	       -e "s|[@]VERSION[@]|$(VERSION)|" \
+	       -e "$(SH_SCRIPT_SED_CMD)" \
+	       $(grog_srcdir)/grog.pl \
+	       >$@ \
+	&& chmod +x $@
+
+grog_TESTS = \
+  src/utils/grog/tests/PF-does-not-start-pic-region.sh \
+  src/utils/grog/tests/preserve-groff-options.sh \
+  src/utils/grog/tests/recognize-perl-pod.sh \
+  src/utils/grog/tests/smoke-test.sh
+TESTS += $(grog_TESTS)
+EXTRA_DIST += $(grog_TESTS)
+
+
+# Local Variables:
+# mode: makefile-automake
+# fill-column: 72
+# End:
+# vim: set autoindent filetype=automake textwidth=72:

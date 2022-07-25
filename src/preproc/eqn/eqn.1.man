@@ -57,8 +57,7 @@
 .IR n ]
 .RB [ \-T
 .IR name ]
-.RI [ file
-\&.\|.\|.\&]
+.RI [ file\~ .\|.\|.]
 .YS
 .
 .
@@ -79,31 +78,52 @@
 .SH Description
 .\" ====================================================================
 .
-The GNU version of
+The GNU implemenation of
 .I eqn \" GNU
 is part of the
 .IR groff (@MAN7EXT@)
 document formatting system.
 .
 .I \%@g@eqn
-compiles descriptions of equations embedded in
+is a
+.IR \%@g@troff (@MAN1EXT@)
+preprocessor that translates descriptions of equations embedded in
 .IR roff (@MAN7EXT@)
-input files into commands that are understood by
+input files into the language understood by
 .IR \%@g@troff (@MAN1EXT@).
 .
+It copies the contents of each
+.I file
+to the standard output stream,
+except that lines between
+.B .EQ
+and
+.B .EN
+(or \[lq]inline\[rq] within a pair of user-specified delimiters)
+are interpreted as equation descriptions.
+.
 Normally,
-it should be invoked using the
+.I \%@g@eqn
+is not executed directly by the user,
+but invoked by specifying the
 .B \-e
-option of
+option to
 .IR groff (@MAN1EXT@).
 .
-Although its syntax is compatible with
-AT&T
+While GNU
+.IR eqn 's \" GNU
+input syntax is highly compatible with AT&T
 .IR eqn , \" AT&T
-its output cannot be processed with AT&T
+the output
+.I \%@g@eqn
+produces cannot be processed by AT&T
 .IR troff ; \" AT&T
-it must be processed with GNU
-.IR troff . \" GNU
+GNU
+.I troff \" GNU
+(or a
+.I troff \" generic
+implementing relevant GNU extensions)
+must be used.
 .
 If no
 .I file
@@ -282,13 +302,22 @@ but quoting it protects it from macro expansion.
 .
 .TP
 .BI chartype\~ "t text"
-Unquoted groups of characters are split up into individual characters,
-and the type of each character is looked up;
-this changes the type that is stored for each character;
-it says that the characters in
-.I text
-from now on have
+Each (unquoted) character
+.RI in\~ text
+is assigned
 .RI type\~ t .
+.
+The
+.RI type\~ t
+can also be
+.RB \[lq] letter \[rq]
+or
+.RB \[lq] digit \[rq];
+in these cases
+.B chartype
+changes the font style of the characters.
+.
+See subsection \[lq]Fonts\[rq] below.
 .
 For example,
 .
@@ -302,20 +331,10 @@ chartype "punctuation" .,;:
 .
 .
 .IP
-would make the characters \[lq].,;:\[rq] have type punctuation whenever
-they subsequently appeared in an equation.
-.
-The
-.RI type\~ t
-can also be
-.B letter
-or
-.BR digit ;
-in these cases
-.B chartype
-changes the font type of the characters.
-.
-See subsection \[lq]Fonts\[rq] below.
+assigns the
+.RB \[lq] punctuation \[rq]
+type to each of the characters in \[lq].,;:\[rq] wherever they
+subsequently appear in an equation.
 .
 .
 .\" ====================================================================
@@ -421,7 +440,7 @@ is defined as follows.
 .RS
 .IP
 .EX
-accent { "^" }
+accent { "\[ha]" }
 .EE
 .RE
 .
@@ -670,8 +689,6 @@ This primitive provides an interface to
 escape
 (but with opposite sign).
 .
-.
-.IP
 This keyword has no effect if the equation is part of a
 .I pic
 picture.
@@ -803,15 +820,16 @@ primitive emboldens an equation by overprinting two copies of the
 equation horizontally offset by this amount.
 .
 This parameter is not used in MathML mode;
-instead,
 fat text uses
 .
-.
 .RS
-.IP
+.RS
 .EX
 <mstyle mathvariant=\[aq]double\-struck\[aq]>
 .EE
+.RE
+.
+instead.
 .RE
 .
 .
@@ -908,7 +926,7 @@ you are using.
 .
 .TP
 .B default_rule_thickness
-This should set to the thickness of the
+This should be set to the thickness of the
 .B \[rs][ru]
 character,
 or the thickness of horizontal lines produced with the
@@ -983,8 +1001,8 @@ the subscript is shifted down by at least this amount.
 .
 .TP
 .B sup_drop
-The baseline of a superscript is no more than this much amount below
-the top of the object on which the superscript is set.
+The baseline of a superscript is no more than this much below the top of
+the object on which the superscript is set.
 .
 .
 .TP
@@ -1590,6 +1608,7 @@ typesetting.
 .
 .\" Restore compatibility mode (for, e.g., Solaris 10/11).
 .cp \n[*groff_eqn_1_man_C]
+.do rr *groff_eqn_1_man_C
 .
 .
 .\" Local Variables:

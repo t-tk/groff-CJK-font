@@ -243,14 +243,14 @@ int tfm::get_design_size()
 
 tfm::~tfm()
 {
-  a_delete char_info;
-  a_delete width;
-  a_delete height;
-  a_delete depth;
-  a_delete italic;
-  a_delete lig_kern;
-  a_delete kern;
-  a_delete param;
+  delete[] char_info;
+  delete[] width;
+  delete[] height;
+  delete[] depth;
+  delete[] italic;
+  delete[] lig_kern;
+  delete[] kern;
+  delete[] param;
 }
 
 int read2(unsigned char *&s)
@@ -294,14 +294,14 @@ int tfm::load(const char *file)
       error("unexpected end of file on '%1'", file);
     else
       error("error on file '%1'", file);
-    a_delete buf;
+    delete[] buf;
     fclose(fp);
     return 0;
   }
   fclose(fp);
   if (lf < 6) {
     error("bad TFM file '%1': impossibly short", file);
-    a_delete buf;
+    delete[] buf;
     return 0;
   }
   unsigned char *ptr = buf;
@@ -319,12 +319,12 @@ int tfm::load(const char *file)
   if ((6 + lh + (ec - bc + 1) + nw + nh + nd + ni + nl + nk + ne + np)
       != lf) {
     error("bad TFM file '%1': lengths do not sum", file);
-    a_delete buf;
+    delete[] buf;
     return 0;
   }
   if (lh < 2) {
     error("bad TFM file '%1': header too short", file);
-    a_delete buf;
+    delete[] buf;
     return 0;
   }
   char_info = new char_info_word[ec - bc + 1];
@@ -369,7 +369,7 @@ int tfm::load(const char *file)
   for (i = 0; i < np; i++)
     param[i] = read4(ptr);
   assert(ptr == buf + lf*4 - 2);
-  a_delete buf;
+  delete[] buf;
   return 1;
 }
 

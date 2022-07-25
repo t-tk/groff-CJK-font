@@ -664,7 +664,7 @@ void format::add_rows(int n)
   vline = new char*[nrows + n];
   for (i = 0; i < nrows; i++)
     vline[i] = old_vline[i];
-  a_delete old_vline;
+  delete[] old_vline;
   for (i = 0; i < n; i++) {
     vline[nrows + i] = new char[ncolumns + 1];
     for (int j = 0; j < ncolumns + 1; j++)
@@ -674,7 +674,7 @@ void format::add_rows(int n)
   entry = new entry_format *[nrows + n];
   for (i = 0; i < nrows; i++)
     entry[i] = old_entry[i];
-  a_delete old_entry;
+  delete[] old_entry;
   for (i = 0; i < n; i++)
     entry[nrows + i] = new entry_format[ncolumns];
   nrows += n;
@@ -682,16 +682,16 @@ void format::add_rows(int n)
 
 format::~format()
 {
-  a_delete separation;
-  ad_delete(ncolumns) width;
-  a_delete equal;
-  a_delete expand;
+  delete[] separation;
+  delete[] width;
+  delete[] equal;
+  delete[] expand;
   for (int i = 0; i < nrows; i++) {
-    a_delete vline[i];
-    ad_delete(ncolumns) entry[i];
+    delete[] vline[i];
+    delete[] entry[i];
   }
-  a_delete vline;
-  a_delete entry;
+  delete[] vline;
+  delete[] entry;
 }
 
 struct input_entry_format : public entry_format {

@@ -306,10 +306,10 @@ separator:
 placeless_element:
 	FIGNAME '=' macro_name
 		{
-		  a_delete graphname;
+		  delete[] graphname;
 		  graphname = new char[strlen($3) + 1];
 		  strcpy(graphname, $3);
-		  a_delete $3;
+		  delete[] $3;
 		}
 	|
 	VARIABLE '=' any_expr
@@ -350,7 +350,7 @@ placeless_element:
 	| PRINT print_args
 		{
 		  fprintf(stderr, "%s\n", $2.str);
-		  a_delete $2.str;
+		  delete[] $2.str;
 		  fflush(stderr);
 		}
 	| SH
@@ -362,7 +362,7 @@ placeless_element:
 		    lex_error("unsafe to run command '%1'", $3);
 		  else
 		    system($3);
-		  a_delete $3;
+		  delete[] $3;
 		}
 	| COPY TEXT
 		{
@@ -381,8 +381,8 @@ placeless_element:
 		    do_lookahead();
 		  copy_file_thru($2.str, $5, $7);
 		  // do not delete the filename
-		  a_delete $5;
-		  a_delete $7;
+		  delete[] $5;
+		  delete[] $7;
 		}
 	| COPY THRU
 		{ delim_flag = 2; }
@@ -393,8 +393,8 @@ placeless_element:
 		  if (yychar < 0)
 		    do_lookahead();
 		  copy_rest_thru($4, $6);
-		  a_delete $4;
-		  a_delete $6;
+		  delete[] $4;
+		  delete[] $6;
 		}
 	| FOR VARIABLE '=' expr TO expr optional_by DO
 	  	{ delim_flag = 1; }
@@ -411,7 +411,7 @@ placeless_element:
 		    do_lookahead();
 		  if ($1.x != 0.0)
 		    push_body($1.body);
-		  a_delete $1.body;
+		  delete[] $1.body;
 		}
 	| simple_if ELSE
 		{ delim_flag = 1; }
@@ -441,17 +441,17 @@ reset_variables:
 	RESET VARIABLE
 		{
 		  reset($2);
-		  a_delete $2;
+		  delete[] $2;
 		}
 	| reset_variables VARIABLE
 		{
 		  reset($2);
-		  a_delete $2;
+		  delete[] $2;
 		}
 	| reset_variables ',' VARIABLE
 		{
 		  reset($3);
-		  a_delete $3;
+		  delete[] $3;
 		}
 	;
 
@@ -463,8 +463,8 @@ print_args:
 		  $$.str = new char[strlen($1.str) + strlen($2.str) + 1];
 		  strcpy($$.str, $1.str);
 		  strcat($$.str, $2.str);
-		  a_delete $1.str;
-		  a_delete $2.str;
+		  delete[] $1.str;
+		  delete[] $2.str;
 		  if ($1.filename) {
 		    $$.filename = $1.filename;
 		    $$.lineno = $1.lineno;
@@ -524,14 +524,14 @@ text_expr:
 	text EQUALEQUAL text
 		{
 		  $$ = strcmp($1.str, $3.str) == 0;
-		  a_delete $1.str;
-		  a_delete $3.str;
+		  delete[] $1.str;
+		  delete[] $3.str;
 		}
 	| text NOTEQUAL text
 		{
 		  $$ = strcmp($1.str, $3.str) != 0;
-		  a_delete $1.str;
-		  a_delete $3.str;
+		  delete[] $1.str;
+		  delete[] $3.str;
 		}
 	| text_expr ANDAND text_expr
 		{ $$ = ($1 != 0.0 && $3 != 0.0); }
@@ -689,7 +689,7 @@ object_spec:
 		  $$ = new object_spec(TEXT_OBJECT);
 		  $$->text = new text_item(format_number($3.str, $2),
 					   $3.filename, $3.lineno);
-		  a_delete $3.str;
+		  delete[] $3.str;
 		}
 	| '[' 
 		{
@@ -1109,7 +1109,7 @@ text:
 		  $$.filename = $3.filename;
 		  $$.lineno = $3.lineno;
 		  $$.str = do_sprintf($3.str, $4.v, $4.nv);
-		  a_delete $4.v;
+		  delete[] $4.v;
 		  free($3.str);
 		}
 	;
@@ -1142,7 +1142,7 @@ sprintf_args:
 		      memcpy(foo, oldv, $$.nv*sizeof(double));
 		      $$.v = foo;
 #endif
-		      a_delete oldv;
+		      delete[] oldv;
 		    }
 		  }
 		  $$.v[$$.nv] = $3;
@@ -1409,7 +1409,7 @@ path:
 	| LABEL relative_path
 		{
 		  lex_warning("initial '%1' in 'with' argument ignored", $1);
-		  a_delete $1;
+		  delete[] $1;
 		  $$ = $2;
 		}
 	;
@@ -1917,8 +1917,13 @@ char *do_sprintf(const char *form, const double *v, int nv)
 	}
 	one_format += *form++;
 	one_format += '\0';
+// We validated the format string above.  Most conversion specifiers are
+// rejected, including `n`.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
 	snprintf(sprintf_buf, sizeof(sprintf_buf),
 		 one_format.contents(), v[i++]);
+#pragma GCC diagnostic pop
       }
       one_format.clear();
       result += sprintf_buf;

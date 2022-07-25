@@ -88,7 +88,7 @@ search_list_iterator::search_list_iterator(search_list *p, const char *q)
 search_list_iterator::~search_list_iterator()
 {
   list->niterators -= 1;
-  a_delete query;
+  delete[] query;
   delete iter;
 }
 
@@ -113,7 +113,7 @@ search_item::search_item(const char *nm, int fid)
 
 search_item::~search_item()
 {
-  a_delete name;
+  delete[] name;
 }
 
 int search_item::is_named(const char *nm) const

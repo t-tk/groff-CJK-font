@@ -34,6 +34,6 @@ struct device_init {
 device_init::device_init()
 {
   char *tem = getenv("GROFF_TYPESETTER");
-  if (tem)
+  if (tem && tem[0])
     device = tem;
 }

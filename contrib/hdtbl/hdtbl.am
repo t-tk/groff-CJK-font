@@ -7,11 +7,11 @@
 #
 # groff is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free
-# Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Software Foundation, either version 3 of the License, or (at your
+# option) any later version.
 #
-# groff is distributed in the hope that it will be useful, but WITHOUT ANY
-# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# groff is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 # FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 # for more details.
 #
@@ -19,26 +19,22 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 hdtbl_srcdir = $(top_srcdir)/contrib/hdtbl
-hdtbl_builddir = $(top_builddir)/contrib/hdtbl
 
 man7_MANS += contrib/hdtbl/groff_hdtbl.7
 
 # Groff command used to generate .ps files
-HDTBL_TFLAG = -M$(hdtbl_srcdir) -M$(hdtbl_builddir)
+HDTBL_TFLAG = -M$(hdtbl_srcdir)
 HDTBL_PFLAG=-t -p -e -U
 HDTBLGROFF = \
   GROFF_COMMAND_PREFIX= \
   GROFF_BIN_PATH="$(GROFF_BIN_PATH)" \
   $(GROFFBIN) $(FFLAG) $(TFLAG) $(HDTBL_TFLAG) $(HDTBL_PFLAG)
 
-# Files installed in $(tmacdir).
-# These files are generated with 'strip.sed' from their unstripped source file
-# equivalent (e.g. hdtbl.tmac is generated from hdtbl.tmac-u)
-HDTBLSTRIPFILES = \
+HDTBLTMACFILES = \
   contrib/hdtbl/hdtbl.tmac \
   contrib/hdtbl/hdmisc.tmac
 hdtbltmacdir = $(tmacdir)
-hdtbltmac_DATA = $(HDTBLSTRIPFILES)
+dist_hdtbltmac_DATA = $(HDTBLTMACFILES)
 
 # Files installed in $(exampledir)/hdtbl.  HDTBLEXAMPLEFILES are
 # located in the source tree, while HDTBLPROCESSEDEXAMPLEFILES are
@@ -87,19 +83,16 @@ nodist_hdtblexample_DATA = \
   $(HDTBLPROCESSEDEXAMPLEFILES) \
   gnu.eps
 else
-EXTRA_DIST += $(HDTBLEXAMPLEFILES) 
+EXTRA_DIST += $(HDTBLEXAMPLEFILES)
 endif
-$(hdtblexample_DATA): $(HDTBLSTRIPFILES)
+$(hdtblexample_DATA): $(HDTBLTMACFILES)
 
-MOSTLYCLEANFILES += $(HDTBLGENFILES) $(HDTBLPROCESSEDEXAMPLEFILES) \
-  $(HDTBLSTRIPFILES)
+MOSTLYCLEANFILES += $(HDTBLGENFILES) $(HDTBLPROCESSEDEXAMPLEFILES)
 
 EXTRA_DIST += \
   contrib/hdtbl/ChangeLog \
   contrib/hdtbl/TODO \
-  contrib/hdtbl/groff_hdtbl.7.man \
-  contrib/hdtbl/hdtbl.tmac-u \
-  contrib/hdtbl/hdmisc.tmac-u
+  contrib/hdtbl/groff_hdtbl.7.man
 
 if BUILD_EXAMPLES
 hdtbl_TESTS = contrib/hdtbl/examples/test-hdtbl.sh
@@ -130,10 +123,6 @@ SUFFIXES += .roff .in .ps
 
 $(HDTBLPROCESSEDEXAMPLEFILES): gnu.eps groff troff eqn pic tbl \
   contrib/hdtbl/examples/common.roff
-
-$(HDTBLSTRIPFILES): $(top_srcdir)/tmac/strip.sed
-	@$(MKDIR_P) `dirname $@`
-	sed -f $(top_srcdir)/tmac/strip.sed $(hdtbl_srcdir)/`basename $@`-u > $@;
 
 uninstall_groffdirs: uninstall-hdtbl-hook
 uninstall-hdtbl-hook:

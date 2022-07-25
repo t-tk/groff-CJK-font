@@ -692,7 +692,7 @@ static void store_citation(reference *ref)
       citation_max *= 2;
       citation = new reference *[citation_max];
       memcpy(citation, old_citation, ncitations*sizeof(reference *));
-      a_delete old_citation;
+      delete[] old_citation;
     }
   }
   citation[ncitations++] = ref;
@@ -751,7 +751,7 @@ static unsigned store_reference(const string &str)
 	    ;
 	  *p = old_table[i];
 	}
-      a_delete old_table;
+      delete[] old_table;
     }
   }
   if (label_in_text)

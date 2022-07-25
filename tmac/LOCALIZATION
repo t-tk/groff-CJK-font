@@ -9,19 +9,24 @@ hyphenation pattern files.
 
     A.  A string identifying the groff locale (e.g., "english") is set.
     B.  Locale-specific strings used by macro packages are (re)defined.
-    C.  Other tweaks to macro package configuration are peformed, such
+    C.  Other tweaks to macro package configuration are performed, such
         as altering the ordering of the components of a date string.
     D.  Additional inter-sentence space is set to a language-appropriate
         amount with the .ss request.
     E.  A hyphenation mode appropriate to the hyphenation pattern files
-        for the locale is set with the .hy request.
+        for the locale is set with the .hy request.  Here's a mapping
+        from TeX hyphenation pattern minimums to groff hyphenation
+        modes.
+            \lefthyphenmin=2, \righthyphenmin=2 => 1
+            \lefthyphenmin=2, \righthyphenmin=3 => 4
+            \lefthyphenmin=1, \righthyphenmin=2 => 32
     F.  Hyphenation codes appropriate to the hyphenation pattern files
         for the locale are set with the .hcode request.
     G.  The hyphenation language is set with the .hla request.
-    H.  Hyphenation pattern and exception files are loaded with the .hpf
+    H.  Support for the character encoding used by the hyphenation
+        pattern files is loaded with the .mso request.
+    I.  Hyphenation pattern and exception files are loaded with the .hpf
         and .hpfa requests.
-    I.  Support for a character encoding approriate to the locale is
-        loaded with the .mso request.
 
 2.  A locale-independent file (trans.tmac) activates the localized
     strings set up in item B above.

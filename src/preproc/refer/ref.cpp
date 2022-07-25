@@ -152,7 +152,7 @@ reference::reference(const char *start, int len, reference_id *ridp)
 reference::~reference()
 {
   if (nfields > 0)
-    ad_delete(nfields) field;
+    delete[] field;
 }
 
 // ref is the inline, this is the database ref
@@ -175,7 +175,7 @@ void reference::merge(reference &ref)
       nfields++;
   if (nfields != old_nfields) {
     if (old_nfields > 0)
-      ad_delete(old_nfields) field;
+      delete[] field;
     field = new string[nfields];
   }
   int j = 0;
@@ -209,7 +209,7 @@ void reference::insert_field(unsigned char c, string &s)
   for (i = pos; i < nfields; i++)
     field[i + 1].move(old_field[i]);
   if (nfields > 0)
-    ad_delete(nfields) old_field;
+    delete[] old_field;
   nfields++;
   field_index[c] = pos;
   for (i = c + 1; i < 256; i++)
@@ -229,14 +229,14 @@ void reference::delete_field(unsigned char c)
   for (i = field_index[c]; i < nfields - 1; i++)
     field[i].move(old_field[i + 1]);
   if (nfields > 0)
-    ad_delete(nfields) old_field;
+    delete[] old_field;
   nfields--;
   field_index[c] = NULL_FIELD_INDEX;
   for (i = c + 1; i < 256; i++)
     if (field_index[i] != NULL_FIELD_INDEX)
       field_index[i] -= 1;
 }
-    
+
 void reference::compute_hash_code()
 {
   if (!rid.is_null())

@@ -3,7 +3,7 @@ pdfmark.ms
 
 This file is part of groff, the GNU roff type-setting system.
 
-Copyright (C) 2004-2020 Free Software Foundation, Inc.
+Copyright (C) 2004-2021 Free Software Foundation, Inc.
 written by Keith Marshall <keith.d.marshall@ntlworld.com>
 
 Permission is granted to copy, distribute and/or modify this document
@@ -32,7 +32,7 @@ Publishing with GNU Troff
 .\"
 .pdfview /PageMode /UseOutlines
 .\"
-.\" Initialise the outline view to show only three heading levels,
+.\" Initialize the outline view to show only three heading levels,
 .\" with additional subordinate level headings folded.
 .\"
 .nr PDFOUTLINE.FOLDLEVEL 3
@@ -63,6 +63,15 @@ Publishing with GNU Troff
 .\"
 .ds rg \*{\(rg\*}
 .\"
+.\" Define strings, to represent frequently used registered trade marks.
+.\"
+.ds Adobe "Adobe\Z'\\$1'\*(rg\"
+.ds Acrobat "Acrobat\Z'\\$1'\*(rg\"
+.ds Distiller "Distiller\Z'\\$1'\*(rg\"
+.ds PostScript "PostScript\Z'\\$1'\*(rg\"
+.
+.ds Microsoft "Microsoft\Z'\\$1'\*(rg\"
+.\"
 .\" Establish the page layout.
 .\"
 .nr PO  2.5c
@@ -92,7 +101,7 @@ Publishing with GNU Troff
 \\$5\fC\\$3\fP\f[CBI]\\$1\fP\fC\\$2\fP\\$4
 ..
 .ds = \f(CB\\$1\f(CR\\$4\f[CBI]\\$2\f(CR\\$3
-.\"
+.
 .NH 1
 .\" When we use numbered section headings, we might like to automatically
 .\" insert a table of contents entry, using the text of the heading itself.
@@ -121,20 +130,20 @@ Publishing with GNU Troff
 .if !dSN-NO-DOT .als SN-NO-DOT SN
 .LP
 It might appear that it is a fairly simple matter to
-produce documents in Adobe\*(rg\~\(lqPortable\~Document\~Format\(rq,
+produce documents in \*[Adobe]\~\(lqPortable\~Document\~Format\(rq,
 commonly known as PDF, using
 .CW groff ) GNU\~Troff\~(
 as the document formatter.
 Indeed,
 .CW groff 's
-default output format is the native Adobe\*(rg\~PostScript\*(rg format,
-which PDF producers such as Adobe\*(rg Acrobat\*(rg Distiller\*(rg,
+default output format is the native \*[Adobe]\~\*[PostScript] format,
+which PDF producers such as \*[Adobe] \*[Acrobat] \*[Distiller ,]
 or GhostScript, expect as their input format.
 Thus, the PDF production process would seem to entail simply
 formatting the document source with
 .CW groff ,
-to produce a PostScript\*(rg version of the document,
-which can subsequently be processed by Acrobat\*(rg Distiller\*(rg
+to produce a \*[PostScript] version of the document,
+which can subsequently be processed by \*[Acrobat] \*[Distiller]
 or GhostScript, to generate the final PDF document.
 .LP
 For many PDF production requirements,
@@ -143,14 +152,14 @@ However, this is a limited PDF production method,
 in which the resultant PDF document represents no more than
 an on screen image of the printed form of the document, if
 .CW groff 's
-PostScript\*(rg output were printed directly.
+\*[PostScript] output were printed directly.
 .LP
 The Portable Document Format provides a number of features,
 which significantly enhance the experience of reading a document on screen,
 but which are of little or no value to a document which is merely printed.
 It
 .EM is
-possible to exploit these PDF features, which are described in the Adobe\*(rg
+possible to exploit these PDF features, which are described in the \*[Adobe]
 .\"
 .de pdfmark-manual
 .\" This is an example of a resource reference specified by URI ...
@@ -169,17 +178,17 @@ possible to exploit these PDF features, which are described in the Adobe\*(rg
 with some refinement of the simple PDF production method, provided
 appropriate \(lqfeature implementing\(rq instructions can be embedded into
 .CW groff 's
-PostScript\*(rg rendering of the document.
+\*[PostScript] rendering of the document.
 This, of course, implies that the original document source, which
 .CW groff
-will process to generate the PostScript\*(rg description of the document,
+will process to generate the \*[PostScript] description of the document,
 must include appropriate markup to exploit the desired PDF features.
 It is this preparation of the
 .CW groff
 document source to exploit a number of these features,
 which provides the principal focus of this document.
 .LP
-The markup techniques to be described have been utilised in the production of
+The markup techniques to be described have been utilized in the production of
 the PDF version of this document itself.
 This has been formatted using
 .CW groff 's
@@ -194,16 +203,16 @@ such as:\(en
 .IP \(bu
 Selecting a default document view, which defines how the document will appear
 when opened in the reader application; for example, when this document is
-opened in Acrobat\*(rg\~Reader, it should display the top of the cover sheet,
+opened in \*[Acrobat]\~Reader, it should display the top of the cover sheet,
 in the document view pane, while a document outline should appear to the left,
 in the \(lqBookmarks\(rq pane.
 .IP \(bu
 Adding document identification \(lqmeta\(hydata\(rq,
-which can be accessed, in Acrobat\*(rg\~Reader,
+which can be accessed, in \*[Acrobat]\~Reader,
 by inspecting the \(lqFile\^/\^Document\~Properties\^/\^Summary\(rq.
 .IP \(bu
 Creating a document outline, which will be displayed in the \(lqBookmarks\(rq
-pane of Acrobat\*(rg\~Reader, such that readers may quickly navigate to any
+pane of \*[Acrobat]\~Reader, such that readers may quickly navigate to any
 section of the document, simply by clicking on the associated heading
 in the outline view.
 .IP \(bu
@@ -218,7 +227,7 @@ points within the PDF document.
 .LP
 All of the techniques described have been tested on
 .EM both
-GNU/Linux, and on Microsoft\*(rg Windows\(tm2000 operating platforms, using
+GNU/Linux, and on \*[Microsoft] Windows\(tm2000 operating platforms, using
 .CW groff
 .CW 1.19.1 ,\c
 .pdfhref L -D footnote1 -- \**
@@ -253,7 +262,7 @@ together with an appropriate text editor, for creating and marking up the
 .CW groff
 input files.
 These additional utilities are not provided, as standard,
-on the Microsoft\*(rg Windows\(tm platform,
+on the \*[Microsoft] Windows\(tm platform,
 but several third party implementations are available.
 Some worth considering include the MKS\*(rg\~Toolkit,\**
 .FS
@@ -271,7 +280,7 @@ POSIX
 .LG
 emulation environment and
 Unix\(tm
-toolkit for 32\(hybit Microsoft\*(rg Windows\(tm platforms; see
+toolkit for 32\(hybit \*[Microsoft] Windows\(tm platforms; see
 .pdfhref W http://cygwin.com
 for information and download.
 .FE
@@ -279,7 +288,7 @@ or MSYS.\**
 .FS
 Another free, but minimal suite of common
 Unix\(tm
-tools for 32\(hybit Microsoft\*(rg Windows\(tm, available for download from
+tools for 32\(hybit \*[Microsoft] Windows\(tm, available for download from
 .pdfhref W -A ; http://www.mingw.org
 it
 .EM does 
@@ -291,6 +300,7 @@ This list is by no means exhaustive, and should in no way be construed as an
 endorsement of any of these packages, nor to imply that other similar packages,
 which may be available, are in any way inferior to them.
 .bp
+.
 .NH 1
 .\" We may wish a section heading to represent a named destination,
 .\" so that we can create a linked reference to it, from some other 
@@ -337,16 +347,17 @@ macro package;  thus, users are free to use any other macro package,
 of their choice, to format their documents, while also using the
 .CW pdfmark
 macros to add PDF features.
+.
 .NH 2
 .XN -N pdfmark-operator -- The \F[C]pdfmark\F[] Operator
 .LP
 All PDF features are implemented by embedding instances of the
 .B \F[C]pdfmark\F[]
-operator, as described in the Adobe\*(rg
+operator, as described in the \*[Adobe]
 .pdfmark-manual ,
 into
 .CW groff 's
-PostScript\*(rg output stream.
+\*[PostScript] output stream.
 To facilitate the use of this operator, the
 .CW pdfmark
 macro package defines the primitive
@@ -354,7 +365,7 @@ macro package defines the primitive
 macro; it simply emits its argument list,
 as arguments to a
 .CW pdfmark
-operator, in the PostScript\*(rg output stream.
+operator, in the \*[PostScript] output stream.
 .LP
 .pdfhref M -N pdfmark-example
 To illustrate the use of the
@@ -407,6 +418,7 @@ macro may be useful to users wishing to implement more advanced PDF features,
 than those currently supported directly by the
 .CW pdfmark
 macro package.
+.
 .NH 2
 .XN -N docview -- Selecting an Initial Document View
 .LP
@@ -416,7 +428,7 @@ the first page will be displayed,
 at the default magnification set for the reader,
 and outline and thumbnail views will be hidden.
 When using a PDF reader,
-such as Acrobat\*(rg\~Reader,
+such as \*[Acrobat]\~Reader,
 which supports the
 .CW /DOCVIEW
 class of the
@@ -430,7 +442,7 @@ For example
 .QP
 .CW ".pdfview /PageMode /UseOutlines"
 .LP
-will cause Acrobat\*(rg\~Reader to open the document outline view,
+will cause \*[Acrobat]\~Reader to open the document outline view,
 to the left of the normal page view,
 while
 .QP
@@ -457,7 +469,7 @@ for more information.
 .LP
 It should be noted that the view controlling meta\(hydata, defined by the
 .CW pdfview
-macro, is not written immediately to the PostScript\*(rg output stream,
+macro, is not written immediately to the \*[PostScript] output stream,
 but is stored in an internal meta\(hydata \(lqcache\(rq,
 (simply implemented as a
 .CW groff
@@ -473,7 +485,7 @@ macro,
 .\"     .pdfhref L -D pdfsync -P ( -A ).
 .\"
 .XR pdfsync ). (
-.\"
+.
 .NH 2
 .XN -N docinfo -- Adding Document Identification Meta-Data
 .LP
@@ -520,7 +532,7 @@ the
 .CW /DOCINFO
 records specified with the
 .CW pdfinfo
-macro are not immediately written to the PostScript\*(rg output stream;
+macro are not immediately written to the \*[PostScript] output stream;
 they are stored in the same meta\(hydata cache as
 .CW /DOCVIEW
 specifications, until this cache is explicitly flushed,
@@ -528,13 +540,14 @@ by invoking the
 .CW pdfsync
 macro,
 .XR pdfsync ). (
+.
 .NH 2
 .XN -N add-outline -- Creating a Document Outline
 .LP
 A PDF document outline comprises a table of references,
 to \(lqbookmarked\(rq locations within the document.
 When the document is viewed in an \(lqoutline\~aware\(rq PDF document reader,
-such as Adobe\*(rg Acrobat\*(rg Reader,
+such as \*[Adobe] \*[Acrobat] Reader,
 this table of \(lqbookmarks\(rq may be displayed in a document outline pane,
 or \(lqBookmarks\(rq pane, to the left of the main document view.
 Individual references in the outline view may then be selected,
@@ -545,12 +558,13 @@ The document outline may be considered as a collection of \(lqhypertext\(rq
 references to \(lqbookmarked\(rq locations within the document.
 The
 .CW pdfmark
-macro package provides a single generalised macro,
+macro package provides a single generalized macro,
 .CW pdfhref ,
 for creating and linking to \(lqhypertext\(rq reference marks.
 This macro will be described more comprehensively in a later section,
 .XR pdfhref ); (
 the description here is restricted to its use for defining document outline entries.
+.
 .NH 3
 .XN -N basic-outline -- A Basic Document Outline
 .LP
@@ -620,6 +634,7 @@ macro, as
 .QP
 .CW
 \&.pdfbookmark 3 \*(SN A Basic Document Outline
+.
 .NH 3
 .XN Hierarchical Structure in a Document Outline
 .LP
@@ -691,7 +706,7 @@ value will be unknown, when defining the parent entry.
 To resolve this paradox, the
 .CW pdfhref
 macro creates the outline entry in two distinct phases \(em
-a destination marker is placed in the PostScript\*(rg output stream immediately,
+a destination marker is placed in the \*[PostScript] output stream immediately,
 when the outline reference is defined,
 but the actual outline entry is stored in an internal \(lqoutline cache\(rq,
 until its subordinate hierarchy has been fully defined;
@@ -722,11 +737,12 @@ To avoid this problem, the user should follow the guidelines given in
 .pdfhref L -D pdfsync -A ,
 .pdfhref F
 .\"
-to synchronise the output state with the cache state,
+to synchronize the output state with the cache state,
 .XR pdfsync ), (
 at the end of the
 .CW groff
 formatting run.
+.
 .NH 3
 .XN -N outline-view -- Associating a Document View with an Outline Reference
 .LP
@@ -744,7 +760,7 @@ However, rather than requiring that each individual use of the
 macro, to create an outline entry,
 should include its own view specification,
 the actual specification assigned to each entry is derived from
-a generalised specification defined in the string
+a generalized specification defined in the string
 .CW PDFBOOKMARK.VIEW ,
 together with the setting of the numeric register
 .CW PDFHREF.VIEW.LEADING ,
@@ -800,7 +816,7 @@ Any alternative definition for
 .CW PDFBOOKMARK.VIEW
 .EM must
 be specified in terms of valid view specification parameters,
-as described in the Adobe\*(rg
+as described in the \*[Adobe]
 .pdfmark-manual .
 .LP
 Note the use of the register
@@ -822,7 +838,7 @@ and is followed, in the
 definition, by the
 .CW grops
 .CW u \(rq \(lq
-operator, to convert it to PostScript\*(rg units on output.
+operator, to convert it to \*[PostScript] units on output.
 It may be used in any redefined specification for
 .CW PDFBOOKMARK.VIEW ,
 (or in the analogous definition of
@@ -850,7 +866,7 @@ by providing
 page size specifications to
 .CW groff ,
 .CW grops
-and to the PostScript\*(rg to PDF converter employed,
+and to the \*[PostScript] to PDF converter employed,
 and avoiding any page length changes within the document source.
 .LP
 Also note that
@@ -866,6 +882,7 @@ ensure that these are computed
 invoking the
 .CW pdfhref
 macro.
+.
 .NH 3
 .XN -N outline-folding -- Folding the Outline to Conceal Less Significant Headings
 .LP
@@ -893,7 +910,7 @@ For example, the setting used in this document:
 .QS
 .LD
 .fam C
-\&.\e" Initialise the outline view to show only three heading levels,
+\&.\e" Initialize the outline view to show only three heading levels,
 \&.\e" with additional subordinate level headings folded.
 \&.\e"
 \&.nr PDFOUTLINE.FOLDLEVEL 3
@@ -939,6 +956,7 @@ the outline cache should be flushed,
 .EM immediately
 before the change,
 which should immediately preceed a level one heading.
+.
 .NH 3
 .XN -N multipart-outline -- Outlines for Multipart Documents
 .LP
@@ -951,13 +969,13 @@ has a uniquely named destination.
 .LP
 As the overall size of the PDF document increases,
 it may become convenient to divide it into smaller,
-individually formatted PostScript\*(rg components,
+individually formatted \*[PostScript] components,
 which are then assembled, in the appropriate order,
 to create a composite PDF document.
 While this strategy may simplify the overall process of creating and
 editing larger documents, it does introduce a problem in creating
 an overall document outline,
-since each individual PostScript\*(rg component will be assigned
+since each individual \*[PostScript] component will be assigned
 duplicated sequences of \(lqbookmark\(rq names,
 with each name ultimately referring to multiple locations in the composite document.
 To avoid such reference naming conflicts, the
@@ -1000,7 +1018,7 @@ capabilities to the standard
 .CW ms
 package,
 .XR using-spdf ), (
-the table of contents is collected into a separate PostScript\*(rg section
+the table of contents is collected into a separate \*[PostScript] section
 from the main body of the document.
 In the \(lqbody\(rq section, the document outline is \(lquntagged\(rq,
 but in the \(lqTable\~of\~Contents\(rq section, a modified version of the
@@ -1019,6 +1037,7 @@ Alternatively, as in the case of the basic outline,
 this may equally well be specified as
 .QP
 .CW ".pdfbookmark -T T 1 \e\e*[TOC]"
+.
 .NH 3
 .XN Delegation of the Outline Definition
 .LP
@@ -1054,6 +1073,7 @@ macro, to create the document outline,
 is delegated to the
 .CW XN
 macro.
+.
 .NH 2
 .XN -N pdfhref -- Adding Reference Marks and Links
 .LP
@@ -1073,7 +1093,7 @@ which is a contraction of \(lqPDF HyperText Reference\(rq,
 indicates that the general purpose of this macro is to define
 .EM any
 type of dynamic reference mark, within a PDF document.
-Its generalised usage syntax takes the form
+Its generalized usage syntax takes the form
 .QP
 .fam C
 .B .pdfhref
@@ -1145,17 +1165,18 @@ specifications are inserted automatically into the document reference map
 during the PDF document formatting process,
 .XR create-map ). (
 .IP \*[= I]
-Initialise support for
+Initialize support for
 .CW pdfhref
 features.
 The current
 .CW pdfhref
-implementation provides only one such feature which requires initialisation
+implementation provides only one such feature which requires initialization
 \(em a helper macro which must be attached to a user supplied page trap handler,
 in order to support mapping of reference \(lqhot\(hyspots\(rq
 which extend through a page transition;
 .XR page-trap ). (
 .QE
+.
 .NH 3
 .XN Optional Features of the \F[C]pdfhref\F[] Macro
 .LP
@@ -1509,6 +1530,7 @@ argument specified with the
 .CWB -F
 option.
 .QE
+.
 .NH 3
 .XN -N mark-dest -- Marking a Reference Destination
 .LP
@@ -1604,6 +1626,7 @@ option, which causes any specified
 to be \(lqechoed\(rq in the document text,
 at the point where the reference mark is placed,
 in addition to its inclusion in the cross reference map.
+.
 .NH 4
 .XN -N export-map -- Mapping a Destination for Cross Referencing
 .LP
@@ -1627,7 +1650,7 @@ Again, the details of
 the cross reference map is generated will be discussed in
 .pdfhref F SECREF L -D do-xref -A ;
 .pdfhref F
-however, it is important to recognise that
+however, it is important to recognize that
 .EM what
 content is included in the cross reference map is established
 when the reference destination is defined \(em it is derived
@@ -1661,6 +1684,7 @@ operator; this may be redefined by the user,
 to export additional cross reference information,
 or to modify the default format for cross reference links,
 .XR set-format ). (
+.
 .NH 4
 .XN -N pdfhref-view -- Associating a Document View with a Reference Mark
 .LP
@@ -1751,6 +1775,7 @@ all comments in
 .pdfhref F
 relating to its use, and indeed to page position computations in general,
 apply equally to marked reference views and to outline reference views.
+.
 .NH 3
 .XN -N link-named -- Linking to a Marked Reference Destination
 .LP
@@ -1773,6 +1798,7 @@ the same document as the link,
 .XR link-intern ), (
 or is defined as a named destination in a different PDF document,
 .XR link-extern ). (
+.
 .NH 4
 .XN -N link-intern -- References within a Single PDF Document
 .LP
@@ -1909,9 +1935,10 @@ However, since the appearance of the link will be influenced by
 factors established when the named destination is marked,
 .XR mark-dest ), (
 and also by the formatting rules in effect when the link is placed,
-the presentation of a suitable exanple will be deferred,
+the presentation of a suitable example will be deferred,
 until the formatting mechanism has been explained,
 .XR set-format ). (
+.
 .NH 4
 .XN -N link-extern -- References to Destinations in Other PDF Documents
 .LP
@@ -2054,6 +2081,7 @@ the presentation of an example of the placing of
 a reference to an external destination will be deferred,
 until the formatting mechanism has been explained,
 .XR set-format ). (
+.
 .NH 3
 .XN -N add-weblink -- Linking to Internet Resources
 .LP
@@ -2157,6 +2185,7 @@ making it obvious that the appropriate URI is
 \&.pdfhref W -A , \*[GROFF-WEBSITE]
 the requisite mark up might be:\e(en
 .DE
+.
 .NH 3
 .XN -N set-format -- Establishing a Format for References
 .LP
@@ -2179,6 +2208,7 @@ macro \(em
 .XR set-colour
 \(em unless the user specifically chooses to adopt, and implement,
 some alternative strategy.
+.
 .NH 4
 .XN -N set-colour -- Using Colour to Demarcate Link Regions
 .LP
@@ -2188,12 +2218,15 @@ references to other locations, either within the same document,
 or even in other documents, or on the World Wide Web,
 it is usually desirable to make the regions
 where these active links are placed stand out from the surrounding text.
+.
 .NH 4
 .XN -N user-format -- Specifying Reference Text Explicitly
+.
 .NH 4
 .XN -N auto-format -- Using Automatically Formatted Reference Text
+.
 .NH 4
-.XN -N custom-format -- Customising Automatically Formatted Reference Text
+.XN -N custom-format -- Customizing Automatically Formatted Reference Text
 .LP
 It is incumbent on the user,
 if employing automatic formatting of the displayed reference,
@@ -2205,6 +2238,7 @@ in which the reference will appear;
 thus, it may be easiest to
 .EM always
 use manual formatting for external references.
+.
 .NH 3
 .XN Problematic Links
 .LP
@@ -2218,6 +2252,7 @@ operator, there may be occasions when the resulting link
 does function as expected.
 A number of scenarios, which are known to be troublesome,
 are described below.
+.
 .NH 4
 .XN -N page-trap -- Links with a Page Transition in the Active Region
 .LP
@@ -2254,7 +2289,7 @@ Plant a trap to invoke this macro, at the appropriate vertical position
 marking the end of normal running text on each page.
 .KS
 .IP \n+[ITEM].
-Initialise the
+Initialize the
 .CW pdfhref
 hook into this page transition trap, by invoking
 .RS
@@ -2274,16 +2309,16 @@ at the start of each new page.
 .RE
 .QE
 .LP
-It may be observed that this initialisation of the
+It may be observed that this initialization of the
 .CW pdfhref
 page transition hook is, typically, required only once
 .EM before
 document formatting begins.
 Users of document formatting macro packages may reasonably expect that
-this initialisation should be performed by the macro package itself.
+this initialization should be performed by the macro package itself.
 Thus, writers of such macro packages which include
 .CW pdfmark
-bindings, should provide appropriate initialisation,
+bindings, should provide appropriate initialization,
 so relieving the end user of this responsibility.
 The following example, abstracted from the sample
 .CW ms
@@ -2300,10 +2335,12 @@ illustrates how this may be accomplished:\(en
 \&.
 \&.pdfhref I -PT pg@bottom
 .DE
+.
 .NH 2
 .XN -N add-note -- Annotating a PDF Document using Pop-Up Notes
+.
 .NH 2
-.XN -N pdfsync -- Synchronising Output and \F[C]pdfmark\F[] Contexts
+.XN -N pdfsync -- Synchronizing Output and \F[C]pdfmark\F[] Contexts
 .LP
 It has been noted previously, that the
 .CW pdfview
@@ -2319,7 +2356,7 @@ macro, when used to create a document outline,
 .XR add-outline ), (
 do not immediately write their
 .CW pdfmark
-output to the PostScript\*(rg data stream;
+output to the \*[PostScript] data stream;
 instead, they cache their output, in a
 .CW groff
 diversion, in the case of the
@@ -2350,7 +2387,7 @@ data is to be flushed to the output stream, the
 .CW pdfmark
 macro package provides the
 .CW pdfsync
-macro, (to synchronise the cache and output states).
+macro, (to synchronize the cache and output states).
 In its simplest form, it is invoked without arguments, i.e.
 .QP
 .fam C
@@ -2419,6 +2456,7 @@ is terminated,
 .EM before
 it commences the formatting of the table of contents section.
 .bp
+.
 .NH 1
 .XN -N pdf-layout -- PDF Document Layout
 .LP
@@ -2453,6 +2491,7 @@ macro packages,
 as to how the
 .CW pdfmark
 macros may be employed with their chosen primary macro package.
+.
 .NH 2
 .XN -N using-spdf -- Using \F[C]pdfmark\F[] Macros with the \F[C]ms\F[] Macro Package
 .LP
@@ -2503,6 +2542,7 @@ which require special handling when producing PDF documents.
 These additional macros,
 and the issues they are intended to address,
 are described below.
+.
 .NH 3
 .XN \F[C]ms\F[] Section Headings in PDF Documents
 .LP
@@ -2516,7 +2556,7 @@ macros, to specify section headings.
 However,
 there is no standard mechanism for generating a
 table of contents entry based on the text of the section heading;
-neither is there any recognised standard method for establishing a
+neither is there any recognized standard method for establishing a
 cross reference link to the section.
 .LP
 To address this
@@ -2530,14 +2570,19 @@ macro,
 to be used in conjunction with the
 .CW NH
 macro.
+.
 .NH 4
 .XN -N xn-macro -- The \F[C]XN\F[] Macro
+.
 .NH 1
 .XN The PDF Publishing Process
+.
 .NH 2
 .XN -N do-xref -- Resolving Cross References
+.
 .NH 3
 .XN -N create-map -- Creating a Document Reference Map
+.
 .NH 3
 .XN -N import-map -- Deploying a Document Reference Map
 .TC

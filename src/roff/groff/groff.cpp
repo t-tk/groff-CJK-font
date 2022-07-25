@@ -176,7 +176,7 @@ int main(int argc, char **argv)
       commands[TBL_INDEX].set_name(command_prefix, "tbl");
       break;
     case 'J':
-      commands[IDEAL_INDEX].set_name(command_prefix, "gideal");
+      // commands[IDEAL_INDEX].set_name(command_prefix, "gideal");
       // need_pic = 1;
       break;
     case 'j':
@@ -587,7 +587,7 @@ possible_command::possible_command()
 possible_command::~possible_command()
 {
   free(name);
-  a_delete argv;
+  delete[] argv;
 }
 
 void possible_command::set_name(const char *s)
@@ -598,8 +598,8 @@ void possible_command::set_name(const char *s)
 
 void possible_command::clear_name()
 {
-  a_delete name;
-  a_delete argv;
+  delete[] name;
+  delete[] argv;
   name = NULL;
   argv = NULL;
 }
@@ -780,13 +780,14 @@ char **possible_command::get_argv()
 
 void synopsis(FILE *stream)
 {
+  // Add `J` to the cluster if we ever get ideal(1) support.
   fprintf(stream,
-"usage: %1$s [-abceghijklpstvzCEGNRSUVXZ] [-dCS] [-Denc] [-fFAM]"
-" [-Fdir] [-Idir] [-Kenc] [-Larg] [-mNAME] [-Mdir] [-nNUM] [-oLIST]"
-" [-Parg] [-rCN] [-Tdev] [-wNAME] [-Wname] [FILE ...]\n"
-"usage: %1$s -h\n"
-"usage: %1$s --help\n",
-	  program_name);
+"usage: %s [-abcCeEgGijklNpRsStUVXzZ] [-dCS] [-dNAME=STRING] [-Denc]"
+" [-fFAM] [-Fdir] [-Idir] [-Kenc] [-Larg] [-mNAME] [-Mdir] [-nNUM]"
+" [-oLIST] [-Parg] [-rCN] [-rREG=EXPR] [-Tdev] [-wNAME] [-Wname]"
+" [FILE ...]\n"
+"usage: %s {-h | --help | -v | --version}\n",
+	  program_name, program_name);
 }
 
 void help()
@@ -797,20 +798,20 @@ void help()
 "-b\tprint backtraces with errors or warnings\n"
 "-c\tdisable color output\n"
 "-C\tenable compatibility mode\n"
-"-d CS\tdefine string C as S\n"
-"-d C=S\tdefine string C as S; C can be multiple characters\n"
+"-d CS\tdefine one-character string name C as string S\n"
+"-d NAME=STRING\n\tdefine string NAME as STRING\n"
 "-D ENC\tfall back to ENC as default input encoding; implies -k\n"
 "-e\tpreprocess with eqn\n"
-"-E\tsuppress error diagnostics\n"
+"-E\tsuppress error diagnostics; implies -Ww\n"
 "-f FAM\tuse FAM as the default font family\n"
 "-F DIR\tsearch DIR for device and font description files\n"
 "-g\tpreprocess with grn\n"
-"-G\tpreprocess with grap\n"
+"-G\tpreprocess with grap; implies -p\n"
 "-h\toutput this usage message and exit\n"
 "-i\tread standard input after all FILEs\n"
 "-I DIR\tsearch DIR for input files; implies -s\n"
-"-j\tpreprocess with chem\n"
-"-J\tpreprocess with gideal\n"
+"-j\tpreprocess with chem; implies -p\n"
+// "-J\tpreprocess with gideal\n"
 "-k\tpreprocess with preconv\n"
 "-K ENC\tuse ENC as input encoding; implies -k\n"
 "-l\tspool the output\n"
@@ -822,8 +823,8 @@ void help()
 "-o LIST\toutput only page in LIST (\"1\"; \"2,4\"; \"3,7-11\")\n"
 "-p\tpreprocess with pic\n"
 "-P ARG\tpass ARG to the postprocessor\n"
-"-r CN\tdefine register C as N\n"
-"-r C=N\tdefine register C as N; C can be multiple characters\n"
+"-r CN\tdefine one-character register name C as numeric expression N\n"
+"-r REG=EXPR\n\tdefine register REG as numeric expression EXPR\n"
 "-R\tpreprocess with refer\n"
 "-s\tpreprocess with soelim\n"
 "-S\tenable safer mode (the default)\n"

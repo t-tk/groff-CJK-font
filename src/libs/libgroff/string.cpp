@@ -44,7 +44,7 @@ static char *salloc(int len, int *sizep)
 
 static void sfree(char *ptr, int)
 {
-  a_delete ptr;
+  delete[] ptr;
 }
 
 static char *sfree_alloc(char *ptr, int oldsz, int len, int *sizep)
@@ -53,7 +53,7 @@ static char *sfree_alloc(char *ptr, int oldsz, int len, int *sizep)
     *sizep = oldsz;
     return ptr;
   }
-  a_delete ptr;
+  delete[] ptr;
   if (len == 0) {
     *sizep = 0;
     return 0;
@@ -69,7 +69,7 @@ static char *srealloc(char *ptr, int oldsz, int oldlen, int newlen, int *sizep)
     return ptr;
   }
   if (newlen == 0) {
-    a_delete ptr;
+    delete[] ptr;
     *sizep = 0;
     return 0;
   }
@@ -77,7 +77,7 @@ static char *srealloc(char *ptr, int oldsz, int oldlen, int newlen, int *sizep)
     char *p = new char[*sizep = newlen*2];
     if (oldlen < newlen && oldlen != 0)
       memcpy(p, ptr, oldlen);
-    a_delete ptr;
+    delete[] ptr;
     return p;
   }
 }
@@ -317,13 +317,13 @@ void string::remove_spaces()
       len = l + 1;
       char *tmp = new char[sz];
       memcpy(tmp, p, len);
-      a_delete ptr;
+      delete[] ptr;
       ptr = tmp;
     }
     else {
       len = 0;
       if (ptr) {
-	a_delete ptr;
+	delete[] ptr;
 	ptr = 0;
 	sz = 0;
       }

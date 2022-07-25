@@ -40,7 +40,7 @@ output::output() : args(0), desired_height(0.0), desired_width(0.0)
 
 output::~output()
 {
-  a_delete args;
+  delete[] args;
 }
 
 void output::set_desired_width_height(double wid, double ht)
@@ -51,7 +51,7 @@ void output::set_desired_width_height(double wid, double ht)
 
 void output::set_args(const char *s)
 {
-  a_delete args;
+  delete[] args;
   if (s == 0 || *s == '\0')
     args = 0;
   else
@@ -404,7 +404,7 @@ text_item::text_item(char *t, const char *fn, int ln)
 
 text_item::~text_item()
 {
-  a_delete text;
+  delete[] text;
 }
 
 object_spec::object_spec(object_type t) : type(t)
@@ -443,8 +443,8 @@ object_spec::~object_spec()
     delete tem;
   }
   delete with;
-  a_delete shaded;
-  a_delete outlined;
+  delete[] shaded;
+  delete[] outlined;
 }
 
 class command_object : public object {
@@ -465,7 +465,7 @@ command_object::command_object(char *p, const char *fn, int ln)
 
 command_object::~command_object()
 {
-  a_delete s;
+  delete[] s;
 }
 
 void command_object::print()
@@ -669,7 +669,7 @@ void graphic_object::print_text()
 graphic_object::~graphic_object()
 {
   if (text)
-    ad_delete(ntext) text;
+    delete[] text;
 }
 
 class rectangle_object : public graphic_object {
@@ -1445,7 +1445,7 @@ void spline_object::print()
 
 line_object::~line_object()
 {
-  a_delete v;
+  delete[] v;
 }
 
 linear_object *object_spec::make_line(position *curpos, direction *dirp)

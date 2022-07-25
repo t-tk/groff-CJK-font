@@ -29,7 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
 extern void fatal_error_exit();
 
-enum error_type { WARNING, ERROR, FATAL };
+enum error_type { DEBUG, WARNING, ERROR, FATAL };
 
 static void do_error_with_file_and_line(const char *filename,
 					const char *source_filename,
@@ -40,10 +40,10 @@ static void do_error_with_file_and_line(const char *filename,
 					const errarg &arg2,
 					const errarg &arg3)
 {
-  int need_space = 0;
+  bool need_space = false;
   if (program_name) {
     fprintf(stderr, "%s:", program_name);
-    need_space = 1;
+    need_space = true;
   }
   if (lineno >= 0 && filename != 0) {
     if (strcmp(filename, "-") == 0)
@@ -52,7 +52,7 @@ static void do_error_with_file_and_line(const char *filename,
       fprintf(stderr, "%s (%s):%d:", filename, source_filename, lineno);
     else
       fprintf(stderr, "%s:%d:", filename, lineno);
-    need_space = 1;
+    need_space = true;
   }
   if (need_space)
     fputc(' ', stderr);
@@ -65,6 +65,9 @@ static void do_error_with_file_and_line(const char *filename,
     break;
   case WARNING:
     fputs("warning: ", stderr);
+    break;
+  case DEBUG:
+    fputs("debug: ", stderr);
     break;
   }
   errprint(format, arg1, arg2, arg3);
@@ -85,6 +88,13 @@ static void do_error(error_type type,
 			      current_lineno, type, format, arg1, arg2, arg3);
 }
 
+void debug(const char *format,
+	   const errarg &arg1,
+	   const errarg &arg2,
+	   const errarg &arg3)
+{
+  do_error(DEBUG, format, arg1, arg2, arg3);
+}
 
 void error(const char *format, 
 	   const errarg &arg1,
@@ -108,6 +118,17 @@ void fatal(const char *format,
 	   const errarg &arg3)
 {
   do_error(FATAL, format, arg1, arg2, arg3);
+}
+
+void debug_with_file_and_line(const char *filename,
+			      int lineno,
+			      const char *format,
+			      const errarg &arg1,
+			      const errarg &arg2,
+			      const errarg &arg3)
+{
+  do_error_with_file_and_line(filename, 0, lineno,
+			      DEBUG, format, arg1, arg2, arg3);
 }
 
 void error_with_file_and_line(const char *filename,

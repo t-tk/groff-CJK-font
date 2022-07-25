@@ -203,19 +203,19 @@ const char *get_gbfont()
 
 void set_gfont(const char *s)
 {
-  a_delete gfont;
+  delete[] gfont;
   gfont = strsave(s);
 }
 
 void set_grfont(const char *s)
 {
-  a_delete grfont;
+  delete[] grfont;
   grfont = strsave(s);
 }
 
 void set_gbfont(const char *s)
 {
-  a_delete gbfont;
+  delete[] gbfont;
   gbfont = strsave(s);
 }
 
@@ -457,7 +457,7 @@ void box_list::append(box *pp)
     maxlen *= 2;
     p = new box*[maxlen];
     memcpy(p, oldp, sizeof(box*)*len);
-    a_delete oldp;
+    delete[] oldp;
   }
   p[len++] = pp;
 }
@@ -466,7 +466,7 @@ box_list::~box_list()
 {
   for (int i = 0; i < len; i++)
     delete p[i];
-  a_delete p;
+  delete[] p;
 }
 
 void box_list::list_check_tabs(int level)

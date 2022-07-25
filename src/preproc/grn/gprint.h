@@ -48,7 +48,7 @@
 #define BOTCENT 15
 #define TEXT(t) ( (t <= CENTCENT) || (t >= TOPLEFT) )
 
-/* WARNING * WARNING * WARNING * WARNING * WARNING * WARNING * WARNING 
+/* WARNING * WARNING * WARNING * WARNING * WARNING * WARNING * WARNING
  *    The above (TEXT) test is dependent on the relative values of the
  *    constants and will have to change if these values change or if new
  *    commands are added with value greater than BOTCENT
@@ -83,4 +83,8 @@ typedef struct elmt {
 #define Nullpoint(pt)  ((pt) == (POINT *) NULL)
 #define PTNextPoint(pt) (pt->nextpt)
 
-/* EOF */
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

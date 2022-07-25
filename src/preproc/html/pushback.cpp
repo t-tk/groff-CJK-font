@@ -65,7 +65,6 @@ pushBackBuffer::pushBackBuffer (char *filename)
     sys_fatal("malloc");
   }
   stackPtr = 0;   /* index to push back stack        */
-  debug    = 0;
   verbose  = 0;
   eofFound = FALSE;
   lineNo   = 1;

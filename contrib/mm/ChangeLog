@@ -1,3 +1,92 @@
+2021-08-12  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* m.tmac (R): Alter to work analogously to `B` and `I` macros;
+	accept multiple arguments if given, and alternate roman with
+	previous font.  Stop explicitly turning off underlining.
+
+2021-07-17  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	Refactor author title handling.
+
+	* m.tmac (AU): Emit error diagnostic and skip remainder of macro
+	definition if called without arguments; this will keep people
+	familiar with the ms package from getting incorrect and
+	surprising output.  Initialize `cov*at!` array element to zero
+	for current author number (`AT` already updates it).
+
+	* mm/ms.cov (cov@print-authors): Enforce requirement documented
+	in groff_mm(7) that .AU is mandatory if .COVER is used.  Emit
+	diagnostic if `cov*au` is not defined, and skip remainder of
+	macro definition.  Test for existence of authors' titles
+	differently; now that `cov*at!` (a count of titles for the
+	current author) is guaranteed to be initialized, we can use it
+	as part of a while loop condition, instead of the hard-coded "9"
+	as an arbitrary limit on the allowed quantity of author titles
+	{though surely even that is obnoxiously high in practice}, and
+	more importantly avoid using a \w escape to measure the width of
+	the interpolation of a potentially undefined string.  Use `nop`
+	to indent text output.  Delete apparent typo causing `mac`
+	warning with respect to undefined `.` macro.  Introduce
+	temporary strings for the author and author title "loop indices"
+	to shorten and clarify logic.  Remove them when done.
+
+	Fixes <https://savannah.gnu.org/bugs/?60926>.
+
+2021-07-17  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* mm/ms.cov (cov@print-title): Enforce requirement documented in
+	groff_mm(7) that .TL is mandatory if .COVER is used.  Emit
+	diagnostic if `cov*title` is not defined, and skip remainder of
+	macro definition.
+
+2021-07-17  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* mm/ms.cov (COVEND): Fix thinko; test for existence of
+	`cov*abs-arg` register with `r` conditional operator, not `d`.
+
+2021-07-17  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* m.tmac: Stop emitting debugging diagnostic using undefined
+	string.  Problem exposed by commit
+	d6d98d2b3e0ad070037073bb288bbaee3fc04cf0, 8 December 2013.
+
+	Fixes <https://savannah.gnu.org/bugs/?60397>.
+
+2021-07-17  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	Stop installing empty macro files.
+
+	* mm.am: Delete variable `MMLOCALE`.
+	(install_mm): Delete `for` loop that touches the files.
+	(uninstall_mm): Delete `for` loop that deletes the files.
+	* m.tmac: Update initializtion.
+	  - Load the `\*[@country]_locale` file with `msoquiet` instead
+	    of `mso`.
+	  - Add version check to require groff 1.23 or later, since
+	    the `msoquiet` request is now being used.
+	  - Move "include guard" to follow the compatibility mode and
+	    groff version checks.  Remove its `do` prefix.
+	* groff_mm.7.man (Localization): Migrate topic into its own
+	subsection and update discussion.
+
+	Fixes <https://savannah.gnu.org/bugs/?60700>.
+
+2021-07-17  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* mm/ms.cov (cov@print-firm): Do nothing if the `cov*firm`
+	string is not defined.  Silences a `mac` warning and prevents
+	the document date from being incorrectly aligned.
+
+	* tests/ms_cover_sheet_robust_to_missing_AF.sh: Test it.
+	* mm.am (mm_TESTS): Run test.
+
+	Fixes <https://savannah.gnu.org/bugs/?60915>.
+
+2021-07-14  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* m.tmac: Rename `cov*mt-addresse` to `cov*mt-addressee`.
+	* NOTES: Update the only place the foregoing is documented.
+
 2021-05-31  G. Branden Robinson <g.branden.robinson@gmail.com>
 
 	* groff_mm.7.man (Description/Macros) <LT>: Document the "SP"
@@ -1114,6 +1203,8 @@ are permitted in any medium without royalty provided the copyright
 notice and this notice are preserved.
 
 Local Variables:
-version-control: never
+fill-column: 72
 mode: change-log
+version-control: never
 End:
+vim:set autoindent textwidth=72:

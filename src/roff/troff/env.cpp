@@ -39,7 +39,7 @@ enum { ADJUST_LEFT = 0,
   ADJUST_BOTH = 1,
   ADJUST_CENTER = 3,
   ADJUST_RIGHT = 5,
-  ADJUST_MAX = 5,
+  ADJUST_MAX = 5
 };
 
 enum {
@@ -51,18 +51,16 @@ enum {
   HYPHEN_NOT_FIRST_CHARS = 8,
   HYPHEN_LAST_CHAR = 16,
   HYPHEN_FIRST_CHAR = 32,
-  HYPHEN_MAX = 63,
+  HYPHEN_MAX = 63
 };
 
-struct env_list {
+struct env_list_node {
   environment *env;
-  env_list *next;
-  env_list(environment *e, env_list *p) : env(e), next(p) {}
+  env_list_node *next;
+  env_list_node(environment *e, env_list_node *p) : env(e), next(p) {}
 };
 
-env_list *env_stack;
-const int NENVIRONMENTS = 10;
-environment *env_table[NENVIRONMENTS];
+env_list_node *env_stack;
 dictionary env_dictionary(10);
 environment *curenv;
 static int next_line_number = 0;
@@ -267,9 +265,12 @@ int font_size::to_units()
 // we can't do this in a static constructor because various dictionaries
 // have to get initialized first
 
+static symbol default_environment_name("0");
+
 void init_environments()
 {
-  curenv = env_table[0] = new environment("0");
+  curenv = new environment(default_environment_name);
+  (void)env_dictionary.lookup(default_environment_name, curenv);
 }
 
 void tab_character()
@@ -1100,60 +1101,35 @@ node *environment::extract_output_line()
 
 void environment_switch()
 {
-  int pop = 0;	// 1 means pop, 2 means pop but no error message on underflow
-  if (curenv->is_dummy())
-    error("can't switch environments when current environment is dummy");
-  else if (!has_arg())
-    pop = 1;
+  if (curenv->is_dummy()) {
+    error("cannot switch out of dummy environment");
+  }
   else {
-    symbol nm;
-    if (!tok.delimiter()) {
-      // It looks like a number.
-      int n;
-      if (get_integer(&n)) {
-	if (n >= 0 && n < NENVIRONMENTS) {
-	  env_stack = new env_list(curenv, env_stack);
-	  if (env_table[n] == 0)
-	    env_table[n] = new environment(i_to_a(n));
-	  curenv = env_table[n];
-	}
-	else
-	  nm = i_to_a(n);
+    symbol nm = get_long_name();
+    if (nm.is_null()) {
+      if (env_stack == 0)
+	error("environment stack underflow");
+      else {
+	int seen_space = curenv->seen_space;
+	int seen_eol   = curenv->seen_eol;
+	int suppress_next_eol = curenv->suppress_next_eol;
+	curenv = env_stack->env;
+	curenv->seen_space = seen_space;
+	curenv->seen_eol   = seen_eol;
+	curenv->suppress_next_eol = suppress_next_eol;
+	env_list_node *tem = env_stack;
+	env_stack = env_stack->next;
+	delete tem;
       }
-      else
-	pop = 2;
     }
     else {
-      nm = get_long_name(1);
-      if (nm.is_null())
-	pop = 2;
-    }
-    if (!nm.is_null()) {
       environment *e = (environment *)env_dictionary.lookup(nm);
       if (!e) {
 	e = new environment(nm);
 	(void)env_dictionary.lookup(nm, e);
       }
-      env_stack = new env_list(curenv, env_stack);
+      env_stack = new env_list_node(curenv, env_stack);
       curenv = e;
-    }
-  }
-  if (pop) {
-    if (env_stack == 0) {
-      if (pop == 1)
-	error("environment stack underflow");
-    }
-    else {
-      int seen_space = curenv->seen_space;
-      int seen_eol   = curenv->seen_eol;
-      int suppress_next_eol = curenv->suppress_next_eol;
-      curenv = env_stack->env;
-      curenv->seen_space = seen_space;
-      curenv->seen_eol   = seen_eol;
-      curenv->suppress_next_eol = suppress_next_eol;
-      env_list *tem = env_stack;
-      env_stack = env_stack->next;
-      delete tem;
     }
   }
   skip_line();
@@ -1161,29 +1137,20 @@ void environment_switch()
 
 void environment_copy()
 {
-  symbol nm;
   environment *e=0;
   tok.skip();
-  if (!tok.delimiter()) {
-    // It looks like a number.
-    int n;
-    if (get_integer(&n)) {
-      if (n >= 0 && n < NENVIRONMENTS)
-	e = env_table[n];
-      else
-	nm = i_to_a(n);
-    }
+  symbol nm = get_long_name();
+  if (nm.is_null()) {
+    error("no environment specified to copy from");
   }
-  else
-    nm = get_long_name(1);
-  if (!e && !nm.is_null())
+  else {
     e = (environment *)env_dictionary.lookup(nm);
-  if (e == 0) {
-    error("No environment to copy from");
-    return;
-  }
-  else
+  if (e)
     curenv->copy(e);
+  else
+    error("cannot copy from nonexistent environment '%1'",
+	  nm.contents());
+  }
   skip_line();
 }
 
@@ -1281,7 +1248,7 @@ void override_sizes()
       sizes = new int[n*2];
       memcpy(sizes, old_sizes, n*sizeof(int));
       n *= 2;
-      a_delete old_sizes;
+      delete[] old_sizes;
     }
     sizes[i++] = lower;
     if (lower == 0)
@@ -2558,7 +2525,7 @@ void do_input_trap(int continued)
       warning(WARN_RANGE,
 	      "number of lines for input trap must be greater than zero");
     else {
-      symbol s = get_name(1);
+      symbol s = get_name(true /* required */);
       if (!s.is_null()) {
 	curenv->input_trap_count = n;
 	curenv->input_trap = s;
@@ -2657,7 +2624,7 @@ const char *tab_stops::to_string()
   int need = count*12 + 3;
   if (buf == 0 || need > buf_size) {
     if (buf)
-      a_delete buf;
+      delete[] buf;
     buf_size = need;
     buf = new char[buf_size];
   }
@@ -3043,7 +3010,7 @@ class int_env_reg : public reg {
  public:
   int_env_reg(INT_FUNCP);
   const char *get_string();
-  int get_value(units *val);
+  bool get_value(units *val);
 };
 
 class vunits_env_reg : public reg {
@@ -3051,7 +3018,7 @@ class vunits_env_reg : public reg {
  public:
   vunits_env_reg(VUNITS_FUNCP f);
   const char *get_string();
-  int get_value(units *val);
+  bool get_value(units *val);
 };
 
 
@@ -3060,7 +3027,7 @@ class hunits_env_reg : public reg {
  public:
   hunits_env_reg(HUNITS_FUNCP f);
   const char *get_string();
-  int get_value(units *val);
+  bool get_value(units *val);
 };
 
 class string_env_reg : public reg {
@@ -3074,10 +3041,10 @@ int_env_reg::int_env_reg(INT_FUNCP f) : func(f)
 {
 }
 
-int int_env_reg::get_value(units *val)
+bool int_env_reg::get_value(units *val)
 {
   *val = (curenv->*func)();
-  return 1;
+  return true;
 }
 
 const char *int_env_reg::get_string()
@@ -3089,10 +3056,10 @@ vunits_env_reg::vunits_env_reg(VUNITS_FUNCP f) : func(f)
 {
 }
 
-int vunits_env_reg::get_value(units *val)
+bool vunits_env_reg::get_value(units *val)
 {
   *val = (curenv->*func)().to_units();
-  return 1;
+  return true;
 }
 
 const char *vunits_env_reg::get_string()
@@ -3104,10 +3071,10 @@ hunits_env_reg::hunits_env_reg(HUNITS_FUNCP f) : func(f)
 {
 }
 
-int hunits_env_reg::get_value(units *val)
+bool hunits_env_reg::get_value(units *val)
 {
   *val = (curenv->*func)().to_units();
-  return 1;
+  return true;
 }
 
 const char *hunits_env_reg::get_string()
@@ -3127,7 +3094,7 @@ const char *string_env_reg::get_string()
 class horizontal_place_reg : public general_reg {
 public:
   horizontal_place_reg();
-  int get_value(units *);
+  bool get_value(units *);
   void set_value(units);
 };
 
@@ -3135,10 +3102,10 @@ horizontal_place_reg::horizontal_place_reg()
 {
 }
 
-int horizontal_place_reg::get_value(units *res)
+bool horizontal_place_reg::get_value(units *res)
 {
   *res = curenv->get_input_line_position().to_units();
-  return 1;
+  return true;
 }
 
 void horizontal_place_reg::set_value(units n)
@@ -3378,15 +3345,6 @@ void print_env()
 {
   errprint("Current Environment:\n");
   curenv->print_env();
-  for (int i = 0; i < NENVIRONMENTS; i++) {
-    if (env_table[i]) {
-      errprint("Environment %1:\n", i);
-      if (env_table[i] != curenv)
-	env_table[i]->print_env();
-      else
-	errprint("  current\n");
-    }
-  }
   dictionary_iterator iter(env_dictionary);
   symbol s;
   environment *e;
@@ -3565,7 +3523,7 @@ hyphenation_language *current_language = 0;
 
 static void set_hyphenation_language()
 {
-  symbol nm = get_name(1);
+  symbol nm = get_name(true /* required */);
   if (!nm.is_null()) {
     current_language = (hyphenation_language *)language_dictionary.lookup(nm);
     if (!current_language) {
@@ -3595,7 +3553,7 @@ static void hyphen_word()
     int i = 0;
     int npos = 0;
     while (i < WORD_MAX && !tok.space() && !tok.newline() && !tok.eof()) {
-      charinfo *ci = tok.get_char(1);
+      charinfo *ci = tok.get_char(true /* required */);
       if (ci == 0) {
 	skip_line();
 	return;
@@ -3620,7 +3578,7 @@ static void hyphen_word()
       tem = (unsigned char *)current_language->exceptions.lookup(symbol(buf),
 								 tem);
       if (tem)
-	a_delete tem;
+	delete[] tem;
     }
   }
   skip_line();
@@ -3742,7 +3700,7 @@ void hyphen_trie::insert_hyphenation(dictionary *ex, const char *pat,
     memcpy(tem, pos, npos + 1);
     tem = (unsigned char *)ex->lookup(symbol(buf), tem);
     if (tem)
-      a_delete tem;
+      delete[] tem;
   }
 }
 
@@ -4084,7 +4042,7 @@ void hyphenate(hyphen_list *h, unsigned flags)
 
 static void do_hyphenation_patterns_file(int append)
 {
-  symbol name = get_long_name(1);
+  symbol name = get_long_name(true /* required */);
   if (!name.is_null()) {
     if (!current_language)
       error("no current hyphenation language");

@@ -1020,7 +1020,7 @@ detect_file_encoding(FILE *fp)
   }
   len = stat_buf.st_size;
   if (debug_flag)
-    fprintf(stderr, "  len: %zu\n", len);  
+    fprintf(stderr, "  len: %lu\n", (unsigned long)len);
   if (len == 0)
     goto end;
   data = (char *)calloc(len, 1);
@@ -1041,7 +1041,8 @@ detect_file_encoding(FILE *fp)
     goto end;
   }
   if (debug_flag)
-    fprintf(stderr, "  uchardet read: %zu bytes\n", read_bytes);
+    fprintf(stderr, "  uchardet read: %lu bytes\n",
+	    (unsigned long)read_bytes);
   uchardet_data_end(ud);
   charset = uchardet_get_charset(ud);
   if (debug_flag) {

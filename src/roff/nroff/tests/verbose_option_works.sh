@@ -20,6 +20,8 @@
 
 # Ensure a predictable character encoding.
 export LC_ALL=C
+export LESSCHARSET=
+export GROFF_TYPESETTER=
 
 set -e
 
@@ -60,3 +62,7 @@ nroff -V \"1a 1b\" 2 | sed "$sedexpr" \
 echo "testing 'nroff -V 1a\\\"1b 2'" >&2
 nroff -V 1a\"1b 2 | sed "$sedexpr" \
     | grep -x "test-groff -Tascii -mtty-char 1a\"1b 2"
+
+echo "testing 'nroff -V -d FOO=BAR 1'" >&2
+nroff -V -d FOO=BAR 1 | sed "$sedexpr" \
+    | grep -x "test-groff -Tascii -mtty-char -d FOO=BAR 1"

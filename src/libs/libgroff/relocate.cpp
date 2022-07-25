@@ -115,7 +115,7 @@ char *searchpath(const char *name, const char *pathp)
 #endif
       return path;
     }
-    a_delete path;
+    delete[] path;
     if (*end == '\0')
       break;
     p = end + 1;
@@ -135,12 +135,12 @@ char *searchpathext(const char *name, const char *pathext, const char *pathp)
     strcpy(namex, name);
     strcat(namex, ext);
     found = searchpath(namex, pathp);
-    a_delete namex;
+    delete[] namex;
     if (found)
        break;
     ext = strtok(0, PATH_SEP);
   }
-  a_delete tmpathext;
+  delete[] tmpathext;
   return found;
 }
 
@@ -176,7 +176,7 @@ void set_current_prefix()
     if (!pathextstr)
       pathextstr = strsave(PATH_EXT);
     curr_prefix = searchpathext(program_name, pathextstr, getenv("PATH"));
-    a_delete pathextstr;
+    delete[] pathextstr;
   }
 #else /* !_WIN32 */
   curr_prefix = searchpath(program_name, getenv("PATH"));

@@ -54,29 +54,8 @@ troffrc!html
 .el \
 .	do tr \[char65]\~
 .
-.
-.\" Determine the groff locale from the environment if possible.  Try
-.\" LC_ALL first, then LANG.  "C" means English (en).  Otherwise, only
-.\" the first two characters of the locale name are used.
-.do ds troffrc!language \V[LC_ALL]
-.do if '\*[troffrc!language]'' \{\
-.	do ds troffrc!language \V[LANG]
-.	do if '\*[troffrc!language]'' \
-.		do ds troffrc!language C
-.\}
-.do if '\*[troffrc!language]'C' \
-.	do ds troffrc!language en
-.do length troffrc!lang_length \*[troffrc!language]
-.do if (\n[troffrc!lang_length] > 2) \
-.	do substring troffrc!language 0 1
-.do msoquiet \*[troffrc!language].tmac
-.do rm troffrc!language
-.do rr troffrc!lang_length
-.\" If the configured system locale has no groff localization, fall back
-.\" to English.
-.do if !d locale \
-.	do mso en.tmac
-.
+.\" Set the input localization to English.
+.do mso en.tmac
 .
 .\" Handle paper formats.
 .do mso papersize.tmac

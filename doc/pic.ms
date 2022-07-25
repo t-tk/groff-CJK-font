@@ -144,23 +144,40 @@ The normal definitions of \fB.PS\fP and \fB.PE\fP in the \fIms\fP macro
 package and elsewhere have also the side-effect of centering the
 \fBpic\fP output on the page.
 .
+.KS
 .NH 2
 PIC Error Messages
 .PP
-If you make a \fBpic\fP syntax error, \fIgpic\/\fP(1) issues an
-error message in the standard \fIgcc\/\fP(1)-like syntax.
-A typical error message looks like this
-.KS
+If you make a mistake in \fBpic\fP input such that the program cannot
+interpret what you mean,
+\fIgpic\/\fP(1) issues a diagnostic message in the format prescribed by
+the GNU Coding Standards.
+.
+A typical error message looks like
+.
+.
+.ds FAM C
 .DS
-.CW
-pic:pic.ms:<nnn>: parse error before `<token>'
-pic:pic.ms:<nnn>: giving up on this picture
+pic:\fIfile\fP:\fInnn\fP: syntax error before \[aq]\fItoken\fP\[aq]
+pic:\fIfile\fP:\fInnn\fP: giving up on this picture
 .DE
-.R
-.KE
+.ds FAM T
+.
+.
 .LP
-where \[la]nnn\[ra] is a line number, and \[la]token\[ra] is a token near (usually
-just after) the error location.
+where
+.I file
+is the name of the file being processed,
+.I nnn
+is a line number within that file,
+and
+.I token
+is a symbol in the \fBpic\fP language
+(often a keyword)
+near
+(usually just after)
+the error location.
+.KE
 .
 .
 .NH 1
@@ -330,7 +347,7 @@ would have been joined to the top of the arc, like this:
 .PS
 arc; move; "arc";
 .PE
-.CE "5: Result of \fBarc; move; \"arc\"\fP"
+.CE "5: Result of \fBarc; move; ""arc""\fP"
 .PP
 This is because drawing an arc changes the default direction to the
 one its exit end points at.
@@ -339,7 +356,7 @@ To reinforce this point, consider:
 .PS
 arc cw; move; "arc";
 .PE
-.CE "6: Result of \fBarc cw; move; \"arc\"\fP"
+.CE "6: Result of \fBarc cw; move; ""arc""\fP"
 .PP
 All we've done differently here is specify \[lq]cw\[rq] for a clockwise arc
 (\[lq]ccw\[rq] specifies counter-clockwise direction).
@@ -443,7 +460,7 @@ modifier:
 .PS
 box width 3 "this text is far too long for a default box"
 .PE
-.CE "2: Result of \fBbox width 3 \"text far too long\"\fP"
+.CE "2: Result of \fBbox width 3 ""text far too long""\fP"
 .PP
 This modifier takes a dimension in inches.
 There is also a \[lq]height\[rq] modifier that changes a box's height.
@@ -2150,7 +2167,7 @@ With two non-zero arguments, it scales to the maximum height.
 How Scaling is Handled
 .PP
 When \fBpic\fP processes a picture description on input, it passes
-\fB.PS\fP and \fB.PE\fP through to the postprocessor.
+\fB.PS\fP, \fB.PE\fP, and \fB.PF\fP through to the postprocessor.
 The \fB.PS\fP gets decorated with two numeric arguments which are the X
 and Y\~dimensions of the picture in inches.
 The post-processor can use these to reserve space for the picture and
@@ -2182,9 +2199,9 @@ the following definitions:
 .vs
 .KE
 .LP
-Equivalent definition is supplied by GNU \fIpic\/\fP(1) if you use
-the \-mpic option; this should make it usable with macro pages other
-than \fIms\/\fR(1).
+Equivalent definitions of these and of \fB.PF\fP are supplied by GNU
+\fIpic\/\fP(1) if you use the \-mpic option; this should make it usable
+with macro pages other than \fIms\/\fR(1).
 .PP
 If \fB.PF\fP is used instead of \fB.PE\fP, the \fBtroff\fP position is
 restored to what it was at the picture start (Kernighan notes that
@@ -2196,7 +2213,7 @@ The invocation
 .DE
 .LP
 causes the contents of \fIfile\fP to replace the \fB.PS\fP line.
-This feature is deprecated; use `\fBcopy\fP \fIfile\fR' instead).
+This feature is deprecated; use `\fBcopy\fP \fIfile\fR' instead.
 .
 .NH 2
 PIC and [gt]roff commands
@@ -2645,8 +2662,8 @@ Lexical Items
 .PP
 In general, \fBpic\fP is a free-format, token-oriented language that
 ignores whitespace outside strings.
-But certain lines and contructs are specially interpreted at the lexical
-level:
+But certain lines and constructs are specially interpreted at the
+lexical level:
 .PP
 A comment begins with \fB#\fP and continues to \fB\en\fP (comments may
 also follow text in a line).
@@ -2876,14 +2893,14 @@ direction on the block's bounding box.
 .DS
 .CW
 <attribute> ::=
-  h[eigh]t <expr>       \fR# set height of closed figure \fP
-  wid[th] <expr>        \fR# set width of closed figure \fP
-  rad[ius] <expr>       \fR# set radius of circle/arc \fP
-  diam[eter] <expr>     \fR# set diameter of circle/arc \fP
-  up [<expr>]           \fR# move up \fP
-  down [<expr>]         \fR# move down \fP
-  left [<expr>]         \fR# move left \fP
-  right [<expr>]        \fR# move right \fP
+  h[eigh]t <expr>       \fR# set height of closed figure\fP
+  wid[th] <expr>        \fR# set width of closed figure\fP
+  rad[ius] <expr>       \fR# set radius of circle/arc\fP
+  diam[eter] <expr>     \fR# set diameter of circle/arc\fP
+  up [<expr>]           \fR# move up\fP
+  down [<expr>]         \fR# move down\fP
+  left [<expr>]         \fR# move left\fP
+  right [<expr>]        \fR# move right\fP
   from <position>       \fR# set from position of open figure\fP
   to <position>         \fR# set to position of open figure\fP
   at <position>         \fR# set center of open figure\fP

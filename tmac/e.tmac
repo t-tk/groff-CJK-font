@@ -1,17 +1,37 @@
-.\"	@(#)e.tmac	2.31 (Berkeley) 5/21/88
+.\" Copyright (c) 1988, 1993
+.\"   The Regents of the University of California.  All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in
+.\"    the documentation and/or other materials provided with the
+.\"    distribution.
+.\" 3. [Deleted.  See
+.\"     ftp://ftp.cs.berkeley.edu/pub/4bsd/README.Impt.License.Change]
+.\" 4. Neither the name of the University nor the names of its
+.\"    contributors may be used to endorse or promote products derived
+.\"    from this software without specific prior written permission.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS "AS IS"
+.\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+.\" TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+.\" PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR
+.\" CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+.\" SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+.\" LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
+.\" USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+.\" ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+.\" OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+.\" OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
+.\"
+.\"	@(#)e.tmac	8.1 (Berkeley) 06/05/93
+.\"
 .\"	Modified by James Clark for use with groff.
-.\"
-.\" Copyright (c) 1988 Regents of the University of California.
-.\" All rights reserved.
-.\"
-.\" Redistribution and use in source and binary forms are permitted
-.\" provided that this notice is preserved and that due credit is given
-.\" to the University of California at Berkeley.  The name of the
-.\" University may not be used to endorse or promote products derived
-.\" from this software without specific prior written permission.  This
-.\" software is provided "as is" without express or implied warranty.
-.\"
-.\"	%beginstrip%
 .\"
 .\"**************************************************************
 .\"*								*
@@ -22,7 +42,7 @@
 .\"*		Electronics Research Laboratory			*
 .\"*		U.C. Berkeley.					*
 .\"*								*
-.\"*	VERSION 2.31	First Release: 11 Sept 1978		*
+.\"*	VERSION 8.1	First Release: 11 Sept 1978		*
 .\"*								*
 .\"*	Documentation is available.				*
 .\"*								*
@@ -37,35 +57,41 @@
 .\"		---	an internal macro.
 .\"
 .
-.do nr need_eo_h 0
-.do nr need_eo_tl 0
-.do nr need_tl 1
+.do nr devtag-needs-end-of-heading 0
+.do nr devtag-needs-end-of-title 0
+.do nr devtag-needs-title 1
 .
 .do mso devtag.tmac
 .
 .if !\n(.g .ig
 .de @R		\" --- initialize number register to 0, if undefined
-.if !r\\$1 .nr \\$1 0
+.do if !r\\$1 .nr \\$1 0
+..
+.
+.\" --- sanity check the page dimensions
+.do de check_page_length
+.if (\\n(.pu<14v) .ab e.tmac: cannot format short page length \\n(.pu
 ..
 .
 .\" --- check whether grohtml needs end of title/heading
-.de @html_check_need_title
-.do if (\\n[need_eo_tl] == 1) \
+.do de1 @html_check_need_title
+.if \\n[devtag-needs-end-of-title] \
 \{\
-.	do nr need_eo_tl 0
-.	do DEVTAG-EO-TL
+.	nr devtag-needs-end-of-title 0
+.	DEVTAG-EO-TL
 .\}
-.do if (\\n[need_tl] == 1) \
+.if \\n[devtag-needs-title] \
 \{\
-.	do DEVTAG-TL
-.	do nr need_tl 0
-.	do nr need_eo_tl 1
+.	DEVTAG-TL
+.	nr devtag-needs-title 0
+.	nr devtag-needs-end-of-title 1
 .\}
-.do if \\n[need_eo_h]>0 .do DEVTAG-EO-H
-.do nr need_eo_h 0
+.if \\n[devtag-needs-end-of-heading] .DEVTAG-EO-H
+.nr devtag-needs-end-of-heading 0
 ..
 .
-.de @check_need_title
+.\" If this macro were non-empty, we'd want to define it with .de1.
+.do de @check_need_title
 ..
 .
 .ie '\*(.T'html' \
@@ -78,7 +104,7 @@
 .
 .if !\n(.g .ig
 .de @S		\" --- initialize string/macro to empty, if undefined
-.if !d\\$1 .ds \\$1 \" empty
+.do if !d\\$1 .ds \\$1\" empty
 ..
 .
 .@R @\"			\" debugging level
@@ -87,7 +113,7 @@
 .\"		*** INTERNAL GP MACROS ***
 .
 .
-.de @C			\" --- change ev's, taking info with us
+.de @C			\" --- change environments, taking info with us
 .nr _S \\n(.s
 .nr _V \\n(.v
 .nr _F \\n(.f
@@ -137,8 +163,8 @@
 \{\
 .	nr _S \\n(.s
 .	nr _F \\n(.f
-.	if r _#p .ps \\n[_#p]
-.	if r _#f .ft \\n[_#f]
+.	do if r _#p .do ps \\n[_#p]
+.	do if r _#f .do ft \\n[_#f]
 .	@# \\$1 \\$2 \\$3 \\$4
 .	ft \\n(_F
 .	ps \\n(_S
@@ -247,10 +273,10 @@
 .nr ?H 0
 .nr ?c \\n(?C
 .nr ?C 0
-.rn |4 |0
-.rn |5 |1
-.rn |6 |2
-.rn |7 |3
+.do if d |4 .rn |4 |0
+.do if d |5 .rn |5 |1
+.do if d |6 .rn |6 |2
+.do if d |7 .rn |7 |3
 .nr _w 0			\" reset max footnote width
 .nr ?W 0			\" no wide floats this page (yet)
 .nr ?I 1
@@ -267,7 +293,7 @@
 .	sp |\\n(tmu		\" move to top of text
 .ev
 .mk _k				\" for columned output
-.if \\n(?n=1 .nm 1		\" restore line numbering if n1 mode
+.if \\n(?n=1 .nm 1\"		restore line numbering if n1 mode
 .nr $c 1			\" set first column
 .if \n@>4 .tm -- @h >> .ns nl=\\n(nl %=\\n% _k=\\n(_k tm=\\n(tm
 .ie \\n(?s \
@@ -472,6 +498,7 @@
 .if !'\*(.T'html' .rn bp @b	\" --- begin page
 .
 .de bp			\" *** begin new page (overrides columns)
+.do check_page_length
 .nr $c \\n($m			\" force new page, not new column
 .ie \\n(nl>0 \
 .	@b \\$1
@@ -487,12 +514,19 @@
 ..
 .
 .rn ll xl		\" *** special line length (local)
-.de ll			\" *** line length (global to environments)
+.de ll
 .xl \\$1
 .lt \\$1
-.nr $l \\n(.l
+.nr $l \\n(.l		\" *** line length (copied among ev 0, 1, and 2)
 .if (\\n($m<=1):(\\n($l>\\n(_L) \
 .	nr _L \\n(.l
+..
+.
+.rn pl xP		\" *** save page length request
+.
+.de pl			\" *** set page length
+.xP \\$1
+.do check_page_length
 ..
 .
 .rn po @O		\" --- local page offset
@@ -540,8 +574,8 @@
 .de n1			\" *** line numbering 1
 .ll -\w'0000'u
 .nr ?n 1
-.nr _#p \\n(.s
-.nr _#f \\n(.f
+.do nr _#p \\n(.s
+.do nr _#f \\n(.f
 .nm 1
 ..
 .
@@ -556,21 +590,24 @@
 \{\
 .		ds |i \\$1
 .		ds |j \\$1
+.		nr |l 0
 .		\" Pick off leading char and rest to check.
 .		do substring |i 0 0  \"
-.		do substring |j 1    \" for +N / -N
+.		do length |l \\$1
+.		if \\n(|l>1 .do substring |j 1	\" for +N / -N
 .		ie `\\*(|i`+` \
-.			nr ln (\\n[_ln])+\\*(|j
+.			do nr ln (\\n[_ln])+\\*(|j
 .		el \
 .			ie `\\*(|i`-` \
-.				nr ln (\\n[_ln])-\\*(|j
+.				do nr ln (\\n[_ln])-\\*(|j
 .			el \
 .				nr ln \\$1  \" unsigned N
-.		nr _#p \\n(.s
-.		nr _#f \\n(.f
+.		do nr _#p \\n(.s
+.		do nr _#f \\n(.f
 .		nm \\n(ln
 .		nr ?n 2
 .		rm |i |j
+.		rr |l
 .\}
 .	el \
 .		tm Line \\n(.c -- Bad .n2 value
@@ -578,7 +615,7 @@
 .el \
 \{\
 .	nm
-.	nr _ln \\n(ln
+.	do nr _ln \\n(ln
 .	po +\w'0000'u
 .	ll \\n($lu
 .	nr ?n 0
@@ -736,6 +773,7 @@
 ..
 .
 .de @p			\" --- initialize for paragraph
+.do check_page_length
 .do check_need_title
 .if "\\n(.z"|e" .tm Line \\n(c. -- Unmatched continued equation
 .in \\n($iu+\\n(pou
@@ -755,6 +793,7 @@
 .
 .
 .de sh			\" *** section heading
+.do check_page_length
 .fi
 .do check_need_title
 .if (\\n(si>0)&(\\n(si<1n) \
@@ -764,7 +803,7 @@
 .if '\*(.T'html' \
 \{\
 .	do DEVTAG-SH \\$1
-.	do nr need_eo_h 1
+.	do nr devtag-needs-end-of-heading 1
 .\}
 .@d "\\$1" +1 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8
 .if !"\\$2"_" \
@@ -893,6 +932,7 @@
 .
 .
 .de 2c			\" *** double columned output
+.do check_page_length
 .br
 .if \\n($m>1 \
 .	1c\"			\" revert to 1c if already 2c
@@ -909,16 +949,17 @@
 ..
 .
 .de 1c			\" *** single columned output
+.do check_page_length
 .br
 .nr $c 1
 .nr $m 1
-.ll \\n(_Lu			\" return to normal output
-.sp |\\n(.hu
+.ll \\n(_Lu\"			return to normal output
+.sp |\\n(nlu
 .@O \\n(_ou
 ..
 .
 .de bc			\" *** begin column
-.sp 24i
+.sp \\n(.tu
 ..
 .
 .
@@ -1146,8 +1187,8 @@
 .\"	EQN
 .\"
 .de EQ			\" *** equation start
-.do if \\n[need_eo_h]>0 .do DEVTAG-EO-H
-.do nr need_eo_h 0
+.do if \\n[devtag-needs-end-of-heading] .do DEVTAG-EO-H
+.do nr devtag-needs-end-of-heading 0
 .ec
 .if "\*(.T"html" \
 \{\
@@ -1204,7 +1245,7 @@
 .if \\n(_d=4 \
 .	in 0
 .mk _q
-.if \n@>1 .tm --@e: _Q=\\n(_Q _q=\\n(_q nl=\\n(nl |p=\\*(|p
+.if \n@>1 .tm --@q: _Q=\\n(_Q _q=\\n(_q nl=\\n(nl |p=\\*(|p
 .if !"\\*(|p"" \
 \{\
 .	rs
@@ -1284,7 +1325,7 @@
 .\"
 .\"	REFER
 .\"
-.mso refer-me.tmac
+.do mso refer-me.tmac
 .
 .\"
 .\"	IDEAL
@@ -1304,6 +1345,9 @@
 .ls
 ..
 .
+.de && \" no-op so we can define and end one macro inside another
+..
+.
 .\"
 .\"	PIC
 .\"
@@ -1315,9 +1359,10 @@
 .ne \\$1u
 .nr g7 \\n(.u
 .ls 1
-.if \\n(?n \
+.ie \\n(?n \
 \{\
-.	de PS_nm_check && \" define macro to emit .nm at top diversion
+.	do nr PS_nm_cnt 0
+.	do de PS_nm_check && \" define macro to emit .nm at top diversion
 .	if \n@>4 .tm -- PS: \\\\$1 \\\\$2 .z=\\\\n(.z PS_nm_cnt=\\\\n[PS_nm_cnt]
 .	\" Multiple .PS/.PE in a keep.
 .	if `\\\\$2`init` \
@@ -1338,22 +1383,26 @@
 .\}
 .\}
 .el \!.PS_nm_check \\\\$1
-.&&
+.	&&
 .	mk _q		\" emit a single numbered line for PS picture
 .	rs
-\&\ 
+\&\ \" space
 .	br
 .	rt \\n(_qu
-.	PS_nm_check suspend init
+.	do PS_nm_check suspend init
 .\}
 ..
 .
-.de PE			\" *** end picture
-.if \\n(?n .PS_nm_check resume
+.de PF			\" *** end picture; "fly back" to top
+.if \\n(?n .do PS_nm_check resume
 .ls
 .in
 .if \\n(g7 .fi
 .do HTML-IMAGE-END
+..
+.
+.de PE			\" *** end picture
+.PF
 .sp .6
 ..
 .
@@ -1715,48 +1764,48 @@
 .\"		*** HTML VERSIONS OF .x(, .x), AND .xp ***
 .
 .
-.de (x-html    \" --- create TAG and divert text
+.do de1 (x-html    \" --- create TAG and divert text
 .nr _x +1
-.do nr _xn +1
-.do TAG "_x\\n[_x]
+.nr _xn +1
+.TAG "_x\\n[_x]
 .br
-.do di |x\\n[_xn]
+.di |x\\n[_xn]
 .br
 ..
 .
-.de )x-html    \" --- end diversion
+.do de1 )x-html    \" --- end diversion
 .br
 .di
 ..
 .
-.de xp-html    \" --- create list of links
-.do nr _xx 1
+.do de1 xp-html    \" --- create list of links
+.nr _xx 1
 .br
-.do ev xp-html-ev
+.ev xp-html-ev
 .sp
-.do ULS
-.do while \\n[_xx]<=\\n[_xn] \
+.ULS
+.while \\n[_xx]<=\\n[_xn] \
 \{\
 .	br
-.	do unformat |x\\n[_xx]
-.	do di xp-html-div
+.	unformat |x\\n[_xx]
+.	di xp-html-div
 .	br
 .	ll 100i
 .	fi
-.	do |x\\n[_xx]
+.	|x\\n[_xx]
 .	br
 .	di
-.	do asciify xp-html-div
-.	do rm xp-html-as
-.	do as xp-html-as #
-.	do as xp-html-as _x\\n[_xx]
+.	asciify xp-html-div
+.	rm xp-html-as
+.	as xp-html-as #
+.	as xp-html-as _x\\n[_xx]
 .	ll
 .	LI
-.	do URL \\*[xp-html-as] "\\*[xp-html-div]
-.	do rm xp-html-as
-.	do nr _xx +1
+.	URL \\*[xp-html-as] "\\*[xp-html-div]
+.	rm xp-html-as
+.	nr _xx +1
 .\}
-.do ULE
+.ULE
 .sp
 .ev
 ..

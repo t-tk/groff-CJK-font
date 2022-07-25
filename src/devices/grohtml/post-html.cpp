@@ -375,7 +375,7 @@ char_block::char_block(int length)
 char_block::~char_block()
 {
   if (buffer != NULL)
-    a_delete buffer;
+    delete[] buffer;
 }
 
 class char_buffer {
@@ -1696,15 +1696,15 @@ assert_state::~assert_state ()
   while (xhead != NULL) {
     t = xhead;
     xhead = xhead->next;
-    a_delete (char *)t->val;
-    a_delete (char *)t->id;
+    delete[] (char *)t->val;
+    delete[] (char *)t->id;
     delete t;
   }
   while (yhead != NULL) {
     t = yhead;
     yhead = yhead->next;
-    a_delete (char *)t->val;
-    a_delete (char *)t->id;
+    delete[] (char *)t->val;
+    delete[] (char *)t->id;
     delete t;
   }
 }
@@ -1749,9 +1749,9 @@ void assert_state::add (assert_pos **h,
     }
     t->id = i;
     t->val = v;
-    a_delete (char *)c;
-    a_delete (char *)f;
-    a_delete (char *)l;
+    delete[] (char *)c;
+    delete[] (char *)f;
+    delete[] (char *)l;
   }
 }
 
@@ -1806,7 +1806,7 @@ void assert_state::close (const char *c)
 const char *replace_negate_str (const char *before, char *after)
 {
   if (before != NULL)
-    a_delete (char *)before;
+    delete[] (char *)before;
 
   if (strlen(after) > 0) {
     int d = atoi(after);
@@ -1827,7 +1827,7 @@ const char *replace_negate_str (const char *before, char *after)
 const char *replace_str (const char *before, const char *after)
 {
   if (before != NULL)
-    a_delete (char *)before;
+    delete[] (char *)before;
   return after;
 }
 

@@ -77,7 +77,7 @@ word::word (const char *w, int n)
 
 word::~word ()
 {
-  a_delete s;
+  delete[] s;
 }
 
 /*

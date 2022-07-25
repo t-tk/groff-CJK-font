@@ -1077,7 +1077,7 @@ void troff_output_file::put_char_width(charinfo *ci, tfont *tf,
     put('\n');
     hpos += w.to_units() + kk;
   }
-  else if (tcommand_flag) {
+  else if (device_has_tcommand) {
     if (tbuf_len > 0 && hpos == output_hpos && vpos == output_vpos
 	&& (!gcol || gcol == current_glyph_color)
 	&& (!fcol || fcol == current_fill_color)
@@ -1200,7 +1200,7 @@ void troff_output_file::set_font(tfont *tf)
       font_position = new symbol[nfont_positions];
       memcpy(font_position, old_font_position,
 	     old_nfont_positions*sizeof(symbol));
-      a_delete old_font_position;
+      delete[] old_font_position;
     }
     font_position[n] = nm;
   }
@@ -1573,7 +1573,7 @@ void troff_output_file::really_transparent_char(unsigned char c)
 
 troff_output_file::~troff_output_file()
 {
-  a_delete font_position;
+  delete[] font_position;
 }
 
 void troff_output_file::trailer(vunits page_length)
@@ -4018,25 +4018,24 @@ int tag_node::ends_sentence()
   return 2;
 }
 
-int get_reg_int(const char *p)
+// Get contents of register `p`--used only by suppress_node::tprint().
+static int get_register(const char *p)
 {
+  assert(0 != p);
   reg *r = (reg *)number_reg_dictionary.lookup(p);
-  units prev_value;
-  if (r && (r->get_value(&prev_value)))
-    return (int)prev_value;
-  else
-    warning(WARN_REG, "number register '%1' not defined", p);
-  return 0;
+  assert(0 != r);
+  units value;
+  assert(r->get_value(&value));
+  return (int)value;
 }
 
-const char *get_reg_str(const char *p)
+// Get contents of string `p`--used only by suppress_node::tprint().
+static const char *get_string(const char *p)
 {
+  assert(0 != p);
   reg *r = (reg *)number_reg_dictionary.lookup(p);
-  if (r)
-    return r->get_string();
-  else
-    warning(WARN_REG, "register '%1' not defined", p);
-  return 0;
+  assert(0 != r);
+  return r->get_string();
 }
 
 void suppress_node::put(troff_output_file *out, const char *s)
@@ -4049,17 +4048,15 @@ void suppress_node::put(troff_output_file *out, const char *s)
 }
 
 /*
- *  We need to remember the start of the image and its name.
+ *  We need to remember the start of the image and its name (\O5).  But
+ *  we won't always need this information; for instance, \O2 is used to
+ *  produce a bounding box with no associated image or position thereof.
  */
 
 static char last_position = 0;
-static const char *last_image_filename = 0;
-static int last_image_id = 0;
-
-inline int min(int a, int b)
-{
-  return a < b ? a : b;
-}
+static const char *image_filename = "";
+static size_t image_filename_len = 0;
+static int subimage_counter = 0;
 
 /*
  *  tprint - if (is_on == 2)
@@ -4081,28 +4078,66 @@ inline int min(int a, int b)
 void suppress_node::tprint(troff_output_file *out)
 {
   int current_page = topdiv->get_page_number();
-  // firstly check to see whether this suppress node contains
-  // an image filename & position.
+  // Does the node have an associated position and file name?
   if (is_on == 2) {
-    // remember position and filename
+    // Save them for future bounding box limits.
     last_position = position;
-    char *tem = (char *)last_image_filename;
-    last_image_filename = strsave(filename.contents());
-    if (tem)
-      free(tem);
-    last_image_id = image_id;
-    // printf("start of image and page = %d\n", current_page);
+    image_filename = strsave(filename.contents());
+    image_filename_len = strlen(image_filename);
   }
-  else {
-    // now check whether the suppress node requires us to issue limits.
+  else { // is_on = 0 or 1
+    // Now check whether the suppress node requires us to issue limits.
     if (emit_limits) {
-      char name[8192];
-      // remember that the filename will contain a %d in which the
-      // last_image_id is placed
-      if (last_image_filename == (char *) 0)
-	*name = '\0';
-      else
-	sprintf(name, last_image_filename, last_image_id);
+      const size_t namebuflen = 8192;
+      char name[namebuflen] = { '\0' };
+      // Jump through a flaming hoop to avoid a "format nonliteral"
+      // warning from blindly using sprintf...and avoid trouble from
+      // mischievous image stems.
+      //
+      // Keep this format string synced with pre-html:makeFileName().
+      const char format[] = "%d";
+      const size_t format_len = strlen(format);
+      const char *percent_position = strstr(image_filename, format);
+      if (percent_position) {
+	subimage_counter++;
+	assert(sizeof subimage_counter <= 8);
+	// A 64-bit signed int produces up to 19 decimal digits.
+	char *subimage_number = (char *)malloc(20); // 19 digits + \0
+	if (0 == subimage_number)
+	  fatal("memory allocation failure");
+	// Replace the %d in the filename with this number.
+	size_t enough = image_filename_len + 19 - format_len;
+	char *new_name = (char *)malloc(enough);
+	if (0 == new_name)
+	  fatal("memory allocation failure");
+	ptrdiff_t prefix_length = percent_position - image_filename;
+	strncpy(new_name, image_filename, prefix_length);
+	sprintf(subimage_number, "%d", subimage_counter);
+	size_t number_length = strlen(subimage_number);
+	strcpy(new_name + prefix_length, subimage_number);
+	// Skip over the format in the source string.
+	const char *suffix_src = image_filename + prefix_length
+	  + format_len;
+	char *suffix_dst = new_name + prefix_length + number_length;
+	strcpy(suffix_dst, suffix_src);
+	// Ensure the new string fits with room for a terminal '\0'.
+	const size_t len = strlen(new_name);
+	if (len > (namebuflen - 1))
+	  error("constructed file name in suppressed output escape is"
+		" too long (>= %1 bytes); skipping image",
+		(int)namebuflen);
+	else
+	  strncpy(name, new_name, (namebuflen - 1));
+	free(new_name);
+	free(subimage_number);
+      }
+      else {
+	if (image_filename_len > (namebuflen - 1))
+	  error("file name in suppressed output escape is too long"
+		" (>= %1 bytes); skipping image", (int)namebuflen);
+	else
+	  strcpy(name, image_filename);
+      }
       if (is_html) {
 	switch (last_position) {
 	case 'c':
@@ -4130,37 +4165,39 @@ void suppress_node::tprint(troff_output_file *out)
       }
       else {
 	// postscript (or other device)
-	if (suppress_start_page > 0 && current_page != suppress_start_page)
-	  error("suppression limit registers span more than one page;"
-		" image description %1 will be wrong", image_no);
+	if (suppress_start_page > 0
+	    && (current_page != suppress_start_page))
+	  error("suppression limit registers span more than a page;"
+		" grohtml-info for image %1 will be wrong", image_no);
 	// if (topdiv->get_page_number() != suppress_start_page)
-	//  fprintf(stderr, "end of image and topdiv page = %d   and  suppress_start_page = %d\n",
+	//  fprintf(stderr, "end of image and topdiv page = %d   and"
+	//		      " suppress_start_page = %d\n",
 	//	  topdiv->get_page_number(), suppress_start_page);
 
 	// remember that the filename will contain a %d in which the
 	// image_no is placed
 	fprintf(stderr,
-		"grohtml-info:page %d  %d  %d  %d  %d  %d  %s  %d  %d  %s\n",
+		"grohtml-info:page %d  %d  %d  %d  %d  %d  %s  %d  %d"
+		"  %s\n",
 		topdiv->get_page_number(),
-		get_reg_int("opminx"), get_reg_int("opminy"),
-		get_reg_int("opmaxx"), get_reg_int("opmaxy"),
+		get_register("opminx"), get_register("opminy"),
+		get_register("opmaxx"), get_register("opmaxy"),
 		// page offset + line length
-		get_reg_int(".o") + get_reg_int(".l"),
-		name, hresolution, vresolution, get_reg_str(".F"));
+		get_register(".o") + get_register(".l"),
+		name, hresolution, vresolution, get_string(".F"));
 	fflush(stderr);
       }
     }
-    else {
+    else { // We are not emitting limits.
       if (is_on) {
 	out->on();
-	// lastly we reset the output registers
 	reset_output_registers();
       }
       else
 	out->off();
       suppress_start_page = current_page;
     }
-  }
+  } // is_on
 }
 
 int suppress_node::force_tprint()
@@ -4496,7 +4533,7 @@ int draw_node::is_tag()
 draw_node::~draw_node()
 {
   if (point)
-    a_delete point;
+    delete[] point;
 }
 
 hunits draw_node::width()
@@ -5877,7 +5914,7 @@ static void grow_font_table(int n)
   if (old_font_table_size)
     memcpy(font_table, old_font_table,
 	   old_font_table_size*sizeof(font_info *));
-  a_delete old_font_table;
+  delete[] old_font_table;
   for (int i = old_font_table_size; i < font_table_size; i++)
     font_table[i] = 0;
 }
@@ -5982,7 +6019,7 @@ void mount_style(int n, symbol name)
 
 void font_translate()
 {
-  symbol from = get_name(1);
+  symbol from = get_name(true /* required */);
   if (!from.is_null()) {
     symbol to = get_name();
     if (to.is_null() || from == to)
@@ -6000,7 +6037,7 @@ void font_position()
     if (n < 0)
       error("negative font position");
     else {
-      symbol internal_name = get_name(1);
+      symbol internal_name = get_name(true /* required */);
       if (!internal_name.is_null()) {
 	symbol external_name = get_long_name();
 	mount_font(n, internal_name, external_name); // ignore error
@@ -6020,7 +6057,7 @@ font_family::font_family(symbol s)
 
 font_family::~font_family()
 {
-  a_delete map;
+  delete[] map;
 }
 
 int font_family::make_definite(int i)
@@ -6039,7 +6076,7 @@ int font_family::make_definite(int i)
 	    map_size = i + 10;
 	  map = new int[map_size];
 	  memcpy(map, old_map, old_map_size*sizeof(int));
-	  a_delete old_map;
+	  delete[] old_map;
 	  for (int j = old_map_size; j < map_size; j++)
 	    map[j] = -1;
 	}
@@ -6106,7 +6143,7 @@ void style()
     if (n < 0)
       error("negative font position");
     else {
-      symbol internal_name = get_name(1);
+      symbol internal_name = get_name(true /* required */);
       if (!internal_name.is_null())
 	mount_style(n, internal_name);
     }
@@ -6119,7 +6156,7 @@ static int get_fontno()
   int n;
   tok.skip();
   if (tok.delimiter()) {
-    symbol s = get_name(1);
+    symbol s = get_name(true /* required */);
     if (!s.is_null()) {
       n = symbol_fontno(s);
       if (n < 0) {
@@ -6175,7 +6212,7 @@ void remove_font_special_character()
   symbol f = font_table[n]->get_name();
   while (!tok.newline() && !tok.eof()) {
     if (!tok.space() && !tok.tab()) {
-      charinfo *s = tok.get_char(1);
+      charinfo *s = tok.get_char(true /* required */);
       string gl(f.contents());
       gl += ' ';
       gl += s->nm.contents();

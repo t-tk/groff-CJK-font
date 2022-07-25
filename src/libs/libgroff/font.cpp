@@ -93,7 +93,7 @@ text_file::text_file(FILE *p, char *s)
 
 text_file::~text_file()
 {
-  a_delete buf;
+  delete[] buf;
   free(path);
   if (fp)
     fclose(fp);
@@ -120,7 +120,7 @@ int text_file::next()
 	  char *old_buf = buf;
 	  buf = new char[size*2];
 	  memcpy(buf, old_buf, size);
-	  a_delete old_buf;
+	  delete[] old_buf;
 	  size *= 2;
 	}
 	buf[i++] = c;
@@ -209,7 +209,7 @@ int glyph_to_unicode(glyph *g)
 /* font functions */
 
 font::font(const char *s)
-: ligatures(0), kern_hash_table(0), space_width(0), special(0),
+: ligatures(0), kern_hash_table(0), space_width(0), special(false),
   ch_index(0), nindices(0), ch(0), ch_used(0), ch_size(0), widths_cache(0)
 #ifdef ENABLE_UCSRANGE
   ,wch(0)
@@ -227,9 +227,9 @@ font::~font()
 {
   for (int i = 0; i < ch_used; i++)
     if (ch[i].special_device_coding)
-      a_delete ch[i].special_device_coding;
-  a_delete ch;
-  a_delete ch_index;
+      delete[] ch[i].special_device_coding;
+  delete[] ch;
+  delete[] ch_index;
   if (kern_hash_table) {
     for (int i = 0; i < KERN_HASH_TABLE_SIZE; i++) {
       font_kern_list *kerns = kern_hash_table[i];
@@ -239,10 +239,10 @@ font::~font()
 	delete tem;
       }
     }
-    a_delete kern_hash_table;
+    delete[] kern_hash_table;
   }
-  a_delete name;
-  a_delete internalname;
+  delete[] name;
+  delete[] internalname;
   while (widths_cache) {
     font_widths_cache *tem = widths_cache;
     widths_cache = widths_cache->next;
@@ -330,34 +330,34 @@ int font::get_skew(glyph *g, int point_size, int sl)
   return int(h * tan((slant + sl) * PI / 180.0) + .5);
 }
 
-int font::contains(glyph *g)
+bool font::contains(glyph *g)
 {
   int idx = glyph_to_index(g);
   assert(idx >= 0);
   // Explicitly enumerated glyph?
   if (idx < nindices && ch_index[idx] >= 0)
-    return 1;
+    return true;
 #ifdef ENABLE_UCSRANGE
   int uc  = glyph_to_ucs_codepoint(g);
   if (uc>0) {
     font_char_metric *wcp = get_font_wchar_metric(uc);
     if (wcp != NULL)
-      return 1;
+      return true;
   }
 #endif
   if (is_unicode) {
     // Unicode font
     // ASCII or Unicode character, or groff glyph name that maps to Unicode?
     if (glyph_to_unicode(g) >= 0)
-      return 1;
+      return true;
     // Numbered character?
     if (glyph_to_number(g) >= 0)
-      return 1;
+      return true;
   }
-  return 0;
+  return false;
 }
 
-int font::is_special()
+bool font::is_special()
 {
   return special;
 }
@@ -373,7 +373,7 @@ font_widths_cache::font_widths_cache(int ps, int ch_size,
 
 font_widths_cache::~font_widths_cache()
 {
-  a_delete width;
+  delete[] width;
 }
 
 #ifdef ENABLE_UCSRANGE
@@ -415,7 +415,7 @@ int font::get_width(glyph *g, int point_size)
   if (idx < nindices && ch_index[idx] >= 0) {
     // Explicitly enumerated glyph
     int i = ch_index[idx];
-    if (real_size == unitwidth || font::unscaled_charwidths)
+    if (real_size == unitwidth || font::use_unscaled_charwidths)
       return ch[i].width;
 
     if (!widths_cache)
@@ -446,7 +446,7 @@ int font::get_width(glyph *g, int point_size)
     int w = wcwidth(get_code(g));
     if (w > 1)
       width *= w;
-    if (real_size == unitwidth || font::unscaled_charwidths)
+    if (real_size == unitwidth || font::use_unscaled_charwidths)
       return width;
     else
       return scale(width, point_size);
@@ -622,9 +622,9 @@ int font::get_kern(glyph *g1, glyph *g2, int point_size)
   return 0;
 }
 
-int font::has_ligature(int mask)
+bool font::has_ligature(int mask)
 {
-  return mask & ligatures;
+  return (bool) (mask & ligatures);
 }
 
 int font::get_character_type(glyph *g)
@@ -738,7 +738,7 @@ void font::alloc_ch_index(int idx)
     memcpy(ch_index, old_ch_index, sizeof(int)*old_nindices);
     for (int i = old_nindices; i < nindices; i++)
       ch_index[i] = -1;
-    a_delete old_ch_index;
+    delete[] old_ch_index;
   }
 }
 
@@ -752,7 +752,7 @@ void font::extend_ch()
     font_char_metric *old_ch = ch;
     ch = new font_char_metric[ch_size];
     memcpy(ch, old_ch, old_ch_size*sizeof(font_char_metric));
-    a_delete old_ch;
+    delete[] old_ch;
   }
 }
 
@@ -767,14 +767,14 @@ void font::compact()
     int *old_ch_index = ch_index;
     ch_index = new int[i];
     memcpy(ch_index, old_ch_index, i*sizeof(int));
-    a_delete old_ch_index;
+    delete[] old_ch_index;
     nindices = i;
   }
   if (ch_used < ch_size) {
     font_char_metric *old_ch = ch;
     ch = new font_char_metric[ch_used];
     memcpy(ch, old_ch, ch_used*sizeof(font_char_metric));
-    a_delete old_ch;
+    delete[] old_ch;
     ch_size = ch_used;
   }
 }
@@ -832,7 +832,7 @@ int font::scan_papersize(const char *p,
   double l, w;
   char lu[2], wu[2];
   const char *pp = p;
-  int test_file = 1;
+  bool attempt_file_open = true;
   char line[255];
 again:
   if (csdigit(*pp)) {
@@ -860,17 +860,19 @@ again:
 	  *size = papersizes[i].name;
 	return 1;
       }
-    if (test_file) {
+    if (attempt_file_open) {
       FILE *f = fopen(p, "r");
       if (f) {
-	fgets(line, 254, f);
+	if (fgets(line, 254, f)) {
+	  // Don't recurse on file names.
+	  attempt_file_open = false;
+	  char *linep = strchr(line, '\0');
+	  // skip final newline, if any
+	  if (*(--linep) == '\n')
+	    *linep = '\0';
+	  pp = line;
+	}
 	fclose(f);
-	test_file = 0;
-	char *linep = strchr(line, '\0');
-	// skip final newline, if any
-	if (*(--linep) == '\n')
-	  *linep = '\0';
-	pp = line;
 	goto again;
       }
     }
@@ -878,17 +880,17 @@ again:
   return 0;
 }
 
-// If the font can't be found, then if not_found is non-NULL, it will be set
-// to 1 otherwise a message will be printed.
+// If the font can't be found, then if not_found is non-NULL, it will be
+// set to 1 otherwise a message will be printed.
 
-int font::load(int *not_found, int head_only)
+bool font::load(int *not_found, int head_only)
 {
   if (strcmp(name, "DESC") == 0) {
     if (not_found)
       *not_found = 1;
     else
       error("'DESC' is not a valid font file name");
-    return 0;
+    return false;
   }
   char *path;
   FILE *fp;
@@ -897,7 +899,7 @@ int font::load(int *not_found, int head_only)
       *not_found = 1;
     else
       error("can't find font file '%1'", name);
-    return 0;
+    return false;
   }
   text_file t(fp, path);
   t.skip_comments = 1;
@@ -916,7 +918,7 @@ int font::load(int *not_found, int head_only)
       int n;
       if (p == 0 || sscanf(p, "%d", &n) != 1 || n <= 0) {
 	t.error("bad argument for 'spacewidth' command");
-	return 0;
+	return false;
       }
       space_width = n;
     }
@@ -925,7 +927,7 @@ int font::load(int *not_found, int head_only)
       double n;
       if (p == 0 || sscanf(p, "%lf", &n) != 1 || n >= 90.0 || n <= -90.0) {
 	t.error("bad argument for 'slant' command", p);
-	return 0;
+	return false;
       }
       slant = n;
     }
@@ -946,7 +948,7 @@ int font::load(int *not_found, int head_only)
 	  ligatures |= LIG_ffl;
 	else {
 	  t.error("unrecognised ligature '%1'", p);
-	  return 0;
+	  return false;
 	}
       }
     }
@@ -954,13 +956,13 @@ int font::load(int *not_found, int head_only)
       p = strtok(0, WS);
       if (!p) {
 	t.error("'internalname' command requires argument");
-	return 0;
+	return false;
       }
       internalname = new char[strlen(p) + 1];
       strcpy(internalname, p);
     }
     else if (strcmp(p, "special") == 0) {
-      special = 1;
+      special = true;
     }
 #ifdef ENABLE_UCSRANGE
     else if (strcmp(p, "kernpairs") != 0 && strcmp(p, "charset") != 0 &&
@@ -979,7 +981,7 @@ int font::load(int *not_found, int head_only)
   if (p == 0) {
     if (!is_unicode) {
       t.error("missing charset command");
-      return 0;
+      return false;
     }
   } else {
     char *command = p;
@@ -987,7 +989,7 @@ int font::load(int *not_found, int head_only)
     while (command) {
       if (strcmp(command, "kernpairs") == 0) {
 	if (head_only)
-	  return 1;
+	  return true;
 	for (;;) {
 	  if (!t.next()) {
 	    command = 0;
@@ -1004,12 +1006,12 @@ int font::load(int *not_found, int head_only)
 	  p = strtok(0, WS);
 	  if (p == 0) {
 	    t.error("missing kern amount");
-	    return 0;
+	    return false;
 	  }
 	  int n;
 	  if (sscanf(p, "%d", &n) != 1) {
 	    t.error("bad kern amount '%1'", p);
-	    return 0;
+	    return false;
 	  }
 	  glyph *g1 = name_to_glyph(c1);
 	  glyph *g2 = name_to_glyph(c2);
@@ -1094,7 +1096,7 @@ int font::load(int *not_found, int head_only)
 #endif
       else if (strcmp(command, "charset") == 0) {
 	if (head_only)
-	  return 1;
+	  return true;
 	had_charset = 1;
 	glyph *last_glyph = NULL;
 	for (;;) {
@@ -1113,11 +1115,11 @@ int font::load(int *not_found, int head_only)
 	  if (p[0] == '"') {
 	    if (last_glyph == NULL) {
 	      t.error("first charset entry is duplicate");
-	      return 0;
+	      return false;
 	    }
 	    if (strcmp(nm, "---") == 0) {
 	      t.error("unnamed character cannot be duplicate");
-	      return 0;
+	      return false;
 	    }
 	    glyph *g = name_to_glyph(nm);
 	    copy_entry(g, last_glyph);
@@ -1136,33 +1138,33 @@ int font::load(int *not_found, int head_only)
 				&metric.subscript_correction);
 	    if (nparms < 1) {
 	      t.error("bad width for '%1'", nm);
-	      return 0;
+	      return false;
 	    }
 	    p = strtok(0, WS);
 	    if (p == 0) {
 	      t.error("missing character type for '%1'", nm);
-	      return 0;
+	      return false;
 	    }
 	    int type;
 	    if (sscanf(p, "%d", &type) != 1) {
 	      t.error("bad character type for '%1'", nm);
-	      return 0;
+	      return false;
 	    }
 	    if (type < 0 || type > 255) {
 	      t.error("character type '%1' out of range", type);
-	      return 0;
+	      return false;
 	    }
 	    metric.type = type;
 	    p = strtok(0, WS);
 	    if (p == 0) {
 	      t.error("missing code for '%1'", nm);
-	      return 0;
+	      return false;
 	    }
 	    char *ptr;
 	    metric.code = (int)strtol(p, &ptr, 0);
 	    if (metric.code == 0 && ptr == p) {
 	      t.error("bad code '%1' for character '%2'", p, nm);
-	      return 0;
+	      return false;
 	    }
 	    if (is_unicode) {
 	      int w = wcwidth(metric.code);
@@ -1191,21 +1193,21 @@ int font::load(int *not_found, int head_only)
 	}
 	if (last_glyph == NULL) {
 	  t.error("I didn't seem to find any characters");
-	  return 0;
+	  return false;
 	}
       }
       else {
 	t.error("unrecognised command '%1' "
 		"after 'kernpairs' or 'charset' command",
 		  command);
-	return 0;
+	return false;
       }
     }
     compact();
   }
   if (!is_unicode && !had_charset) {
     t.error("missing 'charset' command");
-    return 0;
+    return false;
   }
   if (space_width == 0) {
     if (zoom)
@@ -1213,7 +1215,7 @@ int font::load(int *not_found, int head_only)
     else
       space_width = scale_round(unitwidth, res, 72 * 3 * sizescale);
   }
-  return 1;
+  return true;
 }
 
 static struct {
@@ -1232,14 +1234,14 @@ static struct {
   { "sizescale", &font::sizescale },
   };
 
-int font::load_desc()
+bool font::load_desc()
 {
   int nfonts = 0;
   FILE *fp;
   char *path;
   if ((fp = open_file("DESC", &path)) == 0) {
     error("can't find 'DESC' file");
-    return 0;
+    return false;
   }
   text_file t(fp, path);
   t.skip_comments = 1;
@@ -1255,20 +1257,20 @@ int font::load_desc()
       char *q = strtok(0, WS);
       if (!q) {
 	t.error("missing value for command '%1'", p);
-	return 0;
+	return false;
       }
       //int *ptr = &(this->*(table[idx-1].ptr));
       int *ptr = table[idx-1].ptr;
       if (sscanf(q, "%d", ptr) != 1) {
 	t.error("bad number '%1'", q);
-	return 0;
+	return false;
       }
     }
     else if (strcmp("family", p) == 0) {
       p = strtok(0, WS);
       if (!p) {
 	t.error("family command requires an argument");
-	return 0;
+	return false;
       }
       char *tem = new char[strlen(p)+1];
       strcpy(tem, p);
@@ -1278,7 +1280,7 @@ int font::load_desc()
       p = strtok(0, WS);
       if (!p || sscanf(p, "%d", &nfonts) != 1 || nfonts <= 0) {
 	t.error("bad number of fonts '%1'", p);
-	return 0;
+	return false;
       }
       font_name_table = (const char **)new char *[nfonts+1]; 
       for (int i = 0; i < nfonts; i++) {
@@ -1286,7 +1288,7 @@ int font::load_desc()
 	while (p == 0) {
 	  if (!t.next()) {
 	    t.error("end of file while reading list of fonts");
-	    return 0;
+	    return false;
 	  }
 	  p = strtok(t.buf, WS);
 	}
@@ -1297,7 +1299,7 @@ int font::load_desc()
       p = strtok(0, WS);
       if (p != 0) {
 	t.error("font count does not match number of fonts");
-	return 0;
+	return false;
       }
       font_name_table[nfonts] = 0;
     }
@@ -1305,7 +1307,7 @@ int font::load_desc()
       p = strtok(0, WS);
       if (!p) {
 	t.error("papersize command requires an argument");
-	return 0;
+	return false;
       }
       int found_paper = 0;
       while (p) {
@@ -1321,13 +1323,13 @@ int font::load_desc()
       }
       if (!found_paper) {
 	t.error("bad paper size");
-	return 0;
+	return false;
       }
     }
     else if (strcmp("unscaled_charwidths", p) == 0)
-      unscaled_charwidths = 1;
+      use_unscaled_charwidths = true;
     else if (strcmp("pass_filenames", p) == 0)
-      pass_filenames = 1;
+      pass_filenames = true;
     else if (strcmp("sizes", p) == 0) {
       int n = 16;
       sizes = new int[n];
@@ -1337,7 +1339,7 @@ int font::load_desc()
 	while (p == 0) {
 	  if (!t.next()) {
 	    t.error("list of sizes must be terminated by '0'");
-	    return 0;
+	    return false;
 	  }
 	  p = strtok(t.buf, WS);
 	}
@@ -1352,14 +1354,14 @@ int font::load_desc()
 	  // fall through
 	default:
 	  t.error("bad size range '%1'", p);
-	  return 0;
+	  return false;
 	}
 	if (i + 2 > n) {
 	  int *old_sizes = sizes;
 	  sizes = new int[n*2];
 	  memcpy(sizes, old_sizes, n*sizeof(int));
 	  n *= 2;
-	  a_delete old_sizes;
+	  delete[] old_sizes;
 	}
 	sizes[i++] = lower;
 	if (lower == 0)
@@ -1368,7 +1370,7 @@ int font::load_desc()
       }
       if (i == 1) {
 	t.error("must have some sizes");
-	return 0;
+	return false;
       }
     }
     else if (strcmp("styles", p) == 0) {
@@ -1391,7 +1393,7 @@ int font::load_desc()
 	    style_table[j] = old_style_table[j];
 	  for (; j < style_table_size; j++)
 	    style_table[j] = 0;
-	  a_delete old_style_table;
+	  delete[] old_style_table;
 	}
 	char *tem = new char[strlen(p) + 1];
 	strcpy(tem, p);
@@ -1399,16 +1401,16 @@ int font::load_desc()
       }
     }
     else if (strcmp("tcommand", p) == 0)
-      tcommand = 1;
+      has_tcommand = true;
     else if (strcmp("use_charnames_in_special", p) == 0)
-      use_charnames_in_special = 1;
+      use_charnames_in_special = true;
     else if (strcmp("unicode", p) == 0)
-      is_unicode = 1;
+      is_unicode = true;
     else if (strcmp("image_generator", p) == 0) {
       p = strtok(0, WS);
       if (!p) {
 	t.error("image_generator command requires an argument");
-	return 0;
+	return false;
       }
       image_generator = strsave(p);
     }
@@ -1417,39 +1419,40 @@ int font::load_desc()
     else if (unknown_desc_command_handler) {
       char *command = p;
       p = strtok(0, "\n");
-      (*unknown_desc_command_handler)(command, trim_arg(p), t.path, t.lineno);
+      (*unknown_desc_command_handler)(command, trim_arg(p), t.path,
+				      t.lineno);
     }
   }
   if (res == 0) {
     t.error("missing 'res' command");
-    return 0;
+    return false;
   }
   if (unitwidth == 0) {
     t.error("missing 'unitwidth' command");
-    return 0;
+    return false;
   }
   if (font_name_table == 0) {
     t.error("missing 'fonts' command");
-    return 0;
+    return false;
   }
   if (sizes == 0) {
     t.error("missing 'sizes' command");
-    return 0;
+    return false;
   }
   if (sizescale < 1) {
     t.error("bad 'sizescale' value");
-    return 0;
+    return false;
   }
   if (hor < 1) {
     t.error("bad 'hor' value");
-    return 0;
+    return false;
   }
   if (vert < 1) {
     t.error("bad 'vert' value");
-    return 0;
+    return false;
   }
-  return 1;
-}      
+  return true;
+}
 
 void font::handle_unknown_font_command(const char *, const char *,
 				       const char *, int)
@@ -1463,3 +1466,9 @@ font::set_unknown_desc_command_handler(FONT_COMMAND_HANDLER func)
   unknown_desc_command_handler = func;
   return prev;
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

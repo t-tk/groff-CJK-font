@@ -441,10 +441,6 @@ man7dir=$(manroot)/man$(man7ext)
 # uintmax_t=<value>		define to `unsigned long' or `unsigned long
 #				long' if <inttypes.h> does not exist
 #
-# TRADITIONAL_CPP		if your C++ compiler uses a traditional
-#				(Reiser) preprocessor
-# ARRAY_DELETE_NEEDS_SIZE	if your C++ doesn't understand `delete []'
-#
 # PAGE=A4			if the printer's page size is A4
 # GHOSTSCRIPT=gs		the name (and directory if required) of the
 #				ghostscript program
@@ -697,11 +693,11 @@ include $(top_srcdir)/src/preproc/refer/refer.am
 include $(top_srcdir)/src/preproc/soelim/soelim.am
 include $(top_srcdir)/src/preproc/tbl/tbl.am
 include $(top_srcdir)/src/roff/groff/groff.am
-include $(top_srcdir)/src/roff/grog/grog.am
 include $(top_srcdir)/src/roff/nroff/nroff.am
 include $(top_srcdir)/src/roff/troff/troff.am
 include $(top_srcdir)/src/utils/addftinfo/addftinfo.am
 include $(top_srcdir)/src/utils/afmtodit/afmtodit.am
+include $(top_srcdir)/src/utils/grog/grog.am
 include $(top_srcdir)/src/utils/hpftodit/hpftodit.am
 include $(top_srcdir)/src/utils/indxbib/indxbib.am
 include $(top_srcdir)/src/utils/lkbib/lkbib.am
@@ -922,8 +918,17 @@ SUFFIXES += .man
 # Version files - see script 'build-aux/git-gen-version'
 EXTRA_DIST += $(top_srcdir)/.version
 BUILT_SOURCES += $(top_srcdir)/.version
-$(top_srcdir)/.version:
-	echo $(VERSION) > $@-t && mv $@-t $@
+# Regenerate a temporary version string file on every build, but update
+# the real version file's mtime only if its contents change.
+.PHONY: .version.tree
+.version.tree:
+	@test -f $(distdir)/.tarball-verion || echo $(VERSION) > $@
+$(top_srcdir)/.version: .version.tree
+	@if ! test -f $(distdir)/.tarball-version; then \
+	  test -f $@ || cp .version.tree $@; \
+	  cmp -s .version.tree $@ || cp .version.tree $@; \
+	fi
+MOSTLYCLEANFILES += .version.tree
 dist-hook:
 	echo $(VERSION) > $(distdir)/.tarball-version
 

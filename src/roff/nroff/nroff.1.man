@@ -7,7 +7,7 @@
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 1989-2020 Free Software Foundation, Inc.
+.\" Copyright (C) 1989-2021 Free Software Foundation, Inc.
 .\"
 .\" Permission is granted to make and distribute verbatim copies of this
 .\" manual provided the copyright notice and this permission notice are
@@ -36,41 +36,35 @@
 .
 .SY @g@nroff
 .RB [ \-bcCEhikpStUVz ]
-[\c
-.BI \-d cs\c
-]
-[\c
-.BI \-K arg\c
-]
-[\c
-.BI \-m name\c
-]
-[\c
-.BI \-M dir\c
-]
-[\c
-.BI \-n num\c
-]
-[\c
-.BI \-o list\c
-]
-[\c
-.BI \-P post-proc-option\c
-]
-[\c
-.BI \-r cn\c
-]
-[\c
-.BI \-T name\c
-]
-[\c
-.BI \-w warning\c
-]
-[\c
-.BI \-W warning\c
-]
-.RI [ file
-\&.\|.\|.\&]
+.RB [ \-d\~\c
+.IR cs ]
+.RB [ \-d\~\c
+.IB name =\c
+.IR string ]
+.RB [ \-K\~\c
+.IR enc ]
+.RB [ \-m\~\c
+.IR name ]
+.RB [ \-M\~\c
+.IR dir ]
+.RB [ \-n\~\c
+.IR num ]
+.RB [ \-o\~\c
+.IR list ]
+.RB [ \-P\~\c
+.IR arg ]
+.RB [ \-r\~\c
+.IR cn ]
+.RB [ \-r\~\c
+.IB reg =\c
+.IR expr ]
+.RB [ \-T\~\c
+.IR dev ]
+.RB [ \-w\~\c
+.IR name ]
+.RB [ \-W\~\c
+.IR name ]
+.RI [ file\~ .\|.\|.]
 .YS
 .
 .
@@ -143,39 +137,37 @@ is implied.
 .
 .
 .P
-Whitespace is
-.I not
-permitted between an option and its argument.
-.
 The
 .BR \-b ,
+.BR \-c ,
 .BR \-C ,
 .BR \-d ,
 .BR \-E ,
 .BR \-i ,
-.BR \-k ,
-.BR \-K ,
 .BR \-m ,
 .BR \-M ,
 .BR \-n ,
 .BR \-o ,
-.BR \-P ,
 .BR \-r ,
+.BR \-U ,
 .BR \-w ,
 .BR \-W ,
 and
-.B \-Z
+.B \-z
 options have the effects described in
 .IR \%@g@troff (@MAN1EXT@).
 .
 .B \-c
 and
 .B \-h
-are equivalent to
+imply
 .RB \[lq] \-P\-c \[rq]
 and
 .RB \[lq] \-P\-h \[rq],
-respectively.
+respectively;
+.B \-c
+is also interpreted directly by
+.IR \%@g@troff .
 .
 In addition,
 this implementation ignores the AT&T
@@ -189,33 +181,56 @@ and
 .IR groff ).
 .
 The options
-.B \-p
-(pic),
-.B \-t
-.RB ( tbl ),
-.B \-S
-(safer),
+.BR \-k ,
+.BR \-K ,
+.BR \-p ,
+.BR \-P ,
+.BR \-t ,
 and
-.B \-U
-(unsafe) are passed to
-.IR groff .
+.B \-S
+are documented in
+.IR groff (@MAN1EXT@).
 .
 .B \-V
 causes
 .I \%@g@nroff
 to display the constructed
 .I groff
-command on the standard output,
+command on the standard output stream,
 but does not execute it.
 .
 .B \-v
 and
 .B \-\-version
-show version information,
+show version information about
+.I \%@g@nroff
+and the programs it runs,
 while
 .B \-\-help
 displays a usage message;
 all exit afterward.
+.
+.
+.\" ====================================================================
+.SH "Exit status"
+.\" ====================================================================
+.
+.I \%@g@nroff
+exits with error
+.RB status\~ 2
+if there was a problem parsing its arguments,
+with
+.RB status\~ 0
+if any of the options
+.BR \-V ,
+.BR \-v ,
+.BR \-\-version ,
+or
+.B \-\-help
+were specified,
+and with the status of
+.I groff
+otherwise.
 .
 .
 .\" ====================================================================
@@ -259,6 +274,16 @@ is unset.
 .
 .
 .\" ====================================================================
+.SH Files
+.\" ====================================================================
+.
+.TP
+.I \%@MACRODIR@/\:tty\-char\:.tmac
+Character definitions from this file are loaded to replace
+unrepresentable glyphs.
+.
+.
+.\" ====================================================================
 .SH Notes
 .\" ====================================================================
 .
@@ -271,12 +296,6 @@ may require command-line options to correctly handle some output
 sequences;
 see
 .IR \%grotty (@MAN1EXT@).
-.
-.
-.P
-Character definitions in the file
-.I \%@MACRODIR@/\:tty\-char\:.tmac
-are loaded to replace unrepresentable glyphs.
 .
 .
 .\" ====================================================================
@@ -292,6 +311,7 @@ are loaded to replace unrepresentable glyphs.
 .
 .\" Restore compatibility mode (for, e.g., Solaris 10/11).
 .cp \n[*groff_nroff_1_man_C]
+.do rr *groff_nroff_1_man_C
 .
 .
 .\" Local Variables:
