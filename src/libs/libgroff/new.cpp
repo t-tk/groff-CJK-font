@@ -48,7 +48,7 @@ void *operator new(size_t size)
   return p;
 }
 
-void operator delete(void *p)
+void operator delete(void *p) throw()
 {
   if (p)
     free(p);
@@ -67,3 +67,9 @@ void operator delete(void *p,
   if (p)
     free(p);
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

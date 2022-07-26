@@ -746,8 +746,8 @@ It is even.
 .SS "Paper size"
 .\" ====================================================================
 .
-In
-.IR groff ,
+In GNU
+.IR roff ,
 the page dimensions for the formatter
 .I \%@g@troff
 and for output devices are handled separately.
@@ -769,8 +769,7 @@ The
 .I papersize
 macro package,
 automatically loaded by
-.I troffrc
-at start-up,
+.IR @g@troff ,
 provides an interface for configuring page dimensions by convenient
 names,
 like \[lq]letter\[rq] or
@@ -1230,7 +1229,7 @@ typically specified by the
 option to the formatter or a front end.
 .
 If neither this option nor the
-.I GROFF_TYPESETTER
+.I \%GROFF_TYPESETTER
 environment variable is used,
 the default output device is
 .BR @DEVICE@ .
@@ -1273,7 +1272,7 @@ character set and encoding.
 .TP
 .B lbp
 for Canon CaPSL printers
-(\%LBP-4 and \%LBP-8 series laser printers).
+(LBP-4 and LBP-8 series laser printers).
 .
 .
 .TP
@@ -1349,7 +1348,7 @@ postprocessor.
 All of the postprocessors provided by GNU
 .I roff
 are
-.IR "output drivers",
+.IR "output drivers" ,
 which prepare a document for viewing or printing.
 .
 Postprocessors for other purposes,
@@ -1555,13 +1554,53 @@ the databases.
 .
 .
 .\" ====================================================================
+.SH "Exit status"
+.\" ====================================================================
+.
+.I groff
+exits with a failure status if there was a problem parsing its arguments
+and a successful status if either of the options
+.B \-h
+or
+.B \-\-help
+was specified.
+.
+Otherwise,
+.I groff
+runs a pipeline to process its input;
+if all commands within the pipeline exit successfully,
+.I groff
+does likewise.
+.
+If not,
+.IR groff 's
+exit status encodes a summary of problems encountered,
+setting bit\~0 if a command exited with a failure status,
+bit\~1 if a command was terminated with a signal,
+and bit\~2 if a command could not be executed.
+.
+(Thus,
+if all three misfortunes befell one's pipeline,
+.I groff
+would exit with status 2\[ha]0 + 2\[ha]1 + 2\[ha]2 = 1+2+4 = 7.)
+.
+To troubleshoot pipeline problems,
+you may wish to re-run the
+.I groff
+command with the
+.B \-V
+option and break the reported pipeline down into separate stages,
+inspecting the exit status and any diagnostic messages of each command.
+.
+.
+.\" ====================================================================
 .SH Environment
 .\" ====================================================================
 .
 Normally,
-the path separator in the environment variables ending with
-.I _PATH
-below is the colon;
+the path separator in environment variables ending with
+.I PATH
+is the colon;
 this may vary depending on the operating system.
 .
 For example,
@@ -1651,10 +1690,6 @@ option.
 option overrides
 .IR \%GROFF_ENCODING .
 .
-See
-.MR preconv @MAN1EXT@
-for details.
-.
 .
 .TP
 .I GROFF_FONT_PATH
@@ -1719,7 +1754,7 @@ is used.
 The
 .B \-T
 option overrides
-.IR GROFF_TYPESETTER .
+.IR \%GROFF_TYPESETTER .
 .
 .
 .TP

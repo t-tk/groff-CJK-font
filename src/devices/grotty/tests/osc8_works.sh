@@ -93,7 +93,7 @@ echo "testing http URI (4)" >&2
 echo "$output" | grep -Eq '0000060 +033 +\\'
 
 echo "testing mailto URI (1)" >&2
-echo "$output" | grep -Eq '0000120 +.*+033 +] +8 +;$'
+echo "$output" | grep -Eq '0000120 +.* +033 +] +8 +;$'
 
 echo "testing mailto URI (2)" >&2
 echo "$output" | grep -Eq '0000140 +; +m +a +i +l +t +o +: +g +\. +b'

@@ -74,7 +74,7 @@ features are also noted.
 .
 .I groff
 features identifiers of arbitrary length,
-supports non-integral point sizes,
+supports non-integral type sizes,
 adds new escapes and requests,
 provides new conditional tests,
 recognizes additional scaling indicators and numerical operators,
@@ -109,7 +109,7 @@ within can be of arbitrary length.
 .
 .
 .\" ====================================================================
-.SS "Fractional point sizes and new scaling indicators"
+.SS "Fractional type sizes and new scaling indicators"
 .\" ====================================================================
 .
 A
@@ -130,7 +130,7 @@ has the effect of multiplying by
 .
 Requests and escapes in
 .I groff
-interpret arguments that represent a point size as being in units of
+interpret arguments that represent a type size as being in units of
 scaled points;
 that is,
 they evaluate such arguments using an implied default scaling indicator
@@ -161,7 +161,7 @@ The request
 .RB \[lq] ".ps 10.25" \[rq]
 is synonymous with
 .RB \[lq] ".ps 10.25z" \[rq]
-and sets the point size to 10250\~scaled points,
+and sets the type size to 10250\~scaled points,
 or 10.25\~points.
 .
 .
@@ -171,11 +171,11 @@ in
 .IR groff ,
 the register
 .B \[rs]n[.s]
-can contain a non-integral point size.
+can contain a non-integral type size.
 .
 The new register
 .B \[rs]n[.ps]
-returns the point size in scaled points.
+returns the type size in scaled points.
 .
 .
 .P
@@ -645,14 +645,13 @@ or
 is associated with the production of the next inline image.
 .RE
 .
+.
 .TP
 .BI \[rs]R\[aq] name\~\[+-]n \[aq]
-This has the same effect as
+Synonymous with
+.RB \[lq] .nr
+.IR name\~\[+-]n \[rq].
 .
-.RS
-.IP
-.BI .nr\~ name\~\[+-]n
-.RE
 .
 .TP
 .BI \[rs]s[ \[+-]n ]
@@ -3181,7 +3180,7 @@ the width of every glyph is increased by an amount between
 .I n1
 and
 .IR n2 ;
-when the current point size is less than or equal to
+when the current type size is less than or equal to
 .I s1
 the width is increased by
 .IR n1 ;
@@ -3189,11 +3188,11 @@ when it is greater than or equal to
 .I s2
 the width is increased by
 .IR n2 ;
-when the point size is greater than or equal to
+when the type size is greater than or equal to
 .I s1
 and less than or equal to
 .I s2
-the increase in width is a linear function of the point size.
+the increase in width is a linear function of the type size.
 .
 .TP
 .BI .tm1\~ string
@@ -3368,25 +3367,34 @@ enabled is global.
 Initially,
 vertical position traps are enabled.
 .
-.TP
-.BI .warn\~ n
-Control warnings.
-.IR n \~\c
-is the sum of the numbers associated with each warning that is to be
-enabled; all other warnings are disabled.
 .
-The number associated with each warning is listed in
+.TP
+.B .warn\~\c
+.RI [ n ]
+Select the categories,
+or \[lq]types\[rq],
+of reported warnings.
+.
+.IR n \~is
+the sum of the numeric codes associated with each warning category that
+is to be enabled;
+all other categories are disabled.
+.
+The categories and their associated codes are listed in section
+\[lq]Warnings\[rq] of
 .MR @g@troff @MAN1EXT@ .
+.\" TODO: Maybe move that table to groff(7).
 .
 For example,
-.B .warn 0
-disables all warnings, and
-.B .warn 1
-disables all warnings except that about missing glyphs.
+.RB \[lq] ".warn 0" \[rq]
+disables all warnings,
+and
+.RB \[lq] ".warn 1" \[rq]
+disables all warnings except those about missing glyphs.
 .
-If
-.I n
-is not given, all warnings are enabled.
+If no argument is given,
+all warning categories are enabled.
+.
 .
 .TP
 .BI .warnscale\~ si
@@ -3848,11 +3856,11 @@ request, or the number of the current page plus\~1.
 .
 .TP
 .B \[rs]n[.ps]
-The current point size in scaled points.
+The current type size in scaled points.
 .
 .TP
 .B \[rs]n[.psr]
-The last-requested point size in scaled points.
+The last-requested type size in scaled points.
 .
 .TP
 .B \[rs]n[.pvs]
@@ -3873,7 +3881,7 @@ The slant of the current font as set with
 .
 .TP
 .B \[rs]n[.sr]
-The last requested point size in points as a decimal fraction.
+The last requested type size in points as a decimal fraction.
 .
 This is a string-valued register.
 .
@@ -3935,6 +3943,7 @@ and 0\~otherwise.
 .B \[rs]n[.vpt]
 1\~if vertical position traps are enabled, 0\~otherwise.
 .
+.
 .TP
 .B \[rs]n[.warn]
 The sum of the numbers associated with each of the currently enabled
@@ -3942,6 +3951,7 @@ warnings.
 .
 The number associated with each warning is listed in
 .MR @g@troff @MAN1EXT@ .
+.\" TODO: Maybe move that table to groff(7).
 .
 .
 .TP
@@ -4076,15 +4086,20 @@ The return value of the system() function executed by the last
 .B sy
 request.
 .
+.
 .TP
 .B \[rs]n[slimit]
-If greater than\~0, the maximum number of objects on the input stack.
+If greater than\~0,
+sets the maximum quantity of objects on
+.IR \%@g@troff 's
+internal input stack.
 .
-If less than or equal to\~0, there is no limit on the number of
-objects on the input stack.
+If less than or equal to\~0,
+there is no limit:
+recursion can continue until program memory is exhausted.
 .
-With no limit, recursion can continue until virtual memory is
-exhausted.
+The default value is 1000,
+fixed at compile time.
 .
 .
 .TP
@@ -4332,7 +4347,7 @@ first character,
 and so on for each character.
 .
 The width of the glyph is that given in the font file,
-appropriately scaled for the current point size,
+appropriately scaled for the current type size,
 and rounded so that it is a multiple of the horizontal resolution.
 .
 Special characters cannot be printed using this command.
@@ -4490,7 +4505,7 @@ machine units.
 .
 Traditionally,
 .RI AT&T\~ troff
-drivers use a line thickness proportional to the current point size;
+drivers use a line thickness proportional to the current type size;
 drivers should continue to do this if no
 .B Dt
 command has been given, or if a
@@ -5026,7 +5041,7 @@ form.
 The Graphic Systems C/A/T phototypesetter
 (the original device target for
 .RI AT&T\~ troff )
-supported only a few discrete point sizes in the range 6\[en]36,
+supported only a few discrete type sizes in the range 6\[en]36 points,
 so Ossanna contrived a special case in the parser to do what the user
 must have meant.
 .
@@ -5036,7 +5051,7 @@ McIlroy referred to it as a \[lq]living fossil\[rq].]
 .
 .
 .P
-Fractional point sizes cause one noteworthy incompatibility.
+Fractional type sizes cause one noteworthy incompatibility.
 .
 In
 .RI AT&T\~ troff
@@ -5044,12 +5059,12 @@ the
 .B .ps
 request ignores scaling indicators and thus
 .RB \[lq] .ps\~10u \[rq]
-sets the point size to 10\~points,
+sets the type size to 10\~points,
 whereas in
 .I groff
-it sets the point size to 10\~scaled points.
+it sets the type size to 10\~scaled points.
 .
-See subsection \[lq]Fractional point sizes and new scaling
+See subsection \[lq]Fractional type sizes and new scaling
 indicators\[rq] above.
 .
 .

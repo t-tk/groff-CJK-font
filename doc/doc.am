@@ -29,8 +29,20 @@ DOC_GROFF_ONLY=\
   $(GROFFBIN) -I$(abs_top_builddir) -M $(doc_srcdir) \
 	$(TFLAG) $(FFLAG) -pet -ww -b
 
-DOC_GROFF = $(DOC_SED) -e '1i\
-.lf 1 $<' $< | $(DOC_GROFF_ONLY)
+# A dance is required to embed a literal newline inside a sed expression
+# inside a shell command executed as part of a Make target rule.
+#
+# Use the POSIX shell $'\n' feature when all platforms of interest
+# support it.
+#
+#DOC_GROFF = $(DOC_SED) -e 1i\$$'\n'".lf 1 $<"$$'\n' $< \
+#	| $(DOC_GROFF_ONLY)
+#
+# In the meantime, a shell variable must be prepared in each target rule
+# shell command using $(DOC_SED).  This solution is adapted from the GNU
+# Autoconf manual, "Newlines in Make Rules".
+DOC_GROFF = nlinit=`echo 'nl="'; echo '"'`; eval "$$nlinit"; \
+	  $(DOC_SED) -e "1i\\$$nl.lf 1 $<$$nl" $< | $(DOC_GROFF_ONLY)
 
 # Other doc, installed in $(docdir)
 if BUILD_OTHERDOC
@@ -159,8 +171,9 @@ doc/pic.html: $(dist_devpsfont_DATA) $(nodist_devpsfont_DATA)
 doc/pic.html: $(doc_srcdir)/pic.ms $(devhtmlfont_DATA)
 	$(GROFF_V)$(MKDIR_P) $(doc_builddir) \
 	&& cd $(doc_builddir) \
-	&& $(DOC_SED) -e '1i\
-.lf 1 $(doc_srcdir)/pic.ms' $(doc_srcdir)/pic.ms \
+	&& nlinit=`echo 'nl="'; echo '"'`; eval "$$nlinit"; \
+	  $(DOC_SED) -e "1i\\$$nl.lf 1 $(doc_srcdir)/pic.ms$$nl" \
+	  $(doc_srcdir)/pic.ms \
 	   | $(DOC_GROFF_ONLY) -P-p -P-Ipic -P-D$(imagedir) -P-jpic \
 	                       -Thtml -ms > pic.html
 
@@ -179,8 +192,9 @@ doc/webpage.html: \
   $(doc_srcdir)/groff.css
 	$(GROFF_V)$(MKDIR_P) doc \
 	&& cd $(doc_builddir) \
-	&& $(DOC_SED) -e '1i\
-.lf 1 $(doc_srcdir)/webpage.ms' $(doc_srcdir)/webpage.ms \
+	&& nlinit=`echo 'nl="'; echo '"'`; eval "$$nlinit"; \
+	  $(DOC_SED) -e "1i\\$$nl.lf 1 $(doc_srcdir)/webpage.ms$$nl" \
+	  $(doc_srcdir)/webpage.ms \
 	   | $(DOC_GROFF_ONLY) -P-jwebpage -P-nrpb -P-Iwebpage \
 	                       -P-D$(imagedir) -Thtml -ms > webpage.html
 

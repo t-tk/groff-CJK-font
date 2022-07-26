@@ -47,25 +47,25 @@ This page has fully-capitalized section headings.\
 OUTPUT=$(printf "%s\n" "$EXAMPLE" | "$groff" -Tascii -P-cbou -mdoc)
 FAIL=
 
-if [ -z "$(echo "$OUTPUT" | sed -n '/Name/{N;/smoke/p}')" ]
+if [ -z "$(echo "$OUTPUT" | sed -n '/Name/{N;/smoke/p;}')" ]
 then
     FAIL=yes
     echo "section \"Name\" check failed" >&2
 fi
 
-if [ -z "$(echo "$OUTPUT" | sed -n '/Description/{N;/mixed-case/p}')" ]
+if [ -z "$(echo "$OUTPUT" | sed -n '/Description/{N;/mixed-case/p;}')" ]
 then
     FAIL=yes
     echo "section \"Description\" check failed" >&2
 fi
 
-if [ -z "$(echo "$OUTPUT" | sed -n '/NAME/{N;/smoke/p}')" ]
+if [ -z "$(echo "$OUTPUT" | sed -n '/NAME/{N;/smoke/p;}')" ]
 then
     FAIL=yes
     echo "section \"NAME\" check failed" >&2
 fi
 
-if [ -z "$(echo "$OUTPUT" | sed -n '/DESCRIPTION/{N;/fully-cap/p}')" ]
+if [ -z "$(echo "$OUTPUT" | sed -n '/DESCRIPTION/{N;/fully-cap/p;}')" ]
 then
     FAIL=yes
     echo "section \"DESCRIPTION\" check failed" >&2

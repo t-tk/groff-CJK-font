@@ -227,16 +227,24 @@ groff \- GNU roff language reference
 .SH Description
 .\" ====================================================================
 .
-.P
-The name
 .I groff
-stands for
-.I GNU roff
-and is the free implementation of the roff type-setting system.
+is short for GNU
+.IR roff ,
+a free re-implementation of the AT&T device-independent
+.I troff \" AT&T
+typesetting system.
 .
 See
 .MR roff @MAN7EXT@
-for a survey and the background of the groff system.
+for a survey and the background of
+.I roff
+systems.
+.
+.I groff
+also refers to GNU
+.I roff
+system's front end,
+.MR groff @MAN1EXT@ .
 .
 .
 .P
@@ -958,12 +966,12 @@ the request name is
 .request .el
 \[lq]else\[rq])
 followed by a conditional expression
-.IR cond-expr ,
-and then the remainder of the line
-.I anything
+.IR cond-expr ;
+the remainder of the line,
+.IR anything ,
 is interpreted as if it were an input line.
 .
-Any number of spaces between arguments to requests serves only to
+Any quantity of spaces between arguments to requests serves only to
 separate them;
 leading spaces in
 .I anything
@@ -990,14 +998,14 @@ call more than one macro,
 span more than one text line,
 or mix the foregoing.
 .
-The opening and closing brace escapes
+The opening and closing brace escape sequences
 .esc {
 and
 .esc }
 perform such grouping.
 .
-Brace escapes can be used outside of control structures,
-but when they are they have no meaning and produce no output.
+Brace escape sequences outside of control structures have no meaning and
+produce no output.
 .
 .
 .P
@@ -1010,23 +1018,23 @@ immediately subsequent to the request's conditional expression.
 should appear on a line with other occurrences of itself as necessary to
 match
 .esc {
-escapes.
+sequences.
 .
 It can be preceded by a control character,
 spaces,
 and tabs.
 .
-Input after a
+Input after any quantity of
 .esc }
-escape on the same line is only processed if all the preceding
-conditions to which the escapes correspond are true.
+sequences on the same line is only processed if all the preceding
+conditions to which they correspond are true.
 .
 Furthermore,
 a
 .esc }
 closing the body of a
 .request .while
-request must be the last such escape on an input line.
+request must be the last such escape sequence on an input line.
 .
 .
 .\" ====================================================================
@@ -1240,10 +1248,17 @@ Without a sign,
 .I N
 replaces any existing value.
 .
-To assign a negative number,
-either prefix the expression with a zero or enclose it with parentheses.
+A leading minus sign
+.RI in\~ N
+is always interpreted as a decrementation operator,
+not an algebraic sign.
 .
-If a prior value does not exist,
+To assign a register a negative value or the negated value of another
+register,
+enclose the assigned expression in parentheses or subtract it from zero.
+.
+If a prior value does not exist
+(the register was undefined),
 an increment or decrement is applied as if to\~0.
 .
 .
@@ -1343,7 +1358,7 @@ The default is \[lq]0\[rq].
 Create alias
 (additional name)
 .I new
-for existing number register named
+for existing register named
 .IR old .
 .
 .TPx
@@ -1711,7 +1726,7 @@ and
 escape sequences.
 .
 .I scheme
-identifies a color space and determines the number of required
+identifies a color space and determines the quantity of required
 .IR color-component s;
 it must be one of
 .RB \[lq] rgb \[rq]
@@ -2095,7 +2110,7 @@ Set the hyphenation language to
 .
 .TPx
 .REQ .hlm n
-Set the maximum number of consecutive hyphenated lines to
+Set the maximum quantity of consecutive hyphenated lines to
 .IR n .
 .
 .TPx
@@ -2272,7 +2287,7 @@ Set leader repetition glyph
 Compute the number of characters of
 .I anything
 and store the count
-in the number register
+in the register
 .IR reg .
 .
 .
@@ -2568,7 +2583,7 @@ Next page number
 .
 .TPx
 .REQ .pnr
-Print the names and contents of all currently defined number registers
+Print the names and contents of all currently defined registers
 on stderr.
 .
 .TPx
@@ -2583,16 +2598,18 @@ The current page offset is available in register
 Page offset
 .IR N .
 .
+.
 .TPx
 .REQ .ps
-Return to previous point size.
+Return to previous type size.
 .TPx
 .
+.
 .REQ .ps "\[+-]N"
-Set/increase/decrease the point size to/by
+Set/increase/decrease the type size to/by
 .I N
 scaled points
-(a non-positive resulting point size is set to 1\~u);
+(a non-positive resulting type size is set to 1\~u);
 also see
 .esc[] s \[+-]N .
 .
@@ -2681,7 +2698,7 @@ to
 .
 .TPx
 .REQ .rr "ident"
-Remove name of number register
+Remove register
 .IR ident .
 .
 .TPx
@@ -3052,14 +3069,25 @@ Set vertical base line spacing to
 (default scaling indicator\~\c
 .scaleindicator p ).
 .
-.TPx
-.REQ .warn
-Enable all warnings.
 .
 .TPx
-.REQ .warn "n"
-Set warnings code to
-.IR n .
+.REQ .warn
+Enable all warning categories.
+.
+.
+.TPx
+.REQ .warn\~0
+Disable all warning categories.
+.
+.
+.TPx
+.REQ .warn n
+Enable warnings in categories whose codes sum
+.RI to\~ n ;
+.\" TODO: Move that table here, perhaps.
+see
+.MR @g@troff @MAN1EXT@ .
+.
 .
 .TPx
 .REQ .warnscale "si"
@@ -3240,9 +3268,9 @@ Escape sequences serve a variety of purposes.
 Widespread uses include
 commenting the source document;
 changing the font style;
-setting the point size;
+setting the type size;
 interpolating special characters,
-number registers,
+registers,
 and strings into the text;
 and placing or suppressing break and hyphenation points.
 .
@@ -3925,13 +3953,13 @@ or decrement register
 .
 .TP
 .ESC s \[+-]N
-Set/increase/decrease the point size to/by
+Set/increase/decrease the type size to/by
 .I N
 scaled points.
 .
 .I N
 must be a single digit;
-0 restores the previous point size.
+0 restores the previous type size.
 .
 (In compatibility mode only,
 a non-zero
@@ -3950,7 +3978,7 @@ request.
 .fam C
 .BI \es \[+-] ( N
 .fam
-Set/increase/decrease the point size to/by
+Set/increase/decrease the type size to/by
 .I N
 scaled points;
 .I N
@@ -3973,7 +4001,7 @@ request.
 .fam C
 .BI \es \[+-] \[aq] N \[aq]
 .fam
-Set/increase/decrease the point size to/by
+Set/increase/decrease the type size to/by
 .I N
 scaled points.
 .
@@ -4414,11 +4442,11 @@ The depth of the last glyph added to the current environment.
 .
 It is positive if the glyph extends below the baseline.
 .
+.
 .TPx
 .REG .ce
-The number of lines remaining to be centered, as set by the
-.request .ce
-request.
+The count of lines remaining to be centered.
+.
 .
 .TPx
 .REG .cht
@@ -4453,11 +4481,13 @@ Current vertical place in current diversion; equal to register
 .
 .TPx
 .REG .ev
-The name or number of the current environment (string-valued).
+The name of the current environment (string-valued).
+.
 .
 .TPx
 .REG .f
-Current font number.
+Mounting position index of the current font.
+.
 .
 .TPx
 .REG .F
@@ -4471,9 +4501,10 @@ The current font family (string-valued).
 .REG .fn
 The current (internal) real font name (string-valued).
 .
+.
 .TPx
 .REG .fp
-The number of the next free font position.
+The next free font mounting position index.
 .
 .
 .TPx
@@ -4508,10 +4539,12 @@ The hyphenation language in the current environment.
 The count of immediately preceding consecutive hyphenated lines in the
 current environment.
 .
+.
 .TPx
 .REG .hlm
-The maximum number of consecutive hyphenated lines allowed in the
+The maximum quantity of consecutive hyphenated lines allowed in the
 current environment.
+.
 .
 .TPx
 .REG .hy
@@ -4652,40 +4685,47 @@ request, or the number of the current page plus\ 1.
 .
 .TPx
 .REG .ps
-The current point size in scaled points.
+The current type size in scaled points.
+.
 .
 .TPx
 .REG .psr
-The last-requested point size in scaled points.
+The last-requested type size in scaled points.
+.
 .
 .TPx
 .REG .pvs
 The current post-vertical line spacing.
 .
+.
 .TPx
 .REG .R
-The number of unused number registers.
-Always 10000 in GNU troff.
+The count of available unused registers;
+always 10000 in GNU
+.IR troff . \" GNU
+.
 .
 .TPx
 .REG .rj
-The number of lines to be right-justified as set by the
-.request .rj
-request.
+The count of lines remaining to be right-aligned.
+.
 .
 .TPx
 .REG .s
-Current point size as a decimal fraction.
+Current type size as a decimal fraction.
+.
 .
 .TPx
 .REG .slant
 The slant of the current font as set with
 .esc S .
 .
+.
 .TPx
 .REG .sr
-The last requested point size in points as a decimal fraction
+The last requested type size in points as a decimal fraction
 (string-valued).
+.
 .
 .TPx
 .REG .ss
@@ -4765,9 +4805,10 @@ Number of basic units per vertical unit of output device resolution.
 .REG .w
 Width of previous glyph.
 .
+.
 .TPx
 .REG .warn
-The sum of the number codes of the currently enabled warnings.
+The sum of the numeric codes of currently enabled warning categories.
 .
 .
 .TPx
@@ -4940,12 +4981,21 @@ Right skip width from the center of the last glyph in the
 .esc w
 argument.
 .
+.
 .TPx
 .REG slimit
-If greater than 0, the maximum number of objects on the input stack.
+If >0,
+sets the maximum quantity of objects on
+.IR \%@g@troff 's
+internal input stack.
 .
-If \[<=]0 there is no limit, i.e., recursion can continue until virtual
-memory is exhausted.
+If \[<=]0,
+there is no limit:
+recursion can continue until program memory is exhausted.
+.
+The default is 1000,
+fixed at compile time.
+.
 .
 .TPx
 .REG ssc
@@ -5434,8 +5484,8 @@ when the macro is defined,
 and once outside of it,
 when the macro is called.
 .
-This fact leads to exponential growth in the number of escape characters
-required to delay interpolation of
+This fact leads to exponential growth in the quantity of escape
+characters required to delay interpolation of
 .BR \[rs]n ,
 .BR \[rs]g ,
 .BR \[rs]$ ,

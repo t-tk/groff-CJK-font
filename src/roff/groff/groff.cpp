@@ -327,10 +327,10 @@ int main(int argc, char **argv)
       break;
     case '?':
       usage(stderr);
-      exit(1);
+      exit(EXIT_FAILURE);
       break;
     default:
-      assert(0);
+      assert(0 == "no case to handle option character");
       break;
     }
   }
@@ -494,7 +494,7 @@ int main(int argc, char **argv)
   if (Vflag)
     print_commands(Vflag == 1 ? stdout : stderr);
   if (Vflag == 1)
-    exit(0);
+    exit(EXIT_SUCCESS);
   return run_commands(vflag);
 }
 
@@ -845,7 +845,7 @@ void help()
 "\n"
 "See groff(1) for details.\n",
 	stdout);
-  exit(0);
+  exit(EXIT_SUCCESS);
 }
 
 void usage(FILE *stream)

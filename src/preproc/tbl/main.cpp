@@ -1595,6 +1595,7 @@ int main(int argc, char **argv)
     }
   printf(".if !\\n(.g .ab GNU tbl requires groff extensions; aborting\n"
 	 ".do if !dTS .ds TS\n"
+	 ".do if !dT& .ds T&\n"
 	 ".do if !dTE .ds TE\n");
   if (argc > optind) {
     for (int i = optind; i < argc; i++) 

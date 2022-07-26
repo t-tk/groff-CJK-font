@@ -1,9 +1,346 @@
+2021-11-01  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[man]: Try to minimize the number of times a URI is broken when
+	it has to be typeset and prevent it from provoking adjustment
+	warnings.
+
+	* tmac/an-ext.tmac (UE, ME): Do it.  New Boolean register `mL`
+	records whether the URI will cause a break.  New string `m2`
+	contains the user-specified URI (`m1`) plus the angle brackets
+	around it and any user-specified trailing punctuation (\$1).
+	New register `mW` stores the formatted width of `m2`.  If the
+	page offset plus the indentation plus the current horizontal
+	position on the output line plus `mW` exceeds the output line
+	length, turn off adjustment and break the line _before_
+	typesetting `m2`.  Then, if we forced a break, restore the
+	previous adjustment mode.  Shift off the first macro parameter
+	and emit the (undocumented) rest as before.
+
+	* tmac/groff_man.7.man.in (Hyperlink macros): Document it.
+
+	* tmac/tests/an-ext_UE-breaks-before-long-URIs.sh: Test it.
+	* tmac/tmac.am (tmac_TESTS): Run test.
+
+	Prompted by a suggestion from James K. Lowden
+	<https://lists.gnu.org/archive/html/groff/2021-10/msg00048.html>
+	--thanks, James!
+
+2021-11-01  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/devices/grohtml/post-html.cpp
+	(html_printer::do_file_components): Add assertion.
+
+2021-11-01  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/devices/grops/ps.cpp (usage): Document -p and --version
+	options.
+
+2021-10-31  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/mdoc/doc-nroff (doc-setup-page-layout): Set the title
+	length to the device line length (register `.l`) if register
+	`LT` is not defined.  This keeps the title length from being set
+	to 78n when the line length is not, preventing the output from
+	looking silly.
+
+2021-10-31  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/preproc/tbl/main.cpp (main): Emit groff code to define
+	macro `T&` as empty if it is not already defined.  (All of our
+	full-service macro packages [except mdoc(7)] already do this, so
+	there's no change in semantics; mom(7) even defines it as an
+	empty _string_.)
+
+2021-10-31  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/roff/groff/tests/string_case_xform_requests.sh: Migrate
+	test to POSIX shell, dropping use of process substitution (a
+	Bashism).  Also rewrite to stop using a here document within a
+	command substitution, mainly for paranoia.
+
+	* src/roff/groff/tests/string_case_xform_requests.sh:
+	* src/roff/groff/tests/on_latin1_device_oq_is_0x27.sh: Update
+	shebang lines to use /bin/sh as the interpreter.
+
+2021-10-31  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/devices/grops/ps.cpp (encode_subfont): Update assertion to
+	check for `sub` parameter being a null pointer rather than
+	`sub->glyphs`; the latter is a member array of a `subencoding`
+	struct so it can't be a null pointer.  (`glyphs` is an array of
+	pointers to `const char`; the _elements_ of the array can [and
+	are initialized to] be null pointers, but the address of the
+	array itself will never be in a C/C++ implementation.)  Detected
+	by Clang 13's "-Wtautological-pointer-compare".
+
+2021-10-31  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/libs/libgroff/new.cpp (delete): Declare `throw()` (no
+	exceptions thrown); quiets "-Wimplicit-exception-spec-mismatch"
+	from Clang 13.
+
+2021-10-31  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* m4/groff.m4: Fix messaging nits.
+	(GROFF_MAKEINFO): Set `missing` to "missing 'makeinfo'" for
+	consistency with other assignments to `missing`.
+	(GROFF_TMAC): Utter an intelligible result in the configure
+	check when no system macro files requiring groff wrapping are
+	located.
+
+2021-10-30  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[troff]: Handle special character escape sequences that map to
+	basic Latin glyphs in device control escape sequences
+	consistently among output devices.
+
+	* src/roff/troff/input.cpp (encode_char): Rearrange
+	conditionals.  This is the logic that puts the "whatever" within
+	a \X'whatever' escape sequence into GNU troff's intermediate
+	output.  Handle stretchable and unstretchable space escape
+	sequences ("\ " and \~") first.  Then, if the token is a special
+	character escape sequence, retrieve its "contents" (glyph name).
+	Move the basic Latin mapping for the seven glyph names '-',
+	'aq', 'dq', 'ga', 'ha', 'rs', and 'ti' here, before checking
+	whether the device description issued the
+	'use_charnames_in_special' directive.  This way, the 'html' and
+	'xhtml' output devices can straightforwardly embed these basic
+	Latin characters in device control escapes (notably, "html:",
+	for which the present convention is to follow the this tag
+	immediately with a literal HTML URI, complete with `<a href>`
+	element syntax).  If the special character is none of these and
+	we should 'use_charnames_in_special', proceed as groff 1.22.4
+	and earlier did.  This is a behavior change, as was my addition
+	of this translation mechanism in the first place, so...
+
+	* doc/groff.texi (Postprocessor Access): Document it.
+
+	* src/roff/groff/tests/\
+	device_control_escapes_express_basic_latin.sh: Test it.
+	* src/roff/groff/groff.am (groff_TESTS): Run test.
+
+	Fixes <https://savannah.gnu.org/bugs/?61401>.
+
+2021-10-30  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[troff]: Map \[ti] correctly in device control escape sequences.
+
+	* src/roff/troff/input.cpp (encode_char): Fix copy-and-paste
+	error.  \[ti] should put '~', not '^', into a device control
+	command.
+
+	Fixes <https://savannah.gnu.org/bugs/?61403>; problem introduced
+	by me in commit 9d61b3d1, 1 October.
+
+2021-10-30  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[man]: Handle degenerate input quietly.
+
+	* tmac/an.tmac (TH): Define new register `an-TH-was-called`.
+	(an-end): Return immediately if that register is not defined;
+	to format the default page footer we must have the information
+	declared in a valid `TH` call.  (`TH` also initializes the type
+	size and baseline spacing registers we use to prepare the page
+	footer environment.)  If the register _is_ defined, remove it
+	just prior to the end of this macro definition, in preparation
+	for next page to be rendered.
+
+	* tmac/tests/an_handle-degenerate-input-quietly.sh: Test it.
+
+	Fixes <https://savannah.gnu.org/bugs/61402>, a regression from
+	groff 1.22.4 (problem introduced by me in the course of many
+	changes to trap management and header/footer handling to work
+	nicely in batch rendering with -mandoc and mdoc(7) documents).
+
+2021-10-28  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[man]: Warn if `TE` table macro called but `TW` register (set by
+	tbl(1)) undefined.  Arrange it so that we warn only once per
+	man(7) document, not per table.
+
+	* tmac/an.tmac (TH): Remove `TW` register when processing new
+	document and clear `an-was-tbl-failure-reported` register.
+	(TE): Check `TW` and `an-was-tbl-failure-reported` registers; if
+	the former is undefined and the latter false, emit the message
+	and set `an-was-tbl-failure-reported`.
+
+	Addresses part of <https://savannah.gnu.org/bugs/?61379>.
+	Thanks to Bjarni Ingi Gislason for the suggestion.
+
+2021-10-28  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[tests]: Improve portability.
+
+	* src/devices/grotty/tests/osc8_works.sh: Fix typo in test.
+	Multiple regex quantifiers after an atom were not flagged with a
+	diagnostic by GNU grep 3.3, but were by BSD grep 2.5.1-FreeBSD.
+
+	* src/roff/groff/tests/smoke-test_html_device.sh: Stop trying to
+	set $LC_CTYPE to "C.UTF-8"; some systems don't support this
+	expediency.  Skip the test if the tester hasn't configured the
+	environment adequately.
+
+	* tmac/tests/s_TC-works-with-percent-in-custom-titles.sh: Fix
+	portability problems exposed by FreeBSD sed (which version is
+	unclear).  {1} Use POSIX BREs, dropping use of '+' quantifier.
+	{2} Add semicolons to terminate commands before braces on the
+	same line.  Simplify surrounding test structure.
+	* tmac/tests/e_footnotes-work-with-columns.sh: Fix same two sed
+	problems.
+	* tmac/tests/andoc_flush-between-packages.sh:
+	* tmac/tests/doc_accept-mixed-case-section-headings.sh:
+	* tmac/tests/an_TS-do-not-keep-tables-when-cR-set.sh: Fix same
+	sed semicolon problem.
+
+	* src/roff/groff/tests/on_latin1_device_oq_is_0x27.sh: Rewrite
+	test to stop using a here document (containing an unpaired
+	single quote) inside a command substitution, which is broken in
+	GNU Bash 3.2 and some other versions.  Instead construct the
+	input with printf(1).  Also gets rid of a Bashism (process
+	substitution) that Ingo pointed out years ago.
+	* src/utils/grog/tests/recognize-perl-pod.sh: Same problem,
+	different solution.  The Perl POD output is far too large to
+	construct programmatically, so move it into an external file...
+	* src/utils/grog/tests/foo.man: ...here.
+	* src/utils/grog/grog.am (EXTRA_DIST): Ship new test artifact.
+
+2021-10-27  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* doc/doc.am: Make sed-based insertion of `lf` requests more
+	portable: a dance is required to embed a literal newline inside
+	a sed expression inside a shell command executed as part of a
+	Make target rule.  We assume that neither the POSIX shell $''
+	operator nor a working printf(1) is available.
+	(DOC_GROFF): Define a shell variable containing a literal
+	newline, evading make(1) and echo(1)'s valiant attempts to
+	consume it.
+	(doc/pic.html, doc/webpage.html): Repeat trick, slightly
+	modified since the dependency needs to be manually identified.
+
+	Solution adapted from the GNU Autoconf manual, "Newlines in Make
+	Rules".
+
+	Fixes <https://savannah.gnu.org/bugs/?61265>.  Thanks to John
+	Gardner for the report.
+
+2021-10-26  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/an.tmac (TH): Stop populating `an-extra3` (the default
+	center header) if the section argument is "3p".  "3p" does not
+	always mean a Perl-related man page; Debian- and Arch
+	Linux-based systems[1][2] (at least) have long used a "3perl"
+	suffix, while OpenBSD appears to still use "3p" for Perl[3],
+	which is also used by the POSIX man page distribution[4].
+	Fortunately, Perl and POSIX are reliable at providing a fifth
+	argument to `TH` anyway, so our fallback is as unnecessary as it
+	is non-impartial.
+	* tmac/groff_man.7.man.in (Document structure macros) <TH>:
+	De-document the above behavior.
+
+	[1] https://manpages.debian.org/bullseye/perl-doc/\
+	Pod::Man.3perl.en.html
+	[2] https://man.archlinux.org/man/Pod::Man.3perl
+	[3] https://man.openbsd.org/man3p/Pod::Man.3p
+	[4] https://man7.org/linux/man-pages/man3/system.3p.html
+
+2021-10-26  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[man]: Abbreviate the inside footer if necessary.
+
+	* tmac/an.tmac (an-prepare-inner-footer): Prevent the inside
+	footer from overrunning the center footer.
+	(BT): Use new string `an-ifoot` instead of `an-extra2` in page
+	footers.
+
+	Fixes <https://savannah.gnu.org/bugs/?61386>.
+
+2021-10-26  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	Add regression test for Savannah #61386.
+
+	* tmac/tests/an_inner-footer-abbreviation-works.sh: Do it.
+	* tmac/tmac.am (tmac_TESTS): Run test.
+
+2021-10-26  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* man/groff_char.7.man (Description, Special character escape
+	forms): Document the `\C` escape sequence.  Fix error: \[a] is
+	_not_ "translated to \a, the uninterpreted leader escape
+	sequence," but requests a glyph _named_ '\a' internally--it
+	appears thus in diagnostic messages and, importantly, in the
+	font description files defining special character glyph names.
+
+2021-10-25  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/an.tmac: Refactor to reduce repetition.
+	(an-break-paragraph): New macro handles paragraph-breaking tasks
+	previously duplicated.
+	(SH, SS, P, TP, IP, HP): Call it rather than issuing its
+	constituent requests.
+
+2021-10-25  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/an.tmac (TP): Reset type size, vertical spacing, and font
+	to defaults before setting the new paragraph.
+
+	Fixes <https://savannah.gnu.org/bugs/?61380>.
+
+2021-10-24  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* doc/groff.texi (Auto-increment): Fix error; the `\R` escape
+	sequence does _not_ support an auto-incrementation amount.
+	* man/groff_out.5.man (Command reference/Simple commands): Fix
+	erroneous claim: 'N' is not a GNU roff extension; it appears on
+	page 27 of CSTR#54 (1992).
+
+2021-10-24  Keith Marshall  <keith.d.marshall@ntlworld.com>
+
+	[ms]: Provide global default XH and XN implementations.
+
+	cf. <https://savannah.gnu.org/bugs/?58946#comment13>
+
+	* tmac/s.tmac (XH-INIT, XN-INIT, XH-UPDATE-TOC)
+	(XH, XN, XH-REPLACEMENT, XN-REPLACEMENT): Implement them, and...
+	* tmac/groff_ms.7.man: ...document them.
+
+2021-10-24  Keith Marshall  <keith.d.marshall@ntlworld.com>
+
+	[ms]: Fix misleading NH macro indentation.
+
+	* tmac/s.tmac (@NH) [.T is html]: .if statement should exhibit
+	same indentation as preceding .DEVTAG-NH statement, but is
+	overindented; fix it.
+
+2021-10-23  Keith Marshall  <keith.d.marshall@ntlworld.com>
+
+	[ms]: Defend against uncontrolled page trap recursion.
+
+	* tmac/s.tmac (pg@top) [HM+FM+.V>.p]: Diagnose insufficient page
+	length, and abort; cf. <https://savannah.gnu.org/bugs/?61294>
+
+2021-10-21  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[groff]: Fix code style nits.
+
+	* src/roff/groff/groff.cpp (main, help): Use standard C library
+	preprocessor symbols `EXIT_SUCCESS` and `EXIT_FAILURE` instead
+	of 0 and 1 literals, respectively.  See commit fa4c27e9, 7
+	September.
+	(main): Replace `assert(0)` with a communicative predicate.
+
+2021-10-21  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/devices/grotty/tty.cpp (tty_printer::special_link):
+	Eliminate casts by retyping `uri` and `pair` to pointers to
+	`const char`s.
+
 2021-10-21  G. Branden Robinson <g.branden.robinson@gmail.com>
 
 	* tmac/tmac.am: Build more quietly.
 	(tmac/stamp-wrap): Prefix all rule commands with `$(AM_V_at)`;
-	since this target is a stamp file instead of useful artifact to
-	be distributed, make its creation completely silent by default.
+	since this target is a stamp file instead of a useful artifact
+	to be distributed, make its creation completely silent by
+	default.
 
 2021-10-21  G. Branden Robinson <g.branden.robinson@gmail.com>
 
@@ -33,10 +370,9 @@
 	Prefix earlier rule commands with `$(AM_V_at)`.  Use `printf`
 	instead of `echo` to build the file, and create a temporary file
 	at first so that we don't race with the compiler on parallelized
-	builds.  Drop nilpotent sed-transformation of a single closing
-	brace (and newline); this looks like a relic of past times when
-	we'd drop a trailing ".0" from the version number stored in the
-	C symbol `Version_string`.
+	builds.  Drop nilpotent sed transformation; this looks like a
+	relic of past times when we'd drop a trailing ".0" from the
+	version number stored in the C symbol `Version_string`.
 	(charset.alias, ref-del.sed, ref-add.sed): Prefix rule command
 	with `$(AM_V_GEN)`.
 
@@ -61,8 +397,8 @@
 	* doc/doc.am: Build more quietly.
 	(doc/examples.stamp): Prefix all rule commands with
 	`$(AM_V_at)`; since this target is a stamp file instead of
-	useful artifact to be distributed, make its creation completely
-	silent by default.
+	a useful artifact to be distributed, make its creation
+	completely silent by default.
 	(doc/groff.info, .texi.txt): Prefix directory creation with
 	`$(AM_V_at)` and `makeinfo` command with `$(AM_V_GEN)`.
 	(.texi.dvi, .texi.pdf): Prefix directory creation with
@@ -71,7 +407,7 @@
 	unavailable.
 	(.texi.html): Prefix directory creation with
 	`$(AM_V_at)`.  Two HTML versions are produced, in split and
-	unspit versions; prefix one `makeinfo` command with
+	unsplit versions; prefix one `makeinfo` command with
 	`$(AM_V_GEN)` and the other with `$(AM_V_at)` so that only one
 	message is produced.
 	(gnu.eps): Drop useless/noisy `echo` command.  Prefix copy
@@ -426,7 +762,7 @@
 	(UE, ME): Generate device control commands for `tty` device to
 	emit hyperlinks.
 
-	* tmac/groff_man.7.man.in (Options): Document -U.
+	* tmac/groff_man.7.man.in (Options): Document -rU.
 	(Files) [style]: Add example of `U` register enablement.
 
 	* tmac/man.local: Disable `U` register by default, except on the
@@ -2149,9 +2485,9 @@
 2021-07-28  G. Branden Robinson <g.branden.robinson@gmail.com>
 
 	[grohtml]: Fix Savannah #60981.  Refactor device description
-	file handling, make it more robust, and make this preprocessor's
-	-F option work as documented, and to honor documented device
-	description file semantics.
+	file handling and make it more robust.  Make pre-grohtml's
+	-F option work as documented and honor device description file
+	semantics documented in groff_font(5).
 
 	* src/preproc/html/pre-html.cpp: Store partial filespecs of HTML
 	and PostScript device files in constant strings.

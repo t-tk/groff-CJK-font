@@ -5397,25 +5397,17 @@ static node *do_non_interpreted()
 static void encode_char(macro *mac, char c)
 {
   if (c == '\0') {
-    if ((font::use_charnames_in_special) && tok.is_special()) {
-      charinfo *ci = tok.get_char(true /* required */);
-      const char *s = ci->get_symbol()->contents();
-      if (s[0] != (char)0) {
-	mac->append('\\');
-	mac->append('[');
-	int i = 0;
-	while (s[i] != (char)0) {
-	  mac->append(s[i]);
-	  i++;
-	}
-	mac->append(']');
-      }
-    }
-    else if (tok.is_stretchable_space()
+    if (tok.is_stretchable_space()
 	     || tok.is_unstretchable_space())
       mac->append(' ');
     else if (tok.is_special()) {
-      const char *sc = tok.get_char()->get_symbol()->contents();
+      const char *sc;
+      if (font::use_charnames_in_special) {
+	charinfo *ci = tok.get_char(true /* required */);
+	sc = ci->get_symbol()->contents();
+      }
+      else
+	sc = tok.get_char()->get_symbol()->contents();
       if (strcmp("-", sc) == 0)
 	mac->append('-');
       else if (strcmp("aq", sc) == 0)
@@ -5429,10 +5421,24 @@ static void encode_char(macro *mac, char c)
       else if (strcmp("rs", sc) == 0)
 	mac->append('\\');
       else if (strcmp("ti", sc) == 0)
-	mac->append('^');
-      else
-	error("special character '%1' cannot be used within device"
-	      " control escape sequence", sc);
+	mac->append('~');
+      else {
+	if (font::use_charnames_in_special) {
+	  if (sc[0] != (char)0) {
+	    mac->append('\\');
+	    mac->append('[');
+	    int i = 0;
+	    while (sc[i] != (char)0) {
+	      mac->append(sc[i]);
+	      i++;
+	    }
+	    mac->append(']');
+	  }
+	  else
+	      error("special character '%1' cannot be used within"
+		    " device control escape sequence", sc);
+	}
+      }
     }
     else if (!(tok.is_hyphen_indicator()
 	       || tok.is_dummy()

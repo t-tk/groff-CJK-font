@@ -13,40 +13,41 @@ VERSION 1.23.0
 troff
 -----
 
-o The troffrc file now loads an English localization file instead of
+o The `troffrc` file now loads an English localization file instead of
   directly housing configuration parameters appropriate to the English
   language.  See "Macro Packages" below.
 
-o A new read-only register ".cp" is implemented.  Within a 'do' request,
+o A new read-only register `.cp` is implemented.  Within a 'do' request,
   "\n[.cp]" holds the saved value of compatibility mode.  See
   groff_diff(7) or the groff Texinfo manual for rationale, use case, and
   example.
 
-o A new read-only register ".nm" is implemented.  It reports the
+o A new read-only register `.nm` is implemented.  It reports the
   enablement status of output line numbering (caused by the 'nm'
   request) irrespective of the temporary suspension of numbering with
   the 'nn' request.  This register was introduced because there was no
   way to introspect its state, tbl(1) needs to be able to do so, and the
-  writable line number register \n[ln] is not a reliable proxy for it.
+  writable line number register `ln` is not a reliable proxy for it.
 
-o Point-size escapes of the form '\sNN', where NN is in the range 10-39,
-  are now recognized only in compatibility mode (groff -C); when
-  encountered, an error diagnostic is emitted.  Otherwise, \sN is
-  interpreted as setting the point size to the single-digit value N,
-  which ends the escape.  This change eliminates a quirk in the language
-  grammar that dates back to the mid-1970s (AT&T troff by Ossanna) but
-  was not documented in the Troff User's Manual until 1992 when
-  Kernighan updated CSTR #54 for device-independent AT&T troff.
+o Point-size escape sequences of the form "\sNN", where NN is in the
+  range 10-39, are now recognized only in compatibility mode ("groff
+  -C"); when encountered, an error diagnostic is emitted.  Otherwise,
+  "\sN" is interpreted as setting the point size to the single-digit
+  value N, which ends the escape sequence.  This change eliminates a
+  quirk in the language grammar that dates back to the mid-1970s (AT&T
+  troff by Ossanna) but was not documented in the Troff User's Manual
+  until 1992 when Kernighan updated CSTR #54 for device-independent AT&T
+  troff.
 
-  The form '\s(NN' is accepted for two-digit point sizes in all known
-  troffs.  The form '\s[NNN]' accepts a numeric expression of variable
+  The form "\s(NN" is accepted for two-digit point sizes in all known
+  troffs.  The form "\s[NNN]" accepts a numeric expression of variable
   length; it has been supported by groff since version 1.02 (June 1991)
   at the latest and is by current versions of Heirloom Doctools troff
   and neatroff.  The form "\s'NNN'" is also widely supported.
 
-  Summary: in your documents, rewrite escapes beginning with '\s1',
-  '\s2', or '\s3' in an unambiguous and portable form.  For instance,
-  '\s36' can become any of:
+  Summary: in your documents, rewrite escape sequences beginning with
+  "\s1", "\s2", or "\s3" in an unambiguous and portable form.  For
+  instance, "\s36" can become any of:
     \s(36
     \s[36]
     \s'36'
@@ -67,8 +68,8 @@ o New requests 'stringdown' and 'stringup' are available.  These change
   its lowercase or uppercase version (if any), respectively.  groff
   special characters (see the groff_char(7) man page) can be used and
   the output will often transform in the expected way due to the
-  regular naming convention of the special character escapes for
-  accented letters.
+  regular naming convention of the special character escapes sequences
+  for accented letters.
 
 nroff
 -----
@@ -77,8 +78,8 @@ o The new option -P takes an argument to pass to the output driver
   (always grotty(1)).  "-P-i" directs the terminal device to display
   real italic (oblique) characters instead of underlining: it is up to
   your terminal (emulator) to support italics (xterm does since patch
-  #314 [2014-12-28]).  "-P-h" can now be used instead of "-h"; the
-  latter may eventually be deprecated and repurposed.
+  #314 [2014-12-28]).  "-P-h" can now be used instead of -h; the latter
+  may eventually be deprecated and repurposed.
 
 o The new option -V emits the constructed groff command that nroff would
   run to standard output instead of executing it.  Arguments to nroff
@@ -96,24 +97,24 @@ o nroff now supports whitespace between option flag letters and option
 groff
 -----
 
-o The -I option now implies "-g" (run the grn(1) preprocessor), and
-  supplies grn an "-M" option with the argument to -I.
+o The -I option now implies -g (run the grn(1) preprocessor), and
+  supplies grn an -M option with the argument to -I.
 
 Macro Packages
 --------------
 
 o English localization has been split into a dedicated macro file,
-  en.tmac, for better parallelism with other localization files and to
+  `en.tmac`, for better parallelism with other localization files and to
   improve support for multilingual documents.  Those who want a
   different default input language should edit the troffrc file to
-  source the desired groff locale macro file (cs.tmac, de.tmac,
-  den.tmac, fr.tmac, it.tmac, ja.tmac, sv.tmac, or zh.tmac) instead of
-  en.tmac.
+  source the desired groff locale macro file (`cs.tmac`, `de.tmac`,
+  `den.tmac`, `fr.tmac`, `it.tmac`, `ja.tmac`, `sv.tmac`, or `zh.tmac`)
+  instead of `en.tmac`.
 
   The default hyphenation mode (as used by the 'hy' request) for users
   of English has changed from "1", which was inappropriate for the
   TeX-based hyphenation patterns groff has used since at least 1991, to
-  "4".  However, invoking .hy without an argument remains synonymous
+  "4".  However, invoking ".hy" without an argument remains synonymous
   with ".hy 1".
 
 o The hyphenation patterns for English have been updated using the
@@ -129,15 +130,15 @@ o The new rfc1345 macro package, contributed by Dorai Sitaram, defines
 o The new sboxes macro package, contributed by Deri James, offers a
   simple interface to the new gropdf(1) "background" feature.  Using it,
   ms documents can draw colored rectangles beneath any groff output.
-  See "Using PDF boxes with the ms macros", installed as 'msboxes.ms'
-  and 'msboxes.pdf' for instructions and a demonstration.
+  See "Using PDF boxes with groff and the ms macros", installed as
+  `msboxes.ms` and `msboxes.pdf` for instructions and a demonstration.
 
 o The an (man) macro package can now produce clickable hyperlinks within
   terminal emulators, using the OSC 8 support added to grotty(1) (see
-  below).  The groff man(7) extension macros "UR" and "MT", present
+  below).  The groff man(7) extension macros 'UR' and 'MT', present
   since 2007, expose this feature.  At present the feature is disabled
-  by default in "man.local" pending more widespread recognition of OSC 8
-  sequences in pager programs.  The package now recognizes a "U"
+  by default in `man.local` pending more widespread recognition of OSC 8
+  sequences in pager programs.  The package now recognizes a `U`
   register to configure hyperlink support for any output driver.
 
   Use a command like
@@ -146,7 +147,7 @@ o The an (man) macro package can now produce clickable hyperlinks within
   "grotty(1)" and no additional garbage characters, then you may wish to
   edit "man.local" to remove the lines that disable this feature.
 
-o The an (man) macro package supports a new macro, "MR", intended for
+o The an (man) macro package supports a new macro, 'MR', intended for
   use by man page cross references in preference to the font style
   alternation macros historically used.  Where before you would write
     .BR ls (1).
@@ -157,11 +158,12 @@ o The an (man) macro package supports a new macro, "MR", intended for
   (the third argument, typically used for trailing punctuation, is
   optional).  Because the macro semantically identifies a man page, it
   can create a clickable hyperlink ("man:ls(1)" for the above example)
-  on supporting devices.  Furthermore, a new string, MF, defines the
-  font to be used for setting man page titles (the first argument to .MR
-  and .TH), permitting configuration by distributions, sites, and users.
+  on supporting devices.  Furthermore, a new string, `MF`, defines the
+  font to be used for setting man page titles (the first argument to
+  'MR' and 'TH'), permitting configuration by distributions, sites, and
+  users.
 
-  The MR macro is offered for compatibility with Plan 9 troff, which
+  The 'MR' macro is offered for compatibility with Plan 9 troff, which
   introduced it in August 2020, and to ameliorate several long-standing
   problems with man page cross references: (1) the package's lack of
   inherent hyperlink support for them; (2) false-positive identification
@@ -175,8 +177,8 @@ o The an (man) macro package supports a new macro, "MR", intended for
   maintenance communities over which typeface should be used to set the
   man page title (italics, roman, or bold).
 
-o Part of the an (man) macro package has been renamed from "an-old.tmac"
-  to "an.tmac", replacing a file that sourced the "andoc.tmac" wrapper.
+o Part of the an (man) macro package has been renamed from `an-old.tmac`
+  to `an.tmac`, replacing a file that sourced the `andoc.tmac` wrapper.
   This means that the "-man" argument to groff (or nroff, or troff) will
   no longer load the andoc wrapper, and not successfully format mdoc(7)
   man pages.  If you are not sure which macro package a given man page
@@ -186,12 +188,12 @@ o Part of the an (man) macro package has been renamed from "an-old.tmac"
   this.  The man-db man(1) implementation has, since 2001, used
   "-mandoc" preferentially if available when man-db is configured.
 
-o The an (man) macro package supports a new AD string to put the default
-  adjustment mode under user control at rendering time.  The default is
-  'b' (adjust lines to both margins) as has been the Unix man(7) default
-  since 1979.
+o The an (man) macro package supports a new `AD` string to put the
+  default adjustment mode under user control at rendering time.  The
+  default is "b" (adjust lines to both margins) as has been the Unix
+  man(7) default since 1979.
 
-o The an (man) and doc (mdoc) macro packages support new CS and CT
+o The an (man) and doc (mdoc) macro packages support new `CS` and `CT`
   registers to control rendering of man page section headings and titles
   (seen in the page header), respectively, in full capitals.  These
   default off (with no visible effect on pages which already fully
@@ -219,54 +221,57 @@ o The groff_man(7) man page documenting the groff implementation of the
 
 o The doc (mdoc) macro package now honors the HY register as the an
   (man) package does: to set the default hyphenation mode.  It
-  furthermore recognizes the AD string (see above) for compatibility
+  furthermore recognizes the `AD` string (see above) for compatibility
   with an (man), but at present ignores its value.
 
 o The m (mm) macro package now requires a title to be declared when
-  memorandum type 5 is used (.MT 5), just as type 4 has since groff 1.10
-  (November 1995).
+  memorandum type 5 is used (".MT 5"), just as type 4 has since groff
+  1.10 (November 1995).
 
 o The m (mm) and s (ms) macro packages no longer manipulate the warning
   level.  If you want all warnings on, use the 'warn' request with no
   arguments in your document or pass "-w w" to groff (see troff(1) or
   the groff Texinfo manual for more on warnings).
 
-o The m (mm) and s (ms) macro packages' "R" macros now work analogously
-  to their "B" and "I" macros instead of ignoring their arguments.
+o The m (mm) and s (ms) macro packages' 'R' macros now work analogously
+  to their 'B' and 'I' macros instead of ignoring their arguments.
 
-o The s (ms) macro package supports a new string, FR, which defines the
-  ratio of the footnote line length to the current line length.  The
+o The s (ms) macro package supports a new string, `FR`, which defines
+  the ratio of the footnote line length to the current line length.  The
   default expression is "11/12", 11/12ths of the normal line length,
   adopted for better compatibility with ms documents prepared with AT&T
   ms or its descendant implementations in Heirloom Doctools and
   neatroff.  This is a change from previous groff releases, which used a
   ratio of 5/6ths.
 
-  You may wish to set the FR string to 1 to align with contemporary
+  You may wish to set the `FR` string to "1" to align with contemporary
   typesetting practices.  In Version 7 Unix ms, its descendants, and
-  groff prior to this release, an FL register was used for the line
+  groff prior to this release, an `FL` register was used for the line
   length in footnotes; however, setting this register at document
   initialization time had no effect on the footnote line length in
   multi-column arrangements.
 
-  FR should be used in preference to the old FL register in contemporary
-  documents; see the groff Texinfo manual or the "Using groff with the
-  ms macros" document, also part of this release.
+  `FR` should be used in preference to the old `FL` register in
+  contemporary documents; see the groff Texinfo manual or the "Using
+  groff with the ms macros" document, also part of this release.  Thanks
+  to T. Kurt Bond.
 
-o The s (ms) macro package has added strings, \*< and \*>, to perform
-  subscripting.  They work analogously to the \*{ and \*} superscripting
+o The s (ms) macro package has added strings, `<` and `>`, to perform
+  subscripting.  They work analogously to the `{` and `}` superscripting
   strings that have been present in groff ms since 1991 or earlier.
 
-o The s (ms) macro package has added a hook macro, FS-MARK, which is
-  called automatically by the FS macro (with same arguments given to FS)
-  before any other footnote processing.  It is empty by default but can
-  be defined by the user to, for example, place a hyperlink anchor so
-  that a link within a footnote can return to its referential context.
-  "Portable Document Format Publishing with GNU Troff", distributed with
-  groff as pdfmark.ms, uses this technique.
+o The s (ms) macro package has added a hook macro, 'FS-MARK', which is
+  called automatically by the 'FS' macro (with the same arguments given
+  to 'FS') before any other footnote processing.  It is empty by default
+  but can be defined by the user to, for example, place a hyperlink
+  anchor so that a link within a footnote can return to its referential
+  context.  "Portable Document Format Publishing with GNU Troff",
+  distributed with groff as `pdfmark.ms`, uses this technique.  Thanks
+  to Keith Marshall.
 
 gropdf
 ------
+
 o A new device control command, "background", enables boxes to be drawn
   underneath other page content.  The boxes can be shaded with colors,
   drawn with a colored border of configurable thickness, and interrupted

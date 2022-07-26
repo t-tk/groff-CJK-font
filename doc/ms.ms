@@ -3408,7 +3408,9 @@ California at Berkeley.)
 .
 .
 .IP \[bu]
-\[lq]Using PDF boxes with the
+\[lq]Using PDF boxes with
+.I groff
+and the
 .I ms
 macros\[rq];
 Deri James;

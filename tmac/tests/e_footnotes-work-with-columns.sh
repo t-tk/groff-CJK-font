@@ -38,6 +38,6 @@ qux'
 
 test -n "$(echo "$EXAMPLE" \
     | "$groff" -Tascii -P-cbou -me \
-    | sed -n '/foo/{N;/bar \+baz/{N;/qux/p}}')"
+    | sed -n '/foo/{N;/bar  *baz/{N;/qux/p;};}')"
 
 # vim:set ai et sw=4 ts=4 tw=72:

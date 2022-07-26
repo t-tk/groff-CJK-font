@@ -5042,6 +5042,7 @@ void html_printer::do_file_components (void)
   if (fragment_no > 1)
     write_navigation(top, prev, next, current);
   else {
+    assert(current_paragraph != 0);
     current_paragraph->done_para();
     write_rule();
     if (valid_flag) {

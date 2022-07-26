@@ -40,7 +40,7 @@ FDL in the main directory of the groff source package.
 
 <h1 class="docs">The document element tags</h1>
 
-<div style="width: 386px; margin: auto;">
+<div style="width: 460px; margin: auto;">
 <ul class="no-enumerator">
   <li><a href="#docelement-intro">Introduction to the document element tags</a></li>
   <li><a href="#docelement-control">Control macros &ndash; changing the tag defaults</a>
@@ -284,7 +284,7 @@ to be red, once you&#8217;ve defined or initialized the colour, red,
 will turn them red.
 </p>
 
-<h4 id="lead" class="docs" style="margin-top: -.5em; margin-bottom: -.75em;">Lead/linespacing</h4>
+<h4 id="lead" class="docs" style="margin-top: -.5em; margin-bottom: -.75em;">Lead / linespacing</h4>
 
 <p>
 Control macros that end in _AUTOLEAD take the same argument as
@@ -357,27 +357,27 @@ regardless of the paragraph indent.
 </span>
 </p>
 
-<h4 id="quad" class="docs" style="margin-top: -1em; margin-bottom: -.75em;">Quad/justification style</h4>
+<h4 id="quad" class="docs" style="margin-top: -1em; margin-bottom: -.75em;">Quad / justification style</h4>
 
 <p>
 Control macros that end in _QUAD take the same arguments as
 <a href="typesetting.html#quad">QUAD</a>.
 </p>
 
-<h4 id="underline" class="docs" style="margin-bottom: -.75em;">Underline style, rule weight</h4>
+<h4 id="underscore" class="docs" style="margin-bottom: -.75em;">Underscore style, rule weight</h4>
 
 <p>
-If mom gives the option to underline a document element, the weight
+If mom gives the option to underscore a document element, the weight
 of the underline and its distance from the
 <a href="definitions.html#baseline">baseline</a>
-are controlled by macros that end in _UNDERSCORE or _UNDERLINE.
-These macros take the following arguments:
+are controlled by macros that end in _UNDERSCORE or _UNDERLINE, the
+two being synonymous.  These macros take the following arguments:
 <br/>
 <span class="pre-in-pp">
   DOUBLE     - double underscore
   &lt;weight&gt;   - the underscore weight (in points, no unit of measure required
   &lt;distance&gt; - distance from baseline (unit of measure required)
-  &lt;rule gap&gt; - distance between double underscore rules (unit of measure required_
+  &lt;rule gap&gt; - distance between double underscore rules (unit of measure required)
 </span>
 <kbd>DOUBLE</kbd> by itself will double-underscore the element.  The
 remaining arguments must be entered in the order given.  You may not
@@ -389,13 +389,13 @@ skip over any of them, which means that if you only wish to change
 <p>
 Page elements that are separated from
 <a href="definitions.html#running">running text</a>
-by a rule (i.e. page headers, page footers and footnotes) are
+by a rule (i.e. page headers, page footers, and footnotes) are
 controlled by macros that end in _RULE_WEIGHT.
 </p>
 
 <p>
-The weight argument to _UNDERLINE macros is the same as the argument
-to
+The weight argument to _UNDERSCORE macros is the same as the
+argument to
 <a href="inlines.html#rule-weight">RULE_WEIGHT</a>,
 as is the argument to _RULE_WEIGHT macros.
 </p>
@@ -435,14 +435,25 @@ Not all the control macros for a particular tag may be available
 with an <kbd>&lt;element&gt;_STYLE</kbd> macro.  Generally speaking,
 though, if a tag has control macros for
 <br/>
-<span class="pre-in-pp">
-  FAMILY FONT SIZE
-  LEAD AUTOLEAD
-  QUAD INDENT
-  COLOR
-  CAPS SMALLCAPS
-  UNDERLINE/UNDERSCORE
-</span>
+<table style="font-family: monospace; font-weight: bold; margin-left: 5em; margin-top: -1em">
+  <tr>
+  <td style="padding-right: 1em">FAMILY</td>
+  <td style="padding-right: 1em">LEAD</td>
+  <td style="padding-right: 1em">INDENT</td>
+  <td style="padding-right: 1em">SMALLCAPS</td>
+  </tr>
+  <tr>
+  <td style="padding-right: 1em">FONT</td>
+  <td style="padding-right: 1em">AUTOLEAD</td>
+  <td style="padding-right: 1em">COLOR</td>
+  <td style="padding-right: 1em">UNDERSCORE or UNDERLINE</td>
+  </tr>
+  <tr>
+  <td style="padding-right: 1em">SIZE</td>
+  <td style="padding-right: 1em">QUAD</td>
+  <td style="padding-right: 1em">CAPS</td>
+  </tr>
+<table>
 those parameters may be used within an
 <kbd>&lt;element&gt;_STYLE</kbd> macro.
 </p>
@@ -453,7 +464,7 @@ those parameters may be used within an
 If you need to reverse the sense of <kbd>CAPS</kbd>,
 <kbd>SMALLCAPS</kbd> or <kbd>UNDERSCORE/UNDERLINE</kbd>, which
 do not take a value after the keyword, use <kbd>NO_CAPS</kbd>,
-<kbd>NO_SMALLCAPS</kbd> and <kbd>NO_UNDERSCORE/NO_UNDERLINE</kbd>.
+<kbd>NO_SMALLCAPS</kbd>, and <kbd>NO_UNDERSCORE/NO_UNDERLINE</kbd>.
 </p>
 </div>
 
@@ -542,8 +553,8 @@ or
 <p class="tip">
 <span class="tip">Tips on vertical spacing around epigraphs:</span>
 If you wish to change the vertical position of an epigraph with
-<a href="typesetting.html#space">SPACE</a>/
-<a href="typesetting.html#ald">ALD</a>/
+<a href="typesetting.html#space">SPACE</a>,
+<a href="typesetting.html#ald">ALD</a>, or
 <a href="typesetting.html#rld">RLD</a>,
 do so before invoking <kbd>.EPIGRAPH</kbd>, like this:
 <br/>
@@ -669,20 +680,6 @@ this is that writers of fiction often have single-line paragraphs
 break these one-liners&mdash;if they fall at the bottom of the
 page&mdash;to a new page, which is not what you want.
 </p>
-
-<div class="box-tip">
-<p class="tip">
-<span class="tip">Tip:</span>
-If you would prefer not to clutter up your files with
-<kbd>.PP</kbd>s, you can use groff&#8217;s &#8220;blank line
-macro&#8221; to instruct groff to interpret blank lines as
-<kbd>.PP</kbd>&#8217;s, like this:
-<br/>
-<span class="pre-in-pp">
-  .blm PP
-</span>
-</p>
-</div>
 
 <!-- -PP- -->
 
@@ -812,12 +809,12 @@ italic.  Neither persists past the end of the paragraph.
 <h4 id="pp-color" class="docs" style="margin-top: -.25em;">3. Paragraph colour</h4>
 
 <p>
-Mom has no special control macro for colourizing paragraphs.  If you
-wish a colourized paragraph, you must use the macro
+Mom has no special control macro for colourising paragraphs.  If you
+wish a colourised paragraph, you must use the macro
 <a href="color.html#color">COLOR</a>
 or the
 <a href="definitions.html#inline">inline escape</a>,
-<a href="color.html#color-inline"><kbd>\*[&lt;colourname&gt;]</kbd></a>,
+<a href="color.html#color-inline"><kbd><nobr>\*[&lt;colourname&gt;]</nobr></kbd></a>,
 <i>after</i> <kbd>.PP</kbd>.  The colour must be one pre-defined (or
 &#8220;initialized&#8221;) with
 <a href="color.html#newcolor">NEWCOLOR</a>
@@ -877,9 +874,9 @@ paragraph whose leading you wish to change.
 <div class="box-tip">
 <p class="tip">
 <span class="note">Warning:</span>
-Changing a paragraph&#8217;s leading will almost certainly screw
-up mom&#8217;s ability to balance the bottom margin of pages.
-Should you absolutely require a change of paragraph&#8217;s leading and
+Changing a paragraph&#8217;s leading will almost certainly screw up
+mom&#8217;s ability to balance the bottom margin of pages.  Should
+you absolutely require a change to a paragraph&#8217;s leading and
 need to get mom back on track leading-wise afterwards, use the
 <a href="docprocessing.html#shim">SHIM</a>
 or
@@ -895,7 +892,7 @@ Mom&#8217;s default paragraph leading (document leading)
 is 16 points, adjusted to fill the page.
 </p>
 
-<h4 id="pp-just-quad" class="docs" style="margin-top: -.25em;">5. Justification/quad</h4>
+<h4 id="pp-just-quad" class="docs" style="margin-top: -.25em;">5. Justification / quad</h4>
 
 <p>
 The justification/quad-direction of regular text paragraphs (i.e.
@@ -1007,12 +1004,12 @@ that run to more than one paragraph.
 
 <p>
 If you wish to have first paragraphs indented, invoke the macro
-<kbd>.INDENT_FIRST_PARAS</kbd> without an argument, either before or
-after
+INDENT_FIRST_PARAS without an argument, either before or after
 <a href="docprocessing.html#start">START</a>.
 INDENT_FIRST_PARAS is a toggle macro, therefore passing it any
-argument (<b>OFF, QUIT, Q, X</b>...) cancels its effect, meaning
-that first paragraphs will once again not be indented.
+argument (<kbd>OFF</kbd>, <kbd>QUIT</kbd>, <kbd>Q</kbd>,
+<kbd>X</kbd>...) cancels its effect, meaning that first paragraphs
+will once again not be indented.
 </p>
 
 <h4 id="pp-space" class="docs">8. Inter-paragraph spacing</h4>
@@ -1020,11 +1017,12 @@ that first paragraphs will once again not be indented.
 <p>
 By default, mom does not insert a blank line between
 paragraphs.  If you would like her to do so, invoke the macro
-<kbd>.PARA_SPACE</kbd> without an argument, either before or after
+PARA_SPACE without an argument, either before or after
 <a href="docprocessing.html#start">START</a>.
 PARA_SPACE is a toggle macro, therefore passing it any argument
-(<b>OFF, QUIT, Q, X</b>...) cancels its effect, meaning that
-paragraphs will once again not be separated by a blank line.
+(<kbd>OFF</kbd>, <kbd>QUIT</kbd>, <kbd>Q</kbd>, <kbd>X</kbd>...)
+cancels its effect, meaning that paragraphs will once again not be
+separated by a blank line.
 </p>
 
 <p>
@@ -1105,11 +1103,12 @@ expect the blank line to appear.
 </ul>
 
 <p>
-Heads, subheads, and deeper levels of section headings are handled by 
-a single macro HEADING to which you pass an argument stating the
-desired level.  <kbd>.HEADING 1 &quot;&lt;text&gt;&quot;</kbd>, for
-example, would be a main head; <kbd>.HEADING 2
-&quot;&lt;text&gt;&quot;</kbd> would be a subhead; etc.
+Heads, subheads, and deeper levels of section headings are
+handled by a single macro, HEADING, to which you pass an
+argument stating the desired level. <kbd><nobr>.HEADING 1
+&quot;&lt;text&gt;&quot;</nobr></kbd>, for example, would be a main
+head; <kbd><nobr>.HEADING 2 &quot;&lt;text&gt;&quot;</nobr></kbd>
+would be a subhead; etc.
 </p>
 
 <p>
@@ -1140,7 +1139,7 @@ By default, a blank line precedes headings, regardless of the level.
 Mom initially sets up a very basic style for nine levels of heading,
 of which you can have an infinite number, although as has been said,
 if you need more than four levels of heading, you should consider
-re-organizing your material.  The pared-down style of mom&#8217;s
+re-organising your material.  The pared-down style of mom&#8217;s
 defaults is intentional; it is expected that you will design
 headings to your own specifications with the
 <a href="definitions.html#controlmacro">control macro</a>,
@@ -1338,7 +1337,7 @@ which may be given in any order:
 <p>
 You may enter your entire argument list on a single line, or, if it
 is very long, break it into shorter lines with the
-&#8220;line-continued&#8221; backslash {<kbd>\</kbd>), as shown
+&#8220;line-continued&#8221; backslash (<kbd>\</kbd>), as shown
 above.
 </p>
 
@@ -1468,7 +1467,7 @@ Macro: <b>PREFIX_CHAPTER_NUMBER</b> <kbd class="macro-args">&lt;none&gt; | &lt;c
 
 <p>
 If, in addition to numbering heads, you want mom to prepend the
-chapter number, invoke <kbd>PREFIX_CHAPTER_NUMBER</kbd>.
+chapter number, invoke <kbd>.PREFIX_CHAPTER_NUMBER</kbd>.
 </p>
 
 <p>
@@ -1531,11 +1530,11 @@ numbered head element of each collated document).
 
 <p>
 PREFIX_CHAPTER_NUMBER can be disabled by passing it any argument
-other than a digit (e.g. <b>OFF, QUIT, END, X</b>, etc), although,
-as noted above, mom will keep, and&mdash;in the case of collated
-documents&mdash;increment the chapter number, allowing you to turn
-prefixing of chapter numbers to numbered head elements off and on
-according to your needs or whims.
+other than a digit (e.g. (<kbd>OFF</kbd>, <kbd>QUIT</kbd>, <kbd>Q</kbd>,
+<kbd>X</kbd>...), although, as noted above, mom will keep,
+and&mdash;in the case of collated documents&mdash;increment the
+chapter number, allowing you to turn prefixing of chapter numbers to
+numbered head elements off and on according to your needs or whims.
 </p>
 
 <div class="box-tip">
@@ -1918,7 +1917,7 @@ The second argument is the number of times to repeat the character.
 </p>
 
 <p>
-The third argument is a +|-value by which to raise (+) or lower (-)
+The third argument is a +|-value by which to raise (-) or lower (+)
 the character in order to make it appear visually centred between
 sections of text.  This lets you make vertical adjustments to
 characters that don&#8217;t sit on the
@@ -1939,7 +1938,7 @@ Mom&#8217;s default for LINEBREAK_CHAR is
 <span class="pre-in-pp">
   .LINEBREAK_CHAR * 3 -3p
 </span>
-ie three asterisks, lowered 3 points from their normal vertical
+i.e. three asterisks, raised 3 points from their normal vertical
 position (for
 <a href="docprocessing.html#printstyle">PRINTSTYLE <kbd>TYPESET</kbd></a>;
 the vertical adjustment is -2 points for
@@ -2075,11 +2074,11 @@ The text of quotes and blockquotes is output immediately, and may therefore
 start on one page and finish on the next.  If you wish to keep the
 text together as a block, deferred to the following page if the
 block doesn&#8217;t all fit on one page, wrap
-(BLOCK)QUOTE&nbsp;/&nbsp;(BLOCK)QUOTE&nbsp;OFF
+<kbd><nobr>(BLOCK)QUOTE...(BLOCK)QUOTE&nbsp;OFF</nobr></kbd>
 inside a
-<a href="images.html#floats-intro">float</a>.  If you further wish to
-force a page break before the floated quote or blockquote (leaving
-whitespace at the bottom of the page, pass
+<a href="images.html#floats-intro">float</a>.
+If you further wish to force a page break before the floated quote
+or blockquote (leaving whitespace at the bottom of the page, pass
 <a href="images.html#float">FLOAT</a>
 the <kbd>FORCE</kbd> argument.
 <span class="pre-in-pp">
@@ -2102,7 +2101,9 @@ Quotes and blockquotes may be labelled and/or captioned identically to
 with the macros
 <a href="images.html#label">LABEL</a>
 and
-<a href="images.html#caption">CAPTION</a>.
+<a href="images.html#caption">CAPTION</a>
+(see
+<a href="images.html#float-label-caption">Labelling and captioning floats</a>).
 </p>
 
 <!-- -QUOTE- -->
@@ -2251,7 +2252,8 @@ below quotes, invoke
 with no argument.  If you wish to restore mom&#8217;s
 default behaviour regarding the spacing of quotes (see
 <a href="#quote-spacing">Quote spacing</a>),
-invoke the macro with any argument (<kbd>OFF, QUIT, END, X</kbd>...)
+invoke the macro with any argument (<kbd>OFF</kbd>, <kbd>QUIT</kbd>,
+<kbd>END</kbd>, <kbd>X</kbd>...)
 </p>
 
 <div class="box-tip">
@@ -2268,10 +2270,10 @@ This macro also sets mom&#8217;s spacing policy for
 By default in
 <a href="docprocessing.html#printstyle">PRINTSTYLE TYPEWRITE</a>,
 mom underlines quotes.  If you&#8217;d rather she didn&#8217;t,
-invoke <kbd>.UNDERLINE_QUOTES</kbd> with any argument (<b>OFF,
-QUIT, END, X</b>...) to disable the feature.  Invoke it without
-an argument to restore mom&#8217;s default underlining of
-quotes.
+invoke <kbd>.UNDERLINE_QUOTES</kbd> with any argument
+(<kbd>OFF</kbd>, <kbd>QUIT</kbd>, <kbd>END</kbd>, <kbd>X</kbd>...)
+to disable the feature.  Invoke it without an argument to restore
+mom&#8217;s default underlining of quotes.
 </p>
 
 <p>
@@ -2280,7 +2282,7 @@ she set them in italic, you must follow each instance of QUOTE with
 the typesetting macro
 <a href="typesetting.html#font">FT I</a>.
 Furthermore, since mom underlines all instances of italics by
-default in <b>PRINTSTYLE TYPEWRITE</b>, you must also make sure that
+default in PRINTSTYLE&nbsp;TYPEWRITE, you must also make sure that
 ITALIC_MEANS_ITALIC is enabled (see
 <a href="docprocessing.html#typewrite-control">PRINTSTYLE TYPEWRITE control macros</a>).
 </p>
@@ -2397,7 +2399,7 @@ space allotted for it, you&#8217;d do
 <span class="note">Note:</span>
 The aliases CITE and CITATION may be used in place of the BLOCKQUOTE
 tag, as well as in any of the control macros that begin or end with
-<kbd>BLOCKQUOTE_</kbd>.
+BLOCKQUOTE_.
 </p>
 </div>
 
@@ -2438,7 +2440,7 @@ using BLOCKQUOTE_STYLE.
 <kbd>BLOCKQUOTE_INDENT</kbd> takes one of two kinds of argument: an
 integer representing the amount by which to multiply the argument
 passed to
-<a href="#para-indent"><kbd>.PARA_INDENT</kbd></a>
+<a href="#para-indent">PARA_INDENT</a>
 (by default, 2
 <a href="definitions.html#em">ems</a>
 for TYPESET, 3
@@ -2460,7 +2462,7 @@ and 1 (for
 <p class="tip">
 <span class="note">Note:</span>
 If your PARA_INDENT is 0 (i.e. no indenting of the first line of
-paragraphs), you <i>must</i> set a BLOCKQUOTE_INDENT yourself, with
+paragraphs), you must set a BLOCKQUOTE_INDENT yourself, with
 a unit of measure appended to the argument.  Mom has no default for
 BLOCKQUOTE_INDENT if paragraph first lines are not being indented.
 </p>
@@ -2480,8 +2482,8 @@ below blockquotes, invoke
 with no argument.  If you wish to restore mom&#8217;s default
 behaviour regarding the spacing of blockquotes (see
 <a href="#quote-spacing">Quote spacing</a>),
-invoke the macro with any argument (<b>OFF, QUIT, END,
-X</b>...).
+invoke the macro with any argument (<kbd>OFF</kbd>, <kbd>QUIT</kbd>,
+<kbd>END</kbd>, <kbd>X</kbd>...).
 </p>
 
 <div class="box-tip">
@@ -2523,8 +2525,9 @@ Inline escape: <b><kbd>\*[CODE]</kbd></b>
 </p>
 
 <p>
-When you invoke the macro <kbd>.CODE</kbd> or insert <kbd>\*[CODE]</kbd> into
-running text, mom switches to a
+When you invoke the macro CODE or insert
+<kbd><nobr>\*[CODE]</nobr></kbd> into running text, mom switches to
+a
 <a href="definitions.html#fixedwidthfont">fixed-width font</a>
 (Courier, by default) and turns
 <a href="goodies.html#smartquotes">SMARTQUOTES</a>
@@ -2613,32 +2616,32 @@ introducing unwanted vertical whitespace.
 
 <p>
 Passing any argument other than <kbd>BR</kbd>, <kbd>BREAK</kbd> or
-<kbd>SPREAD</kbd> to CODE (e.g. <kbd>OFF, QUIT, END, X,</kbd> etc.)
-turns CODE off and returns the family, font, and smartquotes back to
-their former state.
+<kbd>SPREAD</kbd> to CODE (e.g. <kbd>OFF</kbd>, <kbd>QUIT</kbd>,
+<kbd>END</kbd>, <kbd>X</kbd>, etc) turns CODE off and returns the
+family, font, and smartquotes back to their former state.
 </p>
 
 <h4 class="docs" style="font-size: 102%">Using <kbd>\*[CODE]</kbd> inline</h4>
 
 <p>
-<kbd>\*[CODE]</kbd> invokes <kbd>.CODE</kbd>, allowing you to
+<kbd><nobr>\*[CODE]</nobr></kbd> invokes <kbd>.CODE</kbd>, allowing you to
 bracket code snippets inline.  It does not accept the <kbd>BR</kbd>,
 <kbd>BREAK</kbd>, or <kbd>SPREAD</kbd> arguments.  It is most useful
 for short snippets, as in the following example.
 <br/>
 <span class="pre-in-pp">
-  \*[CODE]apropos\*[CODE OFF] and \*[CODE]man&nbsp;-k\*[CODE] are identical.
+  \*[CODE]apropos\*[CODE X] and \*[CODE]man&nbsp;-k\*[CODE X] are identical.
 </span>
 </p>
 
 <p>
-<kbd>\*[CODE]</kbd> does not permit changing the escape character,
-so <kbd>\e</kbd> or a doubled backslash must be used.  Furthermore,
-if your code starts with a period, you must enter it as
+<kbd><nobr>\*[CODE]</nobr></kbd> does not permit changing the escape
+character, so <kbd>\e</kbd> or a doubled backslash must be used.
+Furthermore, if your code starts with a period, you must enter it as
 &#8220;<kbd>\&.</kbd>&#8221;.
 <br/>
 <span class="pre-in-pp">
-  Registers are created with the \*[CODE]\&.nr\*[CODE OFF] request.
+  Registers are created with the \*[CODE]\&.nr\*[CODE X] request.
 </span>
 </p>
 
@@ -2662,10 +2665,10 @@ it with
   .CODE OFF
   \&.  As this demonstrates...
 </span>
-Use of <kbd>\*[CODE]</kbd> inline does not require the
-<kbd>\c</kbd>, however periods and apostrophes after
-<kbd>\*[CODE&nbsp;OFF]</kbd> still need to be introduced with
-<kbd>\&</kbd>, as in this example:
+Use of <kbd><nobr>\*[CODE]</nobr></kbd> inline does not require
+the <kbd>\c</kbd>, however periods and apostrophes after
+<kbd><nobr>\*[CODE&nbsp;X]</nobr></kbd> still need to be introduced
+with <kbd>\&</kbd>, as in this example:
 <br/>
 <span class="pre-in-pp">
   ...append the unit of measure \*[CODE]p\*[CODE&nbsp;OFF]\&. New sentence...
@@ -2711,7 +2714,7 @@ CODE_SIZE works a little differently from the other _SIZE macros
 macros</a>).  The argument you pass it is a percentage of the
 prevailing document point size.  It does not require a pre-pended
 plus (<kbd>+</kbd>) or minus (<kbd>-</kbd>) sign, nor an appended
-percent sign (<kbd>%</kbd>).  Thus, is you want the point size of your CODE font to be
+percent sign (<kbd>%</kbd>).  Thus, if you want the point size of your CODE font to be
 90% of the prevailing document point size, you enter:
 <br/>
 <span class="pre-in-pp">
@@ -2725,9 +2728,9 @@ technically the same point size.  CODE_SIZE lets you choose a
 percentage of the prevailing point size for your fixed-width
 CODE font so it doesn&#8217;t look gangly or minuscule in relation
 to the type around it.  All invocations of <kbd>.CODE</kbd> or
-<kbd>\*[CODE]</kbd> will use this size, so that if you decide to
-change the prevailing point size of your document, the CODE font
-will be scaled proportionally.
+<kbd><nobr>\*[CODE]</nobr></kbd> will use this size, so that if you
+decide to change the prevailing point size of your document, the
+CODE font will be scaled proportionally.
 </p>
 
 <div class="rule-short"><hr/></div>
@@ -2757,7 +2760,8 @@ Setting lists with mom is easy.  First, you initialize a list with
 the LIST macro.  Then, for every item in the list, you invoke
 the macro <kbd>.ITEM</kbd> followed by the text of the item.
 When a list is finished, you exit the list with
-<kbd>.LIST&nbsp;OFF</kbd> (or <kbd>QUIT, END, BACK,</kbd> etc.)
+<kbd>.LIST&nbsp;OFF</kbd> (or <kbd>QUIT</kbd>, <kbd>END</kbd>,
+<kbd>BACK</kbd>, etc.)
 </p>
 
 <p>
@@ -2765,7 +2769,7 @@ By default mom starts each list with the enumerator flush with the
 left margin of running text that comes before it, like this:
 <br/>
 <span class="pre-in-pp">
-  My daily schedule needs organizing.  I can&#8217;t
+  My daily schedule needs organising.  I can&#8217;t
   seem to get everything done I want.
   o an hour&#8217;s worth of exercise
   o time to prepare at least one healthy
@@ -2873,7 +2877,7 @@ The optional arguments <kbd>BULLET</kbd>, <kbd>DASH</kbd>,
 uppercase letters), <kbd>alpha</kbd> (for lowercase letters),
 <kbd>ROMAN&lt;n&gt;</kbd> (for uppercase roman numerals),
 <kbd>roman&lt;n&gt;</kbd> (for lowercase roman numerals) tell
-<kbd>mom</kbd> what kind of enumerator to use for a given list.
+mom what kind of enumerator to use for a given list.
 </p>
 
 <p>
@@ -2967,7 +2971,7 @@ The size and vertical positioning of special characters may be
 adjusted with
 <a href="definitions.html#inlines">inline escapes</a>
 in the argument passed to USER.  For example, to raise the position
-of <kbd>\[sq]</kbd> slightly, you might do
+of <kbd><nobr>\[sq]</nobr></kbd> slightly, you might do
 <span class="pre-in-pp">
   .LIST USER "\*[UP .25p]\[sq]\*[DOWN .25p]"
     or
@@ -3072,7 +3076,7 @@ which would produce
 </p>
 </div>
 
-<h3 class="docs">Exiting lists &ndash; LIST OFF/BACK or QUIT_LISTS</h3>
+<h3 class="docs">Exiting lists &ndash; LIST OFF / BACK or QUIT_LISTS</h3>
 
 <p>
 Any single argument to <kbd>LIST</kbd> other than
@@ -3259,12 +3263,12 @@ produces (approximately)
 <span class="pre-in-pp">
   Lorem ipsum dolor sit amet, consetetur sadipscing elitr,
   sed diam nonumy eirmod tempor invidunt ut labore.
-      o List 1 item
-      o List 1 item
+      &bull; List 1 item
+      &bull; List 1 item
           - List 2 item
           - List 2 item
-      o List 1 item
-      o List 1 item
+      &bull; List 1 item
+      &bull; List 1 item
   Lorem ipsum dolor sit amet, consetetur sadipscing elitr,
   sed diam nonumy eirmod tempor invidunt ut labore.
 </span>
@@ -3273,7 +3277,7 @@ produces (approximately)
 <h4 id="reset-list" class="docs" style="margin-top: -.25em;">2. Resetting an initialized list&#8217;s enumerator &ndash; RESET_LIST</h4>
 
 <p>
-In nested lists, if your choice of list enumerator for a given level
+In nested lists, if your choice of enumerator for a given level
 of list is <kbd>DIGIT</kbd>, <kbd>ALPHA</kbd>, <kbd>alpha</kbd>,
 <kbd>ROMAN</kbd> or <kbd>roman</kbd>, you may sometimes want to
 reset the list&#8217;s enumerator when you return to that list.
@@ -3281,37 +3285,34 @@ Consider the following:
 <br/>
 <span class="pre-in-pp">
   Things to do religiously each and every day:
-  1. Take care of the dog
-     a) walk every day
-     b) brush once a week
-        - trim around the eyes every fourth brushing
-        - don&#8217;t forget to check nails
-  2. Feed the cat
-     a) soft food on Mon., Wed. and Fri.
-     b) dry food on Tues., Thurs. and Sat.
-     c) canned tuna on Sunday
+  &bull; take care of the dog
+    a) walk every day
+    b) brush once a week
+       - trim around the eyes every fourth brushing
+       - don&#8217;t forget to check nails
+  &bull; feed the cat
+    d) soft food on Mon., Wed. and Fri.
+    e) dry food on Tues., Thurs. and Sat.
+    f) canned tuna on Sunday
 </span>
 </p>
 
 <p>
-Normally, within a nested list, when you return to an
-incrementally-enumerated list, the enumerator continues incrementing
-from where it left off.  That means, in the example above, the
-normal state of affairs for the alpha&#8217;ed list under
-<br/>
-<span class="pre-in-pp">
-  2.  Feed the cat
-</span>
-would be d), e) and f).  The solution, in such a case, is simply
-to reset the enumerator&mdash;before <kbd>.ITEM</kbd>&mdash;with
-the macro <kbd>.RESET_LIST</kbd>.  By default, with no argument,
-<kbd>.RESET_LIST</kbd> resets the enumerator to 1, A, a, I or i
-depending on the style of enumerator.  You may, if you wish, pass
-<kbd>.RESET_LIST</kbd> a
-<a href="definitions.html#numericargument">numeric argument</a>
-representing the starting enumerator for the reset (if different
-from "1"), although I can&#8217;t at present think of a use for this
-feature.
+The alpha-enumerated items under &#8220;Feed the cat&#8221;
+would be normally a), b), c), but we want d), e), f).  The
+solution is to reset the second <kbd>.LIST alpha</kbd>&#8217;s
+enumerator&mdash;before the first <kbd>.ITEM</kbd>&mdash;with
+the macro RESET_LIST.
+</p>
+
+<p>
+With no argument, <kbd>.RESET_LIST</kbd> resets an incrementing
+enumerator to 1, A, a, I or i depending on the style of enumerator.
+If you pass <kbd>.RESET_LIST</kbd> a
+<a href="definitions.html#numericargument">numeric argument</a>,
+it represents the starting postion for an incrementing enumerator.  In
+the example above, <kbd>.RESET_LIST 4</kbd>&nbsp;starts the second
+alpha-ed list at d).
 </p>
 
 <h4 id="pad-list-digits" class="docs" style="margin-top: -.25em;">3. Padding digit enumerators &ndash; PAD_LIST_DIGITS</h4>
@@ -3456,7 +3457,7 @@ for instructions on line-numbered endnotes.)
 <div class="box-tip">
 <p class="tip">
 <span class="note">Note:</span>
-Do not use <kbd>NUMBER_LINES</kbd> inside 
+Do not use NUMBER_LINES inside 
 <a href="#quote">QUOTE</a>
 or
 <a href="#blockquote">BLOCKQUOTE</a>.
@@ -3476,8 +3477,8 @@ The first time you invoke
 you must, at a minimum, tell it what line number you want the
 <i>next</i>
 <a href="definitions.html#outputline">output line</a>
-to have.  The optional arguments <kbd>which lines to number</kbd>
-and <kbd>gutter</kbd> allow you to state which lines should
+to have.  The optional arguments <kbd>&lt;which lines to number&gt;</kbd>
+and <kbd>&lt;gutter&gt;</kbd> allow you to state which lines should
 be numbered (e.g. every five or every ten lines), and the gutter to
 place between line numbers and
 <a href="definitions.html#running">running text</a>.
@@ -3494,7 +3495,7 @@ subsequent output lines sequentially.
 
 <p>
 If you want only every five lines numbered, pass mom the optional
-<kbd>which lines to number</kbd> argument, like this:
+<kbd>&lt;which lines to number&gt;</kbd> argument, like this:
 <span class="pre-in-pp">
   .NUMBER_LINES 1 5
 </span>
@@ -3511,15 +3512,16 @@ Hence, in the above example, line number <kbd>1</kbd> will
 </p>
 
 <p>
-If you want line number <kbd>1</kbd> to be numbered, you have to
-invoke <kbd>.NUMBER_LINES 1 1</kbd> before the first output line
-you want numbered, then study your <i>output</i> copy and determine
-where best to insert the following in your <i>input</i> input text:
+If you want line number <kbd>1</kbd> to be numbered, you have
+to invoke <kbd><nobr>.NUMBER_LINES 1 1</nobr></kbd> before the
+first output line you want numbered, then study your <i>output</i>
+copy and determine where best to insert the following in your
+<i>input</i> text:
 <br/>
 <span class="pre-in-pp">
   .NUMBER_LINES \n[ln] 5
 </span>
-(The escape, <kbd>\n[ln]</kbd>, ensures that NUMBER_LINES
+(The escape <kbd>\n[ln]</kbd> ensures that NUMBER_LINES
 automatically supplies the correct value for the first argument,
 <kbd>&lt;start number&gt;</kbd>.)
 </p>
@@ -3571,7 +3573,7 @@ option to resume, using
 <span class="pre-in-pp">
   .NUMBER_LINES&nbsp;OFF
 </span>
-(or <kbd>END, QUIT, X,</kbd> etc).
+(or <kbd>END</kbd>, <kbd>QUIT</kbd>, <kbd>X</kbd>, etc).
 </p>
 
 <p>To resume line numbering:
@@ -3600,7 +3602,7 @@ desired result.
       you should re-invoke, at a minimum,
       <kbd>.NUMBER_LINES&nbsp;1</kbd> for each collated
       document, in order to ensure that each begins with the
-      number, <kbd>1</kbd>, prepended to the first line.
+      number <kbd>1</kbd> prepended to the first line.
   </li>
   <li style="margin-top: .25em;">Occasionally, you may want to
       change the current gutter between line numbers and running
@@ -3704,27 +3706,25 @@ or
 <span class="pre-in-pp">
   .NUMBER_BLOCKQUOTE_LINES
 </span>
-either before or after <kbd>NUMBER_LINES</kbd>.  Both behave
-identically with respect to the affected macro (i.e. <kbd>QUOTE</kbd>
-or <kbd>BLOCKQUOTE</kbd>).
+either before or after NUMBER_LINES. Both behave identically with
+respect to the affected macro (i.e. QUOTE or BLOCKQUOTE).
 </p>
 
 <h5 id="number-quote-lines-selective" class="docs" style="font-size: 87%">&bull;&nbsp;Selectively enabling line numbering for QUOTEs and BLOCKQUOTEs</h5>
 
 <p>
-If you&#8217;d like to enable line numbering
-selectively for quotes and blockquotes <i>only</i>, enable
-<kbd>NUMBER_QUOTE_LINES</kbd> or <kbd>NUMBER_BLOCKQUOTE_LINES</kbd>
-first, followed by <kbd>NUMBER_LINES&nbsp;&lt;n&gt;</kbd>, where
-<kbd>&lt;n&gt;</kbd> is the first line number of the quote
-or blockquote.  Afterwards, enter your <kbd>QUOTE</kbd> or
-<kbd>BLOCKQUOTE</kbd>.  When the quote or blockquote is finished (i.e.
-after <kbd>QUOTE&nbsp;OFF</kbd> or <kbd>BLOCKQUOTE&nbsp;OFF</kbd>),
-turn line numbering off.  Each subsequent quote or blockquote you
-want line numbered requires only <kbd>NUMBER_LINES &lt;n&gt;</kbd>
-(with a corresponding <kbd>NUMBER_LINES OFF</kbd>) until you turn
-<kbd>NUMBER_QUOTE_LINES</kbd> or <kbd>NUMBER_BLOCKQUOTE_LINES</kbd>
-off.
+If you&#8217;d like to enable line numbering selectively for quotes
+and blockquotes <i>only</i>, invoke <kbd>.NUMBER_QUOTE_LINES</kbd>
+or <kbd>.NUMBER_BLOCKQUOTE_LINES</kbd> first, followed by
+<kbd>.NUMBER_LINES&nbsp;&lt;n&gt;</kbd>, where <kbd>&lt;n&gt;</kbd>
+is the first line number of the quote or blockquote.  Afterwards,
+enter your QUOTE or BLOCKQUOTE.  When the quote or blockquote
+is finished (i.e. after <kbd>.QUOTE&nbsp;OFF</kbd> or
+<kbd>.BLOCKQUOTE&nbsp;OFF</kbd>), turn line numbering off.  Each
+subsequent quote or blockquote you want line numbered requires
+only <kbd>.NUMBER_LINES &lt;n&gt;</kbd> (with a corresponding
+<kbd>.NUMBER_LINES OFF</kbd>) until you turn NUMBER_QUOTE_LINES or
+NUMBER_BLOCKQUOTE_LINES off.
 </p>
 
 <p>
@@ -3759,13 +3759,13 @@ or blockquotes to hang outside a document&#8217;s overall left
 margin and be reliably flush with the line numbers of paragraph
 text.  Consequently, line numbers in quotes or blockquotes hang
 to the left of the quote, separated by the currently active
-gutter for <kbd>NUMBER_LINES</kbd>.
+gutter for NUMBER_LINES.
 </p>
 
 <p>
-If you&#8217;d like to change the line number gutter for
-quotes or blockquotes, invoke <kbd>NUMBER_QUOTE_LINES</kbd> or
-<kbd>NUMBER_BLOCKQUOTE_LINES</kbd> with a digit representing the
+If you&#8217;d like to change the line number gutter for quotes
+or blockquotes, invoke <kbd>.NUMBER_QUOTE_LINES</kbd> or
+<kbd>.NUMBER_BLOCKQUOTE_LINES</kbd> with a digit representing the
 number of
 <a href="definitions.html#figurespace">figure spaces</a>
 you&#8217;d like between the line numbers and the quoted text, like this:
@@ -3798,8 +3798,8 @@ appear in the output copy.
 </p>
 
 <p>
-Once having turned <kbd>NUMBER_QUOTE_LINES</kbd> or
-<kbd>NUMBER_BLOCKQUOTE_LINES</kbd> on, you may disable them with
+Once having turned NUMBER_QUOTE_LINES or NUMBER_BLOCKQUOTE_LINES on,
+you may disable them with
 <span class="pre-in-pp">
   .NUMBER_QUOTE_LINES OFF
 </span>
@@ -3952,7 +3952,8 @@ the page the deferred ones were moved to, add the space manually by
 putting a
 <a href="typesetting.html#space"><kbd>.SPACE</kbd></a>
 command at the end of the footnote text, before
-<kbd>.FOOTNOTE&nbsp;OFF</kbd> (or <kbd>X, QUIT, EXIT</kbd>, etc).
+<kbd>.FOOTNOTE&nbsp;OFF</kbd> (or <kbd>OFF</kbd>, <kbd>QUIT</kbd>,
+<kbd>END</kbd>, <kbd>X</kbd>, etc).
 </p>
 
 <p>
@@ -4084,8 +4085,9 @@ for fill modes.
 In the second instance, you must explicitly tell mom that
 you want input text after <kbd>.FOOTNOTE&nbsp;OFF</kbd> to
 begin on a new output line.  This is accomplished by passing
-<kbd>.FOOTNOTE&nbsp;OFF</kbd> (or <kbd>QUIT, END, X,</kbd> etc) an
-additional argument: <kbd>BREAK</kbd> or <kbd>BR</kbd>.
+<kbd>.FOOTNOTE&nbsp;OFF</kbd> (or <kbd>OFF</kbd>, <kbd>QUIT</kbd>,
+<kbd>END</kbd>, <kbd>X</kbd>, etc) an additional argument:
+<kbd>BREAK</kbd> or <kbd>BR</kbd>.
 </p>
 
 <p>
@@ -4165,7 +4167,7 @@ you insert footnotes into quotes.
 </div>
 
 <div class="box-macro-args">
-Tag: FOOTNOTE <kbd class="macro-args">&lt;toggle&gt; [ BREAK | BR ] | INDENT LEFT | RIGHT | BOTH &lt;indent value&gt;</kbd>
+Tag: FOOTNOTE <kbd class="macro-args">&lt;toggle&gt; [ BREAK | BR ] [ INDENT LEFT | RIGHT | BOTH &lt;indent value&gt; ]</kbd>
 </div>
 
 <p class="requires">
@@ -4177,8 +4179,9 @@ See <span style="font-style: normal"><a href="#footnote-note">HYPER-IMPORTANT NO
 <p>
 FOOTNOTE is a toggle macro, therefore invoking it on a line by
 itself allows you to enter a footnote in the body of a document.
-Invoking it with any argument other than INDENT (i.e. <kbd>OFF,
-QUIT, END, X...</kbd>) tells mom you&#8217;re finished.
+Invoking it with any argument other than <kbd>INDENT</kbd> (i.e.
+<kbd>OFF</kbd>, <kbd>QUIT</kbd>, <kbd>END</kbd>, <kbd>X</kbd>...)
+tells mom you&#8217;re finished.
 </p>
 
 <p>
@@ -4238,9 +4241,10 @@ explanation and examples
 In
 <a href="definitions.html#filled">no-fill</a>
 modes, the optional argument <kbd>BREAK</kbd> or <kbd>BR</kbd> may
-be used after the <kbd>OFF</kbd> (or <kbd>QUIT, END, X,</kbd> etc.)
-argument to instruct mom not to join the next input line to the
-previous output.  See
+be used after the <kbd>OFF</kbd> (or <kbd>OFF</kbd>,
+<kbd>QUIT</kbd>, <kbd>END</kbd>, <kbd>X</kbd>, etc) argument to
+instruct mom not to join the next input line to the previous output.
+See
 <a href="#fn-and-punct-nofill">here</a>
 for a more complete explanation, with examples.
 </p>
@@ -4304,13 +4308,13 @@ using FOOTNOTE_STYLE.
 <h4 id="footnote-markers" class="docs" style="margin-top: -1.25em;">2. Footnote markers &ndash; FOOTNOTE_MARKERS</h4>
 
 <p>
-If you don&#8217;t want footnote markers, in either the body of
+If you don&#8217;t want footnote markers in either the body of
 the document or beside footnote entries themselves, toggle them
-off with <kbd>.FOOTNOTE_MARKERS&nbsp;OFF</kbd> (or <kbd>END, QUIT,
-X</kbd>...).  This means, of course, that you&#8217;ll
-have to roll your own.  If you want them back on, invoke
-<kbd>.FOOTNOTE_MARKERS</kbd> with no argument.  Footnote markers are
-on by default.
+off with <kbd>.FOOTNOTE_MARKERS&nbsp;OFF</kbd> (or <kbd>OFF</kbd>,
+<kbd>QUIT</kbd>, <kbd>END</kbd>, <kbd>X</kbd>...).  This means,
+of course, that you&#8217;ll have to roll your own.  If you want
+them back on, invoke <kbd>.FOOTNOTE_MARKERS</kbd> with no argument.
+Footnote markers are on by default.
 </p>
 
 <p>
@@ -4422,22 +4426,27 @@ footnotes either by single line numbers, or line ranges.  If
 what you want is a single line number, you need only invoke
 <kbd>.FOOTNOTE</kbd>, <i>without the terminating</i> <kbd>\c</kbd>,
 at the appropriate place in running text.  Input lines after the
-footnote has been terminated (e.g. with <kbd>.FOOTNOTE OFF</kbd>)
-must begin at the left margin.
+footnote has been terminated (e.g. with
+<kbd>.FOOTNOTE&nbsp;OFF</kbd>) are entered normally.
 </p>
 
 <p>
 If you want a range of line numbers (e.g.&nbsp;[5-11]&nbsp;),
-insert, directly into the first line of the range you want,
-the <a href="definitions.html#inlines">inline escape</a>,
-<kbd>\*[FN_MARK]</kbd>.  For the terminating line number of the
-range, you need only invoke <kbd>.FOOTNOTE</kbd> (again, without the
-terminating <kbd>\c</kbd>); mom is smart enough to figure out that
-where <kbd>.FOOTNOTE</kbd> was invoked represents the terminating
-line number.  Range-numbered footnotes are always output on the
-page where <kbd>.FOOTNOTE</kbd> was invoked, not the page where
-<kbd>\*[FN_MARK]</kbd> appears (subject, of course, to the rules for
-footnotes that fall too close to the bottom of a page, as outlined
+insert, directly into the first line of the range you want, the
+<a href="definitions.html#inlines">inline escape</a>,
+<kbd><nobr>\*[FN_MARK]</nobr></kbd>.  For the terminating line
+number of the range, you need only invoke <kbd>.FOOTNOTE</kbd>
+(again, without the terminating <kbd>\c</kbd>); mom is smart enough
+to figure out that where <kbd>.FOOTNOTE</kbd> was invoked represents
+the terminating line number.
+</p>
+
+<p>
+Range-numbered footnotes are always output on the page
+where <kbd>.FOOTNOTE</kbd> was invoked, not the page where
+<kbd><nobr>\*[FN_MARK]</nobr></kbd> appears (subject, of course, to
+the rules for footnotes that fall too close to the bottom of a page,
+as outlined
 <a href="#footnote-rules">here</a>).
 </p>
 
@@ -4585,10 +4594,11 @@ you can accomplish with <kbd>.FOOTNOTE_SPACING&nbsp;1v</kbd>.
 <h4 id="footnote-rule" class="docs" style="margin-top: -.25em;">7. Footnote rule &ndash; FOOTNOTE_RULE</h4>
 
 <p>
-If you don&#8217;t want a footnote separator rule, toggle it off with
-<kbd>.FOOTNOTE_RULE&nbsp;OFF</kbd> (or <kbd>END, QUIT, X</kbd>...).
-Toggle it back on by invoking <kbd>.FOOTNOTE_RULE</kbd> with no
-argument.  The default is to print the rule.
+If you don&#8217;t want a footnote separator rule, toggle it
+off with <kbd>.FOOTNOTE_RULE&nbsp;OFF</kbd> (or <kbd>END</kbd>,
+<kbd>QUIT</kbd>, <kbd>X</kbd>...).  Toggle it back on by invoking
+<kbd>.FOOTNOTE_RULE</kbd> with no argument.  The default is to print
+the rule.
 </p>
 
 <h4 id="footnote-rule-length" class="docs" style="margin-top: -.25em;">8. Footnote rule length &ndash; FOOTNOTE_RULE_LENGTH</h4>
@@ -4850,8 +4860,9 @@ See <span style="font-style: normal"><a href="#endnote-note">HYPER-IMPORTANT NOT
 <p>
 ENDNOTE is a toggle macro, therefore invoking it on a line by itself
 allows you to enter an endnote in the body of a document.  Invoking
-it with any other argument (i.e. <kbd>OFF, QUIT, END, X...</kbd>)
-tells mom that you&#8217;ve finished the endnote.
+it with any other argument (i.e. <kbd>OFF</kbd>, <kbd>QUIT</kbd>,
+<kbd>END</kbd>, <kbd>X</kbd>...) tells mom that you&#8217;ve
+finished the endnote.
 </p>
 
 <div class="box-tip">
@@ -4901,9 +4912,10 @@ endnotes,
 In
 <a href="definitions.html#filled">no-fill</a>
 modes, the optional argument <kbd>BREAK</kbd> or <kbd>BR</kbd> may
-be used after the <kbd>OFF</kbd> (or <kbd>QUIT, END, X,</kbd> etc.)
-argument to instruct mom not to join the next input line to the
-previous output.  See
+be used after the <kbd>OFF</kbd> (or <kbd>OFF</kbd>,
+<kbd>QUIT</kbd>, <kbd>END</kbd>, <kbd>X</kbd>, etc) argument to
+instruct mom not to join the next input line to the previous output.
+See
 <a href="#fn-and-punct-nofill">here</a>
 for a more complete explanation.  The examples are for
 <kbd>.FOOTNOTE</kbd>, but apply equally to <kbd>.ENDNOTE</kbd>.
@@ -5217,7 +5229,7 @@ with no argument.  And if, god help you, you want to change endnote
 single-spacing back to double-spacing for different spacing of
 endnotes output at the ends of separate documents in a collated
 document, invoke <kbd>.SINGLESPACE_ENDNOTES</kbd> with any argument
-(<kbd>OFF, QUIT, Q, X</kbd>...).
+(<kbd>OFF</kbd>, <kbd>QUIT</kbd>, <kbd>END</kbd>, <kbd>X</kbd>...).
 </p>
 
 <!-- -ENDNOTE_PARA_INDENT- -->
@@ -5466,8 +5478,8 @@ default is not to print the centre string.
 <p>
 If, for some reason, having enabled the header/footer centre string
 on endnotes pages, you wish to disable it, invoke the same macro
-with any argument (<kbd>OFF, QUIT, Q, X</kbd>...).
-</p>
+with any argument (<kbd>OFF</kbd>, <kbd>QUIT</kbd>, <kbd>END</kbd>,
+<kbd>X</kbd>...). </p>
 
 <h5 id="endnotes-allows-headers" class="docs" style="margin-top: -.5em; margin-bottom: .5em; margin-left: .5em;">&bull;&nbsp;Allow headers on endnotes pages</h5>
 
@@ -5695,7 +5707,7 @@ title.
 If you&#8217;re generating a table of contents, you may want the
 endnotes pages title to be in caps, but the toc entry in caps/lower
 case.  If the argument to
-<kbd><a href="#endnotes-header-string">ENDNOTES_HEADER_STRING</a></kbd>
+<a href="#endnotes-header-string">ENDNOTES_HEADER_STRING</a>
 is in caps/lower case and ENDNOTES_HEADER_CAPS is on, this is exactly
 what will happen.
 </p>
@@ -5805,11 +5817,11 @@ nothing to prevent you from doing so.)
 If you want a range of line numbers (e.g.&nbsp;[5-11]&nbsp;),
 insert, directly into the first line of the range you want, the
 <a href="definitions.html#inlines">inline escape</a>,
-<kbd>\*[EN-MARK]</kbd>.  For the terminating line number of the
-range, you need only invoke <kbd>.ENDNOTE</kbd> (again, without the
-terminating <kbd>\c</kbd>).  Mom is smart enough to figure out that
-where <kbd>.ENDNOTE</kbd> is invoked represents the terminating line
-number.
+<kbd><nobr>\*[EN-MARK]</nobr></kbd>.  For the terminating line
+number of the range, you need only invoke <kbd>.ENDNOTE</kbd>
+(again, without the terminating <kbd>\c</kbd>).  Mom is smart enough
+to figure out that where <kbd>.ENDNOTE</kbd> is invoked represents
+the terminating line number.
 </p>
 
 <div id="endnote-linenumbers-note" class="box-tip">
@@ -6420,8 +6432,9 @@ argument of <kbd>RIGHT</kbd> will set a right margin note.
 </p>
 
 <p>
-Any argument, such as <kbd>OFF</kbd> (or <kbd>QUIT, END, X</kbd>,
-etc) exits the current margin note.
+Any argument, such as <kbd>OFF</kbd> (or <kbd>OFF</kbd>,
+<kbd>QUIT</kbd>, <kbd>END</kbd>, <kbd>X</kbd>, etc) exits the
+current margin note.
 </p>
 
 <div class="rule-short"><hr/></div>
@@ -6582,7 +6595,7 @@ pre-defined (or &#8220;initialized&#8221;) colour changes the colour
 of both the FINIS string and the em-dashes that surround it.  If you
 use the
 <a href="definitions.html#inline">inline escape</a>,
-<a href="color.html#color-inline"><kbd>\*[&lt;colourname&gt;]</kbd></a>,
+<a href="color.html#color-inline"><kbd><nobr>\*[&lt;colourname&gt;]</nobr></kbd></a>,
 in the argument passed to FINIS, only the text will be in the
 new colour; the em-dashes will be in the default document colour
 (usually black).

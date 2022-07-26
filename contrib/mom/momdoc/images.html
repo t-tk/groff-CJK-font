@@ -307,7 +307,8 @@ sign or unit of measure should be appended.
 <h5 class="docs" style="margin-top: 1em; text-transform: none">ADJUST</h5>
 
 <p>
-<kbd>ADJUST</kbd> lets you raise (<kbd>+</kbd>) or lower (<kbd>-</kbd>) the image
+<kbd>ADJUST</kbd> lets you raise (<kbd>-</kbd>) or lower
+(<kbd>+</kbd>) the image
 <span style="font-style: italic">within the space allotted for it</span>
 by the amount you specify.  This is useful for achieving good
 optical centering between surrounding blocks of type.  A unit of
@@ -421,9 +422,9 @@ is enabled and the document is processed with
 <a href="using.html#pdfmom" style="font-weight: bold">pdfmom</a>,
 the target name can be used to generate the target&#8217;s label
 number in running text if it is entered as a groff string, i.e. of the
-form <kbd>\*[name]</kbd>.  For example, if you create a target named
-&#8220;foo&#8221; for a pdf image whose autolabel number would be 3,
-entering
+form <kbd><nobr>\*[name]</nobr></kbd>.  For example, if you create
+a target named &#8220;foo&#8221; for a pdf image whose autolabel
+number would be 3, entering
 <br/>
 <span class="pre-in-pp">
   See
@@ -723,7 +724,28 @@ or
 </div>
 
 <div class="box-macro-args">
-Macro: <b>FLOAT</b> <kbd class="macro-args">[ ADJUST +|-&lt;amount&gt; ] [ FORCE ] [ SPAN ] [ INDENT &lt;value&gt; ] [ CENTER ] [ RIGHT ] [ NO_SHIM] [ NO_FLEX ] | TARGET "&lt;name&gt;" | &lt;anything&gt;</kbd>
+Macro: <b>FLOAT</b> <kbd class="macro-args">&lt;arguments&gt; | &lt;anything&gt;
+<br/>
+Arguments:
+<br/>
+[ ADJUST +|-&lt;amount&gt; ] \
+<br/>
+[ FORCE ] \
+<br/>
+[ SPAN ] \
+<br/>
+[ INDENT &lt;value&gt; ] \
+<br/>
+[ CENTER ] \
+<br/>
+[ RIGHT ] \
+<br/>
+[ NO_SHIM] \
+<br/>
+[ NO_FLEX ] \
+<br/>
+[ TARGET "&lt;name&gt;" ]</kbd>
+<br/>
 </div>
 
 <div class="box-tip">
@@ -763,7 +785,8 @@ additional material is included in what is floated.
 <p style="margin-top: -.5em">
 To begin a float, simply invoke <kbd>.FLOAT</kbd> and follow it with
 whatever you want the float to contain.  When you&#8217;re done,
-invoke <kbd>.FLOAT&nbsp;OFF</kbd> (or <kbd>QUIT, END, X</kbd>, etc).
+invoke <kbd>.FLOAT&nbsp;OFF</kbd> (or <kbd>OFF</kbd>,
+<kbd>QUIT</kbd>, <kbd>END</kbd>, <kbd>X</kbd>, etc).
 </p>
 
 <h5 class="docs" style="margin-top: 1em; text-transform: none">ADJUST</h5>
@@ -1052,12 +1075,14 @@ before ending the float:
 <h3  id="reserved-label-strings" class="docs" style="text-transform: none">Reserved variables for labels</h3>
 
 <p>
-Mom reserves strings you may use when entering label text after
-the <kbd>LABEL</kbd> argument. <kbd>\*[chapter]</kbd> holds the
-current chapter or major section number. <kbd>\*[fig-label]</kbd>,
-<kbd>\*[tbl-label]</kbd>, and <kbd>\*[eqn-label]</kbd>
-increment the label number of the appropriate label type by one,
-and are initially set to zero after each invocation of
+Mom reserves strings you may use when entering
+label text after the <kbd>LABEL</kbd> argument.
+<kbd><nobr>\*[chapter]</nobr></kbd> holds the current chapter
+or major section number. <kbd><nobr>\*[fig-label]</nobr></kbd>,
+<kbd><nobr>\*[tbl-label]</nobr></kbd>, and
+<kbd><nobr>\*[eqn-label]</nobr></kbd> increment the label number of
+the appropriate label type by one, and are initially set to zero
+after each invocation of
 <a href="docprocessing.html#start">START</a>
 when the
 <a href="docprocessing.html#doctype">DOCTYPE</a>
@@ -1073,7 +1098,8 @@ produce <kbd>Fig. 2.3.</kbd>
 
 <p>
 If your <b>DOCTYPE</b> is <kbd>DEFAULT</kbd> or <kbd>NAMED</kbd>,
-you must reset <kbd>\*[&lt;type&gt;-label]</kbd> after each
+you must reset <kbd><nobr>\*[&lt;type&gt;-label]</nobr></kbd> after
+each
 <a href="docprocessing.html#collate">COLLATE</a>
 by entering
 <br/>
@@ -1281,7 +1307,7 @@ documents created with versions prior to 2.0-c as necessary.
 
 <p>
 Mom documents can include tables generated with the groff
-preprocessor, <b>tbl</b>.  If you are unfamiliar with <b>tbl</b>, I
+preprocessor <b>tbl</b>.  If you are unfamiliar with <b>tbl</b>, I
 recommend downloading a copy of
 <a href="http://plan9.bell-labs.com/10thEdMan/tbl.pdf">Tbl - A Program to Format Tables</a>,
 which, in addition to providing a thorough introduction, contains
@@ -1341,7 +1367,7 @@ span as many pages as necessary to complete output.  A table header
 will be printed at the top of each page&#8217;s table output.  In the
 event that there is not enough room to print the table header and
 at least one row of table data near the bottom of a page, mom will
-break to a new page before beginning table output, leaving a blank
+break to a new page before beginning table output, leaving a gap
 in
 <a href="definitions.html#running">running text</a>.
 </p>
@@ -1594,11 +1620,12 @@ number of rows.
 <h5 class="docs" style="margin-top: 1em; text-transform: none">ADJUST</h5>
 
 <p>
-<kbd>ADJUST</kbd> lets you raise (<kbd>+</kbd>) or lower
-(<kbd>-</kbd>) the table <span style="font-style: italic">within
-the space allotted for it</span> by the amount you specify.  This
-is useful for achieving good optical centering between surrounding
-blocks of type.  A unit of measure is required.
+<kbd>ADJUST</kbd> lets you raise (<kbd>-</kbd>) or lower
+(<kbd>+</kbd>) the table
+<span style="font-style: italic">within the space allotted for it</span>
+by the amount you specify.  This is useful for achieving good
+optical centering between surrounding blocks of type.  A unit of
+measure is required.
 </p>
 
 <h5 class="docs" style="margin-top: 1em; text-transform: none">NO_SHIM</h5>
@@ -1691,9 +1718,9 @@ is enabled and the document is processed with
 <a href="using.html#pdfmom" style="font-weight: bold">pdfmom</a>,
 the target name can be used to generate the target&#8217;s label
 number in running text if it is entered as a groff string, i.e. of
-the form <kbd>\*[name]</kbd>.  For example, if you create a target
-called &#8220;foo&#8221; for a table whose autolabel number would be
-3, entering
+the form <kbd><nobr>\*[name]</nobr></kbd>.  For example, if you
+create a target called &#8220;foo&#8221; for a table whose autolabel
+number would be 3, entering
 <br/>
 <span class="pre-in-pp">
   See
@@ -1756,7 +1783,7 @@ double-quotes.  The SOURCE argument may only be used if
 
 <p>
 Mom documents can include diagrams generated with the groff
-preprocessor, <b>pic</b>.  If you are unfamiliar with <b>pic</b>, I
+preprocessor <b>pic</b>.  If you are unfamiliar with <b>pic</b>, I
 recommend downloading a copy of
 <a href="http://www.kohala.com/start/troff/gpic.raymond.ps">Making Pictures with GNU PIC</a>
 which provides a thorough introduction and contains many examples.
@@ -1885,8 +1912,8 @@ argument.
 <h5 class="docs" style="margin-top: 1em; text-transform: none">ADJUST</h5>
 
 <p>
-<kbd>ADJUST</kbd> lets you raise (<kbd>+</kbd>) or lower
-(<kbd>-</kbd>) a diagram
+<kbd>ADJUST</kbd> lets you raise (<kbd>-</kbd>) or lower
+(<kbd>+</kbd>) a diagram
 <span style="font-style: italic">within the space allotted for it</span>
 by the amount you specify.  This is useful for achieving good
 optical centering between surrounding blocks of type.  A unit of
@@ -1976,9 +2003,9 @@ is enabled and the document is processed with
 <a href="using.html#pdfmom" style="font-weight: bold">pdfmom</a>,
 the target name can be used to generate the target&#8217;s label
 number in running text if it is entered as a groff string, i.e. of
-the form <kbd>\*[name]</kbd>.  For example, if you create a target
-called &#8220;foo&#8221; for a diagram whose autolabel number would
-be 3, entering
+the form <kbd><nobr>\*[name]</nobr></kbd>.  For example, if you
+create a target called &#8220;foo&#8221; for a diagram whose
+autolabel number would be 3, entering
 <br/>
 <span class="pre-in-pp">
   See
@@ -2171,8 +2198,8 @@ if <kbd>-L</kbd> or <kbd>-I</kbd> are passed as arguments to
 <h5 class="docs" style="margin-top: 1em; text-transform: none">ADJUST</h5>
 
 <p>
-<kbd>ADJUST</kbd> lets you raise (<kbd>+</kbd>) or lower
-(<kbd>-</kbd>) an equation
+<kbd>ADJUST</kbd> lets you raise (<kbd>-</kbd>) or lower
+(<kbd>+</kbd>) an equation
 <span style="font-style: italic">within the space allotted for it</span>
 by the amount you specify.  This is useful for achieving good
 optical centering between surrounding blocks of type.  A unit of
@@ -2271,9 +2298,9 @@ is enabled and the document is processed with
 <a href="using.html#pdfmom" style="font-weight: bold">pdfmom</a>,
 the target name can be used to generate the target&#8217;s label
 number in running text if it is entered as a groff string, i.e. of
-the form <kbd>\*[name]</kbd>.  For example, if you create a target
-called &#8220;foo&#8221; for an equation whose autolabel number
-would be 3, entering
+the form <kbd><nobr>\*[name]</nobr></kbd>.  For example, if you
+create a target called &#8220;foo&#8221; for an equation whose
+autolabel number would be 3, entering
 <br/>
 <span class="pre-in-pp">
   See
@@ -2297,10 +2324,10 @@ A block of <b>eqn</b> code is terminated with <kbd>.EN</kbd>.
 <p>
 If an equation needs to span multiple lines, possibly aligned
 with <b>eqn</b>&#8217;s <kbd>'mark'</kbd> and <kbd>'lineup'</kbd>
-directives, separate invocations of <kbd>.EQ/.EN</kbd> are required
-for each line, and the optional argument, <kbd>CONTINUED</kbd> (or
-<kbd>CONT</kbd>, or <kbd>...</kbd> [three dots, an ellipsis]), must
-be passed to <kbd>.EN</kbd>.
+directives, separate invocations of <kbd><nobr>.EQ/.EN</nobr></kbd>
+are required for each line, and the optional argument,
+<kbd>CONTINUED</kbd> (or <kbd>CONT</kbd>, or <kbd>...</kbd> [three
+dots, an ellipsis]), must be passed to <kbd>.EN</kbd>.
 </p>
 
 <p>
@@ -2420,9 +2447,9 @@ would disable autolabelling of images.
 <p>
 By default, when <b>AUTOLABEL</b> is enabled, the label numbers are
 prefixed, and, in the case of equations, suffixed, with strings such
-that they appear for tables as &#8220;Table &lt;n&gt;&#8221;, for
-<b>pic</b> diagrams and pdf images as &#8220;Fig. &lt;n&gt;&#8221;,
-and for equations as &#8220;(&lt;n&gt;)&#8221;.
+that they appear for tables as &#8220;Table&nbsp;&lt;n&gt;&#8221;, for
+<b>pic</b> diagrams and pdf images as &#8220;Fig.&nbsp;&lt;n&gt;&#8221;,
+and for equations as &#8220;Eq.&nbsp;(&lt;n&gt;)&#8221;.
 </p>
 
 <p>
@@ -2484,8 +2511,8 @@ as if it were <b>DOCTYPE&nbsp;CHAPTER</b>, hence, with
 <kbd>PREFIX_CHAPTER</kbd>, each collated <b>DEFAULT</b>
 doctype&#8217;s prefixed &#8220;chapter&#8221; number is
 incremented and the label number itself reset to &#8220;1&#8221;.
-If you do not give <kbd>PREFIX_CHAPTER</kbd>, the label number
-is <i>not</i> reset automatically.  To reset it, invoke
+If you do not supply the <kbd>PREFIX_CHAPTER</kbd> argument, the
+label number is <i>not</i> reset automatically.  To reset it, invoke
 <kbd>.AUTOLABEL_&lt;type&gt;</kbd> after each
 <a href="docprocessing.html#collate">COLLATE</a>.
 </div>
@@ -2701,8 +2728,8 @@ set quad right, and their captions centered.
 Regardless of the quad direction, captions, labels and sources
 are set on the width of the figure, table, or pdf image
 unless you pass the optional <kbd>ON_LL</kbd> argument to
-<kbd>QUAD&nbsp;&lt;direction&gt;</kbd>, in which case the prevailing
-document line length is used instead.
+<kbd><nobr>QUAD&nbsp;&lt;direction&gt;</nobr></kbd>, in which case
+the prevailing document line length is used instead.
 </p>
 
 <h5 class="docs" style="text-transform: none">&bull;&nbsp;eqn</h5>
@@ -2713,9 +2740,10 @@ set flush right with the page&#8217;s right margin regardless of
 equation positioning, which is, again by default, centered.  If the
 equation is positioned left, the label will appear at the right
 margin regardless of the direction you give to <kbd>QUAD</kbd>.  If
-the equation is indented with the <kbd>-I&nbsp;&lt;indent&gt;</kbd>
-option, a quad direction of <kbd>LEFT</kbd> is observed, but may
-overprint the last line of the equation.
+the equation is indented with the
+<kbd><nobr>-I&nbsp;&lt;indent&gt;</nobr></kbd> option, a quad
+direction of <kbd>LEFT</kbd> is observed, but may overprint the last
+line of the equation.
 </p>
 
 <p>
@@ -3193,8 +3221,8 @@ Non-toggle macros like
 or
 <a href="docelement.html#pp">PP</a>
 require that the box be started beforehand.  Boxed pre-processor
-material must be fully enclosed by BOX/BOX&nbsp;OFF, as in this
-recipe for a one-off boxed pic diagram:
+material must be fully enclosed by BOX&nbsp;/&nbsp;BOX&nbsp;OFF, as
+in this recipe for a one-off boxed pic diagram:
 <span class="pre-in-pp">
 .BOX
 .PS
@@ -3457,8 +3485,8 @@ including <kbd>PAGE_COLOR OFF</kbd>, only the last applies.
 Unlike other
 <a href="definitions.html#toggle">toggle macros</a>,
 PAGE_COLOR requires the use of <kbd>OFF</kbd> or <kbd>off</kbd>
-to terminate it rather than an arbitrary string (<kbd>QUIT, X,
-END</kbd>, etc.)
+to terminate it rather than an arbitrary string (<kbd>OFF</kbd>,
+<kbd>QUIT</kbd>, <kbd>END</kbd>, <kbd>X</kbd>, etc).
 </p>
 </div>
 

@@ -135,10 +135,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .\"                   TOC  entry is determined by the definition
 .\"                   of this macro.
 .\"
-.\" Both XH, and XN macros, share a common entry point.
+.\" Our replacements for both XH, and XN macros share a common entry
+.\" point; we map both to their respective replacement hooks, so that
+.\" we may continue to take advantage of setup logic in s.tmac.  When
+.\" these are eventually invoked, they will have been renamed so that
+.\" they replace XH, and XH respectively.
 .\"
-.de XH als
-.als XN XH
+.de XH-REPLACEMENT als
+.als XN-REPLACEMENT XH-REPLACEMENT
 .\" FIXME: within s.tmac, the heading level established by the most
 .\" recent prior invocation of the NH macro is tracked by the "nh*hl"
 .\" private register; perhaps s.tmac could expose this more publicly,
@@ -158,22 +162,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ..
 .aln .NH spdf:nh*hl
 .
-.\" The user is expected to furnish the XH-INIT, XH-UPDATE-TOC, and
-.\" XN-INIT handlers.  (Note that the XH-UPDATE-TOC hook serves both
-.\" XH and XN; there is no separate XN-UPDATE-TOC).  These stubs are
-.\" provided to avoid possible "undefined macro" warnings; each is
-.\" implemented as a no-op.
-.\"
-.de XH-INIT de
-.de XH-UPDATE-TOC de
-.de XN-INIT
-..
 .\" The common entry point for both XH, and XN, handles initialization,
 .\" and interpretation of any specified options, before handing over to
 .\" one of two distinct formatting helper macros, which are specific to
 .\" the XH, and XN implementations respectively.
 .\"
-.am XH \" and also XN
+.am XH-REPLACEMENT \" thus serving as implementation for both XH and XN
+.\"
+.\" The user is expected to furnish the XH-INIT, XH-UPDATE-TOC, and
+.\" XN-INIT handlers.  (Note that the XH-UPDATE-TOC hook serves both
+.\" XH and XN; there is no separate XN-UPDATE-TOC).  A suitable stub
+.\" for each is provided by s.tmac; we have no need to replace them.
+.\"
 .   \\$0-INIT
 .   rm spdf:refname
 .   als spdf:bm.define spdf:bm.basic

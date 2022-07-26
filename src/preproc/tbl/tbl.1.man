@@ -120,20 +120,53 @@ the standard input stream is read.
 .SS Overview
 .\" ====================================================================
 .
-.B tbl
-expects to find table descriptions wrapped in the
+.I \%@g@tbl
+expects to find table descriptions between input lines that begin with
 .B .TS
-(table start) and
+(table start)
+and
 .B .TE
-(table end) macros.
+(table end).
 .
-Within each such table sections, another table can be defined by
-using the request
-.B .T&
-before the final command
-.BR .TE .
+Within each such table region,
+another description can be preceded with an input line beginning with
+.BR .T& .
 .
-Each table definition has the following structure:
+.
+.P
+(Experienced
+.I roff
+users should observe that
+.I \%@g@tbl
+is not a
+.I roff
+language interpreter:
+the default control character must be used,
+and no spaces or tabs are permitted between the control character and
+the macro name.
+.
+These
+.I \%@g@tbl
+input tokens remain as-is in the output,
+where they become ordinary macro calls.
+.
+Macro packages often define
+.BR TS ,
+.BR T& ,
+and
+.B TE
+macros to handle issues of table placement on the page.
+.
+.I \%@g@tbl
+produces
+.I groff
+code to define these macros as empty if their definitions do not exist
+when the formatter encounters a table region.)
+.
+.
+.P
+Each table definition has the following structure.
+.
 .
 .TP
 .I Global options
@@ -147,6 +180,7 @@ The
 must always be finished by a
 .B "semi-colon ;" .
 .
+.
 .TP
 .I Table format specification
 .
@@ -157,12 +191,12 @@ Each cell in a column is classified by being
 centered,
 left-aligned,
 numeric
-(aligned to a decimal point),
+(aligned to a configurable decimal separator),
 and so on.
 .
 This specification can have several lines,
 but must be finished by a
-.B dot .
+.B dot .\&
 at the end of the last line.
 .
 After each cell definition,
@@ -187,81 +221,99 @@ is an arbitrary character.
 .
 The line immediately following the
 .B .TS
-macro may contain any of the following global options (ignoring the
-case of characters \[en] Unix tbl only accepts options with all
-characters lowercase or all characters uppercase), separated by
-spaces, tabs, or commas:
+macro may contain any of the following global options
+(ignoring the
+case of characters\[em]AT&T
+.I tbl \" AT&T
+accepted only options with all characters in the same lettercase),
+separated by
+spaces,
+tabs,
+or commas.
+.
 .
 .TP
 .B allbox
 Enclose each item of the table in a box.
 .
+.
 .TP
 .B box
 Enclose the table in a box.
 .
+.
 .TP
 .B center
-Center the table
-(default is left-justified).
+Center the table;
+the default is to left-align it.
 .
-The alternative keyword name
+As a GNU extension,
+the alternative keyword name
 .B centre
-is also recognized
-(this is a GNU
-.I tbl \" exception
-extension).
+is also recognized.
+.
 .
 .TP
 .BI decimalpoint( c )
-Set the character to be recognized as the decimal point in numeric
-columns
-(GNU
-.I tbl \" exception
-only).
+Set the character to be recognized as the decimal separator in numeric
+columns.
+.
+This is a GNU extension.
+.
 .
 .TP
 .BI delim( xy )
 Use
 .I x
 .RI and\~ y
-as start and end delimiters for
+as the start and end delimiters for
 .MR @g@eqn @MAN1EXT@ .
+.
 .
 .TP
 .B doublebox
 Enclose the table in a double box.
 .
+.
 .TP
 .B doubleframe
 Same as
-.B doublebox
-(GNU
-.I tbl \" exception
-only).
+.BR doublebox .
+.
+This is a GNU extension.
+.
 .
 .TP
 .B expand
-Make the table as wide as the current line length (providing a column
+Make the table as wide as the current line length
+(providing a column
 separation factor).
 .
-Ignored if one or more \[oq]x\[cq] column specifiers are used (see
-below).
+Ignored if one or more
+.RB \[lq] x \[rq]
+column specifiers are used
+(see below).
+.
 .
 .IP
-In case the sum of the column widths is larger than the current line
-length,
+If the sum of the column widths is larger than the current line length,
 the column separation factor is set to zero;
 such tables extend into the right margin,
 and there is no column separation at all.
 .
+.I \%@g@tbl
+generates
+.I groff
+code to issue a diagnostic warning in this case.
+.
+.
 .TP
 .B frame
 Same as
-.B box
-(GNU
-.I tbl \" exception
-only).
+.BR box .
+.
+This is a GNU extension.
+.
 .
 .TP
 .BI linesize( n )
@@ -273,34 +325,37 @@ in
 .IR n -point
 type.
 .
+.
 .TP
 .B nokeep
-Don't use diversions to prevent page breaks
-(GNU
-.I tbl
-only).
+Don't use diversions to prevent page breaks.
 .
-Normally
+Normally,
 .I \%@g@tbl
 attempts to prevent undesirable breaks in boxed tables by using
 diversions.
 .
 This can sometimes interact badly with macro packages' own use of
-diversions\[em]when footnotes, for example, are used.
+diversions\[em]when footnotes,
+for example,
+are used.
+.
+This is a GNU extension.
+.
 .
 .TP
 .B nospaces
-Ignore leading and trailing spaces in data items
-(GNU
-.I tbl \" exception
-only).
+Ignore leading and trailing spaces in table entries.
+.
+This is a GNU extension.
+.
 .
 .TP
 .B nowarn
-Turn off warnings related to tables exceeding the current line width
-(GNU
-.I tbl \" exception
-only).
+Turn off warnings related to tables exceeding the current line width.
+.
+This is a GNU extension.
+.
 .
 .TP
 .BI tab( x )
@@ -312,8 +367,8 @@ instead of a tab to separate items in a line of input data.
 .LP
 The global options must end with a semicolon.
 .
-There might be whitespace between an option and its argument in
-parentheses.
+Spaces and tabs are permitted between an option's name and its
+parenthesized argument.
 .
 .
 .\" ====================================================================
@@ -505,55 +560,59 @@ delimiters for that purpose.
 .
 .TP
 .BR r , R
-Right-justify item within the column.
+Right-align item within the column.
+.
 .
 .TP
-.BR s , S
-Span previous item on the left into this column.
+.BR s ,\~ S
+Span previous item on the left into this column
+(not allowed in the first column).
 .
-Not allowed for the first column.
 .
 .TP
 .B ^
-Span down entry from previous row in this column.
+Span down entry from previous row in this column
+(not allowed on the first row).
 .
-Not allowed for the first row.
 .
 .TP
-.BR _ , -
-Replace this entry with a horizontal line.
+.BR _ ,\~ \-
+Replace table entry with a horizontal rule.
 .
-Note that \[oq]_\[cq] and \[oq]-\[cq] can be used for table fields only,
-not for column separator lines.
 .
 .TP
 .B =
+Replace table entry with a double horizontal rule.
 .
-Replace this entry with a double horizontal line.
-.
-Note that \[oq]=\[cq] can be used for table fields only,
-not for column separator lines.
 .
 .TP
 .B |
-The corresponding column becomes a vertical rule (if two of these are
-adjacent, a double vertical rule).
+Make the corresponding column a vertical rule
+(if two of these are adjacent,
+a double vertical rule).
 .
 .
-.LP
+.P
 A vertical bar to the left of the first key letter or to the right of
 the last one produces a line at the edge of the table.
 .
 .
-.LP
-To change the data format within a table, use the
+.P
+To change the table format within a
+.I tbl
+region,
+use the
 .B .T&
-command (at the start of a line).
+token at the start of a line.
 .
-It is followed by format and data lines (but no global options)
-similar to the
+It is followed by format and data lines
+(but no global options)
+similarly to the
 .B .TS
-request.
+token.
+.
+The quantity of columns in a new table format thus introduced cannot
+increase relative to the previous table format.
 .
 .
 .\" ====================================================================
@@ -692,7 +751,7 @@ and
 The macro should contain only simple
 .I roff
 requests to change the text block formatting,
-like text adjustment,
+like adjustment,
 hyphenation,
 size,
 or font.
@@ -827,17 +886,22 @@ Within such data lines, items are normally separated by tab characters
 option).
 .
 Long input lines can be broken across multiple lines if the last
-character on the line is \[oq]\[rs]\[cq] (which vanishes after
+character on the line is \[lq]\[rs]\[rq]
+(which vanishes after
 concatenation).
 .
 .
-.LP
-Note that
+.P
 .I \%@g@tbl
-computes the column widths line by line, applying \[rs]w on each entry
-which isn't a text block.
+computes the column widths line by line,
+applying the
+.I roff
+escape sequence
+.B \[rs]w
+to each entry that isn't a text block.
 .
-As a consequence, constructions like
+As a consequence,
+constructions like
 .IP
 .EX
 \&.TS
@@ -981,7 +1045,7 @@ its width is subsequently available in the register
 .SS Miscellaneous
 .\" ====================================================================
 .
-The number register
+The register
 .B \[rs]n[TW]
 holds the table width; it can't be used within the table itself
 but is defined right before calling
@@ -1046,9 +1110,11 @@ arithmetic.
 .
 .MR @g@tbl @MAN1EXT@
 should always be called before
-.MR @g@eqn @MAN1EXT@
-.RI ( groff (@MAN1EXT@)
-automatically takes care of the correct order of preprocessors).
+.MR @g@eqn @MAN1EXT@ .
+.
+(\c
+.MR groff @MAN1EXT@
+automatically takes care of the correct order of preprocessors.)
 .
 Don't call the
 .B EQ
@@ -1107,50 +1173,62 @@ you should avoid using any names beginning with
 .
 Since
 .I \%@g@tbl
-defines its own macros (right before each table) it is necessary to use
-an \[oq]end-of-macro\[cq] macro.
+defines its own macros at the beginning of each table region,
+it is necessary to call end macros instead of ending macro definitions
+with
+.RB \[lq] ..\& \[rq].
+.\" XXX: Why don't we fix that by ending all of tbl's own macro
+.\" definitions with a call to a macro in its own reserved name space?
 .
-Additionally, the escape character has to be switched off.
+Additionally,
+the escape character must be disabled.
 .
-Here's an example.
 .
-.
-.IP
+.RS
+.P
 .EX
+\&.de END
+\&..
 \&.eo
-\&.de ATABLE ..
+\&.de MYTABLE END
 \&.TS
 \&allbox tab(;);
 \&cl.
-\&\[rs]$1;\[rs]$2
+\&This is table \[rs]$1.;\[rs]$2
 \&.TE
-\&...
+\&.END
 \&.ec
-\&.ATABLE A table
-\&.ATABLE Another table
-\&.ATABLE And \[dq]another one\[dq]
+\&.MYTABLE 1 alpha
+\&.MYTABLE 2 beta
+\&.MYTABLE 3 "gamma delta"
 .EE
+.RE
 .
 .
-.LP
-Note, however, that not all features of
+.P
+However,
+not all features of
 .I \%@g@tbl
-can be wrapped into a macro because
+can be exercised from such macros because
 .I \%@g@tbl
-sees the input earlier than
-.IR \%@g@troff .
+is a
+.I roff
+preprocessor:
+it sees the input earlier than
+.I \%@g@troff
+does.
 .
 For example,
-number formatting with vertically aligned decimal points fails if those
-numbers are passed on as macro parameters because decimal point
-alignment is handled by
+vertically aligning decimal separators fails if the numbers containing
+them occur as macro parameters;
+the alignment is performed by
 .I \%@g@tbl
-itself:
-it only sees
+itself,
+which sees only
 .BR \[rs]$1 ,
 .BR \[rs]$2 ,
-etc.,
-and therefore can't recognize the decimal point.
+and so on,
+and therefore can't recognize a decimal separator that may be present.
 .
 .
 .\" ====================================================================
@@ -1169,14 +1247,17 @@ all exit afterward.
 .
 .TP
 .B \-C
-Enable compatibility mode to
+Enable AT&T compatibility mode:
 recognize
 .B .TS
 and
 .B .TE
 even when followed by a character other than space or newline.
 .
-Leader characters (\[rs]a) are handled as interpreted.
+The uninterpreted leader escape sequence,
+.BR \[rs]a ,
+.I is
+interpreted.
 .
 .
 .\" ====================================================================
@@ -1205,7 +1286,7 @@ A text block within a table must be able to fit on one page.
 .LP
 The
 .B bp
-request cannot be used to force a page-break in a multi-page table.
+request cannot be used to force a page break in a multi-page table.
 .
 Instead, define
 .B BP
@@ -1227,26 +1308,46 @@ instead of
 .BR bp .
 .
 .
-.LP
-Using \[rs]a directly in a table to get leaders does not work (except in
-compatibility mode).
+.P
+Using
+.B \[rs]a
+to put leaders in table entries does not work,
+except in compatibility mode.
 .
-This is correct behavior: \[rs]a is an
-.B uninterpreted
+This is correct behavior:
+.B \[rs]a
+is an
+.I uninterpreted
 leader.
 .
-To get leaders use a real leader, either by using a control A or like
-this:
+You can still use the
+.I roff
+leader character (Control+A) or define a string to use
+.B \[rs]a
+as it was designed:
+to be interpreted only in copy mode.
 .
-.IP
+.
+.RS
+.P
 .EX
 \&.ds a \[rs]a
 \&.TS
-\&tab(;);
-\&lw(1i) l.
-\&A\[rs]*a;B
+\&box center tab(;);
+\&lw(2i)0 l.
+\&Population\[rs]*a;6,327,119
 \&.TE
 .EE
+.RE
+.
+.
+.\" We use a real leader to avoid defining a string in a man page.
+.P
+.TS
+box center tab(;);
+lw(2i)0 l.
+Population;6,327,119
+.TE
 .
 .
 .LP

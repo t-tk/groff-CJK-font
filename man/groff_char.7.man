@@ -101,13 +101,14 @@ request.
 .
 .P
 This document lists all of the glyph names predefined by
-.I groff
-and describes the systematic notation by which it enables access to
+.IR groff 's
+font description files
+and presents the systematic notation by which it enables access to
 arbitrary Unicode code points and construction of composite glyphs.
 .
 The glyphs listed in this document may not be available,
 or may vary in appearance,
-depending on the output driver chosen when the page was rendered
+depending on the output device chosen when the page was rendered
 (with the
 .B \-T
 option to the
@@ -116,7 +117,8 @@ or
 .I roff
 programs).
 .
-The driver used in generation of this page was \[lq]\*[.T]\[rq].
+The device name used in generation of this page was
+.BR \*[.T] .
 .
 .
 .P
@@ -130,10 +132,10 @@ these exist for syntactical or historical reasons.
 .BR \e\- ,
 and
 .B \e_
-are translated on input to the special characters
+are translated on input to the special character escape sequences
 .BR \e[aq] ,
 .BR \e[ga] ,
-.BR \e[-] ,
+.BR \e[\-] ,
 and
 .BR \e[ul] ,
 respectively.
@@ -158,7 +160,7 @@ and the Bell Systems logo
 .P
 In
 .IR groff ,
-you can test output driver support for any character
+you can test output device support for any character
 (ordinary or special)
 with the conditional expression operator
 .RB \[lq] c \[rq].
@@ -351,7 +353,7 @@ this will
 .I not
 be the case on more-capable devices.
 .
-Review your document using as many different output drivers as possible.
+Review your document using as many different output devices as possible.
 .
 .\" XXX: move these to tty.tmac instead?
 .fchar \[u02C6] ^
@@ -537,8 +539,9 @@ it is more portable,
 both to other
 .I roff
 systems and to UTF-8 environments,
-to use their glyph names,
+to use their special character escape sequences,
 shown below.
+.
 .
 .P
 .TS
@@ -606,18 +609,16 @@ and accessed either by name or numerically by code point.
 .
 Code points and combining properties are determined by character
 encoding standards,
-whereas glyph names originated in AT&T
+whereas glyph names as used here originated in AT&T
 .I troff \" AT&T
 special character escape sequences.
 .
-Glyph names are not limited to alphanumeric characters;
-any character that is valid in a
+Any character valid in a
 .I groff
-identifier may be used.
+identifier may be used in a glyph name.
 .
 Predefined glyph names use only characters in the basic Latin
-repertoire,
-however.
+repertoire.
 .
 .
 .TP
@@ -625,7 +626,7 @@ however.
 is a special character escape for the glyph with the two-character name
 .IR gl .
 .
-This is the syntax form supported by AT&T
+This is the original syntax form supported by AT&T
 .IR troff .
 .
 The acute accent,
@@ -634,40 +635,68 @@ is an example.
 .
 .
 .TP
-.BI \[rs][ glyph-name ]
+.BI \[rs]C\[aq] glyph-name \[aq]
 is a special character escape for
 .IR glyph-name ,
 which can be of arbitrary length.
 .
-The foregoing acute accent example could be expressed in
+The delimiter,
+shown here as a neutral apostrophe,
+can be any character not occurring in
+.IR glyph-name .
+.
+This syntax form was introduced in later versions of AT&T
+device-independent
+.IR troff . \" AT&T
+.
+The foregoing acute accent example can be expressed
+as
+.BR \[rs]C\[aq]aa\[aq] .
+.
+.
+.TP
+.BI \[rs][ glyph-name ]
+is a special character escape for
+.IR glyph-name ,
+which can be of arbitrary length but must not contain a closing square
+bracket
+.RB \[lq] ] \[rq].
+.
+(No glyph names predefined by
+.I groff
+employ
+.RB \[lq] ] \[rq].)
+.
+The foregoing acute accent example can be expressed in
 .I groff
 as
 .BR \[rs][aa] .
 .
 .
-.IP
-An ordinary input character
-.RI \[lq] c \[rq]
-is not the same as
-.BI \[rs][ c ]\c
-;
-the latter is internally mapped to glyph name
+.P
+.BI \[rs]C\[aq] c \[aq]
+and
+.BI \[rs][ c ]
+are not synonyms for the ordinary character
+.RI \[lq] c \[rq],
+but request the special character named
 .RB \[lq] \[rs] \c
 .IR c \[rq].
 .
-In other words,
+For example,
 .RB \[lq] \[rs][a] \[rq]
 is not \[lq]a\[rq],
-but rather
+but rather a special character with the internal glyph name
+(used in font description files and diagnostic messages)
 .BR \[rs]a ,
-the uninterpreted leader escape sequence.
+which is typically undefined.
 .
-By default,
+The only such glyph name
 .I groff
-defines a single glyph name of length one,
-namely the minus sign,
-which can be accessed as either
-.B \[rs]\-
+predefines is the minus sign,
+which can be accessed as
+.BR \[rs]\- ,
+.BR \[rs]C\[aq]\-\[aq] ,
 or
 .BR \[rs][\-] .
 .
@@ -866,7 +895,8 @@ font
 .MR groff_font @MAN5EXT@ ).
 .
 Often,
-such glyphs have metrics which look incongruous in normal text.
+such glyphs lack bold or italic style forms or have metrics that look
+incongruous in ordinary prose.
 .
 A few which are not uncommon in running text have \[lq]text
 variants\[rq],
@@ -963,6 +993,10 @@ _
 \[.i]	\e[.i]	u0131	i without tittle
 \[.j]	\e[.j]	u0237	j without tittle
 \[Fn]	\e[Fn]	u0192	lowercase f with hook, function
+\[/L]	\e[/L]	u0141	L with stroke
+\[/l]	\e[/l]	u0142	l with stroke
+\[/O]	\e[/O]	u00D8	O with stroke
+\[/o]	\e[/o]	u00F8	o with stroke
 .TE
 .
 .
@@ -985,10 +1019,6 @@ _
 \[oe]	\e[oe]	u0153	oe ligature
 \[IJ]	\e[IJ]	u0132	IJ digraph
 \[ij]	\e[ij]	u0133	ij digraph
-\[/L]	\e[/L]	u0141	L with stroke
-\[/l]	\e[/l]	u0142	l with stroke
-\[/O]	\e[/O]	u00D8	O with stroke
-\[/o]	\e[/o]	u00F8	o with stroke
 .TE
 .
 .
@@ -998,7 +1028,7 @@ _
 .
 All of these glyphs can be composed using combining glyph names as
 described in subsection \[lq]Special character escape forms\[rq] above;
-the names below can be thought of as convenient short aliases.
+the names below can be thought of as short aliases for convenience.
 .
 .TS
 l l l lx.
@@ -1110,8 +1140,8 @@ _
 .
 The neutral double quote,
 often useful when documenting programming languages,
-is also available as a special character for convenience when including
-it in macro arguments;
+is also available as a special character for convenient embedding in
+macro arguments;
 see subsection \[lq]Fundamental character set\[rq] above.
 .
 .TS
@@ -1230,9 +1260,9 @@ and
 .B \[rs](rf
 which provide the floor operator.
 .
-Some output drivers,
+Some output devices,
 such as
-.MR grodvi @MAN1EXT@ ,
+.BR dvi ,
 don't unify such glyphs.
 .
 For this reason,
