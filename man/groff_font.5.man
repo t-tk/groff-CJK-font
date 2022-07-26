@@ -128,8 +128,8 @@ The default font family is
 .BI fonts\~ "n F1"\~\c
 .RI .\|.\|.\&\~ Fn
 Fonts
-.IR F1 ", \|.\|.\|., " Fn
-are mounted in the font positions
+.IR F1 ", \|.\|.\|.\|, " Fn
+are mounted at font positions
 .IR m "\|+\|1, \|.\|.\|., " m \|+\| n
 where
 .I m
@@ -161,13 +161,13 @@ to generate PNG images from PostScript input.
 .
 Under GNU/Linux,
 this is usually
-.IR gs (1),
+.MR gs 1 ,
 but under other systems
 (notably Cygwin)
 it might be set to another name.
 .
 The
-.IR \%grohtml (@MAN1EXT@)
+.MR grohtml @MAN1EXT@
 driver uses this directive.
 .
 .
@@ -512,10 +512,11 @@ measurements applicable to fonts must be proportional to the type size.
 .I groff
 achieves this using the precedent set by AT&T device-independent
 .IR troff : \" AT&T
-one size of a font is chosen as a norm,
-and all other sizes are scaled linearly relative to that basis.
+one font size is chosen as a norm,
+and all others are scaled linearly relative to that basis.
 .
-The \[lq]unit width\[rq] is the number of basic units per point.
+The \[lq]unit width\[rq] is the number of basic units per point when the
+font is rendered at this nominal size.
 .
 .
 .P
@@ -563,6 +564,11 @@ Empty lines are ignored in both sections.
 .BI name\~ F
 The name of the font
 .RI is\~ F .
+.
+.RB \[lq] DESC \[rq]
+and
+.RB \[lq] 0 \[rq]
+are invalid font names.
 .
 .
 .TP
@@ -653,20 +659,17 @@ is optional.
 .P
 The directive
 .B charset
-starts the charset subsection.
+starts the character set subsection.
 .
 (For typesetter devices,
-this keyword is a misnomer since it starts an ordered list of glyphs,
+this keyword is a misnomer since it starts a list of glyphs,
 not characters.)
 .
-The
-.B charset
-line is followed by a sequence of lines,
-each with information about one glyph.
+It precedes a series of glyph descriptions,
+one per line.
 .
-A line comprises a number of fields separated by spaces or tabs.
-.
-The format is as follows.
+Each such glyph description comprises a set of fields separated by
+spaces or tabs and organized as follows.
 .
 .
 .IP
@@ -776,20 +779,20 @@ Italic corrections are relevant to glyphs in italic or oblique styles.
 .
 The
 .I italic-correction
-subfield gives the amount of space that should be added after the glyph
-when it is to be followed immediately by a glyph from an upright style.
+is the amount of space that should be added after an oblique glyph to be
+followed immediately by an upright glyph.
 .
 The
 .I left-italic-correction
-subfield gives the amount of space that should be added before the glyph
-when it is to be preceded immediately by a glyph from an upright style.
+is the amount of space that should be added before an oblique glyph to
+be preceded immediately by an upright glyph.
 .
 The
-.I subscript-correction
-gives the amount of space that should be added after a glyph before
-adding a subscript.
-.
-This should be less than the italic correction.
+.I
+subscript-correction
+is the amount of space that should be added after an oblique glyph to be
+followed by a subscript;
+it should be less than the italic correction.
 .
 .
 .P
@@ -817,7 +820,7 @@ and
 3
 means the glyph has both an ascender and a descender
 (for example,
-this is true of parentheses in some fonts).
+parentheses in some fonts).
 .
 .
 .P
@@ -835,7 +838,7 @@ escape sequence.
 The code can be any integer
 (that is,
 any integer parsable by the C standard library's
-.IR strtol (3)
+.MR strtol 3
 function).
 .
 .
@@ -977,7 +980,7 @@ and device-independent output format.
 .
 .P
 Section \[lq]See also\[rq] of
-.IR groff (@MAN1EXT@)
+.MR groff @MAN1EXT@
 lists utilities available for preparing font files in a variety of
 formats for use with
 .I groff
@@ -985,9 +988,9 @@ output drivers.
 .
 .
 .P
-.IR groff_out (@MAN5EXT@),
-.IR \%@g@troff (@MAN1EXT@),
-.IR \%addftinfo (@MAN1EXT@)
+.MR groff_out @MAN5EXT@ ,
+.MR @g@troff @MAN1EXT@ ,
+.MR addftinfo @MAN1EXT@
 .
 .
 .\" Restore compatibility mode (for, e.g., Solaris 10/11).

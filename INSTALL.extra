@@ -79,33 +79,28 @@ MS-Windows, see the file README.MinGW.
 Dependencies
 ============
 
-groff is written in C++, so you need a C++ compiler.  The C++ source
-files use a suffix of `.cpp', so your C++ compiler must be able to
-handle this.  If you don't already have a C++ compiler, we suggest gcc
-2.7.1 or later (gcc version 2 includes GNU C++ as well as GNU C).  From
-gcc 2.5, it is no longer necessary to install libg++: the C++ header
-files needed by groff are created by the gcc installation process.  To
-override configure's choice of C++ compiler, you can set the CXX
-environment variable.
+groff is written in ISO C++98, so you need a C++ compiler capable of
+handling this standardized version of the language.  The C++ source
+files use a suffix of '.cpp'; your C++ compiler must be able to
+handle this.  A C/C++ preprocessor that conforms to ISO C90 is also
+required.  If you don't already have a C++ compiler, we suggest GCC 9.4
+or later.  To override the configure script's choice of C++ compiler,
+you can set the CXX environment variable to the name of its executable.
 
-If you have a library that provides a faster malloc than your system's
-usual malloc, it is good idea to include it in LIBS.  For example,
-using the malloc that comes with GNU Emacs version 20 can give a
-worthwhile (and sometimes spectacular) performance improvement.
+Several programs distributed with GNU roff are written in the Perl
+language.  Version 5.6.1 or later is required.
 
-Many programs within the `groff' system are written in the Perl
-language.  So you need a `perl' program with the least version of
-`v5.6.1'.
+In order to build the documentation, you need 'makeinfo' from the
+'texinfo' package; in fact 'configure' will fail if this program is
+not found unless you pass the option '--with-doc=no'.
 
-In order to build the documentation you would need `makeinfo' from the
-'texinfo' package, in fact `configure' will fail if this program is
-not found unless you pass the option `with-doc=no'.
-
-The `uchardet' library is an optional dependency of the `preconv'
-program: if this library is found by `configure' it will be
-automatically used by `preconv'.  In order to discover the presence of
-the `uchardet' library you would also need to have the `pkg-config'
-program installed on your system.
+The 'uchardet' library is an optional dependency of the 'preconv'
+program: if this library is found by 'configure' it will be
+automatically used by 'preconv'.  In order to discover the presence of
+the 'uchardet' library, you will also need to have the 'pkg-config'
+program installed on your system, and the library's C header files will
+need to be present on the system--on a package-based host system, this
+can mean installing uchardet's '-dev' or '-devel' package.
 
 
 Miscellaneous
@@ -127,21 +122,21 @@ Evaluation
 ==========
 
 Once groff is built, you can check it for correct operation without
-having to install it.  groff comes with a test suite; use `make check'
+having to install it.  groff comes with a test suite; use 'make check'
 to run it.
 
 You can also try it out from the directory you used to build it.  A
-script called `test-groff' is supplied for this purpose.  It sets up
+script called 'test-groff' is supplied for this purpose.  It sets up
 environment variables to allow groff to run without being installed.
 For example, the command
 
   ./test-groff -man -Tascii src/roff/groff/groff.1 | less -R
 
-displays the groff(1) man page with the `less' pager.  (You might prefer
-either the `-Tlatin' or `-Tutf8' option to `-Tascii' depending on the
+displays the groff(1) man page with the 'less' pager.  (You might prefer
+either the '-Tlatin1' or '-Tutf8' option to '-Tascii' depending on the
 character set you're using.)
 
-The groff texinfo manual can be previewed as an info document.
+The groff Texinfo manual can be previewed as an info document.
 
   info ./doc/groff.info
 
@@ -151,8 +146,8 @@ It can be viewed as text as well (albeit text encoded in ISO Latin-1).
   less doc/groff.txt # for Latin-1 users
 
 To get a DVI, PDF, or HTML version of the groff texinfo manual, say
-`make groff.dvi', `make groff.pdf', or `make groff.html', respectively,
-in the `doc' subdirectory (after configuring the groff package).
+'make groff.dvi', 'make groff.pdf', or 'make groff.html', respectively,
+in the 'doc' subdirectory (after configuring the groff package).
 Texinfo version 5.0 or later is a prerequisite for generation of these
 formats.  Here are some ways you might view the documents produced.
 

@@ -1,3 +1,5 @@
+#include <config.h>
+
 #ifndef SABER
 #ifndef lint
 static char Xrcsid[] = "$XConsortium: Dvi.c,v 1.9 89/12/10 16:12:25 rws Exp $";

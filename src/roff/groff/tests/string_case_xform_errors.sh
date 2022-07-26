@@ -20,7 +20,7 @@
 
 groff="${abs_top_builddir:-.}/test-groff"
 
-expected="troff: <standard input>:1: error: cannot apply string case transformation to a request ('br')"
+expected="troff:<standard input>:1: error: cannot apply string case transformation to a request ('br')"
 
 actual=$("$groff" -Tutf8 2>&1 <<EOF
 .stringdown br

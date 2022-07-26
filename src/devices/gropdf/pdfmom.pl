@@ -5,7 +5,7 @@
 #
 
 # Copyright (C) 2012-2020 Free Software Foundation, Inc.
-#      Written by Deri James <deri@chuzzlewit.demon.co.uk>
+#      Written by Deri James <deri@chuzzlewit.myzen.co.uk>
 #
 # This file is part of groff.
 #

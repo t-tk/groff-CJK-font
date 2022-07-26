@@ -22,11 +22,11 @@ Publishing with GNU Troff
 .AU Keith Marshall
 .AI <keith.d.marshall@ntlworld.com>
 .CE
-.\"
+.
 .\" Specify the Internet address for the groff web site.
 .\"
 .ds GROFF-WEBSITE http://www.gnu.org/software/groff
-.\"
+.
 .\" Set the PDF default document view attribute, to ensure that the document
 .\" outline is visible, each time the document is opened in Acrobat Reader.
 .\"
@@ -36,19 +36,19 @@ Publishing with GNU Troff
 .\" with additional subordinate level headings folded.
 .\"
 .nr PDFOUTLINE.FOLDLEVEL 3
-.\"
+.
 .\" Add document identification meta-data
 .\"
 .pdfinfo /Title     Portable Document Format Publishing with GNU Troff
 .pdfinfo /Author    Keith Marshall
 .pdfinfo /Subject   Tips and Techniques for Exploiting PDF Features with GNU Troff
 .pdfinfo /Keywords  groff troff PDF pdfmark
-.\"
+.
 .\" Set the default cross reference format to indicate section numbers,
 .\" rather than page numbers, when we insert a reference pointer.
 .\"
 .ds PDFHREF.INFO section \\*[SN-NO-DOT] \\$*
-.\"
+.
 .\" Define a macro, to print reference links WITHOUT the usual "see" prefix.
 .\"
 .de XR-NO-PREFIX
@@ -57,35 +57,114 @@ Publishing with GNU Troff
 .XR \\$@
 .rn xx PDFHREF.PREFIX
 ..
-.\"
-.\" Define a string,
-.\" to insert a Registered Trade Mark symbol as a superscript.
+.
+.\" Define a string, to insert a Registered Trade Mark symbol as
+.\" a superscript...
 .\"
 .ds rg \*{\(rg\*}
 .\"
-.\" Define strings, to represent frequently used registered trade marks.
+.\" ...and use it to define strings, representing frequently used
+.\" registered trade marks.
 .\"
 .ds Adobe "Adobe\Z'\\$1'\*(rg\"
 .ds Acrobat "Acrobat\Z'\\$1'\*(rg\"
 .ds Distiller "Distiller\Z'\\$1'\*(rg\"
 .ds PostScript "PostScript\Z'\\$1'\*(rg\"
-.
-.ds Microsoft "Microsoft\Z'\\$1'\*(rg\"
 .\"
+.ds Microsoft "Microsoft\Z'\\$1'\*(rg\"
+.
 .\" Establish the page layout.
 .\"
 .nr PO  2.5c
 .nr LL 17.0c
 .nr LT 17.0c
-.nr HY  0
-.nr FF  3
 .nr DI  5n
+.nr HY  0
+.
+.\" Within the table of contents, the width of the right-hand margin,
+.\" in which space is reserved for the display of page numbers, and the
+.\" appearance of the leaders which precede it, are controlled by:-
 .\"
+.char \[TC-LEADER] \h'0.8n'.
+.nr TC-MARGIN \w'00000'
+.
 .\" Generate headers in larger point sizes, for NH levels < 4,
 .\" with point size increasing by 1.5p, for each lesser NH level.
 .\"
 .nr GROWPS 4
 .nr PSINCR 1.5p
+.
+.
+.\" Implement an interface with the FS macro (from s.tmac) to facilitate
+.\" placement of footnote reference marks, with each serving as an active
+.\" pdfhref link to the associated footnote itself.
+.\"
+.de pdf:fn.mark nr
+.\" Macro to replace original duty performed by "\**"; must be invoked
+.\" at point of footnote mark placement, e.g. by FS, BEFORE recording of
+.\" the associated text within the footnote diversion is commenced.
+.\"
+.ie \\n[.$] \{\
+.   pdfhref L -D pdf:fn\\$1 -- \\$2
+.   pdfhref M -N pdf:fn\\$1r
+.   \}
+.\"
+.\" s.tmac does not publicly expose its auto-incrementing footnote index;
+.\" to avoid a dependency on an undocumented internal feature, we create
+.\" our own counter, while keeping the internal index synchronized, by
+.\" interpolating a renamed "\**", each time we increment our counter.
+.\"
+.el .\\$0 \\n+[pdf:fn.index.count] \\*[pdf:fn.index]
+.nr pdf:fn.index.count 0 1
+.rn * pdf:fn.index
+.ds * \c
+.
+.\" For versions of s.tmac which support the FS-MARK callback hook, it
+.\" is sufficient for us to answer the callback request.
+.\"
+.\" FIXME: in time, we may be able to unconditionally assume that this
+.\" callback hook will be supported...
+.\"
+.ie d FS-MARK .als FS-MARK pdf:fn.mark
+.el \{\
+.\" ...but in the interim, we may need to redefine s.tmac's FS macro,
+.\" (actually the @FS internal macro, rather than FS itself), to gain
+.\" an effect equivalent to taking control of FS-MARK, to achieve the
+.\" placement of a footnote mark as an active pdfhref link.
+.\"
+.rn @FS pdf:fn.record
+.de @FS
+.pdf:fn.mark
+.pdf:fn.record
+..
+.\}
+.\" Override s.tmac's (undocumented) footnote output hook; this emulates
+.\" the default output style for \n[FF] == 3 footnotes, with the footnote
+.\" number formatted as a pdfhref link back to the position at which the
+.\" footnote marker appears, within the document text.
+.\"
+.de FP
+.LP
+.nr pdf:fn.tag.width (u;2*\\n[FI])
+.ds pdf:fn.tag \s'-1.5p'\\$1.\s'+1.5p'
+.pdfhref M -N pdf:fn\\$1
+.in +\\n[pdf:fn.tag.width]u
+.ti -\\n[pdf:fn.tag.width]u
+.nr pdf:fn.tag.width -\\w'\\*[pdf:fn.tag]'u
+.pdfhref L -D pdf:fn\\$1r -A \\h'\\n[pdf:fn.tag.width]u'\c -- \\*[pdf:fn.tag]
+..
+.de pdfhref-nobreak
+.\" FIXME: I've only noticed this anomaly when planting pdfhref links
+.\" within footnotes; if the start of the link text is placed near the
+.\" line length limit, and all of it is moved to the start of the next
+.\" line, the "hot-spot" region is computed to be one line higher than
+.\" it should be; ending the preceding input line with "\c", and then
+.\" invoking pdfhref via this wrapper, works around this issue.
+.\"
+.ie \\n[.l]-\\n[.i]-\\n[.k]-\\w'\\$\\n[.$]' \&
+.el \p
+.pdfhref \\$*
+..
 .
 .\" Define a local macro to facilitate choice of style for emphasis;
 .\" by default, make it equivalent to the ms standard "I" macro.
@@ -326,27 +405,24 @@ All of the techniques described have been tested on
 .EM both
 GNU/Linux, and on \*[Microsoft] Windows\(tm2000 operating platforms, using
 .CW groff
-.CW 1.19.1 ,\c
-.pdfhref L -D footnote1 -- \**
+.CW 1.19.1 ,\**
 .FS
-.pdfhref M footnote1
 Later versions should, and some earlier versions may, be equally suitable.
-See
-.pdfhref W \*[GROFF-WEBSITE]
+See\c
+.pdfhref-nobreak W \*[GROFF-WEBSITE]
 for information and availability of the latest version.
 .FE
 in association with
 .CW AFPL
 .CW GhostScript
-.CW 8.14 .\c
-.pdfhref L -D footnote2 -- \**
+.CW 8.14 .\**
 .FS
-.pdfhref M footnote2
 Again, other versions may be suitable.
-See
-.pdfhref W http://ghostscript.com
+See\c
+.pdfhref-nobreak W http://ghostscript.com
 for information and availability.
 .FE
+\&
 Other tools employed, which should be readily available on
 .EM any
 Unix\(tm
@@ -363,8 +439,8 @@ on the \*[Microsoft] Windows\(tm platform,
 but several third party implementations are available.
 Some worth considering include the MKS\*(rg\~Toolkit,\**
 .FS
-A commercial offering; see
-.pdfhref W http://mkssoftware.com/products/tk/default.asp
+A commercial offering; see\c
+.pdfhref-nobreak W http://mkssoftware.com/products/tk/default.asp
 for information.
 .FE
 Cygwin,\**
@@ -377,22 +453,23 @@ POSIX
 .LG
 emulation environment and
 Unix\(tm
-toolkit for 32\(hybit \*[Microsoft] Windows\(tm platforms; see
-.pdfhref W http://cygwin.com
+toolkit for \%32\(hybit \*[Microsoft] Windows\(tm platforms; see\c
+.pdfhref-nobreak W http://cygwin.com
 for information and download.
 .FE
 or MSYS.\**
 .FS
 Another free, but minimal suite of common
 Unix\(tm
-tools for 32\(hybit \*[Microsoft] Windows\(tm, available for download from
-.pdfhref W -A ; https://mingw.osdn.io
+tools for \%32\(hybit \*[Microsoft] Windows\(tm, available for download from\c
+.pdfhref-nobreak W -A ; https://mingw.osdn.io
 it
 .EM does 
 include those tools listed above,
 and is the package which was actually used when performing the Windows\(tm2000
 platform tests referred to in the text.
 .FE
+\&
 This list is by no means exhaustive, and should in no way be construed as an
 endorsement of any of these packages, nor to imply that other similar packages,
 which may be available, are in any way inferior to them.
@@ -422,18 +499,57 @@ the appropriate macro calls, as described below, may be placed in the
 .CW groff
 document source, which should then be processed with a
 .CW groff
-command of the form
+command of the form\**
+.FS
+.pdfhref M pdf-features-fn
+.nr pdf-features-fn \n[fn*text-num]
+Note that,
+if any
+.CW -T \^\c
+.CWI dev
+option is specified,
+it should be either
+.CW -T \^\c
+.CW ps ,
+or
+.CW -T \^\c
+.CW pdf ;
+any other explicit choice is unlikely to be compatible with
+.CW -m \|\|\c
+.CW pdfmark ,
+and will have an unpredictable
+(possibly erroneous)
+effect on the ouput.
+If no
+.CW -T \^\c
+.CWI dev
+option is specified,
+(in which case
+.CW -T \^\c
+.CW ps
+is implicitly assumed),
+or if
+.CW -T \^\c
+.CW ps
+is explicitly specified,
+then the output will be produced in \*[PostScript] format,
+and will require conversion to PDF,
+(e.g. by using GhostScript tools);
+explicit specification of
+.CW -T \^\c
+.CW pdf
+will result in direct output in PDF format,
+thus obviating the need for conversion.
+.FE
 .QP
 .fam C
-groff -Tps [-m
-.I name "] -m"
+groff [-Tps\h'0.2p'|\h'0.2p'-Tpdf] [-m\F[]\|\|\FC\c
+.I name ]
+-m\F[]\|\|\FC\c
 .B pdfmark
-.I options \& [-
-.I "file ..." \& "...] "
-.LP
-(Or use the PDF post-processor to avoid using ghostscript,
-.CW -Tpdf\c
-).
+.I options \F[]\|\|\FC\c [-
+.I file \F[]\|\|\FC\c "...] "
+\&...
 .LP
 It may be noted that the
 .CW pdfmark
@@ -941,6 +1057,7 @@ It may be used in any redefined specification for
 (or in the analogous definition of
 .CW PDFHREF.VIEW ,
 described in
+'ne 2v
 .XR-NO-PREFIX pdfhref-view ),
 but
 .EM not
@@ -2601,17 +2718,41 @@ macros in conjunction with the
 macros,
 simply by issuing a
 .CW groff
-command of the form
+command of the form\**
+.FS
+Once again,
+.pdfhref L -D pdf-features-fn -- as noted in footnote\*{\n[pdf-features-fn]\*}
+to
+.XR-NO-PREFIX pdf-features ,
+do not specify any
+.CW -T \^\c
+.CWI dev
+option,
+other than
+.CW -T \^\c
+.CW ps ,
+or
+.CW -T \^\c
+.CW pdf ;
+specify
+.CW -T \^\c
+.CW pdf ,
+if you wish to avoid the conversion of \*[PostScript] output to PDF,
+which will be required if you specify
+.CW -T \^\c
+.CW ps ,
+or if you omit the
+.CW -T \^\c
+.CWI dev
+option entirely.
+.FE
 .QP
 .fam C
-groff -Tps
-.B -mspdf
-.I "-options ...\&" ] [
-file(s) ...
-.LP
-(Or use the PDF post-processor to avoid using ghostscript,
-.CW -Tpdf\c
-).
+groff [-Tps\h'0.2p'|\h'0.2p'-Tpdf] [-m\F[]\|\|\FC\c
+.B spdf
+.I options \F[]\|\|\FC\c [-
+.I file \F[]\|\|\FC\c "...] "
+\&...
 .LP
 When using the
 .CW spdf.tmac
@@ -2670,6 +2811,7 @@ macro.
 .
 .NH 4
 .XN -S -N xn-macro -- The \F[C]XN\F[] Macro
+.bp
 .
 .NH 1
 .XN The PDF Publishing Process

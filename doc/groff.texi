@@ -424,7 +424,7 @@ developing GNU and promoting software freedom.''
 @title groff
 @subtitle The GNU implementation of @code{troff}
 @subtitle Edition 1.23.0
-@subtitle September 2021
+@subtitle October 2021
 @author by Trent A.@tie{}Fisher
 @author and Werner Lemberg
 
@@ -2763,8 +2763,7 @@ Default: 0.3@dmn{v} (1@dmn{v} on low-resolution devices).
 
 @Defmpreg {QI, ms}
 Defines the indentation amount used on both sides of a paragraph set
-with the @code{QP} or between the @code{QS} and @code{QE} macros.  This
-is a Berkeley extension.
+with the @code{QP} or between the @code{QS} and @code{QE} macros.
 
 Effective: next paragraph.
 
@@ -2942,6 +2941,22 @@ Effective: next page.
 
 Default: 2@dmn{n}.
 @endDefmpreg
+
+@Defmpreg {TC-MARGIN, ms}
+Defines the width of the field in which page numbers are set in a table
+of contents entry; the right margin thus moves inboard by this amount.
+This is a GNU extension.
+
+Effective: next @code{PX} call.
+
+Default: @code{\w'000'}
+@endDefmpreg
+
+@c XXX: Normally we'd have an entry for TC-LEADER here, but it's a
+@c special character and we have no custom Texinfo macros for defining
+@c (and indexing) these.  There would be little point in an index for
+@c one item, and the plan is to drop this entire @section from this
+@c manual once doc/ms.ms is ready.  See Savannah #60061.
 
 @c ---------------------------------------------------------------------
 
@@ -3132,7 +3147,7 @@ specified again or a heading or different paragraphing macro is called.
 
 @Defmac {QP, , ms}
 Set a paragraph indented from both left and right margins by the amount
-stored in the @code{QI} register.  This is a Berkeley extension.
+stored in the @code{QI} register.
 @endDefmac
 
 @DefmacList {QS, , ms}
@@ -3140,8 +3155,7 @@ stored in the @code{QI} register.  This is a Berkeley extension.
 Begin (@code{QS}) and end (@code{QE}) a region where each paragraph is
 indented from both margins by the amount stored in the @code{QI}
 register.  The text between @code{QS} and @code{QE} can be structured
-further by use of other paragraphing macros.  These macros are GNU
-extensions.
+further by use of other paragraphing macros.
 @endDefmac
 
 @Defmac {XP, , ms}
@@ -3214,8 +3228,9 @@ as by calling @samp{.NH 1} and then @samp{.NH 1} as the next such call,
 Alternatively, a first argument of@tie{}@code{S} can be given, followed
 by integral arguments to number the levels of the heading explicitly.
 Further automatic numbering, if used, resumes using the specified
-heading level indices as their predecessors.  This feature is a GNU
-extension.
+heading level indices as their predecessors.
+@c Although undocumented in Tuthill's 4.2BSD ms.diffs paper...
+This feature is a Berkeley extension.
 @endDefmac
 
 An example may be illustrative.
@@ -3249,7 +3264,8 @@ normally precedes each heading is omitted.
 
 @DefstrList {SN-STYLE, ms}
 @DefstrItemx {SN-DOT, ms}
-@DefstrListEndx {SN-NO-DOT, ms}
+@DefstrItemx {SN-NO-DOT, ms}
+@DefstrListEndx {SN, ms}
 After invocation of @code{NH}, the assigned number is made available in
 the strings @code{SN-DOT} (as it appears in a printed heading with
 default formatting, followed by a terminating period) and
@@ -3269,6 +3285,10 @@ define the alias as follows.
 @noindent
 Any such change in numbering style becomes effective from the next use
 of @code{NH} following redefinition of the alias for @code{SN-STYLE}.
+The formatted number of the current section is available in the
+@code{SN} string (a feature first documented by Berkeley), facilitating
+its inclusion in @code{XS}/@code{XA}/@code{XE} table of contents
+entries.
 @endDefstr
 
 @Defmac {SH, [@Var{match-level}], ms}
@@ -3706,7 +3726,7 @@ begins a kept display of the layout specified in its first argument;
 non-kept displays are begun with dedicated macros corresponding to their
 layout.
 
-@DefmacList {DS, @t{L}, ms}
+@DefmacList {DS, [@t{L}], ms}
 @DefmacListEndx {LD, , ms}
 Begin (@code{DS}:@: kept) left-aligned display.
 @endDefmac
@@ -3760,8 +3780,8 @@ boundary.
 @cindex equations [@code{ms}]
 @cindex references [@code{ms}]
 
-The @file{ms} macros support the standard @code{groff} preprocessors:
-@code{tbl}, @code{pic}, @code{eqn}, and @code{refer}.
+The @file{ms} package is often used with the @code{tbl}, @code{pic},
+@code{eqn}, and @code{refer} preprocessors.
 @pindex tbl
 @pindex pic
 @pindex eqn
@@ -3801,6 +3821,10 @@ to the preprocessor and the format of the bibliographic database.  Type
 @samp{man refer} at the command line to view it.
 @endDefmac
 
+When @code{refer} emits collected references (as might be done on a
+``Works Cited'' page), it interpolates the @code{REFERENCES} string as
+an unnumbered section heading (@code{SH}).
+
 @menu
 * Example multi-page table::
 @end menu
@@ -3829,6 +3853,10 @@ l | l .
 .TE
 @endCartoucheExample
 
+Attempting to place a multi-page table inside a keep can lead to
+unpleasant results, particularly if the @code{tbl} @code{allbox} option
+is used.
+
 @c ---------------------------------------------------------------------
 
 @node ms Footnotes,  , Example multi-page table, ms Body Text
@@ -3854,11 +3882,12 @@ page.
 
 @DefmacList {FS, [@Var{marker}], ms}
 @DefmacListEndx {FE, , ms}
-Begin (@code{FS}) and end (@code{FE}) a footnote.  A @var{marker}
-argument is placed at the beginning of the footnote text.  If
-@var{marker} is omitted, the next pending automatic footnote number
-enqueued by interpolation of the @code{*} string is used, and if none
-exists, nothing is prefixed.
+Begin (@code{FS}) and end (@code{FE}) a footnote.  @code{FS} calls
+@code{FS-MARK} with any supplied @var{marker} argument, which is then
+also placed at the beginning of the footnote text.  If @var{marker} is
+omitted, the next pending automatic footnote number enqueued by
+interpolation of the @code{*} string is used, and if none exists,
+nothing is prefixed.
 @endDefmac
 
 You may not desire automatically numbered footnotes in spite of their
@@ -3870,6 +3899,16 @@ specifying its marker at the appropriate place (for example, by using
 correspondence.  You may wish to use @code{\*@{} and @code{\*@}} to
 superscript the marker at the anchor point, in the footnote text, or
 both.
+
+@code{groff} @file{fs} provides a hook macro, @code{FS-MARK}, for
+user-determined operations to be performed when the @code{FS} macro is
+called.  It is passed the same arguments as @code{FS} itself.  An
+application of @code{FS-MARK} is anchor placement for a hyperlink
+reference, so that a footnote can link back to its referential
+context.@footnote{``Portable Document Format Publishing with GNU
+Troff'', @file{pdfmark.ms} in the @code{groff} distribution, uses this
+technique.}  By default, this macro has an empty definition.
+@code{FS-MARK} is a GNU extension.
 
 @cindex footnotes, and keeps [@code{ms}]
 @cindex keeps, and footnotes [@code{ms}]
@@ -4051,19 +4090,68 @@ gutter width; it is a GNU extension.
 @cindex @code{ms} macros, creating table of contents
 @cindex table of contents, creating [@code{ms}]
 
-The facilities in the @file{ms} macro package for creating a table of
-contents are semi-automated at best.  Assuming that you want the table
-of contents to consist of the document's headings, you need to repeat
-those headings wrapped in @code{XS} and @code{XE} macros.
+Because @code{roff} formatters process their input in a single pass,
+material on page 50, for example, cannot influence what appears on
+page@tie{}1---this poses a challenge for a table of contents at its
+traditional location in front matter, if you wish to avoid manually
+maintaining it.  @code{ms} enables the collection of material to be
+presented in the table of contents as it appears, saving its page number
+along with it, and then emitting the collected contents on demand toward
+the end of the document.  The table of contents can then be resequenced
+to its desired location as part of post-processing---with a PDF page
+relocation tool, or by physically rearranging the pages of a printed
+document, depending on the output format and circumstances.
 
-@DefmacList {XS, [@Var{page}], ms}
-@DefmacItemx {XA, [@Var{page}], ms}
+Define an entry to appear in the table of contents by bracketing its
+text between calls to the @code{XS} and @code{XE} macros.  A typical
+application is to call them immediately after @code{NH} or @code{SH}
+pairs, supplements an entry---for instance, when it requires multiple
+output lines, whether because a heading is too long to fit or because
+style dictates that page numbers not be repeated.  In a document with a
+multi-level sectioning structure, you may wish to indent the text thus
+wrapped to correspond to its sectioning depth; this can be done in the
+entry text by prefixing it with tabs or horizontally spacing escape
+sequences, or by providing a second argument to the @code{XA} macro.
+@code{XS} and @code{XA} automatically associate the page number where
+they are called with the text following them, but they accept arguments
+to override this behavior.  At the end of the document, call @code{TC}
+or @code{PX} to emit the table of contents; @code{TC} resets the page
+number to @samp{i} (Roman numeral one), and then calls @code{PX}.
+
+All of these macros are Berkeley extensions.
+
+@DefmacList {XS, [@Var{page-number}], ms}
+@DefmacItemx {XA, [@Var{page-number} [@Var{indentation}]], ms}
 @DefmacListEndx {XE, , ms}
-These macros define a table of contents or an individual entry in the
-table of contents, depending on their use.  The macros are very simple;
-they cannot indent a heading based on its level.  The easiest way to
-work around this is to add tabs to the table of contents string.  The
-following is an example:
+Begin, supplement, and end a table of contents entry.  Each entry is
+associated with @var{page-number} (otherwise the current page number); a
+@var{page-number} of @samp{no} prevents a leader and page number from
+being emitted for that entry.  Use of @code{XA} within
+@code{XS}/@code{XE} is optional; it can be repeated.  If
+@var{indentation} is present, a supplemental entry is indented by that
+amount; ens are assumed if no unit is indicated.  Text on input lines
+between @code{XS} and @code{XE} is stored for later recall by @code{PX}.
+@endDefmac
+
+@Defmac {PX, [@code{no}], ms}
+Switch to single-column layout.  Unless @code{no} is specified, center
+and interpolate the @code{TOC} string in bold and two points larger than
+the body text.  Emit the table of contents entries.
+@endDefmac
+
+@Defmac {TC, [@code{no}], ms}
+Set the page number to@tie{}1, the page number format to lowercase Roman
+numerals, and call @code{PX} (with a @code{no} argument, if present).
+@endDefmac
+
+You can customize the style of the leader that bridges each table of
+contents entry with its page number; define the @code{TC-LEADER} special
+character by using the @code{char} request.  A typical leader combines
+the dot glyph @samp{.} with a horizontal space escape sequence to spread
+the dots.  The width of the page number field is stored in the
+@code{TC-MARGIN} register.
+
+Here's an example of typical @code{ms} table of contents preparation.
 
 @CartoucheExample
 .NH 1
@@ -4071,63 +4159,30 @@ Introduction
 .XS
 Introduction
 .XE
-.LP
-...
-.CW
+@r{@dots{}}
 .NH 2
 Methodology
 .XS
 Methodology
+.XA
+@arrow{}@arrow{}Fassbinder's Approach
+@arrow{}@arrow{}Kahiu's Approach
 .XE
-.LP
-...
+@r{@dots{}}
+.NH 1
+Findings
+.XS
+Findings
+.XE
+@r{@dots{}}
+.TC
 @endCartoucheExample
 
-You can manually create a table of contents by beginning with the
-@code{XS} macro for the first entry, specifying the page number for that
-entry as the argument to @code{XS}.  Add subsequent entries using the
-@code{XA} macro, specifying the page number for that entry as the
-argument to @code{XA}.  The following is an example:
-
-@CartoucheExample
-.XS 1
-Introduction
-.XA 2
-A Brief History of the Universe
-.XA 729
-Details of Galactic Formation
-...
-.XE
-@endCartoucheExample
-@endDefmac
-
-@Defmac {TC, [@code{no}], ms}
-Prints the table of contents on a new page, setting the page number
-to@tie{}@strong{i} (Roman lowercase numeral one).  You should usually
-place this macro at the end of the file, since @code{groff} is a
-single-pass formatter and can only print what has been collected up to
-the point that the @code{TC} macro appears.
-
-The optional argument @code{no} suppresses printing the title specified
-by the string @code{TOC}.
-@endDefmac
-
-@Defmac {PX, [@code{no}], ms}
-Prints the table of contents on a new page, using the current page
-numbering sequence.  Use this macro to print a manually generated table
-of contents at the beginning of your document.
-
-The optional argument @code{no} suppresses printing the title specified
-by the string @code{TOC}.
-@endDefmac
-
-The @cite{Groff and Friends HOWTO} includes a @code{sed} script that
-automatically inserts @code{XS} and @code{XE} macro entries after each
-heading in a document.
-
-Altering the @code{NH} macro to automatically build the table of
-contents is perhaps initially more difficult, but would save a great
-deal of time in the long run if you use @file{ms} regularly.
+Provins's ``Groff and Friends HOWTO'' includes a @code{sed} script that
+automatically inserts @code{XS} and @code{XE} entries after each heading
+in a document.  Altering the @code{NH} macro to automatically build the
+table of contents is perhaps initially more difficult, but could save a
+great deal of time in the long run if you use @code{ms} regularly.
 
 @c ---------------------------------------------------------------------
 
@@ -4307,8 +4362,12 @@ Uppercase Æ ligature.
 @cindex @code{ms} macros, @code{groff} differences from @acronym{AT&T}
 @cindex @acronym{AT&T} @file{ms}, macro package differences
 
-This section lists the (minor) differences between the @code{groff}
-@file{ms} macros and @acronym{AT&T} @file{ms} macros.
+The @code{groff} @file{ms} macros are a complete re-implementation,
+using no original @acronym{AT&T} code.  Since they take advantage of the
+extended features in @code{groff}, they cannot be used with
+@acronym{AT&T} @code{troff}.  @code{groff} @file{ms} supports several
+features described above as Berkeley and Version 10 Research Unix
+extensions, and adds several of its own.
 
 @itemize @bullet
 @item
@@ -4364,21 +4423,10 @@ Displays are left-aligned by default, not indented.  In @acronym{AT&T}
 @file{ms}, it is synonymous with @samp{.DS L}.
 
 @item
-Block displays were not documented in the @acronym{AT&T} @file{ms}
-manual (Berkeley corrected this oversight), but Version@tie{}7 Unix
-@file{ms} supported them nevertheless, as does @code{groff} @file{ms}
-(this is thus only an @emph{apparent} difference).
-
-@item
 Right-aligned displays are available.  The @acronym{AT&T} @file{ms}
 manual observes that ``it is tempting to assume that @samp{.DS R} will
 right adjust lines, but it doesn't work''.  In @code{groff} @file{ms},
 it does.
-
-@item
-@code{groff} @file{ms} handles @code{S} as the first argument to the
-@code{NH} macro specially, allowing alteration of the automatic heading
-numbering sequence.
 
 @item
 @code{groff} @file{ms} supports the @code{PN} register, but it is not
@@ -4401,6 +4449,11 @@ occasion for a default column width register.  Further, the @code{MINGW}
 register and the second argument to @code{MC} specify a @emph{minimum}
 space between columns, not the fixed gutter width of @acronym{AT&T}
 @file{ms}.
+
+@item
+The @acronym{AT&T} @file{ms} manual did not document the @code{QI}
+register, whereas Berkeley did; @code{groff} @file{ms} accordingly
+supports it.
 @end itemize
 
 @Defmpreg {GS, ms}
@@ -11033,14 +11086,14 @@ spacing; it is associated with the environment (@pxref{Environments}).
 @cindex @code{\s}, with fractional type sizes
 A @dfn{scaled point} is equal to @math{1/@var{sizescale}} points, where
 @var{sizescale} is specified in the device description file @file{DESC},
-and defaults to 1@tie{}.  A new scaling indicator @samp{z} has has the
-effect of multiplying by @var{sizescale}.  Requests and escape sequences
-in GNU @code{troff} interpret arguments that represent a point size as
-being in units of scaled points; that is, they evaluate each such
-argument using a default scaling indicator of @samp{z}.  Arguments
-treated in this way comprise those to the escapes @code{\H} and
-@code{\s}, to the request @code{ps}, the third argument to the @code{cs}
-request, and the second and fourth arguments to the @code{tkf} request.
+and defaults to@tie{}1.  A new scaling indicator @samp{z} has the effect
+of multiplying by @var{sizescale}.  Requests and escape sequences in GNU
+@code{troff} interpret arguments that represent a point size as being in
+units of scaled points; that is, they evaluate each such argument using
+a default scaling indicator of @samp{z}.  Arguments treated in this way
+comprise those to the escape sequences @code{\H} and @code{\s}, to the
+request @code{ps}, the third argument to the @code{cs} request, and the
+second and fourth arguments to the @code{tkf} request.
 
 For example, if @var{sizescale} is@tie{}1000, then a scaled point
 is one one-thousandth of a point.  The request @samp{.ps 10.25} is
@@ -17882,7 +17935,7 @@ The default font family is @var{fam}.
 
 @item fonts @var{n} @var{F1} @r{@dots{}} @var{Fn}
 @kindex fonts
-Fonts @var{F1} @dots{} @var{Fn} are mounted in the font positions
+Fonts @var{F1}, @dots{}, @var{Fn} are mounted at font positions
 @var{m}+1, @dots{}, @var{m}+@var{n} where @var{m} is the number of
 @code{styles} (see below).  This directive may extend over more than one
 line.  A font name of@tie{}@code{0} causes no font to be mounted at the
@@ -18063,9 +18116,9 @@ multiple sizes.  While paper size measurements in the device description
 file are in absolute units, measurements applicable to fonts must be
 proportional to the type size.  @code{groff} achieves this using the
 precedent set by @acronym{AT&T} device-independent @code{troff}: one
-size of a font is chosen as a norm, and all other sizes are scaled
-linearly relative to that basis.  The ``unit width'' is the number of
-basic units per point.
+font size is chosen as a norm, and all others are scaled linearly
+relative to that basis.  The ``unit width'' is the number of basic units
+per point when the font is rendered at this nominal size.
 
 For instance, @code{groff}'s @code{lbp} device uses a @code{unitwidth}
 of@tie{}800.  In its Times roman font @samp{TR}, its @code{spacewidth}
@@ -18087,7 +18140,8 @@ extend to the end of a line.  Empty lines are ignored in both sections.
 @table @code
 @item name @var{f}
 @kindex name
-The name of the font is@tie{}@var{f}.
+The name of the font is@tie{}@var{f}.  @samp{DESC} and @samp{0} are
+invalid font names.
 
 @item spacewidth @var{n}
 @kindex spacewidth
@@ -18134,10 +18188,10 @@ is optional.
 @kindex charset
 The directive @code{charset} starts the character set
 subsection.@footnote{For typesetter devices, this keyword is misnamed
-since it starts an ordered list of glyphs, not characters.}  The
-@code{charset} line is followed by a sequence of lines, each with
-information about one glyph.  A line comprises a number of fields
-separated by spaces or tabs.  The format is as follows.
+since it starts a list of glyphs, not characters.}  It precedes a series
+of glyph descriptions, one per line.  Each such glyph description
+comprises a set of fields separated by spaces or tabs and organized as
+follows.
 
 @quotation
 @var{name} @var{metrics} @var{type} @var{code} [@var{entity-name}]
@@ -18211,14 +18265,13 @@ glyph, that is, the distance below the baseline to which the glyph
 extends (downwards is positive); if a glyph does not extend below the
 baseline, it should be given a zero depth, rather than a negative depth.
 Italic corrections are relevant to glyphs in italic or oblique styles.
-The @var{italic-correction} subfield gives the amount of space that
-should be added after the glyph when it is to be immediately followed by
-a glyph from an upright style.  The @var{left-italic-correction}
-subfield gives the amount of space that should be added before the glyph
-when it is to be immediately preceded by a glyph from an upright style.
-The @var{subscript-correction} gives the amount of space that should be
-added after a glyph before adding a subscript.  This should be less than
-the italic correction.
+The @var{italic-correction} is the amount of space that should be added
+after an oblique glyph to be followed immediately by an upright glyph.
+The @var{left-italic-correction} is the amount of space that should be
+added before an oblique glyph to be preceded immediately by an upright
+glyph.  The @var{subscript-correction} is the amount of space that
+should be added after an oblique glyph to be followed by a subscript; it
+should be less than the italic correction.
 
 The @var{type} field gives a featural description of the glyph.
 
@@ -18230,8 +18283,8 @@ means the glyph has a descender (for example, @samp{p});
 means the glyph has an ascender, (for example, @samp{b}); and
 
 @item 3
-means the glyph has both an ascender and a descender (for example, this
-is true of parentheses in some fonts).
+means the glyph has both an ascender and a descender (for example,
+parentheses in some fonts).
 @end table
 
 The @var{code} field gives a numeric identifier that the postprocessor

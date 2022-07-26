@@ -77,11 +77,11 @@ and indexing.
 .
 .I ms
 supports the
-.IR \%@g@tbl (@MAN1EXT@),
-.IR \%@g@eqn (@MAN1EXT@),
-.IR \%@g@pic (@MAN1EXT@),
+.MR @g@tbl @MAN1EXT@ ,
+.MR @g@eqn @MAN1EXT@ ,
+.MR @g@pic @MAN1EXT@ ,
 and
-.IR \%@g@refer (@MAN1EXT@)
+.MR @g@refer @MAN1EXT@
 preprocessors for inclusion of tables,
 mathematical equations,
 diagrams,
@@ -172,7 +172,9 @@ macro at the end of your document.
 The following tables list the document control registers and strings.
 .
 For any parameter whose default is unsatisfactory,
-define its register or string before calling any
+define its register,
+string,
+or special character before calling any
 .I ms
 macro other than
 .BR RP .
@@ -321,6 +323,10 @@ Other settings
 Parameter	Definition	Effective	Default
 _
 \[rs]n[MINGW]	Minimum gutter width	next page	2n
+\[rs]n[TC\-MARGIN]	TOC page number margin width	\
+next \f[B]PX\f[] call	\[rs]w\[aq]000\[aq]
+\[rs][TC\-LEADER]	TOC leader character	next \f[B]PX\f[] call\
+	.\[rs]h\[aq]1m\[aq]
 _
 .TE
 .
@@ -343,6 +349,18 @@ this is the case only for output to terminals and emulators thereof.
 The \[lq]gutter\[rq] affected by
 .B \[rs]n[MINGW]
 is the gap between columns in multiple-column page arrangements.
+.
+The
+.B TC\-MARGIN
+register and
+.B TC\-LEADER
+special character affect the formatting of tables of contents assembled
+by the
+.BR XS ,
+.BR XA ,
+and
+.B XE
+macros.
 .
 .
 .\" ====================================================================
@@ -367,7 +385,7 @@ multiplied by\~1000.
 In
 .I ms
 documents that don't need to be portable to other implementations,
-using a scaling indicator,
+use of a scaling indicator,
 as in
 .RB \[lq] ".nr PS 10.5p" \[rq],
 is preferable.
@@ -648,8 +666,6 @@ is called.
 Set a paragraph indented from both left and right margins by
 .BR \[rs]n[QI] .
 .
-This macro and register are Berkeley extensions.
-.
 .
 .TP
 .B .QS
@@ -667,8 +683,6 @@ The text between
 and
 .B .QE
 can be structured further by use of other paragraphing macros.
-.
-These macros are GNU extensions.
 .
 .
 .TP
@@ -747,7 +761,8 @@ Further automatic numbering,
 if used,
 resumes using the specified heading level indices as their predecessors.
 .
-This feature is a GNU extension.
+.\" Although undocumented in Tuthill's 4.2BSD ms.diffs paper...
+This feature is a Berkeley extension.
 .
 .
 .PP
@@ -784,6 +799,13 @@ of
 .B .NH
 following redefinition of the alias for
 .BR \[rs]*[SN\-STYLE] .
+.
+The formatted number of the current section is available in
+.B \[rs]*[SN]
+(a feature first documented by Berkeley),
+facilitating its inclusion in
+.BR .XS / .XA / .XE
+table of contents entries.
 .
 .
 .TP
@@ -1197,7 +1219,7 @@ layout.
 .
 .
 .TP
-.B .DS L
+.BR .DS \~[ L ]
 .TQ
 .B .LD
 Begin
@@ -1281,14 +1303,13 @@ Changes to either register take effect at the next display boundary.
 .
 The
 .I ms
-macros support the standard
-.I groff
-preprocessors:
+package is often used with the
 .IR \%@g@tbl ,
 .IR \%@g@pic ,
 .IR \%@g@eqn ,
 and
-.IR \%@g@refer .
+.I \%@g@refer
+preprocessors.
 .
 The
 .B \[rs]n[DD]
@@ -1364,18 +1385,23 @@ Denote a reference to be processed by the
 .I refer
 preprocessor.
 .
-The GNU
-.IR \%@g@refer (@MAN1EXT@)
-manual page provides a comprehensive reference
-to the preprocessor and the format of the
-bibliographic database.
+.
+.P
+When
+.I \%@g@refer
+emits collected references
+(as might be done on a \[lq]Works Cited\[rq] page),
+it interpolates the string
+.B \[rs]*[REFERENCES]
+as an unnumbered section heading
+.RB ( .SH ).
 .
 .
-.PP
+.P
 Attempting to place a multi-page table inside a keep can lead to
 unpleasant results,
 particularly if the
-.I tbl
+.I tbl \" generic
 .RB \[lq] allbox \[rq]
 option is used.
 .
@@ -1418,9 +1444,14 @@ of a text column or page.
 .RI \~[ marker ]
 Begin a footnote.
 .
-A
+The
+.B .FS\-MARK
+hook
+(see below)
+is called with any supplied
 .I marker
-argument is placed at the beginning of the footnote text.
+argument,
+which is then also placed at the beginning of the footnote text.
 .
 If
 .I marker
@@ -1436,6 +1467,25 @@ nothing is prefixed.
 .TP
 .B .FE
 End footnote text.
+.
+.
+.P
+.I groff ms
+provides a hook macro,
+.BR FS\-MARK ,
+for user-determined operations to be performed when the
+.B FS
+macro is called.
+.
+It is passed the same arguments as
+.B .FS
+itself.
+.
+By default,
+this macro has an empty definition.
+.
+.B .FS\-MARK
+is a GNU extension.
 .
 .
 .P
@@ -1458,26 +1508,45 @@ respectively.
 .
 .
 .P
-The
+Paragraph-level formatting of footnotes is performed by a macro named
+.BR FP ,
+which is called once for each individual footnote.
+A default implementation of
+.B FP
+is provided;
+alternatively,
+you may define your own replacement implementation,
+and so assert your own control over footnote paragraph formatting.
+.
+.P
+When using the default implementation of
+.BR FP ,
+the
 .B FF
 register controls the formatting of automatically numbered footnotes,
 and those for which
 .B .FS
-is given a marker argument,
-at the bottom of a column or page as follows.
-.
+is given a
+.I marker
+argument,
+at the bottom of a column or page as follows:-
 .
 .RS
 .TP
 0
-Set an automatic number as a superscript
+Set an automatically generated number,
+or a specified
+.B FS
+.I marker
+argument,
+as a superscript
 (on typesetter devices)
 or surrounded by square brackets
 (on terminals).
 .
 The footnote paragraph is indented if there is an
 .B .FS
-argument or an automatic number.
+argument or an automatically generated number.
 .
 This is the default.
 .
@@ -1487,7 +1556,7 @@ This is the default.
 Like
 .BR 0 ,
 but set the marker as regular text,
-and follow an automatic number with a period.
+and follow an automatically generated number with a period.
 .
 .
 .TP
@@ -1503,6 +1572,34 @@ Like
 .BR 1 ,
 but set the footnote paragraph with the marker hanging.
 .RE
+.
+.P
+Conversely,
+if you choose to provide your own
+.B FP
+macro implementation,
+.I you
+have control of how footnote paragraphs will be formatted;
+it is your choice as to how the
+.B FF
+register should be interpreted,
+(if at all).
+For each individual footnote,
+your macro will be called with one argument,
+which represents either an automatically generated footnote number,
+or the verbatim
+.I marker
+argument passed in the initiating
+.B FS
+macro call;
+in the latter case,
+an explicit second argument of
+.RB \[lq] no \[rq]
+will also be present,
+indicating that no embellishment of the footnote
+.I marker
+(as may be appropriate for footnote numbers)
+is required.
 .
 .
 .\" ====================================================================
@@ -1529,7 +1626,7 @@ to set the left,
 center,
 and right footers similarly.
 .
-The approach works best for documents that do not distinguish odd and
+This approach works best for documents that do not distinguish odd and
 even pages.
 .
 .
@@ -1723,47 +1820,144 @@ it is a GNU extension.
 .SS "Creating a table of contents"
 .\" ====================================================================
 .
-Wrap text that you want to appear in the table of contents in
+Define an entry to appear in the table of contents by bracketing its
+text between calls to the
 .B XS
 and
 .B XE
 macros.
 .
-Use the
-.B TC
-macro to print the table of contents at the end of the document,
-resetting the page number to\~\c
-.B i
-(Roman numeral\~1).
+A typical application is to call them immediately after
+.B NH
+or
+.B SH
+and repeat the heading text within them.
 .
+The
+.B XA
+macro,
+used within
+.BR .XS / .XE
+pairs,
+supplements an entry\[em]for instance,
+when it requires multiple output lines,
+whether because a heading is too long to fit or because style dictates
+that page numbers not be repeated.
 .
-.P
-You can manually create a table of contents
-by specifying a page number as the first argument to
-.BR XS .
-.
-Add subsequent entries using the
+In a document with a multi-level sectioning structure,
+you may wish to indent the text thus wrapped to correspond to its
+sectioning depth;
+this can be done in the entry text by prefixing it with tabs or
+horizontally spacing escape sequences,
+or by providing a second argument to the
 .B XA
 macro.
 .
-Use the
+.B .XS
+and
+.B .XA
+automatically associate the page number where they are called with the
+text following them,
+but they accept arguments to override this behavior.
+.
+At the end of the document,
+call
+.B TC
+or
 .B PX
-macro to print a manually-generated table of contents
-without resetting the page number.
+to emit the table of contents;
+.B .TC
+resets the page number
+.RB to\~ i
+(Roman numeral one),
+and then calls
+.BR PX .
+.
+.
+.TP
+.B .XS\c
+.RI \~[ page-number ]
+.TQ
+.B .XA\c
+.RI \~[ page-number \~[ indentation ]]
+.TQ
+.B .XE
+Begin,
+supplement,
+and end a table of contents entry.
+.
+Each entry is associated with
+.I page-number
+(otherwise the current page number);
+a
+.I page-number
+of
+.RB \[lq] no \[rq]
+prevents a leader and page number from being emitted for that entry.
+.
+Use of
+.B .XA
+within
+.BR .XS / .XE
+is optional;
+it can be repeated.
+.
+If
+.I indentation
+is present,
+a supplemental entry is indented by that amount;
+ens are assumed if no unit is indicated.
+.
+Text on input lines between
+.B .XS
+and
+.B .XE
+is stored for later recall by
+.BR .PX .
+.
+.
+.TP
+.BR .PX \~[ no ]
+Switch to single-column layout.
+.
+Unless
+.RB \[lq] no \[rq]
+is specified,
+center and interpolate
+.B \[rs]*[TOC]
+in bold and two points larger than the body text.
+.
+Emit the table of contents entries.
+.
+.
+.TP
+.BR .TC \~[ no ]
+Set the page number to\~1,
+the page number format to lowercase Roman numerals,
+and call
+.B PX
+(with a
+.RB \[lq] no \[rq]
+argument,
+if present).
 .
 .
 .P
-If you give the argument
-.RB \[lq] no \[rq]
-to either
-.B PX
-or
-.BR TC ,
-.I groff
-suppresses printing the title
-specified by the
-.B \[rs]*[TOC]
-string.
+You can customize the style of the leader that bridges each table of
+contents entry with its page number;
+define the
+.B TC\-LEADER
+special character by using the
+.B char
+request.
+.
+A typical leader combines the dot glyph
+.RB \[lq] .\& \[rq]
+with a horizontal space escape sequence to spread the dots.
+.
+The width of the page number field is stored in the
+.B TC\-MARGIN
+register.
 .
 .
 .\" ====================================================================
@@ -1780,7 +1974,10 @@ Since they take advantage of the extended features in
 they cannot be used with AT&T
 .IR troff .
 .
-Other differences include:
+.I groff ms
+supports several features described above as Berkeley and Version 10
+Research Unix extensions,
+and adds several of its own.
 .
 .
 .IP \[bu] 3n
@@ -1812,15 +2009,6 @@ The error-handling policy of
 .I groff ms
 is to detect and report errors,
 rather than silently to ignore them.
-.
-.
-.IP \[bu]
-Berkeley localisms, in particular the
-.B TM
-and
-.B CT
-macros,
-are not implemented.
 .
 .
 .IP \[bu]
@@ -1933,21 +2121,6 @@ it is synonymous with
 .
 .
 .IP \[bu]
-Block displays were not documented in the AT&T
-.I ms
-manual
-(Berkeley corrected this oversight),
-but Version\~7 Unix
-.I ms
-supported them nevertheless,
-as does
-.I groff ms
-(this is thus only an
-.I apparent
-difference).
-.
-.
-.IP \[bu]
 Right-aligned displays are available.
 .
 The AT&T
@@ -1960,16 +2133,6 @@ but it doesn't work\[rq].
 In
 .IR "groff ms" ,
 it does.
-.
-.
-.IP \[bu]
-.I groff ms
-handles
-.RB \[lq] S \[rq]
-as the first argument to the
-.B NH
-macro specially,
-allowing alteration of the automatic heading numbering sequence.
 .
 .
 .IP \[bu]
@@ -2035,6 +2198,17 @@ specify a
 space between columns,
 not the fixed gutter width of AT&T
 .IR ms .
+.
+.
+.IP \[bu]
+The AT&T
+.I ms
+manual did not document the
+.B QI
+register,
+whereas Berkeley did;
+.I "groff ms"
+accordingly supports it.
 .
 .
 .IP \[bu]
@@ -2221,7 +2395,6 @@ Larry Kollar
 .SH "See also"
 .\" ====================================================================
 .
-.
 A manual is available in source and rendered form.
 .
 On your system,
@@ -2240,6 +2413,27 @@ Macro Package\[rq];
 Larry Kollar.
 .
 .
+.TP
+.I \%@DOCDIR@/\:msboxes\:.ms
+.TQ
+.I \%@DOCDIR@/\:msboxes\:.pdf
+\[lq]Using PDF boxes with the
+.I ms
+macros\[rq];
+Deri James.
+.
+.B BOXSTART
+and
+.B BOXSTOP
+macros are available via the
+.I sboxes
+extension package,
+enabling colored,
+bordered boxes when the
+.B pdf
+output device is used.
+.
+.
 .PP
 .IR "Groff: The GNU Implementation of troff" ,
 by Trent A.\& Fisher and Werner Lemberg,
@@ -2251,12 +2445,12 @@ You can browse it interactively with \[lq]info groff\[rq].
 .
 .
 .PP
-.IR groff (@MAN1EXT@),
-.IR \%@g@troff (@MAN1EXT@),
-.IR \%@g@tbl (@MAN1EXT@),
-.IR \%@g@pic (@MAN1EXT@),
-.IR \%@g@eqn (@MAN1EXT@),
-.IR \%@g@refer (@MAN1EXT@)
+.MR groff @MAN1EXT@ ,
+.MR @g@troff @MAN1EXT@ ,
+.MR @g@tbl @MAN1EXT@ ,
+.MR @g@pic @MAN1EXT@ ,
+.MR @g@eqn @MAN1EXT@ ,
+.MR @g@refer @MAN1EXT@
 .
 .
 .\" Restore compatibility mode (for, e.g., Solaris 10/11).

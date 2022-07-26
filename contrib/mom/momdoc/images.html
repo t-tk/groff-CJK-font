@@ -45,12 +45,12 @@ FDL in the main directory of the groff source package.
   <li><a href="#images-intro">Inserting images and graphics</a>
   <ul>
     <li><a href="#converting">Image conversion and file processing</a>
-    <ul style="margin-left: -1.25em">
+    <ul style="margin-left: -1em">
       <li><a href="#pdf">PDF</a></li>
       <li><a href="#eps">EPS</a></li>
     </ul></li>
     <li><a href="#pdf-image">The PDF_IMAGE macro</a>
-    <ul style="margin-left: -1.25em">
+    <ul style="margin-left: -1em">
       <li><a href="#pdf-image-frame">PDF_IMAGE_FRAME</a>&mdash;set parameters for image frames</li>
     </ul></li>
     <li><a href="#pspic">The PSPIC macro</a></li>
@@ -59,7 +59,7 @@ FDL in the main directory of the groff source package.
   <ul>
     <li><a href="#float">The FLOAT macro</a></li>
     <li><a href="#float-label-caption">Labelling and captioning floats</a>
-		<ul style="margin-left: -1.25em">
+		<ul style="margin-left: -1em">
 		<li><a href="#label">LABEL</a></li>
 		<li><a href="#caption">CAPTION</a></li>
 		</ul></li>
@@ -67,20 +67,20 @@ FDL in the main directory of the groff source package.
   <li><a href="#preprocessor-support">Preprocessor support</a>
   <ul>
     <li><a href="#tbl">tbl</a>
-    <ul style="margin-left: -1.25em;">
+    <ul style="margin-left: -1em;">
       <li><a href="#ts-te">.TS / .TH / .TE macros and arguments</a></li>
     </ul></li>
     <li><a href="#eqn">eqn</a>
-      <ul style="margin-left: -1.25em;">
+      <ul style="margin-left: -1em;">
         <li><a href="#eq-en">.EQ / .EN macros and arguments</a></li>
       </ul></li>
     <li><a href="#pic">pic</a>
-    <ul style="margin-left: -1.25em;">
+    <ul style="margin-left: -1em;">
       <li><a href="#ps-pe">.PS / .PE macros and arguments</a></li>
-      <li><a href="#pic-text-style">PIC_TEXT_STYLE</a>&mdash;set parameters for text used in diagrams</li>
+      <li><a href="#pic-text-style">PIC_TEXT_STYLE</a>&mdash;set parameters for text in diagrams</li>
     </ul></li>
     <li><a href="#grap">grap</a>
-    <ul style="margin-left: -1.25em;">
+    <ul style="margin-left: -1em;">
     </ul></li>
     <li><a href="#refer">refer</a></li>
   </ul>
@@ -89,7 +89,7 @@ FDL in the main directory of the groff source package.
       <li><a href="#autolabel">AUTOLABEL</a></li>
       <li><a href="#set-autolabel">SET_AUTOLABEL</a></li>
       <li><a href="#caption-after-label">CAPTION_AFTER_LABEL</a></li>
-      <li><a href="#captions-labels-sources">CAPTIONS / LABELS / SOURCES</a>&mdash;set style parameters for each</li>
+      <li><a href="#captions-labels-sources">CAPTIONS / LABELS / SOURCES</a>&mdash;set parameters for each</li>
       <li><a href="#mla">MLA</a></li>
     </ul></li>
   <li><a href="#lists-of">Lists of Figures, Tables, and Equations</a>
@@ -97,11 +97,28 @@ FDL in the main directory of the groff source package.
       <li><a href="#lists-placement">Placement of Lists</a></li>
       <li><a href="#lists-macros">Macros to generate Lists</a></li>
       <li><a href="#formatting-lists">Formatting and style parameters for Lists</a>
-      <ul style="margin-left: -1.25em">
+      <ul style="margin-left: -1em">
         <li><a href="#lists-style">LISTS_STYLE</a></li>
       </ul></li>
   </ul></li>
-</ul>
+  <li><a href="#box-intro">Shaded backgrounds and frames (boxes)</a>
+    <ul>
+      <li><a href="#box-intro">Introduction and description</a></li>
+      <li><a href="#box-macro">The BOX macro</a></li>
+      <li><a href="#box-notes">Additional notes on box usage and behaviour</a></li>
+        <ul>
+         <li><a href="#qbef">QUOTE, BLOCKQUOTE, EPIGRAPH, FLOAT</a></li>
+         <li><a href="#code">CODE</li>
+         <li><a href="#quotes">Description of boxed BLOCKQUOTEs and EPIGRAPHs</a></li>
+         <ul style="margin-left: -1em; list-style: disc;">
+           <li><a href="#leftover">Leftover box syndrome</a></li>
+         </ul>
+         <li><a href="#slides">Slides</a></li>
+         <li><a href="#footnotes">Footnotes</a></li>
+        </ul>
+      <li><a href="#page-color-intro">Page colour</a></li>
+    </ul>
+  </li>
 </div>
 
 <div class="rule-medium"><hr/></div>
@@ -178,16 +195,18 @@ recommended.
 </span>
 </p>
 
-<!---PDF_IMAGE--->
+<!-- -PDF_IMAGE- -->
 
 <div class="macro-id-overline">
 <h3 id="pdf-image" class= "macro-id">PDF_IMAGE</h3>
 </div>
 
 <div class="box-macro-args">
-Macro: <b>PDF_IMAGE</b> <kbd class="macro-args">[ -L | -C | -R | -I &lt;indent&gt; ] \
+Macro: <b>PDF_IMAGE</b> \
 <br/>
-&lt;pdf image&gt; &lt;width&gt; &lt;height&gt; [ SCALE &lt;factor&gt; ] \
+<kbd class="macro-args">[ -L | -C | -R | -I &lt;indent&gt; ] \
+<br/>
+&lt;pdf image file&gt; &lt;width&gt; &lt;height&gt; [ SCALE &lt;factor&gt; ] \
 <br/>
 [ ADJUST +|-&lt;vertical adjustment&gt; ] [ NO_SHIM ] [ NO_FLEX ] \
 <br/>
@@ -321,11 +340,11 @@ enabled, which it is by default.  Shimming ensures that running text
 after the image falls properly on the page&#8217;s
 <a href="definitions.html#baseline-grid">baseline grid</a>,
 but can result in slightly unequal spacing above and below
-(correctible with the <kbd>ADJUST</kbd> argument).
+(correctable with the <kbd>ADJUST</kbd> argument).
 <kbd>NO_SHIM</kbd> is useful when you have several images on the
 page and there are visible differences in the spacing beneath them
 as a result of shimming.  To ensure a flush bottom margin, the last
-image on the page should be shimmed, ie should not be given the
+image on the page should be shimmed, i.e. should not be given the
 <kbd>NO_SHIM</kbd> argument.
 </p>
 
@@ -339,7 +358,7 @@ enabled. <kbd>NO_FLEX</kbd> is useful when you have several images
 on the page and you want to distribute excess vertical
 whitespace on the page amongst other flex-spacing points on the
 page.  If there are no others, the final image should be
-flex-spaced, ie not given the <kbd>NO_FLEX</kbd> argument.
+flex-spaced, i.e. not given the <kbd>NO_FLEX</kbd> argument.
 </p>
 
 <h5 class="docs" style="margin-top: 1em; text-transform: none">FRAME</h5>
@@ -401,7 +420,7 @@ When
 is enabled and the document is processed with
 <a href="using.html#pdfmom" style="font-weight: bold">pdfmom</a>,
 the target name can be used to generate the target&#8217;s label
-number in running text if it is entered as a groff string, ie of the
+number in running text if it is entered as a groff string, i.e. of the
 form <kbd>\*[name]</kbd>.  For example, if you create a target named
 &#8220;foo&#8221; for a pdf image whose autolabel number would be 3,
 entering
@@ -638,6 +657,19 @@ start on one page and finish on the next.
 </p>
 
 <p>
+Floats always begin in
+<a href="definitions.html#filled">no-fill mode</a>.
+Text entered immediately after FLOAT will be set line-for-line
+unless a
+<a href="typesetting.html#justify">JUSTIFY</a>
+or
+<a href="typesetting.html#quad">QUAD&nbsp;L|R|C</a>
+precedes it.  Alternatively, any macro that sets a quad direction
+may be used, e.g.
+<a href="docelement.html#pp">PP</a>.
+</p>
+
+<p>
 Floats always deposit a break before they begin, which means the
 line beforehand will not be
 <a href="definitions.html#filled">filled</a>.
@@ -744,7 +776,7 @@ the space allotted to it</i> by the specified amount.
 <a href="definitions.html#unitofmeasure">unit of measure</a>
 appended.  <kbd>ADJUST</kbd> gives you precise control over
 the vertical centering of floats, allowing you to compensate for
-unequal spacing that may result of from the automatic
+unequal spacing that may result from the automatic
 <a href="docprocessing.html#shim">shimming</a>
 or
 <a href="docprocessing.html#flex">flex-spacing</a>
@@ -754,7 +786,7 @@ floats.
 <p>
 <kbd>ADJUST</kbd> is ignored for the first float deferred to
 a following page but respected for subsequent deferred floats
-output immediately afterward.
+output immediately afterwards.
 </p>
 
 <h5 class="docs" style="margin-top: 1em; text-transform: none">FORCE</h5>
@@ -764,7 +796,7 @@ The <kbd>FORCE</kbd> argument instructs mom to output the float
 exactly where it occurs in the input file.  With <kbd>FORCE</kbd>,
 mom immediately breaks to a new page to output the float if it does
 not fit on the current page.  While this is somewhat contrary to the
-notion of floats (ie that running text should continue to fill the
+notion of floats (i.e. that running text should continue to fill the
 page), there are circumstances where it may be desirable.
 </p>
 
@@ -803,7 +835,7 @@ already centered by default.
 <h5 class="docs" style="margin-top: 1em; text-transform: none">RIGHT</h5>
 
 <p>
-<kbd>RIGHT</kbd> instructs mom to place a float a the right of the
+<kbd>RIGHT</kbd> instructs mom to place a float at the right of the
 page; the longest line in the float will be flush with the
 page&#8217;s right margin.
 </p>
@@ -818,11 +850,11 @@ enabled, which it is by default.  Shimming ensures that running text
 after the float falls properly on the page&#8217;s
 <a href="definitions.html#baseline-grid">baseline grid</a>,
 but can result in slightly unequal spacing above and below
-(correctible with the <kbd>ADJUST</kbd> argument).
+(correctable with the <kbd>ADJUST</kbd> argument).
 <kbd>NO_SHIM</kbd> is useful when you have several floats on the
 page and there are visible differences in the spacing beneath them
 as a result of shimming.  To ensure a flush bottom margin, the last
-float on the page should be shimmed, ie should not be given the
+float on the page should be shimmed, i.e. should not be given the
 <kbd>NO_SHIM</kbd> argument.
 </p>
 
@@ -836,7 +868,7 @@ enabled. <kbd>NO_FLEX</kbd> is useful when you have several floats
 on the page and you want to distribute excess vertical
 whitespace on the page amongst other flex-spacing points on the
 page.  If there are no others, the final float should be
-flex-spaced, ie not given the <kbd>NO_FLEX</kbd> argument.
+flex-spaced, i.e. not given the <kbd>NO_FLEX</kbd> argument.
 </p>
 
 <h5 class="docs" style="margin-top: 1em; text-transform: none">TARGET</h5>
@@ -868,7 +900,7 @@ Floats use
 <a href="definitions.html#filled">no-fill mode</a>,
 with each input line beginning at the left margin.  If this is not
 what you want, you must specify the preferred horizontal alignment
-<i>within the float</i> (e.g.,
+<i>within the float</i> (e.g.
 <a href="typesetting.html#lrc">CENTER</a>
 or
 <a href="typesetting.html#lrc">RIGHT</a>).
@@ -1054,7 +1086,7 @@ before <kbd>.START</kbd>.
 <p>
 If
 <a href="#autolabel">autolabelling</a>
-is enabled, e.g., <kbd>.AUTOLABEL_IMAGES</kbd> (List
+is enabled, e.g. <kbd>.AUTOLABEL_IMAGES</kbd> (List
 of Figures) or <kbd>.AUTOLABEL_PIC</kbd> (also List of Figures),
 the prefix is stripped from the label when it appears in
 the List.  Thus, if you have invoked <kbd>.AUTOLABEL_PIC</kbd>,
@@ -1166,7 +1198,7 @@ inside the float.
 </p>
 
 <p>
-If you want a caption at the top, put <kbd>CAPTIO</kbd> immediately
+If you want a caption at the top, put <kbd>CAPTION</kbd> immediately
 underneath
 <a href="#float">FLOAT</a>
 and follow it with the text of the caption surrounded by double-quotes:
@@ -1502,7 +1534,7 @@ circumstances under which it fails, whereas <kbd>.TS</kbd> without
 <h5 class="docs" style="margin-top: 1em; text-transform: none">BOXED</h5>
 
 <p>
-If a table is to be boxed (ie <kbd>tbl</kbd> is given the flags
+If a table is to be boxed (i.e., <kbd>tbl</kbd> is given the flags
 <kbd>'box'</kbd> or <kbd>'allbox'</kbd>) you must pass the argument
 <kbd>BOXED</kbd> to <kbd>.TS</kbd>, as in this example:
 <br/>
@@ -1520,7 +1552,7 @@ If a table is to be boxed (ie <kbd>tbl</kbd> is given the flags
 <h5 class="docs" style="margin-top: 1em; text-transform: none">CENTER</h5>
 
 <p>
-If a table is to be centered on the page, (ie <kbd>tbl</kbd> is
+If a table is to be centered on the page, (i.e., <kbd>tbl</kbd> is
 given the <kbd>'center'</kbd> flag), you must pass the argument
 <kbd>CENTER</kbd> to <kbd>.TS</kbd>, as in this example, which
 creates a (possibly) multipage boxed table, centered on the page,
@@ -1579,11 +1611,11 @@ enabled, which it is by default.  Shimming ensures that running text
 after the table falls properly on the page&#8217;s
 <a href="definitions.html#baseline-grid">baseline grid</a>,
 but can result in slightly unequal spacing above and below
-(correctible with the <kbd>ADJUST</kbd> argument).
+(correctable with the <kbd>ADJUST</kbd> argument).
 <kbd>NO_SHIM</kbd> is useful when you have several tables on the
 page and there are visible differences in the spacing beneath them
 as a result of shimming.  To ensure a flush bottom margin, the last
-table on the page should be shimmed, ie should not be given the
+table on the page should be shimmed, i.e. should not be given the
 <kbd>NO_SHIM</kbd> argument.
 </p>
 
@@ -1597,7 +1629,7 @@ enabled. <kbd>NO_FLEX</kbd> is useful when you have several tables
 on the page and you want to distribute excess vertical
 whitespace on the page amongst other flex-spacing points on the
 page.  If there are no others, the final table should be
-flex-spaced, ie not given the <kbd>NO_FLEX</kbd> argument.
+flex-spaced, i.e. not given the <kbd>NO_FLEX</kbd> argument.
 </p>
 
 <h5 class="docs" style="margin-top: 1em; text-transform: none">CAPTION</h5>
@@ -1658,7 +1690,7 @@ When
 is enabled and the document is processed with
 <a href="using.html#pdfmom" style="font-weight: bold">pdfmom</a>,
 the target name can be used to generate the target&#8217;s label
-number in running text if it is entered as a groff string, ie of
+number in running text if it is entered as a groff string, i.e. of
 the form <kbd>\*[name]</kbd>.  For example, if you create a target
 called &#8220;foo&#8221; for a table whose autolabel number would be
 3, entering
@@ -1737,7 +1769,10 @@ flag when you process the file.
 Diagrams created with <kbd>pic</kbd> begin with the macro
 <kbd>.PS</kbd> (<b>P</b>ic <b>S</b>tart) and end with
 <kbd>.PE</kbd> (<b>P</b>ic <b>E</b>nd).  Everything between them is
-intrepreted by the preprocessor as pic instructions.
+interpreted by the preprocessor as pic instructions.  Please note:
+<i>Making Pictures with GNU PIC</i> says that <kbd>.PF</kbd> can
+also be used to terminate a pic diagram, but this is not supported
+by mom.
 </p>
 
 <p>
@@ -1779,13 +1814,11 @@ doing so.
 Macro: <b>PS</b>
 <kbd class="macro-args">
 <br/>
-Arguments:
+Arguments: [ &lt;width&gt;&nbsp;&lt;height&gt; ]
+<kbd class="macro-args">
 <br/>
-&nbsp;&nbsp;[ width ]</kbd> <span style="font-size: 95%">(in inches; no unit of measure required)</span>
-<kbd class="macro-args"><br/>
-&nbsp;&nbsp;[ height ]</kbd> <span style="font-size: 95%">(in
-inches; no unit of measure required)</span>
-<kbd class="macro-args"><br/>
+&nbsp;&nbsp;[ LEFT ]</kbd>
+<br/>
 &nbsp;&nbsp;[ ADJUST +|-&lt;vertical adjustment&gt;]</kbd>
 <span style="font-size: 95%">
 (<a href="definitions.html#unitofmeasure">unit of measure</a>
@@ -1826,14 +1859,29 @@ itself, not groff or mom.
 <p>
 The <kbd>width</kbd> and <kbd>height</kbd> arguments to
 <kbd>.PS</kbd> are idiosyncratic owing to the preprocessor itself.
-If a width argument is supplied, the diagram, but not any text it
-contains, is scaled to the given width.  If a literal width argument
-of <kbd>0</kbd> (zero) is given and a height argument is supplied,
-the diagram, but not any text it contains, will be scaled to the
-requested height.  In the case of two non-zero arguments being
-given, only the height scaling is applied.
+Both are optional and both expect a value in inches, so neither
+argument should have a
+(<a href="definitions.html#unitofmeasure">unit of measure</a>
+appended.
 </p>
 
+<p>
+If the <kbd>width</kbd> argument is supplied, the diagram, but
+not any text it contains, is scaled to the given width.  If a
+literal width argument of <kbd>0</kbd> (zero) is given and a
+<kbd>height</kbd> argument is supplied, the diagram, but not any
+text it contains, will be scaled to the requested height.  In the
+case of two non-zero arguments being given, only the height scaling
+is applied.
+</p>
+
+<h5 class="docs" style="margin-top: 1em; text-transform: none">LEFT</h5>
+
+<p>
+By default, pic diagrams are centred on the page.  If you would
+prefer them to be flush left, pass <kbd>PS</kbd> the <kbd>LEFT</kbd>
+argument.
+</p>
 <h5 class="docs" style="margin-top: 1em; text-transform: none">ADJUST</h5>
 
 <p>
@@ -1850,16 +1898,16 @@ measure is required.
 <p>
 <kbd>NO_SHIM</kbd> instructs mom not to apply
 <a href="docprocessing.html#shim-vs-flex">shimming</a>
-after a <b>pic</b> diagrame, which she will do automatically when
+after a <b>pic</b> diagram, which she will do automatically when
 shimming is enabled, which it is by default.  Shimming ensures that
-running text after the diagrame falls properly on the page&#8217;s
+running text after the diagram falls properly on the page&#8217;s
 <a href="definitions.html#baseline-grid">baseline grid</a>,
 but can result in slightly unequal spacing above and below
-(correctible with the <kbd>ADJUST</kbd> argument).
+(correctable with the <kbd>ADJUST</kbd> argument).
 <kbd>NO_SHIM</kbd> is useful when you have several diagrams on the
 page and there are visible differences in the spacing beneath them
 as a result of shimming.  To ensure a flush bottom margin, the last
-diagram on the page should be shimmed, ie should not be given the
+diagram on the page should be shimmed, i.e. should not be given the
 <kbd>NO_SHIM</kbd> argument.
 </p>
 
@@ -1873,7 +1921,7 @@ flex-spacing is enabled. <kbd>NO_FLEX</kbd> is useful when you
 have several diagrams on the page and you want to distribute excess
 vertical whitespace on the page amongst other flex-spacing points
 on the page.  If there are no others, the final diagram should be
-flex-spaced, ie not given the <kbd>NO_FLEX</kbd> argument.
+flex-spaced, i.e. not given the <kbd>NO_FLEX</kbd> argument.
 </p>
 
 <h5 class="docs" style="margin-top: 1em; text-transform: none">CAPTION</h5>
@@ -1927,7 +1975,7 @@ When
 is enabled and the document is processed with
 <a href="using.html#pdfmom" style="font-weight: bold">pdfmom</a>,
 the target name can be used to generate the target&#8217;s label
-number in running text if it is entered as a groff string, ie of
+number in running text if it is entered as a groff string, i.e. of
 the form <kbd>\*[name]</kbd>.  For example, if you create a target
 called &#8220;foo&#8221; for a diagram whose autolabel number would
 be 3, entering
@@ -2034,8 +2082,9 @@ Support for <b>eqn</b> is provided via extensions to the standard
 the scope of this documentation, but is covered in the manpage
 <kbd>eqn(1)</kbd>.  You can also download a copy of Ted
 Harding&#8217;s
-<!--- edit me -->
-<a href="http://www.zen89632.zen.co.uk/Groff/Eqn/eqnguide.pdf">A Guide to Typesetting Mathematics Using GNU eqn</a>,
+<a href="http://lists.gnu.org/archive/html/groff/2013-10/pdfTyBN2VWR1c.pdf">
+A Guide to Typesetting Mathematics Using GNU eqn
+</a>,
 which contains useful examples.  If you use <b>eqn</b>, you must give groff or
 pdfmom the <b>-e</b> flag.
 
@@ -2050,7 +2099,7 @@ Macro: <a href="#eq"><b>EQ</b></a>
 <br/>
 <kbd class="macro-args">Arguments:
 <br/>
-&nbsp;&nbsp;[ -L | -C | -I &lt;ident&gt; ]</kbd>
+&nbsp;&nbsp;[ -L | -C | -I &lt;indent&gt; ]</kbd>
 <span style="font-size: 95%">
 (<a href="definitions.html#unitofmeasure">unit of measure</a>
 required)
@@ -2140,11 +2189,11 @@ enabled, which it is by default.  Shimming ensures that running text
 after the equation falls properly on the page&#8217;s
 <a href="definitions.html#baseline-grid">baseline grid</a>,
 but can result in slightly unequal spacing above and
-below (correctible with the <kbd>ADJUST</kbd> argument).
+below (correctable with the <kbd>ADJUST</kbd> argument).
 <kbd>NO_SHIM</kbd> is useful when you have several equations on the
 page and there are visible differences in the spacing beneath them
 as a result of shimming.  To ensure a flush bottom margin, the last
-equation on the page should be shimmed, ie should not be given the
+equation on the page should be shimmed, i.e. should not be given the
 <kbd>NO_SHIM</kbd> argument.
 </p>
 
@@ -2158,7 +2207,7 @@ is enabled. <kbd>NO_FLEX</kbd> is useful when you have several
 equations on the page and you want to distribute excess vertical
 whitespace on the page amongst other flex-spacing points on
 the page.  If there are no others, the final equation should be
-flex-spaced, ie not given the <kbd>NO_FLEX</kbd> argument.
+flex-spaced, i.e. not given the <kbd>NO_FLEX</kbd> argument.
 </p>
 
 </p>
@@ -2221,7 +2270,7 @@ When
 is enabled and the document is processed with
 <a href="using.html#pdfmom" style="font-weight: bold">pdfmom</a>,
 the target name can be used to generate the target&#8217;s label
-number in running text if it is entered as a groff string, ie of
+number in running text if it is entered as a groff string, i.e. of
 the form <kbd>\*[name]</kbd>.  For example, if you create a target
 called &#8220;foo&#8221; for an equation whose autolabel number
 would be 3, entering
@@ -2257,8 +2306,8 @@ be passed to <kbd>.EN</kbd>.
 <p>
 If <kbd>-L</kbd> or <kbd>-I</kbd> is given to the first
 <kbd>.EQ</kbd> of a multi-line equation, they remain in effect
-until the final <kbd>.EN</kbd>, which does not have the
-<kbd>CONTINUED</kbd> argument.
+until an <kbd>.EN</kbd> without the <kbd>CONTINUED</kbd> argument
+is reached.
 </p>
 
 <p>
@@ -3004,6 +3053,414 @@ macro.
 <p>
 <kbd>NO_PAGINATION</kbd> disables pagination of Lists pages.
 </p>
+
+<h2 id="box-intro" class="docs">Shaded backgrounds and frames (boxes)</h2>
+
+<p>
+Mom lets you add shaded backgrounds and frames to text and other
+material.  For convenience, she calls backgrounds and frames
+&#8220;boxes.&#8221; Entire passages may be boxed, or individual
+document elements like headings, quotes, or pre-processor output.
+Furthermore, boxes may be nested.
+</p>
+
+<p>
+Boxes start on the baseline where the boxed material would have
+started were it not for the box, subject to minor aesthetic
+corrections mom takes the liberty of making.
+</p>
+
+<p>
+Boxes extend from the current left margin to the current right
+margin, respecting any active left and/or right indents.  There are
+two exceptions,
+<a href="docelement.html#epigraph">EPIGRAPH BLOCK</a>
+and
+<a href="docelement.html#blockquote">BLOCKQUOTE</a>,
+which are discussed
+<a href="#quotes">here</a>.
+</p>
+
+<p>
+After a box is started, active left and right indents are
+cleared.  The box&#8217;s inset determines the new left and right
+margins.  Indents set inside a box are relative to the inset.
+When a box is stopped, formerly active left and right indents
+are restored.
+</p>
+ 
+<p>
+Frames are drawn from the perimeter inward.  The inset is
+relative to the inner edge of the frame.
+</p>
+
+<p>
+If a box (including the bottom inset) can complete on a page, it
+does, even if there is no further room for type.  This may, on
+occasion, result in slight deviations from normal bottom margin
+alignment.
+</p>
+
+<p>
+Boxes span pages whenever the boxed material continues on the next
+page.  Spanning boxes extend fully to the bottom margin of the page
+on which they begin, leaving a slightly larger inset at the bottom
+than around the other sides.
+</p>
+
+<p>
+When there is not enough room to set at least one line of type
+inside a box, mom defers starting the box until the next page,
+leaving a gap.
+</p>
+
+<p>
+Boxed material is not
+<a href="docprocessing.html#shim-vs-flex">shimmed</a>
+or
+<a href="docprocessing.html#shim-vs-flex">flexed</a>.
+If either was active prior to the box, it is restored when the box
+ends and mom automatically shims or flexes whatever comes next.
+</p>
+
+<div class="box-tip">
+<p class="tip">
+<span class="important">NOTE:</span>
+Shaded backgrounds and frames are not available when your
+<a href="docprocessing.html#printstyle">PRINTSTYLE</a>
+is <kbd>TYPEWRITE</kbd> or when
+<a href="docprocessing.html#columns">COLUMNS</a> are enabled.
+</p>
+</div>
+
+<div class="macro-id-overline">
+<h3 id="pdf-image" class= "macro-id">BOX</h3>
+</div>
+
+<div id="box-macro" class="box-macro-args" style="margin-top: .5em">
+Macro: <b>BOX</b> <kbd class="macro-args"> [ &lt;arguments&gt; ] | &lt;anything&gt;
+<br/>
+Arguments:
+<br/>
+[ SHADED &lt;color&gt; | OUTLINED &lt;colour&gt; ] \
+<br/>
+[ INSET &lt;dist&gt; ] \
+<br/>
+[ WEIGHT &lt;wt&gt; ] \
+<br/>
+[ ADJUST +|-&lt;amount&gt; ] \
+<br/>
+[ EQN | PIC | GRAP | IMG ]
+</kbd>
+</div>
+
+</p>
+Without arguments, BOX begins a shaded grey background.
+The material inside is inset by one
+<a href="definitions.html#picaspoints">pica</a>.
+Any other type of box requires at a minimum either
+<kbd>SHADED</kbd> or <kbd>OUTLINED</kbd>.  In the case of boxes
+that are to contain pdf images or pre-processor material for
+<a href="#eqn">eqn</a>,
+<a href="#pic">pic</a>,
+or
+<a href="#grap">grap</a>,
+<kbd>IMG</kbd>, <kbd>EQN</kbd>, <kbd>PIC</kbd>, or <kbd>GRAP</kbd>
+must also be given.  Note that
+<a href="#tbl">tbl</a>
+does not have this requirement.
+</p>
+
+<p>
+BOX is a
+<a href="definitions.html#toggle">toggle macro</a>,
+so any argument other than one in the list completes the box
+(<kbd>QUIT</kbd>, <kbd>END</kbd>, <kbd>X</kbd>, etc).
+</p>
+
+<p>
+Boxes should be started inside toggle macros like
+<a href="docelement.html#quote">QUOTE</a>
+or
+<a href="#float">FLOAT</a>
+just after the macro is called, and terminated just before toggling
+the macro off (unless you wish the box to enclose further material).
+</p>
+
+<p>
+Non-toggle macros like
+<a href="docelement.html#heading">HEADING</a>
+or
+<a href="docelement.html#pp">PP</a>
+require that the box be started beforehand.  Boxed pre-processor
+material must be fully enclosed by BOX/BOX&nbsp;OFF, as in this
+recipe for a one-off boxed pic diagram:
+<span class="pre-in-pp">
+.BOX
+.PS
+&lt;pic commands&gt;
+.PE
+.BOX OFF
+</span>
+Arguments to BOX are not sticky.  Each time you invoke BOX, you
+must invoke it with arguments unless you want mom&#8217;s default grey
+background.  If all or several boxes in a document require the same
+arguments, create a macro at the top of the input file that calls
+BOX with the arguments you want, e.g.
+<span class="pre-in-pp">
+&nbsp;&nbsp;.de PINK_BOX
+&nbsp;&nbsp;.BOX \
+&nbsp;&nbsp;&nbsp;&nbsp;SHADED pink \
+&nbsp;&nbsp;&nbsp;&nbsp;OUTLINED darkred \
+&nbsp;&nbsp;&nbsp;&nbsp;WEIGHT 1p \
+&nbsp;&nbsp;&nbsp;&nbsp;INSET 9p
+&nbsp;&nbsp;..
+</span>
+<kbd>.PINK_BOX</kbd> may then be used instead of <kbd>.BOX</kbd> any
+time you want a box with those arguments.
+</p>
+
+<h3 class="docs">SHADED | OUTLINED</h3>
+
+<p>
+<kbd>SHADED</kbd> or <kbd>OUTLINED</kbd> are required.  Both may
+be given, resulting in a shaded background with a frame, and both
+require a colour, e.g.
+<span class="pre-in-pp">
+&nbsp;&nbsp;.BOX SHADED blue OUTLINED black
+</span>
+The colour may be
+<ul style="margin-top: -1em;" display="inline">
+  <li>an xcolor name</li>
+  <li>a colour initialized with
+      <a href="color.html#newcolor">NEWCOLOR</a>
+      or
+      <a href="color.html#xcolor">XCOLOR</a>
+  </li>
+  <li>an RGB hexadecimal string beginning with (e.g. #FF0000)</li>
+</ul>
+Note that without <kbd>SHADED</kbd>, the above would simply draw a
+black frame.
+</p>
+
+<h3 class="docs">WEIGHT</h3>
+
+<p>
+Mom&#8217;s default weight for <kbd>OUTLINED</kbd> is 1/2
+<a href="definitions.html#picaspoints">point</a>.
+If you&#8217;d like to change it, give <kbd>WEIGHT</kbd> the desired
+value with a unit of measure appended, typically points, e.g.
+<span class="pre-in-pp">
+&nbsp;&nbsp;.BOX OUTLINED black WEIGHT 1p
+</span>
+</p>
+
+<h3 class="docs">INSET</h3>
+
+<p>
+Mom&#8217;s default inset for boxes is one
+<a href="definitions.html#picaspoints">pica</a>
+on all sides.  If you&#8217;d like a larger or smaller inset, give
+<kbd>INSET</kbd> the distance you want with a unit of measure
+appended, e.g.
+<span class="pre-in-pp">
+&nbsp;&nbsp;.BOX SHADED pink INSET 2m
+</span>
+</p>
+
+<h3 class="docs">ADJUST</h3>
+
+<p>
+If you are not happy with the starting position of a box, you can
+change it by giving <kbd>ADJUST</kbd> the distance you want it
+raised (-) or lowered (+) with a unit of measure appended.  For
+example, to lower a box three points,
+<span class="pre-in-pp">
+&nbsp;&nbsp;.BOX OUTLINED black ADJUST +3p
+</span>
+To raise it,
+<span class="pre-in-pp">
+&nbsp;&nbsp;.BOX OUTLINED black ADJUST -3p
+</span>
+</p>
+
+<h3 class="docs">PIC / GRAP / EQN / IMG</h3>
+
+<p>
+The <kbd>PIC</kbd> argument must be given to BOX if the box contains
+any
+<a href="#pic">pic</a>
+diagrams.  Likewise, graphs made with
+<a href="#grap">grap</a>,
+equations made with
+<a href="#eqn">eqn</a>,
+and
+<a href="#pdf-image">pdf images</a>
+require a corresponding <kbd>GRAP</kbd>, <kbd>EQN</kbd>, or
+<kbd>IMG</kbd> argument.
+</p>
+
+<p>
+If you&#8217;re boxing a single diagram, graph, or pdf image, wrap
+it in a float, like this:
+<span class="pre-in-pp">
+&nbsp;&nbsp;.FLOAT
+&nbsp;&nbsp;.BOX PIC &lt;other parameters&gt;
+&nbsp;&nbsp;.PS
+&nbsp;&nbsp;&lt;pic input&gt;
+&nbsp;&nbsp;.PE
+&nbsp;&nbsp;.BOX OFF
+&nbsp;&nbsp;.FLOAT OFF
+</span>
+Notice that in the case of pdf images, pic, and grap, this
+represents a change from the norm, where the use of FLOAT may be
+destructive and is discouraged.
+</p>
+
+<h2 id="box-notes" class="docs">Additional notes on BOX usage and behaviour</h2>
+
+<h3 id="qbef" class="docs">QUOTE, BLOCKQUOTE, EPIGRAPH, FLOAT</h3>
+
+<p>
+<a href="docelement.html#quote">QUOTE</a>,
+<a href="docelement.html#blockquote">BLOCKQUOTE</a>,
+<a href="docelement.html#epigraph">EPIGRAPH</a>,
+and
+<a href="images.html#float">FLOAT</a>
+require that boxes be started <i>after</i> they are
+invoked and stopped just before they are toggled off:
+<span class="pre-in-pp">
+&nbsp;&nbsp;.QUOTE
+&nbsp;&nbsp;.BOX <parameters>
+&nbsp;&nbsp;Text of quote
+&nbsp;&nbsp;.BOX OFF
+&nbsp;&nbsp;.QUOTE OFF
+</span>
+</p>
+
+<h3 id="code" class="docs">CODE</h3>
+
+<p>
+If you&#8217;re boxing 
+<a href="docelement.html#code">CODE</a>
+that&#8217;s wrapped inside
+<a href="docelement.html#quote">QUOTE</a>,
+as described
+<a href="docelement.html#quote-code">here</a>,
+set the quote indent to &#8220;0&#8221; with
+<span class="pre-in-pp">
+&nbsp;&nbsp;.QUOTE_STYLE INDENT 0
+</span>
+so that the box&#8217;s leftmost inset is respected.  
+</p>
+
+<p>
+Here&#8217;s a recipe for setting boxed code with an 18-point inset:
+<span class="pre-in-pp">
+&nbsp;&nbsp;.QUOTE_STYLE INDENT 0
+&nbsp;&nbsp;.QUOTE
+&nbsp;&nbsp;.CODE
+&nbsp;&nbsp;.BOX INSET 18p
+&nbsp;&nbsp;Hello, world.
+&nbsp;&nbsp;.BOX OFF
+&nbsp;&nbsp;.QUOTE OFF
+</span>
+Note that CODE, wrapped inside QUOTE, does not require a corresponding CODE OFF.
+</p>
+
+<h4 id="quotes" class="docs">Description of boxed BLOCKQUOTES and EPIGRAPH BLOCKS</h4>
+
+<p>
+When you box a BLOCKQUOTE, or an EPIGRAPH with the <kbd>BLOCK</kbd>
+argument, the box is centred on the page and is only as wide as the
+blockquote or epigraph plus the box&#8217;s inset.
+</p>
+
+<p>
+QUOTE and EPIGRAPH (without the <kbd>BLOCK</kbd> argument), on the
+other hand, set the box fully to the left and right margins.
+</p>
+
+<h4 id="leftover" class="docs">Leftover box syndrome</h4>
+
+<p>
+Boxed quotes and blockquotes sometimes exhibit leftover box
+syndrome, where the page after a fully terminated boxed quote or
+blockquote begins with an empty bit of box.  Equally, you may
+sometimes see the lower edge of a quote&#8217;s or
+blockquote&#8217;s box falling slightly below the page&#8217;s
+bottom margin.
+</p>
+
+<p>
+The solution in both situations is to use the <kbd>ADJUST</kbd>
+argument to raise or lower the box&#8217;s starting position.
+Leftover box syndrome is usually fixed by raising the box slightly.
+When the box runs too deep, lowering it is generally recommended,
+although this will result in a widowed line at the top of the next
+page.  In either case, some experimentation is necessary.
+</p>
+
+<h3 id="slides" class="docs">SLIDES</h3>
+
+<p>
+On a slide with no pauses, boxes behave as they do in printed
+documents.
+</p>
+
+<p>
+When a slide contains pauses, only the material up to the first
+pause is boxed.  As subsequent material is revealed, the box changes
+location, moving down to surround each new item.  This behaviour
+persists until the box is stopped, making it useful for highlighting
+material as it is revealed.
+</p>
+
+<h3 id="footnotes" class="docs">Footnotes</h3>
+
+<p>
+You don&#8217;t have to worry about boxes encroaching on footnotes.
+Mom makes sure they don&#8217;t.
+</p>
+
+<h2 id="page-color-intro" class="docs">Page colour</h2>
+
+<p>
+Mom lets you change the page (&#8220;paper&#8221;) colour
+from white to anything you like.  While this has limited application
+in printed documents, it can be effective in
+<a href="docprocessing.html#slides">slide presentations</a>.
+</p>
+
+<div class="macro-id-overline">
+<h3 id="page-color" class= "macro-id">PAGE_COLOR</h3>
+</div>
+
+<div id="box-macro" class="box-macro-args" style="margin-top: .5em">
+Macro: <b>PAGE_COLOR</b> <kbd class="macro-args"> &lt;color&gt; | OFF | off
+</div>
+<p class="requires" style="font-style: normal">
+<i>Aliased as</i> <kbd>PAGE_COLOUR</kbd>, <kbd>SLIDE_COLOR</kbd>,
+<i>and</i> <kbd>SLIDE_COLOUR</kbd.
+</p>
+
+<p>
+When you invoke PAGE_COLOR with a <kbd>color</kbd> argument, the
+current and subsequent pages turn the colour you request.  If
+more than one instance of PAGE_COLOR appears before a page break,
+including <kbd>PAGE_COLOR OFF</kbd>, only the last applies.
+</p>
+
+<div class="box-tip">
+<p class="tip">
+<span class="note">Note:</span>
+Unlike other
+<a href="definitions.html#toggle">toggle macros</a>,
+PAGE_COLOR requires the use of <kbd>OFF</kbd> or <kbd>off</kbd>
+to terminate it rather than an arbitrary string (<kbd>QUIT, X,
+END</kbd>, etc.)
+</p>
+</div>
 
 <div class="rule-long"><hr/></div>
 

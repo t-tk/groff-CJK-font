@@ -1,19 +1,12 @@
 .\" -*- mode: text; coding: utf-8; -*-
 \#
 \# Copyright (C) 2004-2020 Free Software Foundation, Inc.
+\# Revised for version 2.5 2021-08.
 \#
 \# Copying and distribution of this file, with or without modification,
 \# are permitted in any medium without royalty provided the copyright
 \# notice and this notice are preserved.
 \#
-.\"----------------------------------------------------------------
-.\" Make first slide black.  Remove if printing to save ink.
-.po 0
-.ll 11i
-.DBX SOLID 0 \n[.l]u \n[.p]u
-.\"----------------------------------------------------------------
-.
-.\"----------------------------------------------------------------
 .\" Macro for code blocks
 .de CODE_BLOCK
 . ie \\n[.$] \{\
@@ -80,7 +73,12 @@
 .
 .STRING hand \*[darkred]\[rh]\*[black]
 .
+.\" Make first slide black.
+.\" If printing, remove to save ink.
+.SLIDE_COLOR black
+.
 .START
+.SLIDE_COLOR off
 .
 .ADD_SPACE 9p
 .IB 8P
@@ -256,12 +254,44 @@ parameters.\*[BU6]\*[UP 2p]\s[-2]*\s[0]
 .PT_SIZE +2
 .
 .NEWSLIDE "Blinds .5"
+.SLIDE_COLOR antiquewhite
+.
+.ADD_SPACE 9p
+.
+.HEADING 1 "Highlighting items
+.SP .5v
+.PP
+The BOX macro lets you highlight items as they are revealed with
+frames and shaded backgrounds\*[HANG .]
+.PAUSE "Fade .5"
+.BOX SHADED pink INSET 3p
+.PP
+This item is highlighted with a shaded background\*[HANG .]
+.PAUSE
+.PP
+The highlight moves to each new item as it's revealed\*[HANG .]
+.PAUSE
+.PP
+Highlighting can continue for as many slides as you want\*[HANG .]
+.PAUSE
+.PP
+If there are no pauses on a slide, BOX can be used
+.BR
+to provide a background for all the items\*[HANG .]
+.PAUSE
+.PP
+The SLIDE_COLOR macro lets you colour
+.BR
+the whole slide (q.v.)\*[HANG .]
+.BOX off
+.
+.NEWSLIDE "Box 1 . O"
+.SLIDE_COLOR off
 .
 .ADD_SPACE 9p
 .
 .HEADING 1 "Macros and preprocessors"
 .SP .5v
-.
 .PP
 Slides can make full use of all mom's document processing and
 typesetting macros, including preprocessors and image insertion\*[HANG .]
@@ -271,20 +301,22 @@ typesetting macros, including preprocessors and image insertion\*[HANG .]
 .
 .PAD "\
 \*[FWD 4P+6p]\*[ST1]#\*[ST1X]\
-\*[FWD 1P]\*[ST2]#\*[ST2X]\
-\*[FWD 3P+6p]\*[ST3]#\*[ST3X]\
+\*[FWD 2P+6p]\*[ST2]\*[FWD 12P]\\*[ST2X]\
+\*[FWD 3P+9p]\*[ST3]#\*[ST3X]\
 \*[FWD 3P]\*[ST4]#\*[ST4X]\*[FWD 2P]"
 .
 .ST 1 L
-.ST 2 L
-.ST 3 L
-.ST 4 L
+.ST 2 C
+.ST 3 C
+.ST 4 C
 .
 .PAUSE "Fade .5"
 .
 .TAB 1
 .PT_SIZE -1.5
+.CENTER
 \*[BD]\*[blue2]\*[DOWN 6p]tbl
+.LEFT
 .mk
 .PT_SIZE -1
 .COLOR blue2
@@ -313,7 +345,7 @@ _
 \*[FWD 10p]\*[DOWN 6p]pic
 .COLOR green4
 .SP 3p
-.PS 2
+.PS 2 LEFT
 A: ellipse wid 0.5 ht 0.5
   arrow color "green4" up 0.2 from A.n
   arrow color "green4" up 0.2 right 0.2 from A.ne
@@ -351,11 +383,11 @@ f sub X (x) ^=^ left {
 .COLOR blue2
 \*[DOWN 6p]pdf image\*[black]\*[PREV]
 .SP 2P+6p
-.PDF_IMAGE -L penguin.pdf 81p 96p FRAME
+.PDF_IMAGE -C penguin.pdf 81p 96p FRAME
 .TQ
 .
 .NEWSLIDE "Box 1 . O"
-.ADD_SPACE 9p
+.ADD_SPACE 5p
 .IB 10P
 .PT_SIZE +1.5
 .

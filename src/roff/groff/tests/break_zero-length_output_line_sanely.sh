@@ -31,12 +31,13 @@ INPUT='.de _
 .	nh
 .	ll 0
 .	di A
-\\&\\\\$1
+\&\\$1
 .	di
 .	br
 ..
 ._ " XYZ"
-.A'
+.A
+'
 
-OUTPUT=$(echo "$INPUT" | "$groff" -Tascii)
+OUTPUT=$(printf "%s" "$INPUT" | "$groff" -Tascii)
 echo "$OUTPUT" | grep -qx XYZ

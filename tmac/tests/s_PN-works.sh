@@ -27,10 +27,10 @@ groff="${abs_top_builddir:-.}/test-groff"
 EXAMPLE=\
 '.bp 2
 .LP
-This is page \\n[PN].
+This is page \n[PN].
 '
 
-echo "$EXAMPLE" \
+printf "%s" "$EXAMPLE" \
     | "$groff" -Tascii -P-cbou -ms \
     | grep -Fqx 'This is page 2.'
 

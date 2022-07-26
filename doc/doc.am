@@ -1,15 +1,14 @@
 # Copyright (C) 2002-2020 Free Software Foundation, Inc.
-#      Original Makefile.sub written by Werner Lemberg <wl@gnu.org>
-#      Automake migration by 
-#      Bertrand Garrigues <bertrand.garrigues@laposte.net>
-#
+# Original Makefile.sub written by Werner Lemberg <wl@gnu.org>.
+# Adapted to Automake by Bertrand Garrigues
+#   (bertrand.garrigues@laposte.net).
 #
 # This file is part of groff.
 #
 # groff is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free
-# Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Software Foundation, either version 3 of the License, or (at your
+# option) any later version.
 #
 # groff is distributed in the hope that it will be useful, but WITHOUT
 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -105,7 +104,8 @@ EXTRA_DIST += $(EXAMPLEFILES)
 endif
 
 if BUILD_HTMLEXAMPLES
-# webpage.html is generated, webpage*.html files are installed by the local rule.
+# webpage.html is generated; webpage*.html files are installed by the
+# local rule.
 HTMLEXAMPLEFILES = doc/webpage.html
 HTMLEXAMPLEFILESALL = webpage*.html
 HTMLEXAMPLEIMAGEFILES = webpage*
@@ -135,8 +135,8 @@ SUFFIXES += .me .ms .ps .html .txt .texi .dvi .pdf .xhtml
 
 .ms.html:
 	$(GROFF_V)$(MKDIR_P) `dirname $@` \
-	&& $(DOC_GROFF) -P-p -P-b -P-I`basename $< | sed -e 's|.ms$$||'` \
-	                -P-D$(imagedir) -Thtml -ms >$@
+	&& $(DOC_GROFF) -P-p -P-b -P-I`basename $< \
+	  | sed -e 's|.ms$$||'` -P-D$(imagedir) -Thtml -ms >$@
 .ms.txt:
 	$(GROFF_V)$(MKDIR_P) `dirname $@` \
 	&& $(DOC_GROFF) -Tascii -ms -mwww >$@
@@ -165,14 +165,18 @@ doc/pic.html: $(doc_srcdir)/pic.ms $(devhtmlfont_DATA)
 	                       -Thtml -ms > pic.html
 
 doc/examples.stamp: doc/groff.css
-	@$(MKDIR_P) $(doc_builddir)
-	test -f $(doc_builddir)/groff.css || cp $(doc_srcdir)/groff.css $(doc_builddir)
-	echo timestamp > $@
+	$(AM_V_at)$(MKDIR_P) $(doc_builddir)
+	$(AM_V_at)test -f $(doc_builddir)/groff.css || \
+	  cp $(doc_srcdir)/groff.css $(doc_builddir)
+	$(AM_V_at)echo timestamp > $@
 
 doc/webpage.html: $(bin_PROGRAMS) $(prefixexecbin_PROGRAMS)
 doc/webpage.html: doc/examples.stamp $(devhtmlfont_DATA)
-doc/webpage.html: $(dist_devpsfont_DATA) $(nodist_devpsfont_DATA) 
-doc/webpage.html: $(doc_srcdir)/webpage.ms gnu.eps $(doc_srcdir)/groff.css
+doc/webpage.html: $(dist_devpsfont_DATA) $(nodist_devpsfont_DATA)
+doc/webpage.html: \
+  $(doc_srcdir)/webpage.ms \
+  gnu.eps \
+  $(doc_srcdir)/groff.css
 	$(GROFF_V)$(MKDIR_P) doc \
 	&& cd $(doc_builddir) \
 	&& $(DOC_SED) -e '1i\
@@ -229,7 +233,8 @@ if BUILD_HTML
 	-test -d $(DESTDIR)$(htmldocimagedir) \
 	  || $(mkinstalldirs) $(DESTDIR)$(htmldocimagedir)
 	$(RM) $(DESTDIR)$(htmldocimagedir)/$(HTMLDOCIMAGEFILES)
-	$(INSTALL_DATA) $(doc_builddir)/$(imagedir)/$(HTMLDOCIMAGEFILES) \
+	$(INSTALL_DATA) \
+	  $(doc_builddir)/$(imagedir)/$(HTMLDOCIMAGEFILES) \
 	  $(DESTDIR)$(htmldocimagedir)
 endif
 
@@ -250,11 +255,13 @@ if BUILD_HTMLEXAMPLES
 	-test -d $(DESTDIR)$(exampleimagedir) \
 	  || $(mkinstalldirs) $(DESTDIR)$(exampleimagedir)
 	$(RM) $(DESTDIR)$(exampleimagedir)/$(HTMLEXAMPLEIMAGEFILES)
-	$(INSTALL_DATA) $(doc_builddir)/$(imagedir)/$(HTMLEXAMPLEIMAGEFILES) \
+	$(INSTALL_DATA) \
+	  $(doc_builddir)/$(imagedir)/$(HTMLEXAMPLEIMAGEFILES) \
 	  $(DESTDIR)$(exampleimagedir)
 endif
 
-uninstall-hook: uninstall_doc_examples uninstall_doc_htmldoc uninstall_mom
+uninstall-hook: \
+  uninstall_doc_examples uninstall_doc_htmldoc uninstall_mom
 uninstall_doc_examples:
 if BUILD_EXAMPLES
 	$(RM) -f $(DESTDIR)$(exampledir)/gnu.eps
@@ -296,28 +303,29 @@ endif
 # working TeX installation.  Note that texi2dvi properly honours the
 # `MAKEINFO' environment variable.
 #
-# We can't use automake's facilities because the make dist target attempts to 
-# generate a pdf version of groff.texi by invoking texi2dvi without the -e 
-# option, which is needed to build this file.
-# info_TEXINFOS = doc/groff.texi
-# doc_groff_TEXINFOS = doc/fdl.texi
+# We can't use automake's facilities because the `dist` target attempts
+# to generate a PDF version of groff.texi by invoking texi2dvi without
+# the -e option, which is needed to build this file.
+#info_TEXINFOS = doc/groff.texi
+#doc_groff_TEXINFOS = doc/fdl.texi
 #
-# Note that GNU standards require to install only info doc. Info doc
-# can still be disabled by passing 
-# --with-doc=<something else than info or yes> 
-# to configure
+# The GNU Coding Standards require only installation of documentation in
+# Info format.  This can still be disabled by passing
+#   --with-doc=<something other than "info" or "yes">
+# to configure.
 
 all: build_infodoc
 if BUILD_INFODOC
 build_infodoc: doc/groff.info
 groffinfodir = $(infodir)
 groffpdfdir = $(infodir)
-MOSTLYCLEANFILES += doc/groff.info doc/groff.info-2 doc/groff.info-2
+MOSTLYCLEANFILES += doc/groff.info doc/groff.info-[0-9]
 doc/groff.info: $(doc_srcdir)/groff.texi
-	@$(MKDIR_P) $(doc_builddir)
-	LANG=C \
+	$(AM_V_at)$(MKDIR_P) $(doc_builddir)
+	$(AM_V_GEN)LANG=C \
 	LC_ALL=C \
-	$(MAKEINFO) -o doc/groff.info --enable-encoding -I$(doc_srcdir) $(doc_srcdir)/groff.texi
+	$(MAKEINFO) -o doc/groff.info --enable-encoding \
+	  -I$(doc_srcdir) $(doc_srcdir)/groff.texi
 else
 build_infodoc:
 endif
@@ -331,47 +339,50 @@ TEXI2DVI = texi2dvi
 texi2dvi_missing = no
 # Rules to generate various doc files from .texi files.
 .texi.txt:
-	@$(MKDIR_P) $(doc_builddir)
-	LANG=C \
+	$(AM_V_at)$(MKDIR_P) $(doc_builddir)
+	$(AM_V_GEN)LANG=C \
 	LC_ALL=C \
-	$(MAKEINFO) --enable-encoding -I$(doc_srcdir) --plaintext -o $@ $<
+	$(MAKEINFO) --enable-encoding -I$(doc_srcdir) --plaintext \
+	  -o $@ $<
 
 .texi.dvi:
 if HAVE_TEXI2DVI
-	@$(MKDIR_P) $(doc_builddir)
-	LANG=C \
+	$(AM_V_at)$(MKDIR_P) $(doc_builddir)
+	$(AM_V_GEN)LANG=C \
 	LC_ALL=C \
 	TEXINPUTS="$(top_srcdir)/build-aux:$(TEXINPUTS)" \
 	MAKEINFO='$(MAKEINFO) -I $(doc_srcdir)' \
 	FORCE_SOURCE_DATE=1 \
-	$(TEXI2DVI) -e --batch --build-dir=doc/`basename $@`.t2d -o $@ $<
+	$(TEXI2DVI) -e --batch --build-dir=doc/`basename $@`.t2d \
+	  -o $@ $<
 else
-	@echo "Program texi2dvi is missing, cannot generate dvi doc"; \
+	@echo "program texi2dvi is missing; cannot generate $@" >&2; \
 	exit 1
 endif
 
 .texi.pdf:
 if HAVE_TEXI2DVI
-	@$(MKDIR_P) $(doc_builddir)
-	LANG=C \
+	$(AM_V_at)$(MKDIR_P) $(doc_builddir)
+	$(AM_V_GEN)LANG=C \
 	LC_ALL=C \
 	TEXINPUTS="$(top_srcdir)/build-aux:$(TEXINPUTS)" \
 	MAKEINFO='$(MAKEINFO) -I $(doc_srcdir)' \
-	$(TEXI2DVI) -e --batch --pdf --build-dir=doc/`basename $@`.t2p -o $@ $<
+	$(TEXI2DVI) -e --batch --pdf --build-dir=doc/`basename $@`.t2p \
+	  -o $@ $<
 else
-	@echo "Program texi2dvi is missing, cannot generate pdf doc"; \
+	@echo "program texi2dvi is missing; cannot generate $@" >&2; \
 	exit 1
 endif
 
 # This will generate both html split into several files and html doc
 # in a single file.
 .texi.html:
-	@$(MKDIR_P) $(doc_builddir)/
-	LANG=C \
+	$(AM_V_at)$(MKDIR_P) $(doc_builddir)/
+	$(AM_V_GEN)LANG=C \
 	LC_ALL=C \
 	$(MAKEINFO) --html -I $(doc_srcdir) \
 	  -o doc/`basename $@`.node $<
-	LANG=C \
+	$(AM_V_at)LANG=C \
 	LC_ALL=C \
 	$(MAKEINFO) --html -I $(doc_srcdir) --no-split \
 	  -o $@ $<
@@ -408,7 +419,8 @@ clean_otherdoc:
 install-data-local: install_infodoc
 if BUILD_INFODOC
 install_infodoc: doc/groff.info
-	-test -d $(DESTDIR)$(infodir) || $(mkinstalldirs) $(DESTDIR)$(infodir)
+	-test -d $(DESTDIR)$(infodir) \
+	  || $(mkinstalldirs) $(DESTDIR)$(infodir)
 	  for p in doc/groff.info `ls doc/groff.info*`; do \
 	    f=`basename $$p`; \
 	    $(RM) $(DESTDIR)$(infodir)/$$f; \
@@ -417,12 +429,16 @@ install_infodoc: doc/groff.info
 	$(INSTALL_INFO) --info-dir=$(DESTDIR)$(infodir) \
 	  $(DESTDIR)$(infodir)/groff.info
 install-pdf-local: doc/groff.pdf
-	-test -d $(DESTDIR)$(pdfdocdir) || $(mkinstalldirs) $(DESTDIR)$(pdfdocdir)
+	-test -d $(DESTDIR)$(pdfdocdir) \
+	  || $(mkinstalldirs) $(DESTDIR)$(pdfdocdir)
 	cp $(top_builddir)/doc/groff.pdf $(DESTDIR)$(pdfdocdir)
 install-html-local: doc/groff.html
-	-test -d $(DESTDIR)$(htmldocdir)/groff.html.mono || $(mkinstalldirs) $(DESTDIR)$(htmldocdir)/groff.html.mono
-	cp -r $(top_builddir)/doc/groff.html $(DESTDIR)$(htmldocdir)/groff.html.mono
-	cp -r $(top_builddir)/doc/groff.html.node $(DESTDIR)$(htmldocdir)
+	-test -d $(DESTDIR)$(htmldocdir)/groff.html.mono \
+	  || $(mkinstalldirs) $(DESTDIR)$(htmldocdir)/groff.html.mono
+	cp -r $(top_builddir)/doc/groff.html \
+	  $(DESTDIR)$(htmldocdir)/groff.html.mono
+	cp -r $(top_builddir)/doc/groff.html.node \
+	  $(DESTDIR)$(htmldocdir)
 else
 install_infodoc:
 endif
@@ -452,22 +468,22 @@ endif
 EXTRA_DIST += doc/gnu.xpm
 MOSTLYCLEANFILES += gnu.eps
 gnu.eps:
-	echo $(XPMTOPPM)
-	if test -f $(top_srcdir)/doc/gnu.eps; then \
+	$(AM_V_GEN)if test -f $(top_srcdir)/doc/gnu.eps; then \
 	  cp $(top_srcdir)/doc/gnu.eps . ; \
 	elif test -f $(top_builddir)/doc/gnu.eps; then \
 	  cp $(top_builddir)/doc/gnu.eps . ; \
 	else \
 	  if test ""$(XPMTOPPM) != "found"; then \
-	    echo "Program xpmtoppm is missing, can't generate gnu.eps" ; \
+	    echo "program xpmtoppm is missing; can't generate $@" >&2;\
 	    exit 1; \
 	  fi; \
 	  if test ""$(pnmtops) != "found"; then \
-	    echo "Program pnmtops is missing, can't generate gnu.eps" ; \
+	    echo "program pnmtops is missing; can't generate $@" >&2;\
 	    exit 1; \
 	  fi; \
 	  if test "$(pnmtops_nosetpage)" != "pnmtops -nosetpage"; then \
-	    echo "Program pnmtops can't handle -nosetpage, can't generate gnu.eps" ; \
+	    echo "program pnmtops can't handle -nosetpage option;" \
+	      "can't generate $@" >&2;\
 	    exit 1; \
 	  fi; \
 	  xpmtoppm $(top_srcdir)/doc/gnu.xpm | pnmdepth 15 \

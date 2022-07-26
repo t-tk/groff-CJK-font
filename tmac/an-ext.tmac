@@ -1,6 +1,6 @@
 .\" an-ext.tmac
 .\"
-.\" Copyright (C) 2007-2020 Free Software Foundation, Inc.
+.\" Copyright (C) 2007-2021 Free Software Foundation, Inc.
 .\"
 .\" Written by Eric S. Raymond <esr@thyrsus.com>
 .\"            Werner Lemberg <wl@gnu.org>
@@ -26,11 +26,23 @@
 .if \n(mX>1 \
 .  nx
 .
-.\" Check whether we are using grohtml.
+.\" Check if we're using grohtml or grotty, and therefore support URIs.
 .nr mH 0
-.if \n(.g \
+.nr mY 0
+.nr mU 0
+.if \n(.g \{\
 .  if '\*(.T'html' \
 .    nr mH 1
+.  if '\*(.T'ascii' \
+.    nr mY 1
+.  if '\*(.T'cp1047' \
+.    nr mY 1
+.  if '\*(.T'latin1' \
+.    nr mY 1
+.  if '\*(.T'utf8' \
+.    nr mY 1
+.  nr mU \n(mH+\n(mY
+.\}
 .
 .
 .\" Map mono-width fonts to standard fonts for groff's TTY device.
@@ -88,7 +100,7 @@
 .\" Start URL.
 .de UR
 .  ds m1 \\$1\"
-.  if \\n(mH \{\
+.  if \\nU&\\n(mU \{\
 .    \" Start diversion in a new environment.
 .    do ev link-text-env
 .    do di link-text-div
@@ -98,22 +110,32 @@
 .
 .\" End URL.
 .de UE
-.  ie \\n(mH \{\
+.  ie \\nU&\\n(mU \{\
 .    br
 .    di
 .    ev
 .
-.    \" Has there been one or more input lines for the link text?
+.    \" Has there been at least one input line of hyperlinked text?
 .    ie \\n(dn \{\
+.      if \\n(mH \
 \X^html:<a href="\\*(m1">^\c
-.      \" Yes, strip off final newline of diversion and emit it.
+.      if \\n(mY \
+\X^tty: link \\*(m1^\c
+.      \" Strip off the final newline of the diversion and emit it.
 .      do chop link-text-div
 .      do link-text-div
 \c
+.      if \\n(mH \
 \X^html:</a>^\c
+.      if \\n(mY \
+\X^tty: link^\c
 .    \}
-.    el \
+.    el \{\
+.      if \\n(mH \
 \X^html:<a href="\\*(m1">\\*(m1</a>^\c
+.      if \\n(mY \
+\X^tty: link \\*(m1^\\*(m1\X^tty: link^\c
+.    \}
 \&\\$*\"
 .  \}
 .  el \{\
@@ -129,7 +151,7 @@
 .\" Start email address.
 .de MT
 .  ds m1 \\$1\"
-.  if \\n(mH \{\
+.  if \\nU&\\n(mU \{\
 .    \" Start diversion in a new environment.
 .    do ev link-text-env
 .    do di link-text-div
@@ -139,22 +161,32 @@
 .
 .\" End email address.
 .de ME
-.  ie \\n(mH \{\
+.  ie \\nU&\\n(mU \{\
 .    br
 .    di
 .    ev
 .
-.    \" Has there been one or more input lines for the link text?
+.    \" Has there been at least one input line of hyperlinked text?
 .    ie \\n(dn \{\
+.      if \\n(mH \
 \X^html:<a href="mailto:\\*(m1">^\c
-.      \" Yes, strip off final newline of diversion and emit it.
+.      if \\n(mY \
+\X^tty: link mailto:\\*(m1^\c
+.      \" Strip off the final newline of the diversion and emit it.
 .      do chop link-text-div
 .      do link-text-div
 \c
+.      if \\n(mH \
 \X^html:</a>^\c
+.      if \\n(mY \
+\X^tty: link^\c
 .    \}
-.    el \
+.    el \{\
+.      if \\n(mH \
 \X^html:<a href="mailto:\\*(m1">\\*(m1</a>^\c
+.      if \\n(mY \
+\X^tty: link mailto:\\*(m1^\\*(m1\X^tty: link^\c
+.    \}
 \&\\$*\"
 .  \}
 .  el \{\
@@ -165,6 +197,20 @@
 .    hy \\n(HY
 .  \}
 ..
+.
+.
+.\" Set a man page cross reference.
+.\" .MR page-title page-section [trailing-text]
+.if !\n(.g \{\
+.  de MR
+.    nh
+.    ie \\n(.$=1 \
+.      I \\$1
+.    el \
+.      IR \\$1 (\\$2)\\$3
+.    hy \\n(HY
+..
+.\}
 .
 .
 .\" Continuation line for .TP header.

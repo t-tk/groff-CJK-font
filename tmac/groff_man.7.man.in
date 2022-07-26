@@ -15,7 +15,7 @@ _ifstyle()dnl
 the width of a letter \(lqn\(rq in the font current when the macro is
 called
 (see section \(lqNumerical Expressions\(rq in
-.IR groff (@MAN7EXT@))\c
+.MR groff @MAN7EXT@ )\c
 _endif
 \&.
 
@@ -124,7 +124,7 @@ _ifnotstyle()dnl
 Man page authors and maintainers who are not already experienced
 .I groff
 users should consult
-.IR groff_man_style (@MAN7EXT@),
+.MR groff_man_style @MAN7EXT@ ,
 an expanded version of this document,
 for additional explanations and advice.
 .
@@ -153,8 +153,9 @@ _
 \&.IP	Indented paragraph	Paragraph macros
 \&.IR	Italic, roman alternating	Font style macros
 \&.LP	(Left) paragraph	Paragraph macros
-\&.ME	Mail-to end	Hyperlink and email macros
-\&.MT	Mail-to start	Hyperlink and email macros
+\&.ME	Mail-to end	Hyperlink macros
+\&.MR	Man page cross reference	Hyperlink macros
+\&.MT	Mail-to start	Hyperlink macros
 \&.P	Paragraph	Paragraph macros
 \&.PP	Paragraph	Paragraph macros
 \&.RB	Roman, bold alternating	Font style macros
@@ -169,8 +170,8 @@ _
 \&.TH	Title heading	Document structure macros
 \&.TP	Tagged paragraph	Paragraph macros
 \&.TQ	Supplemental paragraph tag	Paragraph macros
-\&.UE	URL end	Hyperlink and email macros
-\&.UR	URL start	Hyperlink and email macros
+\&.UE	URI end	Hyperlink macros
+\&.UR	URI start	Hyperlink macros
 \&.YS	Synopsis end	Command synopsis macros
 .TE
 .
@@ -180,6 +181,7 @@ Macros whose use we discourage
 .RB ( .AT ,
 .BR .DT ,
 .BR .HP ,
+.BR .OP ,
 .BR .PD ,
 and
 .BR .UC )
@@ -196,7 +198,7 @@ _ifstyle()dnl
 .\" filling, hyphenation, breaking, adjustment (elsewhere known as
 .\" justification)
 .\" font (family, style [elsewhere known as face])
-.\" point size
+.\" type size
 .\" typesetter (troff device, PostScript, PDF)
 .\" terminal (nroff device, emulator, typewriter, TTY)
 .\"
@@ -308,7 +310,7 @@ group of macros.
 .B .TH
 (title heading) identifies the document as a man page and defines
 information enabling its indexing by
-.IR mandb (8)
+.MR mandb 8
 or a similar tool.
 .
 Section headings
@@ -357,7 +359,7 @@ manuals.
 _endif()dnl
 .
 See
-.IR man (1)
+.MR man 1
 for details on the section numbers and suffixes applicable to your
 system.
 .
@@ -458,7 +460,7 @@ in bold
 .BR HF )
 and,
 on typesetter devices,
-slightly larger than the base point size.
+slightly larger than the base type size.
 .
 If the heading font
 .B \[rs]*[HF]
@@ -500,10 +502,10 @@ for a man page to be properly indexed.
 .
 See
 _ifnotstyle()dnl
-.IR groff_man_style (@MAN7EXT@)
+.MR groff_man_style @MAN7EXT@
 for suggestions and
 _endif()dnl
-.IR man (7)
+.MR man 7
 for the conventions prevailing on your system.
 .RE \" Move left margin back to standard position.
 .
@@ -589,7 +591,7 @@ support them.
 .\" Plan 9 troff does, but its implementation doesn't manipulate filling
 .\" or hyphenation, so AT&T Unix's probably didn't either.
 .\"
-.\" Neatroff and DWB 3.3 troff/onroff don't ship (m)an macros.
+.\" Neatroff doesn't ship (m)an macros.
 .
 To be certain your page will be portable to systems that do not,
 copy their definitions from the
@@ -675,7 +677,7 @@ which can be changed by the deprecated
 macro;
 see subsection \(lqHorizontal and vertical spacing\(rq below.
 .
-They also reset the point size and font style to defaults
+They also reset the type size and font style to defaults
 .RB ( .TQ
 again excepted);
 see subsection \(lqFont style macros\(rq below.
@@ -911,7 +913,7 @@ Multiple
 blocks can be specified,
 for instance to distinguish differing modes of operation of a complex
 command like
-.IR tar (1);
+.MR tar 1 ;
 each will be vertically separated as paragraphs are.
 .
 .
@@ -1115,32 +1117,150 @@ _endif()dnl
 .
 .
 .\" ====================================================================
-.SS "Hyperlink and email macros"
+.SS "Hyperlink macros"
 .\" ====================================================================
+.
+Man page cross references
+_ifstyle()dnl
+like
+.MR ls 1
+_endif()dnl
+are best presented with
+.BR .MR .
 .
 Email addresses are bracketed with
 .BR .MT / .ME
-and URL hyperlinks with
+and other forms of hyperlink with
 .BR .UR / .UE .
+.
+Hyperlinked text is supported on the
+.BR html ,
+.BR tty ,
+and
+.B xhtml
+output devices;
+terminals and pager programs must support ECMA-48 OSC\~8 escape
+sequences
+(see
+.MR grotty @MAN1EXT@ ).
+.
+When device support is unavailable or disabled with the
+.B U
+register
+(see section \[lq]Options\[rq] below),
+.B .MT
+and
+.B .UR
+URIs are rendered between angle brackets after the linked text.
 .
 .
 .P
-These macros are GNU extensions not defined on systems running
+.BR .MT ,
+.BR .ME ,
+.BR .UR ,
+and
+.B .UE
+are GNU extensions not defined on systems running
 AT&T,
 Plan\~9,
 or
 Solaris
-.IR troff ;
+.IR troff ; \" Solaris
 see
 .I an\-ext.tmac
 in section \(lqFiles\(rq below.
+.
+Plan\~9
+.I troff \" Plan 9
+implements
+.BR .MR .
+_ifstyle()dnl
+.
+.
+.P
+URIs can be lengthy;
+rendering them can result in jarring adjustment or variations in line
+length,
+or
+.I \%@g@troff
+warnings when a hyperlink is longer than an output line.
+.
+The application of non-printing break point escape sequences
+.B \e:
+after each slash
+(or series thereof),
+and before each dot
+(or series thereof)
+is recommended.
+.
+The former practice avoids forcing a trailing slash in a URI onto a
+separate output line,
+and the latter helps the reader to avoid mistakenly interpreting a dot
+at the end of a line as a period
+(or multiple dots as an ellipsis).
+.
+Thus,
+.RS
+.EX
+\&.UR http://\e:example\e:.com/\e:fb8afcfbaebc74e\e:.cc
+.EE
+.RE
+has several potential break points in the URI shown.
+.
+The
+.B \e:
+escape sequences are ignored when supplied to device control commands
+for embedding in hyperlink-aware output drivers.
+_endif()dnl
+.
+.
+.TP
+.BI .MR "\~page-title manual-section"\c
+.RI \~[ trailing-text ]
+Set a man page cross reference as
+.RI \[lq] page-title ( manual-section )\[rq].
+.
+If
+.I trailing-text
+(typically punctuation)
+is specified,
+it follows the closing parenthesis without intervening space.
+.
+Hyphenation is disabled while the cross reference is set.
+.
+.I page-title
+is set in the font specified by the
+.B MF
+string.
+.
+The cross reference hyperlinks to a URI of the form
+.RB \[lq] man:\c
+.IR page-title ( manual-section )\[rq].
+_ifstyle()dnl
+.
+.
+.RS
+.IP
+.EX
+The output driver
+\&.MR grops @MAN1EXT@
+produces Postscript from
+\&.I troff
+output.
+\&.
+The Ghostscript program (\[rs]c
+\&.MR gs 1 )
+interprets Postscript and PDF.
+.EE
+.RE
+_endif()dnl
 .
 .
 .TP
 .BI .MT " address"
 .TQ
 .BR .ME " ["\c
-.IR punctuation ]
+.IR trailing-text ]
 Identify
 .I address
 as an RFC 6068
@@ -1148,27 +1268,25 @@ as an RFC 6068
 for a \(lqmailto:\(rq URI with the text between the two macro
 calls as the link text.
 .
-A
-.I punctuation
-argument to
+An argument to
 .B .ME
 is placed at the end of the link text without intervening space.
 .
 .I address
-may not be visible in the output text,
-particularly if the man page is being viewed as HTML.
+may not be visible in the rendered document if the output driver
+supports hyperlinks.
 .
-On a device that is not a browser,
+If it does not,
 .I address
 is set in angle brackets after the link text and before
-.IR punctuation .
-.
-.
+.IR trailing-text .
 _ifstyle()dnl
+.
+.
 .IP
 When rendered by
 .I groff
-to a terminal or PostScript device,
+to a PostScript device,
 .RS
 .IP
 .EX
@@ -1184,52 +1302,38 @@ for more information.
 .IP
 displays as \(lqContact Fred Foonly \(lafred\:.foonly@\:fubar\:.net\(ra
 for more information.\(rq.
-.
-.
-.IP
-The use of
-.B \e:
-to insert non-printing break points is a GNU extension and can be
-omitted.
-.
-We place them
-.I before
-each period so that the reader does not mistake them for sentence
-endings.
-.
-.
 _endif()dnl
+.
+.
 .TP
-.BI .UR " URL"
+.BI .UR " uri"
 .TQ
 .BR .UE " ["\c
-.IR punctuation ]
+.IR trailing-text ]
 Identify
-.I URL
+.I uri
 as an RFC 3986 URI hyperlink with the text between the two macro calls
 as the link text.
 .
-A
-.I punctuation
-argument to
+An argument to
 .B .UE
 is placed at the end of the link text without intervening space.
 .
-.I URL
-may not be visible in the output text,
-particularly if the man page is being viewed as HTML.
+.I uri
+may not be visible in the rendered document if the output driver
+supports hyperlinks.
 .
-On a device that is not a browser,
-.I URL
+If it does not,
+.I uri
 is set in angle brackets after the link text and before
-.IR punctuation .
-.
-.
+.IR trailing-text .
 _ifstyle()dnl
+.
+.
 .IP
 When rendered by
 .I groff
-to a terminal or PostScript device,
+to a PostScript device,
 .RS
 .IP
 .EX
@@ -1249,21 +1353,9 @@ the
 .I groff
 home page
 \(lahttps://\:www\:.gnu\:.org/\:software/\:groff/\(ra.\(rq.
-.
-.
-.IP
-The use of
-.B \e:
-to insert non-printing break points is a GNU extension and can be
-omitted.
-.
-We place a break point
-.I before
-each period so that the reader does not interpret the period as ending
-a sentence.
-.
-.
 _endif()dnl
+.
+.
 .\" ====================================================================
 .SS "Font style macros"
 .\" ====================================================================
@@ -1285,7 +1377,7 @@ and
 .B .SB
 macros set text in roman or bold,
 respectively,
-at a smaller point size;
+at a smaller type size;
 these differ visually from regular-sized roman or bold text only on
 typesetter devices.
 .
@@ -1316,19 +1408,18 @@ Because font styles are presentational rather than semantic,
 conflicting traditions have arisen regarding which font styles should be
 used to mark file or path names,
 environment variables,
-in-line literals,
-and man page cross-references.
+and inlined literals.
 _endif()dnl
 .
 .
 .P
-The default point size and family for typesetter devices is 10-point
+The default type size and family for typesetter devices is 10-point
 Times,
 except on the
 .B \%X75\-12
 and
 .B \%X100\-12
-devices where the point size is 12.
+devices where the type size is 12 points.
 .
 The default style is roman.
 .
@@ -1413,7 +1504,7 @@ _endif()dnl
 .IR text ]
 Set
 .I text
-one point smaller than the default point size on typesetter devices.
+one point smaller than the default type size on typesetter devices.
 .
 If the macro is given no arguments,
 the text of the next input line is set smaller.
@@ -1441,7 +1532,7 @@ Set
 .I text
 in bold and
 (on typesetter devices)
-one point smaller than the default point size.
+one point smaller than the default type size.
 .
 If the macro is given no arguments,
 the text of the next input line is set smaller and in bold.
@@ -1529,7 +1620,7 @@ _endif()dnl
 see subsection \(lqPortability\(rq
 _ifnotstyle()dnl
 in
-.IR groff_man_style (@MAN7EXT@)
+.MR groff_man_style @MAN7EXT@
 for approaches.
 _endif()dnl
 _ifstyle()dnl
@@ -1679,7 +1770,7 @@ that is,
 the width of a letter \(lqn\(rq in the font current when the macro is
 called
 (see section \(lqNumerical Expressions\(rq in
-.IR groff (@MAN7EXT@)).
+.MR groff @MAN7EXT@ ).
 _endif()dnl
 _ifnotstyle()dnl
 package assumes \(lqn\(rq.
@@ -1898,7 +1989,7 @@ check,
 or which is developed in the future.
 .
 The table preprocessor
-.IR \%@g@tbl (@MAN1EXT@)
+.MR @g@tbl @MAN1EXT@
 can likely meet your needs.
 _endif()dnl
 .
@@ -1968,7 +2059,7 @@ The following strings are defined for use in man pages.
 _ifnotstyle()dnl
 None of these is necessary in a contemporary man page;
 see
-.IR groff_man_style (@MAN7EXT@).
+.MR groff_man_style @MAN7EXT@ .
 _endif()dnl
 .
 Others are supported for configuration of rendering parameters;
@@ -1987,7 +2078,7 @@ and \(lq(Reg.)\(rq otherwise.
 .
 .TP
 .B \e*S
-interpolates an escape sequence setting the point size to the document
+interpolates an escape sequence setting the type size to the document
 default.
 .
 .
@@ -2018,7 +2109,7 @@ None of the above is necessary in a contemporary man page.
 .
 .B \e*S
 is superfluous,
-since point size changes are invisible on terminal devices and macros
+since type size changes are invisible on terminal devices and macros
 that change it restore its original value afterward.
 .
 Better alternatives exist for the rest;
@@ -2232,6 +2323,30 @@ it suppresses any automatic hyphenation points within;
 any specified with
 .B \e%
 are still honored.
+.
+.
+.TP
+.B \e:
+.\" Heirloom Doctools troff since release 050915 (2005-09-15)
+.\" mandoc since 2018-12-15 (released in 1.14.5, 2019-03-10)
+.\" neatroff since 399a4936, 2014-02-17
+.\" Plan 9 troff does not appear to support it.
+Insert a non-printing break point.
+.
+A word can break at such a point,
+but a hyphen glyph is not written to the output if it does.
+.
+This escape sequence is an input word boundary,
+so the remainder of the word is subject to hyphenation as normal.
+.
+You can use
+.B \e:
+and
+.B \e%
+in combination to control breaking of a file name or URI or to permit
+hyphenation only after certain explicit hyphens within a word.
+.
+See subsection \[lq]Hyperlink macros\[rq] above for an example.
 .
 .
 .TP
@@ -2706,7 +2821,7 @@ to express are likely to be lost.
 .
 If you feel tempted to use it,
 you should probably be composing a table using
-.IR \%@g@tbl (@MAN1EXT@)
+.MR @g@tbl @MAN1EXT@
 markup instead.
 .
 .
@@ -2919,6 +3034,16 @@ SunOS\~4.0 (1988) may have been the first to support
 .\" time and did not support the macro.  SunOS 4.0.3 (May 1989)
 .\" contained over 2,100 uses of .SB.
 .
+Plan\~9
+.I troff \" Plan 9
+introduced
+.B .MR
+in 2020.
+.\" https://github.com/9fans/plan9port/commit/\
+.\"  977b25a76ae8263e53fb4eb1abfc395769f23e3d
+.\"  d32deab17bfffa5bffc5fab3e6577558e40888c5
+.\"  36cd4c58c1346375b98f517fb8568be5bb47618d
+.
 .
 .\" ====================================================================
 .SH Options
@@ -2955,7 +3080,7 @@ Any valid argument to
 \[lq].ad\[rq] request may be used.
 .
 See
-.IR groff (@MAN7EXT@)
+.MR groff @MAN7EXT@
 for less-common choices.
 .
 .
@@ -3049,14 +3174,14 @@ Any valid argument to
 \[lq].ft\[rq] request may be used.
 .
 See
-.IR groff (@MAN7EXT@).
+.MR groff @MAN7EXT@ .
 .
 .
 .TP
 .BI \-rHY= hyphenation-mode
 Set hyphenation mode,
 as documented in section \(lqHyphenation\(rq of
-.IR groff (@MAN7EXT@).
+.MR groff @MAN7EXT@ .
 .
 Use
 .B \-rHY=0
@@ -3121,6 +3246,30 @@ is used for the title length.
 .
 .
 .TP
+.BI \-dMF= man-page-title-font
+Set the font used for man page titles named in
+.B .TH
+and
+.B .MR
+calls;
+the default is
+.RB \(lq I \(rq
+(italic).
+.
+Any valid argument to
+.IR groff 's
+\[lq].ft\[rq] request may be used;
+see
+.MR groff @MAN7EXT@ .
+.
+If the
+.B MF
+string ends in \[lq]I\[rq],
+it is assumed to be an oblique typeface,
+and italic corrections are applied before and after man page titles.
+.
+.
+.TP
 .BI \-rP n
 Start enumeration of pages at
 .I n
@@ -3128,13 +3277,13 @@ rather than\~1.
 .
 .
 .TP
-.BI \-rS point-size
+.BI \-rS type-size
 Use
-.I point-size
-as the base point size;
+.I type-size
+for the document's body text;
 acceptable values are 10,
 11,
-or 12.
+or 12 points.
 .
 See subsection \(lqFont style macros\(rq above for the default.
 .
@@ -3149,6 +3298,30 @@ default.
 .
 .
 .TP
+.B \-rU1
+Enable generation of URI hyperlinks in the
+.I grohtml
+and
+.I grotty
+output drivers.
+.
+.I grohtml
+enables them by default;
+.I grotty
+does not,
+pending more widespread pager support for OSC\~8 escape sequences.
+.
+Use
+.B \-rU0
+to disable hyperlinks;
+this will make the arguments to
+.B MT
+and
+.B UR
+calls visible in the document text produced by link-capable drivers.
+.
+.
+.TP
 .BI \-rX p
 After
 .RI page\~ p ,
@@ -3160,7 +3333,7 @@ and so forth.
 .
 The register tracking the suffixed page letter uses format \(lqa\(rq
 (see the \(lq.af\(rq request in
-.IR groff (@MAN7EXT@)).
+.MR groff @MAN7EXT@ ).
 .
 _ifstyle()dnl
 For example,
@@ -3236,15 +3409,21 @@ The extension macro definitions for
 .BR .UR / .UE ,
 and
 .BR .MT / .ME
-are contained in this file,
-which is written to be compatible with AT&T
-.I troff
+are contained in this file;
+if the formatter is not GNU
+.IR troff , \" GNU
+it also provides an
+.B .MR
+implementation that does not attempt hyperlinking.
+.
+These macros are written to be compatible with AT&T
+.I troff \" AT&T
 and permissively licensed\(emnot copylefted.
 .
 Man page authors concerned about portability to legacy Unix systems are
 encouraged to copy these definitions into their pages,
 and maintainers of
-.I troff
+.I troff \" generic
 implementations or work-alike systems that format man pages are
 encouraged to re-use them.
 .
@@ -3282,7 +3461,7 @@ This is a wrapper that loads
 .
 .TP
 .I \%@LOCALMACRODIR@/\:\%man\:\%.local
-Put local changes and customizations into this file.
+Put site-local changes and customizations into this file.
 _ifstyle()dnl
 .
 .
@@ -3296,6 +3475,8 @@ _ifstyle()dnl
 \&.ss 12 0 \e" See groff(@MAN7EXT@).
 \&.\e" Keep pages narrow even on wide terminals.
 \&.if n .if \(rsn[LL]>78 .nr LL 78n
+\&.\e" Ensure hyperlinks are enabled for terminals.
+\&.nr U 1
 .EE
 .RE
 .RE
@@ -3309,8 +3490,8 @@ or to permit their override with a user-specific
 .I man.local
 file.
 .
-This can be done by placing one or both of following at the end of
-.IR \%@LOCALMACRODIR@/\:\%man\:\%.local .
+This can be achieved by placing one or both of following requests at the
+end of the site-local file.
 .
 .RS
 .RS
@@ -3322,7 +3503,7 @@ This can be done by placing one or both of following at the end of
 .
 However,
 a security-sandboxed
-.IR man (1) \" such as man-db 2.8.5
+.MR man 1 \" such as man-db 2.8.5
 program may lack permission to open such files.
 .RE
 .
@@ -3440,7 +3621,7 @@ If your page renders adequately without one,
 use the simpler form.
 .
 If you need to indent multiple (unmarked) paragraphs,
-consider an setting an indented region with
+consider setting an indented region with
 .B .RS
 and
 .B .RE
@@ -3596,10 +3777,13 @@ macro package was written by James Clark and contributors.
 The extension macros were written by
 .MT wl@\:gnu\:.org
 Werner Lemberg
-.ME
-and
+.ME ,
 .MT esr@\:thyrsus\:.com
 Eric S.\& Raymond
+.ME ,
+and
+.MT g.branden\:.robinson@\:gmail\:.com
+G.\& Branden Robinson
 .ME .
 .
 .
@@ -3609,16 +3793,16 @@ This document was originally written for the Debian GNU/Linux system by
 Susan G.\& Kleinmann
 .ME .
 .
-It was corrected and updated by Werner Lemberg and
-.MT g.branden\:.robinson@\:gmail\:.com
-G.\& Branden Robinson
-.ME .
+It was corrected and updated by Lemberg and Robinson.
 .
-The extension macros were documented by Eric S.\& Raymond.
+The extension macros were documented by Raymond and Robinson.
 _ifstyle()dnl
-He also originated the portability section,
-to which Ingo Schwarze contributed most of the material on escape
-sequences.
+Raymond also originated the portability section,
+to which
+.MT schwarze@\:usta\:.de
+Ingo Schwarze
+.ME
+contributed most of the material on escape sequences.
 _endif()dnl
 .
 .
@@ -3626,20 +3810,20 @@ _endif()dnl
 .SH "See also"
 .\" ====================================================================
 .
-.IR \%@g@tbl (@MAN1EXT@),
-.IR \%@g@eqn (@MAN1EXT@),
+.MR @g@tbl @MAN1EXT@ ,
+.MR @g@eqn @MAN1EXT@ ,
 and
-.IR \%@g@refer (@MAN1EXT@)
+.MR @g@refer @MAN1EXT@
 are preprocessors used with man pages.
 .
 .
 .P
-.IR man (1)
+.MR man 1
 describes the man page librarian on your system.
 .
 .
 .P
-.IR groff_mdoc (@MAN7EXT@)
+.MR groff_mdoc @MAN7EXT@
 describes the
 .I groff
 version of the BSD-originated alternative macro package for man pages.
@@ -3647,14 +3831,14 @@ version of the BSD-originated alternative macro package for man pages.
 .
 .P
 _ifstyle()dnl
-.IR groff_man (@MAN7EXT@),
+.MR groff_man @MAN7EXT@ ,
 _endif()dnl
 _ifnotstyle()dnl
-.IR groff_man_style (@MAN7EXT@),
+.MR groff_man_style @MAN7EXT@ ,
 _endif()dnl
-.IR groff (@MAN7EXT@),
-.IR groff_char (@MAN7EXT@),
-.IR man (7)
+.MR groff @MAN7EXT@ ,
+.MR groff_char @MAN7EXT@ ,
+.MR man 7
 .
 .
 .\" Restore compatibility mode (for, e.g., Solaris 10/11).

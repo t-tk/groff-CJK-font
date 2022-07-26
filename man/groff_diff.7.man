@@ -91,7 +91,7 @@ introduces many new requests;
 with three exceptions,\" .cp, .do, .rj
 they all have names longer than two characters.
 .
-The names of number registers,
+The names of registers,
 fonts,
 strings/\:macros/\:diversions,
 environments,
@@ -169,11 +169,11 @@ or 10.25\~points.
 Consequently,
 in
 .IR groff ,
-the number register
+the register
 .B \[rs]n[.s]
 can contain a non-integral point size.
 .
-The new number register
+The new register
 .B \[rs]n[.ps]
 returns the point size in scaled points.
 .
@@ -353,7 +353,7 @@ True if there is a color called
 .
 .TP
 .BI r\~ reg
-True if there is a number register called
+True if there is a register called
 .IR reg .
 .
 .
@@ -415,7 +415,7 @@ or\~\c
 depending on whether
 .I anything
 is or is not acceptable as the name of a string, macro, diversion,
-number register, environment, font, or color.
+register, environment, font, or color.
 .
 It returns\~\c
 .B 0
@@ -540,7 +540,7 @@ switches back to the previous color.
 .
 .TP
 .BI \[rs]n[ xxx ]
-Interpolate number register
+Interpolate register
 .IR xxx .
 .
 .TP
@@ -680,7 +680,7 @@ is a numeric expression with a default scaling indicator
 Interpolate the contents of the environment variable
 .IR xxx ,
 as returned by
-.IR getenv (3).
+.MR getenv 3 .
 .
 .B \[rs]V
 is interpreted even in copy mode.
@@ -936,7 +936,7 @@ the
 Texinfo manual,
 for details of how a glyph name for a composite glyph is constructed,
 and
-.BR groff_char (@MAN7EXT@)
+.MR groff_char @MAN7EXT@
 for a list of glyph name components used in composite glyph names.
 .
 .TP
@@ -956,7 +956,7 @@ and
 .B sy
 requests are disabled by default.
 .
-.IR \%@g@troff (@MAN1EXT@)'s
+.MR @g@troff @MAN1EXT@ 's
 .B \-U
 option enables the formatter's \[lq]unsafe mode\[rq],
 restoring their function
@@ -977,7 +977,7 @@ and
 .BI .aln\~ "new old"
 Create an alias
 .I new
-for an existing number register named
+for an existing register named
 .IR old ,
 causing the names to refer to the same stored object.
 .
@@ -988,13 +988,13 @@ a warning of type
 .RB \[lq] reg \[rq]
 is generated and the request is ignored.
 .
-To remove a number register alias,
+To remove a register alias,
 call
 .B .rr
 on its name.
 .
-A number register's contents do not become inaccessible until it has no
-more names.
+A register's contents do not become inaccessible until it has no more
+names.
 .
 .
 .TP
@@ -1161,7 +1161,7 @@ will remain nodes,
 so the result cannot be guaranteed to be a pure string.
 .
 See section \[lq]Copy mode\[rq] in
-.IR groff (@MAN7EXT@).
+.MR groff @MAN7EXT@ .
 .
 Glyph parameters such as the type face and size are not preserved;
 use
@@ -1176,7 +1176,7 @@ Write a backtrace of the input stack to the standard error stream.
 Also see the
 .B \-b
 option of
-.IR \%@g@troff (@MAN1EXT@).
+.MR @g@troff @MAN1EXT@ .
 .
 .
 .TP
@@ -2008,7 +2008,7 @@ selects font family \[lq]P\[rq] instead.
 .
 The initial font family is \[lq]T\[rq] (Times),
 but can be overridden by the output device\[em]see
-.IR groff_font (@MAN5EXT@)).
+.MR groff_font @MAN5EXT@ ).
 .
 The current font family is associated with the environment.
 .
@@ -2256,7 +2256,7 @@ This file is sought in the same way that macro files are with the
 request or the
 .BI \-m name
 command-line option to
-.IR groff (@MAN1EXT@).
+.MR groff @MAN1EXT@ .
 .
 .
 .IP
@@ -2536,7 +2536,7 @@ is non-zero or missing, enable pairwise kerning, otherwise disable it.
 .BI .length\~ "reg anything"
 Compute the number of characters in
 .I anything
-and return the count in the number register
+and return the count in the register
 .IR reg .
 .
 If
@@ -2608,7 +2608,7 @@ a         b                   c
 .
 .IP
 Line-tabs mode is associated with the current environment; the
-read-only number register
+read-only register
 .B \[rs]n[.linetabs]
 is set to\~1 if in line-tabs mode, and 0 otherwise.
 .
@@ -2885,7 +2885,7 @@ request implicitly does
 .
 .TP
 .BI .rnn \~xx\~yy
-Rename number register
+Rename register
 .I xx
 to
 .IR yy .
@@ -3048,7 +3048,7 @@ warnings are not suppressed and
 must add 0.2\~m or more for each interword space in a line.
 .
 See
-.IR \%@g@troff (@MAN1EXT@)
+.MR @g@troff @MAN1EXT@
 for warning types and control.
 .
 .TP
@@ -3068,7 +3068,7 @@ version
 .I groff
 special characters
 (see
-.IR groff_char (@MAN7EXT@))
+.MR groff_char @MAN7EXT@ )
 can be used and the output will usually transform in the expected way
 due to the regular naming convention of the special character escapes.
 .
@@ -3076,12 +3076,13 @@ due to the regular naming convention of the special character escapes.
 .RS
 .RS
 .EX
-\&.ds resume R\e[\[aq]e]sum\e[\[aq]e]\e"
-\e*[resume] \e# R\['e]sum\['e]
-\&.stringdown resume
-\e*[resume] \e# r\['e]sum\['e]
-\&.stringup resume
-\e*[resume] \e# R\['E]SUM\['E]
+.B \&.ds resume R\e[\[aq]e]sum\e[\[aq]e]\e"
+.B \e*[resume]
+.B \&.stringdown resume
+.B \e*[resume]
+.B \&.stringup resume
+.B \e*[resume]
+R\['e]sum\['e] r\['e]sum\['e] R\['E]SUM\['E]
 .EE
 .RE
 .RE
@@ -3375,7 +3376,7 @@ is the sum of the numbers associated with each warning that is to be
 enabled; all other warnings are disabled.
 .
 The number associated with each warning is listed in
-.IR \%@g@troff (@MAN1EXT@).
+.MR @g@troff @MAN1EXT@ .
 .
 For example,
 .B .warn 0
@@ -3562,7 +3563,7 @@ this amount is set to
 .
 The arguments' units are twelfths of the space width of the current font
 (see
-.IR groff_font (@MAN5EXT@))
+.MR groff_font @MAN5EXT@ )
 and default to\~12.
 .
 .
@@ -3606,7 +3607,7 @@ and so on.
 .
 .
 .\" ====================================================================
-.SS "New number registers"
+.SS "New registers"
 .\" ====================================================================
 .
 The following read-only registers are available:
@@ -3940,7 +3941,7 @@ The sum of the numbers associated with each of the currently enabled
 warnings.
 .
 The number associated with each warning is listed in
-.IR \%@g@troff (@MAN1EXT@).
+.MR @g@troff @MAN1EXT@ .
 .
 .
 .TP
@@ -4028,7 +4029,7 @@ argument, the center of an accent from a roman font should be placed
 over that glyph.
 .
 .P
-Other available read/write number registers are:
+Other available read/write registers are:
 .
 .TP
 .B \[rs]n[c.]
@@ -4643,13 +4644,13 @@ the output of these can be selectively suppressed with
 and
 .B \-W
 options of
-.IR \%@g@troff (@MAN1EXT@)).
+.MR @g@troff @MAN1EXT@ ).
 .
 Backtraces can be automatically produced when errors or warnings occur
 (the
 .B \-b
 option of
-.IR \%@g@troff (@MAN1EXT@))
+.MR @g@troff @MAN1EXT@ )
 or generated on demand
 .RB ( .backtrace ).
 .
@@ -4745,7 +4746,7 @@ also interprets
 .B \[rs]*[
 and
 .B \[rs]n[
-as an interpolation of a string or number register,
+as an interpolation of a string or register,
 respectively,
 called
 .RB \[lq] [ \[rq].
@@ -4765,7 +4766,7 @@ which means that they are limited to one or two characters.
 See the
 .B \-C
 option in
-.IR groff (@MAN1EXT@)
+.MR groff @MAN1EXT@
 and,
 above,
 the
@@ -4979,7 +4980,7 @@ does not allow the use of the escape sequences
 in names of strings,
 macros,
 diversions,
-number registers,
+registers,
 fonts, or environments;
 .RI AT&T\~ troff
 does.
@@ -5321,9 +5322,9 @@ and device-independent output format.
 .
 .
 .PP
-.IR groff (@MAN1EXT@),
-.IR groff (@MAN7EXT@),
-.IR roff (@MAN7EXT@)
+.MR groff @MAN1EXT@ ,
+.MR groff @MAN7EXT@ ,
+.MR roff @MAN7EXT@
 .
 .
 .\" Clean up.

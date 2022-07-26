@@ -49,7 +49,7 @@ do
     -[dKmMnoPrTwW])
       is_option_argument_pending=yes
       opts="$opts $arg" ;;
-    -[bCEikpStUz] | -[dKMmrnoPwW]*)
+    -[bCEikpRStUz] | -[dKMmrnoPwW]*)
       opts="$opts $arg" ;;
     -T*)
       Topt=$arg ;;
@@ -68,7 +68,7 @@ do
       opts="$opts $arg" ;;
     --help)
       cat <<EOF
-usage: $prog [-bcCEhikpStUVz] [-dCS] [-dNAME=STRING] [-Karg] [-mNAME]\
+usage: $prog [-bcCEhikpRStUVz] [-dCS] [-dNAME=STRING] [-Karg] [-mNAME]\
  [-Mdir] [-nNUM] [-oLIST] [-Parg] [-rCN] [-rREG=EXPR] [-Tdev] [-wNAME]\
  [-Wname] [FILE ...]
 usage: $prog {--help | -v | --version}

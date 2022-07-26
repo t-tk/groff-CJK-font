@@ -19,10 +19,11 @@
 .nr PS 11
 .nr VS 13
 .ds FR 1
+.nr TC-MARGIN \w'00' \" expect 2-digit page numbers at most
 .ie t .nr PI 3.5n
 .el   .nr PI 4n
-.ND August 2021
-.EH '%''August 2021'
+.ND October 2021
+.EH '%''October 2021'
 .EF ''''
 .OH 'Using \f[I]groff\f[] with the \f[I]ms\f[] macros''%'
 .OF ''''
@@ -300,7 +301,9 @@ A list of document control registers and strings follows.
 They are presented in the syntax used to interpolate them.
 .
 For any parameter whose default is unsatisfactory,
-define its register or string before calling any
+define its register,
+string,
+or special character before calling any
 .I ms
 macro other than
 .CW RP .
@@ -358,6 +361,10 @@ Displays	\[rs]n[DD]	Display distance (spacing)	\f[I]special	0.5v \f[R](\f[]1v\f[
 \^	\[rs]n[DI]	Display indentation	\f[I]special	0.5i
 _
 Other	\[rs]n[MINGW]	Minimum gutter width	next page	2n
+\^	\[rs]n[TC\-MARGIN]	TOC page number margin width\
+	next \f[CR]PX\f[] call	\[rs]w\[aq]000\[aq]
+\^	\[rs][TC\-LEADER]	TOC leader character	\
+next \f[CR]PX\f[] call	.\[rs]h\[aq]1m\[aq]
 .TE
 .
 .
@@ -788,8 +795,6 @@ _
 \&.QP	T{
 Set a paragraph indented from both left and right margins by
 .CW \[rs]n[QI] .
-.
-This macro and register are Berkeley extensions.
 T}
 _
 T{
@@ -809,8 +814,6 @@ The text between
 and
 .CW .QE
 can be structured further by use of other paragraphing macros.
-.
-These macros are GNU extensions.
 T}
 _
 \&.XP	T{
@@ -945,7 +948,8 @@ Further automatic numbering,
 if used,
 resumes using the specified heading level indices as their predecessors.
 .
-This feature is a GNU extension.
+.\" Although undocumented in Tuthill's 4.2BSD ms.diffs paper...
+This feature is a Berkeley extension.
 T}
 .TE
 .
@@ -1035,6 +1039,15 @@ of
 .CW .NH
 following redefinition of the alias for
 .CW \[rs]*[SN\-STYLE] .
+.
+The formatted number of the current section is available in
+.CW \[rs]*[SN]
+(a feature first documented by Berkeley),
+facilitating its inclusion in
+.CW .XS /\c
+.CW .XA /\c
+.CW .XE
+table of contents entries.
 .
 .
 .TS
@@ -1913,7 +1926,7 @@ lf(CR) lf(CR) | lx .
 Display macro	Description
 With keep	Without keep
 _
-\&.DS L	\&.LD	Begin left-aligned display.
+\&.DS \f[R][\f[]L\f[R]]	\&.LD	Begin left-aligned display.
 \&.DS I \f[R][\,\f[I]indent\/\f[]]	\
 \&.ID \f[R][\,\f[I]indent\/\f[]]	T{
 Begin display indented by
@@ -1965,14 +1978,13 @@ Tables, figures, equations, and references
 .LP
 The
 .I ms
-macros support the standard
-.I groff
-preprocessors:
+package is often used with the
 .I tbl ,
 .I pic ,
 .I eqn ,
 and
-.I refer .
+.I refer
+preprocessors.
 .
 The
 .CW \[rs]n[DD]
@@ -2070,14 +2082,20 @@ T}	T{
 Denote a reference to be processed by the
 .I refer
 preprocessor.
-.
-The GNU
-.I refer (1)
-man page provides a comprehensive reference to the preprocessor and the
-format of the bibliographic database.
 T}
 .TE
 .KE
+.
+.
+.PP
+When
+.I refer
+emits collected references
+(as might be done on a \[lq]Works Cited\[rq] page),
+it interpolates the string
+.CW \[rs]*[REFERENCES]
+as an unnumbered section heading
+.CW .SH ). (
 .
 .
 .KS
@@ -2116,7 +2134,6 @@ GH-1978\[->]Fribulating gonkulator
 .fi
 T}
 .TE
-.KE
 .
 .
 .PP
@@ -2126,6 +2143,7 @@ particularly if the
 .I tbl
 .CW allbox
 option is used.
+.KE
 .
 .
 .KS
@@ -2191,9 +2209,14 @@ _
 \&.FS \f[R][\f[I]marker\f[]]	T{
 Begin a footnote.
 .
-A
+The
+.CW FS\-MARK
+hook
+(see below)
+is called with any supplied
 .I marker
-argument is placed at the beginning of the footnote text.
+argument,
+which is then also placed at the beginning of the footnote text.
 .
 If
 .I marker
@@ -2237,6 +2260,39 @@ and
 to superscript the marker at the anchor point,
 in the footnote text,
 or both.
+.
+.
+.PP
+.I "groff ms"
+provides a hook macro,
+.CW FS\-MARK ,
+for user-determined operations to be performed when the
+.CW FS
+macro is called.
+.
+It is passed the same arguments as
+.CW FS
+itself.
+.
+An application of
+.CW FS\-MARK
+is anchor placement for a hyperlink reference,
+so that a footnote can link back to its referential context.\**
+.
+.FS
+\[lq]Portable Document Format Publishing with GNU Troff\[rq],
+.I pdfmark.ms
+in the
+.I groff
+distribution,
+uses this technique.
+.FE
+.
+By default,
+this macro has an empty definition.
+.
+.CW FS\-MARK
+is a GNU extension.
 .
 .
 .PP
@@ -2694,40 +2750,198 @@ T}
 .KE
 .
 .
+.\" ------------------------
 .NH 2
 Creating a table of contents
 .XS
 	Creating a table of contents
 .XE
 .LP
-The facilities in the
+Because
+.I roff
+formatters process their input in a single pass,
+material on page 50,
+for example,
+cannot influence what appears on page\~1\[em]this poses a challenge for
+a table of contents at its traditional location in front matter,
+if you wish to avoid manually maintaining it.
+.
 .I ms
-macro package for creating a table of contents
-are semi-automated at best.
-Assuming that you want the table of contents to
-consist of the document's headings, you need to
-repeat those headings wrapped in
-.CW .XS
-and
-.CW .XE
-macros.
+enables the collection of material to be presented in the table of
+contents as it appears,
+saving its page number along with it,
+and then emitting the collected contents on demand toward the end of the
+document.
+.
+The table of contents can then be resequenced to its desired location
+as part of post-processing\[em]with a PDF page relocation tool,
+or by physically rearranging the pages of a printed document,
+depending on the output format and circumstances.
 .
 .
 .PP
-In addition,
-the
+Define an entry to appear in the table of contents by bracketing its
+text between calls to the
 .CW XS
-macro does not know to indent a heading based on its level.
+and
+.CW XE
+macros.
 .
-The easiest way to work around this is to add tabs to the table of
-contents string.
+A typical application is to call them immediately after
+.CW NH
+or
+.CW SH
+and repeat the heading text within them.
 .
-The following is an example.
+The
+.CW XA
+macro,
+used within
+.CW .XS /\c
+.CW .XE
+pairs,
+supplements an entry\[em]for instance,
+when it requires multiple output lines,
+whether because a heading is too long to fit or because style dictates
+that page numbers not be repeated.
 .
+In a document with a multi-level sectioning structure,
+you may wish to indent the text thus wrapped to correspond to its
+sectioning depth;
+this can be done in the entry text by prefixing it with tabs or
+horizontally spacing escape sequences,
+or by providing a second argument to the
+.CW XA
+macro.
+.
+.CW .XS
+and
+.CW .XA
+automatically associate the page number where they are called with the
+text following them,
+but they accept arguments to override this behavior.
+.
+At the end of the document,
+call
+.CW TC
+or
+.CW PX
+to emit the table of contents;
+.CW .TC
+resets the page number
+.B i "" to\~
+(Roman numeral one),
+and then calls
+.\" XXX ".BR PX ." here throws diagnostic with WRONG LINE NUMBER
+.CW PX .
+.
+.
+.PP
+All of these macros are Berkeley extensions.
 .
 .TS
+box;
+cb cb
+lf(CR) lx .
+Macro	Description
+_
+\&.XS \f[R][\f[I]page-number\f[]]	T{
+Begin,
+supplement,
+and end a table of contents entry.
+.
+Each entry is associated with
+.I page-number
+(otherwise the current page number);
+a
+.I page-number
+of
+.CW no
+prevents a leader and page number from being emitted for that entry.
+.
+Use of
+.CW .XA
+within
+.CW .XS /\c
+.CW .XE
+is optional;
+it can be repeated.
+.
+If
+.I indentation
+is present,
+a supplemental entry is indented by that amount;
+ens are assumed if no unit is indicated.
+.
+Text on input lines between
+.CW .XS
+and
+.CW .XE
+is stored for later recall by
+.CW .PX .
+T}
+\&.XA \f[R][\f[I]page-number\f[] [\f[I]indentation\f[]]]	\^
+\&.XE	\^
+_
+\&.PX \f[R][\f[]no\f[R]]	T{
+Switch to single-column layout.
+.
+Unless
+.CW no
+is specified,
+center and interpolate
+.CW \[rs]*[TOC]
+in bold and two points larger than the body text.
+.
+Emit the table of contents entries.
+T}
+_
+\&.TC \f[R][\f[]no\f[R]]	T{
+Set the page number to\~1,
+the page number format to lowercase Roman numerals,
+and call
+.CW PX
+(with a
+.CW no
+argument,
+if present).
+T}
+.TE
+.
+.
+.PP
+You can customize the style of the leader that bridges each table of
+contents entry with its page number;
+define the
+.CW TC\-LEADER
+special character by using the
+.CW char
+request.
+.
+A typical leader combines the dot glyph
+.CW .\& \[rq] \[lq]
+with a horizontal space escape sequence to spread the dots.
+.
+The width of the page number field is stored in the
+.CW TC\-MARGIN
+register.
+.
+.
+.KS
+.PP
+Here's an example of typical
+.I ms
+table of contents preparation and
+(a simulation of)
+its result.
+.
+.ds DOT \h'1m'.\"
+.TS
 box center;
-l .
+cb | cb
+l | c.
+Input	Result
+_
 T{
 .nf
 .CW
@@ -2743,16 +2957,47 @@ Introduction
 Methodology
 \&.XS
 \[->]Methodology
+\&.XA
+\[->]\[->]Fassbinder\[aq]s Approach
+\[->]\[->]Kahiu\[aq]s Approach
 \&.XE
 .R
 \&.\|.\|.
+.CW
+\&.NH 1
+Findings
+\&.XS
+Findings
+\&.XE
+.R
+\&.\|.\|.
+.CW
+\&.TC
 .fi
+T}	T{
+.sp 1v
+.nf
+.LG
+.\" Manual centering--ugh!
+.B "\h'2m'Table of Contents"
+.NL
+.sp 2v
+.\" Use absolute motions to gets the dots aligned.
+Introduction\h'|4.5m'\*[DOT]\*[DOT]\*[DOT]\*[DOT]\*[DOT]\*[DOT]\01
+\h'1m'Methodology\h'|4.5m'\*[DOT]\*[DOT]\*[DOT]\*[DOT]\*[DOT]\*[DOT]\02
+\h'2m'Fassbinder's Approach
+\h'2m'Kahiu's Approach
+\&.\|.\|.
+.\" XXX: Why doesn't \h'|3.5m' achieve alignment?
+Findings\h'|3.2m'\*[DOT]\*[DOT]\*[DOT]\*[DOT]\*[DOT]\*[DOT]\*[DOT]\08
 T}
 .TE
+.rm DOT
+.KE
 .
 .
-.LP
-The
+.PP
+Provins's
 .I "Groff and Friends HOWTO"
 includes a
 .I sed
@@ -2761,14 +3006,16 @@ script that automatically inserts
 and
 .CW .XE
 entries after each heading in a document.
-.PP
+.
 Altering the
-.CW .NH
-macro to automatically build the table of contents
-is perhaps initially more difficult, but would save
-a great deal of time in the long run if you use
+.CW NH
+macro to automatically build the table of contents is perhaps initially
+more difficult,
+but could save a great deal of time in the long run if you use
 .I ms
 regularly.
+.
+.
 .\" ------------------------
 .NH 1
 Differences from AT&T
@@ -2778,11 +3025,20 @@ Differences from AT&T
 .I ms
 .XE
 .LP
-This section lists the (minor) differences between the
+The
 .I "groff ms"
-macros and AT&T
-.I ms
-macros.
+macros are a complete re-implementation,
+using no original AT&T code.
+.
+Since they take advantage of the extended features in
+.I groff ,
+they cannot be used with AT&T
+.I troff .
+.
+.I "groff ms"
+supports several features described above as Berkeley and Version 10
+Research Unix extensions,
+and adds several of its own.
 .
 .
 .PP
@@ -2879,21 +3135,6 @@ it is synonymous with
 .
 .
 .PP
-Block displays were not documented in the AT&T
-.I ms
-manual
-(Berkeley corrected this oversight),
-but Version\~7 Unix
-.I ms
-supported them nevertheless,
-as does
-.I "groff ms"
-(this is thus only an
-.I apparent
-difference).
-.
-.
-.PP
 Right-aligned displays are available.
 .
 The AT&T
@@ -2906,16 +3147,6 @@ but it doesn't work\[rq].
 In
 .I "groff ms" ,
 it does.
-.
-.
-.PP
-.I "groff ms"
-handles
-.CW S \[rq] \[lq]
-as the first argument to the
-.CW NH
-macro specially,
-allowing alteration of the automatic heading numbering sequence.
 .
 .
 .PP
@@ -2983,6 +3214,17 @@ specify a
 space between columns,
 not the fixed gutter width of AT&T
 .I ms .
+.
+.
+.PP
+The AT&T
+.I ms
+manual did not document the
+.CW QI
+register,
+whereas Berkeley did;
+.I "groff ms"
+accordingly supports it.
 .
 .
 .PP
@@ -3129,28 +3371,60 @@ includes font style escape sequences to set the word in italics.
 .\" ------------------------
 .if t .bp
 .NH 1
-Acknowledgements
+Further Reading
 .XS
-Acknowledgements
+Further Reading
 .XE
-.LP
-Two documents provided essential reference material:
-.IP \(bu
-The
-.I "Groff and Friends HOWTO" ,
-.R
-by Dean Allen Provins.
-.IP \(bu
-.I "Using the -ms Macros with Troff and Nroff" ,
-.R
-the original AT&T document by M. E. Lesk.
-.LP
-Without these documents close at hand,
-writing this document would have been a
-much more difficult task.
+.
+.
+.IP \[bu]
+\[lq]Typing Documents on the Unix System:
+Using the \-ms Macros with Troff and Nroff\[rq];
+M.\& E.\& Lesk;
+November 13, 1978.
+.
+This document describes the
+.I ms
+supplied with AT&T Unix Version\~7.
+.
+.
+.IP \[bu]
+\[lq]A Revised Version of \-ms\[rq];
+Bill Tuthill;
+August 1983.
+.
+The 4.2BSD release featured several extensions to
+.I ms ,
+most of which are recreated in
+.I "groff ms" .
+.
+(The exceptions are the
+.CW TM
+and
+.CW CT
+macros for setting a doctoral thesis in the format required by the
+contemporaneous degree-granting authorities of the University of
+California at Berkeley.)
+.
+.
+.IP \[bu]
+\[lq]Using PDF boxes with the
+.I ms
+macros\[rq];
+Deri James;
+March 2021.
+.
+.CW BOXSTART
+and
+.CW BOXSTOP
+macros are available via the
+.I sboxes
+extension package,
+enabling colored,
+bordered boxes when the
+.CW pdf
+output device is used.
 .\" ------------------------
-.\" Toc here at end...
-.\" We need to fix the headers...
 .TC
 .
 .

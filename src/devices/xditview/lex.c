@@ -1,3 +1,5 @@
+#include <config.h>
+
 #include <X11/Xos.h>
 #include <X11/IntrinsicP.h>
 #include <X11/StringDefs.h>

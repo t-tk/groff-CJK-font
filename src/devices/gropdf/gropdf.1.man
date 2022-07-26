@@ -186,7 +186,7 @@ file; it accepts the same arguments as the
 command.
 .
 See
-.BR groff_font (@MAN5EXT@)
+.MR groff_font @MAN5EXT@
 for details.
 .
 .
@@ -236,10 +236,10 @@ Set the foundry to use for selecting fonts of the same name.
 The input to
 .I gropdf
 must be in the format output by
-.IR \%@g@troff (@MAN1EXT@).
+.MR @g@troff @MAN1EXT@ .
 .
 This is described in
-.IR groff_out (@MAN5EXT@).
+.MR groff_out @MAN5EXT@ .
 .
 .
 .LP
@@ -256,7 +256,7 @@ device uses a resolution of 72000 and a sizescale of 1000.
 .
 .LP
 The device description file must contain a valid paper size; see
-.BR groff_font (@MAN5EXT@)
+.MR groff_font @MAN5EXT@
 for more information.
 .
 .B gropdf
@@ -773,7 +773,7 @@ slides with
 If you use present.tmac with
 .B gropdf
 there is no need to run the program
-.BR presentps (@MAN1EXT@)
+.MR presentps @MAN1EXT@
 since the output will already be a presentation pdf.
 .LP
 All other
@@ -795,7 +795,7 @@ parameter is the same as the
 command.
 .
 See
-.BR groff_font (@MAN5EXT@)
+.MR groff_font @MAN5EXT@
 for details.
 .
 This means that you can alter the page size at will within the PDF file
@@ -1144,6 +1144,56 @@ previous value, also any trailing missing parameters are ignored.
 not all PDF Readers support any or all these transitions.
 .LP
 .
+.
+.TP
+.BI "\eX'pdf: background " "cmd left top right bottom weight" \[aq]
+Where:-
+.RS
+.TP
+.I cmd
+Can be any of "page|fill|box" in combination. So "pagefill" would draw a
+rectangle which covers whole current page size (in which case the rest of the
+parameters can be omitted because the box dimensions are taken from the
+current media size). "boxfill", on the other hand, requires the given
+dimensions to place the box. Including "fill" in the command will make the
+rectangle filled with the current background colour "\eM[colour]" and including
+"box" will give the rectangle a border in the current stroke colour
+"\em[colour]".
+.sp .5v
+The "cmd" may also be "off", on its own, which will terminate drawing the
+current box.
+.sp .5v
+Finally the command may be "footnote" followed by a new value for "bottom"
+which will be used for all current boxes, just for the current page. This is
+to allow room for footnotes which grow during the page.
+.LP
+.TP
+.I left
+.TQ
+.I top
+.TQ
+.I right
+.TQ
+.I bottom
+Are the coordinates of the box. The "top" and "bottom" coordinates are
+the minimum and maximum for the box, since the actual start of the
+box is the vertical position of groff when you issue the command and the bottom of
+the box is the point where you turn the box "off". The top and bottom
+coordinates are only used if the box drawing extends onto the next page, so,
+ordinarily they would be set to the header and footer margins.
+.TP
+.I weight
+If "box" is included in the command then this parameter provides the line width
+for the box border.
+.RE
+The convenience macro for this escape is
+.BR .pdfbackground .
+.LP
+There is also a macro file which can be included if you are using the ms macro
+package which can be incorporated by placing -msboxes on the
+.B groff
+command line.
+.
 .\" ====================================================================
 .SS "Importing graphics"
 .\" ====================================================================
@@ -1162,9 +1212,9 @@ The PDF file you wish to insert must be a single page and the drawing
 must just fit inside the media size of the PDF file.
 .
 So, in
-.BR inkscape (1)
+.MR inkscape 1
 or
-.BR gimp (1)
+.MR gimp 1
 (for example) make sure the canvas size just fits the image.
 .
 .
@@ -1177,7 +1227,7 @@ produce PDFs.
 If you find a single page PDF which fails to import properly, it is
 worth running it through the
 .
-.BR pdftk (1)
+.MR pdftk 1
 program by issuing the command:
 .
 .
@@ -1232,7 +1282,7 @@ preceded with some binary bytes.
 .
 .IP \(bu
 Convert the AFM file to a groff font description file with the
-.BR \%afmtodit (@MAN1EXT@)
+.MR afmtodit @MAN1EXT@
 program.
 .
 An example call is
@@ -1271,7 +1321,7 @@ Install both the groff font description files and the fonts in a
 \[oq]devpdf\[cq] subdirectory of the font path which groff finds.
 .
 See section \[lq]Environment\[rq] in
-.IR \%@g@troff (@MAN1EXT@)
+.MR @g@troff @MAN1EXT@
 for the actual value of the font path.
 .
 Note that groff doesn't use the AFM files (but it is a good idea to
@@ -1326,9 +1376,9 @@ the font file has been specified with a full path,
 no directories are searched.
 .
 See
-.IR \%@g@troff (@MAN1EXT@)
+.MR @g@troff @MAN1EXT@
 and
-.IR groff_font (@MAN5EXT@).
+.MR groff_font @MAN5EXT@ .
 .
 .
 .TP
@@ -1357,7 +1407,7 @@ The time zone to use when converting the current time
 .IR SOURCE_DATE_EPOCH )
 to human-readable form;
 see
-.IR tzset (3).
+.MR tzset 3 .
 .
 .
 .\" ====================================================================
@@ -1414,11 +1464,11 @@ automatically loaded by
 .SH "See also"
 .\" ====================================================================
 .
-.IR \%afmtodit (@MAN1EXT@),
-.IR groff (@MAN1EXT@),
-.IR \%@g@troff (@MAN1EXT@),
-.IR groff_font (@MAN5EXT@),
-.IR groff_out (@MAN5EXT@)
+.MR afmtodit @MAN1EXT@ ,
+.MR groff @MAN1EXT@ ,
+.MR @g@troff @MAN1EXT@ ,
+.MR groff_font @MAN5EXT@ ,
+.MR groff_out @MAN5EXT@
 .\" Not actually referenced in above discussion.
 .\" .BR \%pfbtops (@MAN1EXT@),
 .\" .BR \%groff_tmac (@MAN5EXT@),
