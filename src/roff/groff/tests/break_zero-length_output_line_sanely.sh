@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (C) 2020 Free Software Foundation, Inc.
+# Copyright (C) 2021 Free Software Foundation, Inc.
 #
 # This file is part of groff.
 #
@@ -20,10 +20,23 @@
 
 groff="${abs_top_builddir:-.}/test-groff"
 
-# troff should not segfault when its standard output is closed.
-# Savannah #59202.
+set -e
 
-# If a core file already exists, it should be dealt with; skip test.
-test -e core && exit 77
-echo | "$groff" >&-
-! test -e core
+# Do not core dump when attempting to distribute a space amount of zero
+# if someone sets the line length to zero.  See Savannah #61089.
+# Reproducer courtesy of John Gardner.
+
+INPUT='.de _
+.	na
+.	nh
+.	ll 0
+.	di A
+\\&\\\\$1
+.	di
+.	br
+..
+._ " XYZ"
+.A'
+
+OUTPUT=$(echo "$INPUT" | "$groff" -Tascii)
+echo "$OUTPUT" | grep -qx XYZ

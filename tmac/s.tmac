@@ -700,12 +700,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .ds * \E*[fn@mark-start]\En+[fn*text-num]\E*[fn@mark-end]
 ..
 .\" normal FS
+.\" FS-MARK is a user definable hook, which may be used to perform
+.\" any set-up actions, (e.g. planting an HREF link as the footnote
+.\" mark, in the document text); passed the same arguments as have
+.\" been passed to FS itself, unless redefined, it is a no-op.
 .de @FS
+.FS-MARK \\$@
 .ie \\n[.$] .fn*do-FS "\\$1" no
 .el \{\
 .	ie \\n[fn*text-num]>\\n[fn*note-num] .fn*do-FS \\n+[fn*note-num]
 .	el .fn*do-FS
 .\}
+..
+.\" Default no-op fallback for FS-MARK
+.de FS-MARK
 ..
 .\" Second argument of 'no' means don't embellish the first argument.
 .de fn*do-FS

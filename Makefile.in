@@ -335,7 +335,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Copyright (C) 2005-2020 Free Software Foundation, Inc.
+# Copyright (C) 2005-2021 Free Software Foundation, Inc.
 #      Written by Keith Marshall (keith.d.marshall@ntlworld.com)
 #      Automake migration by Bertrand Garrigues
 #
@@ -4407,6 +4407,7 @@ pdfmark_builddir = $(top_builddir)/contrib/pdfmark
 # Files installed in $(tmacdir)
 TMACFILES = \
   contrib/pdfmark/pdfmark.tmac \
+  contrib/pdfmark/sanitize.tmac \
   contrib/pdfmark/spdf.tmac
 
 pdfmarktmacdir = $(tmacdir)
@@ -5217,7 +5218,9 @@ groff_SOURCES = \
   src/roff/groff/pipeline.h
 
 groff_TESTS = \
+  src/roff/groff/tests/ab_works.sh \
   src/roff/groff/tests/adjustment_works.sh \
+  src/roff/groff/tests/break_zero-length_output_line_sanely.sh \
   src/roff/groff/tests/do_not_loop_infinitely_when_breaking_cjk.sh \
   src/roff/groff/tests/dot-cp_register_works.sh \
   src/roff/groff/tests/dot-nm_register_works.sh \
@@ -9503,9 +9506,23 @@ src/preproc/tbl/tests/save-and-restore-tab-stops.sh.log: src/preproc/tbl/tests/s
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
+src/roff/groff/tests/ab_works.sh.log: src/roff/groff/tests/ab_works.sh
+	@p='src/roff/groff/tests/ab_works.sh'; \
+	b='src/roff/groff/tests/ab_works.sh'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 src/roff/groff/tests/adjustment_works.sh.log: src/roff/groff/tests/adjustment_works.sh
 	@p='src/roff/groff/tests/adjustment_works.sh'; \
 	b='src/roff/groff/tests/adjustment_works.sh'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+src/roff/groff/tests/break_zero-length_output_line_sanely.sh.log: src/roff/groff/tests/break_zero-length_output_line_sanely.sh
+	@p='src/roff/groff/tests/break_zero-length_output_line_sanely.sh'; \
+	b='src/roff/groff/tests/break_zero-length_output_line_sanely.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
@@ -10279,8 +10296,8 @@ maintainer-clean-generic:
 	-rm -f src/preproc/refer/label.cpp
 	-rm -f src/preproc/refer/label.hpp
 	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
-@BUILD_INFODOC_FALSE@install-html-local:
 @BUILD_INFODOC_FALSE@install-pdf-local:
+@BUILD_INFODOC_FALSE@install-html-local:
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
@@ -13244,6 +13261,9 @@ uninstall_tmac_hook:
 # fill-column: 72
 # End:
 # vim: set autoindent filetype=automake textwidth=72:
+
+.DELETE_ON_ERROR:
+.PRECIOUS: $(TEST_SUITE_LOG)
 
 # if there is a name prefix we install the man pages by hand
 all: generate_man_files

@@ -1,3 +1,796 @@
+2021-09-24  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* font/devlj4/S: Make font name consistent with file name.
+
+2021-09-24  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/libs/libgroff/font.cpp (font::load): Throw error if a font
+	description file is missing a `spacewidth` directive, since it
+	is now re-documented as mandatory.  Atypically, we don't return
+	false in this scenario; instead we proceed with the existing
+	logic to compute a space width for the font based on typical
+	practices for Western alphabetic fonts (see, e.g.,
+	<https://type.today/en/journal/spaces>.
+
+	* font/devdvi/EX:
+	* font/devdvi/MI:
+	* font/devdvi/S:
+	* font/devdvi/SA:
+	* font/devps/EURO: Add `spacewidth` directive to font
+	description files we ship that were missing it.  We use the same
+	values that libgroff would have computed, so there should be no
+	visible difference.
+
+2021-09-24  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* Makefile.am: Mark `$(TEST_SUITE_LOG)` as `.PRECIOUS`.  This
+	prevents the test suite log from being deleted if there are any
+	failures.
+
+	Fixes <https://savannah.gnu.org/bugs/?61213>.  Thanks to Bjarni
+	Ingi Gislason for the report.
+
+2021-09-23  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/utils/grog/grog.pl (do_line): Move first-macro-call test
+	for `TH` to a more appropriate location.
+
+2021-09-23  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[grog]: Refactor to make it easier to generalize a per-package
+	scoring mechanism.
+
+	* src/utils/grog/grog.pl: Convert `inferred_main_package` from
+	scalar to list.  Add scalar `selected_main_package` to store a
+	"winner" from the list of main packages inferred.
+	(push_main_package): Add subroutine to populate
+	`inferred_main_package`.
+	(do_line, infer_man_or_ms_package): Update to use
+	`push_main_package`.
+	(construct_command): Rewrite to select a main package from the
+	list `inferred_main_package`, taking user-supplied arguments
+	into account as an overriding factor.  Drop now-unused `msupp`
+	list.
+
+2021-09-23  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/roff/groff/groff.cpp (main): If the `-I` option is given,
+	run the grn preprocessor and pass it an `-M` option with `-I`'s
+	argument.
+
+	* NEWS:
+	* src/roff/groff/groff.1.man (Options): Document it.  Also
+	document that `-I` options are passed to the output driver.
+
+2021-09-23  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/utils/grog/grog.pl (do_line): Don't strip groff-style
+	comments \# if AT&T compatibility mode is enabled.
+
+2021-09-23  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[libgroff]: Perform more font description file validation.  Our
+	documentation said that the `name` directive was mandatory but
+	we didn't actually enforce this.  Also be more specific in our
+	complaints of ill-formedness.
+
+	* src/libs/libgroff/font.cpp (font::load): Add local Boolean
+	variable `saw_name_directive`.  Rename `had_charset` to
+	`saw_charset_directive` for symmetry.  Emit distinct diagnostics
+	for `spacewidth` and `slant` directives having a missing,
+	non-numeric, or out-of-range argument.  Emit diagnostic if the
+	file lacks a `name` directive.
+
+2021-09-23  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[libgroff]: Slightly refactor.
+
+	* src/libs/libgroff/font.cpp (struct text_file): Rename member
+	variable `size` to `linebufsize` for clarity (it's certainly not
+	the size of the text file).
+	(text_file::text_file): Initialize `linebufsize` in constructor.
+	(text_file::next_line): Allocate new `buf` using `linebufsize`
+	instead of magic number (which was also stored to `size`, making
+	it only semi-magic, I guess).  Rename local variable `i` to
+	`length` since it is in fact the length (in `char`s) of the
+	string stored in `buf`.
+
+2021-09-23  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[libgroff]: Revisit fix for Savannah #61173.
+
+	* src/libs/libgroff/font.cpp (text_file::text_file): Restore
+	setting of `lineno` member variable to `0` in constructor
+	initializer list, but...
+	(text_file::next_line): ...unconditionally increment it every
+	time through this member function's outer loop.
+
+2021-09-23  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[troff]: Align diagnostic message format with libgroff.
+
+	* src/roff/troff/input.cpp (fatal_with_file_and_line): Report
+	the program name if one is defined.
+	(fatal_with_file_and_line, error_with_file_and_line,
+	debug_with_file_and_line): Report the line number of the input
+	file only if it is positive, so that other values can be used
+	for "whole file" complaints.  See commit cd0457b6, 17 September.
+
+2021-09-23  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[libgroff]: Drop redundant diagnostic.
+
+	* src/libs/libgroff/font.cpp (font::load): Drop redundant
+	diagnostic; a missing `charset` directive is already checked for
+	later, circa line 998.
+
+2021-09-22  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[libgroff]: Fix code style nits.
+
+	* src/libs/libgroff/font.cpp (font::font): Use initializer list
+	as much as possible in constructor.
+	(font::unit_scale, font::get_width, font::get_height,
+	font::get_depth, font::get_italic_correction,
+	font::get_left_italic_correction,
+	font::get_subscript_correction, font::get_character_type,
+	font::get_code, font::get_special_device_encoding): These member
+	functions rely on the font being either indexed or associated
+	with an output device that uses the `unicode` directive in its
+	`DESC` file.  The compiler doesn't know this, so annotate the
+	`abort()` calls that conclude them.  Add an `assert()` before
+	each one to more usefully describe the violated invariant in the
+	event this unreachable code is somehow reached.
+	(font::get_width): Annotate special meaning of zero zoom factor.
+
+2021-09-21  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/include/font.h (UNDEFINED_GLYPH): Use idiomatic C++98 null
+	pointer constant.
+
+2021-09-19  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[grohtml]: Fix compiler warning and dead store.
+
+	* src/devices/grohtml/post-html.cpp (html_printer::special):
+	Update call of `font::load_font()` to stop passing obsolete
+	parameter (deleted by me in 2dff87d3, 17 September).  The value
+	stored to the parameter by that function was never read anyway,
+	so also get rid of the variable that contained it.
+
+	Fixes <https://savannah.gnu.org/bugs/?61187>.  Thanks to Bjarni
+	Ingi Gislason for the report.
+
+2021-09-19  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[libgroff]: Slightly refactor.
+
+	* src/include/font.h (font::scan_papersize): Demote return type
+	from `int` to `bool`.
+	* src/libs/libgroff/font.cpp (font::scan_papersize): As above.
+	Use Boolean instead of integer literals.  Also rename `FILE`
+	stream pointer from `f` to `fp` and perform an explicit
+	comparison against the idiomatic C++98 null pointer constant.
+
+2021-09-17  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[libgroff, troff]: Slightly refactor device and font description
+	file loading.  Remove dead code.
+
+	* src/include/font.h (font::load_font): Drop second parameter.
+	It was never used for its intended purpose.
+	(load): Drop first parameter; likewise.
+	* src/libs/libgroff/font.cpp (font::load)
+	(load): As above.
+
+	* src/libs/libgroff/font.cpp (struct text_file): Rename
+	`skip_comments` to `recognize_comments`.  Demote that and
+	`silent` from `int` to `bool`.
+	(text_file::text_file): Use Boolean rather than integer literals
+	in constructor.
+	(text_file::next_line, font::load): Apply above renaming.
+
+	* src/libs/libgroff/font.cpp (font::load): Rename parameter from
+	`head_only` to `load_header_only` to be more communicative.
+	Drop test of font description file name being `DESC`; this code
+	was not being reached.  Stop throwing errors from this function
+	on failure to open the file; the caller will handle this when it
+	sees our false return value.  Rename local variable `command` to
+	`directive` for alignment with our documentation.  Replace "I
+	dont think this should happen" test and comment with `assert()`.
+	(struct table): Rename member from `command` to
+	`numeric_directive` to indicate its specificity, tracking only a
+	subset of valid `DESC` file directives.
+
+	* src/libs/libgroff/font.cpp (font::load, font::load_desc):
+	Remove redundant assignments to the member variable formerly
+	known as `skip_comments`.
+
+	* src/libs/libgroff/font.cpp (font::load_desc): Rename local
+	variable `directive_found` to `numeric_directive_found` to
+	clarify logic.
+
+	* src/roff/troff/node.cpp (mount_font_no_translate): Simplify
+	call of `font::load_font`.  The `not_found` in-out parameter
+	which was so agonizingly passed up through layers of library
+	calls was never actually read.  Drop code that has been `#if
+	0`-ed out since 1993.
+
+2021-09-17  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/libs/libgroff/font.cpp (font::load_desc): Clear line
+	number before emitting whole-file validity diagnostics.
+
+2021-09-17  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/libs/libgroff/font.cpp (font::load_desc): Emit correct
+	line numbers when complaining of invalid `sizescale`, `hor`, or
+	`vert` values in device description files.
+
+	Fixes <https://savannah.gnu.org/bugs/?61174>.
+
+2021-09-17  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[libgroff]: Increase validation of device and font description
+	files.
+
+	* src/libs/libgroff/font.cpp (font::load): Validate the syntax
+	and value of the `name` directive.
+	(font::load_desc): Issue distinct diagnostics for a `fonts`
+	directive that is missing arguments and for a first argument
+	that can't be interpreted as a valid number.
+
+2021-09-17  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[libgroff]: Make error reporting more flexible.
+
+	* src/libs/libgroff/error.cpp (do_error_with_file_and_line):
+	Interpret a line number of zero specially: treat the diagnostic
+	as applying to the entire file, and omit the line number.
+
+2021-09-17  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[libgroff]: Add information to diagnostics.
+
+	* src/libs/libgroff/font.cpp (font::load): Drop unused argument
+	from `error()` call.
+	(font::load_desc): In another, add name of numeric directive
+	that is given an unparsable number.
+
+2021-09-17  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[libgroff]: Tweak code style.
+
+	* src/libs/libgroff/font.cpp (trim_args, font::load,
+	font::load_desc): Compare pointer explicitly to null pointer
+	literal `0` instead of using logical complementation.
+	(font::load, font::load_desc): Swap order of null pointer
+	equality comparisons when a typo or thinko could lead to lvalue
+	assignment.
+
+2021-09-17  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[libgroff]: Use idiomatic C++98 null pointer constant.
+
+	* src/libs/libgroff/font.cpp (text_file::error,
+	glyph_to_unicode, font::get_special_device_encoding,
+	font::load):
+	* src/libs/libgroff/fontfile.cpp (font::image_generator):
+	* src/libs/libgroff/nametoindex.cpp (class charinfo,
+	character_indexer::named_char_glyph,
+	character_indexer::numbered_char_glyph):
+	* src/libs/libgroff/string.cpp (string::clear):
+	* src/libs/libgroff/tmpfile.cpp (temp_init::temp_init):
+	* src/libs/libgroff/tmpname.cpp (gen_tempname): Use `0` literal
+	instead of `NULL` to represent a null pointer; this was
+	idiomatic in C++98 and is mostly the practice elsewhere in
+	groff.  Also swap order of null pointer equality comparisons
+	when a typo or thinko could lead to lvalue assignment.
+
+	* src/roff/troff/input.cpp (input_stack::diversion_state,
+	input_stack::get_diversion_state, charinfo::contains,
+	glyph_to_name): Similar.
+
+2021-09-17  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[libgroff]: Slightly refactor.
+
+	* src/libs/libgroff/font.cpp (font::load): Use same loop style
+	as `font::load_desc()`.
+
+2021-09-17  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[libgroff]: Fix off-by-one error in font and device description
+	file reader diagnostics.
+
+	* src/libs/libgroff/font.cpp (text_file::text_file): All text
+	files begin with line 1, not line 0.
+
+	Fixes <https://savannah.gnu.org/bugs/?61173>.
+
+2021-09-17  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[libgroff]: Boolify more interfaces.
+
+	* src/include/font.h (font::unit_scale):
+	* src/libs/libgroff/font.cpp (font::unit_scale): Demote return
+	type from `int` to `bool`.  Use Boolean literals instead of
+	integers.
+
+	* src/libs/libgroff/font.cpp (struct text_file): Rename `next`
+	member function to `next_line`.  Demote its return type from
+	`int` to `bool`.  Use Boolean literals instead of integers.
+
+2021-09-16  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[libgroff]: Boolify local variables.
+
+	* src/libs/libgroff/font.cpp (font::load, font::load_desc):
+	Demote local variables used as Booleans from `int` to `bool` and
+	update literals used with them from integer to Boolean.
+
+2021-09-16  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[grn, groff, troff]: Communicate better when device DESC file
+	can't be loaded.
+
+	* src/libs/libgroff/font.cpp (font::load_desc): Stop writing
+	diagnostic to standard error.
+	* src/preproc/grn/main.cpp (getres):
+	* src/roff/troff/troff.cpp (main): Replace "sorry, I can't
+	continue" fatal diagnostic with a more informative message.
+	Instead say which device's DESC file the program was trying to
+	open, which might reveal a user's logic error or typo.
+	* src/roff/groff/groff.cpp (main): Replace "invalid device" text
+	of fatal diagnostic similarly.  I think it is more helpful to
+	indicate the operation that failed rather than saying the device
+	was invalid, particularly since there are other ways for a
+	device description to be invalid even if a DESC file is found
+	and loaded.
+
+2021-09-16  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[troff]: Throw warning diagnostic if device DESC file attempts
+	to load unavailable fonts.
+
+	* src/roff/troff/input.cpp (main): Take advantage of new Boolean
+	return values of `mount_style()` and `mount_font()` to produce
+	warning diagnostics if mounting a style or font as directed by
+	the DESC file fails.  Explain in a comment why, at present, this
+	style mount warning will never actually trip.
+
+2021-09-15  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[troff]: Lift font mounting diagnostic messages to be closer to
+	their user-controlled contexts to provide more information.  In
+	many cases no diagnostic was being thrown at all when an
+	unavailable font was requested by name, which is the method most
+	users prefer, and which meant that failures resulting from typos
+	in font names for many requests (`uf`, `fschar`, `rfschar`,
+	`special`, `fspecial`, `fzoom`, `bd`, `tkf`, `cs`) were going
+	unreported.  Further, promote these font warnings to errors
+	because the request will utterly fail to do what was requested
+	with no reasonable fallback.  Possibly, they were formerly
+	warnings because at the low level they were being emitted, they
+	could also have originated from unavailable fonts encountered in
+	device description files, and while that's bad news, it results
+	in no formatting problems if it doesn't affect fonts that an
+	input document actually uses.
+
+	* src/roff/troff/node.cpp (struct font_lookup_info): New struct
+	keeps the font name or position requested, and the position of
+	successful font lookup.
+	(font_lookup_info::font_lookup_info): Add constructor.
+	(font_lookup_error): New function builds error message using a
+	`font_lookup_info` struct and a message argument.
+	(get_fontno): Rename to...
+	(has_font): ...this.  Add argument to take a pointer to a
+	`font_lookup_info` struct.  Return a `bool` indicating whether
+	the lookup succeeded.  Place former `int` return value into the
+	struct instead.  Populate the other struct members with the
+	requested font name or position, as appropriate.
+	(mount_font_no_translate): Stop throwing warning diagnostic here
+	if a font cannot be loaded.  Instead, throw them...
+	(font_position): ...here, and...
+	(underline_font, define_font_special_character,
+	remove_font_special_character, read_special_fonts,
+	font_special_request, font_zoom_request, bold_font, track_kern,
+	constant_space): ...here, using `font_lookup_info` structs and
+	`has_font()`.
+	(remove_font_special_character): Stop returning early if font
+	lookup fails; it's gratuitously inconsistent with other similar
+	functions (save one, which has a reason to be different).
+	(define_font_special_character): Return early if font lookup
+	fails and say why in a comment (we can't `skip_line()`).
+
+2021-09-15  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* [libgroff, troff]: Further boolify.
+
+	* src/include/font.h (load_font, font): Demote parameters from
+	{pointer to} `int` to `bool` and update default literal from
+	integer to Boolean (except for the pointer).  Update comment.
+	* src/libs/libgroff/font.cpp (load_font, load): Similarly.
+
+	* src/roff/troff/node.h (mount_font):
+	* src/roff/troff/node.cpp (mount_font): Demote return type from
+	`int` to `bool`.
+
+	* src/roff/troff/node.h (mount_style):
+	* src/roff/troff/node.cpp (mount_style): Promote return type
+	from `void` to `bool`.
+
+	* src/roff/troff/node.cpp (mount_font_no_translate): Demote
+	return type and `check_only` parameter from `int` to `bool` and
+	use Boolean rather than integer literals with them.
+	(check_font): Update call site of `mount_font_no_translate` to
+	use Boolean literal.
+	(font_position): Indicate that "error" is ignored by casting
+	return value of `mount_font` to void instead of using a comment.
+	(style): Cast return value of `mount_style` to `void`.
+
+2021-09-15  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* Makefile.am: Add `.DELETE_ON_ERROR` special target; both GNU
+	and FreeBSD make(1)s support it so maybe it will be portable
+	enough.  This avoids, among other problems, a target appearing
+	falsely up-to-date (often as an empty file) when the troff
+	process generating it experiences an assertion failure.
+
+2021-09-12  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	Since June 1991 if not earlier, groff (technically, the refer,
+	lookbib, and lkbib programs) has trusted the header contents of
+	binary bibliographic index files (canonically generated with
+	indxbib(1)) regarding the sizes of the data structures that
+	follow in the file, a notorious class of security problem.  In
+	July 2013, the Mayhem Team at Carnegie Mellon University
+	reported to the Debian Bug Tracking System a problem with
+	groff's refer(1) implementation dumping core when reading an
+	index file prepared by a fuzzer.
+
+	* src/libs/libbib/index.cpp (index_search_item::check_header):
+	Add new member function to validate the header of an indexed
+	bibliography file, returning a string describing in detail the
+	first validity problem encountered.
+	(index_search_item::load): Perform the foregoing check before
+	using any of the size values taken from the header; they are
+	relied upon for pointer arithmetic.  If in verification mode
+	{using the undocumented `-V` flag to refer(1), lkbib(1), or
+	lookbib(1)}, report the details of the problem encountered.
+	Regardless of that mode, if there is a validity problem, report
+	corruption of the index file and abandon it, forcing fallback to
+	the text version of the corresponding bibliography file.
+
+	Fixes <https://bugs.debian.org/716109>.
+
+2021-09-12  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/libs/libbib/index.cpp
+	(index_search_item::get_invalidity_reason): Don't complain about
+	about a last list element being nonnegative if the list size was
+	zero in the first place, as can happen with an empty index.
+	More seriously from a language standpoint, avoid reading through 
+	a negative array index (this can escape a compiler's attention
+	because we're reading from the midst of a heap-allocated or
+	`mmap()`ed region, but it's still a code smell).
+
+	Fixes <https://savannah.gnu.org/bugs/?61144>.
+
+2021-09-12  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/libs/libbib/index.cpp (index_search_item::load,
+	index_search_item::get_invalidity_reason,
+	index_search_item::add_out_of_date_file): Clarify diagnostic
+	messages.  Make it more obvious when we're complaining of a
+	problem in an indexed bibliographic database file (rather than a
+	plain text one).  Dial down the amount of Unix jargon a little.
+
+2021-09-12  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[libbib]: Partially boolify.
+
+	* src/include/search.h:
+	* src/libs/libbib/index.cpp:
+	* src/preproc/refer/refer.cpp:
+	* src/utils/lkbib/lkbib.cpp:
+	* src/utils/lookbib/lookbib.cpp: Demote `verify_flag` from an
+	`int` to a `bool`, rename it to `do_verify`, use Boolean
+	instead of integer literals with it, and update call sites.
+
+	* src/libs/libbib/index.cpp: Rename `do_verify()` member
+	function to `get_invalidity_reason()` (it returns a string).
+	Demote `load()` from `int` to `bool`; do the same for `verify()`
+	and rename it to `is_valid()` as well.  Use Boolean instead of
+	integer literals with them.
+	(index_search_item::is_valid, make_index_search_item): Update
+	call sites of renamed member functions.
+
+2021-09-12  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/libs/libbib/map.c (mapread): Compare return value of
+	`mmap()` to `MAP_FAILED` instead of `(char *)-1`.  `MAP_FAILED`
+	is documented in POSIX Issue 5 a.k.a. SUSv2
+	<https://pubs.opengroup.org/onlinepubs/007908799/xsh/mmap.html>
+	{1997} and should be portable enough by now.
+
+2021-09-11  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[troff]: Clamp negative tab stop positions to zero instead of
+	throwing an assertion failure.
+
+	* src/roff/troff/env.cpp (tab_stops::distance_to_next_tab):
+	Replace `assert` with clamping logic, ensuring that `lastpos`
+	can never be negative.  While negative tab stop positions don't
+	make much sense (they result in zero horizontal motion), user
+	input like `.ta T -5` should never provoke an assertion failure.
+
+	(set_tabs): Throw range warning in additional scenario, viz., if
+	a repeating tab offset is negative.
+
+	Fixes <https://bugs.debian.org/990406>.  Thanks to наб for the
+	report.
+
+2021-09-11  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[troff]: Boolify `set_tabs` function.
+
+	* src/roff/troff/env.cpp (set_tabs): Demote local variables from
+	`int` to `bool` and give them predicate-like names.
+	  - `first` -> `is_first_stop`
+	  - `repeated` -> `is_repeating_stop`
+	Use Boolean instead of integer literals in assignments to them.
+
+2021-09-11  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[man]: Deprecate `OP` macro.
+
+	* tmac/an-ext.tmac (OP): Move implementation from here...
+	* tmac/an.tmac (OP): ...to here.  Throw deprecation warning.
+	Throw style warning if wrong number of arguments given.
+
+	* tmac/groff_man.7.man.in (Description): Drop from introductory
+	macro summary.
+	(Description/Command synopsis macros): Move discussion from
+	here...
+	(Description/Deprecated features): ...to here.  Explain why it's
+	deprecated.
+
+2021-09-07  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[troff]: Make `ab` request quiet if given no arguments.  The
+	`tm`, `tm1`, and `tmc` requests provide ample flexibility for
+	constructing diagnostic messages prior to an error exit, and
+	it's convenient to make `ab` itself quiet instead of saying
+	"User Abort." as Unix Version 7 troff did.  Further, there is no
+	standardization across troffs regarding what `ab` should emit if
+	arguments are absent.
+
+	* src/roff/troff/input.cpp (abort_request): Do it.
+
+	* src/roff/groff/tests/ab_works.sh:
+	* src/roff/groff/groff.am (groff_TESTS): Test it.
+
+	* doc/groff.texi (Debugging, Implementation Differences):
+	* man/groff.7.man (Requests/Request short reference):
+	* man/groff_diff.7.man (Implementation differences): Document
+	it.
+
+	Fixes <https://savannah.gnu.org/bugs/?61070>.  Thanks to Dave
+	Kemper for the discussion.
+
+2021-09-07  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[troff]: Update exit status literals.
+
+	* src/roff/troff/div.cpp (top_level_diversion::begin_page):
+	* src/roff/troff/input.cpp (exit_troff, abort_request, do_error,
+	fatal_with_file_and_line): Use standard C library preprocessor
+	symbols `EXIT_SUCCESS` and `EXIT_FAILURE` instead of 0 and 1
+	literals, respectively.
+
+2021-09-06  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[troff]: Drop unused member function.
+
+	* src/roff/troff/token.h (class token): Drop unused `title`
+	member function.  Its implementation was apparently removed in
+	the prehistory of our Git repository: see James Clark's
+	ChangeLog entry of 1990-09-06.
+
+2021-09-06  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[troff]: Remove workaround for Cfront 1.2 bug.
+
+	* src/roff/troff/input.cpp (do_define_macro): Move `dot_symbol`
+	from to file to function local scope as originally intended.
+
+2021-09-06  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[troff]: Rename parameter.
+
+	* src/roff/troff/input.cpp (token::usable_as_delimiter): Rename
+	parameter from `err` to `report_error` to be more communicative.
+
+2021-09-06  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[troff]: Boolify members of `token` class.
+
+	* src/roff/troff/token.h (class token): Demote return type of
+	several member functions from `int` to `bool` and rename them.
+	  - `backspace` -> `is_backspace`
+	  - `delimiter` -> `usable_as_delimiter`
+	  - `dummy` -> `is_dummy`
+	  - `eof` -> `is_eof`
+	  - `horizontal_space` -> `is_horizontal_space`
+	  - `hyphen_indicator` -> `is_hyphen_indicator`
+	  - `leader` -> `is_leader`
+	  - `left_brace` -> `is_left_brace`
+	  - `newline` -> `is_newline`
+	  - `page_ejector` -> `is_page_ejector`
+	  - `right_brace` -> `is_right_brace`
+	  - `space` -> `is_space`
+	  - `special` -> `is_special`
+	  - `stretchable_space` -> `is_stretchable_space`
+	  - `tab` -> `is_tab`
+	  - `transparent_dummy` -> `is_transparent_dummy`
+	  - `transparent` -> `is_transparent`
+	  - `unstretchable_space` -> `is_unstretchable_space`
+	  - `white_space` -> `is_white_space`
+	  - `zero_width_break` -> `is_zero_width_break`
+	(class token): Drop 1991 comment anticipating that member
+	function `nspaces` could return "2" for a "double space"; this
+	was apparently never implemented.
+	(class token): Drop parameter names from declarations; the
+	prevailing style (familiar from Stroustrup) is not to use them.
+	(token::is_special): Simplify implementation.
+
+	* src/roff/troff/input.cpp (has_arg,
+	token::usable_as_delimiter): Update definitions of above member
+	functions not defined in token.h.
+
+	* src/roff/troff/div.cpp (begin_page, space_request, need_space,
+	output_saved_vertical_space, flush_output):
+	* src/roff/troff/env.cpp (fill, no_fill, center,
+	right_justify, indent, temporary_indent, margin_character,
+	number_lines, do_break_request, hyphen_word):
+	* src/roff/troff/input.cpp (next_file, do_overstrike,
+	do_bracket, do_name_test, do_expr_test, do_zero_width,
+	token::skip, has_arg, skip_line, empty_name_warning,
+	non_empty_name_warning, do_get_long_name, process_input_stack,
+	flush_pending_lines, decode_args, read_request,
+	do_define_string, do_define_character, remove_character,
+	do_define_macro, length_request, get_delim_number, get_line_arg,
+	read_size, get_delim_name, do_register, do_width,
+	read_title_parts, encode_char, do_special, device_request,
+	output_request, skip_alternative, begin_alternative,
+	nop_request, do_if_request, do_source, pipe_source,
+	ps_bbox_request, tag, taga, do_terminal, do_translate,
+	hyphenation_code, hyphenation_patterns_file_code, define_class,
+	get_optional_char, check_missing_character, abort_request,
+	copy_file, transparent_file, do_macro_source,
+	charinfo_to_node_list, read_draw_node, read_color_draw_node):
+	* src/roff/troff/node.cpp (get_fontno,
+	remove_font_special_character, bold_font):
+	* src/roff/troff/number.cpp (start_number, parse_term):
+	* src/roff/troff/reg.cpp (define_number_reg, alter_format):
+	Update call sites to use new names.
+
+	* src/roff/troff/input.cpp (token::usable_as_delimiter,
+	read_draw_node): Return Boolean, not integer, literals.
+
+2021-09-06  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[troff]: Clamp line and title lengths to device horizontal
+	resolution.
+
+	* src/roff/troff/env.cpp (line_length, title_length): Do it.
+
+	Fixes <https://savannah.gnu.org/bugs/?61116>.
+
+2021-09-06  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/roff/troff/env.cpp (do_hyphenation_patterns_file):
+	Refactor slightly.  Demote `append` from `int` to `bool`.
+	(hyphenation_patterns_file, hyphenation_patterns_file_append):
+	Update call sites to use Boolean, not integer, literals.
+
+2021-09-05  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/roff/troff/hvunits.h:
+	* src/roff/groff/number.cpp: Mark `H0`, `V0` objects as `const`.
+
+2021-09-05  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/roff/troff/env.cpp (do_underline_special): Refactor
+	slightly.
+	  - Rename `underline_spaces` -> `do_underline_spaces`.
+	  - Demote it from an `int` to a `bool`.
+	  - Use ternary operator and explicit character literals when
+	    writing device control command instead of doing arithmetic
+	    on a character literal.
+	  - Update call sites to use Boolean literals.
+	  - Relocate function to avoid forward reference.
+	  - Mark function as static to eliminate external linkage.
+	    Remove now-unnecessary prototype.
+
+2021-09-04  Keith Marshall  <keith.d.marshall@ntlworld.com>
+
+	Add "ms" footnote marker placement hook.
+
+	* tmac/s.tmac (FS-MARK): New macro; define as no-op, by default.
+	(@FS): Invoke FS-MARK as first action, allowing caller to "hook" it.
+
+2021-09-04  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/roff/troff/env.cpp (distribute_space): Refactor slightly.
+	  - Rename `force_reverse` to `force_reverse_node_list`.
+	  - Rename `reverse` to `do_reverse`.
+	  - Demote both of the above from `int` to `bool`.
+	  - Use Boolean literals with them.
+	  - Add assertions to enforce positive values of `nspaces` and
+	    `desired_space`.
+	  - Remove now-redundant test for `nspaces` being positive.
+	  - Add explanatory comments.
+	(environment::wrap_up_field): Update call sites of
+	`distribute_space` when non-default value of
+	`force_reverse_node_list` is supplied.
+
+2021-09-04  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[troff]: Don't adjust nonadjustable lines.  This means that the
+	direction from which an output line in adjustment mode "b" (or
+	its "n" synonym) is filled with supplemental space is not
+	changed if that output line does not require adjustment.  This
+	will result in whitespace changes to documents using that
+	adjustment mode, and these changes will be plainly visible on
+	low-resolution output devices like terminals.
+
+	To illustrate, in the following "A" means an output line
+	requiring adjustment; "F" a line that is "full" and does not;
+	and "L" and "R" indicate distribution of adjustment spaces from
+	the left and right, respectively.
+
+	groff 1.22.4    groff 1.23.0
+	------------    ------------
+	A    L          A    L
+	A    R          A    R
+	F    L          F    R
+	A    R          A    L
+
+	* src/roff/troff/env.cpp (distribute_space): Return early if
+	either the amount of desired space to be distributed or the
+	count of space nodes in the output line to distribute it among
+	is zero.
+
+	* tmac/tests/an_TH-repairs-ad-damage.sh: Update test to expect
+	space to be distributed differently.
+
+	Fixes <https://savannah.gnu.org/bugs/?61089> and
+	<https://savannah.gnu.org/bugs/?60673>.
+
+2021-09-04  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	Skip core-dump-checking test if a core file already exists.
+
+	* src/roff/groff/tests/regression_savannah_59202.sh: Skip test
+	if a core dump is already present.
+
+2021-09-04  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	Add regression test for Savannah #60189.
+
+	* src/roff/groff/tests/break_zero-length_output_line_sanely.sh:
+	Do it.
+	* src/roff/groff/groff.am (groff_TESTS): Run test.
+
+2021-08-29  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[troff]: Tweak diagnostic message.
+
+	* src/roff/troff/env.cpp (environment::environment): Use
+	terminology more rigorously in diagnostic.
+
 2021-08-29  G. Branden Robinson <g.branden.robinson@gmail.com>
 
 	[libgroff]: Fix code style nit.
@@ -149,7 +942,7 @@
 	read_map):
 	* src/utils/indxbib/indxbib.cpp (main, get_cwd):
 	* src/utils/tfmtodit/tfmtodit.cpp (tfm::~tfm, tfm::load): Port
-	uses of `a_delete(xxx)` to `delete[]`.
+	uses of `a_delete` to `delete[]`.
 
 2021-08-27  G. Branden Robinson <g.branden.robinson@gmail.com>
 
@@ -164,7 +957,7 @@
 	reference::merge, reference::insert_field,
 	reference::delete_field):
 	* src/preproc/tbl/main.cpp (format::add_rows): Port uses of
-	`ad_delete(xxx)` to `delete[]`.
+	`ad_delete` to `delete[]`.
 
 2021-08-28  G. Branden Robinson <g.branden.robinson@gmail.com>
 
@@ -2364,7 +3157,7 @@
 	(grog): Remove target's dependency on `$(GROG)`.  Remove sed
 	expression replacing `@grog_dir@` with `$(grog_dir)` in grog.pl.
 	* src/roff/grog/grog.pl: Inline most of subs.pl (except for
-	author/license comment banenr).  Delete sub-hunting logic.
+	author/license comment banner).  Delete sub-hunting logic.
 	* src/roff/grog/subs.pl: Delete.
 
 2021-06-08  G. Branden Robinson <g.branden.robinson@gmail.com>
@@ -4497,7 +5290,7 @@
 
 	* src/roff/troff/input.cpp (do_overstrike, do_bracket,
 	do_name_test, do_expr_test, do_zero_width, do_width, do_special,
-	do_if_request, read_color_draw_note): Improve diagnostic
+	do_if_request, read_color_draw_node): Improve diagnostic
 	messages for missing closing delimiters by describing the
 	incomplete structure and the problem token.
 	(read_rgb, read_cmy, read_cmyk, read_gray): Improve English

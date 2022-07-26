@@ -469,7 +469,7 @@ input_iterator *input_stack::top = &nil_iterator;
 int input_stack::level = 0;
 int input_stack::limit = DEFAULT_INPUT_STACK_LIMIT;
 int input_stack::div_level = 0;
-statem *input_stack::diversion_state = NULL;
+statem *input_stack::diversion_state = 0;
 int suppress_push=0;
 
 
@@ -626,8 +626,8 @@ statem *get_diversion_state()
 
 statem *input_stack::get_diversion_state()
 {
-  if (diversion_state == NULL)
-    return NULL;
+  if (0 == diversion_state)
+    return 0;
   else
     return new statem(diversion_state);
 }
@@ -795,7 +795,7 @@ void backtrace_request()
 void next_file()
 {
   symbol nm = get_long_name();
-  while (!tok.newline() && !tok.eof())
+  while (!tok.is_newline() && !tok.is_eof())
     tok.next();
   if (nm.is_null())
     input_stack::end_file();
@@ -1133,7 +1133,7 @@ static int get_copy(node **nd, bool is_defining, bool handle_escape_E)
       return ESCAPE_RIGHT_PARENTHESIS;
     case '.':
       (void)input_stack::get(0);
-      return c;			
+      return c;
     case '%':
       (void)input_stack::get(0);
       return ESCAPE_PERCENT;
@@ -1443,7 +1443,7 @@ node *do_overstrike()
   start.next();
   for (;;) {
     tok.next();
-    if (tok.newline() || tok.eof()) {
+    if (tok.is_newline() || tok.is_eof()) {
       warning(WARN_DELIM, "missing closing delimiter in"
 	      " overstrike escape (got %1)", tok.description());
       input_stack::push(make_temp_iterator("\n"));
@@ -1452,9 +1452,9 @@ node *do_overstrike()
     if (tok == start
 	&& (compatible_flag || input_stack::get_level() == start_level))
       break;
-    if (tok.horizontal_space())
+    if (tok.is_horizontal_space())
       on->overstrike(tok.nd->copy());
-    else if (tok.unstretchable_space())
+    else if (tok.is_unstretchable_space())
     {
       node *n = new hmotion_node(curenv->get_space_width(),
 				 curenv->get_fill_color());
@@ -1480,13 +1480,13 @@ static node *do_bracket()
   int start_level = input_stack::get_level();
   for (;;) {
     tok.next();
-    if (tok.eof() || tok.newline()) {
+    if (tok.is_eof() || tok.is_newline()) {
       warning(WARN_DELIM, "missing closing delimiter in"
 	      " bracket-building escape (got %1)", tok.description());
       // XXX: Most other places we miss a closing delimiter, we push a
       // temp iterator for the EOF case too.  What's special about \b?
       // Exceptions: \w, \X are like this too.
-      if (tok.newline())
+      if (tok.is_newline())
 	input_stack::push(make_temp_iterator("\n"));
       break;
     }
@@ -1512,7 +1512,7 @@ static int do_name_test()
   int some_char = 0;
   for (;;) {
     tok.next();
-    if (tok.newline() || tok.eof()) {
+    if (tok.is_newline() || tok.is_eof()) {
       warning(WARN_DELIM, "missing closing delimiter in"
 	      " name test escape (got %1)", tok.description());
       input_stack::push(make_temp_iterator("\n"));
@@ -1533,7 +1533,7 @@ static int do_expr_test()
   token start;
   start.next();
   int start_level = input_stack::get_level();
-  if (!start.delimiter(true /* report error */))
+  if (!start.usable_as_delimiter(true /* report error */))
     return 0;
   tok.next();
   // disable all warning and error messages temporarily
@@ -1550,7 +1550,7 @@ static int do_expr_test()
   // ignore everything up to the delimiter in case we aren't right there
   for (;;) {
     tok.next();
-    if (tok.newline() || tok.eof()) {
+    if (tok.is_newline() || tok.is_eof()) {
       warning(WARN_DELIM, "missing closing delimiter in"
 	      " expression test escape (got %1)", tok.description());
       input_stack::push(make_temp_iterator("\n"));
@@ -1573,7 +1573,7 @@ static node *do_zero_width()
   curenv = &env;
   for (;;) {
     tok.next();
-    if (tok.newline() || tok.eof()) {
+    if (tok.is_newline() || tok.is_eof()) {
       error("missing closing delimiter");
       break;
     }
@@ -1607,7 +1607,7 @@ static node *do_zero_width()
   int start_level = input_stack::get_level();
   for (;;) {
     tok.next();
-    if (tok.newline() || tok.eof()) {
+    if (tok.is_newline() || tok.is_eof()) {
       warning(WARN_DELIM, "missing closing delimiter in"
 	      " zero-width escape (got %1)", tok.description());
       input_stack::push(make_temp_iterator("\n"));
@@ -1714,15 +1714,15 @@ void token::operator=(const token &t)
 
 void token::skip()
 {
-  while (space())
+  while (is_space())
     next();
 }
 
-int has_arg()
+bool has_arg()
 {
-  while (tok.space())
+  while (tok.is_space())
     tok.next();
-  return !tok.newline();
+  return !tok.is_newline();
 }
 
 void token::make_space()
@@ -2324,7 +2324,7 @@ int token::operator!=(const token &t)
 
 // is token a suitable delimiter (like ')?
 
-int token::delimiter(bool err)
+bool token::usable_as_delimiter(bool report_error)
 {
   switch(type) {
   case TOKEN_CHAR:
@@ -2352,28 +2352,29 @@ int token::delimiter(bool err)
     case '(':
     case ')':
     case '.':
-      if (err)
-        error("cannot use character '%1' as a starting delimiter", char(c));
-      return 0;
+      if (report_error)
+        error("cannot use character '%1' as a starting delimiter",
+	      char(c));
+      return false;
     default:
-      return 1;
+      return true;
     }
   case TOKEN_NODE:
     // the user doesn't know what a node is
-    if (err)
+    if (report_error)
       error("missing argument or invalid starting delimiter");
-    return 0;
+    return false;
   case TOKEN_SPACE:
   case TOKEN_STRETCHABLE_SPACE:
   case TOKEN_UNSTRETCHABLE_SPACE:
   case TOKEN_HORIZONTAL_SPACE:
   case TOKEN_TAB:
   case TOKEN_NEWLINE:
-    if (err)
+    if (report_error)
       error("cannot use %1 as a starting delimiter", description());
-    return 0;
+    return false;
   default:
-    return 1;
+    return true;
   }
 }
 
@@ -2443,8 +2444,8 @@ const char *token::description()
 
 void skip_line()
 {
-  while (!tok.newline())
-    if (tok.eof())
+  while (!tok.is_newline())
+    if (tok.is_eof())
       return;
     else
       tok.next();
@@ -2463,16 +2464,16 @@ void compatible()
 
 static void empty_name_warning(bool required)
 {
-  if (tok.newline() || tok.eof()) {
+  if (tok.is_newline() || tok.is_eof()) {
     if (required)
       warning(WARN_MISSING, "missing name");
   }
-  else if (tok.right_brace() || tok.tab()) {
+  else if (tok.is_right_brace() || tok.is_tab()) {
     const char *start = tok.description();
     do {
       tok.next();
-    } while (tok.space() || tok.right_brace() || tok.tab());
-    if (!tok.newline() && !tok.eof())
+    } while (tok.is_space() || tok.is_right_brace() || tok.is_tab());
+    if (!tok.is_newline() && !tok.is_eof())
       error("%1 is not allowed before an argument", start);
     else if (required)
       warning(WARN_MISSING, "missing name");
@@ -2485,10 +2486,10 @@ static void empty_name_warning(bool required)
 
 static void non_empty_name_warning()
 {
-  if (!tok.newline() && !tok.eof() && !tok.space() && !tok.tab()
-      && !tok.right_brace()
+  if (!tok.is_newline() && !tok.is_eof() && !tok.is_space()
+      && !tok.is_tab() && !tok.is_right_brace()
       // We don't want to give a warning for .el\{
-      && !tok.left_brace())
+      && !tok.is_left_brace())
     error("%1 is not allowed in a name", tok.description());
 }
 
@@ -2523,7 +2524,7 @@ symbol get_long_name(bool required)
 
 static symbol do_get_long_name(bool required, char end)
 {
-  while (tok.space())
+  while (tok.is_space())
     tok.next();
   char abuf[ABUF_SIZE];
   char *buf = abuf;
@@ -2597,7 +2598,7 @@ void exit_troff()
   }
   // This will only happen if a trap-called macro starts a diversion,
   // or if vertical position traps have been disabled.
-  cleanup_and_exit(0);
+  cleanup_and_exit(EXIT_SUCCESS);
 }
 
 // This implements .ex.  The input stack must be cleared before calling
@@ -2825,7 +2826,7 @@ void process_input_stack()
 	  // skip tabs as well as spaces here
 	  do {
 	    tok.next();
-	  } while (tok.white_space());
+	  } while (tok.is_white_space());
 	  symbol nm = get_name();
 #if defined(DEBUGGING)
 	  if (debug_state) {
@@ -2950,8 +2951,8 @@ void process_input_stack()
 	  do {
 	    nspaces += tok.nspaces();
 	    tok.next();
-	  } while (tok.space());
-	  if (tok.newline())
+	  } while (tok.is_space());
+	  if (tok.is_newline())
 	    trapping_blank_line();
 	  else {
 	    push_token(tok);
@@ -3055,7 +3056,7 @@ void process_input_stack()
 
 void flush_pending_lines()
 {
-  while (!tok.newline() && !tok.eof())
+  while (!tok.is_newline() && !tok.is_eof())
     tok.next();
   curenv->output_pending_lines();
   tok.next();
@@ -3813,7 +3814,7 @@ static void interpolate_macro(symbol nm, int no_next)
 
 static void decode_args(macro_iterator *mi)
 {
-  if (!tok.newline() && !tok.eof()) {
+  if (!tok.is_newline() && !tok.is_eof()) {
     node *n;
     int c = get_copy(&n);
     for (;;) {
@@ -4102,7 +4103,7 @@ void read_request()
   macro_iterator *mi = new macro_iterator;
   int reading_from_terminal = isatty(fileno(stdin));
   int had_prompt = 0;
-  if (!tok.newline() && !tok.eof()) {
+  if (!tok.is_newline() && !tok.is_eof()) {
     int c = get_copy(0);
     while (c == ' ')
       c = get_copy(0);
@@ -4162,11 +4163,11 @@ void do_define_string(define_mode mode, comp_mode comp)
     skip_line();
     return;
   }
-  if (tok.newline())
+  if (tok.is_newline())
     c = '\n';
-  else if (tok.tab())
+  else if (tok.is_tab())
     c = '\t';
-  else if (!tok.space()) {
+  else if (!tok.is_space()) {
     error("bad string definition");
     skip_line();
     return;
@@ -4243,11 +4244,11 @@ void do_define_character(char_mode mode, const char *font_name)
     ci = get_charinfo(symbol(s.contents()));
   }
   tok.next();
-  if (tok.newline())
+  if (tok.is_newline())
     c = '\n';
-  else if (tok.tab())
+  else if (tok.is_tab())
     c = '\t';
-  else if (!tok.space()) {
+  else if (!tok.is_space()) {
     error("bad character definition");
     skip_line();
     return;
@@ -4290,8 +4291,8 @@ void define_special_character()
 static void remove_character()
 {
   tok.skip();
-  while (!tok.newline() && !tok.eof()) {
-    if (!tok.space() && !tok.tab()) {
+  while (!tok.is_newline() && !tok.is_eof()) {
+    if (!tok.is_space() && !tok.is_tab()) {
       charinfo *ci = tok.get_char(true /* required */);
       if (!ci)
 	break;
@@ -4455,12 +4456,9 @@ void handle_initial_title()
   handle_initial_request(TITLE_REQUEST);
 }
 
-// this should be local to define_macro, but cfront 1.2 doesn't support that
-static symbol dot_symbol(".");
-
 void do_define_macro(define_mode mode, calling_mode calling, comp_mode comp)
 {
-  symbol nm, term;
+  symbol nm, term, dot_symbol(".");
   if (calling == CALLING_INDIRECT) {
     symbol temp1 = get_name(true /* required */);
     if (temp1.is_null()) {
@@ -4487,7 +4485,7 @@ void do_define_macro(define_mode mode, calling_mode calling, comp_mode comp)
   term = get_name();	// the request that terminates the definition
   if (term.is_null())
     term = dot_symbol;
-  while (!tok.newline() && !tok.eof())
+  while (!tok.is_newline() && !tok.is_eof())
     tok.next();
   const char *start_filename;
   int start_lineno;
@@ -4873,11 +4871,11 @@ void length_request()
   }
   int c;
   node *n;
-  if (tok.newline())
+  if (tok.is_newline())
     c = '\n';
-  else if (tok.tab())
+  else if (tok.is_tab())
     c = '\t';
-  else if (!tok.space()) {
+  else if (!tok.is_space()) {
     error("bad string definition");
     skip_line();
     return;
@@ -4985,7 +4983,7 @@ static int get_delim_number(units *n, unsigned char si, int prev_value)
 {
   token start;
   start.next();
-  if (start.delimiter(true /* report error */)) {
+  if (start.usable_as_delimiter(true /* report error */)) {
     tok.next();
     if (get_number(n, si, prev_value)) {
       if (start != tok)
@@ -5000,7 +4998,7 @@ static int get_delim_number(units *n, unsigned char si)
 {
   token start;
   start.next();
-  if (start.delimiter(true /* report error */)) {
+  if (start.usable_as_delimiter(true /* report error */)) {
     tok.next();
     if (get_number(n, si)) {
       if (start != tok)
@@ -5016,11 +5014,11 @@ static int get_line_arg(units *n, unsigned char si, charinfo **cp)
   token start;
   start.next();
   int start_level = input_stack::get_level();
-  if (!start.delimiter(true /* report error */))
+  if (!start.usable_as_delimiter(true /* report error */))
     return 0;
   tok.next();
   if (get_number(n, si)) {
-    if (tok.dummy() || tok.transparent_dummy())
+    if (tok.is_dummy() || tok.is_transparent_dummy())
       tok.next();
     if (!(start == tok && input_stack::get_level() == start_level)) {
       *cp = tok.get_char(true /* required */);
@@ -5096,7 +5094,7 @@ static int read_size(int *x)
     }
     val *= sizescale;
   }
-  else if (!tok.delimiter(true /* report error */))
+  else if (!tok.usable_as_delimiter(true /* report error */))
     return 0;
   else {
     token start(tok);
@@ -5157,11 +5155,11 @@ static symbol get_delim_name()
 {
   token start;
   start.next();
-  if (start.eof()) {
+  if (start.is_eof()) {
     error("end of input at start of delimited name");
     return NULL_SYMBOL;
   }
-  if (start.newline()) {
+  if (start.is_newline()) {
     error("can't delimit name with a newline");
     return NULL_SYMBOL;
   }
@@ -5219,13 +5217,13 @@ static void do_register()
 {
   token start;
   start.next();
-  if (!start.delimiter(true /* report error */))
+  if (!start.usable_as_delimiter(true /* report error */))
     return;
   tok.next();
   symbol nm = get_long_name(true /* required */);
   if (nm.is_null())
     return;
-  while (tok.space())
+  while (tok.is_space())
     tok.next();
   reg *r = (reg *)number_reg_dictionary.lookup(nm);
   int prev_value;
@@ -5254,13 +5252,13 @@ static void do_width()
   curenv = &env;
   for (;;) {
     tok.next();
-    if (tok.eof() || tok.newline()) {
+    if (tok.is_eof() || tok.is_newline()) {
       warning(WARN_DELIM, "missing closing delimiter in"
 	      " width escape (got %1)", tok.description());
       // XXX: Most other places we miss a closing delimiter, we push a
       // temp iterator for the EOF case too.  What's special about \w?
       // Exception: \b, \X are like this too.
-      if (tok.newline())
+      if (tok.is_newline())
 	input_stack::push(make_temp_iterator("\n"));
       break;
     }
@@ -5290,13 +5288,13 @@ static const symbol percent_symbol("%");
 void read_title_parts(node **part, hunits *part_width)
 {
   tok.skip();
-  if (tok.newline() || tok.eof())
+  if (tok.is_newline() || tok.is_eof())
     return;
   token start(tok);
   int start_level = input_stack::get_level();
   tok.next();
   for (int i = 0; i < 3; i++) {
-    while (!tok.newline() && !tok.eof()) {
+    while (!tok.is_newline() && !tok.is_eof()) {
       if (tok == start
 	  && (compatible_flag || input_stack::get_level() == start_level)) {
 	tok.next();
@@ -5312,7 +5310,7 @@ void read_title_parts(node **part, hunits *part_width)
     part_width[i] = curenv->get_input_line_position();
     part[i] = curenv->extract_output_line();
   }
-  while (!tok.newline() && !tok.eof())
+  while (!tok.is_newline() && !tok.is_eof())
     tok.next();
 }
 
@@ -5399,7 +5397,7 @@ static node *do_non_interpreted()
 static void encode_char(macro *mac, char c)
 {
   if (c == '\0') {
-    if ((font::use_charnames_in_special) && tok.special()) {
+    if ((font::use_charnames_in_special) && tok.is_special()) {
       charinfo *ci = tok.get_char(true /* required */);
       const char *s = ci->get_symbol()->contents();
       if (s[0] != (char)0) {
@@ -5413,13 +5411,13 @@ static void encode_char(macro *mac, char c)
 	mac->append(']');
       }
     }
-    else if (tok.stretchable_space()
-	     || tok.unstretchable_space())
+    else if (tok.is_stretchable_space()
+	     || tok.is_unstretchable_space())
       mac->append(' ');
-    else if (!(tok.hyphen_indicator()
-	       || tok.dummy()
-	       || tok.transparent_dummy()
-	       || tok.zero_width_break()))
+    else if (!(tok.is_hyphen_indicator()
+	       || tok.is_dummy()
+	       || tok.is_transparent_dummy()
+	       || tok.is_zero_width_break()))
       error("%1 is invalid within \\X", tok.description());
   }
   else {
@@ -5442,24 +5440,24 @@ node *do_special()
   for (tok.next();
        tok != start || input_stack::get_level() != start_level;
        tok.next()) {
-    if (tok.eof() || tok.newline()) {
+    if (tok.is_eof() || tok.is_newline()) {
       warning(WARN_DELIM, "missing closing delimiter in"
 	      " device special escape (got %1)", tok.description());
       // XXX: Most other places we miss a closing delimiter, we push a
       // temp iterator for the EOF case too.  What's special about \X?
       // Exceptions: \b, \w are like this too.
-      if (tok.newline())
+      if (tok.is_newline())
 	input_stack::push(make_temp_iterator("\n"));
       break;
     }
     unsigned char c;
-    if (tok.space())
+    if (tok.is_space())
       c = ' ';
-    else if (tok.tab())
+    else if (tok.is_tab())
       c = '\t';
-    else if (tok.leader())
+    else if (tok.is_leader())
       c = '\001';
-    else if (tok.backspace())
+    else if (tok.is_backspace())
       c = '\b';
     else
       c = tok.ch();
@@ -5470,7 +5468,7 @@ node *do_special()
 
 void device_request()
 {
-  if (!tok.newline() && !tok.eof()) {
+  if (!tok.is_newline() && !tok.is_eof()) {
     int c;
     macro mac;
     for (;;) {
@@ -5497,7 +5495,7 @@ void device_macro_request()
     macro *m = p->to_macro();
     if (m)
       curenv->add_node(new special_node(*m));
-    else 
+    else
       error("can't transparently throughput a request");
   }
   skip_line();
@@ -5505,7 +5503,7 @@ void device_macro_request()
 
 void output_request()
 {
-  if (!tok.newline() && !tok.eof()) {
+  if (!tok.is_newline() && !tok.is_eof()) {
     int c;
     for (;;) {
       c = get_copy(0);
@@ -5643,7 +5641,7 @@ static void skip_alternative()
 {
   int level = 0;
   // ensure that ".if 0\{" works as expected
-  if (tok.left_brace())
+  if (tok.is_left_brace())
     level++;
   int c;
   for (;;) {
@@ -5668,7 +5666,7 @@ static void skip_alternative()
       }
     /*
       Note that the level can properly be < 0, e.g.
-	
+
 	.if 1 \{\
 	.if 0 \{\
 	.\}\}
@@ -5683,13 +5681,13 @@ static void skip_alternative()
 
 static void begin_alternative()
 {
-  while (tok.space() || tok.left_brace())
+  while (tok.is_space() || tok.is_left_brace())
     tok.next();
 }
 
 void nop_request()
 {
-  while (tok.space())
+  while (tok.is_space())
     tok.next();
 }
 
@@ -5698,7 +5696,7 @@ static int_stack if_else_stack;
 int do_if_request()
 {
   int invert = 0;
-  while (tok.space())
+  while (tok.is_space())
     tok.next();
   while (tok.ch() == '!') {
     tok.next();
@@ -5791,9 +5789,9 @@ int do_if_request()
     }
     result = check_style(nm);
   }
-  else if (tok.space())
+  else if (tok.is_space())
     result = 0;
-  else if (tok.delimiter()) {
+  else if (tok.usable_as_delimiter()) {
     token delim = tok;
     int delim_level = input_stack::get_level();
     environment env1(curenv);
@@ -5804,7 +5802,7 @@ int do_if_request()
     for (int i = 0; i < 2; i++) {
       for (;;) {
 	tok.next();
-	if (tok.newline() || tok.eof()) {
+	if (tok.is_newline() || tok.is_eof()) {
 	  warning(WARN_DELIM, "missing closing delimiter in conditional"
 		  " expression (got %1)", tok.description());
 	  tok.next();
@@ -5966,7 +5964,7 @@ void do_source(bool quietly)
   if (nm.is_null())
     skip_line();
   else {
-    while (!tok.newline() && !tok.eof())
+    while (!tok.is_newline() && !tok.is_eof())
       tok.next();
     errno = 0;
     FILE *fp = include_search_path.open_file_cautious(nm.contents());
@@ -6009,7 +6007,7 @@ void pipe_source()
     error("pipes not available on this system");
     skip_line();
 #else /* not POPEN_MISSING */
-    if (tok.newline() || tok.eof())
+    if (tok.is_newline() || tok.is_eof())
       error("missing command");
     else {
       int c;
@@ -6504,7 +6502,7 @@ void ps_bbox_request()
   else {
     // File name acquired: swallow the rest of the line.
     //
-    while (!tok.newline() && !tok.eof())
+    while (!tok.is_newline() && !tok.is_eof())
       tok.next();
     errno = 0;
 
@@ -6639,7 +6637,7 @@ const char *input_char_description(int c)
 
 void tag()
 {
-  if (!tok.newline() && !tok.eof()) {
+  if (!tok.is_newline() && !tok.is_eof()) {
     string s;
     int c;
     for (;;) {
@@ -6662,7 +6660,7 @@ void tag()
 
 void taga()
 {
-  if (!tok.newline() && !tok.eof()) {
+  if (!tok.is_newline() && !tok.is_eof()) {
     string s;
     int c;
     for (;;) {
@@ -6687,7 +6685,7 @@ void taga()
 
 void do_terminal(int newline, int string_like)
 {
-  if (!tok.newline() && !tok.eof()) {
+  if (!tok.is_newline() && !tok.is_eof()) {
     int c;
     for (;;) {
       c = get_copy(0);
@@ -6939,12 +6937,12 @@ static void init_hpf_code_table()
 static void do_translate(int translate_transparent, int translate_input)
 {
   tok.skip();
-  while (!tok.newline() && !tok.eof()) {
-    if (tok.space()) {
+  while (!tok.is_newline() && !tok.is_eof()) {
+    if (tok.is_space()) {
       // This is a really bizarre troff feature.
       tok.next();
-      translate_space_to_dummy = tok.dummy();
-      if (tok.newline() || tok.eof())
+      translate_space_to_dummy = tok.is_dummy();
+      if (tok.is_newline() || tok.is_eof())
 	break;
       tok.next();
       continue;
@@ -6953,21 +6951,21 @@ static void do_translate(int translate_transparent, int translate_input)
     if (ci1 == 0)
       break;
     tok.next();
-    if (tok.newline() || tok.eof()) {
+    if (tok.is_newline() || tok.is_eof()) {
       ci1->set_special_translation(charinfo::TRANSLATE_SPACE,
 				   translate_transparent);
       break;
     }
-    if (tok.space())
+    if (tok.is_space())
       ci1->set_special_translation(charinfo::TRANSLATE_SPACE,
 				   translate_transparent);
-    else if (tok.stretchable_space())
+    else if (tok.is_stretchable_space())
       ci1->set_special_translation(charinfo::TRANSLATE_STRETCHABLE_SPACE,
 				   translate_transparent);
-    else if (tok.dummy())
+    else if (tok.is_dummy())
       ci1->set_special_translation(charinfo::TRANSLATE_DUMMY,
 				   translate_transparent);
-    else if (tok.hyphen_indicator())
+    else if (tok.is_hyphen_indicator())
       ci1->set_special_translation(charinfo::TRANSLATE_HYPHEN_INDICATOR,
 				   translate_transparent);
     else {
@@ -7019,7 +7017,7 @@ void char_flags()
 void hyphenation_code()
 {
   tok.skip();
-  while (!tok.newline() && !tok.eof()) {
+  while (!tok.is_newline() && !tok.is_eof()) {
     charinfo *ci = tok.get_char(true /* required */);
     if (ci == 0)
       break;
@@ -7047,7 +7045,7 @@ void hyphenation_code()
 void hyphenation_patterns_file_code()
 {
   tok.skip();
-  while (!tok.newline() && !tok.eof()) {
+  while (!tok.is_newline() && !tok.is_eof()) {
     int n1, n2;
     if (get_integer(&n1) && (0 <= n1 && n1 <= 255)) {
       if (!has_arg()) {
@@ -7083,7 +7081,7 @@ void define_class()
   }
   charinfo *ci = get_charinfo(nm);
   charinfo *child1 = 0, *child2 = 0;
-  while (!tok.newline() && !tok.eof()) {
+  while (!tok.is_newline() && !tok.is_eof()) {
     tok.skip();
     if (child1 != 0 && tok.ch() == '-') {
       tok.next();
@@ -7143,7 +7141,7 @@ void define_class()
     child1 = tok.get_char(true /* required */);
     tok.next();
     if (!child1) {
-      if (!tok.newline())
+      if (!tok.is_newline())
 	skip_line();
       break;
     }
@@ -7208,7 +7206,7 @@ charinfo *token::get_char(bool required)
 
 charinfo *get_optional_char()
 {
-  while (tok.space())
+  while (tok.is_space())
     tok.next();
   charinfo *ci = tok.get_char();
   if (!ci)
@@ -7220,7 +7218,8 @@ charinfo *get_optional_char()
 
 void check_missing_character()
 {
-  if (!tok.newline() && !tok.eof() && !tok.right_brace() && !tok.tab())
+  if (!tok.is_newline() && !tok.is_eof() && !tok.is_right_brace()
+      && !tok.is_tab())
     error("normal or special character expected (got %1): "
 	  "treated as missing",
 	  tok.description());
@@ -7502,22 +7501,20 @@ const char *constant_int_reg::get_string()
 void abort_request()
 {
   int c;
-  if (tok.eof())
+  if (tok.is_eof())
     c = EOF;
-  else if (tok.newline())
+  else if (tok.is_newline())
     c = '\n';
   else {
     while ((c = get_copy(0)) == ' ')
       ;
   }
-  if (c == EOF || c == '\n')
-    fputs("User Abort.", stderr);
-  else {
+  if (!(c == EOF || c == '\n')) {
     for (; c != '\n' && c != EOF; c = get_copy(0))
       fputs(asciify(c), stderr);
+    fputc('\n', stderr);
   }
-  fputc('\n', stderr);
-  cleanup_and_exit(1);
+  cleanup_and_exit(EXIT_FAILURE);
 }
 
 char *read_string()
@@ -7611,7 +7608,7 @@ void copy_file()
     return;
   }
   symbol filename = get_long_name(true /* required */);
-  while (!tok.newline() && !tok.eof())
+  while (!tok.is_newline() && !tok.is_eof())
     tok.next();
   if (break_flag)
     curenv->do_break();
@@ -7643,7 +7640,7 @@ void transparent_file()
     return;
   }
   symbol filename = get_long_name(true /* required */);
-  while (!tok.newline() && !tok.eof())
+  while (!tok.is_newline() && !tok.is_eof())
     tok.next();
   if (break_flag)
     curenv->do_break();
@@ -7801,7 +7798,7 @@ void do_macro_source(bool quietly)
   if (nm.is_null())
     skip_line();
   else {
-    while (!tok.newline() && !tok.eof())
+    while (!tok.is_newline() && !tok.is_eof())
       tok.next();
     char *path;
     FILE *fp = mac_path->open_file(nm.contents(), &path);
@@ -8130,7 +8127,8 @@ int main(int argc, char **argv)
   init_charset_table();
   init_hpf_code_table();
   if (!font::load_desc())
-    fatal("sorry, I can't continue");
+    fatal("cannot load 'DESC' description file for device '%1'",
+	  device);
   units_per_inch = font::res;
   hresolution = font::hor;
   vresolution = font::vert;
@@ -8143,15 +8141,23 @@ int main(int argc, char **argv)
   font_size::init_size_table(font::sizes);
   int i;
   int j = 1;
-  if (font::style_table) {
+  if (font::style_table)
     for (i = 0; font::style_table[i]; i++)
-      mount_style(j++, symbol(font::style_table[i]));
-  }
+      // Mounting a style can't actually fail due to a bad style name;
+      // that's not determined until the full font name is resolved.
+      // The DESC file also can't provoke a problem by requesting over a
+      // thousand slots in the style table.
+      if (!mount_style(j++, symbol(font::style_table[i])))
+	warning(WARN_FONT, "cannot mount style '%1' directed by 'DESC'"
+		" file for device '%2'", font::style_table[i], device);
   for (i = 0; font::font_name_table[i]; i++, j++)
-    // In the DESC file a font name of 0 (zero) means leave this
-    // position empty.
+    // In the DESC file, a font name of 0 (zero) means "leave this
+    // position empty".
     if (strcmp(font::font_name_table[i], "0") != 0)
-      mount_font(j, symbol(font::font_name_table[i]));
+      if (!mount_font(j, symbol(font::font_name_table[i])))
+	warning(WARN_FONT, "cannot mount font '%1' directed by 'DESC'"
+		" file for device '%2'", font::font_name_table[i],
+		device);
   curdiv = topdiv = new top_level_diversion;
   if (nflag)
     topdiv->set_next_page_number(next_page_number);
@@ -8456,11 +8462,11 @@ node *charinfo_to_node_list(charinfo *ci, const environment *envp)
   // requests
   for (;;) {
     tok.next();
-    if (tok.eof())
+    if (tok.is_eof())
       break;
-    if (tok.newline()) {
+    if (tok.is_newline()) {
       error("composite character mustn't contain newline");
-      while (!tok.eof())
+      while (!tok.is_eof())
 	tok.next();
       break;
     }
@@ -8482,10 +8488,10 @@ static node *read_draw_node()
 {
   token start;
   start.next();
-  if (!start.delimiter(true /* report error */)){
+  if (!start.usable_as_delimiter(true /* report error */)){
     do {
       tok.next();
-    } while (tok != start && !tok.newline() && !tok.eof());
+    } while (tok != start && !tok.is_newline() && !tok.is_eof());
   }
   else {
     tok.next();
@@ -8502,7 +8508,7 @@ static node *read_draw_node()
       hvpair *point = new hvpair[maxpoints];
       int npoints = 0;
       int no_last_v = 0;
-      int err = 0;
+      bool err = false;
       int i;
       for (i = 0; tok != start; i++) {
 	if (i == maxpoints) {
@@ -8515,7 +8521,7 @@ static node *read_draw_node()
 	}
 	if (!get_hunits(&point[i].h,
 			type == 'f' || type == 't' ? 'u' : 'm')) {
-	  err = 1;
+	  err = true;
 	  break;
 	}
 	++npoints;
@@ -8526,12 +8532,12 @@ static node *read_draw_node()
 	  break;
 	}
 	if (!get_vunits(&point[i].v, 'v')) {
-	  err = 1;
+	  err = false;
 	  break;
 	}
 	tok.skip();
       }
-      while (tok != start && !tok.newline() && !tok.eof())
+      while (tok != start && !tok.is_newline() && !tok.is_eof())
 	tok.next();
       if (!err) {
 	switch (type) {
@@ -8620,7 +8626,7 @@ static void read_color_draw_node(token &start)
   if (col)
     curenv->set_fill_color(col);
   while (tok != start) {
-    if (tok.newline() || tok.eof()) {
+    if (tok.is_newline() || tok.is_eof()) {
       warning(WARN_DELIM, "missing closing delimiter in color drawing"
 	      " device command (got %1)", tok.description());
       input_stack::push(make_temp_iterator("\n"));
@@ -8759,7 +8765,7 @@ static void do_error(error_type type,
   fputc('\n', stderr);
   fflush(stderr);
   if (type == FATAL)
-    cleanup_and_exit(1);
+    cleanup_and_exit(EXIT_FAILURE);
 }
 
 void debug(const char *format,
@@ -8820,11 +8826,16 @@ void fatal_with_file_and_line(const char *filename, int lineno,
 			      const errarg &arg2,
 			      const errarg &arg3)
 {
-  fprintf(stderr, "%s:%d: fatal error: ", filename, lineno);
+  if (program_name)
+    fprintf(stderr, "%s: ", program_name);
+  fprintf(stderr, "%s:", filename);
+  if (lineno > 0)
+    fprintf(stderr, "%d:", lineno);
+  fputs(" fatal error: ", stderr);
   errprint(format, arg1, arg2, arg3);
   fputc('\n', stderr);
   fflush(stderr);
-  cleanup_and_exit(1);
+  cleanup_and_exit(EXIT_FAILURE);
 }
 
 void error_with_file_and_line(const char *filename, int lineno,
@@ -8835,7 +8846,10 @@ void error_with_file_and_line(const char *filename, int lineno,
 {
   if (program_name)
     fprintf(stderr, "%s: ", program_name);
-  fprintf(stderr, "%s:%d: error: ", filename, lineno);
+  fprintf(stderr, "%s:", filename);
+  if (lineno > 0)
+    fprintf(stderr, "%d:", lineno);
+  fputs(" error: ", stderr);
   errprint(format, arg1, arg2, arg3);
   fputc('\n', stderr);
   fflush(stderr);
@@ -8850,7 +8864,10 @@ void debug_with_file_and_line(const char *filename,
 {
   if (program_name)
     fprintf(stderr, "%s: ", program_name);
-  fprintf(stderr, "%s:%d: debug: ", filename, lineno);
+  fprintf(stderr, "%s:", filename);
+  if (lineno > 0)
+    fprintf(stderr, "%d:", lineno);
+  fputs(" debug: ", stderr);
   errprint(format, arg1, arg2, arg3);
   fputc('\n', stderr);
   fflush(stderr);
@@ -9026,7 +9043,7 @@ bool charinfo::contains(symbol s, bool already_called)
     return false;
   }
   const char *unicode = glyph_name_to_unicode(s.contents());
-  if (unicode != NULL && strchr(unicode, '_') == NULL) {
+  if (unicode != 0 && strchr(unicode, '_') == 0) {
     char *ignore;
     int c = (int)strtol(unicode, &ignore, 16);
     return contains(c, true);
@@ -9099,7 +9116,7 @@ glyph *number_to_glyph(int n)
 const char *glyph_to_name(glyph *g)
 {
   charinfo *ci = (charinfo *)g; // Every glyph is actually a charinfo.
-  return (ci->nm != UNNAMED_SYMBOL ? ci->nm.contents() : NULL);
+  return (ci->nm != UNNAMED_SYMBOL ? ci->nm.contents() : 0);
 }
 
 // Local Variables:

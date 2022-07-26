@@ -429,7 +429,8 @@ getres()
   int linepiece;
 
   if (!font::load_desc())
-    fatal("sorry, I can't continue");
+    fatal("cannot load 'DESC' description file for device '%1'",
+	  device);
 
   res = font::res;
 

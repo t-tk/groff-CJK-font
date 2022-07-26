@@ -86,11 +86,22 @@ Publishing with GNU Troff
 .\"
 .nr GROWPS 4
 .nr PSINCR 1.5p
+.
+.\" Define a local macro to facilitate choice of style for emphasis;
+.\" by default, make it equivalent to the ms standard "I" macro.
 .\"
 .de EM
 .\".I "\s'+0.3'\\$1\s0" "\\$2" "\\$3"
 .I \\$@
 ..
+.\" Also, define variations on the ms standard "CW" macro, to add
+.\" bold, italic, and both styles to constant width text; note that
+.\" each of these accept two additional arguments, in comparison to
+.\" standard "CW", such that \$1 specifies the text which is to be
+.\" styled, \$2 and \$3 specify inner after/before bracketting, to
+.\" set as regular "CW" text,  while \$4 and \$5 become equivalent
+.\" to \$2 and \$3 of standard "CW", acting as outer bracketting.
+.\"
 .de CWB
 \\$5\fC\\$3\fP\f(CB\\$1\fP\fC\\$2\fP\\$4
 ..
@@ -100,34 +111,122 @@ Publishing with GNU Troff
 .de CWBI
 \\$5\fC\\$3\fP\f[CBI]\\$1\fP\fC\\$2\fP\\$4
 ..
+.\" Finally, augment this group with a variant string, which may be
+.\" used to set constant width tags on "IP" paragraphs, with \$1 set
+.\" as if by "CWB", followed by an optional suffix set as if by "CWBI",
+.\" and with the suffix bracketted by \$3 after and \$4 before, each
+.\" set in the regular "CW" style.
+.\"
 .ds = \f(CB\\$1\f(CR\\$4\f[CBI]\\$2\f(CR\\$3
 .
+.\" Additionally, add a cross-reference convenience macro, emulating
+.\" the style of the "ms" font change macros...
+.\"
+.\"  .XR <dest-name> [<affixed> [<prefix>]]
+.\"
+.\" ...such that, when invoked with one, two, or three arguments, this
+.\" expands to the equivalent of:
+.\"
+.\"  .pdfhref L -D <dest-name> [-A <affixed> [-P <prefix>]]
+.\"
+.\" to place a pdfhref reference link, to a named destination, within
+.\" the same document, using the reference text which is predefined in
+.\" the reference dictionary entry associated with the destination.
+.\"
+.de XR
+.if \\n(.$ \{\
+.   if \\n[OPMODE] \{\
+.         ds xr!argv -D "\\$1"
+.         if \\n(.$>1 .as xr!argv " -A "\\$2"
+.         if \\n(.$>2 .as xr!argv " -P "\\$3"
+.         pdfhref L \\*[xr!argv]
+.         rm xr!argv
+.      \}
+.   \}
+..
+.
 .NH 1
-.\" When we use numbered section headings, we might like to automatically
-.\" insert a table of contents entry, using the text of the heading itself.
-.\" The "ms" macros don't provide any standard mechanism for doing this,
-.\" but "spdf.tmac" adds the "XN" macro, which will do it for us.
+.\" Conventionally, in "ms", NH precedes text which is to be set as a
+.\" numbered section heading, but it makes no provision for automatic
+.\" reference to that heading in a table of contents, or (in the case
+.\" of PDF document production) in a document outline.  Both of these
+.\" limitations may be mitigated, by using the XN macro, (provided by
+.\" spdf.tmac), which sets its arguments, both as text to be included
+.\" in the section heading,  as printed, and as an assocated document
+.\" outline reference;  it will also make this same text available to
+.\" the user-specified callback macro,  XH-UPDATE-TOC, whereby it may
+.\" be used, e.g. to construct a table of contents entry.
 .\"
-.\" Here's a simple example of how we might use it.  In this case, the word
-.\" "Introduction" will appear both in the body of the document, as the text
-.\" of the heading, and it will be added to the table of contents, which is
-.\" subsequently "printed" using the "TC" macro; in both locations, it will
-.\" be prefixed by the section number.
+.\" Within the table of contents, structural layout will be achieved,
+.\" under the direction of the following spacing control constants:
 .\"
-.\" As an additional side effect, any use of "XN" will cause the table of
-.\" contents entry to be automatically reproduced, with the exception of its
-.\" page number reference, as a PDF document outline entry.  Thus, the use
-.\" of "XN" to specify numbered section headings results in the automatic
-.\" creation of a numbered PDF document outline.  This automatic creation
-.\" of the outline is completely transparent, and will occur regardless
-.\" of whether the "TC" macro is subsequently invoked, or not.
+.ds XNVS1 0.50v  \" leading for top level
+.ds XNVS2 0.15v  \" leading at nesting level increment
+.ds XNVS3 0.30v  \" leading following nested group
 .\"
+.\" Note that one TOC related callback hook is shared by both XH and
+.\" XN; its is called XH-UPDATE-TOC, regardless of whether called by
+.\" XH or by XN; when called by XN, it is invoked with arguments:
+.\"
+.\"  .XH-UPDATE-TOC <outline-level> <section-number> <text> ...
+.\"
+.de XH-UPDATE-TOC
+.\" This implementation of XH-UPDATE-TOC utilizes the rudimentary ms
+.\" mechanism for formatting a table of contents, using XS and XE to
+.\" bracket individual entries.
+.   XS
+.   \" A local register, tc*hl, is used to track the outline level
+.   \" of each TOC entry, as it is added; it is not defined, until
+.   \" the first entry is recorded...
+.   \"
+.      if r tc*hl \{\
+.         \" ...after which, we use it to establish indentation,
+.         \" to reflect changes in outline level.
+.         \"
+.            ie \\$1>1 \{\
+.               \" When at any outline level greater than one,
+.               \" any level increment will be offset by XNVS2
+.               \" units of vertical space...
+.               \"
+.                  ie \\$1>\\n[tc*hl] .sp \\*[XNVS2]
+.
+.               \" ...whereas any decrement will be offset by
+.               \" XNVS3 units.
+.               \"
+.                  el .if \\n[tc*hl]>\\$1 .sp \\*[XNVS3]
+.               \}
+.
+.         \" ...but every top-level entry, after the first, is
+.         \" offset by XNVS1 units.
+.         \"
+.            el .sp \\*[XNVS1]
+.         \}
+.
+.   \" \$1 becomes the effective outline level for the current table
+.   \" of contents entry, but we must ensure that it is one or more.
+.   \"
+.      ie \\$1 .nr tc*hl \\$1
+.      el .nr tc*hl 1
+.
+.   \" The current outline level determines the indentation at which
+.   \" we place the section number reference...
+.   \"
+.      nop \h'\\n[tc*hl]-1m'\\$2\c
+.
+.   \" ...after which we discard \$1 and \$2,  allowing us to append
+.   \" all remaining arguments, ensuring that there is at least 0.5n
+.   \" of following space, before the first leader dot.
+.   \"
+.      shift 2
+.      nop \h'1.5n'\\$*\h'0.5n'
+.   XE
+..
 .XN Introduction
 .\"
-.\" If using an old s.tmac, without the SN-NO-DOT extension,
-.\" make sure we get SOMETHING in section number references.
+.\" If using an old s.tmac, without the SN-NO-DOT extension, ensure
+.\" that we get SOMETHING in section number references.
 .\"
-.if !dSN-NO-DOT .als SN-NO-DOT SN
+.if !d SN-NO-DOT .als SN-NO-DOT SN
 .LP
 It might appear that it is a fairly simple matter to
 produce documents in \*[Adobe]\~\(lqPortable\~Document\~Format\(rq,
@@ -160,8 +259,7 @@ but which are of little or no value to a document which is merely printed.
 It
 .EM is
 possible to exploit these PDF features, which are described in the \*[Adobe]
-.\"
-.de pdfmark-manual
+.de pdfmark-manual pdfmark-manual
 .\" This is an example of a resource reference specified by URI ...
 .\" We may need to refer often to the Adobe pdfmark Reference Manual,
 .\" so we create the internet link definition using a macro, to make
@@ -171,9 +269,8 @@ possible to exploit these PDF features, which are described in the \*[Adobe]
 .\" preceding it with "--", to avoid "invalid character in name" type
 .\" error messages from groff (caused by the use of "\~").
 .\"
-.pdfhref W -D http://partners.adobe.com/public/developer/en/acrobat/sdk/pdf/pdf_creation_apis_and_specs/pdfmarkReference.pdf \
+.pdfhref W -D https://www.adobe.com/go/acrobatsdk_pdfmark \
     -P \(lq -A \(rq\\$1 -- pdfmark\~Reference\~Manual
-..
 .pdfmark-manual ,
 with some refinement of the simple PDF production method, provided
 appropriate \(lqfeature implementing\(rq instructions can be embedded into
@@ -289,7 +386,7 @@ or MSYS.\**
 Another free, but minimal suite of common
 Unix\(tm
 tools for 32\(hybit \*[Microsoft] Windows\(tm, available for download from
-.pdfhref W -A ; http://www.mingw.org
+.pdfhref W -A ; https://mingw.osdn.io
 it
 .EM does 
 include those tools listed above,
@@ -349,7 +446,7 @@ of their choice, to format their documents, while also using the
 macros to add PDF features.
 .
 .NH 2
-.XN -N pdfmark-operator -- The \F[C]pdfmark\F[] Operator
+.XN -S -N pdfmark-operator -- The \F[C]pdfmark\F[] Operator
 .LP
 All PDF features are implemented by embedding instances of the
 .B \F[C]pdfmark\F[]
@@ -1178,7 +1275,7 @@ which extend through a page transition;
 .QE
 .
 .NH 3
-.XN Optional Features of the \F[C]pdfhref\F[] Macro
+.XN -S -- Optional Features of the \F[C]pdfhref\F[] Macro
 .LP
 The behaviour of a number of the
 .CW pdfhref
@@ -2340,7 +2437,7 @@ illustrates how this may be accomplished:\(en
 .XN -N add-note -- Annotating a PDF Document using Pop-Up Notes
 .
 .NH 2
-.XN -N pdfsync -- Synchronizing Output and \F[C]pdfmark\F[] Contexts
+.XN -S -N pdfsync -- Synchronizing Output and \F[C]pdfmark\F[] Contexts
 .LP
 It has been noted previously, that the
 .CW pdfview
@@ -2493,7 +2590,7 @@ as to how the
 macros may be employed with their chosen primary macro package.
 .
 .NH 2
-.XN -N using-spdf -- Using \F[C]pdfmark\F[] Macros with the \F[C]ms\F[] Macro Package
+.XN -S -N using-spdf -- Using \F[C]pdfmark\F[] Macros with the \F[C]ms\F[] Macro Package
 .LP
 The use of the binding macro package,
 .CW spdf.tmac ,
@@ -2544,7 +2641,7 @@ and the issues they are intended to address,
 are described below.
 .
 .NH 3
-.XN \F[C]ms\F[] Section Headings in PDF Documents
+.XN -S -- \F[C]ms\F[] Section Headings in PDF Documents
 .LP
 Traditionally,
 .CW ms
@@ -2572,7 +2669,7 @@ to be used in conjunction with the
 macro.
 .
 .NH 4
-.XN -N xn-macro -- The \F[C]XN\F[] Macro
+.XN -S -N xn-macro -- The \F[C]XN\F[] Macro
 .
 .NH 1
 .XN The PDF Publishing Process

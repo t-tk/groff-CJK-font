@@ -72,7 +72,7 @@ set PATH=roff\troff;preproc\pic;preproc\eqn;preproc\tbl;preproc\grn;preproc\refe
 echo I will use this command to format a document and print it on an LBP printer:
 roff\groff\groff -V -e -s -t -p -R -me -Tlbp ../doc/meintro.me
 pause
-Rem Uncomment the following if you have a Canon CAPSL LBP-4 or LBP-8 printer:
+Rem Uncomment the following if you have a Canon CaPSL LBP-4 or LBP-8 printer:
 REM roff\groff\groff -e -s -t -p -R -me -Tlbp ../doc/meintro.me >>prn
 Rem
 set PATH=%PATH1%

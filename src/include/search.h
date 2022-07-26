@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
@@ -92,4 +91,10 @@ search_item *make_linear_search_item(int fd, const char *filename, int fid);
 
 extern int linear_truncate_len;
 extern const char *linear_ignore_fields;
-extern int verify_flag;
+extern bool do_verify;
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

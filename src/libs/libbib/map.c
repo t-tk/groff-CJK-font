@@ -44,7 +44,7 @@ char *mapread(int fd, int nbytes)
 {
   char *p = (char *)mmap((void *)0, (size_t)nbytes, PROT_READ,
 			 MAP_FILE|MAP_PRIVATE, fd, (off_t)0);
-  if (p == (char *)-1)
+  if (p == MAP_FAILED)
     return 0;
   /* mmap() shouldn't return 0 since MAP_FIXED wasn't specified. */
   if (p == 0)

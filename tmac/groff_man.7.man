@@ -104,7 +104,6 @@ _
 \&.LP	(Left) paragraph	Paragraph macros
 \&.ME	Mail-to end	Hyperlink and email macros
 \&.MT	Mail-to start	Hyperlink and email macros
-\&.OP	(Command-line) option	Command synopsis macros
 \&.P	Paragraph	Paragraph macros
 \&.PP	Paragraph	Paragraph macros
 \&.RB	Roman, bold alternating	Font style macros
@@ -621,21 +620,11 @@ appearance.
 .
 A command synopsis is wrapped in
 .BR .SY / .YS
-calls,
-with command-line options of some formats indicated by
-.BR .OP .
+calls.
 .
 .
 .P
-These macros are extensions
-.RB ( .OP
-from Documenter's Workbench
-.IR troff ,
-.B .SY
-and
-.B .YS
-from GNU)
-not defined on systems running
+These macros are GNU extensions not defined on systems running
 AT&T,
 Plan\~9,
 or
@@ -668,27 +657,6 @@ but if a break is required,
 subsequent output lines are indented by the width of
 .I command
 plus a space.
-.
-.
-.TP
-.BI .OP " option-name"\/\c
-.RI " [" option-argument ]
-Indicate an optional command parameter called
-.IR option-name ,
-which is set in bold.
-.
-If the option takes an argument,
-specify
-.I option-argument
-using a noun,
-abbreviation,
-or hyphenated noun phrase.
-.
-If present,
-.I option-argument
-is preceded by a space and set in italics.
-.
-Square brackets in roman surround both arguments.
 .
 .
 .TP
@@ -1334,6 +1302,43 @@ may be lost.
 .
 .
 .TP
+.BI .OP " option-name"\/\c
+.RI " [" option-argument ]
+Indicate an optional command parameter called
+.IR option-name ,
+which is set in bold.
+.
+If the option takes an argument,
+specify
+.I option-argument
+using a noun,
+abbreviation,
+or hyphenated noun phrase.
+.
+If present,
+.I option-argument
+is preceded by a space and set in italics.
+.
+Square brackets in roman surround both arguments.
+.
+.
+.IP
+Use of this quasi-semantic macro,
+.\" https://github.com/n-t-roff/DWB3.3/blob/master/macros/man/an.sr#L37
+originating in Documenter's Workbench
+.IR troff ,\" DWB
+is deprecated.
+.
+It cannot easily be used to annotate options that take optional
+arguments or options whose arguments have internal structure
+(such as a mixture of literal and variable components).
+.
+One could work around these limitations with font escape sequences,
+but it is preferable to use font style alternation macros,
+which afford greater flexibility.
+.
+.
+.TP
 .BR .PD " ["\c
 .IR vertical-space ]
 Define the vertical space between paragraphs or (sub)sections.
@@ -1468,7 +1473,7 @@ and
 .
 .\" Per Doug McIlroy in
 .\" <https://lists.gnu.org/archive/html/groff/2019-07/msg00038.html>...
-Version\~9 Unix (1986) introduced
+Version\~9 Research Unix (1986) introduced
 .B .EX
 and
 .BR .EE .
@@ -1771,7 +1776,6 @@ reloads each macro package as necessary.
 .I \%@MACRODIR@/\:an\-ext\:.tmac
 The extension macro definitions for
 .BR .SY ,
-.BR .OP ,
 .BR .YS ,
 .BR .TQ ,
 .BR .EX / .EE ,

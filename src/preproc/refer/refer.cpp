@@ -161,7 +161,7 @@ int main(int argc, char **argv)
 	opt++;
 	break;
       case 'V':
-	verify_flag = 1;
+	do_verify = true;
 	opt++;
 	break;
       case 'f':

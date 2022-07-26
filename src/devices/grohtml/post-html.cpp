@@ -5302,11 +5302,8 @@ void html_printer::special(char *s, const environment *env, char type)
       int r=font::res;   /* resolution of the device */
       font *f=sbuf_style.f;
 
-      if (f == NULL) {
-	int found=FALSE;
-
-	f = font::load_font("TR", &found);
-      }
+      if (f == NULL)
+	f = font::load_font("TR");
 
       /*
        *  need to pass rest of string through to html output during flush
@@ -5330,11 +5327,8 @@ void html_printer::special(char *s, const environment *env, char type)
       font *f=sbuf_style.f;
       string t;
 
-      if (f == NULL) {
-	int found=FALSE;
-
-	f = font::load_font("TR", &found);
-      }
+      if (f == NULL)
+	f = font::load_font("TR");
 
       if (strncmp(s, "math<?p>:", 9) == 0) {
 	if (strncmp((char *)&s[9], "<math>", 6) == 0) {

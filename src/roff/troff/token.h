@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
@@ -68,33 +67,32 @@ public:
   void next();
   void process();
   void skip();
-  int eof();
-  int nspaces();		// 1 if space, 2 if double space, 0 otherwise
-  int space();			// is the current token a space?
-  int stretchable_space();	// is the current token a stretchable space?
-  int unstretchable_space();	// is the current token an unstretchable space?
-  int horizontal_space();	// is the current token a horizontal space?
-  int white_space();		// is the current token space or tab?
-  int special();		// is the current token a special character?
-  int newline();		// is the current token a newline?
-  int tab();			// is the current token a tab?
-  int leader();
-  int backspace();
-  int delimiter(bool err = false);	// usable as a delimiter?
-  int dummy();
-  int transparent_dummy();
-  int transparent();
-  int left_brace();
-  int right_brace();
-  int page_ejector();
-  int hyphen_indicator();
-  int zero_width_break();
+  int nspaces();		// 1 if space, 0 otherwise
+  bool is_eof();
+  bool is_space();
+  bool is_stretchable_space();
+  bool is_unstretchable_space();
+  bool is_horizontal_space();
+  bool is_white_space();
+  bool is_special();
+  bool is_newline();
+  bool is_tab();
+  bool is_leader();
+  bool is_backspace();
+  bool usable_as_delimiter(bool = false);
+  bool is_dummy();
+  bool is_transparent_dummy();
+  bool is_transparent();
+  bool is_left_brace();
+  bool is_right_brace();
+  bool is_page_ejector();
+  bool is_hyphen_indicator();
+  bool is_zero_width_break();
   int operator==(const token &); // need this for delimiters, and for conditions
   int operator!=(const token &); // ditto
   unsigned char ch();
-  charinfo *get_char(bool required = false);
+  charinfo *get_char(bool = false);
   int add_to_node_list(node **);
-  int title();
   void make_space();
   void make_newline();
   const char *description();
@@ -105,8 +103,8 @@ public:
 
 extern token tok;		// the current token
 
-extern symbol get_name(bool required = false);
-extern symbol get_long_name(bool required = false);
+extern symbol get_name(bool = false);
+extern symbol get_long_name(bool = false);
 extern charinfo *get_optional_char();
 extern char *read_string();
 extern void check_missing_character();
@@ -137,55 +135,52 @@ void interpolate_number_reg(symbol, int);
 
 const char *asciify(int c);
 
-inline int token::newline()
-{ 
-  return type == TOKEN_NEWLINE; 
+inline bool token::is_newline()
+{
+  return type == TOKEN_NEWLINE;
 }
 
-inline int token::space()
-{ 
+inline bool token::is_space()
+{
   return type == TOKEN_SPACE;
 }
 
-inline int token::stretchable_space()
+inline bool token::is_stretchable_space()
 {
   return type == TOKEN_STRETCHABLE_SPACE;
 }
 
-inline int token::unstretchable_space()
+inline bool token::is_unstretchable_space()
 {
   return type == TOKEN_UNSTRETCHABLE_SPACE;
 }
 
-inline int token::horizontal_space()
+inline bool token::is_horizontal_space()
 {
   return type == TOKEN_HORIZONTAL_SPACE;
 }
 
-inline int token::special()
-{ 
+inline bool token::is_special()
+{
   return type == TOKEN_SPECIAL;
 }
 
 inline int token::nspaces()
 {
-  if (type == TOKEN_SPACE)
-    return 1;
-  else
-    return 0;
+  return (int)(type == TOKEN_SPACE);
 }
 
-inline int token::white_space()
+inline bool token::is_white_space()
 {
   return type == TOKEN_SPACE || type == TOKEN_TAB;
 }
 
-inline int token::transparent()
+inline bool token::is_transparent()
 {
   return type == TOKEN_TRANSPARENT;
 }
 
-inline int token::page_ejector()
+inline bool token::is_page_ejector()
 {
   return type == TOKEN_PAGE_EJECTOR;
 }
@@ -193,56 +188,62 @@ inline int token::page_ejector()
 inline unsigned char token::ch()
 {
   return type == TOKEN_CHAR ? c : 0;
-} 
+}
 
-inline int token::eof()
+inline bool token::is_eof()
 {
   return type == TOKEN_EOF;
 }
 
-inline int token::dummy()
+inline bool token::is_dummy()
 {
   return type == TOKEN_DUMMY;
 }
 
-inline int token::transparent_dummy()
+inline bool token::is_transparent_dummy()
 {
   return type == TOKEN_TRANSPARENT_DUMMY;
 }
 
-inline int token::left_brace()
+inline bool token::is_left_brace()
 {
   return type == TOKEN_LEFT_BRACE;
 }
 
-inline int token::right_brace()
+inline bool token::is_right_brace()
 {
   return type == TOKEN_RIGHT_BRACE;
 }
 
-inline int token::tab()
+inline bool token::is_tab()
 {
   return type == TOKEN_TAB;
 }
 
-inline int token::leader()
+inline bool token::is_leader()
 {
   return type == TOKEN_LEADER;
 }
 
-inline int token::backspace()
+inline bool token::is_backspace()
 {
   return type == TOKEN_BACKSPACE;
 }
 
-inline int token::hyphen_indicator()
+inline bool token::is_hyphen_indicator()
 {
   return type == TOKEN_HYPHEN_INDICATOR;
 }
 
-inline int token::zero_width_break()
+inline bool token::is_zero_width_break()
 {
   return type == TOKEN_ZERO_WIDTH_BREAK;
 }
 
-int has_arg();
+bool has_arg();
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

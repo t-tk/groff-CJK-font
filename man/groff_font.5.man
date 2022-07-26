@@ -97,10 +97,10 @@ respectively).
 .
 The
 .I DESC
-file can contain the following types of line as shown below.
+file contains a series of directives,
+one per line.
 .
-Except
-for the
+Except for the
 .B charset
 directive,
 which must come last
@@ -111,20 +111,11 @@ Later entries in the file,
 however,
 override previous values.
 .
+Comments start with the
+.RB \[lq] # \[rq]
+character and extend to the end of a line.
+.
 Empty lines are ignored.
-.
-.
-.TP
-.B charset
-This line and everything following it in the file are ignored.
-.
-It is recognized for compatibility with other
-.I troff \" generic
-implementations.
-.
-In GNU
-.IR troff , \" GNU
-character set repertoire is described on a per-font basis.
 .
 .
 .TP
@@ -262,7 +253,7 @@ the argument can be a file name
 .IR /etc/papersize );
 if the file can be opened,
 .I \%@g@troff
-reads the first line and attempts to match the above forms.
+reads the first line and attempts to match either of the other forms.
 .
 No comment syntax is supported.
 .
@@ -433,8 +424,8 @@ output devices use this directive.
 .
 .TP
 .BI unitwidth\~ n
-Quantities in the font files are given in basic units for fonts whose
-point size is
+Quantities in the font description files are in basic units for fonts
+whose point size is
 .IR n \~scaled
 points.
 .
@@ -464,6 +455,21 @@ driver uses this directive.
 The vertical resolution is
 .IR n \~basic
 units.
+.
+All vertical quantities are rounded to multiples of this value.
+.
+.
+.TP
+.B charset
+This line and everything following it in the file are ignored.
+.
+It is recognized for compatibility with other
+.I troff \" generic
+implementations.
+.
+In GNU
+.IR troff , \" GNU
+character set repertoire is described on a per-font basis.
 .
 .
 .P
@@ -542,13 +548,15 @@ expressed as integers.)
 .
 .
 .P
-A font description file has two sections;
-empty lines are ignored in both.
+A font description file has two sections.
 .
-The first section is a sequence of lines each containing a sequence of
-space-delimited words;
-the first word in the line is a key,
-and subsequent words associate a value with that key.
+The first is a sequence of directives;
+it can contain comments,
+which start with the
+.RB \[lq] # \[rq]
+character and extend to the end of a line.
+.
+Empty lines are ignored in both sections.
 .
 .
 .TP
@@ -567,15 +575,15 @@ units at a type size of
 .
 .
 .P
-The above directives are mandatory;
-the remaining ones in the first section are optional.
+The directives above are mandatory in the first section;
+those below are optional.
 .
 .
 .TP
 .BI slant\~ n
-The glyphs of the font have a slant of
-.IR n \~degrees,
-where a positive
+The font's glyphs have a slant of
+.IR n \~degrees;
+a positive
 .I n
 slants in the direction of text flow.
 .
@@ -609,39 +617,37 @@ The list of ligatures must not extend over more than one line.
 .TP
 .B special
 The font is
-.IR special ;
-this means that when a glyph is requested that is not present in
-the current font,
-it is searched for in any special fonts that are mounted.
+.IR special :
+when a glyph is requested that is not present in the current font,
+it is sought in any mounted fonts that bear this property.
 .
 .
 .P
-Other directives are ignored by
-.I \%@g@troff
-but may be used by postprocessors to store arbitrary information
-about the font in the file.
-.
-.
-.P
-The first section can contain comments,
-which start with the
-.B #
-character and extend to the end of a line.
+Other directives in this section are ignored by
+.IR \%@g@troff ,
+but may be used by postprocessors to store arbitrary information about
+the font in the file.
 .
 .
 .P
 The second section contains one or two subsections.
 .
-It must contain a
+These can appear in either order;
+the first one encountered commences the second section.
+.
+Each starts with a directive on a line by itself.
+.
+A
 .B charset
-subsection
-and it may also contain a
-.B kernpairs
-subsection.
+subsection is mandatory unless the associated
+.I DESC
+file contains the
+.B unicode
+directive.
 .
-These subsections can appear in either order.
-.
-Each subsection starts with a directive on a line by itself.
+Another subsection,
+.BR kernpairs ,
+is optional.
 .
 .
 .P
@@ -649,7 +655,8 @@ The directive
 .B charset
 starts the charset subsection.
 .
-(This keyword is a misnomer since it starts an ordered list of glyphs,
+(For typesetter devices,
+this keyword is a misnomer since it starts an ordered list of glyphs,
 not characters.)
 .
 The
@@ -664,7 +671,7 @@ The format is as follows.
 .
 .IP
 .I name metrics type code
-.RI [ entity_name ]
+.RI [ entity-name ]
 .RB [ \-\-
 .IR comment ]
 .
@@ -834,7 +841,7 @@ function).
 .
 .P
 The
-.I entity_name
+.I entity-name
 field defines an identifier for the glyph that the postprocessor
 uses to print the
 .I \%@g@troff
@@ -861,9 +868,9 @@ these data are now compiled directly into
 uses the field to build sub-encoding arrays for PostScript fonts
 containing more than 256 glyphs.
 .
-.
-.P
-Anything on the line after the encoding field or
+Anything on the line after the
+.I entity-name
+field or
 .RB \[lq] \-\- \[rq]
 is ignored.
 .

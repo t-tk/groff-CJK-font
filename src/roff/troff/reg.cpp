@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
@@ -317,7 +316,7 @@ void define_number_reg()
       number_reg_dictionary.define(nm, r);
     }
     r->set_value(v);
-    if (tok.space() && has_arg() && get_number(&v, 'u'))
+    if (tok.is_space() && has_arg() && get_number(&v, 'u'))
       r->set_increment(v);
   }
   skip_line();
@@ -401,7 +400,7 @@ void alter_format()
   }
   else if (c == 'i' || c == 'I' || c == 'a' || c == 'A')
     r->alter_format(c);
-  else if (tok.newline() || tok.eof())
+  else if (tok.is_newline() || tok.is_eof())
     warning(WARN_MISSING, "missing register format");
   else
     error("bad register format (got %1)", tok.description());
@@ -469,3 +468,9 @@ void init_reg_requests()
   init_request("rnn", rename_reg);
   init_request("pnr", print_number_regs);
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

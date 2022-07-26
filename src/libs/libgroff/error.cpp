@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
@@ -34,8 +33,8 @@ enum error_type { DEBUG, WARNING, ERROR, FATAL };
 static void do_error_with_file_and_line(const char *filename,
 					const char *source_filename,
 					int lineno,
-					error_type type, 
-					const char *format, 
+					error_type type,
+					const char *format,
 					const errarg &arg1,
 					const errarg &arg2,
 					const errarg &arg3)
@@ -45,13 +44,15 @@ static void do_error_with_file_and_line(const char *filename,
     fprintf(stderr, "%s:", program_name);
     need_space = true;
   }
-  if (lineno >= 0 && filename != 0) {
+  if (filename != 0) {
     if (strcmp(filename, "-") == 0)
       filename = "<standard input>";
+    fprintf(stderr, "%s", filename);
     if (source_filename != 0)
-      fprintf(stderr, "%s (%s):%d:", filename, source_filename, lineno);
-    else
-      fprintf(stderr, "%s:%d:", filename, lineno);
+      fprintf(stderr, ":(%s)", source_filename);
+    if (lineno > 0)
+      fprintf(stderr, ":%d", lineno);
+    fputc(':', stderr);
     need_space = true;
   }
   if (need_space)
@@ -163,3 +164,9 @@ void fatal_with_file_and_line(const char *filename,
   do_error_with_file_and_line(filename, 0, lineno, 
 			      FATAL, format, arg1, arg2, arg3);
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

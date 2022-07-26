@@ -1,5 +1,4 @@
-// -*- C++ -*-
-/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2021 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
 This file is part of groff.
@@ -73,21 +72,21 @@ struct text_file {
   FILE *fp;
   char *path;
   int lineno;
-  int size;
-  int skip_comments;
-  int silent;
+  int linebufsize;
+  bool recognize_comments;
+  bool silent;
   char *buf;
   text_file(FILE *fp, char *p);
   ~text_file();
-  int next();
-  void error(const char *format, 
+  bool next_line();
+  void error(const char *format,
 	     const errarg &arg1 = empty_errarg,
 	     const errarg &arg2 = empty_errarg,
 	     const errarg &arg3 = empty_errarg);
 };
 
-text_file::text_file(FILE *p, char *s) 
-: fp(p), path(s), lineno(0), size(0), skip_comments(1), silent(0), buf(0)
+text_file::text_file(FILE *p, char *s) : fp(p), path(s), lineno(0),
+  linebufsize(128), recognize_comments(true), silent(false), buf(0)
 {
 }
 
@@ -99,49 +98,47 @@ text_file::~text_file()
     fclose(fp);
 }
 
-int text_file::next()
+bool text_file::next_line()
 {
   if (fp == 0)
-    return 0;
-  if (buf == 0) {
-    buf = new char[128];
-    size = 128;
-  }
+    return false;
+  if (buf == 0)
+    buf = new char[linebufsize];
   for (;;) {
-    int i = 0;
+    lineno++;
+    int length = 0;
     for (;;) {
       int c = getc(fp);
       if (c == EOF)
 	break;
       if (invalid_input_char(c))
-	error("invalid input character code '%1'", int(c));
+	error("invalid input character code %1", int(c));
       else {
-	if (i + 1 >= size) {
+	if (length + 1 >= linebufsize) {
 	  char *old_buf = buf;
-	  buf = new char[size*2];
-	  memcpy(buf, old_buf, size);
+	  buf = new char[linebufsize * 2];
+	  memcpy(buf, old_buf, linebufsize);
 	  delete[] old_buf;
-	  size *= 2;
+	  linebufsize *= 2;
 	}
-	buf[i++] = c;
+	buf[length++] = c;
 	if (c == '\n')
 	  break;
       }
     }
-    if (i == 0)
+    if (length == 0)
       break;
-    buf[i] = '\0';
-    lineno++;
+    buf[length] = '\0';
     char *ptr = buf;
     while (csspace(*ptr))
       ptr++;
-    if (*ptr != 0 && (!skip_comments || *ptr != '#'))
-      return 1;
+    if (*ptr != 0 && (!recognize_comments || *ptr != '#'))
+      return true;
   }
-  return 0;
+  return false;
 }
 
-void text_file::error(const char *format, 
+void text_file::error(const char *format,
 		      const errarg &arg1,
 		      const errarg &arg2,
 		      const errarg &arg3)
@@ -167,7 +164,7 @@ int glyph_to_ucs_codepoint(glyph *g)
 int glyph_to_unicode(glyph *g)
 {
   const char *nm = glyph_to_name(g);
-  if (nm != NULL) {
+  if (nm != 0) {
     // ASCII character?
     if (nm[0] == 'c' && nm[1] == 'h' && nm[2] == 'a' && nm[3] == 'r'
 	&& (nm[4] >= '0' && nm[4] <= '9')) {
@@ -198,7 +195,7 @@ int glyph_to_unicode(glyph *g)
     }
     // groff glyphs that map to Unicode?
     const char *unicode = glyph_name_to_unicode(nm);
-    if (unicode != NULL && strchr(unicode, '_') == NULL) {
+    if (unicode != 0 && strchr(unicode, '_') == 0) {
       char *ignore;
       return (int)strtol(unicode, &ignore, 16);
     }
@@ -208,19 +205,16 @@ int glyph_to_unicode(glyph *g)
 
 /* font functions */
 
-font::font(const char *s)
-: ligatures(0), kern_hash_table(0), space_width(0), special(false),
-  ch_index(0), nindices(0), ch(0), ch_used(0), ch_size(0), widths_cache(0)
+font::font(const char *s) : ligatures(0), kern_hash_table(0),
+  space_width(0), special(false), internalname(0), slant(0.0), zoom(0),
+  ch_index(0), nindices(0), ch(0), ch_used(0), ch_size(0),
+  widths_cache(0)
 #ifdef ENABLE_UCSRANGE
   ,wch(0)
 #endif
 {
   name = new char[strlen(s) + 1];
   strcpy(name, s);
-  internalname = 0;
-  slant = 0.0;
-  zoom = 0;
-  // load();			// for testing
 }
 
 font::~font()
@@ -296,9 +290,11 @@ inline int font::scale(int w, int sz)
     return sz == unitwidth ? w : scale_round(w, sz, unitwidth);
 }
 
-int font::unit_scale(double *value, char unit)
+// Returns whether scaling by arguments was successful.  Used for paper
+// size conversions.
+bool font::unit_scale(double *value, char unit)
 {
-  // we scale everything to inch
+  // Paper sizes are handled in inches.
   double divisor = 0;
   switch (unit) {
   case 'i':
@@ -314,14 +310,14 @@ int font::unit_scale(double *value, char unit)
     divisor = 2.54;
     break;
   default:
-    assert(0);
+    assert(0 == "unit not in [cipP]");
     break;
   }
   if (divisor) {
     *value /= divisor;
-    return 1;
+    return true;
   }
-  return 0;
+  return false;
 }
 
 int font::get_skew(glyph *g, int point_size, int sl)
@@ -395,7 +391,7 @@ int font::get_width(glyph *g, int point_size)
   int idx = glyph_to_index(g);
   assert(idx >= 0);
   int real_size;
-  if (!zoom)
+  if (zoom == 0) // 0 means "don't zoom"
     real_size = point_size;
   else
   {
@@ -451,7 +447,8 @@ int font::get_width(glyph *g, int point_size)
     else
       return scale(width, point_size);
   }
-  abort();
+  assert(0 == "glyph is not indexed and device lacks Unicode support");
+  abort(); // -Wreturn-type
 }
 
 int font::get_height(glyph *g, int point_size)
@@ -474,7 +471,8 @@ int font::get_height(glyph *g, int point_size)
     // Unicode font
     return 0;
   }
-  abort();
+  assert(0 == "glyph is not indexed and device lacks Unicode support");
+  abort(); // -Wreturn-type
 }
 
 int font::get_depth(glyph *g, int point_size)
@@ -497,7 +495,8 @@ int font::get_depth(glyph *g, int point_size)
     // Unicode font
     return 0;
   }
-  abort();
+  assert(0 == "glyph is not indexed and device lacks Unicode support");
+  abort(); // -Wreturn-type
 }
 
 int font::get_italic_correction(glyph *g, int point_size)
@@ -520,7 +519,8 @@ int font::get_italic_correction(glyph *g, int point_size)
     // Unicode font
     return 0;
   }
-  abort();
+  assert(0 == "glyph is not indexed and device lacks Unicode support");
+  abort(); // -Wreturn-type
 }
 
 int font::get_left_italic_correction(glyph *g, int point_size)
@@ -543,7 +543,8 @@ int font::get_left_italic_correction(glyph *g, int point_size)
     // Unicode font
     return 0;
   }
-  abort();
+  assert(0 == "glyph is not indexed and device lacks Unicode support");
+  abort(); // -Wreturn-type
 }
 
 int font::get_subscript_correction(glyph *g, int point_size)
@@ -566,7 +567,8 @@ int font::get_subscript_correction(glyph *g, int point_size)
     // Unicode font
     return 0;
   }
-  abort();
+  assert(0 == "glyph is not indexed and device lacks Unicode support");
+  abort(); // -Wreturn-type
 }
 
 void font::set_zoom(int factor)
@@ -647,7 +649,8 @@ int font::get_character_type(glyph *g)
     // Unicode font
     return 0;
   }
-  abort();
+  assert(0 == "glyph is not indexed and device lacks Unicode support");
+  abort(); // -Wreturn-type
 }
 
 int font::get_code(glyph *g)
@@ -678,7 +681,8 @@ int font::get_code(glyph *g)
       return n;
   }
   // The caller must check 'contains(g)' before calling get_code(g).
-  abort();
+  assert(0 == "glyph is not indexed and device lacks Unicode support");
+  abort(); // -Wreturn-type
 }
 
 const char *font::get_name()
@@ -708,9 +712,10 @@ const char *font::get_special_device_encoding(glyph *g)
 #endif
   if (is_unicode) {
     // Unicode font
-    return NULL;
+    return 0;
   }
-  abort();
+  assert(0 == "glyph is not indexed and device lacks Unicode support");
+  abort(); // -Wreturn-type
 }
 
 const char *font::get_image_generator()
@@ -735,7 +740,7 @@ void font::alloc_ch_index(int idx)
       nindices = idx + 10;
     int *old_ch_index = ch_index;
     ch_index = new int[nindices];
-    memcpy(ch_index, old_ch_index, sizeof(int)*old_nindices);
+    memcpy(ch_index, old_ch_index, sizeof(int) * old_nindices);
     for (int i = old_nindices; i < nindices; i++)
       ch_index[i] = -1;
     delete[] old_ch_index;
@@ -751,7 +756,7 @@ void font::extend_ch()
     ch_size *= 2;
     font_char_metric *old_ch = ch;
     ch = new font_char_metric[ch_size];
-    memcpy(ch, old_ch, old_ch_size*sizeof(font_char_metric));
+    memcpy(ch, old_ch, old_ch_size * sizeof(font_char_metric));
     delete[] old_ch;
   }
 }
@@ -803,10 +808,10 @@ void font::copy_entry(glyph *new_glyph, glyph *old_glyph)
   ch_index[new_index] = ch_index[old_index];
 }
 
-font *font::load_font(const char *s, int *not_found, int head_only)
+font *font::load_font(const char *s, bool load_header_only)
 {
   font *f = new font(s);
-  if (!f->load(not_found, head_only)) {
+  if (!f->load(load_header_only)) {
     delete f;
     return 0;
   }
@@ -815,7 +820,7 @@ font *font::load_font(const char *s, int *not_found, int head_only)
 
 static char *trim_arg(char *p)
 {
-  if (!p)
+  if (0 == p)
     return 0;
   while (csspace(*p))
     p++;
@@ -826,8 +831,8 @@ static char *trim_arg(char *p)
   return p;
 }
 
-int font::scan_papersize(const char *p,
-			 const char **size, double *length, double *width)
+bool font::scan_papersize(const char *p, const char **size,
+			  double *length, double *width)
 {
   double l, w;
   char lu[2], wu[2];
@@ -845,7 +850,7 @@ again:
 	*width = w;
       if (size)
 	*size = "custom";
-      return 1;
+      return true;
     }
   }
   else {
@@ -858,12 +863,12 @@ again:
 	  *width = papersizes[i].width;
 	if (size)
 	  *size = papersizes[i].name;
-	return 1;
+	return true;
       }
     if (attempt_file_open) {
-      FILE *f = fopen(p, "r");
-      if (f) {
-	if (fgets(line, 254, f)) {
+      FILE *fp = fopen(p, "r");
+      if (fp != 0) {
+	if (fgets(line, 254, fp)) {
 	  // Don't recurse on file names.
 	  attempt_file_open = false;
 	  char *linep = strchr(line, '\0');
@@ -872,52 +877,52 @@ again:
 	    *linep = '\0';
 	  pp = line;
 	}
-	fclose(f);
+	fclose(fp);
 	goto again;
       }
     }
   }
-  return 0;
+  return false;
 }
 
-// If the font can't be found, then if not_found is non-NULL, it will be
-// set to 1 otherwise a message will be printed.
-
-bool font::load(int *not_found, int head_only)
+bool font::load(bool load_header_only)
 {
-  if (strcmp(name, "DESC") == 0) {
-    if (not_found)
-      *not_found = 1;
-    else
-      error("'DESC' is not a valid font file name");
-    return false;
-  }
-  char *path;
   FILE *fp;
-  if ((fp = open_file(name, &path)) == NULL) {
-    if (not_found)
-      *not_found = 1;
-    else
-      error("can't find font file '%1'", name);
+  char *path;
+  if ((fp = open_file(name, &path)) == 0)
     return false;
-  }
   text_file t(fp, path);
-  t.skip_comments = 1;
-  t.silent = head_only;
-  char *p;
-  for (;;) {
-    if (!t.next()) {
-      p = 0;
-      break;
-    }
+  t.silent = load_header_only;
+  char *p = 0;
+  bool saw_name_directive = false;
+  while (t.next_line()) {
     p = strtok(t.buf, WS);
     if (strcmp(p, "name") == 0) {
+      p = strtok(0, WS);
+      if (0 == p) {
+	t.error("'name' directive requires an argument");
+	return false;
+      }
+      if (strcmp(p, name) != 0) {
+	t.error("font description file name '%1' does not match 'name'"
+		" argument '%2'", name, p);
+	return false;
+      }
+      saw_name_directive = true;
     }
     else if (strcmp(p, "spacewidth") == 0) {
       p = strtok(0, WS);
       int n;
-      if (p == 0 || sscanf(p, "%d", &n) != 1 || n <= 0) {
-	t.error("bad argument for 'spacewidth' command");
+      if (0 == p) {
+	t.error("missing argument to 'spacewidth' directive");
+	return false;
+      }
+      if (sscanf(p, "%d", &n) != 1) {
+	t.error("invalid argument '%1' to 'spacewidth' directive", p);
+	return false;
+      }
+      if (n <= 0) {
+	t.error("'spacewidth' argument '%1' out of range", n);
 	return false;
       }
       space_width = n;
@@ -925,8 +930,16 @@ bool font::load(int *not_found, int head_only)
     else if (strcmp(p, "slant") == 0) {
       p = strtok(0, WS);
       double n;
-      if (p == 0 || sscanf(p, "%lf", &n) != 1 || n >= 90.0 || n <= -90.0) {
-	t.error("bad argument for 'slant' command", p);
+      if (0 == p) {
+	t.error("missing argument to 'slant' directive");
+	return false;
+      }
+      if (sscanf(p, "%lf", &n) != 1) {
+	t.error("invalid argument '%1' to 'slant' directive", p);
+	return false;
+      }
+      if (n >= 90.0 || n <= -90.0) {
+	t.error("'slant' directive argument '%1' out of range", n);
 	return false;
       }
       slant = n;
@@ -934,7 +947,7 @@ bool font::load(int *not_found, int head_only)
     else if (strcmp(p, "ligatures") == 0) {
       for (;;) {
 	p = strtok(0, WS);
-	if (p == 0 || strcmp(p, "0") == 0)
+	if (0 == p || strcmp(p, "0") == 0)
 	  break;
 	if (strcmp(p, "ff") == 0)
 	  ligatures |= LIG_ff;
@@ -947,15 +960,15 @@ bool font::load(int *not_found, int head_only)
 	else if (strcmp(p, "ffl") == 0)
 	  ligatures |= LIG_ffl;
 	else {
-	  t.error("unrecognised ligature '%1'", p);
+	  t.error("unrecognized ligature '%1'", p);
 	  return false;
 	}
       }
     }
     else if (strcmp(p, "internalname") == 0) {
       p = strtok(0, WS);
-      if (!p) {
-	t.error("'internalname' command requires argument");
+      if (0 == p) {
+	t.error("missing argument to 'internalname' directive");
 	return false;
       }
       internalname = new char[strlen(p) + 1];
@@ -970,64 +983,59 @@ bool font::load(int *not_found, int head_only)
 #else
     else if (strcmp(p, "kernpairs") != 0 && strcmp(p, "charset") != 0) {
 #endif
-      char *command = p;
+      char *directive = p;
       p = strtok(0, "\n");
-      handle_unknown_font_command(command, trim_arg(p), t.path, t.lineno);
+      handle_unknown_font_command(directive, trim_arg(p), t.path,
+				  t.lineno);
     }
     else
       break;
   }
-  int had_charset = 0;
-  if (p == 0) {
-    if (!is_unicode) {
-      t.error("missing charset command");
-      return false;
-    }
-  } else {
-    char *command = p;
-    t.skip_comments = 0;
-    while (command) {
-      if (strcmp(command, "kernpairs") == 0) {
-	if (head_only)
-	  return true;
-	for (;;) {
-	  if (!t.next()) {
-	    command = 0;
-	    break;
-	  }
-	  char *c1 = strtok(t.buf, WS);
-	  if (c1 == 0)
-	    continue;
-	  char *c2 = strtok(0, WS);
-	  if (c2 == 0) {
-	    command = c1;
-	    break;
-	  }
-	  p = strtok(0, WS);
-	  if (p == 0) {
-	    t.error("missing kern amount");
-	    return false;
-	  }
-	  int n;
-	  if (sscanf(p, "%d", &n) != 1) {
-	    t.error("bad kern amount '%1'", p);
-	    return false;
-	  }
-	  glyph *g1 = name_to_glyph(c1);
-	  glyph *g2 = name_to_glyph(c2);
-	  add_kern(g1, g2, n);
+  bool saw_charset_directive = false;
+  char *directive = p;
+  t.recognize_comments = false;
+  while (directive) {
+    if (strcmp(directive, "kernpairs") == 0) {
+      if (load_header_only)
+	return true;
+      for (;;) {
+	if (!t.next_line()) {
+	  directive = 0;
+	  break;
 	}
+	char *c1 = strtok(t.buf, WS);
+	if (0 == c1)
+	  continue;
+	char *c2 = strtok(0, WS);
+	if (0 == c2) {
+	  directive = c1;
+	  break;
+	}
+	p = strtok(0, WS);
+	if (0 == p) {
+	  t.error("missing kern amount");
+	  return false;
+	}
+	int n;
+	if (sscanf(p, "%d", &n) != 1) {
+	  t.error("invalid kern amount '%1'", p);
+	  return false;
+	}
+	glyph *g1 = name_to_glyph(c1);
+	glyph *g2 = name_to_glyph(c2);
+	add_kern(g1, g2, n);
       }
+    }
 #ifdef ENABLE_UCSRANGE
-      else if (strcmp(command, "charset-range") == 0) {
-	if (head_only)
+      else if (strcmp(directive, "charset-range") == 0) {
+	if (load_header_only)
 	  return 1;
-	had_charset = 1;
+	saw_charset_directive = true;
 	int had_range = 0;
 	glyph *last_glyph = NULL;
 	for (;;) {
-	  if (!t.next()) {
-	    command = 0;
+	  if (!t.next_line()) {
+	    directive = 0;
 	    break;
 	  }
 	  char *nm = strtok(t.buf, WS);
@@ -1035,7 +1043,7 @@ bool font::load(int *not_found, int head_only)
 	    continue;			// I dont think this should happen
 	  p = strtok(0, WS);
 	  if (p == 0) {
-	    command = nm;
+	    directive = nm;
 	    break;
 	  }
 	  int start_code = 0;
@@ -1094,124 +1102,131 @@ bool font::load(int *not_found, int head_only)
 	}
       }
 #endif
-      else if (strcmp(command, "charset") == 0) {
-	if (head_only)
-	  return true;
-	had_charset = 1;
-	glyph *last_glyph = NULL;
-	for (;;) {
-	  if (!t.next()) {
-	    command = 0;
-	    break;
+    else if (strcmp(directive, "charset") == 0) {
+      if (load_header_only)
+	return true;
+      saw_charset_directive = true;
+      glyph *last_glyph = 0;
+      for (;;) {
+	if (!t.next_line()) {
+	  directive = 0;
+	  break;
+	}
+	char *nm = strtok(t.buf, WS);
+	assert(nm != 0);
+	p = strtok(0, WS);
+	if (0 == p) {
+	  directive = nm;
+	  break;
+	}
+	if (p[0] == '"') {
+	  if (last_glyph == 0) {
+	    t.error("first entry '%1' in 'charset' subsection is an"
+		    " alias", nm);
+	    return false;
 	  }
-	  char *nm = strtok(t.buf, WS);
-	  if (nm == 0)
-	    continue;			// I dont think this should happen
+	  if (strcmp(nm, "---") == 0) {
+	    t.error("an unnamed character cannot be an alias");
+	    return false;
+	  }
+	  glyph *g = name_to_glyph(nm);
+	  copy_entry(g, last_glyph);
+	}
+	else {
+	  font_char_metric metric;
+	  metric.height = 0;
+	  metric.depth = 0;
+	  metric.pre_math_space = 0;
+	  metric.italic_correction = 0;
+	  metric.subscript_correction = 0;
+	  int nparms = sscanf(p, "%d,%d,%d,%d,%d,%d",
+			      &metric.width, &metric.height,
+			      &metric.depth,
+			      &metric.italic_correction,
+			      &metric.pre_math_space,
+			      &metric.subscript_correction);
+	  if (nparms < 1) {
+	    t.error("invalid width for '%1'", nm);
+	    return false;
+	  }
 	  p = strtok(0, WS);
-	  if (p == 0) {
-	    command = nm;
-	    break;
+	  if (0 == p) {
+	    t.error("missing character type for '%1'", nm);
+	    return false;
 	  }
-	  if (p[0] == '"') {
-	    if (last_glyph == NULL) {
-	      t.error("first charset entry is duplicate");
-	      return false;
-	    }
-	    if (strcmp(nm, "---") == 0) {
-	      t.error("unnamed character cannot be duplicate");
-	      return false;
-	    }
-	    glyph *g = name_to_glyph(nm);
-	    copy_entry(g, last_glyph);
+	  int type;
+	  if (sscanf(p, "%d", &type) != 1) {
+	    t.error("invalid character type for '%1'", nm);
+	    return false;
+	  }
+	  if (type < 0 || type > 255) {
+	    t.error("character type '%1' out of range", type);
+	    return false;
+	  }
+	  metric.type = type;
+	  p = strtok(0, WS);
+	  if (0 == p) {
+	    t.error("missing code for '%1'", nm);
+	    return false;
+	  }
+	  char *ptr;
+	  metric.code = (int)strtol(p, &ptr, 0);
+	  if (metric.code == 0 && ptr == p) {
+	    t.error("invalid code '%1' for character '%2'", p, nm);
+	    return false;
+	  }
+	  if (is_unicode) {
+	    int w = wcwidth(metric.code);
+	    if (w > 1)
+	      metric.width *= w;
+	  }
+	  p = strtok(0, WS);
+	  if ((0 == p) || (strcmp(p, "--") == 0)) {
+	    metric.special_device_coding = 0;
 	  }
 	  else {
-	    font_char_metric metric;
-	    metric.height = 0;
-	    metric.depth = 0;
-	    metric.pre_math_space = 0;
-	    metric.italic_correction = 0;
-	    metric.subscript_correction = 0;
-	    int nparms = sscanf(p, "%d,%d,%d,%d,%d,%d",
-				&metric.width, &metric.height, &metric.depth,
-				&metric.italic_correction,
-				&metric.pre_math_space,
-				&metric.subscript_correction);
-	    if (nparms < 1) {
-	      t.error("bad width for '%1'", nm);
-	      return false;
-	    }
-	    p = strtok(0, WS);
-	    if (p == 0) {
-	      t.error("missing character type for '%1'", nm);
-	      return false;
-	    }
-	    int type;
-	    if (sscanf(p, "%d", &type) != 1) {
-	      t.error("bad character type for '%1'", nm);
-	      return false;
-	    }
-	    if (type < 0 || type > 255) {
-	      t.error("character type '%1' out of range", type);
-	      return false;
-	    }
-	    metric.type = type;
-	    p = strtok(0, WS);
-	    if (p == 0) {
-	      t.error("missing code for '%1'", nm);
-	      return false;
-	    }
-	    char *ptr;
-	    metric.code = (int)strtol(p, &ptr, 0);
-	    if (metric.code == 0 && ptr == p) {
-	      t.error("bad code '%1' for character '%2'", p, nm);
-	      return false;
-	    }
-	    if (is_unicode) {
-	      int w = wcwidth(metric.code);
-	      if (w > 1)
-	        metric.width *= w;
-	    }
-	    p = strtok(0, WS);
-	    if ((p == NULL) || (strcmp(p, "--") == 0)) {
-	      metric.special_device_coding = NULL;
-	    }
-	    else {
-	      char *nam = new char[strlen(p) + 1];
-	      strcpy(nam, p);
-	      metric.special_device_coding = nam;
-	    }
-	    if (strcmp(nm, "---") == 0) {
-	      last_glyph = number_to_glyph(metric.code);
-	      add_entry(last_glyph, metric);
-	    }
-	    else {
-	      last_glyph = name_to_glyph(nm);
-	      add_entry(last_glyph, metric);
-	      copy_entry(number_to_glyph(metric.code), last_glyph);
-	    }
+	    char *nam = new char[strlen(p) + 1];
+	    strcpy(nam, p);
+	    metric.special_device_coding = nam;
+	  }
+	  if (strcmp(nm, "---") == 0) {
+	    last_glyph = number_to_glyph(metric.code);
+	    add_entry(last_glyph, metric);
+	  }
+	  else {
+	    last_glyph = name_to_glyph(nm);
+	    add_entry(last_glyph, metric);
+	    copy_entry(number_to_glyph(metric.code), last_glyph);
 	  }
 	}
-	if (last_glyph == NULL) {
-	  t.error("I didn't seem to find any characters");
-	  return false;
-	}
       }
-      else {
-	t.error("unrecognised command '%1' "
-		"after 'kernpairs' or 'charset' command",
-		  command);
+      if (0 == last_glyph) {
+	t.error("no glyphs defined in font description");
 	return false;
       }
     }
-    compact();
+    else {
+      t.error("unrecognized font description directive '%1' after"
+	      " 'kernpairs' or 'charset'", directive);
+      return false;
+    }
   }
-  if (!is_unicode && !had_charset) {
-    t.error("missing 'charset' command");
+  compact();
+  t.lineno = 0;
+  if (!saw_name_directive) {
+    t.error("font description 'name' directive missing");
+    return false;
+  }
+  if (!is_unicode && !saw_charset_directive) {
+    t.error("font description 'charset' subsection missing");
     return false;
   }
   if (space_width == 0) {
+    t.error("font description 'spacewidth' directive missing");
+    // _Don't_ return false; compute a typical one for Western glyphs.
     if (zoom)
-      space_width = scale_round(unitwidth, res, 72 * 3 * sizescale, zoom);
+      space_width = scale_round(unitwidth, res, 72 * 3 * sizescale,
+				zoom);
     else
       space_width = scale_round(unitwidth, res, 72 * 3 * sizescale);
   }
@@ -1219,7 +1234,7 @@ bool font::load(int *not_found, int head_only)
 }
 
 static struct {
-  const char *command;
+  const char *numeric_directive;
   int *ptr;
 } table[] = {
   { "res", &font::res },
@@ -1239,37 +1254,44 @@ bool font::load_desc()
   int nfonts = 0;
   FILE *fp;
   char *path;
-  if ((fp = open_file("DESC", &path)) == 0) {
-    error("can't find 'DESC' file");
+  if ((fp = open_file("DESC", &path)) == 0)
     return false;
-  }
   text_file t(fp, path);
-  t.skip_comments = 1;
   res = 0;
-  while (t.next()) {
+  while (t.next_line()) {
     char *p = strtok(t.buf, WS);
-    int found = 0;
+    assert(p != 0);
+    bool numeric_directive_found = false;
     unsigned int idx;
-    for (idx = 0; !found && idx < sizeof(table)/sizeof(table[0]); idx++)
-      if (strcmp(table[idx].command, p) == 0)
-	found = 1;
-    if (found) {
+    for (idx = 0; !numeric_directive_found
+		  && idx < sizeof(table) / sizeof(table[0]); idx++)
+      if (strcmp(table[idx].numeric_directive, p) == 0)
+	numeric_directive_found = true;
+    if (numeric_directive_found) {
       char *q = strtok(0, WS);
-      if (!q) {
-	t.error("missing value for command '%1'", p);
+      if (0 == q) {
+	t.error("missing value for directive '%1'", p);
 	return false;
       }
-      //int *ptr = &(this->*(table[idx-1].ptr));
-      int *ptr = table[idx-1].ptr;
-      if (sscanf(q, "%d", ptr) != 1) {
-	t.error("bad number '%1'", q);
+      int val;
+      if (sscanf(q, "%d", &val) != 1) {
+	t.error("'%1' directive given invalid number '%2'", p, q);
 	return false;
       }
+      if ((strcmp(p, "sizescale") == 0
+	  || strcmp(p, "hor") == 0
+	  || strcmp(p, "vert") == 0)
+	  && val < 1) {
+	t.error("expected argument to '%1' directive to be a"
+		" nonnegative number, got '%2'", p, val);
+	return false;
+      }
+      *(table[idx-1].ptr) = val;
     }
     else if (strcmp("family", p) == 0) {
       p = strtok(0, WS);
-      if (!p) {
-	t.error("family command requires an argument");
+      if (0 == p) {
+	t.error("'family' directive requires an argument");
 	return false;
       }
       char *tem = new char[strlen(p)+1];
@@ -1278,16 +1300,21 @@ bool font::load_desc()
     }
     else if (strcmp("fonts", p) == 0) {
       p = strtok(0, WS);
-      if (!p || sscanf(p, "%d", &nfonts) != 1 || nfonts <= 0) {
-	t.error("bad number of fonts '%1'", p);
+      if (0 == p) {
+	t.error("'fonts' directive requires arguments");
 	return false;
       }
-      font_name_table = (const char **)new char *[nfonts+1]; 
+      if (sscanf(p, "%d", &nfonts) != 1 || nfonts <= 0) {
+	t.error("expected first argument to 'fonts' directive to be a"
+		" nonnegative number, got '%1'", p);
+	return false;
+      }
+      font_name_table = (const char **)new char *[nfonts+1];
       for (int i = 0; i < nfonts; i++) {
 	p = strtok(0, WS);
-	while (p == 0) {
-	  if (!t.next()) {
-	    t.error("end of file while reading list of fonts");
+	while (0 == p) {
+	  if (!t.next_line()) {
+	    t.error("unexpected end of file while reading font list");
 	    return false;
 	  }
 	  p = strtok(t.buf, WS);
@@ -1305,18 +1332,18 @@ bool font::load_desc()
     }
     else if (strcmp("papersize", p) == 0) {
       p = strtok(0, WS);
-      if (!p) {
-	t.error("papersize command requires an argument");
+      if (0 == p) {
+	t.error("'papersize' directive requires an argument");
 	return false;
       }
-      int found_paper = 0;
+      bool found_paper = false;
       while (p) {
 	double unscaled_paperwidth, unscaled_paperlength;
 	if (scan_papersize(p, &papersize, &unscaled_paperlength,
 			   &unscaled_paperwidth)) {
 	  paperwidth = int(unscaled_paperwidth * res + 0.5);
 	  paperlength = int(unscaled_paperlength * res + 0.5);
-	  found_paper = 1;
+	  found_paper = true;
 	  break;
 	}
 	p = strtok(0, WS);
@@ -1336,8 +1363,8 @@ bool font::load_desc()
       int i = 0;
       for (;;) {
 	p = strtok(0, WS);
-	while (p == 0) {
-	  if (!t.next()) {
+	while (0 == p) {
+	  if (!t.next_line()) {
 	    t.error("list of sizes must be terminated by '0'");
 	    return false;
 	  }
@@ -1353,7 +1380,7 @@ bool font::load_desc()
 	    break;
 	  // fall through
 	default:
-	  t.error("bad size range '%1'", p);
+	  t.error("invalid size range '%1'", p);
 	  return false;
 	}
 	if (i + 2 > n) {
@@ -1382,7 +1409,7 @@ bool font::load_desc()
       int i = 0;
       for (;;) {
 	p = strtok(0, WS);
-	if (p == 0)
+	if (0 == p)
 	  break;
 	// leave room for terminating 0
 	if (i + 1 >= style_table_size) {
@@ -1408,8 +1435,8 @@ bool font::load_desc()
       is_unicode = true;
     else if (strcmp("image_generator", p) == 0) {
       p = strtok(0, WS);
-      if (!p) {
-	t.error("image_generator command requires an argument");
+      if (0 == p) {
+	t.error("'image_generator' directive requires an argument");
 	return false;
       }
       image_generator = strsave(p);
@@ -1417,38 +1444,27 @@ bool font::load_desc()
     else if (strcmp("charset", p) == 0)
       break;
     else if (unknown_desc_command_handler) {
-      char *command = p;
+      char *directive = p;
       p = strtok(0, "\n");
-      (*unknown_desc_command_handler)(command, trim_arg(p), t.path,
+      (*unknown_desc_command_handler)(directive, trim_arg(p), t.path,
 				      t.lineno);
     }
   }
+  t.lineno = 0;
   if (res == 0) {
-    t.error("missing 'res' command");
+    t.error("device description file missing 'res' directive");
     return false;
   }
   if (unitwidth == 0) {
-    t.error("missing 'unitwidth' command");
+    t.error("device description file missing 'unitwidth' directive");
     return false;
   }
   if (font_name_table == 0) {
-    t.error("missing 'fonts' command");
+    t.error("device description file missing 'fonts' directive");
     return false;
   }
   if (sizes == 0) {
-    t.error("missing 'sizes' command");
-    return false;
-  }
-  if (sizescale < 1) {
-    t.error("bad 'sizescale' value");
-    return false;
-  }
-  if (hor < 1) {
-    t.error("bad 'hor' value");
-    return false;
-  }
-  if (vert < 1) {
-    t.error("bad 'vert' value");
+    t.error("device description file missing 'sizes' directive");
     return false;
   }
   return true;

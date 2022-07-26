@@ -1288,9 +1288,10 @@ Texinfo manual or
 .PD 0
 .
 .TPx
-.REQ .ab "string"
-Write
-.I string
+.REQ .ab "\f[R][\f[]message\f[R]]"
+Abort processing;
+write any
+.I message
 to the standard error stream and exit with failure status.
 .
 .
@@ -1690,29 +1691,59 @@ Same as
 .request .de
 but with compatibility mode switched off during macro expansion.
 .
+.
 .TPx
-.REQ .defcolor "color scheme component"
-Define or redefine a color with name
-.IR color .
+.REQ .defcolor "ident scheme color-component \f[R].\|.\|."
+Define a color named
+.I ident
+for use with the
+.B fcolor
+and
+.B gcolor
+requests and the
+.B \[rs]m
+and
+.B \[rs]M
+escape sequences.
+.
 .I scheme
-can be
-.BR rgb ,
-.BR cym ,
-.BR cymk ,
-.BR gray ,
+identifies a color space and determines the number of required
+.IR color-component s;
+it must be one of
+.RB \[lq] rgb \[rq]
+(three components),
+.RB \[lq] cmy \[rq]
+(three components),
+.RB \[lq] cmyk \[rq]
+(four components),
 or
-.BR grey .
-.I component
-can be single components specified as fractions in the range 0 to 1
-(default scaling indicator\~\c
-.scaleindicator f ),
-as a string of two-digit hexadecimal color components with a leading
-.BR # ,
-or as a string of four-digit hexadecimal components with two leading
-.BR # .
-The color
-.B default
-can't be redefined.
+.RB \[lq] gray \[rq]
+(one component).
+.
+.RB \[lq] grey \[rq]
+is accepted as a synonym of
+.RB \[lq] gray \[rq].
+.
+The color components can be encoded as a hexadecimal value starting
+with
+.B #
+or
+.BR ## .
+.
+The former indicates that each component is in the range 0\[en]255
+(0\[en]FF),
+the latter the range 0\[en]65535 (0\[en]FFFF).
+.
+Alternatively,
+each color component can be specified as a decimal fraction in the range
+0\[en]1,
+interpreted using a default scaling indicator
+.RB of\~\[lq] f \[rq].
+.
+Each output device has a color named
+.RB \[lq] default \[rq]
+that cannot be redefined.
+.
 .
 .TPx
 .REQ .dei "macro"
@@ -5180,11 +5211,12 @@ string,
 or diversion of the same name.
 .
 .I \%@g@troff
-stores subsequent lines to an internal buffer in \[lq]copy mode\[rq]
-(see below).
+enters \[lq]copy mode\[rq]
+(see below),
+storing subsequent input lines as the definition.
 .
 If the optional second argument is not specified,
-the macro definition ends with the control line
+the definition ends with the control line
 .RB \[lq] .. \[rq]\&
 (two dots).
 .
@@ -5193,10 +5225,9 @@ a second argument names a macro whose call syntax ends the definition;
 this \[lq]end macro\[rq] is then called normally.
 .
 Spaces or tabs are permitted after the first control character in the
-line containing this ending token.
-.
-A tab immediately after the token prevents is recognition as the end of
-a macro definition.
+line containing this ending token,
+but a tab immediately after the token prevents is recognition as the end
+of a macro definition.
 .
 Macro definitions can be nested;
 this requires use of unique end macros for each nested definition or
@@ -5244,9 +5275,9 @@ returning to the enclosing context.
 .SS Parameters
 .\" ====================================================================
 .
-Macro calls and string parameters can be accessed using the
-.B \[rs]$
-escapes.
+Macro call and string parameters can be accessed using escape sequences
+starting with
+.RB \[lq] \[rs]$ \[rq].
 .
 The
 .B \[rs]n[.$]
@@ -5316,9 +5347,9 @@ can be termed
 The escape character,
 .B \[rs]
 by default,
-escapes itself.
+can escape a backslash.
 .
-Thus you can control whether a given
+This enables you to control whether a given
 .BR \[rs]n ,
 .BR \[rs]g ,
 .BR \[rs]$ ,
@@ -5390,10 +5421,12 @@ expects them as control characters if you mean to use them literally.
 .P
 Macro definitions can be nested to arbitrary depth.
 .
-Each escape character is interpreted twice\[em]once in copy mode,
+In
+.RB \[lq] \[rs]\[rs] \[rq],
+each escape character is interpreted twice\[em]once in copy mode,
 when the macro is defined,
-and once in interpretation mode,
-when it is executed.
+and once outside of it,
+when the macro is called.
 .
 This fact leads to exponential growth in the number of escape characters
 required to delay interpolation of
@@ -5457,7 +5490,7 @@ Setting a trap is also called
 .
 It is also said that a trap is
 .I sprung
-if the associated macro is executed.
+if the associated macro is called.
 .
 .
 .P
