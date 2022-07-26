@@ -79,6 +79,10 @@ struct text_file {
 	     const errarg &arg1 = empty_errarg,
 	     const errarg &arg2 = empty_errarg,
 	     const errarg &arg3 = empty_errarg);
+  void fatal(const char *format,
+	     const errarg &arg1 = empty_errarg,
+	     const errarg &arg2 = empty_errarg,
+	     const errarg &arg3 = empty_errarg);
 };
 
 text_file::text_file(FILE *p, char *s) : fp(p), path(s), lineno(0),
@@ -141,6 +145,15 @@ void text_file::error(const char *format,
 {
   if (!silent)
     error_with_file_and_line(path, lineno, format, arg1, arg2, arg3);
+}
+
+void text_file::fatal(const char *format,
+		      const errarg &arg1,
+		      const errarg &arg2,
+		      const errarg &arg3)
+{
+  if (!silent)
+    fatal_with_file_and_line(path, lineno, format, arg1, arg2, arg3);
 }
 
 int glyph_to_unicode(glyph *g)
@@ -885,12 +898,13 @@ bool font::load(bool load_header_only)
 	}
 	p = strtok(0, WS);
 	if (0 == p) {
-	  t.error("missing kern amount");
+	  t.error("missing kern amount for kern pair '%1 %2'", c1, c2);
 	  return false;
 	}
 	int n;
 	if (sscanf(p, "%d", &n) != 1) {
-	  t.error("invalid kern amount '%1'", p);
+	  t.error("invalid kern amount '%1' for kern pair '%2 %3'", p,
+		  c1, c2);
 	  return false;
 	}
 	glyph *g1 = name_to_glyph(c1);
@@ -917,12 +931,12 @@ bool font::load(bool load_header_only)
 	}
 	if (p[0] == '"') {
 	  if (last_glyph == 0) {
-	    t.error("first entry '%1' in 'charset' subsection is an"
-		    " alias", nm);
+	    t.error("the first entry ('%1') in 'charset' subsection"
+		    " cannot be an alias", nm);
 	    return false;
 	  }
 	  if (strcmp(nm, "---") == 0) {
-	    t.error("an unnamed character cannot be an alias");
+	    t.error("an unnamed character ('---') cannot be an alias");
 	    return false;
 	  }
 	  glyph *g = name_to_glyph(nm);
@@ -942,7 +956,7 @@ bool font::load(bool load_header_only)
 			      &metric.pre_math_space,
 			      &metric.subscript_correction);
 	  if (nparms < 1) {
-	    t.error("invalid width for '%1'", nm);
+	    t.error("missing or invalid width for glyph '%1'", nm);
 	    return false;
 	  }
 	  p = strtok(0, WS);
@@ -956,7 +970,8 @@ bool font::load(bool load_header_only)
 	    return false;
 	  }
 	  if (type < 0 || type > 255) {
-	    t.error("character type '%1' out of range", type);
+	    t.error("character type '%1' out of range for '%2'", type,
+		    nm);
 	    return false;
 	  }
 	  metric.type = type;
@@ -1002,8 +1017,8 @@ bool font::load(bool load_header_only)
       }
     }
     else {
-      t.error("unrecognized font description directive '%1' after"
-	      " 'kernpairs' or 'charset'", directive);
+      t.error("unrecognized font description directive '%1' (missing"
+	      " 'kernpairs' or 'charset'?)", directive);
       return false;
     }
   }
@@ -1053,7 +1068,6 @@ bool font::load_desc()
   if ((fp = open_file("DESC", &path)) == 0)
     return false;
   text_file t(fp, path);
-  res = 0;
   while (t.next_line()) {
     char *p = strtok(t.buf, WS);
     assert(p != 0);
@@ -1074,12 +1088,16 @@ bool font::load_desc()
 	t.error("'%1' directive given invalid number '%2'", p, q);
 	return false;
       }
-      if ((strcmp(p, "sizescale") == 0
-	  || strcmp(p, "hor") == 0
-	  || strcmp(p, "vert") == 0)
+      if ((strcmp(p, "res") == 0
+	   || strcmp(p, "hor") == 0
+	   || strcmp(p, "vert") == 0
+	   || strcmp(p, "unitwidth") == 0
+	   || strcmp(p, "paperwidth") == 0
+	   || strcmp(p, "paperlength") == 0
+	   ||  strcmp(p, "sizescale") == 0)
 	  && val < 1) {
 	t.error("expected argument to '%1' directive to be a"
-		" nonnegative number, got '%2'", p, val);
+		" positive number, got '%2'", p, val);
 	return false;
       }
       *(table[idx-1].ptr) = val;
@@ -1102,7 +1120,7 @@ bool font::load_desc()
       }
       if (sscanf(p, "%d", &nfonts) != 1 || nfonts <= 0) {
 	t.error("expected first argument to 'fonts' directive to be a"
-		" nonnegative number, got '%1'", p);
+		" non-negative number, got '%1'", p);
 	return false;
       }
       font_name_table = (const char **)new char *[nfonts+1];
@@ -1121,18 +1139,28 @@ bool font::load_desc()
       }
       p = strtok(0, WS);
       if (p != 0) {
-	t.error("font count does not match number of fonts");
+	t.error("font count does not match declared number of fonts"
+		" ('%1')", nfonts);
 	return false;
       }
       font_name_table[nfonts] = 0;
     }
     else if (strcmp("papersize", p) == 0) {
+      if (0 == res) {
+	t.error("'res' directive must precede 'papersize' in device"
+		" description file");
+	return false;
+      }
       p = strtok(0, WS);
       if (0 == p) {
 	t.error("'papersize' directive requires an argument");
 	return false;
       }
       bool found_paper = false;
+      char *savedp = strdup(p);
+      if (0 == savedp)
+	t.fatal("memory allocation failure while processing 'papersize'"
+		" directive");
       while (p) {
 	double unscaled_paperwidth, unscaled_paperlength;
 	if (scan_papersize(p, &papersize, &unscaled_paperlength,
@@ -1144,10 +1172,13 @@ bool font::load_desc()
 	}
 	p = strtok(0, WS);
       }
+      assert(savedp != 0);
       if (!found_paper) {
-	t.error("bad paper size");
+	t.error("unable to determine a paper format from '%1'", savedp);
+	free(savedp);
 	return false;
       }
+      free(savedp);
     }
     else if (strcmp("unscaled_charwidths", p) == 0)
       use_unscaled_charwidths = true;

@@ -514,7 +514,7 @@ options *process_options(table_input &in)
       opt->flags |= table::EXPERIMENTAL;
     }
     else {
-      error("unrecognised global option '%1'", p);
+      error("unrecognized region option '%1'", p);
       // delete opt;
       // return 0;
     }
@@ -1095,7 +1095,7 @@ format *process_format(table_input &in, options *opt,
     } while (success);
     if (list->vline > 2) {
       list->vline = 2;
-      error("more than 2 vertical bars between key letters");
+      error("more than 2 vertical bars between column descriptors");
     }
     if (c == '\n' || c == ',') {
       c = in.get();
@@ -1224,7 +1224,8 @@ format *process_format(table_input &in, options *opt,
     return 0;
   }
   if (have_expand && (opt->flags & table::EXPAND)) {
-    error("ignoring global 'expand' option because of 'x' specifiers");
+    error("'x' column modifier encountered; ignoring region option"
+	  " 'expand'");
     opt->flags &= ~table::EXPAND;
   }
   return f;

@@ -1534,7 +1534,12 @@ void table::add_entry(int r, int c, const string &str,
       e = new double_line_entry(this, f);
   }
   else if (str == "\\^") {
-    do_vspan(r, c);
+    if (r == 0) {
+      error("first row cannot contain a vertical span entry '\\^'");
+      e = new empty_entry(this, f);
+    }
+    else
+      do_vspan(r, c);
   }
   else if (str.length() > 2 && str[0] == '\\' && str[1] == 'R') {
     if (str.search('\n') >= 0)
@@ -1618,17 +1623,17 @@ void table::add_entry(int r, int c, const string &str,
       do_vspan(r, c);
       break;
     case FORMAT_HLINE:
-      if (str.length() != 0)
+      if ((str.length() != 0) && (str != "\\&"))
 	error_with_file_and_line(fn, ln,
-				 "non-empty data entry for '_' format"
-				 " ignored");
+				 "ignoring non-empty data entry using"
+				 " '_' column classifier");
       e = new single_line_entry(this, f);
       break;
     case FORMAT_DOUBLE_HLINE:
-      if (str.length() != 0)
+      if ((str.length() != 0) && (str != "\\&"))
 	error_with_file_and_line(fn, ln,
-				 "non-empty data entry for '=' format"
-				 " ignored");
+				 "ignoring non-empty data entry using"
+				 " '=' column classifier");
       e = new double_line_entry(this, f);
       break;
     default:

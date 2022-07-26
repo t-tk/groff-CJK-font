@@ -22,7 +22,7 @@ groff="${abs_top_builddir:-.}/test-groff"
 input=$(cat <<EOF
 .TH ridonk 1 2021-10-31 "groff test suite"
 .SH Name
-ridonk \- check the typesetting of an absurdly long URI
+ridonk \- check the typesetting of absurdly long URIs
 .SH Description
 .UR https://\:www\:.adobe\:.com/\:content/\:dam/\:acom/\:en/\:devnet/\:\
 actionscript/\:articles/\:5001\:.DSC_Spec\:.pdf
@@ -31,6 +31,13 @@ Commerce
 n.:
 A kind of transaction in which A plunders from B the goods of C,
 and for compensation B picks the pocket of D of money belonging to E.
+.P
+.UR https://1\:2\:3\:4\:5\:6\:7\:8\:9\:1\:1\:2\:3\:4\:5\:6\:7\:8\:9\:\
+2\:1\:2\:3\:4\:5\:6\:7\:8\:9\:3\:1\:2\:3\:4\:5\:6\:7\:8\:9\:4\:1\:2\:\
+3\:4\:5\:6\:7\:8\:9\:5\:1\:2\:3\:4\:5\:6\:7\:8\:9\:6\:1\:2\:3\:4\:5\:\
+6\:7\:8\:9\:7\:1\:2\:3\:4\:5\:6\:7\:8\:9\:8\:1\:2\:3\:4\:5\:6\:7\:8\:\
+9\:9\:1\:2\:3\:4\:5\:6\:7\:8\:9\:0
+.UE
 EOF
 )
 
@@ -50,8 +57,10 @@ echo "testing that lines break where expected" >&2
 output=$(printf "%s" "$input" | "$groff" -Tascii -P-cbou -man)
 break1=$(echo "$output" | grep -x "  *Commerce")
 break2=$(echo "$output" | grep -x "  *<https.*actionscript/")
+break3=$(echo "$output" | grep -x "  *<https.*612")
 test -n "$break1" || wail "first break"
 test -n "$break2" || wail "second break"
+test -n "$break3" || wail "third break"
 
 test -z "$fail"
 

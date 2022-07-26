@@ -3748,7 +3748,7 @@ is centered on the page.
 @DefmacListEndx {CD, , ms}
 Begin a (@code{DS}:@: kept) centered display:@: each line in the display
 is centered.
- @endDefmac
+@endDefmac
 
 @DefmacList {DS, @t{R}, ms}
 @DefmacListEndx {RD, , ms}
@@ -4615,7 +4615,7 @@ not interested in details.
 * Character Translations::
 * @code{troff} and @code{nroff} Modes::
 * Line Layout::
-* Line Control::
+* Line Continuation::
 * Page Layout::
 * Page Control::
 * Fonts and Symbols::
@@ -4699,9 +4699,9 @@ it can---this is known as @dfn{filling}.  To GNU @code{troff}, a
 tabs, or newlines.  Words are separated by spaces, tabs, newlines, or
 file boundaries.@footnote{There are also @emph{escape sequences} which
 can function as word characters, word separators, or neither---the last
-simply have no effect on GNU @code{troff}'s idea of whether its input is
-within a word or not.}  To disable filling, see @ref{Manipulating
-Filling and Adjustment}.
+simply have no effect on GNU @code{troff}'s idea of whether an input
+character is within a word or not.}  To disable filling, see
+@ref{Manipulating Filling and Adjustment}.
 
 @Example
 It is a truth universally acknowledged
@@ -4789,11 +4789,11 @@ T.\& Barnum.
     @result{} P. T. Barnum.
 @endExample
 
-Adding text caused our input to wrap; now, we don't need the escape
-after @samp{T.} but we do after @samp{P.}.  Ensuring that potential
-sentence boundaries are robust to editing activities and reliably
-understood both by GNU @code{troff} and the document author is a goal of
-the advice presented in @ref{Input Conventions}.
+Adding text caused our input to wrap; now, we don't need @code{\&} after
+@samp{T.} but we do after @samp{P.}.  Consistent use of the escape
+sequence ensures that potential sentence boundaries are robust to
+editing activities.  Further advice along these lines will follow in
+@ref{Input Conventions}.
 
 @cindex end-of-sentence transparent characters
 @cindex characters, end-of-sentence transparent
@@ -4852,10 +4852,10 @@ When an output line is nearly full, it is uncommon for the next word
 collected from the input to exactly fill it---typically, there is room
 left over only for part of the next word.  The process of splitting a
 word so that it appears partially on one line (with a hyphen to indicate
-to the reader that the word has been broken) with the remainder of the
-word on the next is @dfn{hyphenation}.  Hyphenation points can be
-manually specified; GNU @code{troff} also uses a hyphenation algorithm
-and language-specific pattern files (based on those used in @TeX{}) to
+to the reader that the word has been broken) with its remainder on the
+next is @dfn{hyphenation}.  Hyphenation points can be manually
+specified; GNU @code{troff} also uses a hyphenation algorithm and
+language-specific pattern files (based on those used in @TeX{}) to
 decide which words can be hyphenated and where.
 
 Hyphenation does not always occur even when the hyphenation rules for a
@@ -5010,7 +5010,7 @@ An input line beginning with a control character is called a
 @cindex text line
 Every line of input that is not a control line is a @dfn{text
 line}.@footnote{The @key{\RET} escape sequence can alter how an input
-line is classified; see @ref{Line Control}.}
+line is classified; see @ref{Line Continuation}.}
 
 @cindex argument
 Requests often take @dfn{arguments}, words (separated from the request
@@ -5301,8 +5301,9 @@ after colons and semicolons as well, as these typically precede
 independent clauses.  Consider breaking after commas; they often occur
 in lists that become easy to scan when itemized by line, or constitute
 supplements to the sentence that are added, deleted, or updated to
-clarify it.   Parenthetical and quoted phrases are also good candidates
-for placement on input lines by themselves.
+clarify it.  Parenthetical and quoted phrases are also good candidates
+for placement on input lines by themselves.  In filled text, spaces and
+newlines are interchangeable; place breaks where it aids your purpose.
 
 @item
 Set your text editor's line length to 72 characters or
@@ -5331,11 +5332,11 @@ which causes GNU @code{troff} to ignore the remainder of the input line.
 
 @item
 Use the empty request---a control character followed immediately by a
-newline---to visually manage separation of material in input files.  The
-@code{groff} project's own documents use an empty request between
-sentences, after macro definitions, and where a break is expected, and
-two empty requests between paragraphs or other requests or macro calls
-that will introduce vertical space into the document.
+newline---to visually manage separation of material in input files.
+Many of the @code{groff} project's own documents use an empty request
+between sentences, after macro definitions, and where a break is
+expected, and two empty requests between paragraphs or other requests or
+macro calls that will introduce vertical space into the document.
 
 You can combine the empty request with the comment escape to include
 whole-line comments in your document, and even ``comment out'' sections
@@ -5345,29 +5346,27 @@ of it.
 We conclude this section with an example sufficiently long to illustrate
 most of the above suggestions in practice.  For the purpose of fitting
 the example between the margins of this manual with the font used for
-its typeset version, we have shortened the input line length to 58
+its typeset version, we have shortened the input line length to 56
 columns.  As before, an arrow @arrow{} indicates a tab character.
 
+@c Wrap example at 56 columns (not counting @arrow{}).
 @CartoucheExample
-.\" raw roff input example
 .\"   nroff this_file.roff | less
-.\"   groff this_file.roff > this_file.ps
-@arrow{}The theory of relativity is intimately connected with the
-theory of space and time.
+.\"   groff -T ps this_file.roff > this_file.ps
+@arrow{}The theory of relativity is intimately connected with
+the theory of space and time.
 .
-I shall therefore begin with a brief investigation of the
-origin of our ideas of space and time,
+I shall therefore begin with a brief investigation of
+the origin of our ideas of space and time,
 although in doing so I know that I introduce a
-controversial subject.
-.
-.\" remainder of paragraph elided
+controversial subject.  \" remainder of paragraph elided
 .
 .
 
-@arrow{}The experiences of an individual appear to us arranged in
-a series of events;
-in this series the single events which we remember appear
-to be ordered according to the criterion of
+@arrow{}The experiences of an individual appear to us arranged
+in a series of events;
+in this series the single events which we remember
+appear to be ordered according to the criterion of
 \[lq]earlier\[rq] and \[lq]later\[rq], \" punct swapped
 which cannot be analysed further.
 .
@@ -5384,14 +5383,15 @@ indeed,
 associate numbers with the events,
 in such a way that the greater number is associated with
 the later event than with an earlier one;
-but the nature of this association may be quite arbitrary.
+but the nature of this association may be quite
+arbitrary.
 .
 This association I can define by means of a clock by
-comparing the order of events furnished by the clock with
-the order of a given series of events.
+comparing the order of events furnished by the clock
+with the order of a given series of events.
 .
-We understand by a clock something which provides a series
-of events which can be counted,
+We understand by a clock something which provides a
+series of events which can be counted,
 and which has other properties of which we shall speak
 later.
 .\" Albert Einstein, _The Meaning of Relativity_, 1922
@@ -5677,6 +5677,7 @@ The register@tie{}@code{z} now contains@tie{}5.
 @item
 @cindex scaling operator
 @cindex operator, scaling
+@opindex ;
 Scaling: @code{(@var{c};@var{e})}.  Evaluate@tie{}@var{e}
 using@tie{}@var{c} as the default scaling indicator.  If @var{c} is
 missing, ignore scaling indicators in the evaluation of@tie{}@var{e}.
@@ -5698,18 +5699,12 @@ be expected.
 @cindex @code{-}, and page motion
 @cindex motion operators
 @cindex operators, motion
+@opindex + (unary)
+@opindex - (unary)
 For many requests that cause a motion on the page, the unary operators
 @samp{+} and @samp{-} work differently if leading an expression.  They
 then indicate a motion relative to the current position (down or up,
 respectively).
-
-@cindex @code{|}, and page motion
-@cindex absolute position operator (@code{|})
-@cindex position, absolute, operator (@code{|})
-Similarly, a leading @samp{|} operator indicates an absolute position.
-For vertical movements, it specifies the distance from the top of the
-page; for horizontal movements, it gives the distance from the beginning
-of the @emph{input} line.
 
 @cindex @code{bp} request, using @code{+} and@tie{}@code{-} with
 @cindex @code{in} request, using @code{+} and@tie{}@code{-} with
@@ -5735,6 +5730,66 @@ Here, leading plus and minus signs indicate increments and decrements.
 
 @xref{Setting Registers}, for some examples.
 
+@codequotebacktick on
+@codequoteundirected on
+
+@opindex |
+@cindex @code{|}, and page motion
+@cindex ``absolute'' position operator (@code{|})
+@cindex position, ``absolute'', operator (@code{|})
+@cindex boundary-relative motion operator (@code{|})
+@c "motion" and "operators" already indexed above
+Similarly, a leading @samp{|} operator indicates a motion relative not
+to the current position but to a boundary.  For vertical movements, it
+specifies a distance from the top of the page (or diversion); for
+horizontal ones, from the beginning of the @emph{input} line.  Some
+escape sequences
+@c XXX: which ones?
+reckon motions relative to the beginning of the input line.@footnote{As
+do tab stops, by default (@pxref{Tabs and Fields}).}  Most do not;
+@samp{|} tells them to do so.
+
+@Example
+Mind the \h'1.2i'gap.
+.br
+Mind the \h'|1.2i'gap.
+.br
+Mind the
+\h'|1.2i'gap.
+@c 13 spaces, 4 spaces, 13 spaces
+    @result{} Mind the             gap.
+    @result{} Mind the    gap.
+    @result{} Mind the             gap.
+@endExample
+
+The main use of this feature is to define macros whose scope is limited
+to the output they format.
+
+@Example
+.\" underline word $1 with trailing punctuation $2
+.de Underline
+.  nop \\$1\l'|0\[ul]'\\$2
+..
+Typographical emphasis is best used
+.Underline sparingly .
+@endExample
+
+@noindent
+In the above example, @samp{|0} specifies a negative motion from the
+current position (at the end of the argument just emitted, @code{\$1})
+to the beginning of the input line.  Thus, the @samp{\l} escape sequence
+in this case draws a line from right to left.  A macro call occurs at
+the beginning of an input line;@footnote{Control structure syntax
+creates an exception to this rule, but is designed to remain useful:
+recalling our example, @samp{.if 1 .Underline this} would underline only
+``this'', precisely.  @xref{Conditionals and Loops}.} if the @code{|}
+operator were omitted, then the underline would be drawn to the
+beginning of the @emph{output} line, where many words might precede the
+macro argument.
+
+@codequotebacktick off
+@codequoteundirected off
+
 @Defesc {\\B, @code{'}, anything, @code{'}}
 @cindex numeric expression, valid
 @cindex valid numeric expression
@@ -5743,7 +5798,7 @@ if @var{anything} is empty or not a valid numeric expression.
 @endDefesc
 
 A register interpolation used as an operand in an expression must have
-an Arabic format; @xref{Assigning Register Formats}.
+an Arabic format; see @ref{Assigning Register Formats}.
 @cindex space characters, in expressions
 @cindex expressions, and space characters
 Due to the way arguments are parsed, spaces are not allowed in
@@ -5918,7 +5973,7 @@ emitted!  The contents of the first macro definition are lost.
 
 To support the needs of documents that require more than filling,
 automatic line breaking and hyphenation, and adjustment, GNU
-@code{troff} allows commands to be embedded into the text.   This is
+@code{troff} allows commands to be embedded into the text.  This is
 done in two ways.
 
 One is a @dfn{request} that takes up an entire line, and often performs
@@ -6430,14 +6485,13 @@ Test
 @endDefesc
 
 @Defreq {ig, [@Var{end}]}
-Ignore input until the macro @var{end} is called on a control line by
-itself (or @samp{..} is encountered if @var{end} is not
-specified).@footnote{Exception: auto-incrementing registers defined
-outside the ignored region @emph{will} be modified if interpolated with
-@code{\n±} inside it.  @xref{Auto-increment}.}  Spaces and tabs are
-allowed between the control character and @samp{.} or @var{end}.
-@code{ig} is useful for commenting out large regions of input.  The
-ignored region does not cause a break.
+Ignore input until, at the current brace scope, the macro @var{end} is
+called at the start of a control line, or the control line @samp{..} is
+encountered if @var{end} is not specified.  @code{ig} is parsed as if it
+were a macro definition, but its contents are discarded, not
+stored.@footnote{Exception: auto-incrementing registers defined outside
+the ignored region @emph{will} be modified if interpolated with
+@code{\n±} inside it.  @xref{Auto-increment}.}
 
 @c Wrap example at 56 columns.
 @Example
@@ -6672,24 +6726,33 @@ interpreted even in copy mode (@pxref{Copy Mode}).
 
 @c ---------------------------------------------------------------------
 
+@codequotebacktick on
+@codequoteundirected on
+
 @node Auto-increment, Assigning Register Formats, Interpolating Registers, Registers
 @subsection Auto-increment
-@cindex auto-increment
-@cindex increment, automatic
+@cindex auto-incrementation of a register
+@cindex incrementation, automatic, of a register
+@cindex decrementation, automatic, of a register
 
-Number registers can also be auto-incremented and auto-decremented.  The
-increment or decrement value can be specified with a third argument to
-the @code{nr} request.
+Registers can also be incremented or decremented by a configured amount
+at the time they are interpolated.  The value of the increment is
+specified with a third argument to the @code{nr} request, and a special
+interpolation syntax is used to alter and then retrieve the register's
+value.  Together, these features are called
+@dfn{auto-increment}.@footnote{A negative auto-increment can be
+considered an ``auto-decrement''.}
 
 @Defreq {nr, ident value incr}
 @cindex @code{\R}, difference to @code{nr}
-Set register @var{ident} to @var{value}; the increment for
-auto-incrementing is set to @var{incr}.  The @code{\R} escape doesn't
-support this notation.
+Set register @var{ident} to @var{value} and its auto-incrementation
+amount to to @var{incr}.  The @code{\R} escape doesn't support this
+notation.
 @endDefreq
 
-To activate auto-incrementing, the escape @code{\n} has a special syntax
-form.
+Auto-incrementation is not @emph{completely} automatic; the @code{\n}
+escape sequence never alters the value of a register.  To apply
+auto-incrementation to a register, use interpolate it with @samp{\n±}.
 
 @DefescList {\\n, +, i, }
 @DefescItem {\\n, -, i, }
@@ -6697,11 +6760,11 @@ form.
 @DefescItem {\\n, -(, id, }
 @DefescItem {\\n, +[, ident, ]}
 @DefescListEnd {\\n, -[, ident, ]}
-Before interpolating, increment or decrement @var{ident} (one-character
-name@tie{}@var{i}, two-character name @var{id}) by the auto-increment
-value as specified with the @code{nr} request (or the @code{\R} escape).
-If no auto-increment value has been specified, these syntax forms are
-identical to @code{\n}.
+Increment or decrement @var{ident} (one-character
+name@tie{}@var{i}, two-character name @var{id}) by the register's
+auto-incrementation value and then interpolate the new register value.
+If @var{ident} has no auto-incrementation value, interpolate as with
+@code{\n}.
 @endDefesc
 
 For example,
@@ -6729,14 +6792,12 @@ produces
 @cindex value, incrementing without changing the register
 To change the increment value without changing the value of a register,
 assign the register's value to itself by interpolating it, and specify
-the desired increment normally.
+the desired increment normally.  Apply an increment of @samp{0} to
+disable auto-incrementation of the register.
 
 @Example
 .nr a \na 10
 @endExample
-
-@codequotebacktick on
-@codequoteundirected on
 
 @c ---------------------------------------------------------------------
 
@@ -6828,8 +6889,8 @@ register.
 Interpolate the format of the register @var{reg} (one-character
 name@tie{}@var{r}, two-character name @var{rg}).  Zeroes represent
 Arabic formats.  If @var{reg} is not defined, @var{reg} is not created
-and nothing is interpolated.  @code{\\g} is interpreted even in copy
-mode (@pxref{Copy Mode}).
+and nothing is interpolated.  @code{\g} is interpreted even in copy mode
+(@pxref{Copy Mode}).
 @endDefesc
 
 @cindex register format, in expressions
@@ -7156,7 +7217,7 @@ the @code{fi} request.
 Enable filling of output lines; a pending output line is broken.  The
 read-only register @code{.u} is set to@tie{}1.  The filling enablement
 status, sometimes called @dfn{fill mode}, is associated with the
-environment (@pxref{Environments}).  See @ref{Line Control}, for
+environment (@pxref{Environments}).  See @ref{Line Continuation}, for
 interaction with the @code{\c} escape.
 @endDefreq
 
@@ -7172,13 +7233,13 @@ Layout}) is ignored and output lines are broken where the input lines
 are.  A pending output line is broken and adjustment is suppressed.  The
 read-only register @code{.u} is set to@tie{}0.  The filling enablement
 status is associated with the environment (@pxref{Environments}).  See
-@ref{Line Control}, for interaction with the @code{\c} escape.
+@ref{Line Continuation}, for interaction with the @code{\c} escape.
 @endDefreq
 
 @DefreqList {ad, [@Var{mode}]}
 @DefregListEndx {.j}
 Enable output line adjustment in @var{mode}, taking effect when the
-pending (or next) output line is broken.   Adjustment is suppressed when
+pending (or next) output line is broken.  Adjustment is suppressed when
 filling is.  @var{mode} can have one of the following values.
 
 @table @code
@@ -8778,7 +8839,7 @@ file @file{tty.tmac}, which is loaded by the start-up file
 
 @c =====================================================================
 
-@node Line Layout, Line Control, @code{troff} and @code{nroff} Modes, gtroff Reference
+@node Line Layout, Line Continuation, @code{troff} and @code{nroff} Modes, gtroff Reference
 @section Line Layout
 @cindex line layout
 @cindex layout, line
@@ -8977,83 +9038,65 @@ collected line still uses the old line length value.
 
 @c =====================================================================
 
-@node Line Control, Page Layout, Line Layout, gtroff Reference
-@section Line Control
+@node Line Continuation, Page Layout, Line Layout, gtroff Reference
+@section Line Continuation
 @cindex line control
 @cindex control, line
 
-It is important to understand how @code{gtroff} handles input and output
-lines.
+GNU @code{troff} distinguishes input and output line continuation.
 
-Many escapes use positioning relative to the input line.  For example,
-this
-
-@Example
-This is a \h'|1.2i'test.
-
-This is a
-\h'|1.2i'test.
-@endExample
-
-@noindent
-produces
-
-@Example
-This is a   test.
-
-This is a             test.
-@endExample
-
-The main usage of this feature is to define macros that act exactly at
-the place where called.
-
-@Example
-.\" A simple macro to underline a word
-.de underline
-.  nop \\$1\l'|0\[ul]'
-..
-@endExample
-
-@noindent
-In the above example, @samp{|0} specifies a negative distance from the
-current position (at the end of the just emitted argument @code{\$1})
-back to the beginning of the input line.  Thus, the @samp{\l} escape
-draws a line from right to left.
-
+@Defesc {\\@key{RET}, , ,}
 @cindex input line continuation (@code{\@key{RET}})
 @cindex line, input, continuation (@code{\@key{RET}})
 @cindex continuation, input line (@code{\@key{RET}})
+@code{\@key{RET}} (a backslash immediately followed by a newline)
+suppresses the effects of that newline in the input.  The next input
+line thus retains the classification of its predecessor as a control or
+text line.  @code{\@key{RET}} is useful for managing line lengths in the
+input during document maintenance; you can break an input line in the
+middle of a request invocation, macro call, or escape sequence.  Input
+line continuation is invisible to the formatter, with two exceptions:
+the @code{|} operator recognizes the new input line
+(@pxref{Expressions}), and the input line counter register @code{.c} is
+incremented.
+
+@c Wrap example at 56 columns (on the _output_).  We use 50n in the
+@c groff input to avoid line adjustment.
+@Example
+.ll 50n
+.de I
+.  ft I
+.  nop \\$*
+.  ft
+..
+Our film class watched
+.I The Effect of Gamma Rays on Man-in-the-Moon
+Marigolds. \" whoops, the input line wrapped
+.br
+.I My own opus begins on line \n[.c] \
+and ends on line \n[.c].
+@endExample
+@Example
+    @result{} Our film class watched @i{The Effect of Gamma Rays on}
+    @result{} @i{Man-in-the-Moon} Marigolds.
+    @result{} @i{My own opus begins on line 11 and ends on line 12.}
+@endExample
+@endDefesc
+
+@DefescList {\\c, , ,}
+@DefregListEndx {.int}
 @cindex output line, continuation (@code{\c})
 @cindex line, output, continuation (@code{\c})
 @cindex continuation, output line (@code{\c})
 @cindex interrupted line
 @cindex line, interrupted
-@code{gtroff} makes a difference between input and output line
-continuation; the latter is also called @dfn{interrupting} a line.
-
-@DefescList {\\@key{RET}, , ,}
-@DefescItemx {\\c, , ,}
-@DefregListEndx {.int}
-Continue an input line.  @code{\@key{RET}} (this is a backslash at the
-end of a line immediately followed by a newline) suppresses the effects
-of the following newline in the input.
-
-@Example
-This is a \
-.test
-    @result{} This is a .test
-@endExample
-
-The @samp{|} operator is also affected.
-
 @cindex @code{\R}, after @code{\c}
-Continue an output line.  Anything on the input line after @code{\c} is
-ignored except @code{\R}, which works as usual.  In contrast to
+@code{\c} continues an output line.  Anything on the input line after it
+is ignored except @code{\R}, which works as usual.  In contrast to
 @code{\@key{RET}}, a line after @code{\c} is treated as a new input
-line, so a control character is recognized at its beginning.
-
-The visual results depend on whether filling is enabled;
-@xref{Manipulating Filling and Adjustment}.
+line, so a control character is recognized at its beginning.  The visual
+results depend on whether filling is enabled; see @ref{Manipulating
+Filling and Adjustment}.
 
 @itemize @bullet
 @item
@@ -9105,7 +9148,7 @@ request invocation or macro call.}
 @codequotebacktick on
 @codequoteundirected on
 
-@node Page Layout, Page Control, Line Control, gtroff Reference
+@node Page Layout, Page Control, Line Continuation, gtroff Reference
 @section Page Layout
 @cindex page layout
 @cindex layout, page
@@ -11345,9 +11388,9 @@ Truly.
 
 @noindent
 By ending each text line of the macros with an escaped
-@samp{\@key{RET}}, we get the desired effect (@pxref{Line Control}).
-What would have happened if we had used only one backslash at a time
-instead?
+@samp{\@key{RET}}, we get the desired effect (@pxref{Line
+Continuation}).  What would have happened if we had used only one
+backslash at a time instead?
 
 Interpolating a string does not hide existing macro arguments.  Thus in
 a macro, a more efficient way of doing
@@ -11386,7 +11429,7 @@ interpolation system
 @noindent
 As the previous example shows, it is possible to store formatted output
 in strings.  The @code{\c} escape prevents the subsequent newline from
-being interpreted as a break (again, @pxref{Line Control}).
+being interpreted as a break (again, @pxref{Line Continuation}).
 
 Copying diversions longer than a single output line produces unexpected
 results.
@@ -12107,13 +12150,15 @@ request, macro, string, or diversion called @var{name}.  GNU
 @code{troff} enters ``copy mode'', storing subsequent input lines as the
 macro definition.  If the optional second argument is not specified, the
 definition ends with the control line @samp{..} (two dots).
-Alternatively, @var{end} identifies a macro whose call syntax ends the
-definition of @var{name}; @var{end} is then called normally.  Spaces or
-tabs are permitted after the control character in the line containing
-this ending token (either @samp{.} or @samp{@var{end}}), but a tab
-immediately after the token prevents its recognition as the end of a
-macro definition.@footnote{While it is possible to define and call a
-macro @samp{.}, you can't use it as an end macro: during a macro
+Alternatively, @var{end} identifies a macro that, if called at the start
+of a control line, ends the definition of @var{name}; @var{end} is then
+called normally.  A macro definition must end at the same brace scope at
+which it began.  Spaces or tabs are permitted after the control
+character in the line containing this ending token (either @samp{.} or
+@samp{@var{end}}), but a tab immediately after the token prevents its
+recognition as the end of a macro definition.  The macro @var{end} can
+be called with arguments.@footnote{While it is possible to define and
+call a macro @samp{.}, you can't use it as an end macro: during a macro
 definition, @samp{..} is never handled as calling @samp{.}, even if
 @samp{.de @var{name} .} explicitly precedes it.}
 @c
@@ -12149,9 +12194,9 @@ unique end macro.
 An end macro need not be defined until it is called.  This fact enables
 a nested macro definition to begin inside one macro and end inside
 another.  Consider the following example.@footnote{The structure of this
-example is adapted from, and structurally isomorphic to, part of a
-solution by Tadziu Hoffman to the problem of reflowing text multiple
-times to find an optimal configuration for it.
+example is adapted from, and isomorphic to, part of a solution by Tadziu
+Hoffman to the problem of reflowing text multiple times to find an
+optimal configuration for it.
 @uref{https://lists.gnu.org/archive/html/groff/2008-12/msg00006.html}}
 
 @Example
@@ -13289,7 +13334,7 @@ input.  Macros called by traps have no arguments.
 Setting a trap is also called @dfn{planting}.
 @cindex trap, springing
 @cindex springing a trap
-It is also said that a trap is @dfn{sprung} if the associated macro is
+It is said that a trap is @dfn{sprung} if the associated macro is
 called.
 
 @menu
@@ -13673,7 +13718,7 @@ operand\c
 In the above, the Courier font family is used to render input on the
 next four text lines because all but the last are interrupted with
 @code{\c}, while the style macros apply only to the next input line.
-@xref{Line Control}.
+@xref{Line Continuation}.
 @endDefreq
 
 Input traps are associated with the environment (@pxref{Environments});
@@ -15363,7 +15408,7 @@ newline (as is done in @code{tm} and @code{tm1}).
 
 @Defreq {ab, [@Var{string}]}
 @cindex aborting (@code{ab})
-Write @var{string} to the standard error stream (like @code{tm}) and
+Write any @var{string} to the standard error stream (like @code{tm}) and
 then abort GNU @code{troff}; that is, stop processing and terminate with
 a failure status.
 @endDefreq
@@ -15373,10 +15418,10 @@ a failure status.
 @cindex exiting (@code{ex})
 Exit GNU @code{troff}; that is, stop processing and terminate with a
 successful status.  To stop processing only the current file, use the
-@code{nx} request; @xref{I/O}.
+@code{nx} request; see @ref{I/O}.
 @endDefreq
 
-When doing something involved it is useful to leave the debugging
+When doing something involved, it is useful to leave the debugging
 statements in the code and have them turned on by a command-line flag.
 
 @Example
@@ -15507,7 +15552,7 @@ For example,
 
 @noindent
 causes a warning if @code{break} warnings are not suppressed and
-@code{gtroff} must add 0.2@dmn{m} or more for each interword space in a
+@code{gtroff} must add 0.2@dmn{m} or more for each inter-word space in a
 line.  @xref{Warnings}.
 @endDefreq
 
@@ -16638,8 +16683,8 @@ The postprocessor @command{grodvi} translates the output from GNU
 @code{troff} into the DVI format produced by the @TeX{} document
 preparation system.  This enables the use of programs that process the
 DVI format, like @command{dvips} and @command{dvipdf}, with GNU
-@code{troff} output.   @command{grodvi} is fully documented in its
-man page, @cite{grodvi@r{(1)}}.
+@code{troff} output.  @command{grodvi} is fully documented in its man
+page, @cite{grodvi@r{(1)}}.
 
 @menu
 * Invoking grodvi::
@@ -17936,9 +17981,13 @@ styles (@file{R}, @file{I}, @file{B}, and @file{BI}, respectively).
 @pindex DESC@r{ file format}
 
 The @file{DESC} file contains a series of directives; each begins a
-line.  Except for the @code{charset} directive, which must come last (if
-at all), their order is not important.  If a directive name is
-duplicated, however, later entries in the file override previous ones.
+line.  Their order is not important, with two exceptions: (1) the
+@code{res} directive must precede any @code{papersize} directive; and
+(2) the @code{charset} directive must come last (if at all).  If a
+directive name is repeated, later entries in the file override previous
+ones (except that the paper dimensions are computed based on the
+@code{res} directive last seen when @code{papersize} is encountered).
+Spaces and/or tabs separate words and are ignored at line boundaries.
 @cindex comments in device description files
 @cindex device description files, comments
 @kindex #
@@ -18070,9 +18119,10 @@ instead of glyphs.
 
 If @code{unicode} is present, no @code{charset} section is required in
 the font description files since the Unicode handling built into
-@code{groff} is used.  However, if there are entries in a @code{charset}
-section, they either override the default mappings for those particular
-characters or add new mappings (normally for composite characters).
+@code{groff} is used.  However, if there are entries in a font
+description file's @code{charset} section, they either override the
+default mappings for those particular characters or add new mappings
+(normally for composite characters).
 
 The @code{utf8}, @code{html}, and @code{xhtml} output devices use this
 directive.
@@ -18090,8 +18140,8 @@ The @code{grohtml} driver uses this directive.
 @item use_charnames_in_special
 @kindex use_charnames_in_special
 GNU @code{troff} should encode special characters inside device control
-commands; @xref{Postprocessor Access}.  The @code{grohtml} driver uses
-this directive.
+commands; see @ref{Postprocessor Access}.  The @code{grohtml} driver
+uses this directive.
 
 @item vert @var{n}
 @kindex vert
@@ -18149,24 +18199,27 @@ in the font description files to be expressed as integers.}
 A font description file has two sections.  The first is a sequence of
 directives, and is parsed similarly to the @file{DESC} file described
 above.  Except for the directive names that begin the second section,
-their ordering is immaterial; later directives of the same name override
-earlier ones;
+their ordering is immaterial.  Later directives of the same name
+override earlier ones, spaces and tabs are handled in the same way,
 @cindex comments in font description files
 @cindex font description files, comments
 @kindex #
-and the same comment syntax is supported.  Empty lines are ignored in
-both sections.
+and the same comment syntax is supported.  Empty lines are ignored
+throughout.
 
 @table @code
 @item name @var{f}
 @kindex name
-The name of the font is@tie{}@var{f}.  @samp{DESC} and @samp{0} are
-invalid font names.
+The name of the font is@tie{}@var{f}.  @samp{DESC} is an invalid font
+name.  Simple integers are valid, but their use is
+discouraged.@footnote{@code{groff} requests and escape sequences
+interpret non-negative font names as mounting positions instead.
+Further, a font named @samp{0} cannot be automatically mounted by the
+@code{fonts} directive of a @file{DESC} file.}
 
 @item spacewidth @var{n}
 @kindex spacewidth
-The width of a normal, unadjusted space is @var{n}@tie{}basic units at
-a type size of @var{unit-width} points.
+The width of an unadjusted inter-word space is @var{n}@tie{}basic units.
 @end table
 
 The directives above are mandatory in the first section; those below are
@@ -18343,8 +18396,9 @@ This notation indicates that @var{name} is another name for the glyph
 named on the preceding line.  Such aliases can be chained.
 
 @kindex kernpairs
-The word @code{kernpairs} starts a section listing kerning pairs.  It
-contains a sequence of lines formatted as follows.
+The word @code{kernpairs} starts a list of kerning adjustments to be
+made to adjacent glyph pairs.  It contains a sequence of lines formatted
+as follows.
 
 @Example
 @var{c1} @var{c2} @var{n}

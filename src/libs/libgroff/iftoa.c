@@ -16,19 +16,15 @@ for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
-#define INT_DIGITS 19		/* enough for 64-bit integer */
+#include "lib.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Prototype */
-char *if_to_a(int, int);
-
-char *if_to_a(int i, int decimal_point)
+const char *if_to_a(int i, int decimal_point)
 {
-  /* room for a -, INT_DIGITS digits, a decimal point, and a terminating '\0' */
-  static char buf[INT_DIGITS + 3];
+  static char buf[INT_DIGITS + 3]; // INT_DIGITS + '-', '.', '\0'
   char *p = buf + INT_DIGITS + 2;
   int point = 0;
   buf[INT_DIGITS + 2] = '\0';
@@ -72,3 +68,9 @@ char *if_to_a(int i, int decimal_point)
 #ifdef __cplusplus
 }
 #endif
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

@@ -1034,7 +1034,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ..
 .de DS
 .if '\\n(.z'ds*div' .@error-recover cannot begin display within display
-.br
+.nr ds*badarg 0
 .di ds*div
 .ie '\\$1'B' \{\
 .	LD
@@ -1048,12 +1048,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .			ie '\\$1'R' .RD
 .			el \{\
 .				ie '\\$1'I' .ID \\$2
-.				el .ID \\$1
+.				el \{\
+.					ie '\\$1'' .ID
+.					el .nr ds*badarg 1
+.				\}
 .			\}
 .		\}
 .	\}
-.	nr \\n[.ev]:ds-type 3
+.	ie \\n[ds*badarg] \{
+.		ds ds*msg unrecognized argument '\\$1' to .\\$0;\"
+.		as ds*msg " did you mean '.\\$0 I \\$1'?\"
+.		@error \\*[ds*msg]
+.		rm ds*msg
+.		di
+.	\}
+.	el .nr \\n[.ev]:ds-type 3
 .\}
+.rr ds*badarg
 ..
 .de ds@need
 .if '\\n(.z'' \{\

@@ -560,7 +560,10 @@ void troff_output::set_location(const char *s, int n)
     printf(".lf %d\n", n);
   else {
     printf(".lf %d %s\n", n, s);
-    last_filename = strdup(s);
+    char *lfn = strdup(s);
+    if (0 == lfn)
+      fatal("memory allocation failure while copying file name");
+    last_filename = lfn;
   }
 }
 

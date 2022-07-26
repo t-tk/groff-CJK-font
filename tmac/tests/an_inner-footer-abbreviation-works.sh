@@ -52,6 +52,19 @@ then
     echo "...FAILED" >&2
 fi
 
+# Regression-test Savannah #61408.
+#
+# Don't spew diagnostics if the page doesn't supply a 3rd .TH argument.
+echo 'testing for graceful behavior when TH has no 3rd argument' >&2
+INPUT='.TH patch 1 "" GNU'
+OUTPUT=$(echo "$INPUT" | "$groff" -Tascii -P-cbou -man -ww -z 2>&1)
+
+if [ -n "$OUTPUT" ]
+then
+    FAIL=yes
+    echo "...FAILED" >&2
+fi
+
 test -z "$FAIL"
 
 # vim:set ai et sw=4 ts=4 tw=72:

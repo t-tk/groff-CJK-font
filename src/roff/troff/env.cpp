@@ -536,7 +536,7 @@ void environment::set_font(int n)
     fontno = n;
   }
   else
-    warning(WARN_FONT, "bad font number");
+    warning(WARN_FONT, "no font mounted at position %1", n);
 }
 
 void environment::set_family(symbol fam)

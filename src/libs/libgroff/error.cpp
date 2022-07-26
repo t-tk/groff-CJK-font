@@ -41,17 +41,23 @@ static void do_error_with_file_and_line(const char *filename,
 {
   bool need_space = false;
   if (program_name) {
-    fprintf(stderr, "%s:", program_name);
+    fputs(program_name, stderr);
+    fputc(':', stderr);
     need_space = true;
   }
   if (filename != 0) {
     if (strcmp(filename, "-") == 0)
       filename = "<standard input>";
-    fprintf(stderr, "%s", filename);
-    if (source_filename != 0)
-      fprintf(stderr, ":(%s)", source_filename);
-    if (lineno > 0)
-      fprintf(stderr, ":%d", lineno);
+    fputs(filename, stderr);
+    if (source_filename != 0) {
+      fputs(":(", stderr);
+      fputs(source_filename, stderr);
+      fputc(')', stderr);
+    }
+    if (lineno > 0) {
+      fputc(':', stderr);
+      errprint("%1", lineno);
+    }
     fputc(':', stderr);
     need_space = true;
   }

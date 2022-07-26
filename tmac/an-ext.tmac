@@ -4,7 +4,6 @@
 .\"
 .\" Written by Eric S. Raymond <esr@thyrsus.com>
 .\"            Werner Lemberg <wl@gnu.org>
-.\"            G. Branden Robinson <g.branden.robinson@gmail.com>
 .\"
 .\" You may freely use, modify and/or distribute this file.
 .\"
@@ -101,7 +100,10 @@
 .\" Start URL.
 .de UR
 .  ds m1 \\$1\"
-.  if \\nU&\\n(mU \{\
+.  \" We can only hyperlink if we're not in a diversion.
+.  nr mD 0
+.  if '\\n(.z'' .nr mD 1
+.  if \\n(mD&\\nU&\\n(mU \{\
 .    \" Start diversion in a new environment.
 .    do ev link-text-env
 .    do di link-text-div
@@ -111,7 +113,7 @@
 .
 .\" End URL.
 .de UE
-.  ie \\nU&\\n(mU \{\
+.  ie \\n(mD&\\nU&\\n(mU \{\
 .    br
 .    di
 .    ev
@@ -140,38 +142,24 @@
 \&\\$*\"
 .  \}
 .  el \{\
-.    nr mL 0 \" Will the URI+punctuation cause a break?
-.    ds m2 \\*(la\\*(m1\\*(ra\\$1\"
-.    nr mW \\w'\\*(m2'
-.    \" If the URI won't fit on the rest of the line, break early and
-.    \" turn off adjustment.
-.    if \\n(.o+\\n(.i+\\n(.ku+\\n(mWu>\\n(.lu \{\
-.      nr mL 1
-.      nr mJ \\n(.j
-.      br
-.      na
-.    \}
 .    nh
-\\*(m2
-.    \" If we had to break before the URI, restore adjustment.
-.    if \\n(mL .ad \\n(mJ
+\\*(la\\*(m1\\*(ra\\$1
 .    do shift
-.    ie \n(.g \&\\$*\"
-.    el \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9\"
+.    ie \n(.g .if \n(.$ \&\\$*\"
+.    el .if \n(.$>1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9\"
 .    hy \\n(HY
-.    rr mJ
-.    rr mW
-.    rr mL
-.    rm m2
-.    rm m1
 .  \}
+. rr mD
 ..
 .
 .
 .\" Start email address.
 .de MT
 .  ds m1 \\$1\"
-.  if \\nU&\\n(mU \{\
+.  \" We can only hyperlink if we're not in a diversion.
+.  nr mD 0
+.  if '\\n(.z'' .nr mD 1
+.  if \\n(mD&\\nU&\\n(mU \{\
 .    \" Start diversion in a new environment.
 .    do ev link-text-env
 .    do di link-text-div
@@ -181,7 +169,7 @@
 .
 .\" End email address.
 .de ME
-.  ie \\nU&\\n(mU \{\
+.  ie \\n(mD&\\nU&\\n(mU \{\
 .    br
 .    di
 .    ev
@@ -210,31 +198,14 @@
 \&\\$*\"
 .  \}
 .  el \{\
-.    nr mL 0 \" Will the URI+punctuation cause a break?
-.    ds m2 \\*(la\\*(m1\\*(ra\\$1\"
-.    nr mW \\w'\\*(m2'
-.    \" If the URI won't fit on the rest of the line, break early and
-.    \" turn off adjustment.
-.    if \\n(.o+\\n(.i+\\n(.ku+\\n(mWu>\\n(.lu \{\
-.      nr mL 1
-.      nr mJ \\n(.j
-.      br
-.      na
-.    \}
 .    nh
-\\*(m2
-.    \" If we had to break before the URI, restore adjustment.
-.    if \\n(mL .ad \\n(mJ
+\\*(la\\*(m1\\*(ra\\$1
 .    do shift
-.    ie \n(.g \&\\$*\"
-.    el \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9\"
+.    ie \n(.g .if \n(.$ \&\\$*\"
+.    el .if \n(.$>1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9\"
 .    hy \\n(HY
-.    rr mJ
-.    rr mW
-.    rr mL
-.    rm m2
-.    rm m1
 .  \}
+. rr mD
 ..
 .
 .
