@@ -1960,6 +1960,163 @@ The width of the page number field is stored in the
 register.
 .
 .
+.P
+When creating a table of contents,
+incorporating content derived from headings specified by
+.B .NH
+and
+.B .SH ,
+traditional
+.I ms
+implementations provide no convenient mechanism
+for duplication of the heading text into the table of contents;
+.I groff ms
+mitigates this limitation,
+by providing the following pair of macros,
+(for use after
+.B .NH
+and
+.B .SH
+respectively):
+.
+.TP
+.BI .XN\~ text\ ...
+.TQ
+.BI .XH\~ outline\-level\ text\ ...
+Duplicate
+.I text\~...
+added to the body ot the document,
+to create a table of contents entry,
+(which may be indented in accordance with
+.IR outline\-level ).
+.
+.P
+Either,
+or both of
+.B XN
+and
+.B XH
+may be redefined by the user,
+(preferably by definition of the replacement hook macros,
+.BR \%XN\-REPLACEMENT ,
+and
+.B \%XH\-REPLACEMENT
+respectively);
+in their default implementations,
+both emit their
+.I text
+arguments into the body of the document,
+as heading text;
+they also pass this same text to the callback macro:
+.
+.TP
+.BI \%.XH\-UPDATE\-TOC\~ \%outline\-level\ text\ ...
+Encapsulate
+.I text
+within
+.BR \%.XS ... XE ,
+to create a table of contents entry.
+This macro is called by both
+.B .XN
+and
+.B .XH
+(no complementary
+.B \%XN\-UPDATE\-TOC
+macro is required),
+and may be redefined by the user;
+in its default implementation,
+its
+.I \%outline\-level
+argument,
+(which is inferred from the last\[hy]specified
+.B .NH
+heading level,
+when called by
+.BR .XN ),
+is simply ignored,
+but may be used by any user\[hy]defined replacement,
+for example,
+to control indentation of the table of contents.
+.
+.IP
+When called by
+.BR .XN ,
+in addition to the inference of the
+.I \%outline\-level
+argument,
+the
+.I text
+arguments are augmented,
+by prefixing the current section number,
+(which is also deduced from the last preceding use of
+.BR .NH ).
+.
+.P
+In addition to
+.BR \%XH\-UPDATE\-TOC ,
+the default
+.B XN
+and
+.B XH
+implementations support the following pair of callback macros:
+.
+.TP
+.B \%.XN\-INIT
+.TQ
+.B \%.XH\-INIT
+Called by
+.BR .XN ,
+and by
+.B .XH
+respectively,
+.I before
+.B \%.XH\-UPDATE\-TOC
+is called;
+in their default implementations,
+neither does anything,
+but either,
+or both,
+may be redefined by the user.
+.
+.P
+If the user has chosen to redefine
+.BR \%XH\-UPDATE\-TOC ,
+in some fashion which requires descrimination
+between the cases of having been called by
+.BR .XN ,
+or by
+.BR .XH ,
+then it may also be appropriate to redefine
+.BR \%XN\-INIT ,
+or
+.BR \%XH\-INIT ,
+or both,
+to handle the required discriminatory effect.
+.
+.P
+It should be noted that,
+whereas
+.I groff ms
+will emit an error diagnostic,
+and will
+.I not
+create any table of contents entry,
+if
+.B .XN
+is used before the first use of
+.BR .NH ,
+no such restriction is imposed on the use of
+.BR .XH .
+Thus,
+while it is nominally intended for use after
+.BR .SH ,
+.B .XH
+may be used in any context,
+in which use of
+.BR \%.XS ... XE
+is permitted.
+.
+.
 .\" ====================================================================
 .SH "Differences from AT&T \f[I]ms\f[]"
 .\" ====================================================================
@@ -2417,7 +2574,9 @@ Larry Kollar.
 .I \%@DOCDIR@/\:msboxes\:.ms
 .TQ
 .I \%@DOCDIR@/\:msboxes\:.pdf
-\[lq]Using PDF boxes with the
+\[lq]Using PDF boxes with
+.I groff
+and the
 .I ms
 macros\[rq];
 Deri James.

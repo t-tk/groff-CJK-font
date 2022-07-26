@@ -164,7 +164,7 @@ AC_DEFUN([GROFF_MAKEINFO],
      missing=
      AC_CHECK_PROG([MAKEINFO], [makeinfo], [makeinfo])
      if test -z "$MAKEINFO"; then
-       missing="'makeinfo' is missing."
+       missing="missing 'makeinfo'"
      else
        AC_MSG_CHECKING([for makeinfo version])
        # We need an additional level of quoting to make sed's regexps work.
@@ -1073,6 +1073,7 @@ AC_DEFUN([GROFF_TMAC],
      done
      rm -f conftest.sol
    fi
+   test "x$tmac_wrap" = "x" && tmac_wrap="none found"
    AC_MSG_RESULT([$tmac_wrap])
    AC_SUBST([tmac_wrap])])
 

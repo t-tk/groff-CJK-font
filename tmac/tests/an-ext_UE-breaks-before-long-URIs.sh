@@ -1,0 +1,58 @@
+#!/bin/sh
+#
+# Copyright (C) 2021 Free Software Foundation, Inc.
+#
+# This file is part of groff.
+#
+# groff is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# groff is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+groff="${abs_top_builddir:-.}/test-groff"
+
+input=$(cat <<EOF
+.TH ridonk 1 2021-10-31 "groff test suite"
+.SH Name
+ridonk \- check the typesetting of an absurdly long URI
+.SH Description
+.UR https://\:www\:.adobe\:.com/\:content/\:dam/\:acom/\:en/\:devnet/\:\
+actionscript/\:articles/\:5001\:.DSC_Spec\:.pdf
+Commerce
+.UE ,
+n.:
+A kind of transaction in which A plunders from B the goods of C,
+and for compensation B picks the pocket of D of money belonging to E.
+EOF
+)
+
+fail=
+
+wail () {
+    echo "...$* FAILED" >&2
+    fail=yes
+}
+
+echo "testing that no diagnostic messages are produced" >&2
+output=$(printf "%s" "$input" \
+    | "$groff" -Tascii -P-cbou -man -ww -z 2>&1)
+test -z "$output" || wail
+
+echo "testing that lines break where expected" >&2
+output=$(printf "%s" "$input" | "$groff" -Tascii -P-cbou -man)
+break1=$(echo "$output" | grep -x "  *Commerce")
+break2=$(echo "$output" | grep -x "  *<https.*actionscript/")
+test -n "$break1" || wail "first break"
+test -n "$break2" || wail "second break"
+
+test -z "$fail"
+
+# vim:set ai et sw=4 ts=4 tw=72:

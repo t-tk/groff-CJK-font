@@ -531,13 +531,11 @@ the document?
 </p>
 
 <p>
-It&#8217;s simple.  Instead of invoking groff with just the
-<kbd>-mom</kbd> option, as explained
-<a href="using.html#using-saving">here</a>,
-invoke groff with the <kbd>-R</kbd> option as well, like this:
+It&#8217;s simple.  Pass the <kbd>-R</kbd> flag to pdfmom or groff,
+like this:
 <br/>
 <span class="pre-in-pp">
-  groff -R -mom &lt;filename&gt; ...
+  pdfmom -R &lt;filename&gt; ...
 </span>
 </p>
 </div>
@@ -746,8 +744,9 @@ are very few rules, and those there are make sense.  In a nutshell:
       <kbd>\[oq]</kbd> and <kbd>\[cq]</kbd> (openquote, closequote) rather than the
       single-quote (or apostrophe) character on your keyboard</li>
   <li>if part of a field needs to be forced into italics, use the
-      escapes <kbd>\*[IT]</kbd> and <kbd>\*[PREV]</kbd>; if the italicized
-      portion concludes the field, omit <kbd>\*[PREV]</kbd></li>
+      escapes <kbd><nobr>\*[IT]</nobr></kbd> and
+      <kbd><nobr>\*[PREV]</nobr></kbd>; if the italicized portion
+      concludes the field, omit <kbd><nobr>\*[PREV]</nobr></kbd></li>
   <li>if you require characters with accents, ligatures or special
       symbols, use groff&#8217;s &#8220;named&#8221; glyphs (e.g.
       <kbd>\['e]</kbd> for <kbd>é</kbd>); a full list can be found in
@@ -894,8 +893,8 @@ information minus <kbd>idem</kbd>, like this:
 <h4 id="p" class="docs fields">%p &ndash; post-author information</h4>
 
 <p>
-When citing from a preface, foreword, introduction, afterword or
-appendix, MLA requires that the information come between the
+When citing from a preface, foreword, introduction, afterword,
+or appendix, MLA requires that the information come between the
 author&#8217;s name and the work&#8217;s title, like this:
 <br/>
 <span class="pre-in-pp">
@@ -1144,7 +1143,7 @@ reference in a footnote by doing
 </span>
 However, if you have a lot of references going into footnotes (or
 endnotes), it&#8217;s much shorter to type <kbd>.REF/.REF</kbd>
-than <kbd>.FOOTNOTE/.FOOTNOTE OFF</kbd>.  It also helps you
+than <kbd>.FOOTNOTE/.FOOTNOTE&nbsp;OFF</kbd>.  It also helps you
 distinguish&mdash;visually, in your input file&mdash;between
 footnotes (or endnotes) which are references, and footnotes (or
 endnotes) which are explanatory, or expand on the text.
@@ -1210,7 +1209,7 @@ By default, FOOTNOTE_REFS sets the
 <a href="docelement.html#footnote-marker-style">FOOTNOTE_MARKER_STYLE</a>
 to <kbd>NUMBER</kbd> (i.e. superscript numbers).  You may change
 change that if you wish by invoking FOOTNOTE_MARKER_STYLE, with the
-argument you want after FOOTNOTE_REFS.
+argument you want, after FOOTNOTE_REFS.
 </p>
 
 <p>
@@ -1241,7 +1240,7 @@ macro to endnotes.&#8221; You invoke it by itself, with no argument.
 <p>
 When ENDNOTE_REFS is in effect, mom continues to format regular
 endnotes, (i.e. those introduced with <kbd>.ENDNOTE</kbd> and
-terminated with <kbd>.ENDNOTE OFF</kbd>) in the normal way.
+terminated with <kbd>.ENDNOTE&nbsp;OFF</kbd>) in the normal way.
 </p>
 
 <p>
@@ -1361,8 +1360,9 @@ hyphenation for references.
 <p>
 HYPHENATE_REFS is a toggle macro; invoking it by itself will turn
 automatic hyphenation of REF-bracketed references on (the default).
-Invoking it with any other argument (<kbd>OFF, NO, X</kbd>, etc.)
-will disable automatic hyphenation for references bracketed by REF.
+Invoking it with any other argument (<kbd>OFF</kbd>, <kbd>NO</kbd>,
+<kbd>X</kbd>, etc.) will disable automatic hyphenation for
+references bracketed by REF.
 </p>
 
 <p>
@@ -1461,7 +1461,7 @@ equivalent arguments to
 
 <p>
 You may enter the BIBLIOGRAPHY_TYPE either before or after
-<kbd>.BIBLIOGRAPHY</kbd>.  It must, however, always come before the
+<kbd>.BIBLIOGRAPHY</kbd>.  It must, however, always come before
 any <kbd>refer</kbd> commands.  See
 <a href="#bibliography-from-embedded">Generating a bibliography from parenthetical insertions</a>
 and
@@ -1895,7 +1895,8 @@ centre string.
 <p>
 If, for some reason, having enabled the header/footer centre string
 on bibliography pages, you wish to disable it, invoke the same macro
-with any argument (<kbd>OFF, QUIT, Q, X</kbd>...).
+with any argument (<kbd>OFF</kbd>, <kbd>QUIT</kbd>, <kbd>Q</kbd>,
+<kbd>X</kbd>...).
 </p>
 
 <h5 id="biblio-allows-headers" class="docs" style="margin-top: -.5em; margin-bottom: .5em; margin-left: .5em;">&bull;&nbsp;Allow headers on bibliography pages</h5>
@@ -1924,7 +1925,7 @@ If you want headers on every page including the first, do
 <span class="note">Note:</span>
 If FOOTERS are on, mom prints footers on every bibliography page.
 This is a style convention.  In mom, there is no such beast as
-BIBLIOGRAPHY_ALLOWS_FOOTERS OFF.
+BIBLIOGRAPHY_ALLOWS_FOOTERS&nbsp;OFF.
 </p>
 </div>
 
@@ -2035,8 +2036,8 @@ Invoked without an argument,
 underneath the bibliography&#8217;s first-page title.  Invoked with the
 argument, <kbd>DOUBLE</kbd>, BIBLIOGRAPHY_STRING_UNDERSCORE will
 double-underscore the title.  Invoked with any other non-numeric
-argument, (e.g. <kbd>OFF, NO, X</kbd>, etc.) the macro disables
-underlining of the title.
+argument, (e.g. <kbd>OFF</kbd>, <kbd>NO</kbd>, <kbd>X</kbd>, etc.)
+the macro disables underlining of the title.
 </p>
 
 <p>

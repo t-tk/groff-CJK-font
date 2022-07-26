@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 #
 # Copyright (C) 2019-2020 Free Software Foundation, Inc.
 #
@@ -20,12 +20,11 @@
 
 groff="${abs_top_builddir:-.}/test-groff"
 
+# This test fails with some versions of GNU Bash, such as 3.2; the here
+# document nested within a command substitution confuses it.
+#
+# https://lists.gnu.org/archive/html/bug-bash/2017-02/msg00024.html
+
 expected="' = '"
-
-actual=$("$groff" -Tlatin1 <<EOF
-.pl 1v
-\[oq] = '
-EOF
-)
-
-diff -u <(echo "$expected") <(echo "$actual")
+actual=$(printf '.pl 1v\n\\[oq] = '"'"'\n' | "$groff" -Tlatin1)
+test "$actual" = "$expected"

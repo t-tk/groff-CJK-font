@@ -98,26 +98,28 @@
 .  pl \\n[nl]u
 ..
 .
-.\" We need an end macro to flush any pending output line and write the
-.\" footer for the final man page rendered.  We can also be called by
-.\" andoc when switching to an mdoc(7) page, irrespective of continuous
-.\" rendering mode.
+.\" We need an end-of-input macro to flush any pending output line and
+.\" write the footer for the final man page rendered.  We can also be
+.\" called by andoc when switching to an mdoc(7) page, irrespective of
+.\" continuous rendering mode.
 .de1 an-end
+.  if !r an-TH-was-called .return
 .  if \\n[cR] \{\
-.  fl
-.  pl +1v
-.  sp 1v
-.  an-footer
-.  \" If we're processing multiple documents and have started a new one,
-.  \" draw a line between this footer and the next header.
-.  if !'\\n[.F]'' \{\
+.    fl
 .    pl +1v
-.    nf
-.    ti 0
+.    sp 1v
+.    an-footer
+.    \" If we're processing multiple documents and have started a new
+.    \" one, draw a line between this footer and the next header.
+.    if !'\\n[.F]'' \{\
+.      pl +1v
+.      nf
+.      ti 0
 \D'l \\n[LL]u 0'
-.    fi
+.      fi
+.    \}
 .  \}
-.  \}
+.  rr an-TH-was-called
 .  ch an-header
 .  bp
 ..
@@ -174,6 +176,8 @@
 .    nr an-is-first-page-of-document 1
 .  \}
 .
+.  nr an-TH-was-called 1 \" an-end can make certain assumptions.
+.
 .  \" Set up rendering parameters.  We do this in TH instead of only
 .  \" once when initializing the package because when rendering multiple
 .  \" pages, a previous page might have changed them.
@@ -208,6 +212,10 @@
 .  ll \\n[LL]u
 .  ss 12
 .
+.  \" We've seen no tbl(1) tables yet in this document.
+.  rr TW
+.  nr an-was-tbl-failure-reported 0
+.
 .  an-reset-tab-stops
 .  an-reset-paragraph-spacing
 .  an-reset-margin-and-inset-level
@@ -224,7 +232,6 @@
 .  el \{ .ie '\\$2'1'  .ds an-extra3 General Commands Manual\"
 .  el \{ .ie '\\$2'2'  .ds an-extra3 System Calls Manual\"
 .  el \{ .ie '\\$2'3'  .ds an-extra3 Library Functions Manual\"
-.  el \{ .ie '\\$2'3p' .ds an-extra3 Perl Programmer's Reference Guide\"
 .  el \{ .ie '\\$2'4'  .ds an-extra3 Kernel Interfaces Manual\"
 .  el \{ .ie '\\$2'5'  .ds an-extra3 File Formats Manual\"
 .  el \{ .ie '\\$2'6'  .ds an-extra3 Games Manual\"
@@ -232,7 +239,7 @@
 .  el \{ .ie '\\$2'8'  .ds an-extra3 System Manager's Manual\"
 .  el \{ .ie '\\$2'9'  .ds an-extra3 Kernel Developer's Manual\"
 .  el                  .ds an-extra3 \" empty
-.  \}\}\}\}\}\}\}\}\}\}
+.  \}\}\}\}\}\}\}\}\}
 .
 .  ds an-extra1 "\\$3\"
 .  ie (\\n[.$] > 3)    .ds an-extra2 "\\$4\"
@@ -326,11 +333,11 @@
 .\" Write the page footer; can be redefined by man.local.
 .de1 BT
 .  ie \\n[D] \{\
-.    if o .tl '\\*[an-extra2]'\\*[an-extra1]'\\*[an-outer-footer-text]'
-.    if e .tl '\\*[an-outer-footer-text]'\\*[an-extra1]'\\*[an-extra2]'
+.    if o .tl '\\*[an-ifoot]'\\*[an-extra1]'\\*[an-outer-footer-text]'
+.    if e .tl '\\*[an-outer-footer-text]'\\*[an-extra1]'\\*[an-ifoot]'
 .  \}
 .  el \
-.    tl '\\*[an-extra2]'\\*[an-extra1]'\\*[an-outer-footer-text]'
+.    tl '\\*[an-ifoot]'\\*[an-extra1]'\\*[an-outer-footer-text]'
 ..
 .
 .\" Abbreviate the page title if it's too long for the header.  Leaves
@@ -380,6 +387,65 @@
 .  rm an-ellipsis
 ..
 .
+.\" Abbreviate the `an-extra2` string (set by .TH) if it's too long for
+.\" the footer.  By default, `an-extra2` is placed as the inner footer.
+.\" We call it `an-ifoot` here and leave it defined for .BT use.
+.\"
+.\" The method here differs from an-prepare-header, because the
+.\" (default) header is symmetrical, with `an-pageref` on both sides,
+.\" whereas the (default) footer is not.  Our approach is to chop
+.\" `an-extra1` (the default center footer) in half and ensure that the
+.\" formatted `an-ifoot` plus that is less than half the title length.
+.de an-prepare-inner-footer
+.  ds an-half-cfoot \\*[an-extra1]\"
+.  length an-half-cfoot-length \\*[an-half-cfoot]
+.  nr an-half-cfoot-length (\\n[an-half-cfoot-length] / 2u)
+.  substring an-half-cfoot 0 \\n[an-half-cfoot-length]
+.  rr an-half-cfoot-length
+.  ds an-ifoot \\*[an-extra2]\"
+.  nr an-half-title-width (\\n[.lt] / 2u)
+.  nr an-half-footer-width \\w'\\*[an-ifoot]\\*[an-half-cfoot]'
+.  \" If abbreviation is not necessary, skip the remaining work.
+.  if (\\n[an-half-footer-width] <= \\n[an-half-title-width]) .return
+.  ds an-ellipsis \|.\|.\|.\|\"
+.  \" Now divide the inner footer in half.
+.  length an-ifoot-length \\*[an-ifoot]
+.  nr an-mark1 (\\n[an-ifoot-length] / 2)
+.  nr an-mark2 (\\n[an-ifoot-length] / 2 + 1)
+.  rr an-ifoot-length
+.  ds an-ifoot-half1 \\*[an-ifoot]\"
+.  ds an-ifoot-half2 \\*[an-ifoot]\"
+.  substring an-ifoot-half1 0 \\n[an-mark1]
+.  substring an-ifoot-half2 \\n[an-mark2] -1
+.  rr an-mark1
+.  rr an-mark2
+.  \" Reduce the two halves until, when rejoined with each other, the
+.  \" ellipsis, and half of the center footer, they fit the half-title.
+.  nr an-half-footer-width \\w'\\*[an-ifoot-half1]\\*[an-ellipsis]\
+\\*[an-ifoot-half2]\\*[an-half-cfoot]'
+.  while (\\n[an-half-footer-width] > \\n[an-half-title-width]) \{\
+.    length an-half1-length \\*[an-ifoot-half1]
+.    length an-half2-length \\*[an-ifoot-half2]
+.    \" Give up if we'd have to trim ifoot's first or last characters.
+.    if ((\\n[an-half1-length] = 1) : (\\n[an-half2-length] = 1)) \
+.      break
+.    \" Trim a character from half1's end and half2's beginning.
+.    substring an-ifoot-half1 0 (\\n[an-half1-length] - 2)
+.    substring an-ifoot-half2 2 (\\n[an-half2-length] - 1)
+.    nr an-half-footer-width \\w'\\*[an-ifoot-half1]\\*[an-ellipsis]\
+\\*[an-ifoot-half2]\\*[an-half-cfoot]'
+.  \}
+.  ds an-ifoot \\*[an-ifoot-half1]\\*[an-ellipsis]\\*[an-ifoot-half2]\"
+.  rr an-half1-length
+.  rr an-half2-length
+.  rm an-ifoot-half1
+.  rm an-ifoot-half2
+.  rr an-half-footer-width
+.  rr an-half-title-width
+.  rm an-ellipsis
+.  rm an-half-cfoot
+..
+.
 .\" Prepare the header for a page of the document.
 .de1 an-header
 .  if \\n[an-suppress-header-and-footer] .return
@@ -424,6 +490,7 @@
 .      \}
 .    \}
 .  \}
+.  an-prepare-inner-footer
 .  if \\n[cR] .pl +1v
 .  BT
 .  rm an-outer-footer-text
@@ -479,9 +546,18 @@
 .  if \\n[an-is-in-diversion] .an-write-paragraph-tag
 ..
 .
+.\" Break a paragraph.  Restore defaults, except for indentation.
+.de an-break-paragraph
+.  ft R
+.  ps \\n[PS]u
+.  vs \\n[VS]u
+.  sp \\n[PD]u
+.  ns
+..
+.
 .\" Set arguments (or next input line if none) as a section heading.
 .de1 SH
-.  sp \\n[PD]u
+.  an-break-paragraph
 .  an-reset-margin-and-inset-level
 .  fi
 .  in \\n[an-margin]u
@@ -505,7 +581,7 @@
 .
 .\" Set arguments (or next input line if none) as a subsection heading.
 .de1 SS
-.  sp \\n[PD]u
+.  an-break-paragraph
 .  an-reset-margin-and-inset-level
 .  fi
 .  in \\n[IN]u
@@ -553,10 +629,21 @@
 .  if \\n[.$] \&\\$*
 ..
 .
+.\" Set an ordinary paragraph.
+.de1 P
+.  an-break-paragraph
+.  in \\n[an-margin]u
+.  nr an-prevailing-indent \\n[IN]
+..
+.
+.\" Accommodate ms(7) paragraphing refugees.
+.als LP P
+.als PP P
+.
 .\" Set a tagged paragraph.  The tag must be on the next input line.
 .\" .TP [indent]
 .de1 TP
-.  sp \\n[PD]u
+.  an-break-paragraph
 .  if \\n[.$] .nr an-prevailing-indent (n;\\$1)
 .  itc 1 an-input-trap
 .  in 0
@@ -567,32 +654,13 @@
 .  nr an-is-in-diversion 1
 ..
 .
-.\" Set an ordinary paragraph.
-.de1 P
-.  sp \\n[PD]u
-.  ps \\n[PS]u
-.  vs \\n[VS]u
-.  ft R
-.  in \\n[an-margin]u
-.  nr an-prevailing-indent \\n[IN]
-.  ns
-..
-.
-.\" Accommodate ms(7) paragraphing refugees.
-.als LP P
-.als PP P
-.
 .\" Set an indented paragraph.
 .\" .IP [marker[ indentation-amount]]
 .de1 IP
+.  an-break-paragraph
 .  ie !\\n[.$] \{\
-.    ps \\n[PS]u
-.    vs \\n[VS]u
-.    ft R
-.    sp \\n[PD]u
 .    ne (1v + 1u)
 .    in (\\n[an-margin]u + \\n[an-prevailing-indent]u)
-.    ns
 .  \}
 .  el \{\
 .    ie (\\n[.$] > 1) .TP "\\$2"
@@ -604,17 +672,13 @@
 .\" Set a paragraph with a hanging indentation.
 .\" .HP [indent]
 .de1 HP
-.  ps \\n[PS]u
-.  vs \\n[VS]u
-.  ft R
-.  sp \\n[PD]u
+.  an-break-paragraph
 .  ne (1v + 1u)
 .  if \\n[.$] .nr an-prevailing-indent (n;\\$1)
 .  in (\\n[an-margin]u + \\n[an-prevailing-indent]u)
 .  ti \\n[an-margin]u
 .  DEVTAG-COL 1
 .  nr an-devtag-needs-second-column 1
-.  ns
 ..
 .
 .\" === Define alternating font macros. ===
@@ -849,6 +913,14 @@
 .de1 TE
 .  HTML-IMAGE-END
 .  if \\n[an-is-output-html] .ll \\n[an-TS-ll]u
+.  if !r TW .if !\\n[an-was-tbl-failure-reported] \{\
+.    ds an-msg tbl preprocessor failed or was not run;\"
+.    as an-msg " table(s) likely not rendered\"
+.    as an-msg " (TE macro called with TW register undefined)\"
+.    an-warn \\*[an-msg]
+.    rm an-msg
+.    nr an-was-tbl-failure-reported 1
+.  \}
 ..
 .
 .\" eqn(1) equation support
@@ -927,7 +999,7 @@
 .\" Set each rendering parameter only if its -[dr] option or man.local
 .\" did not.
 .
-.\" continous rendering (one long page)
+.\" continuous rendering (one long page)
 .if !r cR \{\
 .  ie n .nr cR 1
 .  el   .nr cR 0

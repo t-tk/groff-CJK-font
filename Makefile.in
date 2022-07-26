@@ -4009,7 +4009,8 @@ EXTRA_DIST = gnulib_m4/gnulib-cache.m4 lib/alloca.in.h lib/errno.in.h \
 	src/utils/afmtodit/afmtodit.pl \
 	src/utils/afmtodit/afmtodit.tables \
 	src/utils/afmtodit/make-afmtodit-tables \
-	src/utils/grog/grog.1.man src/utils/grog/grog.pl $(grog_TESTS) \
+	src/utils/grog/grog.1.man src/utils/grog/grog.pl \
+	src/utils/grog/tests/foo.man $(grog_TESTS) \
 	src/utils/hpftodit/hpftodit.1.man \
 	src/utils/indxbib/indxbib.1.man src/utils/indxbib/eign \
 	src/utils/lkbib/lkbib.1.man src/utils/lookbib/lookbib.1.man \
@@ -4501,8 +4502,21 @@ DOC_GROFF_ONLY = \
   $(GROFFBIN) -I$(abs_top_builddir) -M $(doc_srcdir) \
 	$(TFLAG) $(FFLAG) -pet -ww -b
 
-DOC_GROFF = $(DOC_SED) -e '1i\
-.lf 1 $<' $< | $(DOC_GROFF_ONLY)
+
+# A dance is required to embed a literal newline inside a sed expression
+# inside a shell command executed as part of a Make target rule.
+#
+# Use the POSIX shell $'\n' feature when all platforms of interest
+# support it.
+#
+#DOC_GROFF = $(DOC_SED) -e 1i\$$'\n'".lf 1 $<"$$'\n' $< \
+#	| $(DOC_GROFF_ONLY)
+#
+# In the meantime, a shell variable must be prepared in each target rule
+# shell command using $(DOC_SED).  This solution is adapted from the GNU
+# Autoconf manual, "Newlines in Make Rules".
+DOC_GROFF = nlinit=`echo 'nl="'; echo '"'`; eval "$$nlinit"; \
+	  $(DOC_SED) -e "1i\\$$nl.lf 1 $<$$nl" $< | $(DOC_GROFF_ONLY)
 
 
 # Other doc, installed in $(docdir)
@@ -5278,6 +5292,7 @@ groff_TESTS = \
   src/roff/groff/tests/ab_works.sh \
   src/roff/groff/tests/adjustment_works.sh \
   src/roff/groff/tests/break_zero-length_output_line_sanely.sh \
+  src/roff/groff/tests/device_control_escapes_express_basic_latin.sh \
   src/roff/groff/tests/do_not_loop_infinitely_when_breaking_cjk.sh \
   src/roff/groff/tests/dot-cp_register_works.sh \
   src/roff/groff/tests/dot-nm_register_works.sh \
@@ -5474,6 +5489,7 @@ tmac_TESTS = \
   tmac/tests/an-ext_MT-body-hyphenates.sh \
   tmac/tests/an-ext_UE-punct-hyphenates.sh \
   tmac/tests/an-ext_UR-body-hyphenates.sh \
+  tmac/tests/an-ext_UE-breaks-before-long-URIs.sh \
   tmac/tests/an_AT-and-UC-footer-saved-and-restored.sh \
   tmac/tests/an_CS-register-off.sh \
   tmac/tests/an_CS-register-on.sh \
@@ -5490,6 +5506,8 @@ tmac_TESTS = \
   tmac/tests/an_X-register-works.sh \
   tmac/tests/an_avoid-two-font-denial-of-service.sh \
   tmac/tests/an_font-remapping-does-not-affect-titles.sh \
+  tmac/tests/an_handle-degenerate-input-quietly.sh \
+  tmac/tests/an_inner-footer-abbreviation-works.sh \
   tmac/tests/an_no-break-after-short-paragraph-tags.sh \
   tmac/tests/an_page-footers-present.sh \
   tmac/tests/an_page-header-has-current-data.sh \
@@ -9656,6 +9674,13 @@ src/roff/groff/tests/break_zero-length_output_line_sanely.sh.log: src/roff/groff
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
+src/roff/groff/tests/device_control_escapes_express_basic_latin.sh.log: src/roff/groff/tests/device_control_escapes_express_basic_latin.sh
+	@p='src/roff/groff/tests/device_control_escapes_express_basic_latin.sh'; \
+	b='src/roff/groff/tests/device_control_escapes_express_basic_latin.sh'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 src/roff/groff/tests/do_not_loop_infinitely_when_breaking_cjk.sh.log: src/roff/groff/tests/do_not_loop_infinitely_when_breaking_cjk.sh
 	@p='src/roff/groff/tests/do_not_loop_infinitely_when_breaking_cjk.sh'; \
 	b='src/roff/groff/tests/do_not_loop_infinitely_when_breaking_cjk.sh'; \
@@ -9880,6 +9905,13 @@ tmac/tests/an-ext_UR-body-hyphenates.sh.log: tmac/tests/an-ext_UR-body-hyphenate
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
+tmac/tests/an-ext_UE-breaks-before-long-URIs.sh.log: tmac/tests/an-ext_UE-breaks-before-long-URIs.sh
+	@p='tmac/tests/an-ext_UE-breaks-before-long-URIs.sh'; \
+	b='tmac/tests/an-ext_UE-breaks-before-long-URIs.sh'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 tmac/tests/an_AT-and-UC-footer-saved-and-restored.sh.log: tmac/tests/an_AT-and-UC-footer-saved-and-restored.sh
 	@p='tmac/tests/an_AT-and-UC-footer-saved-and-restored.sh'; \
 	b='tmac/tests/an_AT-and-UC-footer-saved-and-restored.sh'; \
@@ -9988,6 +10020,20 @@ tmac/tests/an_avoid-two-font-denial-of-service.sh.log: tmac/tests/an_avoid-two-f
 tmac/tests/an_font-remapping-does-not-affect-titles.sh.log: tmac/tests/an_font-remapping-does-not-affect-titles.sh
 	@p='tmac/tests/an_font-remapping-does-not-affect-titles.sh'; \
 	b='tmac/tests/an_font-remapping-does-not-affect-titles.sh'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+tmac/tests/an_handle-degenerate-input-quietly.sh.log: tmac/tests/an_handle-degenerate-input-quietly.sh
+	@p='tmac/tests/an_handle-degenerate-input-quietly.sh'; \
+	b='tmac/tests/an_handle-degenerate-input-quietly.sh'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+tmac/tests/an_inner-footer-abbreviation-works.sh.log: tmac/tests/an_inner-footer-abbreviation-works.sh
+	@p='tmac/tests/an_inner-footer-abbreviation-works.sh'; \
+	b='tmac/tests/an_inner-footer-abbreviation-works.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
@@ -10439,8 +10485,8 @@ maintainer-clean-generic:
 	-rm -f src/preproc/refer/label.cpp
 	-rm -f src/preproc/refer/label.hpp
 	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
-@BUILD_INFODOC_FALSE@install-pdf-local:
 @BUILD_INFODOC_FALSE@install-html-local:
+@BUILD_INFODOC_FALSE@install-pdf-local:
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
@@ -12269,8 +12315,9 @@ doc/pic.html: $(dist_devpsfont_DATA) $(nodist_devpsfont_DATA)
 doc/pic.html: $(doc_srcdir)/pic.ms $(devhtmlfont_DATA)
 	$(GROFF_V)$(MKDIR_P) $(doc_builddir) \
 	&& cd $(doc_builddir) \
-	&& $(DOC_SED) -e '1i\
-.lf 1 $(doc_srcdir)/pic.ms' $(doc_srcdir)/pic.ms \
+	&& nlinit=`echo 'nl="'; echo '"'`; eval "$$nlinit"; \
+	  $(DOC_SED) -e "1i\\$$nl.lf 1 $(doc_srcdir)/pic.ms$$nl" \
+	  $(doc_srcdir)/pic.ms \
 	   | $(DOC_GROFF_ONLY) -P-p -P-Ipic -P-D$(imagedir) -P-jpic \
 	                       -Thtml -ms > pic.html
 
@@ -12289,8 +12336,9 @@ doc/webpage.html: \
   $(doc_srcdir)/groff.css
 	$(GROFF_V)$(MKDIR_P) doc \
 	&& cd $(doc_builddir) \
-	&& $(DOC_SED) -e '1i\
-.lf 1 $(doc_srcdir)/webpage.ms' $(doc_srcdir)/webpage.ms \
+	&& nlinit=`echo 'nl="'; echo '"'`; eval "$$nlinit"; \
+	  $(DOC_SED) -e "1i\\$$nl.lf 1 $(doc_srcdir)/webpage.ms$$nl" \
+	  $(doc_srcdir)/webpage.ms \
 	   | $(DOC_GROFF_ONLY) -P-jwebpage -P-nrpb -P-Iwebpage \
 	                       -P-D$(imagedir) -Thtml -ms > webpage.html
 

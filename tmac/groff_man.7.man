@@ -210,7 +210,7 @@ macros.
 .RI " [" header-middle ]
 Define the title of the man page as
 .I title
-and the section of the manual volume as
+and the volume of the manual to which it belongs as
 .IR section .
 .
 See
@@ -258,10 +258,18 @@ is centered in the header line.
 If
 .I section
 is a simple integer between 1 and\~9 (inclusive),
-or is exactly \(lq3p\(rq,
 there is no need to specify
 .IR header-middle ;
-the macro package will supply text for it.
+.I an.tmac
+will supply text for it.
+.
+The macro package may also abbreviate
+.I title
+and
+.I footer-inside
+with an ellipsis if they overrun the space available in the header and
+footer,
+respectively.
 .
 For HTML output,
 headers and footers are completely suppressed.
@@ -701,6 +709,12 @@ and
 .B .UR
 URIs are rendered between angle brackets after the linked text.
 .
+If such a URI will not fit on the remainder of the output line,
+the macro package temporarily turns off adjustment
+(if enabled)
+and breaks the line before the URI to minimize the number of output
+lines over which it spreads.
+.
 .
 .P
 .BR .MT ,
@@ -722,6 +736,20 @@ Plan\~9
 .I troff \" Plan 9
 implements
 .BR .MR .
+.
+.
+.P
+The arguments to
+.BR .MR ,
+.BR .MT ,
+and
+.B .UR
+should be prepared for typesetting since they can appear in the
+output.
+.
+Use special character escape sequences to encode Unicode basic Latin
+characters where necessary,
+particularly the hyphen-minus.
 .
 .
 .TP
@@ -1381,7 +1409,7 @@ Square brackets in roman surround both arguments.
 .IP
 Use of this quasi-semantic macro,
 .\" https://github.com/n-t-roff/DWB3.3/blob/master/macros/man/an.sr#L37
-originating in Documenter's Workbench
+an extension originating in Documenter's Workbench
 .IR troff ,\" DWB
 is deprecated.
 .

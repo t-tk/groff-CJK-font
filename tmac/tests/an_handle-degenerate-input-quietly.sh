@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (C) 2020 Free Software Foundation, Inc.
+# Copyright (C) 2021 Free Software Foundation, Inc.
 #
 # This file is part of groff.
 #
@@ -20,29 +20,10 @@
 
 groff="${abs_top_builddir:-.}/test-groff"
 
-# Regression-test Savannah #59345.
+# Regression-test Savannah #61402.
 #
-# Ensure that .TC succeeds in assigning the 'i' format to the page
-# number register when '%' is used in a custom header or footer.
+# Don't spew a lot of diagnostics if we have only empty lines as input.
 
-EXAMPLE=\
-'.OH ##%##
-.NH 1
-Foo
-.XS
-Foo
-.XE
-.LP
-Bar.
-.TC
-'
-
-OUTPUT=$(echo "$EXAMPLE" | "$groff" -Tascii -P-cbou -ms)
-# Strip blank lines from the output first; all we care about for this
-# test is the presence, adjacency, and ordering of non-blank lines.
-FILTERED_OUTPUT=$(echo "$OUTPUT" \
-    | sed '/^$/d' \
-    | sed -n '/i/{N;/Table of Contents/{N;/Foo[. ][. ]*1/p;};}')
-test -n "$FILTERED_OUTPUT"
+test -z "$(echo | "$groff" -man -ww -Tascii -P-cbou 2>&1 > /dev/null)"
 
 # vim:set ai et sw=4 ts=4 tw=72:

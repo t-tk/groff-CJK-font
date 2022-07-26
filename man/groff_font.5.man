@@ -49,8 +49,9 @@ has also abandoned the binary format.)
 .
 The device and font description files for a device
 .I name
-are stored in a directory called
-.IR dev name.
+are stored in a
+.IR dev name
+directory.
 .
 The device description file is called
 .IR DESC ,
@@ -58,7 +59,7 @@ and,
 for each
 .RI font\~ f
 supported by the device,
-a font file
+a font description file is
 .RI called\~\[lq] f \[rq],
 where
 .IR f \~is
@@ -97,19 +98,19 @@ respectively).
 .
 The
 .I DESC
-file contains a series of directives,
-one per line.
+file contains a series of directives;
+each begins a line.
 .
 Except for the
 .B charset
 directive,
 which must come last
 (if at all),
-the order of the lines is not important.
+their order is not important.
 .
-Later entries in the file,
+If a directive name is duplicated,
 however,
-override previous values.
+later entries in the file override previous ones.
 .
 Comments start with the
 .RB \[lq] # \[rq]
@@ -175,17 +176,16 @@ driver uses this directive.
 .BI paperlength\~ n
 The vertical dimension of the physical output medium is
 .IR n \~basic
-units.
-.
-Deprecated:
+units
+(deprecated:
 use
 .B papersize
-instead.
+instead).
 .
 .
 .TP
 .BI papersize\~ format-or-dimension-pair-or-file-name
-Set the dimensions of the physical output medium according to the
+The dimensions of the physical output medium are as according to the
 argument,
 which is either
 a standard paper format,
@@ -268,12 +268,11 @@ scans from left to right and uses the first valid paper specification.
 .BI paperwidth\~ n
 The horizontal dimension of the physical output medium is
 .IR n \~basic
-units.
-.
-Deprecated:
+units
+(deprecated:
 use
 .B papersize
-instead.
+instead).
 .
 .
 .TP
@@ -303,14 +302,11 @@ Use
 .I program
 as a preprocessor.
 .
-Currently,
-this keyword is used only when
-.I \%@g@troff
-is directed to use the
+The
 .B html
-or
+and
 .B xhtml
-output devices.
+output devices use this directive.
 .
 .
 .TP
@@ -360,7 +356,7 @@ The list can extend over more than one line.
 .
 .TP
 .BI sizescale\~ n
-Set the scale factor for point sizes to one divided
+Set the scale factor for type sizes to one divided
 .RI by\~ n .
 .
 The default
@@ -413,6 +409,7 @@ they either override the default mappings for those particular
 characters or add new mappings
 (normally for composite characters).
 .
+.
 .IP
 The
 .BR utf8 ,
@@ -425,7 +422,7 @@ output devices use this directive.
 .TP
 .BI unitwidth\~ n
 Quantities in the font description files are in basic units for fonts
-whose point size is
+whose type size is
 .IR n \~scaled
 points.
 .
@@ -441,9 +438,8 @@ driver uses this directive.
 .
 .TP
 .B use_charnames_in_special
-This directive indicates that
 .I \%@g@troff
-should encode named glyphs inside special commands.
+should encode named glyphs inside device control commands.
 .
 The
 .I \%grohtml
@@ -492,8 +488,8 @@ lines are mandatory.
 .
 Directives not listed above are ignored by
 .I \%@g@troff
-but may be used by postprocessors to store arbitrary information about
-a device in the
+but may be used by postprocessors to obtain arbitrary information about
+the device described in the
 .I DESC
 file.
 .
@@ -551,11 +547,15 @@ expressed as integers.)
 .P
 A font description file has two sections.
 .
-The first is a sequence of directives;
-it can contain comments,
-which start with the
-.RB \[lq] # \[rq]
-character and extend to the end of a line.
+The first is a sequence of directives,
+and is parsed similarly to the
+.I DESC
+file described above.
+.
+Except for the directive names that begin the second section,
+their ordering is immaterial;
+later directives of the same name override earlier ones;
+and the same comment syntax is supported.
 .
 Empty lines are ignored in both sections.
 .
@@ -631,8 +631,8 @@ it is sought in any mounted fonts that bear this property.
 .P
 Other directives in this section are ignored by
 .IR \%@g@troff ,
-but may be used by postprocessors to store arbitrary information about
-the font in the file.
+but may be used by postprocessors to obtain arbitrary information about
+the font described in the file.
 .
 .
 .P
@@ -662,7 +662,7 @@ The directive
 starts the character set subsection.
 .
 (For typesetter devices,
-this keyword is a misnomer since it starts a list of glyphs,
+this directive is misnamed since it starts a list of glyphs,
 not characters.)
 .
 It precedes a series of glyph descriptions,
@@ -684,28 +684,23 @@ spaces or tabs and organized as follows.
 identifies the glyph:
 if
 .I name
-is a single
+is a single printable
 .RI character\~ c ,
 it corresponds to the
 .I troff \" generic
 input
 .RI character\~ c .
 .
-Otherwise,
-it must be of the form
-.BI \[rs] name
-where
+If
 .I name
-is at least one character;
-it then corresponds to the
-.I groff
+is a character sequence not beginning with
+.BR \[rs] ,
+it corresponds to the GNU
+.I troff \" GNU
 special character escape sequence
+\[lq]\c
 .BI \[rs][ name ]\c
-\&,
-or the one-sixth and one-twelfth unbreakable space escape sequences,
-\[rs]| and \[rs]\[ha]
-(\[lq]thin\[rq] and \[lq]hair\[rq] spaces,
-respectively).
+\[rq].
 .
 A name consisting of three minus signs,
 .RB \[lq] \-\-\- \[rq],
@@ -721,13 +716,34 @@ can still be defined using
 .B .char
 and similar requests.
 .
+The
+.I name
+.RB \[lq] \[rs]\- \[rq]
+defines the minus sign glyph.
+.
+Finally,
+.I name
+can be the unbreakable one-sixth and one-twelfth space escape
+sequences,
+\[rs]| and \[rs]\[ha]
+(\[lq]thin\[rq] and \[lq]hair\[rq] spaces,
+respectively),
+in which case only the width metric described below is interpreted;
+a font can thus customize the widths of these spaces.
+.\" XXX: For exhaustivity purposes...you can define "\whatever", which
+.\" has to be accessed with \C'\\whatever' or \[\\whatever], but the
+.\" parser matches predefined escape sequences before looking up special
+.\" characters.  Most such definitions are inaccessible from the
+.\" language, because nearly every '\x', where 'x' is a Unicode basic
+.\" Latin character, is a predefined groff escape sequence.
+.
 .
 .P
 The form of the
 .I metrics
 field is as follows
 (on one line;
-it may be broken here for the sake of readability).
+it may be broken here for readability).
 .
 .
 .IP
@@ -740,7 +756,9 @@ it may be broken here for the sake of readability).
 .
 .
 .P
-There must not be any spaces between these subfields.
+There must not be any spaces,
+tabs,
+or newlines between these subfields.
 .
 Missing subfields are assumed to
 .RB be\~ 0 .
@@ -979,9 +997,9 @@ and device-independent output format.
 .
 .
 .P
-Section \[lq]See also\[rq] of
-.MR groff @MAN1EXT@
-lists utilities available for preparing font files in a variety of
+.MR groff @MAN1EXT@ ,
+subsection \[lq]Utilities\[rq],
+lists programs available for preparing font files in a variety of
 formats for use with
 .I groff
 output drivers.

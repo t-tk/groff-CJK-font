@@ -272,7 +272,7 @@ macros.
 .RI " [" header-middle ]
 Define the title of the man page as
 .I title
-and the section of the manual volume as
+and the volume of the manual to which it belongs as
 .IR section .
 .
 This use of \(lqsection\(rq has nothing to do with the section headings
@@ -325,10 +325,18 @@ is centered in the header line.
 If
 .I section
 is a simple integer between 1 and\~9 (inclusive),
-or is exactly \(lq3p\(rq,
 there is no need to specify
 .IR header-middle ;
-the macro package will supply text for it.
+.I an.tmac
+will supply text for it.
+.
+The macro package may also abbreviate
+.I title
+and
+.I footer-inside
+with an ellipsis if they overrun the space available in the header and
+footer,
+respectively.
 .
 For HTML output,
 headers and footers are completely suppressed.
@@ -1053,6 +1061,12 @@ and
 .B .UR
 URIs are rendered between angle brackets after the linked text.
 .
+If such a URI will not fit on the remainder of the output line,
+the macro package temporarily turns off adjustment
+(if enabled)
+and breaks the line before the URI to minimize the number of output
+lines over which it spreads.
+.
 .
 .P
 .BR .MT ,
@@ -1077,6 +1091,20 @@ implements
 .
 .
 .P
+The arguments to
+.BR .MR ,
+.BR .MT ,
+and
+.B .UR
+should be prepared for typesetting since they can appear in the
+output.
+.
+Use special character escape sequences to encode Unicode basic Latin
+characters where necessary,
+particularly the hyphen-minus.
+.
+(See section \[lq]Portability\[rq] below.)
+.
 URIs can be lengthy;
 rendering them can result in jarring adjustment or variations in line
 length,
@@ -1090,7 +1118,7 @@ after each slash
 (or series thereof),
 and before each dot
 (or series thereof)
-is recommended.
+is recommended as a rule of thumb.
 .
 The former practice avoids forcing a trailing slash in a URI onto a
 separate output line,
@@ -1141,13 +1169,13 @@ The cross reference hyperlinks to a URI of the form
 .EX
 The output driver
 \&.MR grops @MAN1EXT@
-produces Postscript from
+produces PostScript from
 \&.I troff
 output.
 \&.
 The Ghostscript program (\[rs]c
 \&.MR gs 1 )
-interprets Postscript and PDF.
+interprets PostScript and PDF.
 .EE
 .RE
 .
@@ -2714,7 +2742,7 @@ Square brackets in roman surround both arguments.
 .IP
 Use of this quasi-semantic macro,
 .\" https://github.com/n-t-roff/DWB3.3/blob/master/macros/man/an.sr#L37
-originating in Documenter's Workbench
+an extension originating in Documenter's Workbench
 .IR troff ,\" DWB
 is deprecated.
 .
@@ -3518,10 +3546,10 @@ values.
 .TQ
 \(bu warning: scaling indicator invalid in context
 .TQ
-\(bu warning: number register \(aqan\-saved\-margin\c
+\(bu warning: register \(aqan\-saved\-margin\c
 .IR n "\(aq not defined"
 .TQ
-\(bu warning: number register \(aqan\-saved\-prevailing\-indent\c
+\(bu warning: register \(aqan\-saved\-prevailing\-indent\c
 .IR n "\(aq not defined"
 .
 The

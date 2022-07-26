@@ -4,6 +4,7 @@
 .\"
 .\" Written by Eric S. Raymond <esr@thyrsus.com>
 .\"            Werner Lemberg <wl@gnu.org>
+.\"            G. Branden Robinson <g.branden.robinson@gmail.com>
 .\"
 .\" You may freely use, modify and/or distribute this file.
 .\"
@@ -139,11 +140,30 @@
 \&\\$*\"
 .  \}
 .  el \{\
+.    nr mL 0 \" Will the URI+punctuation cause a break?
+.    ds m2 \\*(la\\*(m1\\*(ra\\$1\"
+.    nr mW \\w'\\*(m2'
+.    \" If the URI won't fit on the rest of the line, break early and
+.    \" turn off adjustment.
+.    if \\n(.o+\\n(.i+\\n(.ku+\\n(mWu>\\n(.lu \{\
+.      nr mL 1
+.      nr mJ \\n(.j
+.      br
+.      na
+.    \}
 .    nh
-\\*(la\\*(m1\\*(ra\c
+\\*(m2
+.    \" If we had to break before the URI, restore adjustment.
+.    if \\n(mL .ad \\n(mJ
+.    do shift
 .    ie \n(.g \&\\$*\"
-.    el \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9\"
+.    el \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9\"
 .    hy \\n(HY
+.    rr mJ
+.    rr mW
+.    rr mL
+.    rm m2
+.    rm m1
 .  \}
 ..
 .
@@ -190,11 +210,30 @@
 \&\\$*\"
 .  \}
 .  el \{\
+.    nr mL 0 \" Will the URI+punctuation cause a break?
+.    ds m2 \\*(la\\*(m1\\*(ra\\$1\"
+.    nr mW \\w'\\*(m2'
+.    \" If the URI won't fit on the rest of the line, break early and
+.    \" turn off adjustment.
+.    if \\n(.o+\\n(.i+\\n(.ku+\\n(mWu>\\n(.lu \{\
+.      nr mL 1
+.      nr mJ \\n(.j
+.      br
+.      na
+.    \}
 .    nh
-\\*(la\\*(m1\\*(ra\c
+\\*(m2
+.    \" If we had to break before the URI, restore adjustment.
+.    if \\n(mL .ad \\n(mJ
+.    do shift
 .    ie \n(.g \&\\$*\"
-.    el \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9\"
+.    el \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9\"
 .    hy \\n(HY
+.    rr mJ
+.    rr mW
+.    rr mL
+.    rm m2
+.    rm m1
 .  \}
 ..
 .

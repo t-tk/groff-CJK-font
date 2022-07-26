@@ -46,6 +46,6 @@ l.
 .TE'
 
 OUTPUT=$(printf "%s\n" "$EXAMPLE" | "$groff" -Tascii -P-cbou -t -man)
-test -n "$(echo "$OUTPUT" | sed -n '/52/{N;/53/p}')"
+test -n "$(echo "$OUTPUT" | sed -n '/52/{N;/53/p;}')"
 
 # vim:set ai et sw=4 ts=4 tw=72:

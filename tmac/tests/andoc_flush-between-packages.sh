@@ -58,7 +58,7 @@ FAIL=
 
 if [ -z "$(echo "$OUTPUT" \
     | sed '/^$/d' \
-    | sed -n '/collected/{N;/test page 1/p}')" ]
+    | sed -n '/collected/{N;/test page 1/p;}')" ]
 then
     FAIL=yes
     echo "man to mdoc transition failed" >&2
@@ -66,7 +66,7 @@ fi
 
 if [ -z "$(echo "$OUTPUT" \
     | sed '/^$/d' \
-    | sed -n '/partially-collected/{N;/test page 2/p}')" ]
+    | sed -n '/partially-collected/{N;/test page 2/p;}')" ]
 then
     FAIL=yes
     echo "mdoc to man transition failed" >&2

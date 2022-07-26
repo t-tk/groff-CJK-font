@@ -566,8 +566,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .de 1C
 .MC \\n[LL]u
 ..
-.\" top of page macro
 .de pg@top
+.\" Invoked by '.wh 0' trap at the top of every page.
+.\" At short page length, recursion may occur; ensure
+.\" that page length is sufficient to avoid it.
+.if (u;\\n[HM]+\\n[FM])+\n[.V]>\\n[.p]) \{\
+.      ds pg*pl-abort-msg] "\*[@s]:\"
+.      if !'\\n[.F]'' .as pg*pl-abort-msg "\\n[.F]:\"
+.      if !'\\n[.c]'0' .as pg*pl-abort-msg "\\n[.c]:\"
+.      as pg*pl-abort-msg " abort: insufficient page length specified\"
+.      ab \\*[pg*pl-abort-msg]
+.   \}
 .ch pg*footer -\\n[FM]u/2u
 .nr pg*col-num 0
 .nr pg@fn-bottom-margin 0
@@ -1692,7 +1701,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .nr sh*psincr (\\n[GROWPS]-\\n[nh*hl])*\\n[PSINCR]
 .SH-NO-TAG
 .DEVTAG-NH "\\$1"
-.  if '\*(.T'html' .nr s@devtag-needs-end-of-heading 1
+.if '\*(.T'html' .nr s@devtag-needs-end-of-heading 1
 \\*[SN-STYLE]
 ..
 .\" ****************************
@@ -1731,6 +1740,55 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .	di
 .\}
 .el .@error .XE without .XS
+..
+.\" Rudimentary integration of TOC generation with SH and NH;
+.\" (called by XH and XN respectively, to capture heading text
+.\" for reuse as TOC entry); may be redefined, to achieve more
+.\" sophisticated TOC layout effects.
+.\"
+.\" No-op initializers are called by XH and XN respectively,
+.\" before XH-UPDATE-TOC is called; if XH-UPDATE-TOC has been
+.\" redefined, then it may also be necessary to redefine either,
+.\" or both of these, to perform any initialization specific
+.\" to use after SH and NH respectively.
+.de XH-INIT de
+.de XN-INIT
+..
+.de XH-UPDATE-TOC
+.\" .XH-UPDATE-TOC <outline-level> [<section-number>] <text>
+.\" (<section-number> present only when called by XN)
+.XS
+.shift\" don't use <outline-level> in rudimentary style
+\&\\$*\" capture <section-number> (if present) and <text>
+.XE
+..
+.\" Rudimentary integration hook, to be called (nominally)
+.\" after SH, but acceptable in any body-text context
+.de XH de
+.\" .XH <outline-level> <text>
+.rn XH-REPLACEMENT XH
+.XH \\$@
+.de XH-REPLACEMENT
+.XH-INIT
+.XH-UPDATE-TOC \\$@
+.shift
+\&\\$*
+..
+.\" Rudimentary integration hook, to be called after NH
+.de XN de
+.\" .XN <text>
+.ie \\n[nh*hl] .toc*xn-init \\$@
+.el \{ .@error .XN is not allowed before .NH
+.      nop \&\\$*
+.   \}
+.de toc*xn-init de
+.rn XN-REPLACEMENT XN
+.XN \\$@
+.rm \\$0
+.de XN-REPLACEMENT
+.XN-INIT
+.XH-UPDATE-TOC \\n[nh*hl] \\*[SN] \\$@
+\&\\$*
 ..
 .de toc*end-entry
 \\a\\t\\*[toc*num]

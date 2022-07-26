@@ -497,19 +497,19 @@ void tty_printer::special_link(const char *arg, const environment *env)
     while (c == ' ' || c == '\t');
     arg--;
     // The first argument is the URI.
-    char *uri = (char *)arg;
+    const char *uri = arg;
     do
       c = *arg++;
     while (c != '\0' && c != ' ' && c != '\t');
     arg--;
     ptrdiff_t uri_len = arg - uri;
     // Any remaining arguments are "key=value" pairs.
-    char *pair = 0;
+    const char *pair = 0;
     bool done = false;
     do {
       if (pair != 0)
 	simple_add_char(':', env);
-      pair = (char *)arg;
+      pair = arg;
       bool in_pair = true;
       do {
 	c = *arg++;
