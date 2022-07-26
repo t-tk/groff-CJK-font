@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
 /* Partial emulation of getcwd in terms of getwd. */
 
+#include <config.h>
 #include <sys/param.h>
 #include <string.h>
 #include <errno.h>

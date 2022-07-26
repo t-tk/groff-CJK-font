@@ -5414,11 +5414,32 @@ static void encode_char(macro *mac, char c)
     else if (tok.is_stretchable_space()
 	     || tok.is_unstretchable_space())
       mac->append(' ');
+    else if (tok.is_special()) {
+      const char *sc = tok.get_char()->get_symbol()->contents();
+      if (strcmp("-", sc) == 0)
+	mac->append('-');
+      else if (strcmp("aq", sc) == 0)
+	mac->append('\'');
+      else if (strcmp("dq", sc) == 0)
+	mac->append('"');
+      else if (strcmp("ga", sc) == 0)
+	mac->append('`');
+      else if (strcmp("ha", sc) == 0)
+	mac->append('^');
+      else if (strcmp("rs", sc) == 0)
+	mac->append('\\');
+      else if (strcmp("ti", sc) == 0)
+	mac->append('^');
+      else
+	error("special character '%1' cannot be used within device"
+	      " control escape sequence", sc);
+    }
     else if (!(tok.is_hyphen_indicator()
 	       || tok.is_dummy()
 	       || tok.is_transparent_dummy()
 	       || tok.is_zero_width_break()))
-      error("%1 is invalid within \\X", tok.description());
+      error("%1 is invalid within device control escape sequence",
+	    tok.description());
   }
   else {
     if ((font::use_charnames_in_special) && (c == '\\')) {
@@ -8728,11 +8749,11 @@ static void do_error(error_type type,
     input_stack::backtrace();
   if (!get_file_line(&filename, &lineno))
     filename = 0;
-  if (filename)
+  if (filename) {
     if (program_name)
-      errprint("%1: %2:%3: ", program_name, filename, lineno);
-    else
-      errprint("%1:%2: ", filename, lineno);
+      errprint("%1:", program_name);
+    errprint("%1:%2: ", filename, lineno);
+  }
   else if (program_name)
     fprintf(stderr, "%s: ", program_name);
   switch (type) {

@@ -4,11 +4,11 @@
 #
 # groff is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free
-# Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Software Foundation, either version 3 of the License, or (at your
+# option) any later version.
 #
-# groff is distributed in the hope that it will be useful, but WITHOUT ANY
-# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# groff is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 # FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 # for more details.
 #
@@ -97,20 +97,22 @@ CLEANFILES += \
   ref-add.sed \
   ref-del.sed
 
-# .o files have a 'libgroff_a-' prefix because we set libgroff_a_CPPFLAGS
+# .o files have a 'libgroff_a-' prefix because we set
+# libgroff_a_CPPFLAGS.
 src/libs/libgroff/libgroff_a-device.$(OBJEXT): defs.h
 src/libs/libgroff/libgroff_a-fontfile.$(OBJEXT): defs.h
 src/libs/libgroff/libgroff_a-macropath.$(OBJEXT): defs.h
 src/libs/libgroff/libgroff_a-relocate.$(OBJEXT): defs.h
 
 src/libs/libgroff/version.cpp: $(top_srcdir)/.version
-	@echo Making version.cpp
-	@echo const char \*version_string = \"$(MAJOR_VERSION).$(MINOR_VERSION)\"\; >$@
-	@echo const char \*revision_string = \"$(REVISION)\"\; >>$@
-	@echo extern \"C\" { >>$@
-	@echo const char \*Version_string = \"$(VERSION)\"\; >>$@
-	@echo } >>$@ \
-	  | sed -e 's/\.0\"/\"/' >>$@
+	$(AM_V_at)printf 'const char *version_string = "%s.%s";\n' \
+	  $(MAJOR_VERSION) $(MINOR_VERSION) > $@.tmp
+	$(AM_V_at)printf 'const char *revision_string = "%s";\n' \
+	  $(REVISION) >> $@.tmp
+	$(AM_V_at)printf \
+	  'extern "C" {\nconst char *Version_string = "%s";\n}\n' \
+	  $(VERSION) >> $@.tmp
+	$(AM_V_GEN)mv $@.tmp $@
 
 # Data for localcharset.c.  Taken from libiconv/libcharset.
 
@@ -119,18 +121,21 @@ LIBGROFF_PACKAGE = groff
 all: charset.alias ref-add.sed ref-del.sed
 
 charset.alias: $(libgroff_srcdir)/config.charset
-	$(SHELL) $(libgroff_srcdir)/config.charset '$(HOST)' > t-$@
-	mv t-$@ $@
+	$(AM_V_GEN)$(SHELL) $(libgroff_srcdir)/config.charset \
+	    '$(HOST)' > t-$@ \
+	  && mv t-$@ $@
 
-ref-add.sed : $(libgroff_srcdir)/ref-add.sin
-	sed -e '/^#/d' \
-	    -e 's/@''PACKAGE''@/$(LIBGROFF_PACKAGE)/g' $(libgroff_srcdir)/ref-add.sin > t-$@
-	mv t-$@ $@
+ref-add.sed: $(libgroff_srcdir)/ref-add.sin
+	$(AM_V_GEN)sed -e '/^#/d' \
+	    -e 's/@''PACKAGE''@/$(LIBGROFF_PACKAGE)/g' \
+	    $(libgroff_srcdir)/ref-add.sin > t-$@ \
+	  && mv t-$@ $@
 
-ref-del.sed : $(libgroff_srcdir)/ref-del.sin
-	sed -e '/^#/d' \
-	    -e 's/@''PACKAGE''@/$(LIBGROFF_PACKAGE)/g' $(libgroff_srcdir)/ref-del.sin > t-$@
-	mv t-$@ $@
+ref-del.sed: $(libgroff_srcdir)/ref-del.sin
+	$(AM_V_GEN)sed -e '/^#/d' \
+	    -e 's/@''PACKAGE''@/$(LIBGROFF_PACKAGE)/g' \
+	    $(libgroff_srcdir)/ref-del.sin > t-$@ \
+	  && mv t-$@ $@
 
 install-data-local: install_charset_data
 install_charset_data:

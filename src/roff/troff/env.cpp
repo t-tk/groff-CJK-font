@@ -2058,9 +2058,10 @@ static void distribute_space(node *n, int nspaces, hunits desired_space,
 {
   if (desired_space.is_zero() || nspaces == 0)
     return;
+  // Positive desired space is the typical case.  Negative desired space
+  // is possible if we have overrun an unbreakable line.  But we should
+  // not get here if there are no adjustable space nodes to adjust.
   assert(nspaces > 0);
-  // Negative desired space is conceivable if we implement "squeezing".
-  assert(desired_space > 0);
   // Space cannot always be distributed evenly among all of the space
   // nodes in the node list: there are limits to device resolution.  We
   // add space until we run out, which might happen before the end of

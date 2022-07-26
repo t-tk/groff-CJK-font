@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
@@ -254,6 +253,7 @@ troff_output::troff_output()
 
 troff_output::~troff_output()
 {
+  free((char *)last_filename);
 }
 
 inline position troff_output::transform(const position &pos)
@@ -560,6 +560,12 @@ void troff_output::set_location(const char *s, int n)
     printf(".lf %d\n", n);
   else {
     printf(".lf %d %s\n", n, s);
-    last_filename = s;
+    last_filename = strdup(s);
   }
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

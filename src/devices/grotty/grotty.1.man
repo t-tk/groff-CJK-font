@@ -7,7 +7,7 @@ grotty \- groff output driver for typewriter-like (terminal) devices
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 1989-2020 Free Software Foundation, Inc.
+.\" Copyright (C) 1989-2021 Free Software Foundation, Inc.
 .\"
 .\" Permission is granted to make and distribute verbatim copies of this
 .\" manual provided the copyright notice and this permission notice are
@@ -73,14 +73,14 @@ The GNU
 TTY
 (\[lq]Teletype\[rq])
 output driver translates the output of
-.IR \%@g@troff (@MAN1EXT@)
+.MR @g@troff @MAN1EXT@
 into a form suitable for typewriter-like devices,
 including terminal emulators.
 .
 Normally,
 .I grotty
 is invoked by
-.IR groff (@MAN1EXT@)
+.MR groff @MAN1EXT@
 when the latter is given one of the
 .BR \-Tascii ,
 .BR \-Tlatin1 ,
@@ -105,7 +105,7 @@ reads the standard input stream.
 Output is written to the standard output stream.
 .
 .
-.LP
+.P
 By default,
 .I grotty
 emits SGR escape sequences
@@ -118,8 +118,18 @@ Devices supporting the appropriate sequences can view
 .I roff
 documents using eight different background and foreground colors.
 .
+Following ISO\~6429,
+the following colors are defined in
+.IR tty.tmac :
+black, white, red, green, blue, yellow, magenta, and cyan.
 .
-.LP
+Unrecognized colors are mapped to the default color,
+which is dependent on the settings of the terminal.
+.
+OSC\~8 hyperlinks are produced for these devices.
+.
+.
+.P
 In keeping with long-standing practice and the rarity of terminals,
 hardware or emulated,
 that support oblique or italic fonts,
@@ -129,34 +139,26 @@ the
 option below.
 .
 .
-.LP
-Following ISO\~6429,
-the following colors are defined in
-.IR tty.tmac :
-black, white, red, green, blue, yellow, magenta, and cyan.
-.
-Unrecognized colors are mapped to the default color,
-which is dependent on the settings of the terminal.
-.
-.
 .\" ====================================================================
-.SS "SGR support in pagers"
+.SS "SGR and OSC support in pagers"
 .\" ====================================================================
 .
 When paging
 .IR grotty 's
 output with
-.IR less (1),
-the latter program must be instructed to pass SGR sequences through to
-the device;
+.MR less 1 ,
+the latter program must be instructed to pass SGR and OSC sequences
+through to the device;
 its
 .B \-R
-option is one way to achieve this.
+option is one way to achieve this
+.RI ( less
+version 566 or later is required for OSC\~8 support).
 .
 Consequently,
 programs like
-.IR man (1)
-which page
+.MR man 1
+that page
 .I roff
 documents with
 .I less
@@ -212,13 +214,13 @@ see subsection \[lq]Device control commands\[rq],
 below.
 .
 .
-.LP
+.P
 The legacy output format can be rendered on a video terminal
 (or emulator)
 by piping
 .IR grotty 's
 output through
-.IR ul (1),
+.MR ul 1 ,
 .\" from bsdmainutils 11.1.2+b1 (on Debian Buster)
 which may render bold italics as reverse video.
 .
@@ -226,7 +228,7 @@ which may render bold italics as reverse video.
 .\" double-struck characters as bold nor supports -b, but does render
 .\" SGR sequences (including color) with no flags required.
 Some implementations of
-.IR more (1)
+.MR more 1
 are also able to display these sequences;
 you may wish to experiment with that command's
 .B \-b
@@ -243,7 +245,7 @@ implementations,
 never outputs reverse line feeds.
 .
 There is therefore no need to filter its output through
-.IR col (1).
+.MR col 1 .
 .
 .
 .\" ====================================================================
@@ -251,10 +253,38 @@ There is therefore no need to filter its output through
 .\" ====================================================================
 .
 .I grotty
-understands a single device control function produced using the
+understands the following device control functions produced using the
 .I roff
 .B \[rs]X
 escape sequence in a document.
+.
+.
+.TP
+.BR "\[rs]X\[aq]tty: link " [\c
+.IR uri \~[ key\c
+.BI = value\c
+] \|.\|.\|.\|]\c
+.B \[aq]
+.
+Embed a hyperlink using the OSC 8 terminal escape sequence.
+.
+Specifying
+.I uri
+starts hyperlinked text,
+and omitting it ends the hyperlink.
+.
+When
+.I uri
+is present,
+any number of additional key/value pairs can be specified;
+their interpretation is the responsibility of the terminal emulator.
+.
+Spaces or tabs cannot appear literally in
+.IR uri ,
+.IR key ,
+or
+.IR value ;
+they must be represented in an alternate form.
 .
 .
 .TP
@@ -269,16 +299,22 @@ is non-zero or missing, enable SGR sequences
 otherwise,
 use the legacy output format.
 .
+This device control command,
+like the
+.B \-c
+option,
+also prevents the emission of terminal OSC 8 hyperlink escape sequences.
+.
 .
 .\" ====================================================================
 .SS "Device description files"
 .\" ====================================================================
 .
-.LP
 If
 .I DESC
-file for the character encoding contains the keyword
-.RB \[lq] unicode \[rq],
+file for the character encoding contains the
+.RB \[lq] unicode \[rq]
+directive,
 .I grotty
 emits Unicode characters in UTF-8 encoding.
 .
@@ -286,11 +322,11 @@ Otherwise, it emits characters in a single-byte encoding depending on
 the data in the font description files.
 .
 See
-.IR groff_font (@MAN5EXT@)
+.MR groff_font @MAN5EXT@
 for more details.
 .
 .
-.LP
+.P
 A font description file may contain a command
 .RB \[lq] internalname\~\c
 .IR n \[rq]
@@ -353,6 +389,8 @@ Use
 .IR grotty 's
 legacy output format
 (see subsection \[lq]Legacy output format\[rq] above).
+.
+SGR and OSC escape sequences are not emitted.
 .
 .
 .TP
@@ -423,9 +461,9 @@ Render italic-styled text
 with the SGR attribute for italic text
 rather than underlined text.
 .
-Note that many terminals don't support this attribute;
+Many terminals don't support this attribute;
 however,
-.IR xterm (1),
+.MR xterm 1 ,
 since patch\~#314 (2014-12-28),
 does.
 .
@@ -484,16 +522,18 @@ A list of directories in which to seek the selected output device's
 directory of device and font description files.
 .
 See
-.IR \%@g@troff (@MAN1EXT@)
+.MR @g@troff @MAN1EXT@
 and
-.IR \%groff_font (@MAN5EXT@).
+.MR groff_font @MAN5EXT@ .
 .
 .
 .TP
 .I GROFF_NO_SGR
 If set,
 .IR grotty 's
-legacy output format is used;
+legacy output format is used just as if the
+.B \-c
+option were specified;
 see subsection \[lq]Legacy output format\[rq] above.
 .
 .
@@ -563,7 +603,7 @@ Additional character definitions for use with
 .
 .\" The following no longer seems to be true; an inspection of the
 .\" font/*/dev*.am files suggests no evidence of it, at any rate.
-.\".LP
+.\".P
 .\"Note that on EBCDIC hosts,
 .\"only files for the \[lq]cp1047\[rq] device are installed.
 .
@@ -576,26 +616,26 @@ Additional character definitions for use with
 is intended only for simple documents.
 .
 .
-.LP
+.P
 There is no support for fractional horizontal or vertical motions.
 .
 .
-.LP
+.P
 There is no support for the
 .I roff
 .B \[rs]D
 escape sequence (draw command) other than horizontal and vertical lines.
 .
 .
-.LP
+.P
 Characters above the first line
 (i.e., with a vertical position of\~0)
 cannot be printed.
 .
 .
-.LP
+.P
 Color handling differs from
-.IR grops (@MAN1EXT@).
+.MR grops @MAN1EXT@ .
 .
 The
 .I groff
@@ -625,7 +665,7 @@ not all of which may be supported by a given output device:
 (7)\~horizontal and vertical line-drawing.
 .
 .
-.LP
+.P
 .RS
 .EX
 You might see \ef[B]bold\ef[] and \ef[I]italic\ef[].
@@ -640,11 +680,11 @@ Black on cyan can have a \eM[cyan]\em[black]prominent\em[]\eM[]
 .RE
 .
 .
-.LP
+.P
 Compare and contrast the output of the following:
 .
 .
-.LP
+.P
 .RS
 .EX
 $ \c
@@ -666,7 +706,7 @@ $ \c
 .
 .
 .\" I wish this went without saying...
-.LP
+.P
 Note that the example file above is a \[lq]raw\[rq]
 .I groff
 document,
@@ -676,12 +716,12 @@ not a man page.
 Use of color escapes in man pages is \f[BI]strongly discouraged\f[].
 .
 Some implementations of
-.IR man (1)
+.MR man 1
 .\" ...like man-db 2.8.5-2 on Debian Buster...
 completely disable them.
 .
 See subsection \[lq]Portability\[rq] of
-.IR groff_man_style (@MAN7EXT@)
+.MR groff_man_style @MAN7EXT@
 for guidance on writing man pages that are viewable by as many readers
 as possible.
 .
@@ -705,16 +745,24 @@ ECMA\-ST/\:Ecma\-048\:.pdf
 .UE .
 .
 .
-.LP
-.IR groff (@MAN1EXT@),
-.IR \%@g@troff (@MAN1EXT@),
-.IR groff_out (@MAN5EXT@),
-.IR groff_font (@MAN5EXT@),
-.IR groff_char (@MAN7EXT@),
-.IR ul (1),
-.IR more (1),
-.IR less (1),
-.IR man (1)
+.P
+.UR https://\:gist\:.github\:.com/\:egmontkob/\:\
+eb114294efbcd5adb1944c9f3cb5feda
+\[lq]Hyperlinks in Terminal Emulators\[rq]
+.UE ,
+Egmont Koblinger.
+.
+.
+.P
+.MR groff @MAN1EXT@ ,
+.MR @g@troff @MAN1EXT@ ,
+.MR groff_out @MAN5EXT@ ,
+.MR groff_font @MAN5EXT@ ,
+.MR groff_char @MAN7EXT@ ,
+.MR ul 1 ,
+.MR more 1 ,
+.MR less 1 ,
+.MR man 1
 .
 .
 .\" Restore compatibility mode (for, e.g., Solaris 10/11).

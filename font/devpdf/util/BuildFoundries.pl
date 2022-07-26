@@ -4,7 +4,7 @@
 #   Deri James       : Monday 07 Feb 2011
 
 # Copyright (C) 2011-2020 Free Software Foundation, Inc.
-#      Written by Deri James <deri@chuzzlewit.demon.co.uk>
+#      Written by Deri James <deri@chuzzlewit.myzen.co.uk>
 #
 # This file is part of groff.
 #

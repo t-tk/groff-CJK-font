@@ -1,0 +1,95 @@
+2021-10-21  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* sboxes.am (SBOXES_FLAGS): Drop variable since we only expand
+	it in one place.
+	($(sboxes_builddir)/msboxes.pdf): Be more consistent with the
+	rest of our build, particularly documentation generated in the
+	groff `doc` directory.  Use `GROFF_V` instead of `AM_V_GEN` to
+	control output (since it is in fact groff producing the target).
+	Use `DOC_GROFF` to produce the document rather than
+	`test-groff`.  Use the former `SBOXES_FLAGS` here.
+
+2021-10-20  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* sboxes.am ($(sboxes_builddir)/msboxes.ms,
+	$(sboxes_builddir)/msboxes.pdf): Be quieter by default; use
+	$(AM_V_at) and $(AM_V_GEN) more consistently with the rest of
+	the build.
+
+2021-10-17  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* sboxes.tmac: Rename macros to get out of user name space.  Our
+	ms package documentation says that externally visible names will
+	consist only of uppercase letters and digits.
+	(BoxStart): Rename to BOXSTART.
+	(BoxStop): Rename to BOXSTOP.
+	* msboxes.ms.in: Document and use new names.
+
+2021-10-17  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* sboxes.tmac: Add more prerequisite checking.  Check `GS`
+	register for groff ms macros specifically.  Check installed
+	version of groff since the gropdf in earlier versions won't
+	implement the underlying feature.  Add new string to introduce
+	diagnostic messages now that we have more than one (that we can
+	emit without limp-along AT&T compatibility mode).
+	(sboxes*error): Use new string in diagnostic message.
+
+2021-10-17  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* sboxes.tmac (sboxes*error): Add new macro to produce
+	diagnostic message in a standard format.
+	(BoxStart): Use it.
+
+2021-10-17  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	Make msboxes.ms quote its own source through a
+	self-interpolation process (with help from sed and the build
+	system), avoiding the need to manually keep the source document
+	and its quoted form in sync.
+
+	* msboxes.ms: Rename to...
+	* msboxes.ms.in: ...this.
+	* notquine.sed: New file; this sed script performs quotation of
+	roff syntax characters (and hyphens), inserts the quoted form of
+	the document's source into itself, and reproduces Deri's
+	Schrödinger's footnote trick.
+	* sboxes.am: Introduce new variables `sboxes_builddir` and
+	`sboxesnotquine` for convenience.  Update value of
+	$(SBOXES_EXAMPLEFILES) to point to the new .in source file.  Add
+	the generated ms document to $(SBOXES_PROCESSEDEXAMPLEFILES) and
+	$(MOSTLYCLEANFILES).  Add the `notquine` sed script to the
+	distribution archive via $(EXTRA_DIST).
+	($(sboxes_builddir)/msboxes.ms): New rule produces the ms
+	document from msboxes.ms.in, constructing it with sed.
+	($(sboxes_builddir)/msboxes.pdf): Update rule to add dependency
+	on source document, use new `sboxes_builddir` variable, and look
+	for source document in the build tree instead of the source.
+
+2021-10-17  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* sboxes.am: Add this ChangeLog to `EXTRA_DIST`.
+
+2021-10-11  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* sboxes.am (MOSTLYCLEANFILES): Add
+	`$(SBOXES_PROCESSEDEXAMPLEFILES)`; allows `distcheck` target to
+	succeed.
+
+________________________________________________________________________
+
+##### License
+
+Copyright 2021 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+
+##### Editor settings
+Local Variables:
+fill-column: 72
+mode: change-log
+version-control: never
+End:
+vim:set autoindent textwidth=72:

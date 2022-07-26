@@ -16,6 +16,7 @@ for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
+#include <config.h>
 #include <math.h>
 
 double fmod(x, y)
@@ -24,4 +25,3 @@ double fmod(x, y)
   double quot = x/y;
   return x - (quot < 0.0 ? ceil(quot) : floor(quot)) * y;
 }
-

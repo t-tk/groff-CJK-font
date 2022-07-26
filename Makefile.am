@@ -654,6 +654,7 @@ include $(top_srcdir)/contrib/mom/mom.am
 include $(top_srcdir)/contrib/pdfmark/pdfmark.am
 include $(top_srcdir)/contrib/pic2graph/pic2graph.am
 include $(top_srcdir)/contrib/rfc1345/rfc1345.am
+include $(top_srcdir)/contrib/sboxes/sboxes.am
 include $(top_srcdir)/doc/doc.am
 include $(top_srcdir)/font/devX100/devX100.am
 include $(top_srcdir)/font/devX100-12/devX100-12.am

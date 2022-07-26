@@ -121,6 +121,7 @@ my $wt=-1;
 my $thislev=1;
 my $mark=undef;
 my $suspendmark=undef;
+my $boxmax=0;
 
 
 
@@ -137,6 +138,8 @@ my $transition={PAGE => {Type => '/Trans', S => '', D => 1, Dm => '/H', M => '/I
 		BLOCK => {Type => '/Trans', S => '', D => 1, Dm => '/H', M => '/I', Di => 0, SS => 1.0, B => 0}};
 my $firstpause=0;
 my $present=0;
+my @bgstack; 		# Stack of background boxes
+my $bgbox='';		# Draw commands for boxes on this page
 
 $noslide=1 if exists($ENV{GROPDF_NOSLIDE}) and $ENV{GROPDF_NOSLIDE};
 
@@ -364,6 +367,32 @@ if ($cpageno > 0)
 	    @{$cpage->{Annots}}=@PageAnnots;
 	}
 
+	if ($#bgstack > -1 or $bgbox)
+	{
+	    my $box="q 1 0 0 1 0 0 cm ";
+
+	    foreach my $bg (@bgstack)
+	    {
+		# 0=$bgtype # 1=stroke 2=fill. 4=page
+		# 1=$strkcol
+		# 2=$fillcol
+		# 3=(Left,Top,Right,bottom,LineWeight)
+		# 4=Start ypos
+		# 5=Endypos
+		# 6=Line Weight
+
+		my $pg=$bg->[3] || \@mediabox;
+
+		$bg->[5]=$pg->[3];	# box is continueing to next page
+		$box.=DrawBox($bg);
+		$bg->[4]=$pg->[1];	# will continue from page top
+	    }
+
+	    $stream=$box.$bgbox."Q\n".$stream;
+	    $bgbox='';
+	}
+
+    $boxmax=0;
 	PutObj($cpageno);
 	OutStream($cpageno+1);
 }
@@ -986,8 +1015,8 @@ sub do_x
 		my $lly=$xprm[4];
 		my $urx=$xprm[5];
 		my $ury=$xprm[6];
-		my $wid=$xprm[7];
-		my $hgt=$xprm[8]||-1;
+		my $wid=GetPoints($xprm[7]);
+		my $hgt=GetPoints($xprm[8])||-1;
 		my $mat=[1,0,0,1,0,0];
 
 		if (!exists($incfil{$fil}))
@@ -1072,11 +1101,11 @@ sub do_x
 
 		    if ($flag eq '-C' and $ll > $wid)
 		    {
-			$xpos=int(($ll-$wid)/2);
+			$xpos+=int(($ll-$wid)/2);
 		    }
 		    elsif ($flag eq '-R' and $ll > $wid)
 		    {
-			$xpos=$ll-$wid;
+			$xpos+=$ll-$wid;
 		    }
 
 		    $ypos+=$hgt;
@@ -1228,6 +1257,74 @@ sub do_x
 
 		$present=1;
 	    }
+	    elsif (lc($xprm[1]) eq 'background')
+	    {
+		splice(@xprm,0,2);
+		my $type=shift(@xprm);
+# 		print STDERR "ypos=$ypos\n";
+
+		if (lc($type) eq 'off')
+		{
+		    my $sptr=$#bgstack;
+		    if ($sptr > -1)
+		    {
+                        if ($sptr == 0 and $bgstack[0]->[0] & 4)
+                        {
+                            pop(@bgstack);
+                        }
+                        else
+                        {
+                            $bgstack[$sptr]->[5]=GraphY($ypos);
+			$bgbox=DrawBox(pop(@bgstack)).$bgbox;
+		    }
+		}
+		}
+		elsif (lc($type) eq 'footnote')
+		{
+                    my $t=GetPoints($xprm[0]);
+                    $boxmax=($t<0)?abs($t):GraphY($t);
+                }
+		else
+		{
+		    my $bgtype=0;
+
+		    foreach (@xprm)
+		    {
+			$_=GetPoints($_);
+		    }
+
+		    $bgtype|=2 if $type=~m/box/i;
+		    $bgtype|=1 if $type=~m/fill/i;
+		    $bgtype|=4 if $type=~m/page/i;
+		    $bgtype=5 if $bgtype==4;
+		    my $bgwt=$xprm[4];
+		    $bgwt=$xprm[0] if !defined($bgwt) and $#xprm == 0;
+		    my (@bg)=(@xprm);
+		    my $bg=\@bg;
+
+		    if (!defined($bg[3]) or $bgtype & 4)
+		    {
+			$bg=undef;
+		    }
+		    else
+		    {
+			FixRect($bg);
+		    }
+
+		    if ($bgtype)
+		    {
+                        if ($bgtype & 4)
+                        {
+                            shift(@bgstack) if $#bgstack >= 0 and $bgstack[0]->[0] & 4;
+                            unshift(@bgstack,[$bgtype,$strkcol,$fillcol,$bg,GraphY($ypos),GraphY($bg[3]||0),$bgwt || 0.4]);
+                        }
+                        else
+                        {
+			push(@bgstack,[$bgtype,$strkcol,$fillcol,$bg,GraphY($ypos),GraphY($bg[3]||0),$bgwt || 0.4]);
+		    }
+		}
+	    }
+	}
 	}
 	elsif (lc(substr($xprm[0],0,9)) eq 'papersize')
 	{
@@ -1564,6 +1661,7 @@ sub LoadPDF
 #	$pdftxt=~s/\]/ \]/g;
     my (@pdfwds)=split(' ',$pdftxt);
     my $wd;
+    my $root;
 
     while ($wd=nextwd(\@pdfwds),length($wd))
     {
@@ -1573,6 +1671,27 @@ sub LoadPDF
 	    shift(@pdfwds); shift(@pdfwds);
 	    unshift(@pdfwds,$1) if defined($1) and length($1);
 	    $pdf->[$curobj]->{OBJ}=ParsePDFObj(\@pdfwds);
+            my $o=$pdf->[$curobj];
+
+            if (ref($o->{obj}) eq "HASH" and exists($o->{OBJ}->{Type}) and $o->{OBJ}->{Type} eq '/ObjStm')
+            {
+                LoadStream($o,$pdf);
+                my $pos=$o->{OBJ}->{First};
+                my $s=$o->{STREAM};
+                my @o=split(' ',substr($s,0,$pos));
+                substr($s,0,$pos)='';
+                push(@o,-1,length($s));
+
+                for (my $j=0; $j<=$#o-2; $j+=2)
+                {
+                    my @w=split(' ',substr($s,$o[$j+1],$o[$j+3]-$o[$j+1]));
+                    $pdf->[$o[$j]]->{OBJ}=ParsePDFObj(\@w);
+                }
+
+                $pdf->[$curobj]=undef;
+            }
+
+            $root=$curobj if ref($o->{obj}) eq "HASH" and exists($pdf->[$curobj]->{OBJ}->{Type}) and $pdf->[$curobj]->{OBJ}->{Type} eq '/XRef';
 	}
 	elsif ($wd eq 'trailer' and !exists($pdf->[0]->{OBJ}))
 	{
@@ -1584,6 +1703,7 @@ sub LoadPDF
 	}
     }
 
+    $pdf->[0]=$pdf->[$root] if !defined($pdf->[0]);
     my $catalog=${$pdf->[0]->{OBJ}->{Root}};
     my $page=FindPage(1,$pdf);
     my $xobj=++$objct;
@@ -1592,25 +1712,10 @@ sub LoadPDF
 
     foreach my $o (@{$pdf})
     {
-	if (exists($o->{STREAMPOS}))
+	if (exists($o->{STREAMPOS}) and !exists($o->{STREAM}))
 	{
-	    my $l;
-
-	    $l=$o->{OBJ}->{Length} if exists($o->{OBJ}->{Length});
-
-	    $l=$pdf->[$$l]->{OBJ} if (defined($l) && ref($l) eq 'OBJREF');
-
-	    Msg(1,"Unable to determine length of stream \@$o->{STREAMPOS}->[0]") if !defined($l);
-
-	    sysseek(PD,$o->{STREAMPOS}->[0],0);
-	    Msg(0,'Failed to read all the stream') if $l != sysread(PD,$o->{STREAM},$l);
-
-	    if ($gotzlib and exists($o->{OBJ}->{'Filter'}) and $o->{OBJ}->{'Filter'} eq '/FlateDecode')
-	    {
-		$o->{STREAM}=Compress::Zlib::uncompress($o->{STREAM});
-		delete($o->{OBJ }->{'Filter'});
-	    }
-	}
+            LoadStream($o,$pdf);
+        }
     }
 
     close(PD);
@@ -1619,7 +1724,7 @@ sub LoadPDF
     my $BBox;
     my $insmap={};
 
-    foreach my $k (qw( MediaBox ArtBox TrimBox BleedBox CropBox ))
+    foreach my $k (qw( ArtBox TrimBox BleedBox CropBox MediaBox ))
     {
 	$BBox=FindKey($pdf,$page,$k);
 	last if $BBox;
@@ -1661,10 +1766,38 @@ sub LoadPDF
     ($mat->[4],$mat->[5])=split(' ',PutXY($xpos,$ypos));
     $pages->{'Resources'}->{'XObject'}->{$xonm}=BuildObj($xobj,{'Type' => '/XObject', 'BBox' => $BBox, 'Name' => "/$xonm", 'FormType' => 1, 'Subtype' => '/Form', 'Length' => 0, 'Type' => "/XObject", 'Resources' => \%incres});
 
+    if ($BBox->[0] != 0 or $BBox->[1] != 0)
+    {
+        my (@matrix)=(1,0,0,1,-$BBox->[0],-$BBox->[1]);
+        $obj[$xobj]->{DATA}->{Matrix}=\@matrix;
+    }
+
     BuildStream($xobj,$pdf,$pdf->[$page]->{OBJ}->{Contents});
 
     $/=$keepsep;
     return([$xonm,$BBox] );
+}
+
+sub LoadStream
+{
+    my $o=shift;
+    my $pdf=shift;
+    my $l;
+
+    $l=$o->{OBJ}->{Length} if exists($o->{OBJ}->{Length});
+
+    $l=$pdf->[$$l]->{OBJ} if (defined($l) && ref($l) eq 'OBJREF');
+
+    Msg(1,"Unable to determine length of stream \@$o->{STREAMPOS}->[0]") if !defined($l);
+
+    sysseek(PD,$o->{STREAMPOS}->[0],0);
+    Msg(0,'Failed to read all the stream') if $l != sysread(PD,$o->{STREAM},$l);
+
+    if ($gotzlib and exists($o->{OBJ}->{'Filter'}) and $o->{OBJ}->{'Filter'} eq '/FlateDecode')
+    {
+        $o->{STREAM}=Compress::Zlib::uncompress($o->{STREAM});
+        delete($o->{OBJ }->{'Filter'});
+    }
 }
 
 sub BuildStream
@@ -2541,6 +2674,32 @@ sub NewPage
 	    @{$cpage->{Annots}}=@PageAnnots;
 	}
 
+	if ($#bgstack > -1 or $bgbox)
+	{
+	    my $box="q 1 0 0 1 0 0 cm ";
+
+	    foreach my $bg (@bgstack)
+	    {
+		# 0=$bgtype # 1=stroke 2=fill. 4=page
+		# 1=$strkcol
+		# 2=$fillcol
+		# 3=(Left,Top,Right,bottom,LineWeight)
+		# 4=Start ypos
+		# 5=Endypos
+		# 6=Line Weight
+
+		my $pg=$bg->[3] || \@defaultmb;
+
+		$bg->[5]=$pg->[3];	# box is continueing to next page
+		$box.=DrawBox($bg);
+		$bg->[4]=$pg->[1];	# will continue from page top
+	    }
+
+	    $stream=$box.$bgbox."Q\n".$stream;
+	    $bgbox='';
+	    $boxmax=0;
+	}
+
 	PutObj($cpageno);
 	OutStream($cpageno+1);
     }
@@ -2568,6 +2727,23 @@ sub NewPage
     $mode='g';
     $curfill='';
 #    @mediabox=@defaultmb;
+}
+
+sub DrawBox
+{
+    my $bg=shift;
+    my $res='';
+    my $pg=$bg->[3] || \@mediabox;
+    $bg->[4]=$pg->[1], $bg->[5]=$pg->[3] if $bg->[0] & 4;
+    my $bot=$bg->[5];
+    $bot=$boxmax if $boxmax > $bot;
+    my $wid=$pg->[2]-$pg->[0];
+    my $dep=$bot-$bg->[4];
+
+    $res="$bg->[1] $bg->[2] $bg->[6] w\n";
+    $res.="$pg->[0] $bg->[4] $wid $dep re f " if $bg->[0] & 1;
+    $res.="$pg->[0] $bg->[4] $wid $dep re s " if $bg->[0] & 2;
+    return("$res\n");
 }
 
 sub MakeXO

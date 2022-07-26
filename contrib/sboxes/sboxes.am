@@ -1,0 +1,79 @@
+# Copyright (C) 2021 Free Software Foundation, Inc.
+#      Written by Bertrand Garrigues <bertrand.garrigues@laposte.net>
+#
+#
+# This file is part of groff.
+#
+# groff is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# groff is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+sboxes_srcdir = $(top_srcdir)/contrib/sboxes
+sboxes_builddir = $(top_builddir)/contrib/sboxes
+sboxesnotquine = $(sboxes_srcdir)/notquine.sed
+# Files installed in $(tmacdir).
+SBOXES_NORMAL_FILES = contrib/sboxes/sboxes.tmac
+sboxestmacdir = $(tmacdir)
+dist_sboxestmac_DATA = $(SBOXES_NORMAL_FILES)
+
+EXTRA_DIST += \
+    contrib/sboxes/ChangeLog \
+    contrib/sboxes/notquine.sed
+
+# Files installed in $(examplesdir)/sboxes.  SBOXES_EXAMPLEFILES are
+# located in the source tree, while SBOXESPROCESSEDEXAMPLEFILES are
+# generated in the build tree.
+SBOXES_EXAMPLEFILES = $(sboxes_srcdir)/msboxes.ms.in
+if BUILD_EXAMPLES
+sboxesexampledir = $(exampledir)/sboxes
+dist_sboxesexample_DATA = $(SBOXES_EXAMPLEFILES)
+SBOXES_PROCESSEDEXAMPLEFILES = contrib/sboxes/msboxes.ms \
+    contrib/sboxes/msboxes.pdf
+sboxesprocessedexampledir = $(exampledir)/sboxes
+nodist_sboxesprocessedexample_DATA = $(SBOXES_PROCESSEDEXAMPLEFILES)
+else
+EXTRA_DIST += \
+    contrib/sboxes/msboxes.ms.in
+endif
+
+MOSTLYCLEANFILES += msboxes.ms \
+    $(SBOXES_PROCESSEDEXAMPLEFILES)
+
+$(SBOXES_PROCESSEDEXAMPLEFILES): $(SBOXES_NORMAL_FILES) \
+  groff troff gropdf font/devpdf/build_font_files
+
+# The ordering of the sed -e expressions is important.
+$(sboxes_builddir)/msboxes.ms: $(SBOXES_EXAMPLEFILES) $(sboxesnotquine)
+	$(AM_V_at)mkdir -p $(sboxes_builddir)
+	$(AM_V_at)$(SED) -n -e '1,/REPLACEME/p' \
+	    $(SBOXES_EXAMPLEFILES) > $@.tmp
+	$(AM_V_at)$(SED) -f $(sboxesnotquine) \
+	    $(SBOXES_EXAMPLEFILES) >> $@.tmp
+	$(AM_V_at)$(SED) -n -e '/REPLACEME/,$$p' \
+	    $(SBOXES_EXAMPLEFILES) >> $@.tmp
+	$(AM_V_GEN)mv $@.tmp $@
+
+$(sboxes_builddir)/msboxes.pdf: $(sboxes_builddir)/msboxes.ms
+	$(GROFF_V)$(DOC_GROFF) -M$(sboxes_srcdir) -ms -msboxes -Tpdf \
+	  $(sboxes_builddir)/msboxes.ms > $@
+
+uninstall_groffdirs: uninstall_sboxes
+uninstall_sboxes:
+	if test -d $(DESTDIR)$(exampledir)/sboxes; then \
+	  rmdir $(DESTDIR)$(exampledir)/sboxes; \
+	fi
+
+# Local Variables:
+# fill-column: 72
+# mode: makefile-automake
+# End:
+# vim: set autoindent filetype=automake textwidth=72:

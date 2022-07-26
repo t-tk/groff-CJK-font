@@ -1,7 +1,7 @@
 # Copyright (C) 2011-2020 Free Software Foundation, Inc.
-#      Original Makefile.sub written
-#      by Deri James <deri@chuzzlewit.demon.co.uk>
+#      Written by Deri James <deri@chuzzlewit.myzen.co.uk>
 #      Automake migration by Bertrand Garrigues
+#        <bertrand.garrigues@laposte.net>
 #
 # This file is part of groff.
 #
@@ -53,18 +53,19 @@ EXTRA_DIST += \
   font/devpdf/util/BuildFoundries.pl
 
 font/devpdf/enc/text.enc:
-	@$(MKDIR_P) $(top_builddir)/font/devpdf/enc
-	cp -f $(top_srcdir)/font/devps/text.enc \
+	$(AM_V_at)$(MKDIR_P) $(top_builddir)/font/devpdf/enc
+	$(AM_V_at)cp -f $(top_srcdir)/font/devps/text.enc \
 	  $(top_builddir)/font/devpdf/enc
 
 font/devpdf/map/symbolmap:
-	@$(MKDIR_P) $(top_builddir)/font/devpdf/map
-	@cp -f $(top_srcdir)/font/devps/symbolmap \
+	$(AM_V_at)$(MKDIR_P) $(top_builddir)/font/devpdf/map
+	$(AM_V_at)cp -f $(top_srcdir)/font/devps/symbolmap \
 	  $(top_builddir)/font/devpdf/map
 
 $(DEVPDFFONTMAP_1):
-	@$(MKDIR_P) $(top_builddir)/font/devpdf/map
-	@cp -f $(top_srcdir)/font/devps/generate/`basename $@` \
+	$(AM_V_at)$(MKDIR_P) $(top_builddir)/font/devpdf/map
+	$(AM_V_at)cp -f \
+	  $(top_srcdir)/font/devps/generate/`basename $@` \
 	  $(top_builddir)/font/devpdf/map
 
 font/devpdf/util/BuildFoundries: shdeps.sed \
@@ -91,11 +92,13 @@ font/devpdf/util/BuildFoundries: shdeps.sed \
 font/devpdf/DESC: $(devpdf_srcdir)/DESC.in
 	$(AM_V_GEN)$(MKDIR_P) $(top_builddir)/font/devpdf \
 	&& $(RM) $(top_builddir)/font/devpdf/DESC \
-	&& cat $(devpdf_srcdir)/DESC.in >$(top_builddir)/font/devpdf/DESC \
+	&& cat $(devpdf_srcdir)/DESC.in \
+	  >$(top_builddir)/font/devpdf/DESC \
 	&& if test "$(PAGE)" = A4; then \
 	     echo "papersize a4" >>$(top_builddir)/font/devpdf/DESC; \
 	   else \
-	     echo "papersize letter" >>$(top_builddir)/font/devpdf/DESC; \
+	     echo "papersize letter" \
+	       >>$(top_builddir)/font/devpdf/DESC; \
 	   fi
 
 font/devpdf/Foundry:

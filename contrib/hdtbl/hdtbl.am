@@ -1,7 +1,7 @@
 # Copyright (C) 2006-2020 Free Software Foundation, Inc.
-#      Written by Werner Lemberg (wl@gnu.org)
+#      Written by Werner Lemberg <wl@gnu.org>
 #      Automake migration by Bertrand Garrigues
-#
+#        <bertrand.garrigues@laposte.net>
 #
 # This file is part of groff.
 #
@@ -36,6 +36,8 @@ HDTBLTMACFILES = \
 hdtbltmacdir = $(tmacdir)
 dist_hdtbltmac_DATA = $(HDTBLTMACFILES)
 
+hdtbl_test_template = contrib/hdtbl/examples/test-hdtbl.sh.in
+
 # Files installed in $(exampledir)/hdtbl.  HDTBLEXAMPLEFILES are
 # located in the source tree, while HDTBLPROCESSEDEXAMPLEFILES are
 # generated in the build tree.
@@ -47,7 +49,7 @@ HDTBLGENFILES = \
 EXTRA_DIST += \
   contrib/hdtbl/examples/fonts_n.in \
   contrib/hdtbl/examples/fonts_x.in \
-  contrib/hdtbl/examples/test-hdtbl.sh.in
+  $(hdtbl_test_template)
 
 HDTBLEXAMPLEFILES = \
   contrib/hdtbl/examples/common.roff \
@@ -97,12 +99,15 @@ EXTRA_DIST += \
 if BUILD_EXAMPLES
 hdtbl_TESTS = contrib/hdtbl/examples/test-hdtbl.sh
 TESTS += $(hdtbl_TESTS)
-contrib/hdtbl/examples/test-hdtbl.sh: $(top_builddir)/config.status \
-	$(HDTBLPROCESSEDEXAMPLEFILES) $(top_srcdir)/contrib/hdtbl/examples/test-hdtbl.sh.in
-	sed -e "s|[@]abs_top_builddir[@]|$(abs_top_builddir)|g" \
-	    -e "s|[@]GHOSTSCRIPT[@]|$(GHOSTSCRIPT)|g" \
-	    	$(top_srcdir)/contrib/hdtbl/examples/test-hdtbl.sh.in > $@
-	chmod +x $@
+contrib/hdtbl/examples/test-hdtbl.sh: \
+  $(top_builddir)/config.status \
+  $(HDTBLPROCESSEDEXAMPLEFILES) \
+  $(top_srcdir)/$(hdtbl_test_template)
+	$(AM_V_GEN)sed \
+	  -e "s|[@]abs_top_builddir[@]|$(abs_top_builddir)|g" \
+	  -e "s|[@]GHOSTSCRIPT[@]|$(GHOSTSCRIPT)|g" \
+	  $(top_srcdir)/$(hdtbl_test_template) > $@ \
+	&& chmod +x $@
 MOSTLYCLEANFILES += $(hdtbl_TESTS)
 endif
 

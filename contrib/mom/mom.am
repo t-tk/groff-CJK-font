@@ -1,17 +1,17 @@
 # Copyright (C) 2002-2020 Free Software Foundation, Inc.
-#      Written by Werner Lemberg (wl@gnu.org)
+#      Written by Werner Lemberg <wl@gnu.org>
 #      Automake migration by Bertrand Garrigues
-#
+#        <bertrand.garrigues@laposte.net>
 #
 # This file is part of groff.
 #
 # groff is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free
-# Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Software Foundation, either version 3 of the License, or (at your
+# option) any later version.
 #
-# groff is distributed in the hope that it will be useful, but WITHOUT ANY
-# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# groff is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 # FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 # for more details.
 #
@@ -108,20 +108,25 @@ MOMPROCESSEDEXAMPLEFILES = \
 momprocessedexampledir = $(exampledir)/mom
 nodist_momprocessedexample_DATA = $(MOMPROCESSEDEXAMPLEFILES)
 
+mom_test_template = contrib/mom/examples/test-mom.sh.in
+
 if HAVE_PDFTOOLS
 # Small test suite on mom examples
 mom_TESTS = contrib/mom/examples/tests-mom.sh
 TESTS += $(mom_TESTS)
-contrib/mom/examples/tests-mom.sh: $(top_builddir)/config.status \
-	$(MOMPROCESSEDEXAMPLEFILES)  $(top_srcdir)/contrib/mom/examples/test-mom.sh.in
-	sed -e "s|[@]abs_top_builddir[@]|$(abs_top_builddir)|g" \
-            -e "s|[@]groff_have_urw_fonts[@]|$(groff_have_urw_fonts)|g" \
-	    	$(top_srcdir)/contrib/mom/examples/test-mom.sh.in > $@
-	chmod +x $@
+contrib/mom/examples/tests-mom.sh: \
+  $(top_builddir)/config.status \
+  $(MOMPROCESSEDEXAMPLEFILES) \
+  $(top_srcdir)/$(mom_test_template)
+	$(AM_V_GEN)sed \
+	  -e "s|[@]abs_top_builddir[@]|$(abs_top_builddir)|g" \
+	  -e "s|[@]groff_have_urw_fonts[@]|$(groff_have_urw_fonts)|g" \
+	  $(top_srcdir)/$(mom_test_template) > $@ \
+	&& chmod +x $@
 MOSTLYCLEANFILES += $(mom_TESTS)
 endif
 endif
-EXTRA_DIST += contrib/mom/examples/test-mom.sh.in
+EXTRA_DIST += $(mom_test_template)
 
 # For this list of files we add a symlink from $(exampledir)/mom to $(pdfdocdir)
 PDFDOCFILE = mom-pdf.pdf

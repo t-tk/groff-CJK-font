@@ -92,31 +92,33 @@
 .  rr an-amount
 ..
 .
-.\" This .bp replacement for continuous rendering mode draws a
-.\" horizontal line after each document if there is more than one, and
-.\" adjusts the page length to the current position so that no empty
-.\" lines are inserted.
+.\" This .bp replacement for continuous rendering mode adjusts the page
+.\" length to the current position so that no empty lines are inserted.
 .de an-bp
-.  ie \\n[an-do-draw-line-after-document] \{\
+.  pl \\n[nl]u
+..
+.
+.\" We need an end macro to flush any pending output line and write the
+.\" footer for the final man page rendered.  We can also be called by
+.\" andoc when switching to an mdoc(7) page, irrespective of continuous
+.\" rendering mode.
+.de1 an-end
+.  if \\n[cR] \{\
+.  fl
+.  pl +1v
+.  sp 1v
+.  an-footer
+.  \" If we're processing multiple documents and have started a new one,
+.  \" draw a line between this footer and the next header.
+.  if !'\\n[.F]'' \{\
 .    pl +1v
 .    nf
 .    ti 0
 \D'l \\n[LL]u 0'
 .    fi
 .  \}
-.  el \
-.    nr an-do-draw-line-after-document 1
-.  pl \\n[nl]u
-..
-.
-.\" We need an end macro for continuous rendering as well, to flush any
-.\" pending output line and write the footer for the final man page
-.\" rendered.
-.de1 an-end
-.  fl
-.  pl +1v
-.  sp 1v
-.  an-footer
+.  \}
+.  ch an-header
 .  bp
 ..
 .
@@ -334,7 +336,7 @@
 .\" Abbreviate the page title if it's too long for the header.  Leaves
 .\" string an-pageref defined for use in .PT and .an-footer.  Also
 .\" leaves an-title-abbv for possible use by .PT and .BT re-definers.
-.de an-abbreviate-title
+.de an-prepare-page-title
 .  ds an-title-abbv \\*[an-title]\"
 .  ds an-title-string \\*[an-title]\"
 .  ds an-ellipsis \|.\|.\|.\|\"
@@ -365,6 +367,8 @@
 .    nr an-header-width \
        \\w'\\*[an-pageref]\\*[an-extra3]\\*[an-pageref]'
 .  \}
+.  ds an-pageref \\*[an-lic]\f[\\*[MF]]\\*[an-title-abbv]\\*[an-ic]\
+\f[R](\\*[an-section])\"
 .  rr an-title-length-prev
 .  rr an-mark1
 .  rr an-mark2
@@ -383,7 +387,7 @@
 .  ps \\n[PS]u
 .  vs \\n[VS]u
 .  lt \\n[LT]u
-.  an-abbreviate-title
+.  an-prepare-page-title
 .  ie \\n[cR] .pl +1v
 .  el         .sp .5i
 .  PT
@@ -488,9 +492,9 @@
 .  nr an-need-no-space-mode 1
 .  nr an-need-break 1
 .  ps \\n[PS-SH]u
+.  ne (2v + 1u)
 .  ft \\*[HF]
 .  if \\n[an-remap-I-style-in-headings] .ftr I \\*[an-heading-family]BI
-.  ne (2v + 1u)
 .  if \\n[.$] \{\
 .    ds an-section-heading \\$*\"
 .    if \\n[CS] .stringup an-section-heading
@@ -512,9 +516,9 @@
 .  nr an-need-no-space-mode 1
 .  nr an-need-break 1
 .  ps \\n[PS-SS]u
+.  ne (2v + 1u)
 .  ft \\*[HF]
 .  if \\n[an-remap-I-style-in-headings] .ftr I \\*[an-heading-family]BI
-.  ne (2v + 1u)
 .  if \\n[.$] \&\\$*
 .  if \\n[an-remap-I-style-in-headings] .ftr I I
 ..
@@ -799,6 +803,29 @@
 .    RB "[" "\\$1" "]"
 ..
 .
+.\" Set a man page cross reference.
+.\" .MR page-title page-section [trailing-text]
+.de1 MR
+.  if ((\\n[.$] < 2) : (\\n[.$] > 3)) \
+.    an-style-warn .\\$0 expects 2 or 3 arguments, got \\n[.$]
+.  nh
+.  if (\\n[U] & \\n[mU]) \{\
+.    if \\n(mH \
+\X^html:<a href="man:\\$1(\\$2)">^\c
+.    if \\n(mY \
+\X^tty: link man:\\$1(\\$2)^\c
+.  \}
+\&\\*[an-lic]\f[\\*[MF]]\\$1\\*[an-ic]\f[R](\\$2)\c
+.  if (\\n[U] & \\n[mU]) \{\
+.    if \\n(mH \
+\X^html:</a>^\c
+.    if \\n(mY \
+\X^tty: link^\c
+.  \}
+\&\\$3
+.  hy \\n[HY]
+..
+.
 .\" tbl(1) table support
 .
 .\" Start table.
@@ -886,7 +913,6 @@
 .nr an-devtag-needs-end-of-heading 0
 .nr an-devtag-needs-second-column 0
 .
-.nr an-do-draw-line-after-document 0
 .nr an-is-first-page-of-document 1
 .
 .nr an-is-output-html 0
@@ -1047,6 +1073,10 @@
 .if !r SN \
 .  nr SN 3n
 .
+.\" URI enablement
+.if !r U \
+.  nr U 1
+.
 .\" page number after which to apply letter suffixes
 .\"
 .\" Unlike most of these parameters, we do not set a default for X; only
@@ -1087,6 +1117,22 @@
 .    nr an-remap-I-style-in-headings 1
 .rr an-HF-length
 .rm an-heading-style
+.
+.\" man page title font
+.if !d MF \
+.  ds MF I\"
+.
+.\" Define italic correction strings.  Initially, they are empty.  If MF
+.\" is an oblique style, append the corrections.
+.ds an-lic \" left italic correction
+.ds an-ic \" italic correction
+.ds an-page-title-style \*[MF]\"
+.substring an-page-title-style -1 -1
+.if '\*[an-page-title-style]'I' \{\
+.  as an-lic \,\"
+.  as an-ic \/\"
+.\}
+.rm an-page-title-style
 .
 .if \n[cR] \
 .  an-set-up-continuous-rendering

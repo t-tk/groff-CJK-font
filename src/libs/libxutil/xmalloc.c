@@ -15,6 +15,8 @@ for more details.
 The GNU General Public License version 2 (GPL2) is available in the
 internet at <http://www.gnu.org/licenses/gpl-2.0.txt>. */
 
+#include <config.h>
+
 #include <X11/Xlib.h>
 #include <X11/Intrinsic.h>
 

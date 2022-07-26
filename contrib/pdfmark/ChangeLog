@@ -1,3 +1,57 @@
+2021-10-02  Keith Marshall  <keith.d.marshall@ntlworld.com>
+
+	Make a minor layout adjustment.
+
+	* pdfmark.ms (Section 2.4.3): Add a vertical space reservation, to
+	avoid a widow line at the end of the paragraph explaining use of...
+	(PDFHREF.Y): ...this computed register, in the definition of...
+	(PDFBOOKMARK.VIEW): ...this.
+
+2021-10-02  Keith Marshall  <keith.d.marshall@ntlworld.com>
+
+	Clarify references to use of the -Tpdf option.
+
+	* pdfmark.ms (Section 2, Section 3.1): Add footnotes, indicating that
+	only "-Tps" and "-Tpdf" output formats are supported, and that "-Tpdf"
+	may avoid a separate step, to convert from PostScript to PDF.
+
+2021-10-02  Keith Marshall  <keith.d.marshall@ntlworld.com>
+
+	Work around misplacement of link "hot-spots" in footnotes.
+
+	* pdfmark.ms (pdfhref-nobreak): New document-local macro; used instead
+	of "pdfhref", this forces paragraph adjustment before placement of any
+	unbreakable link text, for which line-wrap may be required.  Currently
+	observed only within footnotes, without adjustment, the "hot-spot" for
+	the link may be placed 1v above its associated text.
+
+2021-10-02  Keith Marshall  <keith.d.marshall@ntlworld.com>
+
+	Link footnote reference marks to footnote text.
+
+	* pdfmark.ms (FP): Redefine locally; replace s.tmac default.
+	(FF): Do not redefine; our FP replacement macro does not use it.
+	[d FS-MARK] (FS-MARK): Redefine locally; map it to...
+	(pdf:fn.mark): ...this locally defined macro.
+	[!d FS-MARK] (@FS): Rename s.tmac implementation as...
+	(pdf:fn.record): ...this, then redefine @FS itself, to call...
+	(pdf:fn.mark, pdf:fn.record): ...these, in respective order.
+	(groff-1.19.1, GhostScript-8.14): Update footnote reference syntax.
+	(Ghostscript-8.14, MSYS): Emulate sentence space after footnote mark.
+	(*): Replace s.tmac string definition; make it equivalent to "\c",
+	after renaming its original implementation as...
+	(pdf:fn.index): ...this; synchronize references with changes to...
+	(pdf:fn.index.count): ...this new locally defined register; it is
+	auto-incremented by one, as each footnote is placed.
+
+2021-10-01  Keith Marshall  <keith.d.marshall@ntlworld.com>
+
+	Incorporate user-defined TOC leader style.
+
+	* pdfmark.ms: Make some comment tidy-up adjustments.
+	(TC-LEADER, TC-MARGIN): Define them, to take advantage of new
+	s.tmac features; cf. <https://savannah.gnu.org/bugs/?61157>.
+
 2021-09-18  Keith Marshall  <keith.d.marshall@ntlworld.com>
 
 	Factor a further unnecessary macro out of spdf.tmac

@@ -1,3 +1,545 @@
+2021-10-21  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/tmac.am: Build more quietly.
+	(tmac/stamp-wrap): Prefix all rule commands with `$(AM_V_at)`;
+	since this target is a stamp file instead of useful artifact to
+	be distributed, make its creation completely silent by default.
+
+2021-10-21  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/roff/troff/troff.am: Build more robustly.
+	(src/roff/troff/majorminor.cpp): Drop progress-reporting `echo`
+	in favor of prefixing final rule command with `$(AM_V_GEN)`.
+	Prefix earlier rule commands with `$(AM_V_at)`.  Use `printf`
+	instead of `echo` to build the file, and create a temporary file
+	at first so that we don't race with the compiler on parallelized
+	builds.
+
+2021-10-21  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/preproc/eqn/eqn.am (neqn): Simplify: drop removal of
+	target prior to overwriting it; any system we can build groff on
+	should have a shell that implements the clobbering semantics of
+	the POSIX shell '>' operator.  (If this isn't true, we have
+	_many_ other target rules in our build to which we must add
+	prefatory `$(RM)`s, or I miss my guess.)
+
+2021-10-21  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/libs/libgroff/libgroff.am: Build more quietly and
+	robustly.
+	(src/libs/libgroff/version.cpp): Drop progress-reporting `echo`
+	in favor of prefixing final rule command with `$(AM_V_GEN)`.
+	Prefix earlier rule commands with `$(AM_V_at)`.  Use `printf`
+	instead of `echo` to build the file, and create a temporary file
+	at first so that we don't race with the compiler on parallelized
+	builds.  Drop nilpotent sed-transformation of a single closing
+	brace (and newline); this looks like a relic of past times when
+	we'd drop a trailing ".0" from the version number stored in the
+	C symbol `Version_string`.
+	(charset.alias, ref-del.sed, ref-add.sed): Prefix rule command
+	with `$(AM_V_GEN)`.
+
+2021-10-21  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/devices/xditview/xditview.am: Build more quietly.
+	(src/devices/xditview/GXditview-ad.h): Drop progress-reporting
+	`echo` in favor of prefixing rule command with `$(AM_V_GEN)`.
+
+2021-10-21  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* font/devpdf/devpdf.am: Build more quietly.
+	(font/devpdf/enc/text.enc, font/devpdf/map/symbolmap,
+	$(DEVPDFFONTMAP_1)): Prefix all rule commands with
+	`$(AM_V_at)`; since these are all `mkdir`s and `cp`s, I reason
+	that little can go wrong with them that won't be disclosed by
+	these tools' own diagnostic messages, so they are insignificant
+	from a perspective of build progress.
+
+2021-10-21  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* doc/doc.am: Build more quietly.
+	(doc/examples.stamp): Prefix all rule commands with
+	`$(AM_V_at)`; since this target is a stamp file instead of
+	useful artifact to be distributed, make its creation completely
+	silent by default.
+	(doc/groff.info, .texi.txt): Prefix directory creation with
+	`$(AM_V_at)` and `makeinfo` command with `$(AM_V_GEN)`.
+	(.texi.dvi, .texi.pdf): Prefix directory creation with
+	`$(AM_V_at)` and `makeinfo` command with `$(AM_V_GEN)`.  Send
+	diagnostic message to standard error if `texi2dvi` is
+	unavailable.
+	(.texi.html): Prefix directory creation with
+	`$(AM_V_at)`.  Two HTML versions are produced, in split and
+	unspit versions; prefix one `makeinfo` command with
+	`$(AM_V_GEN)` and the other with `$(AM_V_at)` so that only one
+	message is produced.
+	(gnu.eps): Drop useless/noisy `echo` command.  Prefix copy
+	operation with `$(AM_V_at)`.  Send diagnostic messages to
+	standard error if there are problems with the Netpbm tools.
+
+	(MOSTLYCLEANFILES): The `mostlyclean` target was leaving a file,
+	`groff.info-3`, behind in the build tree.  At some point our
+	Texinfo manual grew beyond earlier expectations.  Use a glob
+	`[0-9]` instead (giving a hostage to fortune that `makeinfo`
+	will never split our manual into more than nine chunks).
+
+2021-10-21  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* arch/misc/misc.am:
+	(arch_shdeps_sh): Pull file name into a new variable.
+	(EXTRA_DIST, shdeps.sed): Ue it.
+	(shdeps.sed): Build more quietly; prefix with `$(AM_GEN_V)`.
+
+2021-10-20  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[nroff]: Support groff's -R flag to run refer(1).
+
+	There's no reason not to support calling `refer` with nroff-mode
+	documents; typographically, it's less demanding than tbl(1).
+	GNU troff(1) supports an incompatible `-R` flag to suppress the
+	reading of troffrc{,-end} files, but this is likely not the `-R`
+	that users will want--it is most useful for troubleshooting
+	troff, and nroff already unconditionally loads a macro file
+	{tty-char.tmac}.
+
+	* src/roff/nroff/nroff.sh: Do it.
+
+	* src/roff/nroff/nroff.1.man:
+	* NEWS: Document it.
+
+2021-10-20  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/tmac.am (tmac/groff_man.7.man,
+	tmac/groff_man_style.7.man): Be quieter by default; use
+	$(AM_V_GEN) more consistently with the rest of the build.
+
+2021-10-19  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/roff/troff/input.cpp (do_error): Format diagnostic
+	messages in closer alignment with GNU Coding Standards: don't
+	introduce a space between the program name and the input file
+	name.
+
+	* src/roff/groff/tests/string_case_xform_errors.sh: Update
+	expected output.
+
+2021-10-19  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/roff/troff/env.cpp (distribute_space): Revert an
+	`assert()` I added in commit b93eacd8d7 (5 September); we can
+	indeed reach this code with a negative amount of desired space,
+	and in fact the "show hyphenation points" trick
+	<https://froude.eu/groff/examples/hyphenation-points.html>
+	relies upon it.  Add explanatory comment.
+
+	Fixes <https://savannah.gnu.org/bugs/?61348>.
+
+2021-10-17  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* test-groff.in: Add support for sboxes.tmac.
+
+2021-10-11  Paul Eggert <eggert@cs.ucla.edu>
+
+	Include <config.h> before any standard headers.
+
+	Gnulib requires that files that might use Gnulib features (which
+	pretty much means every C or C++ source file) must include
+	<config.h> first.  Arrange for that.  This will be needed once
+	Groff updates to the latest Gnulib; see Bjarni Ingi Gislason's
+	problem report in:
+	<https://lists.gnu.org/r/bug-gnulib/2021-10/msg00008.html>
+
+	The only exception I can see is src/utils/addftinfo/guess.cpp,
+	which does not include any standard include file either directly
+	or indirectly, and so need not include <config.h>.
+
+	* src/devices/xditview/Dvi.c:
+	* src/devices/xditview/font.c:
+	* src/devices/xditview/lex.c:
+	* src/devices/xditview/page.c:
+	* src/devices/xditview/parse.c:
+	* src/libs/libbib/map.c:
+	* src/libs/libgroff/change_lf.cpp:
+	* src/libs/libgroff/cmap.cpp:
+	* src/libs/libgroff/cset.cpp:
+	* src/libs/libgroff/fmod.c:
+	* src/libs/libgroff/getcwd.c:
+	* src/libs/libgroff/lf.cpp:
+	* src/libs/libgroff/ptable.cpp:
+	* src/libs/libgroff/quotearg.c:
+	* src/libs/libxutil/DviChar.c:
+	* src/libs/libxutil/XFontName.c:
+	* src/libs/libxutil/xmalloc.c:
+	* src/utils/indxbib/signal.c: Do it.
+
+	[Fixes <https://savannah.gnu.org/bugs/?61315>. --GBR]
+
+2021-10-10  Deri James  <deri@chuzzlewit.myzen.co.uk>
+
+	Handle pdfs > v1.4 loaded by \X'pdf: pdfpic.
+
+	* src/devices/gropdf/gropdf.pl: Improve loading of pdfs above
+	version 1.4, i.e. handle compressed nodes in /ObjStm. Also improve
+	code in \X'pdf: import'.
+
+2021-10-10  Deri James  <deri@chuzzlewit.myzen.co.uk>
+
+	Add new background boxes to gropdf.
+
+	* src/devices/gropdf/gropdf.pl: New \X'pdf background' command.
+	* tmac/pdf.tmac: Covenience command .pdfbackground added.
+	* contrib/sboxes/: Files which demonstrate use of background
+	boxes using -ms macros.
+
+2021-10-09  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[tests]: Fix portability problems in 2 tests.
+
+	* src/roff/groff/tests/break_zero-length_output_line_sanely.sh:
+	* tmac/tests/s_PN-works.sh: Migrate from `echo` to `printf` for
+	test inputs containing backslashes to be interpreted literally.
+
+	Fixes part of <https://savannah.gnu.org/bugs/?61302>.  Thanks to
+	Deri James for identifying the problem.
+
+2021-10-08  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[grotty]: Slightly refactor.
+
+	* src/devices/grotty/tty.cpp: Boolify.  Demote numerous
+	variables (and one return type) from `int` to `bool`, use
+	Boolean insted of integer literals with them, and give the
+	variables names resembling logical predicates.
+	 - horizontal_tab_flag -> want_horizontal_tabs
+	 - form_feed_flag -> want_form_feeds
+	 - bold_flag_option -> want_emboldening_by_overstriking
+	 - bold_flag -> do_bold
+	 - underline_flag_option -> want_italics_by_underlining
+	 - underline_flag -> do_underline
+	 - overstrike_flag -> want_glyph_composition_by_overstriking
+	 - draw_flag -> allow_drawing_commands
+	 - italic_flag_option -> want_sgr_italics
+	 - italic_flag -> do_sgr_italics
+	 - reverse_flag_option -> want_reverse_video_for_italics
+	 - reverse_flag -> do_reverse_video
+	 - old_drawing_scheme -> use_overstriking_drawing_scheme
+	(class tty_printer:printer): Similarly.
+	 - is_underline -> is_underlining
+	 - is_bold -> is_boldfacing
+	 - cu_flag -> is_continuously_underlining
+	(tty_printer::tty_color): Demote return type as above.  Invert
+	its sense; rename `unknown_color` to `is_known_color`.
+	(tty_printer::color_to_idx): Invert sense of test at
+	`tty_color()` call site.
+
+2021-10-06  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[grotty]: Slightly refactor.
+
+	* src/devices/grotty/tty.cpp (tty_printer::special_link): Use
+	consistent loop styles and drop unnecessary arithmetic.
+
+2021-10-06  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[man]: Fix oversight and improve `MR` test.
+
+	* tmac/an-ext.tmac (initialization): Enable `mY` register to
+	indicate use of grotty(1) (and therefore OSC 8 support) if the
+	"ascii", "cp1047", or "latin1" output devices are used, not just
+	"utf8".
+
+	* tmac/tests/an_MR-works.sh: Drop copy-and-paste cruft from a
+	different test.  Update expected output and check for the
+	presence of "link" device control subcommands, not just correct
+	font selections.
+
+2021-10-05  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[man]: Add `MR` macro for man page cross references.
+
+	* tmac/an.tmac (an-prepare-page-title): After a possibly
+	abbreviated man page title is determined, redefine `an-pageref`
+	to set the title portion in the font stored in the `MF` string
+	and bracket it with italic corrections if that font is thought
+	to be oblique.
+	(MR): Add macro to format the text of a man page cross
+	reference, and hyperlink it on HTML and terminal output devices
+	if permitted by the `U` register.
+	(initialization): Define `MF` string as `I` if not already set.
+	Define `an-lic` and `an-ic` strings as either empty or as
+	containing italic corrections.
+
+	* tmac/an-ext.tmac (MR): If the formatter is not GNU troff,
+	define macro to format the text of a man page cross reference.
+
+	* tmac/groff_man.7.man.in: Document it.
+	(Description): Add macro to summary table.
+	(Description/Hyperlink macros): Document new feature.  Note
+	origin in Plan 9 troff.  [style] Add examples of use.
+	(Description/Font style macros): Drop man page cross references
+	from list of items whose typeface conventions are disputed,
+	since we have a semantic macro now and a configurable means of
+	resolving the problem.
+	(History): Add `MR` item.
+	(Options) <MF>: Document new string.
+	(Files) <an-ext.tmac>: Revise discussion to accommodate `MR`.
+	(Authors): Add myself an author of extension macros.
+
+	* tmac/tests/an_MR-works.sh: Test it.
+	* tmac/tmac.am (tmac_TESTS): Run test.
+
+	* NEWS: Add item.
+
+2021-10-05  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/an.tmac (SH, SS): Invoke `ne` request _before_ performing
+	font remapping: any page-breaking decision will be taken before
+	the remapping happens, and so won't be in effect across a page
+	boundary, undesirably impacting header and footer text.
+
+	Fixes <https://savannah.gnu.org/bugs/?61279>.
+
+2021-10-05  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	Regression-test Savannah #61279.
+
+	* tmac/tests/an_font-remapping-does-not-affect-titles.sh: Do it.
+	* tmac/tmac.am (tmac_TESTS): Run test.
+
+2021-10-04  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/an.tmac (an-abbreviate-title): Rename to...
+	(an-prepare-page-title): ...this.
+
+2021-10-03  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[docs]: Correct erroneous claim: the ".NH S" extension to ms(7)
+	comes from 4.2BSD, not GNU.
+
+2021-10-03  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* doc/ms.ms (Creating a table of contents): Sync with recent
+	additions to groff_ms(7), expand, and heavily revise.
+
+2021-10-03  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[andoc,man,mdoc]: Fix Savannah #61266.  Resolve problems in
+	batch rendering of man pages to PDF arising from entanglement
+	of end-of-input traps, page location traps, continuous rendering
+	mode, and andoc's reloading of the (m)an and (m)doc packages.
+
+	* tmac/andoc.tmac (reload-doc, reload-man): Remove end-of-input
+	traps alongside others.
+
+	* tmac/an.tmac (an-end): Only perform flush and "manual" page
+	footer placement if in continuous rendering mode, since this
+	macro is not only called by a trap placed only in continuous
+	rendering mode, but also by andoc when changing macro packages.
+	Unconditionally remove the `an-header` trap since the next
+	document might be using a different macro package.
+
+	* tmac/mdoc/doc-common: In initialization, set flag indicating
+	that manual header placement will be required.
+	(Dt): Call `doc-setup-header` (which sets up several types of
+	trap) unconditionally, and break the page if the vertical
+	drawing position is anywhere but at the top.
+	(Os): If the package has just been initialized, call
+	`doc-header` to force the page header to be written.
+	(doc-end-macro): Remove `doc-header` trap since the next
+	document might be using a different macro package.  Break the
+	page.  Set flag indicating that manual header placement will be
+	required for the next document.
+
+	* tmac/mdoc/doc-ditroff (doc-setup-header): Only set page
+	location traps for the header and footer if not continuously
+	rendering.
+	* tmac/mdoc/doc-nroff (doc-setup-header): Stop calling
+	`doc-header` here if continuously rendering.  Emit an
+	unconditional break.  Except for the location of the footer
+	trap, the `doc-setup-header` implementations are now identical.
+
+	Refactoring is needed: some macros and registers have misleading
+	names, there is some code duplication in mdoc, and some of the
+	trap management problems are solved in slightly different ways
+	in man(7) and mdoc(7), perhaps unnecessarily.  We also need some
+	test scripts to protect us from regressions.  But this fixes the
+	rendering problems.
+
+	Fixes <https://savannah.gnu.org/bugs/?61266>.
+
+2021-10-02  Keith Marshall  <keith.d.marshall@ntlworld.com>
+
+	Correct manpage typo/inconsistency.
+
+	* tmac/groff_ms.7.man (TC_LEADER, TC_MARGIN): Correct; should
+	be...
+	(TC\-LEADER, TC\-MARGIN): ...respectively, for consistency
+	with...
+	* tmac/s.tmac (TC-LEADER, TC-MARGIN): ...these.
+
+2021-10-03  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/roff/troff/input.cpp (encode_char): Update diagnostic
+	messages to not presume the identity of the escape character;
+	continues 9be3f8e3 (4 June).
+
+2021-10-03  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/devices/grotty/tty.cpp (tty_printer:special_link): Tighten
+	code slightly by taking advantage of preprocessor string literal
+	concatenation.
+
+2021-10-01  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[man]: Fix `U` enablement override so it actually works the way
+	I had in mind.
+	- The package proper enables it by default, but
+	- the sample site configuration file switches it off, on the
+	  assumption that distributors and users will know better than
+	  we do when they get a capable pager in place, and
+	- a register setting at the command line (or otherwise prior to
+	  the loading of the macro package) is dispositive.
+
+	* tmac/an-ext.tmac: Rename URI output device capability register
+	from `U` to `mU`.
+	(UR, UE, MT, ME): Test both `U` and `mU` before handling
+	hyperlinks specially.
+	* tmac/an.tmac: If `man.local` did not initialize `U`, switch it
+	on.  The hope is that we can drop the stuff in `man.local`
+	completely at some point.
+	* tman/man.local: Only initialize `U` if it is not already
+	defined.
+
+2021-10-01  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[man]: Use OSC 8 hyperlinks.
+
+	* tmac/an-ext.tmac: Add registers `mY` (output driver is
+	"grotty") and `U` (generate hyperlinks).  `U` is intended to
+	apply to hyperlinking support in general, not just grotty's OSC
+	8 feature.  If the output driver is either grohtml or grotty,
+	make `U` true (`man.local` is read subsequently and can override
+	it).
+	(UR, MT): Conditionalize diversion production on hyperlink
+	support, not grohtml use per se.
+	(UE, ME): Generate device control commands for `tty` device to
+	emit hyperlinks.
+
+	* tmac/groff_man.7.man.in (Options): Document -U.
+	(Files) [style]: Add example of `U` register enablement.
+
+	* tmac/man.local: Disable `U` register by default, except on the
+	`html` device.
+
+	* NEWS: Add item.
+
+2021-10-01  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[grotty]: Add OSC 8 hyperlink support.
+
+	* src/devices/grotty/tty.cpp: Do it.  Define `OSC` (Operating
+	System Command) and `ST` (String Terminator) preprocessor
+	symbols for these ECMA-48 (ISO 6429) character sequences.
+	(tty_printer::simple_add_char): Add stripped-down alternative to
+	`add_char()` member function for cases where we want to use many
+	defaults because we're writing a terminal escape sequence, not
+	rendering a glyph.  (A function like `add_char()` that takes 8
+	arguments of varying types is a code smell--phew!)
+	(tty_printer::special): Call `special_link()` member function if
+	the device control command is `link`.
+	(tty_printer::special_link): Add new member function to generate
+	OSC 8 hyperlinks.
+
+	* src/devices/grotty/grotty.1.man: Document it.  Observe in
+	multiple places that disablement of SGR escape sequences
+	disables OSC 8 too.
+
+	* src/devices/grotty/tests/osc8_works.sh: Test it.
+	* src/devices/grotty/grotty.am (TESTS, grotty_TESTS): Run test.
+	(EXTRA_DIST): Ship test.
+
+	* NEWS: Add item.
+
+	Fixes <https://savannah.gnu.org/bugs/?60666>.  Thanks to Steffen
+	Nurpmeso for supplying a proof-of-concept.  (I went with my own
+	implementation, though, so blame me if it breaks.)
+
+2021-10-01  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[troff]: Convert special character glyphs corresponding to
+	Unicode Basic Latin ("ASCII") code points to those code points
+	when they occur in device escapes.  (They should be correct for
+	IBM code page 1047 as well, but this is untested.)  This is
+	necessary for encoding URLs in device control commands.  Special
+	character identifiers are presumed to be the defaults documented
+	in groff_char(7); this is a design gap that we should consider
+	addressing.  (We don't have a way to ask "is this the special
+	character corresponding to Unicode basic Latin code point X?")
+
+	* src/roff/troff/input.cpp (encode_char): Do it.
+
+2021-09-30  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[man, mdoc]: Draw line after each page more consistently in
+	continuous rendering mode.
+
+	* tmac/an.tmac (an-bp): Move responsibility for line-drawing
+	after each document from here...
+	(an-end): ...to here.  Refactor; drop
+	`an-do-draw-line-after-document` register in favor of testing
+	`\n[.F]` for nullity; if it is not null, then another document
+	is due to be processed (in fact, `.F` already contains its file
+	name), and we need to draw a separating line.  If it is null, we
+	have reached the end of input and none is necessary.
+
+	* tmac/mdoc/doc-ditroff.tmac (doc-setup-page-layout):
+	* tmac/mdoc/doc-nroff.tmac (doc-setup-page-layout): Save
+	configured line length in new register `doc-line-length`.
+	* tmac/mdoc/doc-common.tmac (doc-end-macro): Port the above
+	man(7) feature to mdoc(7); draw a line of this length after each
+	document if continuously rendering.
+
+2021-10-01  Keith Marshall  <keith.d.marshall@ntlworld.com>
+
+	[ms]: Update footnote handling documentation.
+
+	* tmac/groff_ms.7.man: Make some linguistic style adjustments.
+	(FP): Document it; see <https://savannah.gnu.org/bugs/?61022>.
+	(FS-MARK): Likewise, document this recently added feature.
+
+2021-10-01  Keith Marshall  <keith.d.marshall@ntlworld.com>
+
+	[ms]: Support user-defined TOC leader style.
+
+	* tmac/s.tmac (toc*leader-char): Rename it as...
+	(TC-LEADER): ...this; within PX, leave it unchanged, if
+	predefined.
+	(TC-MARGIN): New numeric register; if predefined, leave it
+	unchanged, otherwise define as \w'000'; use it instead of
+	hard-wired definition, within PX; see
+	<https://savannah.gnu.org/bugs/?61157>.
+
+	* tmac/groff_ms.7.man (TC-LEADER, TC-MARGIN): Document them.
+
+2021-09-28  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[pic]: Update input file name correctly.
+
+	* src/preproc/pic/troff.cpp (troff_output::set_location): Copy
+	the inbound file name argument with `strdup()` and store pointer
+	to this copy in `last_filename` instead of aliasing argument.
+	(troff_output::~troff_output): `free()` the memory allocated by
+	`strdup()` in destructor.
+
+	Fixes <https://savannah.gnu.org/bugs/?61206>.  Pointer
+	assignment instead of a string copy was being performed, which
+	means that after its initial assignment, `last_filename` always
+	shared its value ultimately with the `current_filename` pointer
+	{a libgroff symbol}, so `strcmp()` was always being performed on
+	identical pointers.  Problem appears to date back 30+ years, to
+	the dawn of our repo history.
+
 2021-09-24  G. Branden Robinson <g.branden.robinson@gmail.com>
 
 	* font/devlj4/S: Make font name consistent with file name.
@@ -180,8 +722,7 @@
 	* src/include/font.h (font::load_font): Drop second parameter.
 	It was never used for its intended purpose.
 	(load): Drop first parameter; likewise.
-	* src/libs/libgroff/font.cpp (font::load)
-	(load): As above.
+	* src/libs/libgroff/font.cpp (font::load, load): As above.
 
 	* src/libs/libgroff/font.cpp (struct text_file): Rename
 	`skip_comments` to `recognize_comments`.  Demote that and
@@ -245,8 +786,9 @@
 	[libgroff]: Make error reporting more flexible.
 
 	* src/libs/libgroff/error.cpp (do_error_with_file_and_line):
-	Interpret a line number of zero specially: treat the diagnostic
-	as applying to the entire file, and omit the line number.
+	Interpret a nonpositive line number specially: treat the
+	diagnostic as applying to the entire file, and omit the line
+	number.
 
 2021-09-17  G. Branden Robinson <g.branden.robinson@gmail.com>
 
@@ -468,10 +1010,10 @@
 
 	* src/libs/libbib/index.cpp
 	(index_search_item::get_invalidity_reason): Don't complain about
-	about a last list element being nonnegative if the list size was
-	zero in the first place, as can happen with an empty index.
-	More seriously from a language standpoint, avoid reading through 
-	a negative array index (this can escape a compiler's attention
+	a last list element being nonnegative if the list size was zero
+	in the first place, as can happen with an empty index.  More
+	seriously from a language standpoint, avoid reading through a
+	negative array index (this can escape a compiler's attention
 	because we're reading from the midst of a heap-allocated or
 	`mmap()`ed region, but it's still a code smell).
 
@@ -3832,7 +4374,12 @@
 	macro instead of RI.  The latter seemed kind of random and TH
 	is even more guaranteed to exist; it is the macro name most
 	characteristic of the man(7) language and the andoc.tmac
-	superstructure relies on it.
+	superstructure relies on it.  (TH may have been avoided because
+	of its use with tbl(1); however, neither man(7) nor mdoc(7)
+	support tbl's TH feature, and GNU tbl does not supply its own
+	empty fallback definition as it does for TS and TE.  If we ever
+	want TH-like functionality in future man pages, I suggest we
+	pick a new, non-colliding name for it.)
 	(initialization): Relocate load of devtag package; we don't
 	need it before entering compatibility mode.  Move assignment of
 	format of an-page-letter register from a "loose declaration"

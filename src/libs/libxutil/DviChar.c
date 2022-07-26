@@ -22,6 +22,8 @@ internet at <http://www.gnu.org/licenses/gpl-2.0.txt>. */
  * font indexes and back
  */
 
+#include <config.h>
+
 #include <stdlib.h>
 #include <string.h>
 #include "DviChar.h"

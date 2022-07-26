@@ -4,11 +4,11 @@
 #
 # groff is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free
-# Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Software Foundation, either version 3 of the License, or (at your
+# option) any later version.
 #
-# groff is distributed in the hope that it will be useful, but WITHOUT ANY
-# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# groff is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 # FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 # for more details.
 #
@@ -50,14 +50,14 @@ CLEANFILES += $(XDITVIEW_GENHDRS)
 
 man1_MANS += src/devices/xditview/gxditview.1
 
-# Because we defined gxditview_CPPFLAGS, automake renames all the xditview's 
-# objects, adding an "gxditview-" prefix. 
+# Because we defined gxditview_CPPFLAGS, automake renames all of
+# xditview's objects, adding an "gxditview-" prefix.
 src/devices/xditview/gxditview-device.$(OBJEXT): defs.h
 src/devices/xditview/gxditview-xditview.$(OBJEXT): $(XDITVIEW_GENHDRS)
 
 src/devices/xditview/GXditview-ad.h: $(xditview_srcdir)/GXditview.ad
-	@echo Making $@
-	$(SHELL) $(xditview_srcdir)/ad2c $(xditview_srcdir)/GXditview.ad > $@
+	$(AM_V_GEN)$(SHELL) $(xditview_srcdir)/ad2c \
+	  $(xditview_srcdir)/GXditview.ad > $@
 endif
 
 EXTRA_DIST += \
@@ -89,7 +89,9 @@ if WITHOUT_X11
 install_xditview:
 uninstall_xditview:
 else
-install_xditview: $(xditview_srcdir)/GXditview.ad $(xditview_srcdir)/GXditview-color.ad
+install_xditview: \
+  $(xditview_srcdir)/GXditview.ad \
+  $(xditview_srcdir)/GXditview-color.ad
 	-test -d $(DESTDIR)$(appresdir) \
 	  || $(mkinstalldirs) $(DESTDIR)$(appresdir)
 	if test -f $(DESTDIR)$(appresdir)/GXditview; then \
