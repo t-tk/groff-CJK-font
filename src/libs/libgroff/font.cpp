@@ -151,8 +151,8 @@ void text_file::error(const char *format,
 int glyph_to_ucs_codepoint(glyph *g)
 {
   const char *nm = glyph_to_name(g);
-  if (nm != NULL) {
-    if (check_unicode_name(nm) && strchr(nm, '_')==NULL) {
+  if (nm != 0) {
+    if (check_unicode_name(nm) && strchr(nm, '_')==0) {
       char *ignore;
       return (int)strtol(nm + 1, &ignore, 16);
     }
@@ -244,7 +244,7 @@ font::~font()
   }
 #ifdef ENABLE_UCSRANGE
   struct font_char_metric *wcp, *nwcp;
-  for (wcp = wch; wcp != NULL; wcp = nwcp) {
+  for (wcp = wch; wcp != 0; wcp = nwcp) {
     nwcp = wcp->next;
     if (wcp->special_device_coding)
       delete [] wcp->special_device_coding;
@@ -337,7 +337,7 @@ bool font::contains(glyph *g)
   int uc  = glyph_to_ucs_codepoint(g);
   if (uc>0) {
     font_char_metric *wcp = get_font_wchar_metric(uc);
-    if (wcp != NULL)
+    if (wcp != 0)
       return true;
   }
 #endif
@@ -377,12 +377,12 @@ struct font_char_metric *
 font::get_font_wchar_metric(int uc)
 {
   struct font_char_metric *wcp;
-  for (wcp = wch; wcp != NULL; wcp = wcp->next) {
+  for (wcp = wch; wcp != 0; wcp = wcp->next) {
     if (wcp->code <= uc && uc <= wcp->end_code) {
       return wcp;
     }
   }
-  return NULL;
+  return 0;
 }
 #endif
 
@@ -404,7 +404,7 @@ int font::get_width(glyph *g, int point_size)
   int uc  = glyph_to_ucs_codepoint(g);
   font_char_metric *wcp;
   if (uc>0) wcp = get_font_wchar_metric(uc);
-  if (wcp != NULL && !(idx < nindices && ch_index[idx] >= 0)) {
+  if (wcp != 0 && !(idx < nindices && ch_index[idx] >= 0)) {
     return scale(wcp->width, point_size);
   }
 #endif
@@ -463,7 +463,7 @@ int font::get_height(glyph *g, int point_size)
   int uc  = glyph_to_ucs_codepoint(g);
   font_char_metric *wcp;
   if (uc>0) wcp = get_font_wchar_metric(uc);
-  if (wcp != NULL) {
+  if (wcp != 0) {
     return scale(wcp->height, point_size);
   }
 #endif
@@ -487,7 +487,7 @@ int font::get_depth(glyph *g, int point_size)
   int uc  = glyph_to_ucs_codepoint(g);
   font_char_metric *wcp;
   if (uc>0) wcp = get_font_wchar_metric(uc);
-  if (wcp != NULL) {
+  if (wcp != 0) {
     return scale(wcp->depth, point_size);
   }
 #endif
@@ -511,7 +511,7 @@ int font::get_italic_correction(glyph *g, int point_size)
   int uc  = glyph_to_ucs_codepoint(g);
   font_char_metric *wcp;
   if (uc>0) wcp = get_font_wchar_metric(uc);
-  if (wcp != NULL) {
+  if (wcp != 0) {
     return scale(wcp->italic_correction, point_size);
   }
 #endif
@@ -535,7 +535,7 @@ int font::get_left_italic_correction(glyph *g, int point_size)
   int uc  = glyph_to_ucs_codepoint(g);
   font_char_metric *wcp;
   if (uc>0) wcp = get_font_wchar_metric(uc);
-  if (wcp != NULL) {
+  if (wcp != 0) {
     return scale(wcp->pre_math_space, point_size);
   }
 #endif
@@ -559,7 +559,7 @@ int font::get_subscript_correction(glyph *g, int point_size)
   int uc  = glyph_to_ucs_codepoint(g);
   font_char_metric *wcp;
   if (uc>0) wcp = get_font_wchar_metric(uc);
-  if (wcp != NULL) {
+  if (wcp != 0) {
     return scale(wcp->subscript_correction, point_size);
   }
 #endif
@@ -641,7 +641,7 @@ int font::get_character_type(glyph *g)
   int uc  = glyph_to_ucs_codepoint(g);
   font_char_metric *wcp;
   if (uc>0) wcp = get_font_wchar_metric(uc);
-  if (wcp != NULL) {
+  if (wcp != 0) {
     return wcp->type;
   }
 #endif
@@ -665,7 +665,7 @@ int font::get_code(glyph *g)
   int uc  = glyph_to_ucs_codepoint(g);
   font_char_metric *wcp;
   if (uc>0) wcp = get_font_wchar_metric(uc);
-  if (wcp != NULL) {
+  if (wcp != 0) {
     return uc;
   }
 #endif
@@ -707,7 +707,7 @@ const char *font::get_special_device_encoding(glyph *g)
   int uc  = glyph_to_ucs_codepoint(g);
   font_char_metric *wcp;
   if (uc>0) wcp = get_font_wchar_metric(uc);
-  if (wcp != NULL)
+  if (wcp != 0)
     return wcp->special_device_coding;
 #endif
   if (is_unicode) {
@@ -1027,80 +1027,80 @@ bool font::load(bool load_header_only)
       }
     }
 #ifdef ENABLE_UCSRANGE
-      else if (strcmp(directive, "charset-range") == 0) {
-	if (load_header_only)
-	  return 1;
-	saw_charset_directive = true;
-	int had_range = 0;
-	glyph *last_glyph = NULL;
-	for (;;) {
-	  if (!t.next_line()) {
-	    directive = 0;
-	    break;
-	  }
-	  char *nm = strtok(t.buf, WS);
-	  if (nm == 0)
-	    continue;			// I dont think this should happen
-	  p = strtok(0, WS);
-	  if (p == 0) {
-	    directive = nm;
-	    break;
-	  }
-	  int start_code = 0;
-	  int end_code = 0;
-	  int nrange = sscanf(nm, "u%X..u%X", &start_code, &end_code);
-	  if (nrange == 2) {
-	    had_range = 1;
-	    font_char_metric *wcp = new font_char_metric;
-	    wcp->code = start_code;
-	    wcp->end_code = end_code;
-	    wcp->height = 0;
-	    wcp->depth = 0;
-	    wcp->pre_math_space = 0;
-	    wcp->italic_correction = 0;
-	    wcp->subscript_correction = 0;
-	    int nparms = sscanf(p, "%d,%d,%d,%d,%d,%d",
-				&wcp->width, &wcp->height, &wcp->depth,
-				&wcp->italic_correction,
-				&wcp->pre_math_space,
-				&wcp->subscript_correction);
-	    if (nparms < 1) {
-	      t.error("bad width for '%1'", nm);
-	      return 0;
-	    }
-	    p = strtok(0, WS);
-	    if (p == 0) {
-	      t.error("missing character type for '%1'", nm);
-	      return 0;
-	    }
-	    int type;
-	    if (sscanf(p, "%d", &type) != 1) {
-	      t.error("bad character type for '%1'", nm);
-	      return 0;
-	    }
-	    if (type < 0 || type > 255) {
-	      t.error("character type '%1' out of range", type);
-	      return 0;
-	    }
-	    wcp->type = type;
-
-	    p = strtok(0, WS);
-	    if ((p == NULL) || (strcmp(p, "--") == 0)) {
-	      wcp->special_device_coding = NULL;
-	    } else {
-	      wcp->special_device_coding = new char[strlen(p) + 1];
-	      strcpy(wcp->special_device_coding, p);
-	    }
-	    wcp->next = wch;
-	    wch = wcp;
-	    p = NULL;
-	  }
+    else if (strcmp(directive, "charset-range") == 0) {
+      if (load_header_only)
+	return true;
+      saw_charset_directive = true;
+      int had_range = 0;
+      for (;;) {
+	if (!t.next_line()) {
+	  directive = 0;
+	  break;
 	}
-	if (!had_range) {
-	  t.error("I didn't seem to find any characters");
-	  return 0;
+	char *nm = strtok(t.buf, WS);
+	assert(nm != 0);
+	p = strtok(0, WS);
+	if (0 == p) {
+	  directive = nm;
+	  break;
+	}
+	int start_code = 0;
+	int end_code = 0;
+	int nrange = sscanf(nm, "u%X..u%X", &start_code, &end_code);
+	if (nrange == 2) {
+	  had_range = 1;
+	  font_char_metric *wcp = new font_char_metric;
+	  wcp->code = start_code;
+	  wcp->end_code = end_code;
+	  wcp->height = 0;
+	  wcp->depth = 0;
+	  wcp->pre_math_space = 0;
+	  wcp->italic_correction = 0;
+	  wcp->subscript_correction = 0;
+	  int nparms = sscanf(p, "%d,%d,%d,%d,%d,%d",
+			      &wcp->width, &wcp->height, &wcp->depth,
+			      &wcp->italic_correction,
+			      &wcp->pre_math_space,
+			      &wcp->subscript_correction);
+	  if (nparms < 1) {
+	    t.error("missing or invalid width for character range '%1'", nm);
+	    return false;
+	  }
+	  p = strtok(0, WS);
+	  if (0 == p) {
+	    t.error("missing character type for '%1'", nm);
+	    return false;
+	  }
+	  int type;
+	  if (sscanf(p, "%d", &type) != 1) {
+	    t.error("invalid character type for '%1'", nm);
+	    return false;
+	  }
+	  if (type < 0 || type > 255) {
+	    t.error("character type '%1' out of range for '%2'", type,
+	            nm);
+	    return false;
+	  }
+	  wcp->type = type;
+
+	  p = strtok(0, WS);
+	  if ((0 == p) || (strcmp(p, "--") == 0)) {
+	    wcp->special_device_coding = 0;
+	  }
+	  else {
+	    wcp->special_device_coding = new char[strlen(p) + 1];
+	    strcpy(wcp->special_device_coding, p);
+	  }
+	  wcp->next = wch;
+	  wch = wcp;
+	  p = 0;
 	}
       }
+      if (!had_range) {
+	t.error("no glyphs defined in font description");
+	return false;
+      }
+    }
 #endif
     else if (strcmp(directive, "charset") == 0) {
       if (load_header_only)
