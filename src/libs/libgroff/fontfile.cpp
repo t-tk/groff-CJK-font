@@ -60,9 +60,16 @@ void font::command_line_font_dir(const char *dir)
 
 FILE *font::open_file(const char *nm, char **pathp)
 {
-  char *filename = new char[strlen(nm) + strlen(device) + 5];
-  sprintf(filename, "dev%s/%s", device, nm);
-  FILE *fp = font_path.open_file(filename, pathp);
+  FILE *fp = 0;
+  int expected_size = strlen(nm) + strlen(device) + 5; // 'dev' '/' '\0'
+  char *filename = new char[expected_size];
+  // Do not traverse user-specified directories; Savannah #61424.
+  if (0 == strchr(nm, '/')) {
+    int actual_size = sprintf(filename, "dev%s/%s", device, nm);
+    expected_size--; // sprintf() doesn't count the null terminator.
+    if (actual_size == expected_size)
+      fp = font_path.open_file(filename, pathp);
+  }
   delete[] filename;
   return fp;
 }

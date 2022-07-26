@@ -1028,7 +1028,10 @@ AC_DEFUN([GROFF_TMAC],
        done
      done
    done
-   AC_MSG_RESULT([$sys_tmac_prefix])
+   sys_tmac_prefix_result=none
+   test "x$sys_tmac_prefix" = "x" \
+	|| sys_tmac_prefix_result="$sys_tmac_prefix"
+   AC_MSG_RESULT([$sys_tmac_prefix_result])
    AC_SUBST([sys_tmac_prefix])
 
    AC_MSG_CHECKING([which system macro packages should be made available])
@@ -1073,8 +1076,9 @@ AC_DEFUN([GROFF_TMAC],
      done
      rm -f conftest.sol
    fi
-   test "x$tmac_wrap" = "x" && tmac_wrap="none found"
-   AC_MSG_RESULT([$tmac_wrap])
+   tmac_wrap_result="none found"
+   test "x$tmac_wrap" = "x" || tmac_wrap_result="$tmac_wrap"
+   AC_MSG_RESULT([$tmac_wrap_result])
    AC_SUBST([tmac_wrap])])
 
 
@@ -1763,3 +1767,11 @@ AC_DEFUN([GROFF_PDFTOOLS],
       groff_have_pdftools=no;
    fi
    ])
+
+AC_DEFUN([GROFF_USE_GROFF_ALLOCATOR],
+  [AC_ARG_ENABLE([groff-allocator],
+   [AS_HELP_STRING([--enable-groff-allocator], [enable groff's own \
+allocator for C++ new/delete])],
+   [test "x$enableval" = "xyes" && use_groff_allocator=yes],
+   [use_groff_allocator=]
+)])

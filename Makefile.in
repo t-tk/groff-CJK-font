@@ -1463,14 +1463,17 @@ prefixexecbin_PROGRAMS = eqn$(EXEEXT) grn$(EXEEXT) pic$(EXEEXT) \
 @BUILD_EXAMPLES_TRUE@am__append_16 = $(PROCESSEDEXAMPLEFILES)
 @BUILD_EXAMPLES_FALSE@am__append_17 = $(EXAMPLEFILES)
 @BUILD_INFODOC_TRUE@am__append_18 = doc/groff.info doc/groff.info-[0-9]
-@WITHOUT_X11_FALSE@am__append_19 = libxutil.a
-@WITHOUT_X11_TRUE@am__append_20 = $(GXDITVIEWSOURCES)
-@WITHOUT_X11_FALSE@am__append_21 = gxditview
-@WITHOUT_X11_FALSE@am__append_22 = $(XDITVIEW_GENHDRS)
-@WITHOUT_X11_FALSE@am__append_23 = src/devices/xditview/gxditview.1
-@WITHOUT_X11_FALSE@am__append_24 = xtotroff
-@WITHOUT_X11_FALSE@am__append_25 = src/utils/xtotroff/xtotroff.1
-@USEPROGRAMPREFIX_FALSE@am__append_26 = $(PREFIXMAN1)
+@USE_GROFF_ALLOCATOR_TRUE@am__append_19 = \
+@USE_GROFF_ALLOCATOR_TRUE@  src/libs/libgroff/new.cpp
+
+@WITHOUT_X11_FALSE@am__append_20 = libxutil.a
+@WITHOUT_X11_TRUE@am__append_21 = $(GXDITVIEWSOURCES)
+@WITHOUT_X11_FALSE@am__append_22 = gxditview
+@WITHOUT_X11_FALSE@am__append_23 = $(XDITVIEW_GENHDRS)
+@WITHOUT_X11_FALSE@am__append_24 = src/devices/xditview/gxditview.1
+@WITHOUT_X11_FALSE@am__append_25 = xtotroff
+@WITHOUT_X11_FALSE@am__append_26 = src/utils/xtotroff/xtotroff.1
+@USEPROGRAMPREFIX_FALSE@am__append_27 = $(PREFIXMAN1)
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/gnulib_m4/00gnulib.m4 \
@@ -1629,6 +1632,33 @@ am_libdriver_a_OBJECTS = src/libs/libdriver/input.$(OBJEXT) \
 libdriver_a_OBJECTS = $(am_libdriver_a_OBJECTS)
 libgroff_a_AR = $(AR) $(ARFLAGS)
 libgroff_a_LIBADD =
+am__libgroff_a_SOURCES_DIST = src/libs/libgroff/assert.cpp \
+	src/libs/libgroff/change_lf.cpp src/libs/libgroff/cmap.cpp \
+	src/libs/libgroff/color.cpp src/libs/libgroff/cset.cpp \
+	src/libs/libgroff/curtime.cpp src/libs/libgroff/device.cpp \
+	src/libs/libgroff/errarg.cpp src/libs/libgroff/error.cpp \
+	src/libs/libgroff/fatal.cpp src/libs/libgroff/filename.cpp \
+	src/libs/libgroff/font.cpp src/libs/libgroff/fontfile.cpp \
+	src/libs/libgroff/geometry.cpp src/libs/libgroff/getopt.c \
+	src/libs/libgroff/getopt1.c src/libs/libgroff/glyphuni.cpp \
+	src/libs/libgroff/htmlhint.cpp src/libs/libgroff/hypot.cpp \
+	src/libs/libgroff/iftoa.c src/libs/libgroff/invalid.cpp \
+	src/libs/libgroff/itoa.c src/libs/libgroff/lf.cpp \
+	src/libs/libgroff/lineno.cpp src/libs/libgroff/localcharset.c \
+	src/libs/libgroff/macropath.cpp src/libs/libgroff/matherr.c \
+	src/libs/libgroff/maxfilename.cpp \
+	src/libs/libgroff/maxpathname.cpp src/libs/libgroff/mksdir.cpp \
+	src/libs/libgroff/nametoindex.cpp src/libs/libgroff/paper.cpp \
+	src/libs/libgroff/prime.cpp src/libs/libgroff/progname.c \
+	src/libs/libgroff/ptable.cpp src/libs/libgroff/quotearg.c \
+	src/libs/libgroff/relocate.cpp \
+	src/libs/libgroff/searchpath.cpp src/libs/libgroff/spawnvp.c \
+	src/libs/libgroff/string.cpp src/libs/libgroff/strsave.cpp \
+	src/libs/libgroff/symbol.cpp src/libs/libgroff/tmpfile.cpp \
+	src/libs/libgroff/tmpname.cpp src/libs/libgroff/unicode.cpp \
+	src/libs/libgroff/uniglyph.cpp src/libs/libgroff/uniuni.cpp \
+	src/libs/libgroff/relocatable.h src/libs/libgroff/new.cpp
+@USE_GROFF_ALLOCATOR_TRUE@am__objects_2 = src/libs/libgroff/libgroff_a-new.$(OBJEXT)
 am_libgroff_a_OBJECTS = src/libs/libgroff/libgroff_a-assert.$(OBJEXT) \
 	src/libs/libgroff/libgroff_a-change_lf.$(OBJEXT) \
 	src/libs/libgroff/libgroff_a-cmap.$(OBJEXT) \
@@ -1660,7 +1690,6 @@ am_libgroff_a_OBJECTS = src/libs/libgroff/libgroff_a-assert.$(OBJEXT) \
 	src/libs/libgroff/libgroff_a-maxpathname.$(OBJEXT) \
 	src/libs/libgroff/libgroff_a-mksdir.$(OBJEXT) \
 	src/libs/libgroff/libgroff_a-nametoindex.$(OBJEXT) \
-	src/libs/libgroff/libgroff_a-new.$(OBJEXT) \
 	src/libs/libgroff/libgroff_a-paper.$(OBJEXT) \
 	src/libs/libgroff/libgroff_a-prime.$(OBJEXT) \
 	src/libs/libgroff/libgroff_a-progname.$(OBJEXT) \
@@ -1676,7 +1705,7 @@ am_libgroff_a_OBJECTS = src/libs/libgroff/libgroff_a-assert.$(OBJEXT) \
 	src/libs/libgroff/libgroff_a-tmpname.$(OBJEXT) \
 	src/libs/libgroff/libgroff_a-unicode.$(OBJEXT) \
 	src/libs/libgroff/libgroff_a-uniglyph.$(OBJEXT) \
-	src/libs/libgroff/libgroff_a-uniuni.$(OBJEXT)
+	src/libs/libgroff/libgroff_a-uniuni.$(OBJEXT) $(am__objects_2)
 nodist_libgroff_a_OBJECTS =  \
 	src/libs/libgroff/libgroff_a-version.$(OBJEXT)
 libgroff_a_OBJECTS = $(am_libgroff_a_OBJECTS) \
@@ -1750,7 +1779,7 @@ am__gxditview_SOURCES_DIST = src/devices/xditview/device.c \
 	src/devices/xditview/parse.h src/devices/xditview/xditview.c \
 	src/devices/xditview/device.h src/devices/xditview/DviP.h \
 	src/devices/xditview/Menu.h src/devices/xditview/Dvi.h
-am__objects_2 = src/devices/xditview/gxditview-device.$(OBJEXT) \
+am__objects_3 = src/devices/xditview/gxditview-device.$(OBJEXT) \
 	src/devices/xditview/gxditview-draw.$(OBJEXT) \
 	src/devices/xditview/gxditview-Dvi.$(OBJEXT) \
 	src/devices/xditview/gxditview-font.$(OBJEXT) \
@@ -1758,9 +1787,9 @@ am__objects_2 = src/devices/xditview/gxditview-device.$(OBJEXT) \
 	src/devices/xditview/gxditview-page.$(OBJEXT) \
 	src/devices/xditview/gxditview-parse.$(OBJEXT) \
 	src/devices/xditview/gxditview-xditview.$(OBJEXT)
-@WITHOUT_X11_FALSE@am_gxditview_OBJECTS = $(am__objects_2)
-am__objects_3 =
-@WITHOUT_X11_FALSE@nodist_gxditview_OBJECTS = $(am__objects_3)
+@WITHOUT_X11_FALSE@am_gxditview_OBJECTS = $(am__objects_3)
+am__objects_4 =
+@WITHOUT_X11_FALSE@nodist_gxditview_OBJECTS = $(am__objects_4)
 gxditview_OBJECTS = $(am_gxditview_OBJECTS) \
 	$(nodist_gxditview_OBJECTS)
 @WITHOUT_X11_FALSE@gxditview_DEPENDENCIES = $(am__DEPENDENCIES_1) \
@@ -2094,7 +2123,7 @@ SOURCES = $(lib_libgnu_a_SOURCES) $(EXTRA_lib_libgnu_a_SOURCES) \
 	$(nodist_troff_SOURCES) $(xtotroff_SOURCES)
 DIST_SOURCES = $(am__lib_libgnu_a_SOURCES_DIST) \
 	$(EXTRA_lib_libgnu_a_SOURCES) $(libbib_a_SOURCES) \
-	$(libdriver_a_SOURCES) $(libgroff_a_SOURCES) \
+	$(libdriver_a_SOURCES) $(am__libgroff_a_SOURCES_DIST) \
 	$(am__libxutil_a_SOURCES_DIST) $(addftinfo_SOURCES) \
 	$(eqn_SOURCES) $(grn_SOURCES) $(grodvi_SOURCES) \
 	$(groff_SOURCES) $(grolbp_SOURCES) $(grolj4_SOURCES) \
@@ -3816,16 +3845,15 @@ MOSTLYCLEANFILES = lib/core lib/*.stackdump lib/alloca.h \
 	font/devlj4/DESC font/devpdf/download font/devpdf/DESC \
 	font/devpdf/Foundry font/devpdf/build_font_files \
 	font/devpdf/util/BuildFoundries $(DEVPSFONTFILES_GENERATED) \
-	$(DEVUTF8FONTSFILES) font/devutf8/DESC $(TMACMDOCFILES) \
-	tmac/groff_man.7.man tmac/groff_man_style.7.man tmac/www.tmac \
-	tmac/*-stamp tmac/stamp-wrap tmac/*-wrap \
-	$(prefixexecbin_SCRIPTS) $(bin_SCRIPTS) $(man1_MANS) \
-	$(man5_MANS) $(man7_MANS) $(PREFIXMAN1) test-groff \
-	.version.tree
+	$(DEVUTF8FONTSFILES) font/devutf8/DESC tmac/groff_man.7.man \
+	tmac/groff_man_style.7.man tmac/www.tmac tmac/*-stamp \
+	tmac/stamp-wrap tmac/*-wrap $(prefixexecbin_SCRIPTS) \
+	$(bin_SCRIPTS) $(man1_MANS) $(man5_MANS) $(man7_MANS) \
+	$(PREFIXMAN1) test-groff .version.tree
 MOSTLYCLEANADD = 
 # No GNU Make output.
 noinst_LIBRARIES = lib/libgnu.a libbib.a libdriver.a libgroff.a \
-	$(am__append_19)
+	$(am__append_20)
 
 # Case of out-of-source build: we must create the 'man' directory.
 
@@ -3850,7 +3878,7 @@ BUILT_SOURCES = $(ALLOCA_H) $(ERRNO_H) $(FLOAT_H) $(LIMITS_H) \
 	$(LIBUNISTRING_UNIWIDTH_H) lib/wchar.h lib/wctype.h man defs.h \
 	test-groff $(top_srcdir)/.version
 CLEANFILES = defs.h src/libs/libgroff/version.cpp charset.alias \
-	ref-add.sed ref-del.sed $(am__append_22) \
+	ref-add.sed ref-del.sed $(am__append_23) \
 	src/preproc/eqn/eqn.hpp src/preproc/eqn/eqn.cpp \
 	src/preproc/eqn/eqn.output src/preproc/pic/pic.cpp \
 	src/preproc/pic/pic.hpp src/preproc/pic/pic.output \
@@ -3865,6 +3893,8 @@ CLEANFILES = defs.h src/libs/libgroff/version.cpp charset.alias \
 # doc.eps. We try in priority to use the file in 'doc'.
 
 # TODO: these .c files could be removed (use gnulib instead).
+
+# required test artifacts
 
 # Other files that should be present in the distribution tarball.
 
@@ -3981,7 +4011,7 @@ EXTRA_DIST = gnulib_m4/gnulib-cache.m4 lib/alloca.in.h lib/errno.in.h \
 	src/devices/gropdf/pdfmom.1.man src/devices/grops/grops.1.man \
 	src/devices/grops/psfig.diff src/devices/grops/TODO \
 	src/devices/grotty/grotty.1.man src/devices/grotty/TODO \
-	$(grotty_TESTS) $(am__append_20) src/devices/xditview/ad2c \
+	$(grotty_TESTS) $(am__append_21) src/devices/xditview/ad2c \
 	src/devices/xditview/ChangeLog src/devices/xditview/DESC.in \
 	src/devices/xditview/FontMap \
 	src/devices/xditview/GXditview-color.ad \
@@ -4001,6 +4031,8 @@ EXTRA_DIST = gnulib_m4/gnulib-cache.m4 lib/alloca.in.h lib/errno.in.h \
 	src/preproc/refer/refer.1.man src/preproc/soelim/TODO \
 	src/preproc/soelim/soelim.1.man src/preproc/tbl/tbl.1.man \
 	$(tbl_TESTS) src/roff/groff/groff.1.man $(groff_TESTS) \
+	src/roff/groff/tests/artifacts/HONEYPOT \
+	src/roff/groff/tests/artifacts/devascii/README \
 	src/roff/nroff/nroff.1.man src/roff/nroff/nroff.sh \
 	$(nroff_TESTS) src/roff/troff/column.cpp \
 	src/roff/troff/troff.1.man src/roff/troff/TODO \
@@ -4044,12 +4076,12 @@ man1_MANS = contrib/chem/chem.1 contrib/eqn2graph/eqn2graph.1 \
 	src/devices/grolbp/grolbp.1 src/devices/grolj4/grolj4.1 \
 	src/devices/gropdf/gropdf.1 src/devices/gropdf/pdfmom.1 \
 	src/devices/grops/grops.1 src/devices/grotty/grotty.1 \
-	$(am__append_23) src/preproc/preconv/preconv.1 \
+	$(am__append_24) src/preproc/preconv/preconv.1 \
 	src/roff/groff/groff.1 src/utils/addftinfo/addftinfo.1 \
 	src/utils/afmtodit/afmtodit.1 src/utils/grog/grog.1 \
 	src/utils/hpftodit/hpftodit.1 src/utils/lkbib/lkbib.1 \
 	src/utils/pfbtops/pfbtops.1 src/utils/tfmtodit/tfmtodit.1 \
-	$(am__append_25) $(am__append_26)
+	$(am__append_26) $(am__append_27)
 man5_MANS = contrib/groff_filenames/groff_filenames.5 man/groff_font.5 \
 	man/groff_out.5 man/groff_tmac.5 src/devices/grolj4/lj4_font.5
 man7_MANS = contrib/hdtbl/groff_hdtbl.7 contrib/mm/groff_mm.7 \
@@ -5037,57 +5069,32 @@ libgroff_a_CPPFLAGS = \
 
 
 # Build from OBJS
-libgroff_a_SOURCES = \
-  src/libs/libgroff/assert.cpp \
-  src/libs/libgroff/change_lf.cpp \
-  src/libs/libgroff/cmap.cpp \
-  src/libs/libgroff/color.cpp \
-  src/libs/libgroff/cset.cpp\
-  src/libs/libgroff/curtime.cpp \
-  src/libs/libgroff/device.cpp \
-  src/libs/libgroff/errarg.cpp \
-  src/libs/libgroff/error.cpp \
-  src/libs/libgroff/fatal.cpp \
-  src/libs/libgroff/filename.cpp \
-  src/libs/libgroff/font.cpp \
-  src/libs/libgroff/fontfile.cpp \
-  src/libs/libgroff/geometry.cpp \
-  src/libs/libgroff/getopt.c \
-  src/libs/libgroff/getopt1.c \
-  src/libs/libgroff/glyphuni.cpp \
-  src/libs/libgroff/htmlhint.cpp \
-  src/libs/libgroff/hypot.cpp \
-  src/libs/libgroff/iftoa.c \
-  src/libs/libgroff/invalid.cpp \
-  src/libs/libgroff/itoa.c \
-  src/libs/libgroff/lf.cpp \
-  src/libs/libgroff/lineno.cpp \
-  src/libs/libgroff/localcharset.c \
-  src/libs/libgroff/macropath.cpp \
-  src/libs/libgroff/matherr.c \
-  src/libs/libgroff/maxfilename.cpp \
-  src/libs/libgroff/maxpathname.cpp \
-  src/libs/libgroff/mksdir.cpp \
-  src/libs/libgroff/nametoindex.cpp \
-  src/libs/libgroff/new.cpp \
-  src/libs/libgroff/paper.cpp \
-  src/libs/libgroff/prime.cpp \
-  src/libs/libgroff/progname.c \
-  src/libs/libgroff/ptable.cpp \
-  src/libs/libgroff/quotearg.c \
-  src/libs/libgroff/relocate.cpp \
-  src/libs/libgroff/searchpath.cpp \
-  src/libs/libgroff/spawnvp.c \
-  src/libs/libgroff/string.cpp \
-  src/libs/libgroff/strsave.cpp \
-  src/libs/libgroff/symbol.cpp \
-  src/libs/libgroff/tmpfile.cpp \
-  src/libs/libgroff/tmpname.cpp \
-  src/libs/libgroff/unicode.cpp \
-  src/libs/libgroff/uniglyph.cpp \
-  src/libs/libgroff/uniuni.cpp \
-  src/libs/libgroff/relocatable.h
-
+libgroff_a_SOURCES = src/libs/libgroff/assert.cpp \
+	src/libs/libgroff/change_lf.cpp src/libs/libgroff/cmap.cpp \
+	src/libs/libgroff/color.cpp src/libs/libgroff/cset.cpp \
+	src/libs/libgroff/curtime.cpp src/libs/libgroff/device.cpp \
+	src/libs/libgroff/errarg.cpp src/libs/libgroff/error.cpp \
+	src/libs/libgroff/fatal.cpp src/libs/libgroff/filename.cpp \
+	src/libs/libgroff/font.cpp src/libs/libgroff/fontfile.cpp \
+	src/libs/libgroff/geometry.cpp src/libs/libgroff/getopt.c \
+	src/libs/libgroff/getopt1.c src/libs/libgroff/glyphuni.cpp \
+	src/libs/libgroff/htmlhint.cpp src/libs/libgroff/hypot.cpp \
+	src/libs/libgroff/iftoa.c src/libs/libgroff/invalid.cpp \
+	src/libs/libgroff/itoa.c src/libs/libgroff/lf.cpp \
+	src/libs/libgroff/lineno.cpp src/libs/libgroff/localcharset.c \
+	src/libs/libgroff/macropath.cpp src/libs/libgroff/matherr.c \
+	src/libs/libgroff/maxfilename.cpp \
+	src/libs/libgroff/maxpathname.cpp src/libs/libgroff/mksdir.cpp \
+	src/libs/libgroff/nametoindex.cpp src/libs/libgroff/paper.cpp \
+	src/libs/libgroff/prime.cpp src/libs/libgroff/progname.c \
+	src/libs/libgroff/ptable.cpp src/libs/libgroff/quotearg.c \
+	src/libs/libgroff/relocate.cpp \
+	src/libs/libgroff/searchpath.cpp src/libs/libgroff/spawnvp.c \
+	src/libs/libgroff/string.cpp src/libs/libgroff/strsave.cpp \
+	src/libs/libgroff/symbol.cpp src/libs/libgroff/tmpfile.cpp \
+	src/libs/libgroff/tmpname.cpp src/libs/libgroff/unicode.cpp \
+	src/libs/libgroff/uniglyph.cpp src/libs/libgroff/uniuni.cpp \
+	src/libs/libgroff/relocatable.h $(am__append_19)
 nodist_libgroff_a_SOURCES = src/libs/libgroff/version.cpp
 
 # Data for localcharset.c.  Taken from libiconv/libcharset.
@@ -5275,6 +5282,7 @@ tbl_SOURCES = \
 
 tbl_TESTS = \
   src/preproc/tbl/tests/cooperate-with-nm-request.sh \
+  src/preproc/tbl/tests/do-not-segv-on-invalid-vertical-span-entry.sh \
   src/preproc/tbl/tests/save-and-restore-hyphenation-parameters.sh \
   src/preproc/tbl/tests/save-and-restore-tab-stops.sh
 
@@ -5297,6 +5305,7 @@ groff_TESTS = \
   src/roff/groff/tests/dot-cp_register_works.sh \
   src/roff/groff/tests/dot-nm_register_works.sh \
   src/roff/groff/tests/evc_produces_no_output_if_invalid.sh \
+  src/roff/groff/tests/fp_should_not_traverse_directories.sh \
   src/roff/groff/tests/initialization_is_quiet.sh \
   src/roff/groff/tests/localization_works.sh \
   src/roff/groff/tests/msoquiet_works.sh \
@@ -5487,9 +5496,10 @@ dist_localtmac_DATA = tmac/man.local tmac/mdoc.local
 tmac_TESTS = \
   tmac/tests/an-ext_ME-punct-hyphenates.sh \
   tmac/tests/an-ext_MT-body-hyphenates.sh \
+  tmac/tests/an-ext_UE-breaks-before-long-URIs.sh \
   tmac/tests/an-ext_UE-punct-hyphenates.sh \
   tmac/tests/an-ext_UR-body-hyphenates.sh \
-  tmac/tests/an-ext_UE-breaks-before-long-URIs.sh \
+  tmac/tests/an-ext_link-macros-work-in-paragraph-tags.sh \
   tmac/tests/an_AT-and-UC-footer-saved-and-restored.sh \
   tmac/tests/an_CS-register-off.sh \
   tmac/tests/an_CS-register-on.sh \
@@ -5532,7 +5542,8 @@ tmac_TESTS = \
 
 tmac_XFAIL_TESTS = \
   tmac/tests/an-ext_ME-punct-hyphenates.sh \
-  tmac/tests/an-ext_UE-punct-hyphenates.sh
+  tmac/tests/an-ext_UE-punct-hyphenates.sh \
+  tmac/tests/an-ext_UE-breaks-before-long-URIs.sh
 
 
 # Check input file for bare m4 keywords.
@@ -5965,9 +5976,6 @@ src/libs/libgroff/libgroff_a-mksdir.$(OBJEXT):  \
 src/libs/libgroff/libgroff_a-nametoindex.$(OBJEXT):  \
 	src/libs/libgroff/$(am__dirstamp) \
 	src/libs/libgroff/$(DEPDIR)/$(am__dirstamp)
-src/libs/libgroff/libgroff_a-new.$(OBJEXT):  \
-	src/libs/libgroff/$(am__dirstamp) \
-	src/libs/libgroff/$(DEPDIR)/$(am__dirstamp)
 src/libs/libgroff/libgroff_a-paper.$(OBJEXT):  \
 	src/libs/libgroff/$(am__dirstamp) \
 	src/libs/libgroff/$(DEPDIR)/$(am__dirstamp)
@@ -6014,6 +6022,9 @@ src/libs/libgroff/libgroff_a-uniglyph.$(OBJEXT):  \
 	src/libs/libgroff/$(am__dirstamp) \
 	src/libs/libgroff/$(DEPDIR)/$(am__dirstamp)
 src/libs/libgroff/libgroff_a-uniuni.$(OBJEXT):  \
+	src/libs/libgroff/$(am__dirstamp) \
+	src/libs/libgroff/$(DEPDIR)/$(am__dirstamp)
+src/libs/libgroff/libgroff_a-new.$(OBJEXT):  \
 	src/libs/libgroff/$(am__dirstamp) \
 	src/libs/libgroff/$(DEPDIR)/$(am__dirstamp)
 src/libs/libgroff/libgroff_a-version.$(OBJEXT):  \
@@ -7479,20 +7490,6 @@ src/libs/libgroff/libgroff_a-nametoindex.obj: src/libs/libgroff/nametoindex.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgroff_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/libs/libgroff/libgroff_a-nametoindex.obj `if test -f 'src/libs/libgroff/nametoindex.cpp'; then $(CYGPATH_W) 'src/libs/libgroff/nametoindex.cpp'; else $(CYGPATH_W) '$(srcdir)/src/libs/libgroff/nametoindex.cpp'; fi`
 
-src/libs/libgroff/libgroff_a-new.o: src/libs/libgroff/new.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgroff_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/libs/libgroff/libgroff_a-new.o -MD -MP -MF src/libs/libgroff/$(DEPDIR)/libgroff_a-new.Tpo -c -o src/libs/libgroff/libgroff_a-new.o `test -f 'src/libs/libgroff/new.cpp' || echo '$(srcdir)/'`src/libs/libgroff/new.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/libs/libgroff/$(DEPDIR)/libgroff_a-new.Tpo src/libs/libgroff/$(DEPDIR)/libgroff_a-new.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/libs/libgroff/new.cpp' object='src/libs/libgroff/libgroff_a-new.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgroff_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/libs/libgroff/libgroff_a-new.o `test -f 'src/libs/libgroff/new.cpp' || echo '$(srcdir)/'`src/libs/libgroff/new.cpp
-
-src/libs/libgroff/libgroff_a-new.obj: src/libs/libgroff/new.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgroff_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/libs/libgroff/libgroff_a-new.obj -MD -MP -MF src/libs/libgroff/$(DEPDIR)/libgroff_a-new.Tpo -c -o src/libs/libgroff/libgroff_a-new.obj `if test -f 'src/libs/libgroff/new.cpp'; then $(CYGPATH_W) 'src/libs/libgroff/new.cpp'; else $(CYGPATH_W) '$(srcdir)/src/libs/libgroff/new.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/libs/libgroff/$(DEPDIR)/libgroff_a-new.Tpo src/libs/libgroff/$(DEPDIR)/libgroff_a-new.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/libs/libgroff/new.cpp' object='src/libs/libgroff/libgroff_a-new.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgroff_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/libs/libgroff/libgroff_a-new.obj `if test -f 'src/libs/libgroff/new.cpp'; then $(CYGPATH_W) 'src/libs/libgroff/new.cpp'; else $(CYGPATH_W) '$(srcdir)/src/libs/libgroff/new.cpp'; fi`
-
 src/libs/libgroff/libgroff_a-paper.o: src/libs/libgroff/paper.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgroff_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/libs/libgroff/libgroff_a-paper.o -MD -MP -MF src/libs/libgroff/$(DEPDIR)/libgroff_a-paper.Tpo -c -o src/libs/libgroff/libgroff_a-paper.o `test -f 'src/libs/libgroff/paper.cpp' || echo '$(srcdir)/'`src/libs/libgroff/paper.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/libs/libgroff/$(DEPDIR)/libgroff_a-paper.Tpo src/libs/libgroff/$(DEPDIR)/libgroff_a-paper.Po
@@ -7674,6 +7671,20 @@ src/libs/libgroff/libgroff_a-uniuni.obj: src/libs/libgroff/uniuni.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/libs/libgroff/uniuni.cpp' object='src/libs/libgroff/libgroff_a-uniuni.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgroff_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/libs/libgroff/libgroff_a-uniuni.obj `if test -f 'src/libs/libgroff/uniuni.cpp'; then $(CYGPATH_W) 'src/libs/libgroff/uniuni.cpp'; else $(CYGPATH_W) '$(srcdir)/src/libs/libgroff/uniuni.cpp'; fi`
+
+src/libs/libgroff/libgroff_a-new.o: src/libs/libgroff/new.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgroff_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/libs/libgroff/libgroff_a-new.o -MD -MP -MF src/libs/libgroff/$(DEPDIR)/libgroff_a-new.Tpo -c -o src/libs/libgroff/libgroff_a-new.o `test -f 'src/libs/libgroff/new.cpp' || echo '$(srcdir)/'`src/libs/libgroff/new.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/libs/libgroff/$(DEPDIR)/libgroff_a-new.Tpo src/libs/libgroff/$(DEPDIR)/libgroff_a-new.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/libs/libgroff/new.cpp' object='src/libs/libgroff/libgroff_a-new.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgroff_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/libs/libgroff/libgroff_a-new.o `test -f 'src/libs/libgroff/new.cpp' || echo '$(srcdir)/'`src/libs/libgroff/new.cpp
+
+src/libs/libgroff/libgroff_a-new.obj: src/libs/libgroff/new.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgroff_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/libs/libgroff/libgroff_a-new.obj -MD -MP -MF src/libs/libgroff/$(DEPDIR)/libgroff_a-new.Tpo -c -o src/libs/libgroff/libgroff_a-new.obj `if test -f 'src/libs/libgroff/new.cpp'; then $(CYGPATH_W) 'src/libs/libgroff/new.cpp'; else $(CYGPATH_W) '$(srcdir)/src/libs/libgroff/new.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/libs/libgroff/$(DEPDIR)/libgroff_a-new.Tpo src/libs/libgroff/$(DEPDIR)/libgroff_a-new.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/libs/libgroff/new.cpp' object='src/libs/libgroff/libgroff_a-new.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgroff_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/libs/libgroff/libgroff_a-new.obj `if test -f 'src/libs/libgroff/new.cpp'; then $(CYGPATH_W) 'src/libs/libgroff/new.cpp'; else $(CYGPATH_W) '$(srcdir)/src/libs/libgroff/new.cpp'; fi`
 
 src/libs/libgroff/libgroff_a-version.o: src/libs/libgroff/version.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgroff_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/libs/libgroff/libgroff_a-version.o -MD -MP -MF src/libs/libgroff/$(DEPDIR)/libgroff_a-version.Tpo -c -o src/libs/libgroff/libgroff_a-version.o `test -f 'src/libs/libgroff/version.cpp' || echo '$(srcdir)/'`src/libs/libgroff/version.cpp
@@ -9639,6 +9650,13 @@ src/preproc/tbl/tests/cooperate-with-nm-request.sh.log: src/preproc/tbl/tests/co
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
+src/preproc/tbl/tests/do-not-segv-on-invalid-vertical-span-entry.sh.log: src/preproc/tbl/tests/do-not-segv-on-invalid-vertical-span-entry.sh
+	@p='src/preproc/tbl/tests/do-not-segv-on-invalid-vertical-span-entry.sh'; \
+	b='src/preproc/tbl/tests/do-not-segv-on-invalid-vertical-span-entry.sh'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 src/preproc/tbl/tests/save-and-restore-hyphenation-parameters.sh.log: src/preproc/tbl/tests/save-and-restore-hyphenation-parameters.sh
 	@p='src/preproc/tbl/tests/save-and-restore-hyphenation-parameters.sh'; \
 	b='src/preproc/tbl/tests/save-and-restore-hyphenation-parameters.sh'; \
@@ -9705,6 +9723,13 @@ src/roff/groff/tests/dot-nm_register_works.sh.log: src/roff/groff/tests/dot-nm_r
 src/roff/groff/tests/evc_produces_no_output_if_invalid.sh.log: src/roff/groff/tests/evc_produces_no_output_if_invalid.sh
 	@p='src/roff/groff/tests/evc_produces_no_output_if_invalid.sh'; \
 	b='src/roff/groff/tests/evc_produces_no_output_if_invalid.sh'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+src/roff/groff/tests/fp_should_not_traverse_directories.sh.log: src/roff/groff/tests/fp_should_not_traverse_directories.sh
+	@p='src/roff/groff/tests/fp_should_not_traverse_directories.sh'; \
+	b='src/roff/groff/tests/fp_should_not_traverse_directories.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
@@ -9891,6 +9916,13 @@ tmac/tests/an-ext_MT-body-hyphenates.sh.log: tmac/tests/an-ext_MT-body-hyphenate
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
+tmac/tests/an-ext_UE-breaks-before-long-URIs.sh.log: tmac/tests/an-ext_UE-breaks-before-long-URIs.sh
+	@p='tmac/tests/an-ext_UE-breaks-before-long-URIs.sh'; \
+	b='tmac/tests/an-ext_UE-breaks-before-long-URIs.sh'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 tmac/tests/an-ext_UE-punct-hyphenates.sh.log: tmac/tests/an-ext_UE-punct-hyphenates.sh
 	@p='tmac/tests/an-ext_UE-punct-hyphenates.sh'; \
 	b='tmac/tests/an-ext_UE-punct-hyphenates.sh'; \
@@ -9905,9 +9937,9 @@ tmac/tests/an-ext_UR-body-hyphenates.sh.log: tmac/tests/an-ext_UR-body-hyphenate
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tmac/tests/an-ext_UE-breaks-before-long-URIs.sh.log: tmac/tests/an-ext_UE-breaks-before-long-URIs.sh
-	@p='tmac/tests/an-ext_UE-breaks-before-long-URIs.sh'; \
-	b='tmac/tests/an-ext_UE-breaks-before-long-URIs.sh'; \
+tmac/tests/an-ext_link-macros-work-in-paragraph-tags.sh.log: tmac/tests/an-ext_link-macros-work-in-paragraph-tags.sh
+	@p='tmac/tests/an-ext_link-macros-work-in-paragraph-tags.sh'; \
+	b='tmac/tests/an-ext_link-macros-work-in-paragraph-tags.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \

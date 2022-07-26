@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
@@ -17,6 +16,9 @@ for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
+#ifndef GROFF_LIB_H
+#define GROFF_LIB_H
+
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -25,14 +27,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 #define _ALL_SOURCE
 #endif
 
+#ifdef __cplusplus
 extern "C" {
+#endif
 #ifndef HAVE_STRERROR
   char *strerror(int);
 #endif
   const char *i_to_a(int);
   const char *ui_to_a(unsigned int);
   const char *if_to_a(int, int);
+#ifdef __cplusplus
 }
+#endif
 
 #define __GETOPT_PREFIX groff_
 #include <getopt.h>
@@ -59,9 +65,13 @@ double groff_hypot(double, double);
 
 #include <stdarg.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* LynxOS 4.0.0 doesn't declare vfprintf() */
 #ifdef NEED_DECLARATION_VFPRINTF
-extern "C" { int vfprintf(FILE *, const char *, va_list); }
+  int vfprintf(FILE *, const char *, va_list);
 #endif
 
 #ifndef HAVE_MKSTEMP
@@ -72,48 +82,56 @@ int mkstemp(char *tmpl);
 
 int mksdir(char *tmpl);
 
-FILE *xtmpfile(char **namep = 0,
-	       const char *postfix_long = 0, const char *postfix_short = 0,
-	       int do_unlink = 1);
-char *xtmptemplate(const char *postfix_long, const char *postfix_short);
+#ifdef __cplusplus
+  FILE *xtmpfile(char **namep = 0,
+		 const char *postfix_long = 0,
+		 const char *postfix_short = 0,
+		 int do_unlink = 1);
+  char *xtmptemplate(const char *postfix_long,
+		     const char *postfix_short);
+#endif
 
 #ifdef NEED_DECLARATION_POPEN
-extern "C" { FILE *popen(const char *, const char *); }
+  FILE *popen(const char *, const char *);
 #endif /* NEED_DECLARATION_POPEN */
 
 #ifdef NEED_DECLARATION_PCLOSE
-extern "C" { int pclose (FILE *); }
+  int pclose (FILE *);
 #endif /* NEED_DECLARATION_PCLOSE */
 
-size_t file_name_max(const char *fname);
-size_t path_name_max();
+  size_t file_name_max(const char *fname);
+  size_t path_name_max(void);
 
-extern char invalid_char_table[];
+  extern char invalid_char_table[];
 
-inline int invalid_input_char(int c)
-{
-  return c >= 0 && invalid_char_table[c];
-}
+  inline int invalid_input_char(int c)
+  {
+    return c >= 0 && invalid_char_table[c];
+  }
 
 #ifdef HAVE_STRCASECMP
 #ifdef NEED_DECLARATION_STRCASECMP
 // Ultrix4.3's string.h fails to declare this.
-extern "C" { int strcasecmp(const char *, const char *); }
+  int strcasecmp(const char *, const char *); }
 #endif /* NEED_DECLARATION_STRCASECMP */
 #else /* !HAVE_STRCASECMP */
-extern "C" { int strcasecmp(const char *, const char *); }
+  int strcasecmp(const char *, const char *);
 #endif /* HAVE_STRCASECMP */
 
 #if !defined(_AIX) && !defined(sinix) && !defined(__sinix__)
 #ifdef HAVE_STRNCASECMP
 #ifdef NEED_DECLARATION_STRNCASECMP
 // SunOS's string.h fails to declare this.
-extern "C" { int strncasecmp(const char *, const char *, int); }
+  int strncasecmp(const char *, const char *, int);
 #endif /* NEED_DECLARATION_STRNCASECMP */
 #else /* !HAVE_STRNCASECMP */
-extern "C" { int strncasecmp(const char *, const char *, size_t); }
+  int strncasecmp(const char *, const char *, size_t);
 #endif /* HAVE_STRNCASECMP */
 #endif /* !_AIX && !sinix && !__sinix__ */
+
+#ifdef __cplusplus
+}
+#endif
 
 #ifdef HAVE_CC_LIMITS_H
 #include <limits.h>
@@ -121,13 +139,21 @@ extern "C" { int strncasecmp(const char *, const char *, size_t); }
 #define INT_MAX 2147483647
 #endif /* !HAVE_CC_LIMITS_H */
 
-/* Maximum number of digits in the decimal representation of an int
-   (not including the -). */
-
-#define INT_DIGITS 10
+/* Maximum number of digits in decimal representations of `int` types
+   not including a leading minus sign. */
+#define INT_DIGITS 19		/* enough for 64 bit integer */
+#define UINT_DIGITS 20
 
 #ifdef PI
 #undef PI
 #endif
 
-const double PI = 3.14159265358979323846;
+static const double PI = 3.14159265358979323846;
+
+#endif /* GROFF_LIB_H */
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

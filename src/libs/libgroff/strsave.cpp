@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
@@ -29,7 +28,13 @@ char *strsave(const char *s)
   if (s == 0)
     return 0;
   char *p = (char*)malloc(strlen(s) + 1);
-  strcpy(p, s);
+  if (p != 0)
+    strcpy(p, s);
   return p;
 }
 
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

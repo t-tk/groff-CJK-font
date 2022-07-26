@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
  *   http://partners.adobe.com/public/developer/en/ps/5001.DSC_Spec.pdf
  */
 
+#include "lib.h" // PI
 #include "driver.h"
 #include "stringclass.h"
 #include "cset.h"

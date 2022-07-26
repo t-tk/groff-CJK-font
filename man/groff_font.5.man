@@ -101,16 +101,28 @@ The
 file contains a series of directives;
 each begins a line.
 .
-Except for the
+Their order is not important,
+with two exceptions:
+(1) the
+.B res
+directive must precede any
+.B \%papersize
+directive;
+and
+(2) the
 .B charset
-directive,
-which must come last
-(if at all),
-their order is not important.
+directive must come last
+(if at all).
 .
-If a directive name is duplicated,
-however,
-later entries in the file override previous ones.
+If a directive name is repeated,
+later entries in the file override previous ones
+(except that the paper dimensions are computed based on the
+.B res
+directive last seen when
+.B \%papersize
+is encountered).
+.
+Spaces and/or tabs separate words and are ignored at line boundaries.
 .
 Comments start with the
 .RB \[lq] # \[rq]
@@ -179,12 +191,13 @@ The vertical dimension of the physical output medium is
 units
 (deprecated:
 use
-.B papersize
+.B \%papersize
 instead).
 .
 .
 .TP
-.BI papersize\~ format-or-dimension-pair-or-file-name
+.BI papersize\~ format-or-dimension-pair-or-file-name\c
+\~.\|.\|.
 The dimensions of the physical output medium are as according to the
 argument,
 which is either
@@ -271,7 +284,7 @@ The horizontal dimension of the physical output medium is
 units
 (deprecated:
 use
-.B papersize
+.B \%papersize
 instead).
 .
 .
@@ -402,7 +415,7 @@ handling built into
 is used.
 .
 However,
-if there are entries in a
+if there are entries in a font description file's
 .B charset
 section,
 they either override the default mappings for those particular
@@ -553,11 +566,13 @@ and is parsed similarly to the
 file described above.
 .
 Except for the directive names that begin the second section,
-their ordering is immaterial;
-later directives of the same name override earlier ones;
+their ordering is immaterial.
+.
+Later directives of the same name override earlier ones,
+spaces and tabs are handled in the same way,
 and the same comment syntax is supported.
 .
-Empty lines are ignored in both sections.
+Empty lines are ignored throughout.
 .
 .
 .TP
@@ -566,18 +581,30 @@ The name of the font
 .RI is\~ F .
 .
 .RB \[lq] DESC \[rq]
-and
+is an invalid font name.
+.
+Simple integers are valid,
+but their use is discouraged.
+.
+.RI ( groff
+requests and escape sequences interpret non-negative font names as
+mounting positions instead.
+.
+Further,
+a font named
 .RB \[lq] 0 \[rq]
-are invalid font names.
+cannot be automatically mounted by the
+.B fonts
+directive of a
+.I DESC
+file.)
 .
 .
 .TP
 .BI spacewidth\~  n
-The width of a normal,
-unadjusted space is
+The width of an unadjusted inter-word space is
 .IR n \~basic
-units at a type size of
-.IR unit-width \~points.
+units.
 .
 .
 .P
@@ -897,7 +924,9 @@ is ignored.
 .
 .
 .P
-A line in the charset section can also have the following format.
+A line in the
+.B charset
+section can also have the following format.
 .
 .
 .IP
@@ -915,7 +944,7 @@ Such aliases can be chained.
 .P
 The word
 .B kernpairs
-starts the kernpairs section.
+starts a list of kerning adjustments to be made to adjacent glyph pairs.
 .
 It contains a sequence of lines formatted as follows.
 .

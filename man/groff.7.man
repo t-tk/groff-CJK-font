@@ -240,252 +240,323 @@ for a survey and the background of
 .I roff
 systems.
 .
-.I groff
-also refers to GNU
-.I roff
-system's front end,
-.MR groff @MAN1EXT@ .
-.
 .
 .P
-This document provides only short descriptions of roff language
-elements.
+This document is intended as a reference.
 .
-.IR "Groff: The GNU Implementation of troff" ,
-by Trent A.\& Fisher and Werner Lemberg,
-is the primary
+The primary
 .I groff
 manual,
-and is written in Texinfo.
+.IR "Groff: The GNU Implementation of troff" ,
+by Trent A.\& Fisher and Werner Lemberg,
+is a better resource for learners,
+containing many examples and much discussion.
 .
-You can browse it interactively with \[lq]info groff\[rq].
+It is written in Texinfo;
+you can browse it interactively with \[lq]info groff\[rq].
+.
+Additional formats,
+including plain text,
+HTML,
+DVI,
+and PDF,
+may be available in
+.IR \%@DOCDIR@ .
 .
 .
 .P
-Historically, the
-.I roff language
-was called
-.IR troff .
 .I groff
-is compatible with the classical system and provides proper
-extensions.
-.
-So in GNU, the terms
-.IR roff ,
-.IR troff ,
-and
-.I groff language
-could be used as synonyms.
-.
-However
-.I troff
-slightly tends to refer more to the classical aspects, whereas
-.I groff
-emphasizes the GNU extensions, and
+is a member of a family of related
 .I roff
-is the general term for the language.
+languages that share many traits.
+.
+We use \[lq]roff\[rq] to denote features that are universal,
+or nearly so,
+among implementations of this family.
+.
+We apply the term \[lq]groff\[rq] to the language documented here,
+the GNU implementation of the overall system,
+and the command of that name.
 .
 .
 .P
-The general syntax for writing groff documents is relatively easy, but
-writing extensions to the roff language can be a bit harder.
+GNU
+.IR troff , \" GNU
+installed on this system as
+.MR @g@troff @MAN1EXT@ ,
+is the
+.I formatter:
+a program that reads device and font descriptions
+(\c
+.MR groff_font @MAN5EXT@ ),
+interprets the
+.I groff
+language expressed in text input files,
+and translates that input into a device-independent output format
+(\c
+.MR groff_out @MAN5EXT@ )
+that is usually then post-processed by an output driver to produce
+PostScript,
+PDF,
+HTML,
+DVI,
+or terminal output.
+.
+.
+.\" ====================================================================
+.SH "Input format"
+.\" ====================================================================
+.
+.I roff
+input files contain text interspersed with instructions to control the
+formatter.
+.
+Even in the absence of such instructions,
+.I \%@g@troff
+still processes its input in several ways,
+by filling,
+hyphenating,
+breaking,
+and adjusting it,
+and supplementing it with inter-sentence space.
 .
 .
 .P
-The roff language is line-oriented.
+Input to
+.I \%@g@troff
+must be in one of two character encodings it can recognize:
+IBM code page 1047 on EBCDIC systems,
+and ISO\~Latin-1 (8859-1) otherwise.
 .
-There are only two kinds of lines, control lines and text lines.
+Use of ISO\~646-1991:IRV (\[lq]US-ASCII\[rq]) or (equivalently) the
+\[lq]Basic Latin\[rq]
+subset of ISO\~10646 (\[lq]Unicode\[rq]) is recommended;
+see
+.MR groff_char @MAN7EXT@ .
 .
-The control lines start with a control character, by default a period
-.dquoted_char .
-or a single quote
-.dquoted_char \[aq] ;
-all other lines are text lines.
-.
-.
-.P
-.B Control lines
-represent commands, optionally with arguments.
-.
-They have the following syntax.
-.
-The leading control character can be followed by a command name;
-arguments, if any, are separated by spaces (but not tab characters)
-from the command name and among themselves, for example,
-.RS
-.P
-.Text .command_name arg1 arg2
-.RE
+.MR groff @MAN1EXT@
+and the
+.MR preconv @MAN1EXT@
+preprocessor can transform other encodings,
+including UTF-8,
+to satisfy
+.IR \%@g@troff 's
+requirements.
 .
 .
 .P
-For indentation, any number of space or tab characters can be inserted
-between the leading control character and the command name, but the
-control character must be on the first position of the line.
-.
-.
-.P
-.B Text lines
-represent the parts that is printed.
-They can be modified by escape sequences, which are recognized by a
-leading backslash
-.squoted_char \[rs] .
-These are in-line or even in-word formatting elements or functions.
-.
-Some of these take arguments separated by single quotes
-.dquoted_char \[aq] ,
-others are regulated by a length encoding introduced by an open
-parenthesis
-.squoted_char (
-or enclosed in brackets
-.squoted_char [
-and
-.squoted_char ] .
+.I groff
+input is organized into lines separated by the Unix newline character
+(U+000A) and parsed character by character.
 .
 .
 .\" ====================================================================
 .SH "\f[I]groff\f[] elements"
 .\" ====================================================================
 .
-The roff language elements add formatting information to a text file.
-.
-The fundamental elements are predefined commands and variables that
-make roff a full-blown programming language.
-.
-.
-.P
-There are two kinds of roff commands, possibly with arguments.
-.B Requests
-are written on a line of their own starting with a dot
-.squoted_char .\&
-or a
-.dquoted_char \[aq] ,
-whereas
-.B Escape sequences
-are in-line functions and in-word formatting elements starting with a
-backslash
-.squoted_char \[rs] .
+Lines of input to any
+.I roff
+formatter can be classified as one of two types:
+control lines and text lines.
 .
 .
 .P
-The user can define her own formatting commands using the
+A
+.I control line
+starts with the
+.I control character,
+a dot
+.RB (\[lq] .\& \[rq])
+or the
+.I no-break control character,
+a neutral apostrophe
+.RB (\[lq] \[aq] \[rq]).
+.
+Either control character is followed by zero or more spaces or tabs
+and then an optional
+.I request,
+an instruction built in to the formatter.
+.
+Some requests take one or more
+.I arguments,
+which follow on the same line,
+separated from the request name and each other only by spaces.
+.
+.
+.P
+Any input line that is not a control line is a
+.I text line.
+.
+See section \[lq]Line continuation\[rq] below for an exception to this
+rule.
+.
+Text lines generally become formatted output.
+.
+To start a text line with the control or no-break control character,
+prefix the character with the
+.B \[rs]&
+escape sequence.
+.
+.
+.P
+.I Escape sequences
+start with the
+.I escape character,
+a backslash
+.B \[rs],
+and are followed by at least one additional character.
+.
+They can appear anywhere in the input.
+.
+.
+.P
+With requests,
+the escape and control characters can be changed and,
+in
+.I groff,
+the escape mechanism can be turned off and back on.
+.
+.
+.P
+.I Macros
+permit the extension or replacement of the request repertoire.
+.
+Requests like
 .request .de
-request.
+(shown here with a leading control character to clarify its identity)
+can be invoked to define a macro,
+a user-directed abbreviation for a collection of input lines.
 .
-These commands are called
-.BR macros ,
-but they are used exactly like requests.
+Macros are called on control lines much as requests are invoked,
+albeit with occasional differences in argument handling.
 .
-Macro packages are pre-defined sets of macros written in the groff
-language.
+When a macro is called,
+its definition
+(or \[lq]body\[rq])
+is
+.I interpolated,
+as if typed at its call site.
 .
-A user's possibilities to create escape sequences herself is very
-limited, only special characters can be mapped.
-.
-.
-.P
-The groff language provides several kinds of variables with
-different interfaces.
-.
-There are pre-defined variables, but the user can define her own
-variables as well.
+Its contents are then parsed normally.
 .
 .
 .P
-.B String
-variables store character sequences.
+.I Strings
+store character sequences.
 .
-They are set with the
+They are defined with the
 .request .ds
-request and retrieved by the
+request and interpolated with the
 .esc *
-escape sequences.
+escape sequence.
 .
-Strings can have variables.
+Strings can be parameterized as macros can.
 .
 .
 .P
-.B Register
-variables can store numerical values, numbers with a scale unit, and
-occasionally string-like objects.
+.I Registers
+store numerical values.
 .
 They are set with the
 .request .nr
-request and retrieved by the
+request or
+.esc R
+escape sequence and interpolated with the
 .esc n
-escape sequences.
+escape sequence.
+.
+Some read-only predefined registers interpolate text.
 .
 .
 .P
-.B Environments
-allow the user to temporarily store global formatting parameters like
-line length, font size, etc.\& for later reuse.
+.I Fonts
+are identified either by a name or by a mounting position
+(a non-negative number).
 .
-This is done by the
-.request .ev
-request.
-.
-.
-.P
-.B Fonts
-are identified either by a name or by an internal number.
-.
-The current font is chosen by the
+A font is selected for glyph rendering by the
 .request .ft
 request or by the
 .esc f
-escape sequences.
+escape sequence.
 .
-Each device has special fonts, but the following fonts are available
-for all devices.
+Four font styles are available on all devices.
+.
 .B R
-is the standard font Roman.
+is \[lq]Roman\[rq]:
+normal,
+upright text.
+.
 .B B
-is its
-.B bold
-counterpart.
+is
+.BR bold ,
+an upright typeface with a heavier weight.
 .
-The
-.I italic
-font is called
 .B I
-and is available everywhere, but on text devices it is displayed as an
-underlined Roman font.
+is
+.IR italic ,
+a face that is oblique on typesetter output devices and usually
+underlined instead on terminal devices.
 .
-For the graphical output devices, there exist constant-width pendants
-of these fonts,
-.BR CR ,
-.BR CI ,
-and
-.BR CB .
-On text devices, all glyphs have a constant width anyway.
+.B BI
+is \f[BI]bold-italic\f[]\,, \" indulging a bit of man(7) evil here
+combining both of the foregoing style variations.
+.
+Typesetter devices typically offer one or more
+.I special
+fonts as well;
+they provide glyphs that are not available in the multiple styles of
+text fonts.
 .
 .
 .P
-.B Glyphs
+.I groff
+supports named
+.I colors
+for glyph rendering and drawing of geometric primitives.
+.
+Stroke and fill colors are distinct;
+the stroke color is used for glyphs.
+.
+Colors are defined with the
+.request .defcolor
+request,
+and selected with the
+.request .gcolor
+and
+.request .fcolor
+requests or
+.esc m
+and
+.esc M
+escape sequences.
+.
+.
+.P
+.I Glyphs
 are visual representation forms of
-.BR characters .
-In groff, the distinction between those two elements is not always
-obvious (and a full discussion is beyond the scope of this man page).
+.I characters.
 .
-A first approximation is that glyphs have a specific size and
-colour and are taken from a specific font; they can't be modified any
-more \[en] characters are the input, and glyphs are the output.
+In
+.I groff,
+the distinction between those two elements is not always obvious
+(and a full discussion is beyond our scope).
 .
-As soon as an output line has been generated, it no longer contains
-characters but glyphs.
+To roughly characterize,
+\[lq]A\[rq] is a character when we consider it in the abstract:
+to make it a glyph,
+we must select a typeface with which to render it,
+and determine its type size and color.
 .
-In this man page, we use either \[oq]glyph\[cq] or
-\[oq]character\[cq], whatever is more appropriate.
+The formatting process turns input characters into output glyphs.
 .
 A few characters commonly seen on keyboards are treated
 specially by
 .I roff
-languages and may not look correct in output;
+languages and may not look correct in output if used unthinkingly;
 they are
 the (double) quotation mark
 .RB ( \[dq] ),
-the apostrophe
+the neutral apostrophe
 .RB ( \[aq] ),
 the minus sign
 .RB ( \- ),
@@ -498,34 +569,68 @@ the grave accent
 and the tilde
 .RB ( \[ti] ).
 .
-All are available if required;
+All are available via
+.I special character
+escape sequences,
+along with numerous other symbols;
 see
 .MR groff_char @MAN7EXT@ .
 .
 .
 .P
-Moreover, there are some advanced roff elements.
+A further few language elements arise as page layouts become more
+sophisticated and demanding.
+.
+.
+.I Environments
+collect formatting parameters like line length and typeface.
 .
 A
-.B diversion
-stores (formatted) information into a macro for later usage.
-See
-.MR groff_tmac @MAN5EXT@
-for more details.
+.I diversion
+stores formatted output for later use.
 .
 A
-.B trap
-is a positional condition like a certain number of lines from page top
-or in a diversion or in the input.
+.I trap
+is a condition on the input or output,
+tested automatically by the formatter,
+that is associated with a macro,
+causing it to be called when that condition is fulfilled.
 .
-Some action can be prescribed to be run automatically when the
-condition is met.
 .
-.
+.\" TODO: Move this paragraph to our Texinfo manual and roff(7).
 .P
-More detailed information and examples can be found in the
-.I groff
-Texinfo manual.
+Footnote support often exercises all three of the foregoing features.
+.
+A simple implementation might work as follows.
+.
+A pair of macros is defined:
+one starts a footnote and the other ends it.
+.
+The author calls the first macro where a footnote marker is desired.
+.
+The macro establishes a diversion so that the footnote text is collected
+at the place in the body text where its corresponding marker appears.
+.
+An environment is created for the footnote so that it is set at a
+smaller typeface.
+.
+The footnote text is formatted in the diversion using that environment,
+but it does not yet appear in the output.
+.
+The document author calls the footnote end macro,
+which returns to the previous environment and ends the diversion.
+.
+Later,
+after much more body text in the document,
+a trap,
+set a small distance above the page bottom,
+is sprung.
+.
+The macro called by the trap draws a line across the page and emits the
+stored diversion.
+.
+Thus,
+the footnote is rendered.
 .
 .
 .\" ====================================================================
@@ -708,17 +813,46 @@ There is a sophisticated interface for handling tab positions.
 .SH "Line continuation"
 .\" ====================================================================
 .
+.I roff
+languages distinguish input and output line continuation.
+.
+.
+.P
 A backslash
 .B \[rs]
-at the end of a line immediately followed by a newline suppresses the
-effects of that newline on the input.
+immediately followed by a newline,
+sometimes discussed as
+.BI \[rs] newline\c
+,
+suppresses the effects of that newline
+on the input.
 .
 The next input line thus retains the classification of its predecessor
 as a control or text line.
 .
+.BI \[rs] newline
+is useful for managing line lengths in the input during document
+maintenance;
+you can break an input line in the middle of a request invocation,
+macro call,
+or escape sequence.
+.
+Input line continuation is invisible to the formatter,
+with two exceptions:
+the
+.B |
+operator recognizes the new input line,
+and the input line counter register
+.B .c
+is incremented.
+.
+.
+.P
 The
 .esc c
-escape sequence continues an output line.
+escape sequence continues an
+.I output
+line.
 .
 Anything on the input line after
 .esc c
@@ -828,8 +962,27 @@ Scale by 65536.
 .
 .P
 .B Numerical expressions
-are combinations of the numerical values defined above with the
-following arithmetical operators already defined in classical troff.
+are combinations of
+(zero or more)
+operators with the numerical values discussed above.
+.
+Arithmetic operators are parsed strictly from left to right;
+traditional algebraic precedence is not observed.
+.
+Use
+.B (
+and
+.B )
+to specify operator precedence.
+.
+Parentheses also permit the use of spaces between operators and their
+arguments.
+.
+AT&T
+.I troff \" AT&T
+originated several
+.I roff
+operators.
 .
 .
 .P
@@ -894,20 +1047,50 @@ Logical not
 .
 .TPx
 .B (
-Grouping of expressions
+Begin expression group of higher precedence
 .
 .TPx
 .B )
-Close current grouping
+End expression group of higher precedence
 .
 .RE
 .PD
 .
 .
 .P
-Moreover,
+In many contexts,
+unary prefix operators are also available in contexts where they make
+sense.
+.
+.
+.RS
+.TP
+.B +
+.TQ
+.B \-
+Increment or decrement the argument implied by the request or escape
+sequence by the following expression.
+.
+.
+.TP
+.B |
+Interpret the following expression as a motion relative not to the
+current position but to a boundary.
+.
+For vertical movements,
+it specifies a distance from the top of the page
+(or diversion);
+for horizontal ones,
+from the beginning of the
+.I input
+line.
+.RE
+.
+.
+.P
+Furthermore,
 .I groff
-provides the following additional operators for numerical expressions.
+provides some additional arithmetic operators.
 .
 .
 .P
@@ -938,12 +1121,6 @@ as the default scaling indicator.
 .
 .RE
 .PD
-.
-.
-.P
-For details see the
-.I groff
-Texinfo manual.
 .
 .
 .\" ====================================================================
@@ -1683,12 +1860,13 @@ Append output to diversion
 .
 .
 .TPx
-.REQ .de "macro"
+.REQ .de macro
 Define or redefine
 .I macro
 until
-.B ..\&
-is encountered.
+.RB \[lq] ..\& \[rq]
+occurs at the start of a control line at the current brace scope.
+.
 .
 .TPx
 .REQ .de "macro end"
@@ -1696,19 +1874,20 @@ Define or redefine
 .I macro
 until
 .BI . end
-is called.
+is called at the start of a control line at the current brace scope.
+.
 .
 .TPx
 .REQ .de1 "macro"
-Same as
-.request .de
-but with compatibility mode switched off during macro expansion.
+As
+.request .de ,
+but disable compatibility mode during macro expansion.
 .
 .TPx
 .REQ .de1 "macro end"
-Same as
-.request .de
-but with compatibility mode switched off during macro expansion.
+As
+.request ".de\~\f[I]macro\~end\f[]" ,
+but disable compatibility mode during macro expansion.
 .
 .
 .TPx
@@ -1766,33 +1945,41 @@ that cannot be redefined.
 .
 .TPx
 .REQ .dei "macro"
-Define or redefine a macro whose name is contained in the string
-register
+Define macro indirectly.
+.
+As
+.request .de ,
+but use interpolation of string
 .I macro
-until
-.B ..\&
-is encountered.
+as the name of the defined macro.
+.
 .
 .TPx
 .REQ .dei "macro end"
-Define or redefine a macro indirectly.
+Define macro indirectly.
+.
+As
+.request .de ,
+but use interpolations of strings
 .I macro
 and
 .I end
-are string registers whose contents are interpolated for the macro name
-and the end macro, respectively.
+as the names of the defined and end macros.
+.
 .
 .TPx
 .REQ .dei1 "macro"
-Same as
-.request .dei
-but with compatibility mode switched off during macro expansion.
+As
+.request .dei ,
+but disable compatibility mode during macro expansion.
+.
 .
 .TPx
 .REQ .dei1 "macro end"
-Same as
-.request .dei
-but with compatibility mode switched off during macro expansion.
+As
+.request ".dei\~\f[I]macro\~end\f[]" ,
+but disable compatibility mode during macro expansion.
+.
 .
 .TPx
 .REQ .device "anything"
@@ -2218,15 +2405,25 @@ as if it were an input line.
 .
 .TPx
 .REQ .ig
-Ignore text until
-.B ..\&
-is encountered.
+Ignore input
+(except for side effects of
+.B \[rs]R
+on auto-incrementing registers)
+until
+.RB \[lq] ..\& \[rq]
+occurs at the start of a control line at the current brace scope.
+.
 .
 .TPx
 .REQ .ig "end"
-Ignore text until
+Ignore input
+(except for side effects of
+.B \[rs]R
+on auto-incrementing registers)
+until
 .BI . end
-is called.
+is called at the start of a control line at the current brace scope.
+.
 .
 .TPx
 .REQ .in
@@ -4337,39 +4534,66 @@ and aliasing
 .SH Registers
 .\" ====================================================================
 .
-Registers are variables that store a value.
-.
-In groff,
-most registers store numerical values
+Most registers store numerical values
 (see section \[lq]Numerical Expressions\[rq] above),
-but some can also hold a string value.
+but some
+(predefined,
+read-only ones)
+interpolate text.
 .
+Each register has a name.
 .
-.P
-Each register is given a name.
-Arbitrary registers can be defined and set with the
+A register is defined and assigned with the
 .request .nr
-request.
+request or the
+.esc R
+escape sequence;
+its value is interpolated with the
+.esc n
+escape sequence.
 .
 .
 .P
-The value stored in a register can be retrieved by the escape sequences
-introduced by
-.esc n .
+Registers can also be incremented or decremented by a configured amount
+at the time they are interpolated.
+.
+The value of the increment is specified with a third argument to the
+.request .nr
+request,
+and a special interpolation syntax,
+.BI \[rs]n \[+-]
+is used to alter and then retrieve
+the register's value.
+.
+Together,
+these features are called
+.IR auto-increment .
+.
+(A negative auto-increment can be
+considered an \[lq]auto-decrement\[rq].)
 .
 .
 .P
-Most useful are predefined registers.
+Many predefined registers are available.
 .
-In the following the notation
+In the following presentation,
+the register interpolation syntax
+.BI \[rs]n[ name ]
+is used to refer to a register
 .I name
-is used to refer to
-.register name
-to make clear that we speak about registers.
+to clearly distinguish it from a string or request
+.IR name .
 .
-Please keep in mind that the
-.esc[] n ""
-decoration is not part of the register name.
+The register name space is separate from that used for requests,
+macros,
+strings,
+and diversions.
+.
+Bear in mind that the symbols
+.B \[rs]n[]
+are
+.I not
+part of the register name.
 .
 .
 .\" ====================================================================
@@ -5282,8 +5506,8 @@ this \[lq]end macro\[rq] is then called normally.
 .
 Spaces or tabs are permitted after the first control character in the
 line containing this ending token,
-but a tab immediately after the token prevents is recognition as the end
-of a macro definition.
+but a tab immediately after the token prevents its recognition as the
+end of a macro definition.
 .
 Macro definitions can be nested;
 this requires use of unique end macros for each nested definition or
@@ -5299,7 +5523,7 @@ and end inside another.
 Variants of
 .B .de
 that disable compatibility mode and/or indirect the names of the macros
-being defined or ending the definition through a string are available as
+being defined or ending the definition through strings are available as
 .BR .de1 ,
 .BR .dei ,
 and
@@ -5544,7 +5768,7 @@ Macros called by traps have no arguments.
 Setting a trap is also called
 .IR planting .
 .
-It is also said that a trap is
+It is said that a trap is
 .I sprung
 if the associated macro is called.
 .
@@ -5887,6 +6111,10 @@ to the standard error stream.
 This document was written by
 .MT groff\-bernd\:.warken\-72@\:web\:.de
 Bernd Warken
+.ME
+and revised by
+.MT g.branden\:.robinson@\:gmail\:.com
+G.\& Branden Robinson
 .ME .
 .
 .
@@ -5940,7 +6168,7 @@ the
 formatter,
 and an output driver to viewable or printable form.
 .
-It also exhaustively lists all of the man pages provided with the GNU
+It also exhaustively lists the man pages provided with the GNU
 .I roff
 system.
 .

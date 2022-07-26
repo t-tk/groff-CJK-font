@@ -1,29 +1,314 @@
-2021-11-01  G. Branden Robinson <g.branden.robinson@gmail.com>
+2021-11-10  G. Branden Robinson <g.branden.robinson@gmail.com>
 
-	[man]: Try to minimize the number of times a URI is broken when
-	it has to be typeset and prevent it from provoking adjustment
-	warnings.
+	[tbl]: Accept `\&` as an empty table entry.
 
-	* tmac/an-ext.tmac (UE, ME): Do it.  New Boolean register `mL`
-	records whether the URI will cause a break.  New string `m2`
-	contains the user-specified URI (`m1`) plus the angle brackets
-	around it and any user-specified trailing punctuation (\$1).
-	New register `mW` stores the formatted width of `m2`.  If the
-	page offset plus the indentation plus the current horizontal
-	position on the output line plus `mW` exceeds the output line
-	length, turn off adjustment and break the line _before_
-	typesetting `m2`.  Then, if we forced a break, restore the
-	previous adjustment mode.  Shift off the first macro parameter
-	and emit the (undocumented) rest as before.
+	* src/preproc/tbl/table.cpp (table::add_entry): Suppress
+	diagnostic about non-empty table entries classified as `_` or
+	`=` if the entry consists of exactly `\&`.
 
-	* tmac/groff_man.7.man.in (Hyperlink macros): Document it.
+	* src/preproc/tbl/tbl.1.man (Table data): Document this idiom.
 
-	* tmac/tests/an-ext_UE-breaks-before-long-URIs.sh: Test it.
+2021-11-10  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[tbl]: Update diagnostic messages.
+
+	* src/preproc/tbl/main.cpp (process_options, process_format):
+	* src/preproc/tbl/table.cpp (table::add_entry): Align diagnostic
+	text with terminology now used in tbl(1) man page.
+	  - "global option" -> "region option"
+	  - "specifier" -> "column modifier"
+	  - "format" -> "column classifier"
+
+2021-11-10  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[libgroff]: Fix missing colon in diagnostic messages.
+
+	* src/libs/libgroff/error.cpp (do_error_with_file_and_line):
+	Restore missing colon to diagnostic text.  Problem introduced by
+	me in commit 9a038161, 8 November.
+
+2021-11-09  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[libgroff,grops]: Slightly refactor.
+
+	* src/devices/grops/ps.cpp: Explicitly preprocessor-include
+	"lib.h" since we use the `PI` symbol it defines.
+
+	* src/include/lib.h: Add inclusion guard.  Wrap only `extern "C"
+	and its braces in preprocessor conditionals, so that prototypes
+	are present in the header even for C language code that
+	#includes this header.  Add `static` storage class to `PI`
+	symbol to avoid redefinition errors from the linker.
+
+	* src/libs/libgroff/iftoa.c (if_to_a):
+	* src/libs/libgroff/itoa.c (i_to_a, ui_to_a): Add `const` type
+	qualifier to function definitions for agreement with prototypes
+	in "lib.h".  Drop local copies of prototypes.
+
+2021-11-09  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[libgroff]: Centralize definitions of {U,}INT_DIGITS.
+
+	* src/libs/libgroff/iftoa.c:
+	* src/libs/libgroff/itoa.c: Move definitions of `INT_DIGITS` and
+	`UINT_DIGITS` from here...
+	* src/include/lib.h: ...to here.
+
+	* src/libs/libgroff/iftoa.c:
+	* src/libs/libgroff/itoa.c: Preprocessor-include "lib.h".  This
+	revealed missing guards around `extern "C"` declarations, so...
+
+	* src/include/lib.h: Add them where necessary.
+
+2021-11-09  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/an.tmac (OP): Fix code style nits.  Don't quote macro
+	arguments unnecessarily.  Use consistent backslashing.  Use
+	groff font escape sequence syntax.  Use adjustable non-breaking
+	space escape sequence instead of a non-adjustable one.
+	Parenthesize numeric expression for better readability.
+
+2021-11-09  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[libgroff]: Make allocator replacement optional.  Switch it
+	off by default, relying on C++ runtime new/delete support.
+
+	* configure.ac: Call new `GROFF_USE_GROFF_ALLOCATOR` m4 macro.
+	Use `AM_CONDITIONAL` to set Automake variable
+	`USE_GROFF_ALLOCATOR` if appropriate.  Report whether the
+	allocator is used in configure script output summary.
+	* m4/groff.m4 (GROFF_USE_GROFF_ALLOCATOR): Define new macro to
+	collect user preference.  The default is off.
+	* src/libs/libgroff/libgroff.am (libgroff_a_SOURCES): Build and
+	link new.cpp only if `USE_GROFF_ALLOCATOR`.
+
+	* NEWS: Add item.
+
+2021-11-09  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* m4/groff.m4 (GROFF_TMAC): Report a human-readable message if
+	no system tmac prefix is found, instead of leaving the ellipsis
+	hanging.
+
+2021-11-09  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* m4/groff.m4 (GROFF_TMAC): Use separate shell variable for
+	`AC_MSG_RESULT()` content since the human-readable string we
+	populate it with in the empty case is not appropriate for later
+	`AC_SUBST()`-itution.  Problem introduced by me in commit
+	19670348, 31 October.
+
+2021-11-09  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/tmac.am (MOSTLYCLEANFILES): Remove `$(TMACMDOCFILES)`.
+	This variable, formerly named `TMACMDOCSTRIPFILES`, should not
+	be used in a clean target because its contents are (no longer)
+	generated files.  Problem introduced by me in commit 24602f42, 4
+	July (only noticeable in within-source-tree builds).
+
+2021-11-08  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[libgroff,pic]: Check `strdup()` return value.
+
+	* src/libs/libgroff/font.cpp (struct text_file): Add `fatal()`
+	member function.
+	(text_file::fatal): Implement it.
+
+	* src/libs/libgroff/font.cpp (font::load_desc):
+	* src/preproc/pic/troff.cpp (troff_output::set_location): Die if
+	`strdup()` returned a null pointer.
+
+2021-11-08  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/libs/libgroff/error.cpp (do_error_with_file_and_line):
+	Revise to eliminate `fprintf()` calls, which might perform
+	dynamic memory allocation, rendering this function unsafe to
+	call after memory allocation failures.  Since this function is
+	near the top of our diagnostic output call stack, that would be
+	unfortunate.  `errprint()` does not use dynamic allocation, nor
+	do the `i_to_a()` and `ui_to_a()` functions it calls to format
+	integers.
+
+2021-11-08  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* configure.ac: Add `strdup` to AC_CHECK_FUNCS since we are
+	using it and the whole point of libgroff's `strsave()` was to
+	get along without it.  But `strdup` has been standardized in
+	POSIX for 20 years (SUSv3, POSIX:2001) and is on its way into
+	ISO standard C (N2353) and C++ (P2391R0) as well.
+
+2021-11-08  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/libs/libgroff/strsave.cpp (strsave): Call `strcpy()` only
+	if `malloc()` did not return a null pointer.  Problem noted by
+	Ingo Schwarze.
+
+2021-11-07  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/libs/libgroff/fontfile.cpp (font::open_file): Don't open
+	user-specified font file names with slashes in them; i.e., don't
+	traverse directories outside the configured font path.  Also
+	refuse to open the file if the `sprintf()` used to construct its
+	file name doesn't write the expected quantity of bytes to the
+	destination buffer.
+
+	Fixes <https://savannah.gnu.org/bugs/?61424>.  Thanks to Ingo
+	Schwarze for feedback.
+
+2021-11-07  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[libgroff]: Regression-test Savannah #61424.
+
+	* src/roff/groff/tests/fp_should_not_traverse_directories.sh: Do
+	it.
+	* src/roff/groff/tests/artifacts/HONEYPOT: Add test artifact.
+	* src/roff/groff/tests/artifacts/devascii/README: ...and this;
+	we need an empty directory to make the test work but such things
+	tend to look unintentional.
+	* src/roff/groff/groff.am (groff_TESTS): Run test.
+	(EXTRA_DIST): Ship artifacts.
+
+2021-11-06  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[libgroff]: Fix diagnostic error wording.
+
+	* src/libs/libgroff/font.cpp (font::load): Fix diagnostic
+	message; this is issued when an unrecognized directive is
+	encountered, so it necessarily occurs _before_ any `charset` or
+	`kernpairs` directive.  Give the user a hint accordingly.
+
+2021-11-06  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[man]: Fix paragraph tag regressions.
+
+	* tmac/an-ext.mac (UR, MR): Only create an environment and
+	diversion if we're not already in one of the latter.  If we are
+	{in groff man, this occurs only when collecting a `TP` paragraph
+	tag}, then typeset the URI as part of the indented paragraph.
+	(UE, ME): Pop the diversion and environment stacks only if we
+	pushed them in the first place.  Eliminate spurious space in
+	post-URI arguments by only typesetting excess macro parameters
+	if there were any.
+
+2021-11-05  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[man]: Regression-test Savannah #61425.
+
+	* tmac/tests/an-ext_link-macros-work-in-paragraph-tags.sh: Do
+	it.
 	* tmac/tmac.am (tmac_TESTS): Run test.
 
-	Prompted by a suggestion from James K. Lowden
-	<https://lists.gnu.org/archive/html/groff/2021-10/msg00048.html>
-	--thanks, James!
+2021-11-05  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/s.tmac (DS): Drop a redundant unconditional break; every
+	display macro we call in the event of a valid call already
+	breaks the line, and it's polite to not break if we're given an
+	invalid argument.  Emit a diagnostic error if the argument we're
+	given is invalid, and immediately end the diversion we just
+	opened.
+
+2021-11-04  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/roff/troff/env.cpp (environment::set_font): Clarify
+	diagnostic warning.
+
+2021-11-04  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/preproc/tbl/table.cpp (table::add_entry): If we see a '\^'
+	entry on the first row of a table, it's invalid, but we need to
+	create an empty entry in its place.  Otherwise, someone can put
+	another '\^' right below the one on the first row, creating a
+	reference to a nonexistent table entry and provoking a SEGV.
+	Issue an error diagnostic (distinct from the one in
+	`do_vspan()`), create the entry, and skip `do_vspan()` (given a
+	'^' in a first-row definition, it issues an error diagnostic and
+	returns early, which suffices).  Problem appears to date back to
+	groff 1.02 (June 1991) at the latest.
+
+	Fixes <https://savannah.gnu.org/bugs/?61417>.
+
+2021-11-04  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[tbl]: Regression-test Savannah #61417.
+
+	* src/preproc/tbl/tests/\
+	do-not-segv-on-invalid-vertical-span-entry.sh: Do it.
+	* src/preproc/tbl/tbl.am (tbl_TESTS): Run test.
+
+2021-11-02  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[man]: Fix Savannah #61408.
+
+	* tmac/an.tmac (an-prepare-inner-footer): Don't try to get a
+	substring of an empty string; the man page author might not have
+	specified a third argument to `TH` (or supplied an empty one).
+
+	Fixes <https://savannah.gnu.org/bugs/?61408>.  Thanks to Bjarni
+	Ingi Gislason for the report.
+
+2021-11-02  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[man]: Add regression test for Savannah #61408.
+
+	* tmac/tests/an_inner-footer-abbreviation-works.sh: Do it.
+
+2021-11-02  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[man]: Tweak computation in URI breaking.
+
+	* tmac/an-ext.tmac (UE, ME): Stop adding the page offset `.o`
+	when performing the available horizontal space computation for
+	the typeset URI string.  This made no difference on nroff
+	devices (grotty; even with `.po 15n`), but it caused the
+	breaking decision to be too conservative on troff devices
+	{grops}, forcing some URIs that would fit on the current line to
+	the next one.
+
+	* tmac/tests/an-ext_UE-breaks-before-long-URIs.sh: Add test of
+	URI with no link text, which also has break points after every
+	character, so that we detect even slight alterations.
+
+2021-11-02  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[libgroff]: Do more device and font description file validation,
+	resolve an assertion failure arising from a negative declared
+	device resolution, and correct a documentation error.
+
+	* src/libs/libgroff/font.cpp (font::load): Include more
+	information about invalid input in diagnostic messages.
+	  - When a kern pair's amount is missing or invalid, report the
+	    name of the kern pair.
+	  - When someone tries to declare the first entry in the charset
+	    section as an alias, report the glyph name.
+	  - Identify the token for the unnamed character if an attempt
+	    is made to alias it.
+	  - When an out-of-range character type is applied to a glyph,
+	    name the glyph.
+	(font::load_desc): Same.
+	  - Drop redundant zero initialization of `res`.
+	  - Check all directives that take basic units for positive
+	    values, adding `res`, `unitwidth`, `paperwidth`, and
+	    `paperlength`.  Update this diagnostic to demand positive,
+	    not nonnegative, values.
+	  - When the font count is long in a `fonts` directive, report
+	    how many font names were declared (and thus expected).  (If
+	    the count is short, the next line is read for a font name,
+	    like 'tcommand' in our devutf8/DESC.)
+	  - When interpreting a `papersize` directive, throw an error
+	    and return false if `res` has not yet been encountered,
+	    since it is used in subsequent computations.
+	  - When a paper format cannot be determined, report the
+	    original declared value from the DESC file.  Use `strdup()`
+	    to save it since it gets clobbered by the resolving process.
+	    `free()` the saved string when we're done, regardless of
+	    error condition.
+
+	* doc/groff.texi (Device and Font Files):
+	* man/groff_font.5.man (DESC file format): Document additional
+	exception to order-indifference of directives: (at least one)
+	`res` must precede `papersize`.
+
+	Fixes <https://savannah.gnu.org/bugs/?61414>.
 
 2021-11-01  G. Branden Robinson <g.branden.robinson@gmail.com>
 

@@ -16,18 +16,13 @@ for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
-#define INT_DIGITS 19		/* enough for 64 bit integer */
-#define UINT_DIGITS 20
+#include "lib.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Prototypes */
-char *i_to_a(int);
-char *ui_to_a(unsigned int);
-
-char *i_to_a(int i)
+const char *i_to_a(int i)
 {
   /* Room for INT_DIGITS digits, - and '\0' */
   static char buf[INT_DIGITS + 2];
@@ -49,7 +44,7 @@ char *i_to_a(int i)
   return p;
 }
 
-char *ui_to_a(unsigned int i)
+const char *ui_to_a(unsigned int i)
 {
   /* Room for UINT_DIGITS digits and '\0' */
   static char buf[UINT_DIGITS + 1];
@@ -64,3 +59,9 @@ char *ui_to_a(unsigned int i)
 #ifdef __cplusplus
 }
 #endif
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:
