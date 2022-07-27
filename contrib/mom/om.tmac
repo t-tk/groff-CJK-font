@@ -20,8 +20,8 @@ for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-Version 2.5
------------
+Version 2.5_a
+-------------
 Antoine de St-Exupéry asserted that elegance in engineering is
 achieved not when there is nothing left to add, but when there is
 nothing left to take away.
@@ -53,7 +53,7 @@ extensions, and float management).
 .if (\n[.x]\n[.y] < 118) \
 .   ab [mom]: You need GNU troff version 1.18 or higher to run this version of mom.
 \# Mom version
-.ds version 2.5
+.ds version 2.5_a
 .if dVERSION \{\
 .   ab [mom]: Version \*[version]
 .\}
@@ -477,13 +477,15 @@ end
 .       if \\n[#FLEX_ACTIVE] \
 .          if !\\n[#NO_FLEX] \
 .             tm .ds pre-newpage-\\n% \\n%@\\n[#COL_NUM]
-.    if (\\n[@TOP]=0):(\\n[#END_COVER]=1) \
-.       bp
-.    rr #END_COVER
-.    if \\n[#RESET_FN_OVERFLOW_TRAP] \{\
-.       wh -\\n[#FN_OVERFLOW_TRAP_POS]u FN_OVERFLOW_TRAP
-.       rr #RESET_FN_OVERFLOW_TRAP_POS
-.   \}
+.    ie \\n[#DOCS]=1 \{\
+.       if (\\n[@TOP]=0):(\\n[#END_COVER]=1) .bp
+.       rr #END_COVER
+.       if \\n[#RESET_FN_OVERFLOW_TRAP] \{\
+.          wh -\\n[#FN_OVERFLOW_TRAP_POS]u FN_OVERFLOW_TRAP
+.          rr #RESET_FN_OVERFLOW_TRAP_POS
+.      \}
+.    \}
+.    el .if !\\n[#B_MARGIN_SET]=1 .bp
 .END
 \#
 .ALIAS NEWSLIDE NEWPAGE
@@ -3687,27 +3689,14 @@ end
 \#   characters that have the form \[c].
 \#
 .MAC LEFT_HANG END
-.    ie '\\$0'LEFT_HANG' \{\
-.       vpt 0
-.       sp -1
-.       nr #HANG \w'\\$1'
-.       in +\\n[#HANG]u
-.       ll +\\n[#HANG]u
-.       ie !\\n[.z] .po -\\n[#HANG]u
-.       el \!.po -\\n[#HANG]u
-.       ti -\\n[#HANG]u
-.       vpt
-.    \}
-.    el \{\
-.       vpt 0
-.       in
-.       ll
-.       po
-.       vpt
-.    \}
+.    nr hang-char-width \w'\\$1'
+.    ds hang-char-gutter \\$2
+.    ie '\\*[hang-char-gutter]'' \
+.       nr hang-char \\n[hang-char-width]
+.    el \
+.       nr hang-char \\n[hang-char-width]+\\*[hang-char-gutter]
+\h'-\\n[hang-char]u'\c
 .END
-\#
-.ALIAS NO_HANG LEFT_HANG
 \#
 .MAC HANG END
 \c
@@ -4509,9 +4498,9 @@ y\R'#DESCENDER \\n[.cdp]'
 .       if !d$DRAFT .DRAFT 1
 .    \}
 .    if '\\*[$COPY_STYLE]'FINAL' .nr #COPY_STYLE 2
-.    if !d$CHAPTER_STRING  .CHAPTER_STRING "Chapter"
-.    if !d$DRAFT_STRING    .DRAFT_STRING "Draft"
-.    if !d$REVISION_STRING .REVISION_STRING "Rev."
+.    if '\\*[$CHAPTER_STRING]''  .CHAPTER_STRING "Chapter"
+.    if '\\*[$DRAFT_STRING]''    .DRAFT_STRING "Draft"
+.    if '\\*[$REVISION_STRING]'' .REVISION_STRING "Rev."
 .\" Default
 .    if \\n[#DOC_TYPE]=1 \{\
 .       ie \\n[#COPY_STYLE]=1 \{\
@@ -11968,6 +11957,7 @@ Shimming must be disabled with NO_SHIM before using FLEX.
 .       el .ti \\n[#PP_INDENT]u
 .       return
 .    \}
+.    if \\n[#PP]>0 .br
 .    if \\n[#DOC_TYPE]=4 \{\
 .       if !'\\n[.z]'' .di
 .       nr #TOTAL_FIELDS \\n[#FIELD]
@@ -12140,11 +12130,12 @@ Shimming must be disabled with NO_SHIM before using FLEX.
 .    if r #QUOTE_4_HD .rr #QUOTE_4_HD
 .    if r #LB_4_HD .rr #LB_4_HD
 .END
+\#
 \# ====================================================================
 \#
 \# +++QUOTES+++
 \#
-\# ---Line for line quotes, i.e. poetry or code snippets---
+\# ---Line for line quotes, e.g. poetry or code snippets---
 \#
 \# UNDERLINE QUOTES
 \# ----------------

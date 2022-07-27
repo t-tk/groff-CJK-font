@@ -637,13 +637,13 @@ Text Special Effects
 .PP
 All \fBpic\fP implementations support the following font-styling
 escapes within text objects:
-.IP "\efR, \ef1"
+.IP "\efR, \ef1" \w'\efR,\~\ef3'u+2n
 Set Roman style (the default)
 .IP "\efI, \ef2"
 Set Italic style
 .IP "\efB, \ef3"
 Set Bold style
-.IP "\efP\ \ \ \ \ \ "
+.IP \efP
 Revert to previous style; only works one level deep, does not stack.
 .PP
 In the \fBpic\fP implementations that are preprocessors for a
@@ -1004,7 +1004,8 @@ The second arrow in Figure \*[SN]2 dropped downwards from the circle's
 attachment point for an
 object to be joined to the right.
 .PP
-The meaning of the command \fBmove to last circle .s\fP should be obvious.
+The meaning of the command \fBmove to last circle \&.s\fP should be
+obvious.
 In order to see how it generalizes, we'll need to go into detail on two
 important topics; locations and object names.
 .
@@ -1193,7 +1194,7 @@ compass(ellipse wid 1.5 ht 1);
 .LP
 these are the locations where eight compass rays from the geometric center
 would intersect the figure.
-So when we say \fBlast circle .s\fP we are referring to the south
+So when we say \fBlast circle \&.s\fP we are referring to the south
 compass point of the last circle drawn.
 The explanation of Figure 8-3's program is now complete.
 .PP
@@ -1257,7 +1258,7 @@ Positions may be added or subtracted to yield a new position (to be
 more precise, you can only add a position and an expression pair; the
 latter must be on the right side of the addition or subtraction sign).
 The result is the conventional vector sum or difference of coordinates.
-For example, \fBlast box .ne + (0.1, 0)\fP is a valid position.
+For example, \fBlast box \&.ne + (0.1, 0)\fP is a valid position.
 This example illustrates a common use, to define a position slightly
 offset from a named one (say, for captioning purposes).
 .NH 3
@@ -1436,9 +1437,9 @@ By default, the \fBchop\fR modifier shortens both ends of the line by
 \fBcirclerad\fR.
 By suffixing it with a number you can change the amount of chopping.
 .PP
-If you say \fBline .\|.\|.\& chop \fIr1\fP chop \fIr2\fP\fR with \fIr1\fP
-and \fIr2\fP both numbers, you can vary the amount of chopping at both
-ends.
+If you say \fBline \&.\|.\|.\& chop \fIr1\fP chop \fIr2\fP\fR with
+\fIr1\fP and \fIr2\fP both numbers, you can vary the amount of chopping
+at both ends.
 You can use this in combination with trigonometric functions to write
 code that deals with more complex intersections.
 .
@@ -1503,9 +1504,9 @@ compass([junction()]);
 .CE "1: A sample composite object"
 .LP
 To refer to one of the composite's attachment points, you can say
-(for example) \fBA .s\fP.
+(for example) \fBA \&.s\fP.
 For purposes of object naming, composites are a class.
-You could write \fBlast [] .s\fP as an equivalent reference, usable
+You could write \fBlast [] \&.s\fP as an equivalent reference, usable
 anywhere a location is needed.
 This construction is very important for putting together large,
 multi-part diagrams.
@@ -1866,9 +1867,9 @@ and variable assignment to write true functions.
 .PP
 One detail the example above does not illustrate is the fact that
 macro argument parsing is not token-oriented.
-If you call \fBjumper(\ 1\ )\fP, the value of $1 is \fB"\ 1\ "\fP.
-You could even call \fBjumper(big\ string)\fP to give $1 the value
-\fB"big\ string"\fP.
+If you call \fBjumper(\~1\~)\fP, the value of $1 is \fB"\~1\~"\fP.
+You could even call \fBjumper(big\~string)\fP to give $1 the value
+\fB"big\~string"\fP.
 .PP
 If you want to pass in a coordinate pair, you can avoid getting
 tripped up by the comma by wrapping the pair in parentheses.
@@ -1926,7 +1927,7 @@ source up to the next \fB.PE\fP.
 In either of the last two \fBcopy\fP commands, GNU \fBgpic\fP permits a
 trailing `\fBuntil\fP \fIword\/\fP' clause to be added which terminates
 the copy when the first word matches the argument (the default
-behavior is therefore equivalent to \fBuntil .PE\fP).
+behavior is therefore equivalent to \fBuntil \&.PE\fP).
 .PP
 Accordingly, the command
 .RS
@@ -2755,7 +2756,7 @@ values of the style variables \fBmaxpswid\fP and \fBmaxpsheight\fP
 .PP
 If the ending `.PE' is replaced by `.PF', the page vertical position is
 restored to its value at the time `.PS' was encountered.
-Another alternate form of invocation is `.PS\ <\s[-1]FILENAME\s[0]',
+Another alternate form of invocation is `.PS\~<\s[-1]FILENAME\s[0]',
 which replaces the `.PS' line with a file to be interpreted by \fBpic\fR
 (but this feature is deprecated).
 .PP
@@ -2801,8 +2802,8 @@ In the following, either `|' or a new line starts an alternative.
 .R
 .DE
 .PP
-The current position and direction are saved on entry to a `{\ .\|.\|.\ }'
-construction and restored on exit from it.
+The current position and direction are saved on entry to a
+ `{\~.\|.\|.\~}' construction and restored on exit from it.
 .PP
 Note that in `if' constructions, newlines can only occur in
 \s[-1]BALANCED-BODY\s[0].
@@ -2881,13 +2882,13 @@ empty string is considered as `false' for `&&' and `|\||'.
 .R
 .DE
 .PP
-Drawn objects within `[\ .\|.\|.\ ]' are treated as a single composite
+Drawn objects within `[\~.\|.\|.\~]' are treated as a single composite
 object with a rectangular shape (that of the bounding box of all the
 elements).
 Variable and label assignments within a block are local to the block.
 Current direction of motion is restored to the value at start of block
 upon exit.
-Position is \fInot\fR restored (unlike `{\ }');
+Position is \fInot\fR restored (unlike `{\~}');
 instead, the current position becomes the exit position for the current
 direction on the block's bounding box.
 .DS
@@ -2943,7 +2944,7 @@ a specified location.
 The `by' primitive is not documented in the tutorial portion of
 the Kernighan paper, and should probably be considered unreliable.
 .PP
-The primitive `arrow' is a synonym for `line\ ->'.
+The primitive `arrow' is a synonym for `line\~->'.
 .PP
 Text is normally an attribute of some object, in which case successive
 strings are vertically stacked and centered on the object's center by
@@ -2958,13 +2959,13 @@ before the end of the current item.
 Text may also contain \e-escapes denoting special characters.
 The base font and specific set of escapes supported is implementation
 dependent, but supported escapes always include the following:
-.IP "\efR, \ef1"
+.IP "\efR, \ef1" \w'\efR,\~\ef3'u+2n
 Set Roman style (the default)
 .IP "\efI, \ef2"
 Set Italic style
 .IP "\efB, \ef3"
 Set Bold style
-.IP "\efP\ \ \ \ \ \ "
+.IP \efP
 Revert to previous style; only works one level deep, does not stack.
 .PP
 Color names are dependent on the \gBpic\fR implementation, but in
@@ -3094,7 +3095,7 @@ A north
 .R
 .DE
 both cause a syntax error.
-(DWB \fBpic\fP also allows the weird form `A\ north\ of'.)
+(DWB \fBpic\fP also allows the weird form `A\~north\~of'.)
 .PP
 Here the special rules for the `with' keyword using a path:
 .DS
@@ -3148,7 +3149,7 @@ _
 .TE
 Any of these can be set by assignment, or reset using the \fBreset\fP
 statement.
-Style variables assigned within `[\ ]' blocks are restored to their
+Style variables assigned within `[\~]' blocks are restored to their
 beginning-of-block value on exit; top-level assignments persist across
 pictures.
 Dimensions are divided by \fBscale\fR on output.
@@ -3218,7 +3219,7 @@ The macro may be called as
 .R
 .DE
 .LP
-The arguments (if any) are substituted for tokens $1, $2 .\|.\|.\& $n
+The arguments (if any) are substituted for tokens $1, $2 \&.\|.\|.\& $n
 appearing in the replacement text.
 To undefine a macro, say \fBundef\fP \fIname\fR, specifying the name to
 be undefined.

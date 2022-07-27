@@ -42,7 +42,7 @@ my @command = ();		# the constructed groff command
 my @requested_package = ();	# arguments to '-m' grog options
 my @inferred_preprocessor = ();	# preprocessors the document uses
 my @inferred_main_package = ();	# full-service package(s) detected
-my $selected_main_package;	# full-service package we go with
+my $main_package;		# full-service package we go with
 my $do_run = 0;			# run generated 'groff' command
 my $use_compatibility_mode = 0;	# is -C being passed to groff?
 
@@ -119,11 +119,12 @@ sub process_arguments {
     if ($delayed_option) {
       if ($delayed_option eq '-m') {
 	push @requested_package, $arg;
+	$arg = '';
       } else {
 	push @command, $delayed_option;
       }
 
-      push @command, $arg;
+      push @command, $arg if $arg;
       $delayed_option = '';
       next;
     }
@@ -470,8 +471,6 @@ sub do_line {
   }
 } # do_line()
 
-my @m = ();
-my @supplemental_package = ();
 my @preprocessor = ();
 
 
@@ -619,7 +618,7 @@ sub construct_command {
       }
     }
   } elsif ($inferred_main_package_count == 1) {
-    $selected_main_package = shift @inferred_main_package;
+    $main_package = shift @inferred_main_package;
   }
 
   if ($have_ambiguous_main_package) {
@@ -628,8 +627,8 @@ sub construct_command {
     # for an and s.
     for my $pkg (@main_package) {
       if (grep(/$pkg/, @inferred_main_package)) {
-	$selected_main_package = $pkg;
-	&warn("document ambiguous (choosing '$selected_main_package'"
+	$main_package = $pkg;
+	&warn("document ambiguous (choosing '$main_package'"
 	      . " from '@inferred_main_package'); disambiguate with -m"
 	      . " option");
 	$had_inference_problem = 1;
@@ -642,19 +641,25 @@ sub construct_command {
   # inference differs from the request.  This also ensures that all -m
   # arguments are placed in the same order that the user gave them;
   # caveat dictator.
+  my @auxiliary_package_argument = ();
   for my $pkg (@requested_package) {
+    my $is_auxiliary_package = 1;
     if (grep(/$pkg/, @main_package)) {
-      if ($pkg ne $selected_main_package) {
-	&warn("overriding inferred package '$selected_main_package'"
+      $is_auxiliary_package = 0;
+      if ($pkg ne $main_package) {
+	&warn("overriding inferred package '$main_package'"
 	      . " with requested package '$pkg'");
-	$selected_main_package = $pkg;
+	$main_package = $pkg;
       }
+    }
+    if ($is_auxiliary_package) {
+      push @auxiliary_package_argument, "-m" . $pkg;
     }
   }
 
-  push @m, '-m' . $selected_main_package if ($selected_main_package);
-  push @command, @m;
-  push(@command, @input_file) unless ($file_args_included);
+  push @command, '-m' . $main_package if ($main_package);
+  push @command, @auxiliary_package_argument;
+  push @command, @input_file unless ($file_args_included);
 
   #########
   # execute the 'groff' command here with option '--run'

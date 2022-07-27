@@ -1,4 +1,4 @@
-# Copyright (C) 2014-2020 Free Software Foundation, Inc.
+# Copyright (C) 2014-2022 Free Software Foundation, Inc.
 #
 # This file is part of 'groff'.
 #
@@ -36,11 +36,26 @@ DEVX75FONTS = \
   font/devX75/S
 
 if !WITHOUT_X11
-devX75fontdir = $(fontdir)/devX75
-devX75font_DATA = $(DEVX75FONTS)
+devX75_fontdir = $(fontdir)/font/devX75
+devX75_font_DATA = $(DEVX75FONTS)
 endif
 
 EXTRA_DIST += $(DEVX75FONTS)
+
+# This target generates font descriptions from core X11 font data
+# returned by a running X server; these are _not_ normally generated
+# during a build, but provided with the groff source distribution.
+#
+# This maintainer-mode target alters files in the source tree.
+maintainer-font-descriptions: devX75_font-descriptions
+devX75_fontsrcdir=$(top_srcdir)/font/devX75
+devX75_font-descriptions: $(xtotroff) $(xditview_srcdir)/DESC.in \
+  $(xditview_srcdir)/FontMap-X11
+	  $(AM_V_GEN)$(MKDIR_P) $(devX75_fontsrcdir) \
+	  && sed -e 's/res .*/res 75/' $(xditview_srcdir)/DESC.in \
+	    >$(devX75_fontsrcdir)/DESC \
+	  && $(xtotroff) -d $(devX75_fontsrcdir) -r 75 -s 10 \
+	    $(xditview_srcdir)/FontMap-X11
 
 
 # Local Variables:

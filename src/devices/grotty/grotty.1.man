@@ -82,16 +82,27 @@ Normally,
 is invoked by
 .MR groff @MAN1EXT@
 when the latter is given one of the
-.BR \-Tascii ,
+.RB \[lq] \-T\~ascii \[rq],
+.RB \[lq] \-T\~latin1 \[rq],
 .BR \-Tlatin1 ,
 or
-.B \-Tutf8
+.RB \[lq] \-T\~utf8 \[rq]
 options on systems using ISO character encoding standards,
 or with
-.B \-Tcp1047
+.RB \[lq] \-T\~cp1047 \[rq]
 or
-.B \-Tutf8
+.RB \[lq] \-T\~utf8 \[rq]
 on EBCDIC-based hosts.
+.
+(In this installation,
+.B @DEVICE@
+is the default output device.)
+.
+Use
+.IR groff 's
+.B \-P
+option to pass any options shown above to
+.IR grotty .
 .
 If no
 .I file
@@ -143,8 +154,8 @@ OSC\~8 hyperlinks are produced for these devices.
 .
 .
 .P
-In keeping with long-standing practice and the rarity of terminals,
-hardware or emulated,
+In keeping with long-standing practice and the rarity of terminals
+(and emulators)
 that support oblique or italic fonts,
 italicized text is represented with underlining by default\[em]but see
 the
@@ -288,7 +299,7 @@ When
 .I uri
 is present,
 any number of additional key/value pairs can be specified;
-their interpretation is the responsibility of the terminal emulator.
+their interpretation is the responsibility of the pager or terminal.
 .
 Spaces or tabs cannot appear literally in
 .IR uri ,
@@ -298,31 +309,11 @@ or
 they must be represented in an alternate form.
 .
 .
-.TP
-.BR "\[rs]X\[aq]tty: sgr " [\c
-.IR n ]\c
-.B \[aq]
-.
-If
-.I n
-is non-zero or missing,
-enable SGR sequences
-(this is the default);
-otherwise,
-use the legacy output format.
-.
-This device control command,
-like the
-.B \-c
-option,
-also prevents the emission of terminal OSC 8 hyperlink escape sequences.
-.
-.
 .\" ====================================================================
 .SS "Device description files"
 .\" ====================================================================
 .
-If
+If the
 .I DESC
 file for the character encoding contains the
 .RB \[lq] unicode \[rq]
@@ -335,8 +326,7 @@ it emits characters in a single-byte encoding depending on the data in
 the font description files.
 .
 See
-.MR groff_font @MAN5EXT@
-for more details.
+.MR groff_font @MAN5EXT@ .
 .
 .
 .P
@@ -451,7 +441,7 @@ characters
 .I grotty
 handles
 .BR \[rs]D\[aq]p \|.\|.\|.\& \[aq]
-escape sequences which consist entirely of horizontal and vertical
+escape sequences that consist entirely of horizontal and vertical
 lines similarly.
 .
 .
@@ -567,85 +557,92 @@ see subsection \[lq]Legacy output format\[rq] above.
 .\" ====================================================================
 .SH Files
 .\" ====================================================================
-.\"ne 3v \" Keep section heading and paragraph tag together.
 .
 .TP
-.I @FONTDIR@/devascii/DESC
-Device description file for the
+.I @FONTDIR@/\:\%devascii/\:DESC
+describes the
 .B ascii
-device.
+output device.
 .
 .
 .TP
-.IR @FONTDIR@/devascii/ F
-Font description file for font
-.I F
-of the
-.B ascii
-device.
+.IR @FONTDIR@/\:\%devascii/ F
+describes the font known
+.RI as\~ F
+on device
+.BR ascii .
 .
 .
 .TP
-.I @FONTDIR@/devcp1047/DESC
-Device description file for the
+.I @FONTDIR@/\:\%devcp1047/\:DESC
+describes the
 .B cp1047
-device.
+output device.
 .
 .
 .TP
-.IR @FONTDIR@/devcp1047/ F
-Font description file for font
-.I F
-of the
-.B cp1047
-device.
+.IR @FONTDIR@/\:\%devcp1047/ F
+describes the font known
+.RI as\~ F
+on device
+.BR cp1047 .
 .
 .
 .TP
-.I @FONTDIR@/devlatin1/DESC
-Device description file for the
+.I @FONTDIR@/\:\%devlatin1/\:DESC
+describes the
 .B latin1
-device.
+output device.
 .
 .
 .TP
-.IR @FONTDIR@/devlatin1/ F
-Font description file for font
-.I F
-of the
-.B latin1
-device.
+.IR @FONTDIR@/\:\%devlatin1/ F
+describes the font known
+.RI as\~ F
+on device
+.BR latin1 .
 .
 .
 .TP
-.I @FONTDIR@/devutf8/DESC
-Device description file for the
+.I @FONTDIR@/\:\%devutf8/\:DESC
+describes the
 .B utf8
-device.
+output device.
 .
 .
 .TP
-.IR @FONTDIR@/devutf8/ F
-Font description file for font
-.I F
-of the
+.IR @FONTDIR@/\:\%devutf8/ F
+describes the font known
+.RI as\~ F
+on device
+.BR utf8 .
+.
+.
+.TP
+.I @MACRODIR@/\:tty\:.tmac
+defines macros for use with the
+.BR ascii ,
+.BR cp1047 ,
+.BR latin1 ,
+and
 .B utf8
-device.
+output devices.
+.
+It is automatically loaded by
+.I troffrc
+when any of those output devices is selected.
 .
 .
 .TP
-.I @MACRODIR@/tty.tmac
-Macros for use with
-.IR grotty .
+.I @MACRODIR@/\:tty\-char\:.tmac
+defines fallback characters for use with
+.I grotty.
+.
+.MR nroff @MAN1EXT@
+loads it automatically.
 .
 .
-.TP
-.I @MACRODIR@/tty\-char.tmac
-Additional character definitions for use with
-.IR grotty .
-.
-.
-.\" The following no longer seems to be true; an inspection of the
+.\" XXX: The following no longer seems to be true; an inspection of the
 .\" font/*/dev*.am files suggests no evidence of it, at any rate.
 .\".P
 .\"Note that on EBCDIC hosts,

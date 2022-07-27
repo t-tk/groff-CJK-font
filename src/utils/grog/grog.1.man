@@ -301,9 +301,10 @@ bracket the regions of an input file they replace.
 .IR pic ,
 for example,
 requires
-.B PS
+.BR PS ,
+.BR PE ,
 and
-.B PE
+.B PF
 calls to immediately follow the default control character at the
 beginning of a line.
 .
@@ -321,18 +322,18 @@ to correctly infer its necessity would require
 to recursively open all files given as arguments to the
 .B .so
 request under the same conditions that
-.I \%@g@soelim
+.I @g@soelim
 itself does so;
 see its man page.
 .
 Recall that
-.I \%@g@soelim
+.I @g@soelim
 is only necessary if sourced files need to be preprocessed.
 .
 Therefore,
 as a workaround,
 you may want to run the input through
-.I \%@g@soelim
+.I @g@soelim
 manually,
 piping it to
 .IR grog ,
@@ -341,7 +342,7 @@ and compare the output to running
 on the input directly.
 .
 If the
-.RI \[lq] \%@g@soelim \[rq]ed
+.RI \[lq] @g@soelim \[rq]ed
 input causes
 .I grog
 to infer additional preprocessor options,
@@ -364,7 +365,7 @@ $ \c
 .B grog 1.roff
 groff \-ms 1.roff
 $ \c
-.B \%@g@soelim 1.roff | grog
+.B @g@soelim 1.roff | grog
 groff \-t \-ms \-
 .EE
 .RE
@@ -529,7 +530,7 @@ for
 Consider a file
 .IR \%doc/\:\%grnexampl.me ,
 which uses the
-.I \%@g@grn
+.I @g@grn
 preprocessor to include a
 .MR gremlin 1
 picture file in an
@@ -539,7 +540,7 @@ document.
 Let's say we want to suppress color output,
 produce a DVI file,
 and get backtraces for any errors that
-.I \%@g@troff
+.I @g@troff
 encounters.
 .
 The command
@@ -564,9 +565,11 @@ where we can see that
 .I grog
 has inferred the
 .I me \" generic
-macro package and the
+macro package along with the
 .I eqn \" generic
-preprocessor.
+and
+.I grn \" generic
+preprocessors.
 .
 (The input file is located in
 .I @DOCDIR@

@@ -1,6 +1,6 @@
 .\" Italian localization for groff
 .\"
-.\" Copyright (C) 2021 Free Software Foundation, Inc.
+.\" Copyright (C) 2021-2022 Free Software Foundation, Inc.
 .\"   Written by Edmond Orignac (edmond.orignac@wanadoo.fr)
 .\"
 .\" This file is part of groff.
@@ -25,6 +25,14 @@
 .cp 0
 .
 .
+.\" If changing from an existing locale, we need to preserve the state
+.\" of the "suppress hyphenation before a page location trap" bit.
+.nr locale*use-trap-hyphenation-mode 0
+.if d locale \
+.  if \n[.hy]=\n[\*[locale]*hyphenation-mode-trap] \
+.    nr locale*use-trap-hyphenation-mode 1
+.
+.
 .ds locale italian\"
 .
 .
@@ -32,6 +40,7 @@
 .
 .ds \*[locale]-abstract RIASSUNTO\"
 .ds \*[locale]-app ALLEGATO\"
+.ds \*[locale]-appendix_string Appendice\"
 .ds \*[locale]-april Aprile\"
 .ds \*[locale]-attribute_string da\"
 .ds \*[locale]-august Agosto\"
@@ -79,6 +88,15 @@
 .ds \*[locale]-litb Tabella\"
 .ds \*[locale]-lt ELENCO DEI TABELLE\"
 .ds \*[locale]-lx ELENCO DEI DOCUMENTI\"
+.ds \*[locale]-man-section1 Manuale dei comandi generali\"
+.ds \*[locale]-man-section2 Manuale delle chiamate di sistema\"
+.ds \*[locale]-man-section3 Manuale delle funzioni di libreria\"
+.ds \*[locale]-man-section4 Manuale delle interfacce del kernel\"
+.ds \*[locale]-man-section5 Manuale dei formati di file\"
+.ds \*[locale]-man-section6 Manuale dei giochi\"
+.ds \*[locale]-man-section7 Manuale di informazioni varie\"
+.ds \*[locale]-man-section8 Manuale del gestore di sistema\"
+.ds \*[locale]-man-section9 Manuale dello sviluppatore del kernel\"
 .ds \*[locale]-march Marzo\"
 .ds \*[locale]-may Maggio\"
 .ds \*[locale]-monday Luned\[i `]\"
@@ -109,7 +127,7 @@
 .	\" update the date
 .	ds DY \n[dy] \*[MO] \n[year]
 .	\" set hyphenation flags
-.	nr HY 3 \" 1+2
+.	nr HY 2
 .\}
 .
 .
@@ -134,45 +152,36 @@
 .\}
 .
 .
-.\" me package
-.if d @R \{\
-.	\" date update
-.	ds td \n(dy \*(mo \n(y4
-.	\" Redefinition for the chapter system
-.	de $c
-.	sz 12
-.	ft 3
-.	ce 1000
-.	if \\n(_M<3 \
-.	nr ch +1
-.	ie \\n(_M=1 CAPITOLO\ \ \\n(ch
-.	el .if \\n(_M=2 APPENDICE\ \ \\n(ch
-.	if \w"\\$1" .sp 3-\\n(.L
-.	if \w"\\$1" \\$1
-.	if (\\n(_M<3):(\w"\\$1") \
-.	sp 4-\\n(.L
-.	ce 0
-.	ft
-.	sz
-.	ie \\n(_M=1 \
-.	$C Capitolo \\n(ch "\\$1"
-.	el .if \\n(_M=2 \
-.	$C Appendice \\n(ch "\\$1"
-..
-.\}
-.
-.
 .ss 12 0
 .
+.\" Set up hyphenation.
 .
 .\" Italian hyphenation (\lefthyphenmin=2, \righthyphenmin=2)
-.hy 1
+.nr \*[locale]*hyphenation-mode-base 1
+.nr \*[locale]*hyphenation-mode-trap 2
+.
+.ie \n[locale*use-trap-hyphenation-mode] \
+.  hy \n[\*[locale]*hyphenation-mode-trap]
+.el \
+.  hy \n[\*[locale]*hyphenation-mode-base]
+.
+.rr locale*use-trap-hyphenation-mode
+.
 .hla it
 .hpf hyphen.it
 .
 .
-.\" man, mdoc and mdoc-old are intentionally left untouched: usually
-.\" these packages are translated in the sources of the documents.
+.\" man package
+.if d an \
+.	an*reset-hyphenation-mode
+.
+.
+.\" me package
+.if d @R \{\
+.	ds _td_format \En(dy \E*(mo \En(y4
+.	ld
+.\}
+.
 .
 .cp \n[*groff_it_tmac_C]
 .do rr *groff_it_tmac_C

@@ -1,3 +1,53 @@
+2022-04-03  Ingo Schwarze <schwarze@openbsd.org>
+
+	* sboxes.am: msboxes.ms is documentation, not merely an example.
+	Consequently, install msboxes.ms unconditionally and msboxes.pdf
+	if BUILD_PDFDOC is enabled, both to the documentation directory
+	rather than to the examples directory.
+
+2022-04-02  Ingo Schwarze <schwarze@openbsd.org>
+
+	* sboxes.am: Stop installing msboxes.ms.in;
+	installing msboxes.ms and msboxes.pdf is enough.
+
+2022-03-29  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* msboxes.ms.in: Tweak sboxes documentation to imply ms
+	dependency.
+
+	Fixes <https://savannah.gnu.org/bugs/?62062>.
+
+2022-03-22  Ingo Schwarze <schwarze@openbsd.org>
+
+	* sboxes.am: fix non-portable syntax in the msboxes.pdf target
+	by using DOC_GROFF_ONLY rather than DOC_GROFF in order to not
+	use $< outside a suffix rule; DOC_GROFF functionality is not
+	needed here in the first place.
+
+2022-03-22  Ingo Schwarze <schwarze@openbsd.org>
+
+	* sboxes.am: make the build of msboxes.{ms,pdf} work with BSD
+	make by using $(sboxes_builddir) consistently to prevent
+	variations in target names.
+
+2022-02-06  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* sboxes.tmac: Prefix early diagnostics with package file name
+	literally.  (We don't yet know if we can use \*[] string
+	interpolation.)  It is better to violate DRY a little here than
+	to obscure from the user what is emitting the diagnostic.
+
+2022-02-06  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* sboxes.tmac: Skip macro package instead of aborting if there
+	are prerequisite problems.  This is an auxiliary package; it is
+	not necessarily fatal to the user's purposes if it doesn't load.
+
+2022-02-06  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* notquine.sed: Convert tilde to special character when inlining
+	document source (\~ is used).
+
 2021-11-01  G. Branden Robinson <g.branden.robinson@gmail.com>
 
 	* msboxes.ms.in: Retitle document to "Using PDF Boxes with

@@ -1,4 +1,4 @@
-.\" -*- coding: utf-8 -*- (for preconv; for Emacs, see end of file)
+.\" groff -kt -me -mfr
 .\"
 .\" Copyright (c) 1986, 1993
 .\"   The Regents of the University of California.  All rights reserved.
@@ -37,21 +37,23 @@
 .\"
 .\" Translated to French by Grégoire Babey <gibux@gmx.ch>
 .\"UC 7
-.ll 6.5i
-.lt 6.5i
+.if t .ll 6.5i
+.if t .lt 6.5i
+.nr sx 0
 .ds MO @VERSION@
 .nr si 3n
-.he 'GROFF EN OPTION \-ME''%'
+.he '\f(BIgroff\fP en option \f(BI\-me\fP''%'
 .\"eh 'USD:19-%''Writing Papers with NROFF using \-me'
 .\"oh 'Writing Papers with NROFF using \-me''USD:19-%'
-.ds U \s-1UNIX\s0
-.ds N \s-1NROFF\s0
-.ds T \s-1TROFF\s0
-.ds G \s-1GROFF\s0
+.ds U Unix
+.ds N \fInroff\fP
+.ds T \fItroff\fP
+.ds G \fIgroff\fP
+.ds UG groff\" upright "groff" for use in slanted contexts
 .+c
 .(l C
 .sz 14
-.b "Rédiger des documents avec GROFF \-me"
+.b "Rédiger des documents avec \f(BIgroff \-me\fP"
 .sz
 .sp 2
 .ul
@@ -62,39 +64,47 @@ Electronics Research Laboratory
 University of California, Berkeley
 Berkeley, California 94720
 .sp 2
-.i "Modifié pour \*G by James Clark"
+.i "Modifié pour \fR\*(UG\fP par James Clark*"
+.(f
+* Ce document a été
+.i \*(UG\fRé \" defeat italic correction
+le 27 octobre 2001 et s'applique à la version des macros \-me
+inclus dans la version \*(MO de \*G.
+.)f
 .sp 2
-.i "Adapté au français par Grégoire Babey"
+.i "Adapté au français par Grégoire Babey\(dg"
+.(f
+\(dg La traduction française a été
+.i \*(UG\fRée \" defeat italic correction
+le 20 octobre 2013,
+toutes les commandes ont été testées sur la version 1.21 de \*G.
+.)f
 .)l
 .sp 2
 .pp
 Ce document décrit les outils de traitement de texte
-sur un système \*U\(lz
-.(f
-\(lz\*U est une marque déposée de AT&T Bell Laboratories
-.)f
+sur un système \*U
+et autres systèmes d'exploitation
 fournis par \*G
 et le
 paquet de macros
 \-me.
-Il présuppose que le lecteur 
+Il présuppose que le lecteur
 est déjà familiarisé avec les systèmes \*U
 et un éditeur de texte
 (tel que par exemple
-.b ex
-).
+.i vi ).
 Son intention est d'être une introduction
 simple et concrète, et par conséquent,
 il ne traitera pas toute la matière disponible.
 En particulier,
 de nombreuses variantes et fonctionnalités supplémentaires
 du paquet de macros \-me ne seront pas décrites.
-Pour une discussion plus complète de telle ou telle fonctionnalité, voyez
-.ul
-The \-me Reference Manual
+Pour une discussion plus complète de telle ou telle fonctionnalité,
+voyez
+.q "\fIme\fP Reference Manual"
 et
-.ul
-The \*N/\*T Reference Manual.
+.i "groff: The GNU implementation of troff."
 .pp
 \*G, est un logiciel
 fonctionnant sur le système d'exploitation \*U.
@@ -102,44 +112,57 @@ Il lit un fichier d'entrée
 préparé par l'utilisateur
 et sort un texte formaté,
 prêt à être publié ou mis en page.
-Le fichier d'entrée est formé de 
+Le fichier d'entrée est formé de
 .i texte ,
 les mots destinés à être imprimés,
 et de
 .i requêtes ,
 qui donnent des instructions au programme \*G
 et lui indiquent quelle forme donner à la copie imprimée.
-.br
-.sp
-Chapitre 1:	décrit les éléments de base du traitement de texte.
-
-Chapitre 2:	décrit les requêtes de base.
-
-Chapitre 3:	introduit les mises en évidence: citations, tableaux, figures.
-
-Chapitre 4:	annotations (notes en bas de page, texte différé, index).
-
-Chapitre 5:	requêtes plus complexes, n'ayant pu être traitées au chapitre 2.
-
-Chapitre 6:	les choses que vous devez savoir pour pouvoir rédiger des documents.
-.sp 2
-.br
-Si vous êtes novice, vous ne voudrez sans doute pas attendre d'avoir lu jusqu'au chapitre 4 pour tester par vous mêmes les fonctions de base du programme.
+.nr ii \w'Chapitre\~\0'u+1n
+.ip "Chapitre\~1"
+décrit les éléments de base du traitement de texte.
+.ip "Chapitre\~2"
+décrit les requêtes de base.
+.ip "Chapitre\~3"
+introduit les mises en évidence: citations, tableaux, figures.
+.ip "Chapitre\~4"
+annotations (notes en bas de page, texte différé, index).
+.ip "Chapitre\~5"
+requêtes plus complexes, n'ayant pu être traitées au chapitre 2.
+.ip "Chapitre\~6"
+les choses que vous devez savoir pour pouvoir rédiger des documents.
+.pp
+Si vous êtes novice,
+vous ne voudrez sans doute pas attendre d'avoir lu jusqu'au chapitre 4
+pour tester par vous mêmes les fonctions de base du programme.
 Quand votre texte sera prêt à être traité,
 appelez le formateur \*G en tapant
 cette commande dans votre shell \*U (ou terminal):
 .(b
-groff \-me \-k \ foo > \ foo.ps
+groff \-k \-me \-mfr foo.me > foo.ps
 .)b
-L'option -k tient compte des caractères accentués propres au français.
-.br
-Remplacez foo par le nom de votre fichier qui devra être en un mot.
-.br
-Le fichier devra être placé dans votre répertoire personnel, sinon remplacez foo par le chemin du fichier.
-.br
-À la place de .ps, vous pouvez mettre .pdf ou le format que vous désirez obtenir.
-.sp
-Vous trouverez un description plus complète des options pour la commande \*G en tapant
+L'option
+.b \-k
+tient compte des caractères accentués propres au français.
+.\" BEGIN TRANSLATOR HELP NEEDED
+The
+.b \-mfr
+option
+sets up appropriate inter-sentence space and hyphenation,
+presuming that
+.q foo.me
+is written in French.
+.\" END TRANSLATOR HELP NEEDED
+Remplacez
+.q foo
+par le nom de votre fichier qui devra être en un mot.
+Le fichier devra être placé dans votre répertoire personnel,
+sinon remplacez foo par le chemin du fichier.
+À la place de \&.ps,
+vous pouvez mettre \&.pdf ou le format que vous désirez obtenir.
+Vous trouverez un description plus complète des options pour la commande
+\*G en tapant
 .b "man groff"
 dans votre terminal ou console.
 .pp
@@ -203,24 +226,28 @@ de venir en aide
 à leur parti.
 Il y a quatre-vingt-sept ans...
 .)b
-Parfois, vous désirerez commencer une nouvelle ligne, même si la ligne actuelle n'est pas encore pleine;
+Parfois,
+vous désirerez commencer une nouvelle ligne,
+même si la ligne actuelle n'est pas encore pleine;
 par exemple,
 à la fin d'un paragraphe.
 Pour y parvenir,
 vous pouvez provoquer une
 .i interruption:
-une ligne d'entrée vide, ou une nouvelle ligne commençant par un espacement 
+une ligne d'entrée vide,
+ou une nouvelle ligne commençant par un espacement
 provoquent le début d'une nouvelle ligne.
 Certaines requêtes provoquent automatiquement une interruption.
 .pp
-Les lignes d'entrée ne sont pas toutes destinées à être formatées (voir plus bas).
+Les lignes d'entrée ne sont pas toutes destinées à être formatées
+(voir plus bas).
 Certaines lignes sont des
 .i requêtes
 qui décrivent
 comment le texte doit être formaté.
 Les requêtes commencent toujours par un point ou une apostrophe
 (\c
-.q "\|\(aa\|" ).
+.q "\|\(aq\|" ).
 .pp
 Le formateur de texte effectue aussi des tâches plus complexes,
 comme la numérotation automatique des pages,
@@ -229,7 +256,7 @@ le placement des notes en bas de page au bon endroit,
 et ainsi de suite.
 .pp
 Je peux vous donner quelques conseils
-comment préparer votre texte d'entrée pour  \*G.
+comment préparer votre texte d'entrée pour \*G.
 Premièrement,
 écrivez des lignes d'entrée courtes.
 Des lignes d'entrée courtes seront plus faciles à modifier,
@@ -241,10 +268,10 @@ chaque virgule ou point,
 puisque habituellement les corrections consistent à
 modifier ou supprimer des propositions ou des phrases.
 Deuxièmement,
-n'ajoutez pas d'espacements à la fin des lignes,
-ceci pourrait en certains cas induire en erreur le processeur \*N.
+n'ajoutez pas d'espacements à la fin des lignes.
 Troisièmement,
-ne séparez pas vous-même les mots en fin de ligne avec des traits d'union
+ne séparez pas vous-même les mots en fin de ligne
+avec des traits d'union
 (excepté les mots qui en contiennent naturellement,
 comme
 .q belle-mère );
@@ -259,7 +286,7 @@ sinon vous obtiendrez un espacement là ou vous n'en vouliez pas,
 comme ici par exemple:
 .tr @-
 .nh
-.q "belle@\ mère" .
+.q "belle@\~mère" .
 .br
 .tr @@
 .hy 14
@@ -317,32 +344,40 @@ qui seront décrits plus tard.
 On peut ajouter si on veut des en-têtes et des pieds de page.
 Deux requêtes
 ayant la forme de
-.b .he \ \c
+.b .he \~\c
 .i titre
 and
-.b .fo \ \c
+.b .fo \~\c
 .i titre
-définissent les titres à mettre respectivement en haut et en pied de page.
+définissent les titres à mettre respectivement en haut
+et en pied de page.
 Ces titres sont appelés titres
 .i "en trois parties"
 :
-une première partie est justifiée sur la gauche, la deuxième est centrée, la troisième justifiée sur la droite. Les trois parties sont séparées par des apostrophes.
-Le signe %, si il est présent dans le titre, sera automatiquement remplacé par le numéro de page courant.
+une première partie est justifiée sur la gauche,
+la deuxième est centrée,
+la troisième justifiée sur la droite.
+Les trois parties sont séparées par des apostrophes.
+Le signe %,
+si il est présent dans le titre,
+sera automatiquement remplacé par le numéro de page courant.
 Par exemple l'entrée:
 .(b
-\&.he \(aa\(aa%\(aa\(aa
+\&.he \(aq\(aq%\(aq\(aq
 .)b
 donnera le numéro de page courant centré sur chaque page.
 .(b
-\&.he \(aa\(aa\(aa%\(aa
+\&.he \(aq\(aq\(aq%\(aq
 .)b
 donnera le numéro de page jusifié à droite sur chaque page.
 .(b
-\&.he \(aaGroff -me\(aaTraduction\(aa%\(aa
+\&.he \(aqGroff -me\(aqTraduction\(aq%\(aq
 .)b
-donnera à gauche "Groff -me", au centre "Traduction" et à droite le numéro de page courant.
+donnera à gauche "Groff -me",
+au centre "Traduction" et à droite le numéro de page courant.
 .br
-Les éléments de l'en-tête peuvent débuter par n'importe quelle lettre, mais antislash et guillemets sont à éviter.
+Les éléments de l'en-tête peuvent débuter par n'importe quelle lettre,
+mais antislash et guillemets sont à éviter.
 La commande
 .b .fo
 fonctionne de manière analogue.
@@ -351,14 +386,16 @@ fonctionne de manière analogue.
 .ls 2
 \*G insère un double espacement vertical dans le texe de sortie
 si vous utilisez la requête
-.b ".ls\ 2" ,
+.b ".ls\~2" ,
 comme cela a été fait ici.
 Vous pouvez retourner à l'espacement vertical simple en tapant
-.b ".ls\ 1" .
+.b ".ls\~1" .
 .ls 1
 .sh 2 "Layout de la page"
 .pp
-Un certain nombre de requêtes vous permettent de modifier la présentation de la copie imprimée, ce qu'on appelle le
+Un certain nombre de requêtes
+vous permettent de modifier la présentation de la copie imprimée,
+ce qu'on appelle le
 .i layout
 de la page de sortie.
 La plupart de ces requêtes ajustent dans le texte des
@@ -374,7 +411,7 @@ La requête
 commence une nouvelle page.
 .pp
 La requête
-.b .sp \ \c
+.b .sp \~\c
 .i N
 laisse
 .i N
@@ -406,7 +443,6 @@ suivis de la ligne
 suivie elle-même d'un espacement vertical.
 .pp
 Cette requête ne laissera pas d'espacement vertical en haut d'une page.
-.
 Si vous avez besoin de l'espacement que apparaisse quelle que soit la
 position sur la page,
 utilisez la requête
@@ -417,7 +453,7 @@ mais qui ajoutera toujours l'espacement demandé,
 même en haut d'une page.
 .pp
 La requête
-.b .in \ \c
+.b .in \~\c
 .i +N
 change le nombre d'espacements sur la gauche de la page
 (l'
@@ -487,11 +523,11 @@ fin du texte
 .)b
 .pp
 La requête
-.b .ti \ \c
+.b .ti \~\c
 .i +N
 (indentation temporaire)
 est utilisée de la même manière que
-.b .in \ \c
+.b .in \~\c
 .i +N
 quand l'indentation ne concerne qu'une seule ligne,
 après quoi on retourne à l'indentation initiale.
@@ -517,7 +553,8 @@ Ware, James R. The Best of Confucius,
 Halcyon House, 1950.
 Un livre excellent, qui présente
 en traduction (anglaise) les phrases les plus délicieuses de Confucius.
-Décidément un passage obligé pour tous ceux qui s'intéressent au fondements primitifs de la philosophie chinoise.
+Décidément un passage obligé pour tous ceux
+qui s'intéressent au fondements primitifs de la philosophie chinoise.
 .pp
 Les lignes de texte peuvent être centrées en utilisant la requête
 .b .ce .
@@ -527,7 +564,7 @@ est centrée (horizontalement)
 sur la page.
 Pour centrer plus qu'une ligne,
 utilisez
-.b .ce \ \c
+.b .ce \~\c
 .i N
 (où
 .i N
@@ -535,7 +572,8 @@ est le nombre de lignes à centrer),
 suivi de
 .i N
 lignes.
-Si vous voulez centrer plusieurs lignes, mais vous vous refusez à les compter,
+Si vous voulez centrer plusieurs lignes,
+mais vous vous refusez à les compter,
 tapez:
 .(b
 \&.ce 1000
@@ -543,7 +581,7 @@ lignes à centrer
 \&.ce 0
 .)b
 Cette requête
-.b ".ce\ 0"
+.b ".ce\~0"
 dit à \*G de ne centrer plus que 0 lignes,
 c'est à dire,
 d'arrêter de centrer.
@@ -555,7 +593,8 @@ utilisez
 .b .br .
 .sh 1 "Mises en évidences"
 .pp
-Les mises en évidences sont des passages de textes sortis du corps de texte.
+Les mises en évidences sont des passages de textes sortis
+du corps de texte.
 Citations,
 tableaux
 et figures
@@ -568,7 +607,7 @@ sont précédés et suivis en sortie d'un seul espacement vertical.
 .sh 2 "Citations longues"
 .pp
 Les citations longues
-sont des citations  qui s'étalent sur plusieurs lignes,
+sont des citations qui s'étalent sur plusieurs lignes,
 elles sont donc sorties du corps de texte
 et ne sont pas entourées de guillemets.
 Cela peut être réalisé
@@ -580,7 +619,7 @@ entourant la citation.
 Par exemple,
 l'entrée:
 .(b
-Comme l'indique  Weizenbaum:
+Comme l'indique Weizenbaum:
 \&.(q
 On dit qu'expliquer, c'est expliquer en s'éloignant.
 Cette maxime ne s'accomplit nulle part aussi bien
@@ -589,7 +628,7 @@ que dans le domaine de la programmation informatique,...
 .)b
 génère comme sortie:
 .lp
-Comme l'indique  Weizenbaum:
+Comme l'indique Weizenbaum:
 .(q
 On dit qu'expliquer, c'est expliquer en s'éloignant.
 Cette maxime ne s'accomplit nulle part aussi bien
@@ -711,7 +750,7 @@ Si vous voulez obtenir une mise en évidence
 en mode justifié
 (pour du texte),
 tapez
-.b ".(l\ F"
+.b ".(l\~F"
 [Tout au long de ce chapitre,
 les remarques s'appliquant à
 .b .(l
@@ -726,25 +765,27 @@ l'entrée:
 .(b
 \&.(l F
 Et maintenant les garçons et les filles,
-un jouet plus grand, plus beau que tout ce qui a existé auparavant!
+un jouet plus grand,
+plus beau que tout ce qui a existé auparavant!
 Soyez le premier, la première de votre quartier
 à posséder votre propre ordinateur!
 Oui les enfants, vous aussi vous pouvez posséder
 une de ces machines à gérer les informations.
-Vous aussi vous pouvez produire de beaux papiers formatés
-sans même remuer le petit doigt!
+Vous aussi vous pouvez produire de beaux papiers
+formatés sans même remuer le petit doigt!
 \&.)l
 .)b
 donnera en sortie:
 .(b F
 Et maintenant les garçons et les filles,
-un jouet plus grand, plus beau que tout ce qui a existé auparavant!
+un jouet plus grand,
+plus beau que tout ce qui a existé auparavant!
 Soyez le premier, la première de votre quartier
 à posséder votre propre ordinateur!
 Oui les enfants, vous aussi vous pouvez posséder
 une de ces machines à gérer les informations.
-Vous aussi vous pouvez produire de beaux papiers formatés
-sans même remuer le petit doigt!
+Vous aussi vous pouvez produire de beaux papiers
+formatés sans même remuer le petit doigt!
 .)b
 .pp
 Par exemple,
@@ -753,25 +794,27 @@ alignée sur la gauche, entrez:
 .(b
 \&.(l L F
 Et maintenant les garçons et les filles,
-un jouet plus grand, plus beau que tout ce qui a existé auparavant!
+un jouet plus grand,
+plus beau que tout ce qui a existé auparavant!
 Soyez le premier, la première de votre quartier
 à posséder votre propre ordinateur!
 Oui les enfants, vous aussi vous pouvez posséder
 une de ces machines à gérer les informations.
-Vous aussi vous pouvez produire de beaux papiers formatés
-sans même remuer le petit doigt!
+Vous aussi vous pouvez produire de beaux papiers
+formatés sans même remuer le petit doigt!
 \&.)l
 .)b
 Ce qui donnera:
 .(l L F
 Et maintenant les garçons et les filles,
-un jouet plus grand, plus beau que tout ce qui a existé avant!
+un jouet plus grand,
+plus beau que tout ce qui a existé auparavant!
 Soyez le premier, la première de votre quartier
 à posséder votre propre ordinateur!
 Oui les enfants, vous aussi vous pouvez posséder
 une de ces machines à gérer les informations.
-Vous aussi vous pouvez produire de beaux papiers formatés
-sans même remuer le petit doigt!
+Vous aussi vous pouvez produire de beaux papiers
+formatés sans même remuer le petit doigt!
 .)l
 .pp
 Normalement, les listes et les blocs sont indentés
@@ -779,7 +822,7 @@ Normalement, les listes et les blocs sont indentés
 Pour obtenir une liste
 alignée sur la gauche,
 tapez
-.b ".(l\ L" .
+.b ".(l\~L" .
 Pour obtenir une ligne centrée
 ligne après ligne,
 tapez
@@ -877,17 +920,17 @@ après
 Il fait en sorte
 que le bloc se centre
 sur toute la longueur de la ligne
-plutôt que sur la longueur de ligne raccourcie de l'indentation. 
+plutôt que sur la longueur de ligne raccourcie de l'indentation.
 Aussi,
 la requête demandant de centrer
 doit être placée
-.i à \ l'intérieur
+.i à \~l'intérieur
 de la requête formant le clos.
 .sh 1 "Annotations"
 .pp
 Un certain nombre de requêtes
 servent à mettre du texte de côté
-pour l'imprimer plus tard, comme les 
+pour l'imprimer plus tard, comme les
 .i "notes en bas de page"
 qui sont imprimées au bas de la page courante.
 .br
@@ -997,7 +1040,9 @@ vous utiliserez alors des signes spéciaux*
 .)f
 plutôt que des numéros.
 .br
-Pour faire apparaître une note en bas de page munie d'un signe spécial comme celle que vous admirez ci- dessus, entrez:
+Pour faire apparaître une note en bas de page munie
+d'un signe spécial comme celle que vous admirez ci- dessus,
+entrez:
 .br
 \&...vous utiliserez alors des signes spéciaux*.
 .br
@@ -1023,7 +1068,7 @@ Cependant,
 chaque élément de l'index
 a un numéro de page
 (ou un autre signe distinctif)
-à la fin de  la dernière ligne le décrivant,
+à la fin de la dernière ligne le décrivant,
 à la suite d'une rangée de points (voir ci-dessous).
 .pp
 Les entrées pour l'index
@@ -1044,7 +1089,9 @@ peut avoir un argument,
 quand on veut formuler soi-même
 une valeur prenant la place du
 .q "numéro de page" .
-Sans argument, c'est le numéro de page où se trouve la requête qui sera utilisé automatiquement.
+Sans argument,
+c'est le numéro de page où se trouve la requête
+qui sera utilisé automatiquement.
 Si le numéro de page donné est un trait de soulignage
 (\c
 .q _ )
@@ -1099,7 +1146,8 @@ Si les cochons avaient des ailes
 .(x
 Ceci est une entrée d'index terriblement longue,
 comme on pourrait en avoir besoin pour
-une liste d'illustrations, de tableaux, ou de figures; je m'attends à ce qu'elle fasse au moins deux lignes.
+une liste d'illustrations, de tableaux, ou de figures;
+je m'attends à ce qu'elle fasse au moins deux lignes.
 .)x
 .xp
 .pp
@@ -1128,7 +1176,8 @@ du document,
 plutôt qu'au début
 où il apparaîtra sans doute
 (en temps que table des matières);
-les pages devront peut-être être réarrangées physiquement après impression.
+les pages devront peut-être être réarrangées physiquement
+après impression.
 .sh 1 "Fonctionnalités plus complexes"
 .pp
 Il existe un grand nombre d'autres possibilités,
@@ -1176,7 +1225,7 @@ ligne s'aligne
 sur les autres lignes du paragraphe.
 \&.ip deux
 Et ici nous sommes déjà au second paragraphe.
-Vous noterez que l'argument de  \c
+Vous noterez que l'argument de \c
 .b .ip
 apparaît dans la marge.
 \&.lp
@@ -1218,7 +1267,7 @@ entrer:
 .)b
 .pp
 Si le label prévu pour un paragraphe indenté
-(c'est à dire l'argument de 
+(c'est à dire l'argument de
 .b .ip )
 est plus long que l'espace prévu pour le label (cinq espacements),
 .b .ip
@@ -1226,17 +1275,19 @@ commencera une nouvelle ligne après le label.
 Par exemple,
 l'entrée:
 .(b
-\&.ip label\ long
+\&.ip label\~long
 Ce paragraphe a un label long.
 Le premier caractère du texte de la première ligne
-ne s'alignera pas sur le texte de la seconde ligne et suivantes,
+ne s'alignera pas sur le texte de la seconde ligne
+et suivantes,
 bien que celles-ci soient alignées entre elles.
 .)b
 produira:
-.ip label\ long
+.ip label\~long
 Ce paragraphe a un label long.
 Le premier caractère du texte de la première ligne
-ne s'alignera pas sur le texte de la seconde ligne et suivantes,
+ne s'alignera pas sur le texte de la seconde ligne
+et suivantes,
 bien que celles-ci soient alignées entre elles.
 .pp
 Il est possible de changer la taille du label
@@ -1246,7 +1297,7 @@ Par exemple,
 on pourra écrire l'exemple ci-dessus correctement
 en disant:
 .(b
-\&.ip label\ long 10
+\&.ip label\~long 10
 .)b
 qui rendra l'indentation du paragraphe longue de
 10 espacements pour ce paragraphe seulement.
@@ -1310,9 +1361,9 @@ Ceci est le premier point.
 Ceci est le second point.
 Les "points" sont juste des paragraphes normaux
 auxquels on donne automatiquement un numéro
-à l'aide de la requête .np.
+à l'aide de la requête \&.np.
 \&.pp
-Ce paragraphe remet la numérotation par .np à 1.
+Ce paragraphe remet la numérotation par \&.np à 1.
 \&.np
 Là par exemple,
 nous avons recommencé la numérotation à 1.
@@ -1324,9 +1375,9 @@ Ceci est le premier point.
 Ceci est le second point.
 Les "points" sont juste des paragraphes normaux
 auxquels on donne automatiquement un numéro
-à l'aide de la requête .np.
+à l'aide de la requête \&.np.
 .pp
-Ce paragraphe remet la numérotation à 1 à cause de .pp.
+Ce paragraphe remet la numérotation à 1 à cause de \&.pp.
 .np
 Là par exemple,
 nous avons recommencé la numérotation à 1.
@@ -1355,7 +1406,12 @@ produit\**:
 si vous mettez ces trois ingrédients
 dans une cocotte assez haute,
 et que vous remuez le tout comme un cinglé à feu moyen
-(ne lâchez jamais l'anse de la cocotte) jusqu'à ce que le mélange ait la consistance d'une béchamel (ce qui prend juste une à deux minutes), si ensuite, vous retirez la cocotte du feu et vous incorporez le beurre, vous obtiendrez une délicieuse sauce hollandaise.
+(ne lâchez jamais l'anse de la cocotte)
+jusqu'à ce que le mélange ait la consistance d'une béchamel
+(ce qui prend juste une à deux minutes),
+si ensuite,
+vous retirez la cocotte du feu et vous incorporez le beurre,
+vous obtiendrez une délicieuse sauce hollandaise.
 .)f
 .bu
 Un jaune d'oeuf
@@ -1484,7 +1540,7 @@ en ayant recours à la requête
 \&.nr si 3n
 .)b
 au début du fichier d'entrée,
-ce qui donne  trois espacements d'indentation
+ce qui donne trois espacements d'indentation
 par niveau de profondeur du chapitre.
 .pp
 Des numéros de chapitre
@@ -1514,7 +1570,7 @@ une page de titre typique aura cette apparence:
 \&.tp
 \&.sp 7c
 \&.(l C
-LA CROISSANCE DES ONGLES D'ORTEILS
+LA CROISSANCE DES ONGLES D\(aqORTEILS
 CHEZ LES PRIMATES SUPÉRIEURS
 \&.sp
 par
@@ -1525,7 +1581,7 @@ Frank N. Furter
 .)b
 .pp
 La requête
-.b .+c \ \c
+.b .+c \~\c
 .i T
 peut être utilisée pour
 commencer un nouveau chapitre.
@@ -1545,12 +1601,12 @@ utilisez la requête:
 qui produira sur une nouvelle page,
 les lignes
 .(b C
-CHAPITRE 5
+Chapitre 5
 CONCLUSIONS
 .)b
 avec des espacements appropriés pour une thèse.
 L'en-tête aussi est déplacé en bas de page
-sur la première page d'un chapitre\** .
+sur la première page d'un chapitre\** \&.
 .(f
 \**Voir la première page de ce document
 .)f
@@ -1617,43 +1673,46 @@ les commentaires débutent par la requête
 .hl
 .if t .in 0.5i
 .if t .ta 2i
-.if n .ta 3i
-\&.fo \(aa\(aaÉBAUCHE\(aa\(aa	\e" définir un pied de page pour chaque page.
-\&.tp				\e" commencer la page de titre
-\&.(l C				\e" liste centrée
+.if n .ta \w'.+c "CHAPITRE SUIVANT"'u+1n
+\&.fo \(aq\(aqÉBAUCHE\(aq\(aq	\e" définir un pied de page pour chaque\
+ page
+\&.tp			\e" commencer la page de titre
+\&.(l C			\e" liste centrée
 LA CROISSANCE
-DES ONGLES D'ORTEILS
+DES ONGLES D\(aqORTEILS
 CHEZ LES PRIMATES SUPÉRIEURS
 \&.sp
 par
 \&.sp
 Frank Furter
-\&.)l				\e" fin de la liste centrée
-\&.+c INTRODUCTION		\e" début du chapitre intitulé "INTRODUCTION"
-\&.(x t				\e" faire une entrée pour l'index `t'
+\&.)l			\e" fin de la liste centrée
+\&.+c INTRODUCTION	\e" début du chapitre intitulé "INTRODUCTION"
+\&.(x t			\e" faire une entrée pour l\(aqindex "t"
 Introduction
-\&.)x 				\e" fin de l'entrée d'index
-texte du chapitre 1		\e" =Introduction
+\&.)x 			\e" fin de l\(aqentrée d\(aqindex
+texte du chapitre 1	\e" =Introduction
 \&.+c "CHAPITRE SUIVANT"	\e" commencer un nouveau chapitre
-\&.(x t				\e" faire un entrée pour 'index `t'
+\&.(x t			\e" faire un entrée pour l\(aqindex "t"
 Chapitre suivant
 \&.)x
-texte du chapitre 2		\e" =chapitre suivant
+texte du chapitre 2	\e" =chapitre suivant
 \&.+c CONCLUSIONS
 \&.(x t
 Conclusions
 \&.)x
-texte du chapitre 3		\e" =Conclusions
-\&.++ B				\e" commencer la bibliographie
-\&.+c BIBLIOGRAPHIE		\e" commencer un nouveau `chapitre'
+texte du chapitre 3	\e" =Conclusions
+\&.++ B			\e" commencer la bibliographie
+\&.+c BIBLIOGRAPHIE	\e" commencer un nouveau "chapitre"
 \&.(x t
 Bibliographie
 \&.)x
 texte de la bibliographie
-\&.++ P				\e" commencer la partie préliminaire du document
+\&.++ P			\e" commencer la partie préliminaire...
+\&.	\e" ...du document
 \&.+c "TABLE DES MATIÈRES"
-\&.xp t				\e" imprimer l'index `t' collecté en amont
-\&.+c PREFACE			\e" commencer un nouveau chapitre dans la partie préliminaire.
+\&.xp t			\e" imprimer l\(aqindex "t" collecté en amont
+\&.+c PREFACE		\e" commencer un nouveau chapitre...
+\&.	\e" ...dans la partie préliminaire.
 texte de la préface
 .sp 2
 .in 0
@@ -1678,7 +1737,7 @@ Pour savoir
 comment ces deux programmes fonctionnent
 consultez les manuels de référence de ces processeurs\**.
 .(f
-\**N.d.tr. 
+\**N.d.tr.
 .b "man eqn"
 et
 .b "man tbl"
@@ -1748,7 +1807,7 @@ pour tenir sur une seule page,
 et dont vous savez
 qu'il lui en faudra plusieurs,
 commencez le tableau avec la requête
-.b ".TS\ H"
+.b ".TS\~H"
 et mettez la requête
 .b .TH
 après la ligne du tableau
@@ -1759,7 +1818,7 @@ Par exemple, la définition
 d'un long tableau
 pourrait être:
 .ds TA \|\h'.4n'\v'-.2n'\s-4\zT\s0\v'.2n'\h'-.4n'\(ci\|
-.if n .ds TA \ \o'-T'\ \"
+.if n .ds TA \~\o'-T'\~\"
 .(b
 \&.TS H
 c s s
@@ -1772,7 +1831,7 @@ texte du tableau
 .pp
 .sh 2 "Sortie sur deux colonnes"
 .pp
-Vous pouvez rédiger votre texte sur deux colonnes 
+Vous pouvez rédiger votre texte sur deux colonnes
 automatiquement
 grâce à la requête
 .b .2c .
@@ -1799,7 +1858,7 @@ est un ensemble formé de requêtes et de texte
 qui peut être résumé
 en une seule requête.
 Les macros commencent par la ligne
-.b ".de" \ \c
+.b ".de" \~\c
 .i xx
 (où
 .i xx
@@ -1890,7 +1949,7 @@ Figure 5.
 \e!.)x
 \&.)z
 .)b
-qui différera l'indexation 
+qui différera l'indexation
 jusqu'à ce que la figure soit en sortie.
 Cela garantira
 que le numéro de la page dans l'index soit correct.
@@ -1908,7 +1967,7 @@ des documents
 qui seront joliment imprimés
 sur un terminal normal,
 ou, si vous avez besoin d'un photocompositeur,
-en utilisant le programme de formatage \*T .
+en utilisant le programme de formatage \*T \&.
 .sh 2 "Polices"
 .pp
 Une
@@ -1997,16 +2056,17 @@ génère
 .)b
 Notez que les requêtes de pseudo-police
 ne mettent qu'un seul paramètre dans la pseudo-police;
-les requêtes de police ordinaire (.r, .i, .b, et .bi)
+les requêtes de police ordinaire (.r, \&.i, \&.b, et \&.bi)
 vont commencer à mettre
 tout le texte qui suit
 dans la police spéciale
 si vous ne fournissez pas de paramètre précis\**.
 .(f
-\**N.d.tr. Pour cela, commencer une nouvelle ligne directement après la requête.
+\**N.d.tr. Pour cela,
+commencer une nouvelle ligne directement après la requête.
 La police spéciale sera maintenue jusqu'à la fin du paragraphe.
 .)f
-Si vous utilisez ces requêtes de pseudo-polices (.u, .bx)
+Si vous utilisez ces requêtes de pseudo-polices (.u, \&.bx)
 au milieu des lignes,
 elles ne devraient porter vraiment que sur un seul mot.
 Ceci à cause de la manière
@@ -2014,13 +2074,13 @@ de laquelle \*G justifie le texte.
 Par exemple,
 si vous voulez utiliser les requêtes:
 .(b
-\&.u "italiques gras"
+\&.u "mots soulignés"
 et
 \&.bx "mots dans un cadre"
 .)b
 au milieu d'une ligne,
 \*G produirait
-.u "italiques gras"
+.u "mots soulignés"
 et
 .bx "mots dans un cadre" ,\p
 ce qui, vous l'admettrez sans peine, n'est pas très joli.
@@ -2035,7 +2095,7 @@ la requête de police:
 .)b
 génère
 .q hardi
-en  caractères gras,
+en caractères gras,
 mais mettra
 .q petit
 dans la police du texte environnant,
@@ -2054,8 +2114,8 @@ tapez:
 \&.b "hardi petit"
 .)b
 .pp
-Vous pouvez panacher les polices à l'intérieur d'un seul mot en utilisant
-une séquence spéciale
+Vous pouvez panacher les polices à l'intérieur
+d'un seul mot en utilisant une séquence spéciale
 .b \ec
 en fin de ligne
 pour indiquer
@@ -2107,7 +2167,7 @@ avec la requête
 .)b
 ou en
 .q enlever
-en utilisant le signe - à la place de + .
+en utilisant le signe - à la place de + \&.
 .br
 L'
 .i "espacement vertical"\**
@@ -2120,16 +2180,18 @@ de deux lignes adjacentes.
 sera proportionnel à
 la taille des caractères.
 .pp
-Avec 
-.b \&.sz 
+Avec
+.b .sz
 , ces changements de tailles de caractères sont
 .i temporaires !!!
 Pour revenir à la taille par défaut, tapez simplement
 .(b
-\& .sz
+\& \&.sz
 .)b
-Si vous voulez influencer systématiquement la taille des éléments de votre texte, utilisez les commandes
-.b \&.nr:
+Si vous voulez influencer systématiquement
+la taille des éléments de votre texte,
+utilisez les commandes
+.b .nr:
 .(b
 \&.nr pp 12
 .)b
@@ -2142,7 +2204,10 @@ met tous les titres de chapitre suivant cette commande à 12 pts.
 \&.nr tp 12
 .)b
 met tous les en-têtes et pieds de page suivant cette commande à 12 pts.
-Vous la placerez avantageusement directement après la commande .he (ou .fo).
+Vous la placerez avantageusement directement après la commande
+.b .he
+(ou
+.b .fo ).
 .pp
 On peut donner à un seul mot ou phrase
 une taille plus petite
@@ -2157,7 +2222,7 @@ Par exemple:
 \&.sm UNIX
 .)b
 s'imprime
-.sm UNIX , 
+.sm UNIX ,
 ce qui est plus joli que UNIX.
 .\" Dave Kemper notes that the following probably has not been true
 .\" since 1986; keeping (but commented) for historical interest.
@@ -2177,7 +2242,7 @@ En typographie,
 pour créer des guillemets,
 il est habituel
 d'utiliser deux accents graves et deux accents aigus,
-plutôt  que les guillemets
+plutôt que les guillemets
 (`\|"\|').
 C'est parce que
 deux accents graves et deux accents aigus
@@ -2200,7 +2265,8 @@ même si elles ont eu lieu.\e*(rq
 .)b
 génère le résultat:
 .(b
-.q "Certaines choses ne sont pas vraies, même si elles ont eu lieu"
+\*(lqCertaines choses ne sont pas vraies,
+même si elles ont eu lieu.\*(rq
 .)b
 Plus rapide, la requête:
 .(b
@@ -2211,9 +2277,8 @@ générera
 Notez que vous devez entourer
 le texte concerné de guillemets
 s'il est formé de plusieurs mots.
-.sh 0
-.sp 1i
-.b Remerciements
+.sx 0
+.uh Remerciements
 .pp
 J'aimerais remercier
 Bob Epstein,
@@ -2235,30 +2300,25 @@ le plus souvent accompagnés de propositions de solutions
 (qui m'ont donc forcé à réparer plusieurs petits bogues);
 et la foule de gens qui ont contribué à ce projet
 par leurs idées ou leur soutien.
-.sp 1i
-Ce document a été
-.sm GROFF é
-le 27 octobre 2001 et s'applique à la version des macros  \-me
-inclus dans la version 1.17.2 de \*G.
-.sp 1i
-La traduction française a été
-.sm GROFF ée
-le 20 octobre 2013, toutes les commandes ont été testées sur la version 1.21 de \*G.
 .(b
 .uh "Annexe: petit lexique des noms de requêtes"
-Par ordre d'apparition dans le texte  
-.sp 
+Par ordre d'apparition dans le texte
+.sp
 .TS
-tab(|); 
-l l l .
+tab(|);
+L L Lx.
 \&.sp|space|espacement
 \&.pp|paragraph|nouveau paragraphe
 \&.he|header|en-tête
 \&.fo|footer|pied de page
-\&.ls|line spacing|espacement vertical (entre les lignes)
+\&.ls|line spacing|T{
+espacement vertical (entre les lignes)
+T}
 \&.in|indent|indentation
 \&.ce|center|centrer
-\&.br|break|interruption (commence une nouvelle ligne)
+\&.br|break|T{
+interruption (commence une nouvelle ligne)
+T}
 \&.(q|quote|citation (début)
 \&.)q|quote|citation (fin)
 \&.(l|list|liste (début)
@@ -2272,11 +2332,19 @@ l l l .
 \&.)c|centered block|bloc centré (fin)
 \&.(f|footnote|note en bas de page (début)
 \&.)f|footnote|note en bas de page (fin)
-\&.(x|index|faire apparaître dans l'index (début)
-\&.)x|index|faire apparaître dans l'index (fin)
+\&.(x|index|T{
+faire apparaître dans l'index (début)
+T}
+\&.)x|index|T{
+faire apparaître dans l'index (fin)
+T}
 \&.xp|print index|imprimer l'index
-\&.lp|lined up paragraph|paragraphe aligné (à 1e ligne non-indentée)
-\&.ip|indented paragraph|paragraphe indenté, sauf en sa première ligne
+\&.lp|lined up paragraph|T{
+paragraphe aligné (à 1e ligne non-indentée)
+T}
+\&.ip|indented paragraph|T{
+paragraphe indenté, sauf en sa première ligne
+T}
 \&.np|numbered paragraph|paragraphe numéroté
 \&.sh|set header|faire un titre
 \&.uh|unnumbered header|titre non-numéroté
@@ -2296,7 +2364,9 @@ l l l .
 \&.u|underlined|souligné
 \&.bx|box|encadré
 \&.sz|size|taille de police
-\&.sm|small|plus petit que le texte environnant
+\&.sm|small|T{
+plus petit que le texte environnant
+T}
 \&.q|quoted|entre guillemets
 .TE
 .)b

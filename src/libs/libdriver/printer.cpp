@@ -1,7 +1,3 @@
-// -*- C++ -*-
-
-// <groff_src_dir>/src/libs/libdriver/printer.cpp
-
 /* Copyright (C) 1989-2020 Free Software Foundation, Inc.
    Written by James Clark (jjc@jclark.com)
 
@@ -27,8 +23,8 @@
    when reading man pages), then we may get an error state on the output
    stream, if the user does not read all the way to the end.
 
-   We normally expect to catch this, and clean up the error context, when
-   the pager exits, because we should get, and handle, a SIGPIPE.
+   We normally expect to catch this, and clean up the error context,
+   when the pager exits, because we should get, and handle, a SIGPIPE.
 
    However ...
 */
@@ -36,10 +32,11 @@
 #if (defined(_MSC_VER) || defined(_WIN32)) \
     && !defined(__CYGWIN__) && !defined(_UWIN)
 
-  /* Native MS-Windows doesn't know about SIGPIPE, so we cannot detect the
-     early exit from the pager, and therefore, cannot clean up the error
-     context; thus we use the following static function to identify this
-     particular error context, and so suppress unwanted diagnostics.
+  /* Native MS-Windows doesn't know about SIGPIPE, so we cannot detect
+     the early exit from the pager, and therefore, cannot clean up the
+     error context; thus we use the following static function to
+     identify this particular error context, and so suppress unwanted
+     diagnostics.
   */
 
   static int
@@ -50,14 +47,14 @@
       clearerr (stream);
     /* Clear errno, in case clearerr() and fflush() don't */
     errno = 0;
-    /* Flush the output stream, so we can capture any error context, other
-       than the specific case we wish to suppress.
-       
-       Microsoft doesn't document it, but the error code for the specific
-       context we are trying to suppress seems to be EINVAL -- a strange
-       choice, since it is not normally associated with fflush(); of course,
-       it *should* be EPIPE, but this *definitely* is not used, and *is* so
-       documented.
+    /* Flush the output stream, so we can capture any error context,
+       other than the specific case we wish to suppress.
+
+       Microsoft doesn't document it, but the error code for the
+       specific context we are trying to suppress seems to be EINVAL --
+       a strange choice, since it is not normally associated with
+       fflush(); of course, it *should* be EPIPE, but this *definitely*
+       is not used, and *is* so documented.
     */
     return ((fflush(stream) < 0) && (errno != EINVAL));
   }
@@ -132,8 +129,8 @@ font *printer::find_font(const char *nm)
     if (strcmp(p->p->get_name(), nm) == 0)
       return p->p;
   font *f = make_font(nm);
-  if (!f)
-    fatal("sorry, I can't continue");
+  if (0 /* nullptr */ == f)
+    fatal("cannot find font '%1'", nm);
   font_list = new font_pointer_list(f, font_list);
   return f;
 }
@@ -179,7 +176,7 @@ void printer::set_ascii_char(unsigned char c, const environment *env,
 
   glyph *g = set_char_and_width(buf, env, &w, &f);
 
-  if (g != UNDEFINED_GLYPH ) {
+  if (g != UNDEFINED_GLYPH) {
     set_char(g, f, env, w, 0);
     if (widthp)
       *widthp = w;
@@ -199,29 +196,28 @@ void printer::set_special_char(const char *nm, const environment *env,
   }
 }
 
-glyph *printer::set_char_and_width(const char *nm, const environment *env,
-				   int *widthp, font **f)
+glyph *printer::set_char_and_width(const char *nm,
+				   const environment *env, int *widthp,
+				   font **f)
 {
   glyph *g = name_to_glyph(nm);
   int fn = env->fontno;
   if (fn < 0 || fn >= nfonts) {
-    error("bad font position '%1'", fn);
+    error("invalid font position '%1'", fn);
     return UNDEFINED_GLYPH;
   }
   *f = font_table[fn];
   if (*f == 0) {
-    error("no font mounted at '%1'", fn);
+    error("no font mounted at position %1", fn);
     return UNDEFINED_GLYPH;
   }
   if (!(*f)->contains(g)) {
     if (nm[0] != '\0' && nm[1] == '\0')
-      error("font '%1' does not contain ascii character '%2'",
-	    (*f)->get_name(),
-	    nm[0]);
+      error("font '%1' does not contain ordinary character '%2'",
+	    (*f)->get_name(), nm[0]);
     else
       error("font '%1' does not contain special character '%2'",
-	    (*f)->get_name(),
-	    nm);
+	    (*f)->get_name(), nm);
     return UNDEFINED_GLYPH;
   }
   int w = (*f)->get_width(g, env->size);
@@ -230,23 +226,23 @@ glyph *printer::set_char_and_width(const char *nm, const environment *env,
   return g;
 }
 
-void printer::set_numbered_char(int num, const environment *env, int *widthp)
+void printer::set_numbered_char(int num, const environment *env, int
+				*widthp)
 {
   glyph *g = number_to_glyph(num);
   int fn = env->fontno;
   if (fn < 0 || fn >= nfonts) {
-    error("bad font position '%1'", fn);
+    error("invalid font position '%1'", fn);
     return;
   }
   font *f = font_table[fn];
   if (f == 0) {
-    error("no font mounted at '%1'", fn);
+    error("no font mounted at position %1", fn);
     return;
   }
   if (!f->contains(g)) {
     error("font '%1' does not contain numbered character %2",
-	  f->get_name(),
-	  num);
+	  f->get_name(), num);
     return;
   }
   int w = f->get_width(g, env->size);
@@ -258,7 +254,13 @@ void printer::set_numbered_char(int num, const environment *env, int *widthp)
 font *printer::get_font_from_index(int fontno)
 {
   if ((fontno >= 0) && (fontno < nfonts))
-    return(font_table[fontno]);
+    return font_table[fontno];
   else
-    return(0);
+    return 0;
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

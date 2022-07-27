@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
@@ -1115,6 +1114,7 @@ void do_bib(const char *filename)
     }
     current_filename = filename;
   }
+  current_lineno = 1;
   enum {
     START, MIDDLE, BODY, BODY_START, BODY_BLANK, BODY_DOT
     } state = START;
@@ -1243,3 +1243,8 @@ int next_size(int n)
   return *p;
 }
 
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

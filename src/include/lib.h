@@ -53,8 +53,10 @@ extern "C" {
 #define getlocale(category) ((void)(category), (char *)"C")
 #endif /* !HAVE_SETLOCALE */
 
+#include <stdbool.h>
+
 char *strsave(const char *s);
-int is_prime(unsigned);
+bool is_prime(unsigned);
 double groff_hypot(double, double);
 
 #include <stdio.h>

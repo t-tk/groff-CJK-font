@@ -33,12 +33,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
 #include "nonposix.h"
 
-int exit_started = 0;		// the exit process has started
-int done_end_macro = 0;		// the end macro (if any) has finished
-int seen_last_page_ejector = 0;	// seen the LAST_PAGE_EJECTOR cookie
+bool is_exit_underway = false;
+bool is_eoi_macro_finished = false;
+bool seen_last_page_ejector = false;
+static bool began_page_in_eoi_macro = false;
 int last_page_number = 0;	// if > 0, the number of the last page
 				// specified with -o
-static int began_page_in_end_macro = 0;	// a new page was begun during the end macro
 
 static int last_post_line_extra_space = 0; // needed for \n(.a
 static int nl_reg_contents = -1;
@@ -433,7 +433,8 @@ void top_level_diversion::transparent_output(unsigned char c)
 
 void top_level_diversion::transparent_output(node * /*n*/)
 {
-  error("can't transparently output node at top level");
+  if (getenv("GROFF_ENABLE_TRANSPARENCY_WARNINGS") != 0 /* nullptr */)
+    error("can't transparently output node at top level");
 }
 
 void top_level_diversion::copy_file(const char *filename)
@@ -573,13 +574,14 @@ void cleanup_and_exit(int exit_code)
 // The optional parameter is for the .trunc register.
 int top_level_diversion::begin_page(vunits n)
 {
-  if (exit_started) {
+  if (is_exit_underway) {
     if (page_count == last_page_count
 	? curenv->is_empty()
-	: (done_end_macro && (seen_last_page_ejector || began_page_in_end_macro)))
+	: (is_eoi_macro_finished && (seen_last_page_ejector
+				      || began_page_in_eoi_macro)))
       cleanup_and_exit(EXIT_SUCCESS);
-    if (!done_end_macro)
-      began_page_in_end_macro = 1;
+    if (!is_eoi_macro_finished)
+      began_page_in_eoi_macro = true;
   }
   if (last_page_number > 0 && page_number == last_page_number)
     cleanup_and_exit(EXIT_SUCCESS);

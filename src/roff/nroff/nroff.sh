@@ -28,6 +28,11 @@ opts=
 dry_run=
 is_option_argument_pending=
 
+usage="usage: $prog [-bcCEhikpRStUVz] [-dCS] [-dNAME=STRING] [-Karg]\
+ [-mNAME] [-Mdir] [-nNUM] [-oLIST] [-Parg] [-rCN] [-rREG=EXPR] [-Tdev]\
+ [-wNAME] [-Wname] [file ...]
+usage: $prog {--help | -v | --version}"
+
 for arg
 do
   if [ -n "$is_option_argument_pending" ]
@@ -67,12 +72,7 @@ do
       echo "GNU nroff (groff) version @VERSION@"
       opts="$opts $arg" ;;
     --help)
-      cat <<EOF
-usage: $prog [-bcCEhikpRStUVz] [-dCS] [-dNAME=STRING] [-Karg] [-mNAME]\
- [-Mdir] [-nNUM] [-oLIST] [-Parg] [-rCN] [-rREG=EXPR] [-Tdev] [-wNAME]\
- [-Wname] [FILE ...]
-usage: $prog {--help | -v | --version}
-EOF
+      echo "$usage"
       exit 0 ;;
     --)
       shift
@@ -80,8 +80,8 @@ EOF
     -)
       break ;;
     -*)
-      echo "$prog: usage error: invalid option '$arg';" \
-           " see '$prog --help'" >&2
+      echo "$prog: usage error: invalid option '$arg'" >&2
+      echo "$usage" >&2
       exit 2 ;;
     *)
       break ;;

@@ -1,6 +1,6 @@
 .\" French localization for groff
 .\"
-.\" Copyright (C) 2006-2020 Free Software Foundation, Inc.
+.\" Copyright (C) 2006-2022 Free Software Foundation, Inc.
 .\"   Written by Fabrice Ménard (menard.fabrice@wanadoo.fr)
 .\"
 .\" This file is part of groff.
@@ -25,6 +25,14 @@
 .cp 0
 .
 .
+.\" If changing from an existing locale, we need to preserve the state
+.\" of the "suppress hyphenation before a page location trap" bit.
+.nr locale*use-trap-hyphenation-mode 0
+.if d locale \
+.  if \n[.hy]=\n[\*[locale]*hyphenation-mode-trap] \
+.    nr locale*use-trap-hyphenation-mode 1
+.
+.
 .ds locale french\"
 .
 .
@@ -32,6 +40,7 @@
 .
 .ds \*[locale]-abstract R\[E ']SUM\[E ']\"
 .ds \*[locale]-app ANNEXE\"
+.ds \*[locale]-appendix_string Annexe\"
 .ds \*[locale]-april Avril\"
 .ds \*[locale]-attribute_string par\"
 .ds \*[locale]-august Ao\[u ^]t\"
@@ -79,6 +88,15 @@
 .ds \*[locale]-litb Tableau\"
 .ds \*[locale]-lt LISTE DES TABLEAUX\"
 .ds \*[locale]-lx LISTE DES DOCUMENTS\"
+.ds \*[locale]-man-section1 Manuel des commandes générales\"
+.ds \*[locale]-man-section2 Manuel des appels système\"
+.ds \*[locale]-man-section3 Manuel des fonctions de la bibliothèque\"
+.ds \*[locale]-man-section4 Manuel des interfaces du noyau\"
+.ds \*[locale]-man-section5 Manuel des formats de fichiers\"
+.ds \*[locale]-man-section6 Manuel des jeux\"
+.ds \*[locale]-man-section7 Manuel d'informations diverses\"
+.ds \*[locale]-man-section8 Manuel du gestionnaire de système\"
+.ds \*[locale]-man-section9 Manuel du développeur de noyau\"
 .ds \*[locale]-march Mars\"
 .ds \*[locale]-may Mai\"
 .ds \*[locale]-monday Lundi\"
@@ -109,7 +127,7 @@
 .	\" update the date
 .	ds DY \n[dy] \*[MO] \n[year]
 .	\" set hyphenation flags
-.	nr HY 6 \" 4+2
+.	nr HY 6
 .\}
 .
 .
@@ -134,41 +152,24 @@
 .\}
 .
 .
-.\" me package
-.if d @R \{\
-.	\" date update
-.	ds td \n(dy \*(mo \n(y4
-.	\" Redefinition for the chapter system
-.	de $c
-.	sz 12
-.	ft 3
-.	ce 1000
-.	if \\n(_M<3 \
-.	nr ch +1
-.	ie \\n(_M=1 CHAPITRE\ \ \\n(ch
-.	el .if \\n(_M=2 ANNEXE\ \ \\n(ch
-.	if \w"\\$1" .sp 3-\\n(.L
-.	if \w"\\$1" \\$1
-.	if (\\n(_M<3):(\w"\\$1") \
-.	sp 4-\\n(.L
-.	ce 0
-.	ft
-.	sz
-.	ie \\n(_M=1 \
-.	$C Chapitre \\n(ch "\\$1"
-.	el .if \\n(_M=2 \
-.	$C Annexe \\n(ch "\\$1"
-..
-.\}
-.
-.
 .\" Default encoding
 .mso latin9.tmac
 .
 .ss 12 0
 .
+.\" Set up hyphenation.
+.
 .\" French hyphenation (\lefthyphenmin=2, \righthyphenmin=3)
-.hy 4
+.nr \*[locale]*hyphenation-mode-base 4
+.nr \*[locale]*hyphenation-mode-trap 6
+.
+.ie \n[locale*use-trap-hyphenation-mode] \
+.  hy \n[\*[locale]*hyphenation-mode-trap]
+.el \
+.  hy \n[\*[locale]*hyphenation-mode-base]
+.
+.rr locale*use-trap-hyphenation-mode
+.
 .hcode à à  À à
 .hcode â â  Â â
 .hcode ç ç  Ç ç
@@ -189,8 +190,17 @@
 .hpf hyphen.fr
 .
 .
-.\" man, mdoc and mdoc-old are intentionally left untouched: usually
-.\" these packages are translated in the sources of the documents.
+.\" man package
+.if d an \
+.	an*reset-hyphenation-mode
+.
+.
+.\" me package
+.if d @R \{\
+.	ds _td_format \En(dy \E*(mo \En(y4
+.	ld
+.\}
+.
 .
 .cp \n[*groff_fr_tmac_C]
 .do rr *groff_fr_tmac_C

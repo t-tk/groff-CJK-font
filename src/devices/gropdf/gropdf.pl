@@ -797,7 +797,12 @@ sub do_x
 		IsGraphic();
 		my ($curangle,$hyp)=RtoP($xpos,GraphY($ypos));
 		my ($x,$y)=PtoR($theta+$curangle,$hyp);
-		$stream.="q\n".sprintf("%.3f %.3f %.3f %.3f %.3f %.3f cm",cos($theta),sin($theta),-sin($theta),cos($theta),$xpos-$x,GraphY($ypos)-$y)."\n";
+ 		my ($tx, $ty) = ($xpos - $x, GraphY($ypos) - $y);
+ 		if ($frot) {
+ 		  ($tx, $ty) = ($tx *  sin($theta) + $ty * -cos($theta),
+ 				$tx * -cos($theta) + $ty * -sin($theta));
+ 		}
+ 		$stream.="q\n".sprintf("%.3f %.3f %.3f %.3f %.3f %.3f cm",cos($theta),sin($theta),-sin($theta),cos($theta),$tx,$ty)."\n";
 		$InPicRotate=1;
 	    }
 	    elsif ($par=~m/exec grestore/ and $InPicRotate)
@@ -870,10 +875,11 @@ sub do_x
 		my $pdfmark=$1;
 		$pdfmark=~s((\d{4,6}) u)(sprintf("%.1f",$1/$desc{sizescale}))eg;
 		$pdfmark=~s(\\\[u00(..)\])(chr(hex($1)))eg;
+                $pdfmark=~s/\\n/\n/g;
 
-		if ($pdfmark=~m/(.+) \/DOCINFO\s*$/)
+		if ($pdfmark=~m/(.+) \/DOCINFO\s*$/s)
 		{
-		    my @xwds=split(' ',"<< $1 >>");
+		    my @xwds=split(/ /,"<< $1 >>");
 		    my $docinfo=ParsePDFValue(\@xwds);
 
 		    foreach my $k (sort keys %{$docinfo})
@@ -1692,7 +1698,7 @@ sub LoadPDF
                 $pdf->[$curobj]=undef;
             }
 
-            $root=$curobj if ref($o->{OBJ}) eq 'HASH' and exists($o->{OBJ}->{Type}) and $o->{OBJ}->{Type} eq '/XRef';
+            $root=$curobj if ref($pdf->[$curobj]->{OBJ}) eq 'HASH' and exists($pdf->[$curobj]->{OBJ}->{Type}) and $pdf->[$curobj]->{OBJ}->{Type} eq '/XRef';
 	}
 	elsif ($wd eq 'trailer' and !exists($pdf->[0]->{OBJ}))
 	{

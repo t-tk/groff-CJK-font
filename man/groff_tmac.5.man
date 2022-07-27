@@ -7,7 +7,7 @@ groff_tmac \- macro files in the GNU roff typesetting system
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 2000-2021 Free Software Foundation, Inc.
+.\" Copyright (C) 2000-2022 Free Software Foundation, Inc.
 .\"
 .\" This file is part of groff, the GNU roff typesetting system.
 .\"
@@ -26,6 +26,7 @@ groff_tmac \- macro files in the GNU roff typesetting system
 .cp 0
 .
 .
+.\" TODO: Consider parallelizing with our Texinfo node "Macro Packages".
 .\" ====================================================================
 .SH Description
 .\" ====================================================================
@@ -47,24 +48,19 @@ There is no syntactical difference between a macro file and any other
 document;
 only its purpose distinguishes it.
 .
-When a macro file is installed at a standard location and suitable for
-use by a general audience,
-it is often termed a
+When a macro file is installed at a standard location,
+named according to a certain convention,
+and suitable for use by a general audience,
+it is termed a
 .IR "macro package" .
 .
 Macro packages can be loaded by supplying the
 .B \-m
 option to
-.MR groff @MAN1EXT@
-or
-.MR @g@troff @MAN1EXT@ .
-.
-Alternatively,
-a
+.MR @g@troff @MAN1EXT@
+or a
 .I groff
-document wishing to use a macro package can load it with the
-.B mso
-(\[lq]macro source\[rq]) request.
+front end.
 .
 .
 .P
@@ -92,13 +88,34 @@ Section \[lq]Environment\[rq] of
 .MR @g@troff @MAN1EXT@
 lists these directories.
 .
+Alternatively,
+a
+.I groff
+document wishing to use a macro file can load it with the
+.B mso
+(\[lq]macro source\[rq]) request.
+.
+.
+.P
 Like any other
 .I roff
 document,
-a macro package can use the
+a macro file can use the
 .RB \[lq] so \[rq]
 request (\[lq]source\[rq]) to load further files relative to its own
 location.
+.
+.
+.P
+Macro files are named for their most noteworthy application,
+but a macro file need not define any macros.
+.
+It can restrict itself to defining registers and strings or invoking
+other
+.I groff
+requests.
+.
+It can even be empty.
 .
 .
 .\" ====================================================================
@@ -261,11 +278,20 @@ Localization files can also adjust the date format and provide
 translations of strings used by some of the full-service macro packages;
 alter the input encoding
 (see the next section);
-and change the amount of inter-sentence space.
+and change the amount of additional inter-sentence space.
+.
+For Eastern languages,
+the localization file defines character classes and sets flags on them.
 .
 By default,
 .I troffrc
 loads the localization file for English.
+.
+.
+.TP
+.I trans
+loads localized strings used by various macro packages after their
+localized forms have been prepared by a localization macro file.
 .
 .
 .P
@@ -279,6 +305,7 @@ the following localization files exist.
 .I cs
 Czech;
 localizes
+.IR man ,
 .IR me ,
 .IR mm ,
 .IR mom ,
@@ -295,6 +322,7 @@ Sets the input encoding to Latin-2 by loading
 .I den
 German;
 localizes
+.IR man ,
 .IR me ,
 .IR mm ,
 .IR mom ,
@@ -323,6 +351,7 @@ English.
 .I fr
 French;
 localizes
+.IR man ,
 .IR me ,
 .IR mm ,
 .IR mom ,
@@ -337,6 +366,7 @@ Sets the input encoding to Latin-9 by loading
 .I it
 Italian;
 localizes
+.IR man ,
 .IR me ,
 .IR mm ,
 .IR mom ,
@@ -353,6 +383,7 @@ Japanese.
 .I sv
 Swedish;
 localizes
+.IR man ,
 .IR me ,
 .IR mm ,
 .IR mom ,
@@ -392,7 +423,7 @@ Normally, this macro is loaded at the very beginning of a document or
 specified as the first macro argument on the command line.
 .
 .I groff
-loads latin1 by default at start-up.
+loads latin1 by default at startup.
 .
 These macro packages don't work on EBCDIC hosts.
 .
@@ -401,7 +432,7 @@ These macro packages don't work on EBCDIC hosts.
 .I cp1047
 Encoding support for EBCDIC.
 .
-On those platforms it is loaded automatically at start-up.
+On those platforms it is loaded automatically at startup.
 .
 Due to different character ranges used in
 .I groff
@@ -437,43 +468,56 @@ fonts which contain the necessary glyphs.
 The macro packages in this section are not intended for stand-alone
 use,
 but can add functionality to any other macro package or to plain
-(or \[lq]raw\[rq])
+(\[lq]raw\[rq])
 .I groff
 documents.
 .
 .
-.TP
+.\" TODO:
+.\"   a4
+.\"   devtag
+.\"   doc-old
+.\"   europs
+.\"   psatk
+.\"   psfig
+.TP 9n \" 'papersize'
 .I 62bit
-Provides macros for addition, multiplication, and division of 62-bit
-integers (allowing safe multiplication of 31-bit integers, for example).
+provides macros for addition,
+multiplication,
+and division of 62-bit integers
+(allowing safe multiplication of signed 31-bit integers,
+for example).
 .
 .
 .TP
 .I ec
-Switch to the EC and TC font families.
+configures the
+.B dvi
+output device to use
+the EC and TC font families instead of CM
+(Computer Modern).
 .
-To be used with
-.MR grodvi @MAN1EXT@
-\[em] this man page also gives more details of how to use it.
+See
+.MR grodvi @MAN1EXT@ .
 .
 .
 .TP
 .I hdtbl
-The Heidelberger table macros, contributed by Joachim Walsdorff, allow
-the generation of tables through a syntax similar to the HTML table
+allows the generation of tables using a syntax similar to the HTML table
 model.
 .
-Note that
-.I hdtbl
-is a macro package, not a preprocessor like
-.MR tbl @MAN1EXT@ .
+This Heidelberger table macro package is not a preprocessor,
+which can be useful if the contents of table entries are determined by
+macro calls or string interpolations.
 .
-.I hdtbl
-works only with the
+Compare to
+.MR @g@tbl @MAN1EXT@ .
+.
+It works only with the
 .B ps
 and
 .B pdf
-output drivers.
+output devices.
 .
 See
 .MR groff_hdtbl @MAN7EXT@ .
@@ -481,15 +525,12 @@ See
 .
 .TP
 .I papersize
-This macro file is normally loaded at start-up by the
-.I troffrc
-file.
-.
-It provides an interface to set the paper size on the command line with
-the option
+provides an interface to set the paper size on the command line by
+giving
+.I @g@troff
+the
 .BI "\-d \%paper=" size
-or
-.IR \%@g@troff .
+option.
 .
 Possible values for
 .I size
@@ -535,57 +576,68 @@ see subsection \[lq]Paper sizes\[rq]
 of
 .MR groff @MAN1EXT@ .
 .
+This macro file is normally loaded at startup by the
+.I troffrc
+file.
+.
 .
 .TP
 .I pdfpic
-A single macro is provided in this file,
+provides a single macro,
 .BR PDFPIC ,
-to include a PDF graphic in a document, i.e., under the output driver
-.BR pdf .
+to include a PDF graphic in a document using features of the
+.B pdf
+output driver.
 .
-For all other drivers,
-.I pspic
-is used.
-.
-So
-.I pdfpic
-is an extension of
-.IR pspic .
-.
-This means you can safely replace all
-.B PSPIC
-with
-.BR PDFPIC ;
-nothing gets lost by that.
-.
-The options of
+For other output devices,
 .B PDFPIC
-are identical to the
-.B PSDIF
-options.
+calls
+.BR PSPIC ,
+with which it shares an interface
+(see below).
+.
+This macro file is normally loaded at startup by the
+.I troffrc
+file.
 .
 .
 .TP
 .I pic
-This file provides proper definitions for the macros
-.B PS
-and
+supplies definitions of the macros
+.BR PS ,
 .BR PE ,
-needed for the
+and
+.BR PF ,
+usable with the
 .MR @g@pic @MAN1EXT@
 preprocessor.
 .
 They center each picture.
 .
-Use it only if your macro package doesn't provide proper
-definitions for those two macros (most of them already do).
+Use it if your document does not use a full-service macro package,
+or that package does not supply working
+.I pic
+macro definitions.
+.
+Except for
+.I man
+and
+.IR mdoc ,
+those provided with
+.I groff
+already do so
+(exception:
+.I mm
+employs the name
+.B PF
+for a different purpose).
 .
 .
 .TP
 .I pspic
-A single macro is provided in this file,
+provides a macro,
 .BR PSPIC ,
-to include a PostScript graphic in a document.
+that includes a PostScript graphic in a document.
 .
 The
 .BR ps ,
@@ -593,24 +645,27 @@ The
 .BR html ,
 and
 .B xhtml
-output drivers support inclusion of PS images; for all other drivers
-the image is replaced with a hollow rectangle of the same size.
+output devices support such inclusions;
+for all other drivers,
+the image is replaced with a rectangular border of the same size.
 .
-This macro file is automatically loaded at start-up by
-.B @g@troff
-so it isn't necessary to call it explicitly.
+This macro file is automatically loaded at startup by the
+.I troffrc
+file.
+.
 .
 .IP
-Syntax:
+Its syntax is as follows.
 .RS
 .IP
 \&\fB.PSPIC\fP \
 [\fB\-L\fP\|\
 |\|\fB\-R\fP\|\
 |\|\fB\-C\fP\|\
-|\|\fB\-I\fP\ \fIn\fP] \
+|\|\fB\-I\fP\~\fIn\fP] \
 \fI\|file\fP [\fIwidth\fP [\,\fIheight\/\fP]]
 .RE
+.
 .
 .IP
 .I file
@@ -624,20 +679,23 @@ If neither a
 .I width
 nor a
 .I height
-argument is specified, the image's natural width (as given in the
-file's bounding box) or the current line length is used as the
-width, whatever is smaller.
+argument is specified,
+the image's natural width
+(as given in the file's bounding box)
+or the current line length is used as the width,
+whatever is smaller.
 .
 The
 .I width
 and
 .I height
-arguments may have scaling indicators attached;
-the default scaling indicator is\~\c
-.BR i .
+arguments may have scaling units attached;
+the default scaling unit
+.RB is\~ i .
 .
-This macro scales the graphic uniformly
-in the x and y\~directions so that it is no more than
+.B PSPIC
+scales the graphic uniformly in the x and y\~dimensions so that it is no
+more than
 .I width
 wide
 and
@@ -646,36 +704,63 @@ high.
 .
 Option
 .B \-C
-centers the graphic horizontally, which is the default.
+centers the graphic horizontally;
+this is the default.
 .
-The
 .B \-L
 and
 .B \-R
-options left-align and right-align the graphic, respectively.
+left- and right-align the graphic,
+respectively.
 .
-The
 .B \-I
-option indents the graphic by\~\c
-.I n
-(default scaling indicator is\~\c
-.BR m ).
+indents the graphic
+.RI by\~ n
+(with a default scaling unit
+.RB of\~ m ).
+.
 .
 .IP
-For use of
-.B .PSPIC
-within a diversion it is recommended to extend it with the following
-code, assuring that the diversion's width completely covers the
-image's width.
+To use
+.B PSPIC
+within a diversion,
+we recommend extending it with the following code,
+assuring that the diversion's width completely covers the image's width.
+.
 .
 .RS
 .IP
 .EX
 \&.am PSPIC
-\&.\ \ vpt 0
-\&\[rs]h\[aq](\[rs]\[rs]n[ps-offset]u + \[rs]\[rs]n[ps-deswid]u)\[aq]
-\&.\ \ sp \-1
-\&.\ \ vpt 1
+\&.\~\~vpt 0
+\&\[rs]h\[aq](\[rs]\[rs]n[ps\-offset]u + \[rs]\[rs]n[ps\-deswid]u)\[aq]
+\&.\~\~sp \-1
+\&.\~\~vpt 1
+\&..
+.EE
+.RE
+.
+.
+.IP
+Failure to load
+.BR PSPIC 's
+image argument is not an error.
+.
+(The
+.B psbb
+request does issue an error diagnostic.)
+.
+To make such a failure fatal,
+append to the
+.B pspic*error\-hook
+macro.
+.
+.
+.RS
+.IP
+.EX
+\&.am pspic*error\-hook
+\&.\~\~ab
 \&..
 .EE
 .RE
@@ -683,9 +768,9 @@ image's width.
 .
 .TP
 .I ptx
-A single macro is provided in this file,
+provides a single macro,
 .BR xx ,
-for formatting permuted index entries as produced by the GNU
+to format permuted index entries as produced by the GNU
 .MR ptx 1
 program.
 .
@@ -695,8 +780,8 @@ adapt it to your needs.
 .
 .TP
 .I rfc1345
-defines special character escape sequences based on the glyph mnemonics
-specified in RFC 1345 and the digraph table of the text editor Vim.
+defines special character escape sequences named for the glyph mnemonics
+specified in RFC\~1345 and the digraph table of the Vim text editor.
 .
 See
 .MR groff_rfc1345 @MAN7EXT@ .
@@ -710,27 +795,134 @@ device control command supported by
 .MR gropdf @MAN1EXT@ .
 .
 Using this package,
-.I groff
-documents can draw colored rectangles beneath any output;
-it further includes special support for
-.IR "groff ms" .
+.I groff ms
+documents can draw colored rectangles beneath any output.
 .
+.RS
+.TP
+.B \%.BOXSTART \c
+.B \%SHADED \c
+.I color \c
+.B \%OUTLINED \c
+.I color \c
+.B \%INDENT \c
+.I size \c
+.B \%WEIGHT \c
+.I size
+begins a box,
+where the argument after
+.B \%SHADED
+gives the fill color and that after
+.B \%OUTLINED
+the border color.
+.
+Omit the former to get a borderless filled box and the latter for a
+border with no fill.
+.
+The specified
+.B \%WEIGHT
+is used if the box is
+.BR \%OUTLINED .
+.
+.
+.IP
+.B \%INDENT
+precedes a value which leaves a gap between the border and the contents
+inside the box.
+.
+.
+.IP
+Each
+.I color
+must be a defined
+.I groff
+color name,
+and each
+.I size
+a valid
+.I groff
+numeric expression.
+.
+The keyword/value pairs can be specified in any order.
+.RE
+.
+.
+.IP
+Boxes can be stacked,
+so you can start a box within another box;
+usually the later boxes would be smaller than the containing box,
+but this is not enforced.
+.
+When using
+.BR \%BOXSTART ,
+the left position is the current indent minus the
+.B \%INDENT
+in the command,
+and the right position is the left position
+(calculated above)
+plus the current line length and twice the indent.
+.
+.
+.RS
+.TP
+.B \%.BOXSTOP
+takes no parameters.
+.
+It closes the most recently started box at the current vertical position
+after adding its
+.B \%INDENT
+spacing.
+.RE
+.
+.
+.IP
+Your
+.I groff
+documents can conditionally exercise the
+.I sboxes
+macros.
+.
+The register
+.B \%GSBOX
+is defined if the package is loaded,
+and interpolates a true value if the
+.B pdf
+output device is in use.
+.
+.
+.IP
+.I sboxes
+furthermore hooks into the
+.MR groff_ms @MAN7EXT@
+package to receive notifications when footnotes are growing,
+so that it can close boxes on a page before footnotes are printed.
+.
+When that condition obtains,
+.I sboxes
+will close open boxes two points
+above the footnote separator and re-open them on the next page.
+.
+(This amount probably will not match the box's
+.BR \%INDENT .)
+.
+.
+.IP
 See
-.UR file://\%@DOCDIR@/\:msboxes\:.pdf
+.UR file://@DOCDIR@/\:\%msboxes\:.pdf
 \[lq]Using PDF boxes with
 .I groff
 and the
 .I ms
 macros\[rq]
 .UE
-for instructions and a demonstration.
+for a demonstration.
 .
 .
 .TP
 .I trace
-Use this for tracing macro calls.
-.
-It is only useful for debugging.
+aids the debugging of
+.I groff
+documents by tracing macro calls.
 .
 See
 .MR groff_trace @MAN7EXT@ .
@@ -738,22 +930,19 @@ See
 .
 .TP
 .I tty\-char
-Defines fallback definitions of
+defines fallback definitions of
 .I roff
 special characters for terminal devices.
 .
 These definitions more poorly optically approximate typeset output
 compared to those of the
 .I tty
-file in favor of communicating more semantic information,
-which can allow easier processing with critical equipment.
-.\" XXX: critical equipment like what?
+file in favor of communicating more semantic information.
 .
 .
 .TP
 .I www
-Additions of elements known from the HTML format, as used in World
-Wide Web pages; this includes URL links and mail addresses.
+defines macros corresponding to HTML elements.
 .
 See
 .MR groff_www @MAN7EXT@ .
@@ -763,127 +952,92 @@ See
 .SH Naming
 .\" ====================================================================
 .
-Classical roff systems were designed before the conventions of the
-modern C
-.MR getopt 3
-call evolved, and used a naming scheme for macro packages that looks
-odd to modern eyes.
-.
-Macro packages were always included with the option
-.BR \-m ;
-when this option was directly followed by its argument without an
-intervening space, this looked like a long option preceded by a single
-minus \[em] a sensation in the computer stone age.
-.
-To make this invocation form work, classical troff
-macro packages used names that started with the letter \[oq]m\[cq],
-which was omitted in the naming of the macro file.
-.
-.
-.P
-For example, the macro package for the man pages was called
-.IR man ,
-while its macro file
-.IR tmac.an .
-So it could be activated by the argument
-.I an
-to option
-.BR \-m ,
-or
-.B \-man
-for short.
-.
-.
-.P
-For similar reasons, macro packages that did not start with an
-\[oq]m\[cq] had a leading \[oq]m\[cq] added in the documentation and
-in speech; for example, the package corresponding to
-.I tmac.doc
-was called
-.I mdoc
-in the documentation, although a more suitable name would be
-.IR doc .
-For, when omitting the space between the option and its argument, the
-command-line option for activating this package reads
-.BR \-mdoc .
-.
-.
-.P
-To cope with all situations, actual versions of
-.MR groff @MAN1EXT@
-are smart about both naming schemes by providing two macro files
-for the inflicted macro packages; one with a leading \[oq]m\[cq]
-the other one without it.
-.
-So in
-.IR groff ,
-the
-.I man
-macro package may be specified as one of the following four methods:
-.
-.IP
-.EX
-\fIsh#\fP groff\ \-m\ man
-\fIsh#\fP groff\ \-man
-\fIsh#\fP groff\ \-mman
-\fIsh#\fP groff\ \-m\ an
-.EE
-.
-.
-.P
-Recent packages that do not start with \[oq]m\[cq] do not use an
-additional \[oq]m\[cq] in the documentation.
-.
-For example, the
-.I www
-macro package may be specified only as one of the two methods:
-.
-.IP
-.EX
-\fIsh#\fP groff\ \-m\ www
-\fIsh#\fP groff\ \-mwww
-.EE
-.
-.
-.P
-Obviously, variants like
-.I \-mmwww
-would not make much sense.
-.
-.
-.P
-A second strange feature of classical troff was to name macro files
-in the form
-.IR tmac. name.
-In modern operating systems, the type of a file is specified as a
-postfix, the file name extension.
-.
-Again,
-.I groff
-copes with this situation by searching for both
-.IB anything .tmac
+AT&T
+.I nroff \" AT&T
 and
-.BI tmac. anything
-if only
-.I anything
-is specified.
+.I troff \" AT&T
+were implemented before the conventions of the modern C
+.MR getopt 3
+call evolved,
+and used a naming scheme for macro packages that looks odd to modern
+eyes.
+.
+Macro packages were typically loaded using the
+.B \-m
+option to the formatter;
+when directly followed by its argument without an intervening space,
+this looked like a long option preceded by a single minus\[em]a
+sensation in the computer stone age.
+.
+Macro packages therefore came to be known by names that started with the
+letter \[lq]m\[rq],
+which was omitted from the name of the macro file as stored on disk.
+.
+For example,
+the manuscript macro package was stored as
+.I tmac.s
+and loaded with the option
+.BR \-ms .
 .
 .
 .P
-The easiest way to find out which macro packages are available on a
-system is to check the man\~page
-.MR groff @MAN1EXT@ ,
-or the contents of the
-.I tmac
-directories.
+.I groff
+commands permit space between an option and its argument.
+.
+The syntax
+.RB \[lq] "groff \-m s" \[rq]
+makes the macro file name more clear but may be jarring to users
+familiar with the original convention,
+unaware that the package's \[lq]real\[rq] name was \[lq]s\[rq] all
+along.
+.
+For such packages of long pedigree,
+.I groff
+accommodates different users' expectations by supplying wrapper macro
+files that load the desired file with
+.B mso
+requests.
+.
+Thus,
+all of
+.RB \[lq] "groff \-m s" \[rq],
+.RB \[lq] "groff \-m ms" \[rq],
+.RB \[lq] "groff \-ms" \[rq],
+and
+.RB \[lq] "groff \-mms" \[rq]
+serve to load the manuscript macros.
 .
 .
 .P
-In
-.IR groff ,
-most macro packages are described in\~man pages called
-.IR groff_ name(@MAN7EXT@),
-with a leading \[oq]m\[cq] for the classical packages.
+Wrappers are not provided for packages of more recent vintage.
+.
+For example,
+the
+.I www
+package may be requested at the command line only with
+.RB \[lq] "groff \-m www" \[rq]
+or
+.RB \[lq] "groff \-mwww" \[rq].
+.
+.
+.P
+As noted in passing above,
+AT&T
+.I troff \" AT&T
+named macro files in the form
+.IR tmac. name.
+.
+It has since become conventional in operating systems to use a suffixed
+file name extension to suggest a file type or format.
+.
+.IR @g@troff 's
+.B \-m
+option
+and
+.B mso
+request attempt to load a macro package using either naming convention;
+if one fails,
+the other is tried.
 .
 .
 .\" ====================================================================
@@ -933,18 +1087,21 @@ the roff preprocessor
 must be called if the files to be included need preprocessing.
 .
 This can be done either directly by a pipeline on the command line or
-by using the troff/groff option
-.BR \-s .
+by giving the formatter the
+.B \-s
+option.
 .
-.I man
-calls soelim automatically.
+.MR man 1
+calls
+.I @g@soelim
+automatically.
 .
 .
 .P
 For example, suppose a macro file is stored as
 .
 .IP
-.I @MACRODIR@/macros.tmac
+.I @MACRODIR@/\:\%macros\:.tmac
 .
 .P
 and is used in some document called
@@ -981,7 +1138,7 @@ or
 In both cases, the formatter should be called with option
 .B \-s
 to invoke
-.IR \%@g@soelim .
+.IR @g@soelim .
 .IP
 .EX
 \fIsh#\fP groff \-s docu.roff
@@ -1169,7 +1326,7 @@ with a leading dot.
 .IP \(bu
 Write a comment macro that works both for copy and draft modes;
 since the escape character is off in draft mode,
-trouble might occur when comment escapes are used.
+trouble might occur when comment escape sequences are used.
 .
 For example, the following macro just ignores its arguments, so it
 acts like a comment line:
@@ -1256,10 +1413,13 @@ the diversion and can be manipulated from within the macros.
 This document was written by
 .MT groff\-bernd\:.warken\-72@\:web\:.de
 Bernd Warken
-.ME
-and
+.ME ,
 .MT wl@\:gnu\:.org
 Werner Lemberg
+.ME ,
+and
+.MT g.branden\:.robinson@\:gmail\:.com
+G.\& Branden Robinson
 .ME .
 .
 .

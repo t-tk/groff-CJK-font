@@ -79,23 +79,28 @@ MS-Windows, see the file README.MinGW.
 Dependencies
 ============
 
-groff is written in ISO C++98, so you need a C++ compiler capable of
-handling this standardized version of the language.  The C++ source
-files use a suffix of '.cpp'; your C++ compiler must be able to
+groff is predominantly written in ISO C++98, so you need a C++ compiler
+capable of handling this standardized version of the language.  The C++
+source files use a suffix of '.cpp'; your C++ compiler must be able to
 handle this.  A C/C++ preprocessor that conforms to ISO C90 is also
 required.  If you don't already have a C++ compiler, we suggest GCC 9.4
 or later.  To override the configure script's choice of C++ compiler,
 you can set the CXX environment variable to the name of its executable.
 
-Several programs distributed with GNU roff are written in the Perl
-language.  Version 5.6.1 or later is required.
+A few components of groff are written in ISO C99.  Features later made
+optional by ISO C11 (the 'complex' primitive data type and
+variable-length arrays) are not used.
 
-In order to build the documentation, you need 'makeinfo' from the
-'texinfo' package; in fact 'configure' will fail if this program is
-not found unless you pass the option '--with-doc=no'.
+Several programs distributed with GNU roff are written in the Perl
+language.  Version 5.6.1 (1 April 2001) or later is required.
+
+groff's Texinfo manual is distributed in source, GNU info, HTML, and
+plain text formats.  To regenerate the latter formats (if you alter the
+source, for example), or to produce DVI or PDF versions, see section
+"Evaluation" below.
 
 The 'uchardet' library is an optional dependency of the 'preconv'
-program: if this library is found by 'configure' it will be
+program: if this library is found by 'configure', it will be
 automatically used by 'preconv'.  In order to discover the presence of
 the 'uchardet' library, you will also need to have the 'pkg-config'
 program installed on your system, and the library's C header files will
@@ -106,16 +111,16 @@ can mean installing uchardet's '-dev' or '-devel' package.
 Miscellaneous
 =============
 
-If you want A4 or letter paper format and the configure script produces
-an incorrect guess, say
+If you want A4 or U.S. letter paper format and the configure script
+produces an incorrect guess, say
 
   PAGE=xxx ./configure
 
-where `xxx' should be either `A4' or `letter'.  Note that this only
-affects the paper selection of some device drivers like grops (which
-can be still overridden on the command line).  For compatibility with
-ditroff, the default page length in gtroff is always 11 inches.  The
-page length can be changed with the `pl' request.
+where `xxx' should be either `A4' or `letter'.  This affects only the
+paper selection of some groff output drivers, like grops (which can
+still be overridden on the command line).  For compatibility with AT&T
+troff, GNU troff's default page length is always 11 inches.  The page
+length can be changed with the `pl' request.
 
 
 Evaluation
@@ -136,24 +141,30 @@ displays the groff(1) man page with the 'less' pager.  (You might prefer
 either the '-Tlatin1' or '-Tutf8' option to '-Tascii' depending on the
 character set you're using.)
 
-The groff Texinfo manual can be previewed as an info document.
+The groff Texinfo manual can be viewed in several formats.  Versions
+corresponding to the source document 'doc/groff.texi' are supplied with
+the source distribution archive.  You can browse it in GNU info format.
 
-  info ./doc/groff.info
+  info doc/groff.info
 
-It can be viewed as text as well (albeit text encoded in ISO Latin-1).
+It can be viewed as text encoded in ISO Latin-1 as well.
 
   iconv -f latin1 -t utf8 doc/groff.txt | less # for UTF-8 users
   less doc/groff.txt # for Latin-1 users
 
-To get a DVI, PDF, or HTML version of the groff texinfo manual, say
-'make groff.dvi', 'make groff.pdf', or 'make groff.html', respectively,
-in the 'doc' subdirectory (after configuring the groff package).
-Texinfo version 5.0 or later is a prerequisite for generation of these
-formats.  Here are some ways you might view the documents produced.
+An HTML rendering is also available.
+
+  lynx doc/groff.html
+
+Texinfo version 5.0 or later is a prerequisite for regeneration of
+groff's Texinfo manual if you make changes.  If you also have a working
+TeX installation, you can furthermore render it in DVI or PDF.  Say
+'make doc/groff.dvi' or 'make doc/groff.pdf', respectively, in your
+build directory after configuring the groff package.  Here are some ways
+you might view the formats produced.  Do so from your build directory.
 
   xdvi doc/groff.dvi
   evince doc/groff.pdf
-  lynx doc/groff.html
 
 
 In Case of Trouble
@@ -165,6 +176,22 @@ think that you have found a bug, please submit a report to our bug
 tracker.
 
   https://savannah.gnu.org/bugs/?group=groff&func=additem
+
+
+Uninstalling
+============
+
+If you are dissatisfied with groff, or to prepare for a new installation
+from source, you can uninstall it to ensure that no stale files persist
+on the system.  Run the command 'make uninstall'.  At a minimum, some
+directories not particular to groff, like 'bin' and (depending on
+configuration) an X11 'app-defaults' directory will remain, as will one
+plain file called 'dir', created by GNU Texinfo's 'install-info'
+command.  (As of this writing, 'install-info' offers no provision for
+removing an effectively empty 'dir' file, and groff does not attempt to
+parse this file to determine whether it can be safely removed.)  All
+other groff artifacts will be deleted from the installation hierarchy.
+
 
 ##### Editor settings
 Local Variables:

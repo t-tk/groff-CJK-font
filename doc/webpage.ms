@@ -5,6 +5,10 @@
 .\" To make it work with other output devices also, we include
 .\" www.tmac directly.
 .\"
+.am pspic*error-hook
+.  ab \\n[.F]:\\n[.c]: fatal error: PSPIC failed to include '\\$1'
+..
+.
 .nr PS 10
 .nr VS 12
 .if '\*[.T]'html' .nr LL 10i
@@ -342,10 +346,10 @@ option by default, unless a request similar to:
 .fi
 .in
 
-is invoked during input file processing; (`.if !\en[PHASE] ...\&' ensures
-that the effect of the `.tm' request is restricted to the document setup
-phase of processing, as pdfroff sets it to 1 or\~2 in the output phase,
-but leaves it unset in the setup phase).
+is invoked during input file processing; (`.if !\en[PHASE] \&.\|.\|.\&'
+ensures that the effect of the `.tm' request is restricted to the
+document setup phase of processing, as pdfroff sets it to 1 or\~2 in the
+output phase, but leaves it unset in the setup phase).
 
 The bundled `spdf.tmac' macro package, which implicitly activates
 `\-mpdfmark' for `ms' macro users, ensures that TOC relocation is
@@ -552,7 +556,7 @@ macro packages
 .ULS
 .LI
 A new macro `%U' has been added to the mdoc package to indicate a URL
-reference within an .Rs/.Re environment.
+reference within an \&.Rs/.Re environment.
 
 .LI
 Rudimentary support for the Japanese script has been added, most
@@ -609,7 +613,7 @@ equivalents to the \eX and \eY escapes, respectively.
 
 .LI
 A new read-only number register `.br' is available which is set to\~1
-if a macro is called as .foo and to\~0 if called as 'foo.
+if a macro is called as \&.foo and to\~0 if called as \&'foo.
 This allows reliable modification of requests.
 
 .in 2m
@@ -783,8 +787,8 @@ grotty
 
 .ULS
 .LI
-\eD'p...\&' is now supported if the polygon consists entirely of horizontal
-and vertical lines.
+\eD'p.\|.\|.\&' is now supported if the polygon consists entirely of
+horizontal and vertical lines.
 .ULE
 .
 .
@@ -945,7 +949,7 @@ to handle normal groff number operations without risking overflow errors).
 .LI
 For \-ms, Eric S.\& Raymond contributed support for ancient Bell Labs
 localisms `.SC', `.UC', `.P1', and `.P2'.
-The latter three are enabled only after .SC is called.
+The latter three are enabled only after \&.SC is called.
 
 .LI
 A new string, `SN-STYLE', has been added to the ms macros, controlling
@@ -965,7 +969,7 @@ troff
 
 .ULS
 .LI
-Analogously to the .ft and \ef pair, two new requests `gcolor' and
+Analogously to the \&.ft and \ef pair, two new requests `gcolor' and
 `fcolor' (which pair with \em and \eM, respectively) have been added to
 set the glyph and background colours.
 
@@ -1030,7 +1034,7 @@ The following macros aren't new but haven't been documented previously:
 \&\.\.\.,
 .B OMEGA )
 .br
-\fBldots\fP (three dots on the base line)
+\fBldots\fP (three dots on the baseline)
 .br
 \fBdollar\fP (a dollar glyph)
 .in
@@ -1234,7 +1238,7 @@ www.tmac
 The `HR' macro no longer causes an empty line for non-HTML devices.
 
 A new macro `HEAD' has been added to directly add data to the
-<head>...</head> block.
+<head>.\|.\|.</head> block.
 
 New macros `OLS' and `OLE' to start and end an ordered list.
 
@@ -1500,8 +1504,8 @@ is used to construct glyph names based on Unicode character codes.
 The existing groff glyph names are frozen; no glyph names which can't be
 constructed algorithmically will be added in the future.
 
-The \e[...\&] escape sequence has been extended to specify multiple glyph
-components.
+The \e[.\|.\|.\&] escape sequence has been extended to specify multiple
+glyph components.
 Example:
 
 .in 2m
@@ -1557,16 +1561,16 @@ They are searched after the list of fonts declared with the
 `special' request but before the already mounted special fonts.
 
 .LI
-In groff versions 1.18 and 1.18.1, \eD'f\~...\&' didn't move the current
-point horizontally.
+In groff versions 1.18 and 1.18.1, \eD'f\~.\|.\|.\&' didn't move the
+current point horizontally.
 Despite of being silly, this change has been reverted for backwards
 compatibility.
 Consequently, the intermediate output command `Df' also moves the
 position horizontally again.
 
-\eD'f\~...\&' is deprecated since it depends on the horizontal resolution
+\eD'f\~.\|.\|.\&' is deprecated since it depends on the horizontal resolution
 of the output device (given with the `hor' parameter in the DESC file).
-Use the new \eD'Fg\~...\&' escape instead.
+Use the new \eD'Fg\~.\|.\|.\&' escape instead.
 
 .LI
 For orthogonality, new \eD subcommands to change the fill color are
@@ -1574,13 +1578,13 @@ available:
 
 .in 2m
 .ft C
-\eD\[aq]Fr ...\&\[aq] \f[R](rgb)\f[]
+\eD\[aq]Fr \&.\|.\|.\&\[aq] \f[R](rgb)\f[]
 .br
-\eD\[aq]Fc ...\&\[aq] \f[R](cmy)\f[]
+\eD\[aq]Fc \&.\|.\|.\&\[aq] \f[R](cmy)\f[]
 .br
-\eD\[aq]Fg ...\&\[aq] \f[R](gray)\f[]
+\eD\[aq]Fg \&.\|.\|.\&\[aq] \f[R](gray)\f[]
 .br
-\eD\[aq]Fk ...\&\[aq] \f[R](cmyk)\f[]
+\eD\[aq]Fk \&.\|.\|.\&\[aq] \f[R](cmyk)\f[]
 .br
 \eD\[aq]Fd\[aq] \f[R](default color)\f[]
 .ft R
@@ -1968,7 +1972,7 @@ environment variable also.
 
 For defining color components as fractions between 0 and\~1, a new scaling
 indicator `f' has been defined: 1f\~=\~65536u.
-For testing whether a color is defined (with .if and .ie), a new
+For testing whether a color is defined (with \&.if and \&.ie), a new
 conditional operator `m' is available.
 
 More details can be found in the groff_diff.7 manual page and in
@@ -2162,7 +2166,8 @@ Please see groff_diff.man and groff.texinfo for more details.
 .LI
 The escapes `\e%', `\e&', `\e)', and `\e:' no longer cause an error in \eX;
 they are ignored now.
-Additionally `\e\ ' (space) and `\e\[ti]' are converted to single space characters.
+Additionally `\e\~' (space) and `\e\[ti]' are converted to single space
+characters.
 
 .LI
 The default tab distance in nroff mode is now 0.8i\~(inches) to be compatible

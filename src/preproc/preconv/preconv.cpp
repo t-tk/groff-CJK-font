@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 2005-2020 Free Software Foundation, Inc.
      Written by Werner Lemberg (wl@gnu.org)
 
@@ -51,7 +50,7 @@ extern "C" const char *Version_string;
 char default_encoding[MAX_VAR_LEN];
 char user_encoding[MAX_VAR_LEN];
 char encoding_string[MAX_VAR_LEN];
-int debug_flag = 0;
+bool is_debugging = false;
 int raw_flag = 0;
 
 struct conversion {
@@ -449,9 +448,9 @@ struct utf8 {
     FIFTH,
     SIXTH
   } byte;
-  int expected_bytes;
-  int invalid_warning;
-  int incomplete_warning;
+  int expected_byte_count;
+  bool emit_invalid_utf8_warning;
+  bool emit_incomplete_utf8_warning;
   utf8(FILE *);
   ~utf8();
   void add(unsigned char);
@@ -459,8 +458,9 @@ struct utf8 {
   void incomplete();
 };
 
-utf8::utf8(FILE *f) : fp(f), byte(FIRST), expected_bytes(1),
-		      invalid_warning(1), incomplete_warning(1)
+utf8::utf8(FILE *f) : fp(f), byte(FIRST), expected_byte_count(1),
+		      emit_invalid_utf8_warning(true),
+		      emit_incomplete_utf8_warning(true)
 {
   // empty
 }
@@ -481,23 +481,23 @@ utf8::add(unsigned char c)
     else if (c < 0xC0)
       invalid();
     else if (c < 0xE0) {
-      expected_bytes = 2;
+      expected_byte_count = 2;
       byte = SECOND;
     }
     else if (c < 0xF0) {
-      expected_bytes = 3;
+      expected_byte_count = 3;
       byte = SECOND;
     }
     else if (c < 0xF8) {
-      expected_bytes = 4;
+      expected_byte_count = 4;
       byte = SECOND;
     }
     else if (c < 0xFC) {
-      expected_bytes = 5;
+      expected_byte_count = 5;
       byte = SECOND;
     }
     else if (c < 0xFE) {
-      expected_bytes = 6;
+      expected_byte_count = 6;
       byte = SECOND;
     }
     else
@@ -514,7 +514,7 @@ utf8::add(unsigned char c)
     // can't happen
     break;
   case SECOND:
-    if (expected_bytes == 2) {
+    if (expected_byte_count == 2) {
       if (s[0] < 0xC2)
 	invalid();
       else
@@ -526,7 +526,7 @@ utf8::add(unsigned char c)
       byte = THIRD;
     break;
   case THIRD:
-    if (expected_bytes == 3) {
+    if (expected_byte_count == 3) {
       if (!(s[0] >= 0xE1 || s[1] >= 0xA0))
 	invalid();
       else
@@ -540,7 +540,7 @@ utf8::add(unsigned char c)
     break;
   case FOURTH:
     // We reject everything greater than 0x10FFFF.
-    if (expected_bytes == 4) {
+    if (expected_byte_count == 4) {
       if (!((s[0] >= 0xF1 || s[1] >= 0x90)
 	    && (s[0] < 0xF4 || (s[0] == 0xF4 && s[1] < 0x90))))
 	invalid();
@@ -555,7 +555,7 @@ utf8::add(unsigned char c)
       byte = FIFTH;
     break;
   case FIFTH:
-    if (expected_bytes == 5) {
+    if (expected_byte_count == 5) {
       invalid();
       byte = FIRST;
     }
@@ -569,13 +569,16 @@ utf8::add(unsigned char c)
   }
 }
 
+// We use fprintf(stderr) instead of libgroff's debug() because we need
+// to output longs, and libgroff's errprint() doesn't support that.
+
 void
 utf8::invalid()
 {
-  if (debug_flag && invalid_warning) {
-    fprintf(stderr, "  invalid byte(s) found in input stream --\n"
-		    "  each such sequence replaced with 0xFFFD\n");
-    invalid_warning = 0;
+  if (is_debugging && emit_invalid_utf8_warning) {
+    fprintf(stderr, "  invalid UTF-8 sequence(s) in input stream:"
+		    " replacing each such sequence with 0xFFFD\n");
+    emit_invalid_utf8_warning = false;
   }
   unicode_entity(0xFFFD);
   byte = FIRST;
@@ -584,10 +587,10 @@ utf8::invalid()
 void
 utf8::incomplete()
 {
-  if (debug_flag && incomplete_warning) {
-    fprintf(stderr, "  incomplete sequence(s) found in input stream --\n"
-		    "  each such sequence replaced with 0xFFFD\n");
-    incomplete_warning = 0;
+  if (is_debugging && emit_incomplete_utf8_warning) {
+    fprintf(stderr, "  incomplete UTF-8 sequence(s) in input stream:"
+		    " replacing each such sequence with 0xFFFD\n");
+    emit_incomplete_utf8_warning = false;
   }
   unicode_entity(0xFFFD);
   byte = FIRST;
@@ -829,14 +832,13 @@ get_tag_lines(FILE *fp, string &data)
   }
   if (newline_count > 1)
     return NULL;
-  int emit_warning = 1;
+  bool emit_warning = true;
   for (int lines = newline_count; lines < 2; lines++) {
     while ((c = getc(fp)) != EOF) {
-      if (c == '\0' && debug_flag && emit_warning) {
-	fprintf(stderr,
-		"  null byte(s) found in input stream --\n"
-		"  search for coding tag might return false result\n");
-	emit_warning = 0;
+      if (c == '\0' && is_debugging && emit_warning) {
+	warning("null byte(s) found in input stream:"
+		" search for coding tag might return false result");
+	emit_warning = false;
       }
       data += char(c);
       if (c == '\n' || c == '\r')
@@ -1015,37 +1017,37 @@ detect_file_encoding(FILE *fp)
   /* due to BOM and tag detection we are not at the begining of the file */
   rewind(fp);
   if (fstat(fileno(fp), &stat_buf) != 0) {
-    fprintf(stderr, "fstat: %s\n", strerror(errno));
+    error("fstat: %1", strerror(errno));
     goto end;
   }
   len = stat_buf.st_size;
-  if (debug_flag)
+  if (is_debugging)
     fprintf(stderr, "  len: %lu\n", (unsigned long)len);
   if (len == 0)
     goto end;
   data = (char *)calloc(len, 1);
   read_bytes = fread(data, 1, len, fp);
   if (read_bytes == 0) {
-    fprintf(stderr, "fread: %s\n", strerror(errno));
+    error("fread: %1", strerror(errno));
     goto end;
   }
   /* We rewind back to the original position */
   if (fseek(fp, current_position, SEEK_SET) != 0) {
-    fprintf(stderr, "Fatal error: fseek: %s\n", strerror(errno));
+    fatal("fseek: %1", strerror(errno));
     goto end;
   }
   ud = uchardet_new();
   res = uchardet_handle_data(ud, data, len);
   if (res != 0) {
-    fprintf(stderr, "uchardet_handle_data: %d\n", res);
+    debug("  uchardet_handle_data: error %1\n", res);
     goto end;
   }
-  if (debug_flag)
+  if (is_debugging)
     fprintf(stderr, "  uchardet read: %lu bytes\n",
 	    (unsigned long)read_bytes);
   uchardet_data_end(ud);
   charset = uchardet_get_charset(ud);
-  if (debug_flag) {
+  if (is_debugging) {
     if (charset)
        fprintf(stderr, "  charset: %s\n", charset);
     else
@@ -1070,7 +1072,8 @@ end:
 }
 
 // ---------------------------------------------------------
-// Handle an input file.  If filename is '-' handle stdin.
+// Handle an input file.  If `filename` is "-", read the
+// standard input stream.
 //
 // Return 1 on success, 0 otherwise.
 // ---------------------------------------------------------
@@ -1079,28 +1082,40 @@ do_file(const char *filename)
 {
   FILE *fp;
   string BOM, data;
+  bool is_seekable = false;
+  string reported_filename;
 
-  if (strcmp(filename, "-")) {
-    if (debug_flag)
-      fprintf(stderr, "file '%s':\n", filename);
-    fp = fopen(filename, FOPEN_RB);
-    if (!fp) {
-      error("can't open '%1': %2", filename, strerror(errno));
-      return 0;
-    }
+  // TODO: Consider moving some of this into a `quoted_file_name`
+  // function in libgroff.
+  if (strcmp(filename, "-") == 0) {
+    fp = stdin;
+    reported_filename = string("<standard input>");
   }
   else {
-    if (debug_flag)
-      fprintf(stderr, "standard input:\n");
-    SET_BINARY(fileno(stdin));
-    fp = stdin;
+    fp = fopen(filename, FOPEN_RB);
+    reported_filename = "'" + string(filename) + "'";
+  }
+  if (!fp) {
+    error("can't open %1: %2", reported_filename.contents(),
+	  strerror(errno));
+    return 0;
+  }
+  if (is_debugging)
+    fprintf(stderr, "processing %s\n", reported_filename.contents());
+  if (fseek(fp, 0L, SEEK_SET) == 0)
+    is_seekable = true;
+  else {
+    SET_BINARY(fileno(fp));
+    if (is_debugging)
+      fprintf(stderr, "  stream is not seekable: %s\n",
+	      strerror(errno));
   }
   const char *BOM_encoding = get_BOM(fp, BOM, data);
   // Determine the encoding.
   char *encoding;
   int must_free_encoding = 0;
   if (user_encoding[0]) {
-    if (debug_flag) {
+    if (is_debugging) {
       fprintf(stderr, "  user-specified encoding '%s', "
 		      "no search for coding tag\n",
 		      user_encoding);
@@ -1111,7 +1126,7 @@ do_file(const char *filename)
     encoding = (char *)user_encoding;
   }
   else if (BOM_encoding) {
-    if (debug_flag)
+    if (is_debugging)
       fprintf(stderr, "  found BOM, no search for coding tag\n");
     encoding = (char *)BOM_encoding;
   }
@@ -1119,12 +1134,12 @@ do_file(const char *filename)
     // 'check_coding_tag' returns a pointer to a static array (or NULL).
     char *file_encoding = check_coding_tag(fp, data);
     if (!file_encoding) {
-      if (debug_flag)
+      if (is_debugging)
 	fprintf(stderr, "  no coding tag\n");
-      if (strcmp(filename, "-"))
+      if (is_seekable)
          file_encoding = detect_file_encoding(fp);
       if (!file_encoding) {
-        if (debug_flag)
+        if (is_debugging)
           fprintf(stderr, "  could not detect encoding with uchardet\n");
         file_encoding = default_encoding;
       }
@@ -1132,7 +1147,7 @@ do_file(const char *filename)
         must_free_encoding = 1;
     }
     else
-      if (debug_flag)
+      if (is_debugging)
 	fprintf(stderr, "  coding tag: '%s'\n", file_encoding);
     encoding = file_encoding;
   }
@@ -1148,7 +1163,7 @@ do_file(const char *filename)
 	  encoding_string);
     return 0;
   }
-  if (debug_flag)
+  if (is_debugging)
     fprintf(stderr, "  encoding used: '%s'\n", encoding);
   if (!raw_flag) {
     string fn(filename);
@@ -1243,7 +1258,7 @@ main(int argc, char **argv)
       exit(0);
       break;
     case 'd':
-      debug_flag = 1;
+      is_debugging = true;
       break;
     case 'e':
       if (optarg) {
@@ -1274,7 +1289,7 @@ main(int argc, char **argv)
       assert(0);
     }
   int nbad = 0;
-  if (debug_flag)
+  if (is_debugging)
     fprintf(stderr, "default encoding: '%s'\n", default_encoding);
   if (optind >= argc)
     nbad += !do_file("-");
@@ -1286,4 +1301,8 @@ main(int argc, char **argv)
   return nbad != 0;
 }
 
-/* end of preconv.cpp */
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

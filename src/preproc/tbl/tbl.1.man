@@ -64,14 +64,14 @@ is part of the
 .MR groff @MAN1EXT@
 document formatting system.
 .
-.I \%@g@tbl
+.I @g@tbl
 is a
 .MR @g@troff @MAN1EXT@
 preprocessor that translates descriptions of tables embedded in its
 input into the language,
 .MR groff @MAN7EXT@ ,
 understood by
-.IR \%@g@troff .
+.IR @g@troff .
 .
 It copies the contents of each
 .I file
@@ -98,7 +98,7 @@ implementing any GNU extensions employed)
 must be used.
 .
 Normally,
-.I \%@g@tbl
+.I @g@tbl
 is not executed directly by the user,
 but invoked by specifying the
 .B \-t
@@ -119,7 +119,7 @@ the standard input stream is read.
 .SS Overview
 .\" ====================================================================
 .
-.I \%@g@tbl
+.I @g@tbl
 expects to find table descriptions between input lines that begin with
 .B .TS
 (table start)
@@ -137,7 +137,7 @@ another description can be preceded with an input line beginning with
 (Experienced
 .I roff
 users should observe that
-.I \%@g@tbl
+.I @g@tbl
 is not a
 .I roff
 language interpreter:
@@ -146,7 +146,7 @@ and no spaces or tabs are permitted between the control character and
 the macro name.
 .
 These
-.I \%@g@tbl
+.I @g@tbl
 input tokens remain as-is in the output,
 where they become ordinary macro calls.
 .
@@ -157,7 +157,7 @@ and
 .B TE
 macros to handle issues of table placement on the page.
 .
-.I \%@g@tbl
+.I @g@tbl
 produces
 .I groff
 code to define these macros as empty if their definitions do not exist
@@ -275,6 +275,10 @@ for
 input,
 and ignore input between them.
 .
+.I x
+.RI and\~ y
+need not be distinct.
+.
 .
 .TP
 .B doublebox
@@ -301,10 +305,12 @@ its entries and its column separations
 When
 .B expand
 applies to a table that exceeds the available horizontal space,
-.I tbl
-issues a diagnostic,
-and column separation is automatically reduced as far as
-necessary\[em]even to zero.
+column separation is reduced as far as necessary\[em]even to zero.
+.
+.I @g@tbl
+produces
+.I groff
+input that issues a diagnostic if this occurs.
 .
 The column modifier
 .B x
@@ -314,13 +320,16 @@ overrides this option.
 .
 .TP
 .BI linesize( n )
-Set lines or rules
+Draw lines or rules
 (e.g.,
 from
 .BR box )
-in
-.IR n -point
-type.
+with a thickness of
+.IR n \~points.
+.
+The default is the current type size when the region begins.
+.
+This option is ignored on terminal devices.
 .
 .
 .TP
@@ -328,7 +337,7 @@ type.
 Don't use diversions to prevent page breaks.
 .
 Normally,
-.I \%@g@tbl
+.I @g@tbl
 attempts to prevent undesirable breaks in tables by using diversions.
 .
 This can sometimes interact badly with macro packages' own use of
@@ -400,7 +409,7 @@ make separation necessary.
 Column classifiers are letters or punctuation symbols,
 whereas modifiers consist of or begin with letters or numerals.
 .
-Both are recognized case-insensitively.
+Letters are recognized case-insensitively.
 .
 .
 .P
@@ -432,7 +441,7 @@ can be parenthesized.
 .
 Modifiers select fonts,
 set the type size,
-define the column width,
+.\"define the column width,
 .\"adjust inter-column spacing, \" slack text for window/orphan control
 and perform other tasks described below.
 .
@@ -491,10 +500,10 @@ classifiers are the easiest to understand and use.
 .
 .TP
 .BR A ,\~ a
-Center longest entry in this column;
+Center longest entry in this column,
 left-align remaining entries in the column with respect to the centered
 entry,
-then indent them all by one en.
+then indent all entries by one en.
 .
 Such \[lq]alphabetic\[rq] entries
 (hence the name of the classifier)
@@ -562,7 +571,7 @@ with respect to each other.
 .
 .IP
 The appearance of
-.I \%@g@eqn
+.I @g@eqn
 equations
 within
 .BR N -classified
@@ -573,7 +582,7 @@ separator.
 Use the
 .B \%delim
 region option to make
-.I \%@g@tbl
+.I @g@tbl
 ignore the data within
 .I eqn
 delimiters for that purpose.
@@ -590,7 +599,7 @@ Span previous entry on the left into this column.
 .
 .
 .TP
-.B ^
+.B \[ha]
 Span entry in the same column from the previous row into this row.
 .
 .
@@ -600,7 +609,7 @@ Replace table entry with a horizontal rule.
 .
 An empty table entry is expected to correspond to this classifier;
 if data are found there,
-.I \%@g@tbl
+.I @g@tbl
 issues a diagnostic message.
 .
 .
@@ -610,7 +619,7 @@ Replace table entry with a double horizontal rule.
 .
 An empty table entry is expected to correspond to this classifier;
 if data are found there,
-.I \%@g@tbl
+.I @g@tbl
 issues a diagnostic message.
 .
 .
@@ -631,7 +640,7 @@ one produces a line at the edge of the table.
 .
 .P
 To change the table format within a
-.I \%@g@tbl
+.I @g@tbl
 region,
 use the
 .B .T&
@@ -678,8 +687,6 @@ If the same modifier is applied to a column specifier more than once,
 or if conflicting modifiers are applied,
 only the last occurrence has effect.
 .
-.
-.P
 The
 .RB modifier\~ x
 is mutually exclusive with
@@ -688,10 +695,8 @@ is mutually exclusive with
 but
 .B e
 is not mutually exclusive
-.RB with\~ w .
-.
-If these are repeated or used in combination,
-the last of them controls:
+.RB with\~ w ;
+if these are used in combination,
 .BR x \~unsets
 both
 .B e
@@ -703,6 +708,8 @@ or
 .RB overrides\~ x .
 .
 .
+.br
+.ne 4v \" Keep next two tagged paragraphs together.
 .TP
 .BR b ,\~ B
 Typeset entry in bold;
@@ -734,14 +741,14 @@ This modifier sets the default line length used in a text block.
 Select the font used for the table entry.
 .
 This modifier must be followed by a font name
-(either one or two characters),
+(one or two characters not starting with a digit),
 font mounting position
 (a single digit),
 or a name or mounting position of any length in parentheses.
 .
 The last form is a GNU extension.
 .
-(The parameter corresponds to that set by the
+(The parameter corresponds to that accepted by the
 .I troff \" generic
 .B ft
 request.)
@@ -782,16 +789,15 @@ like adjustment or hyphenation.
 .
 The macro is called
 .I after
-other the column modifiers
+the column modifiers
 .BR b ,
 .BR f ,
 .BR i ,
 .BR p ,
 and
 .B v
-take effect.
-.
-The macro can thus override other column modifiers.
+take effect;
+it can thus override other column modifiers.
 .
 .
 .TP
@@ -802,7 +808,7 @@ This modifier must be followed by an
 .RI integer\~ n
 with an optional leading sign.
 .
-(The parameter corresponds to that set by the
+(The parameter corresponds to that accepted by the
 .I troff \" generic
 .B ps
 request.)
@@ -845,11 +851,10 @@ This is a GNU extension.
 Set the vertical spacing to be used in a table entry containing a text
 block.
 .
-(This parameter corresponds to that set by the
+(This parameter corresponds to that accepted by the
 .I troff \" generic
 .B vs
-request;
-it is the distance between adjacent text baselines.)
+request.)
 .
 This modifier must be followed by an
 .RI integer\~ n
@@ -899,9 +904,9 @@ This modifier sets the default line length used in a text block.
 .BR x ,\~ X
 Expand the column.
 .
-After computing the widths of all columns lacking an
-.BR x \~modifier,
-distribute any remaining line length over all columns bearing it.
+After computing the column widths,
+distribute any remaining line length evenly over all columns bearing
+this modifier.
 .
 Applying the
 .BR x \~modifier
@@ -938,7 +943,7 @@ A negative separation cannot be specified.
 .
 A separation amount after the last column in a row is nonsensical and
 provokes a diagnostic from
-.IR \%@g@tbl .
+.IR @g@tbl .
 .
 .
 .\" ====================================================================
@@ -948,8 +953,12 @@ provokes a diagnostic from
 The table data come after the format specification.
 .
 Each input line corresponds to a table row,
-but a backslash immediately preceding a newline continues a table row
-onto the next input line.
+except that a backslash at the end of a line of table data continues an
+entry on the next input line.
+.
+(Text blocks,
+discussed below,
+also spread table entries across multiple input lines.)
 .
 Table entries within a row are separated in the input by a tab character
 by default;
@@ -971,7 +980,7 @@ populate it with the
 .B \[rs]&
 non-printing input token.
 .
-The table data are interrupted by the a line consisting of the
+The table data are interrupted by a line consisting of the
 .B .T&
 input token,
 and conclude with the line
@@ -986,33 +995,32 @@ It is not filled,
 broken,
 hyphenated,
 adjusted,
-or populated with inter-sentence space.
+or populated with additional inter-sentence space.
 .
-Except in columns using the
+.I @g@tbl
+measures each table entry as it occurs in the input,
+updating the width required by its corresponding column.
+.
+The
+.B x
+modifier makes this width a minimum,
+and the modifiers
 .B w
 or
 .B z
-modifiers,
-.I \%@g@tbl
-measures the width of each table entry as it occurs in the input;
-if it is wider than the widest entry yet seen in that column,
-the entry's width determines that of the column.
+override it entirely.
 .
-Once the table region ends,
-the column widths are known.
-.
-In contrast to typical
+In contrast to conventional
 .I roff
-documents
+input
 (within a paragraph,
 say),
 changes to text formatting,
-such as font or vertical spacing,
+such as font selection or vertical spacing,
 do not persist between entries.
 .
 .
 .P
-.ne 3v
 Several forms of table entry are interpreted specially.
 .
 .
@@ -1146,7 +1154,7 @@ it can be placed within a
 .
 .
 .P
-.I \%@g@tbl
+.I @g@tbl
 interprets a table entry of
 .RB \[lq] T{ \[rq]
 at the end of an input line not as table data,
@@ -1161,6 +1169,9 @@ Text block tokens can share an input line with other table data
 .B T{
 and following
 .BR T} ).
+.
+Input lines between these tokens are formatted in a diversion by
+.IR troff . \" generic
 .
 Text blocks cannot be nested.
 .
@@ -1198,9 +1209,8 @@ As with other table entries,
 when a text block ends,
 any alterations to its formatting are discarded.
 .
-They do not
-affect subsequent table entries,
-including text blocks.
+They do not affect subsequent table entries,
+not even other text blocks.
 .
 .
 .P
@@ -1244,23 +1254,25 @@ its width is subsequently available in the register
 .
 The register
 .B TW
-stores width of the table region in basic units;
+stores the width of the table region in basic units;
 it can't be used within the region itself,
 but is defined before the
 .B .TE
-token is output so that a defined
+token is output so that a
 .I groff
-macro of that name can make use of it.
+macro named
+.B TE
+can make use of it.
 .
 .
 .P
-.I \%@g@tbl
+.I @g@tbl
 also defines a macro
 .B T#
 to produce the bottom and side lines of a boxed table.
 .
 While
-.I \%@g@tbl
+.I @g@tbl
 itself arranges for the output to include a call of this macro at the
 end of such a table,
 it can also be used by macro packages to create boxes for multi-page
@@ -1273,7 +1285,7 @@ See section \[lq]Limitations\[rq] below for more on multi-page tables.
 .\" XXX: The following is a general caveat about preprocessors; move it.
 .P
 Using
-.I \%@g@tbl
+.I @g@tbl
 macros within conditional input
 (that is,
 contingent upon an
@@ -1285,14 +1297,14 @@ or
 request)
 can result in misleading line numbers in subsequent diagnostics.
 .
-.I \%@g@tbl
+.I @g@tbl
 unconditionally injects its output into the source document,
 but the conditional branch containing it may not be taken,
 and if it is not,
 the
 .B lf
 requests that
-.I tbl
+.I @g@tbl
 injects to restore the source line number cannot take effect.
 .
 Consider copying the input line counter register
@@ -1302,10 +1314,10 @@ arithmetic.
 .
 .
 .\" ====================================================================
-.SS "Interaction with \f[I]\%@g@eqn\f[]"
+.SS "Interaction with \f[I]@g@eqn\f[]"
 .\" ====================================================================
 .
-.I \%@g@tbl
+.I @g@tbl
 should always be called before
 .MR @g@eqn @MAN1EXT@ .
 .
@@ -1324,7 +1336,7 @@ set up delimiters in your
 input and use the
 .B \%delim
 region option so that
-.I \%@g@tbl
+.I @g@tbl
 will recognize them.
 .
 .
@@ -1392,7 +1404,7 @@ You can embed a table region inside a macro definition.
 .
 However,
 since
-.I \%@g@tbl
+.I @g@tbl
 writes its own macro definitions at the beginning of each table region,
 it is necessary to call end macros instead of ending macro definitions
 with
@@ -1406,21 +1418,21 @@ the escape character must be disabled. \" XXX: Why?
 .
 .P
 Not all
-.I \%@g@tbl
+.I @g@tbl
 features can be exercised from such macros because
-.I \%@g@tbl
+.I @g@tbl
 is a
 .I roff
 preprocessor:
 it sees the input earlier than
-.I \%@g@troff
+.I @g@troff
 does.
 .
 For example,
 vertically aligning decimal separators fails if the numbers containing
 them occur as macro or string parameters;
 the alignment is performed by
-.I \%@g@tbl
+.I @g@tbl
 itself,
 which sees only
 .BR \[rs]$1 ,
@@ -1428,7 +1440,7 @@ which sees only
 and so on,
 and therefore can't recognize a decimal separator that only appears
 later when
-.I \%@g@troff
+.I @g@troff
 interpolates a macro or string definition.
 .
 .
@@ -1492,7 +1504,7 @@ within the table data,
 call the
 .B TH
 macro;
-this informs the macro package where the row(s) of table headings end.
+this informs the macro package where the headings end.
 .
 If your table has no such heading rows,
 or you do not desire their repetition,
@@ -1696,7 +1708,7 @@ Protein;3
 \&.T&
 LN,AN.
 Mineral
-Pu-239;14.6
+Pu\-239;14.6
 _
 \&.T&
 LN.
@@ -1735,7 +1747,7 @@ vertical alignment,
 and zero-width column modifiers from the
 .I mandoc
 reference for its
-.I tbl
+.I tbl \" generic
 interpreter.
 .
 It rewards close study.
@@ -1813,7 +1825,7 @@ n|n\f[B]\[tmu]\f[]n|difference
 .
 .P
 Some
-.I \%@g@tbl
+.I @g@tbl
 features cannot be illustrated in the limited environment of a portable
 man page.
 .
@@ -1825,7 +1837,7 @@ man page.
 .\".I groff
 .\"macro definition.
 .\".
-.\".IR \%@g@tbl ,
+.\".IR @g@tbl ,
 .\"however,
 .\"cannot know what will result from any macro argument interpolations,
 .\"so we might confine such interpolations to one column of the table and
@@ -1881,12 +1893,11 @@ be sure to change both occurrences of \[lq]BP\[rq].
 .SH "See also"
 .\" ====================================================================
 .
-\[lq]Tbl\[em]A Program to Format Tables\[rq];
-Computing Science Technical Report #49;
-M.\& E.\& Lesk;
-AT&T Bell Laboratories;
-1976,
-revised 16 January 1979.
+\[lq]Tbl\[em]A Program to Format Tables\[rq],
+by M.\& E.\& Lesk,
+1976
+(revised 16 January 1979),
+AT&T Bell Laboratories Computing Science Technical Report No.\& 49.
 .
 .
 .P

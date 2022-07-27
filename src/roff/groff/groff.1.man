@@ -116,10 +116,9 @@ It is also used to format man pages for viewing on terminals.
 The
 .I groff
 command orchestrates the execution of preprocessors,
-the loading of macro packages,
-the formatting of input documents,
-and the production of output appropriate to a variety of hardware
-devices and file formats.
+the transformation of input documents into a device-independent page
+description language,
+and the production of output from that language.
 .
 .
 .\" ====================================================================
@@ -143,7 +142,7 @@ the two programs share a set of options.
 However,
 .I groff
 has some options that
-.I \%@g@troff
+.I @g@troff
 does not share,
 and others which
 .I groff
@@ -151,7 +150,7 @@ interprets differently.
 .
 At the same time,
 not all valid
-.I \%@g@troff
+.I @g@troff
 options can be given to
 .IR groff .
 .
@@ -161,7 +160,7 @@ options can be given to
 .\" ====================================================================
 .
 The following options either do not exist for
-.I \%@g@troff
+.I @g@troff
 or are interpreted differently by
 .IR groff .
 .
@@ -202,7 +201,7 @@ implies
 .TP
 .BI \-I\~ dir
 Works as
-.IR \%@g@troff 's
+.IR @g@troff 's
 option
 (see below),
 but also implies
@@ -214,7 +213,7 @@ It is passed to
 .MR @g@soelim @MAN1EXT@
 and the output driver,
 and
-.I \%@g@grn
+.I @g@grn
 is passed an
 .B \-M
 option with
@@ -234,12 +233,10 @@ implies
 .TP
 .B \-k
 Run
-.MR preconv @MAN1EXT@ ,
-which is run before any other preprocessor.
+.MR preconv @MAN1EXT@
+preprocessor.
 .
-Please refer to
-.IR preconv 's
-manual page for its behavior if neither of
+Refer to its manual page for its behavior if neither of
 .IR groff 's
 .B \-K
 or
@@ -292,23 +289,19 @@ each should be passed with a separate
 option.
 .
 .I groff
-does not prepend
-\[lq]\-\[rq]
-(a minus sign)
-to
+does not prefix an option dash to
 .I arg
 before passing it to the spooler program.
 .
 .
 .TP
 .B \-N
-Don't allow newlines within
+Prohibit newlines within
 .I eqn \" language
-delimiters.
-.
-This is the same as the
+delimiters:
+pass
 .B \-N
-option in
+to
 .MR @g@eqn @MAN1EXT@ .
 .
 .
@@ -333,10 +326,7 @@ each should be passed with a separate
 option.
 .
 .I groff
-does not prepend
-\[lq]\-\[rq]
-(a minus sign)
-to
+does not prefix an option dash to
 .I arg
 before passing it to the postprocessor.
 .
@@ -348,13 +338,11 @@ Run
 preprocessor.
 .
 No mechanism is provided for passing arguments to
-.I \%@g@refer
+.I @g@refer
 because most
-.I \%@g@refer
+.I @g@refer
 options have equivalent language elements that can be specified within
-the document;
-see
-.MR @g@refer @MAN1EXT@ .
+the document.
 .
 .
 .TP
@@ -385,13 +373,13 @@ preprocessor.
 .TP
 .BI \-T\~ dev
 Direct
-.I \%@g@troff
+.I @g@troff
 to format the input for the output device
 .IR dev .
 .
 .I groff
 then calls an output driver to convert
-.IR \%@g@troff 's
+.IR @g@troff 's
 output to a form appropriate for
 .IR dev ;
 see subsection \[lq]Output devices\[rq] below.
@@ -399,16 +387,16 @@ see subsection \[lq]Output devices\[rq] below.
 .
 .TP
 .B \-U
-Operate in unsafe mode;
-see
-.BR \-S .
-.
-Pass the
+Operate in unsafe mode:
+pass the
 .B \-U
 option to
-.I \%@g@pic
+.I @g@pic
 and
-.IR \%@g@troff .
+.IR @g@troff .
+.
+See
+.BR \-S .
 .
 .
 .TP
@@ -449,7 +437,7 @@ display.
 .B \-Z
 Disable postprocessing.
 .
-.I \%@g@troff
+.I @g@troff
 output will appear on the standard output stream
 (unless suppressed with
 .BR \-z );
@@ -463,7 +451,7 @@ for a description of this format.
 .\" ====================================================================
 .
 The following options are passed as-is to the formatter program
-.MR @g@troff @MAN1EXT@ ,
+.MR @g@troff @MAN1EXT@
 and described in more detail in its man page.
 .
 .
@@ -501,7 +489,7 @@ Define string.
 .TP
 .B \-E
 Inhibit
-.I \%@g@troff
+.I @g@troff
 error messages;
 implies
 .BR \-Ww .
@@ -580,7 +568,7 @@ emission of warnings in category
 .TP
 .B \-z
 Suppress formatted device-independent output of
-.IR \%@g@troff .
+.IR @g@troff .
 .
 .
 .\" ====================================================================
@@ -599,7 +587,7 @@ output drivers
 (or \[lq]postprocessors\[rq]),
 a suite of utilities,
 and the formatter
-.I \%@g@troff
+.I @g@troff
 at its heart.
 .
 See
@@ -634,13 +622,14 @@ information.
 .
 Those who prefer to learn by experimenting or are desirous of rapid
 feedback from the system may wish to start with a \[lq]Hello,
-world!\[rq]\& document.
+world!\&\[rq] document.
 .
 .
 .P
 .EX
 $ \c
-.B echo \[dq]Hello, world!\[dq] | groff \-Tascii | sed \[aq]/^$/d\[aq]
+.B echo \[dq]Hello, world!\[dq] | groff \-Tascii \
+| sed \[aq]/\[ha]$/d\[aq]
 Hello, world!
 .EE
 .
@@ -663,7 +652,8 @@ Today's users may prefer output to a UTF-8-capable terminal.
 .P
 .EX
 $ \c
-.B echo \[dq]Hello, world!\[dq] | groff \-Tutf8 | sed \[aq]/^$/d\[aq]
+.B echo \[dq]Hello, world!\[dq] | groff \-Tutf8 \
+| sed \[aq]/\[ha]$/d\[aq]
 .EE
 .
 .
@@ -749,7 +739,7 @@ It is even.
 In GNU
 .IR roff ,
 the page dimensions for the formatter
-.I \%@g@troff
+.I @g@troff
 and for output devices are handled separately.
 .
 In the formatter,
@@ -777,9 +767,10 @@ like \[lq]letter\[rq] or
 see
 .MR groff_tmac @MAN5EXT@ .
 .
-The default used by the formatter depends on its build configuration,
-but is usually one of the foregoing,
-as geographically appropriate.
+The default used by the formatter depends on its build configuration;
+in this installation,
+it is
+.RB \[lq] @PAGE@ \[rq].
 .
 .
 .P
@@ -1011,14 +1002,11 @@ The GNU
 system implements most well-known macro packages for AT&T
 .I troff \" AT&T
 .\" exceptions: mpm, mv
-in a compatible way,
-extends them,
-and adds some packages of its own.
+in a compatible way and extends them.
 .
-Several of them have one- or two-letter names arising from intense
-practices of naming economy in early Unix culture.
-.
-This laconic approach led to many of the packages being identified in
+These have one- or two-letter names arising from intense practices of
+naming economy in early Unix culture,
+a laconic approach that led to many of the packages being identified in
 general usage with the
 .I nroff
 and
@@ -1044,10 +1032,6 @@ Some are \[lq]full-service\[rq] packages,
 adopting responsibility for page layout among other fundamental tasks,
 and defining their own lexicon of macros for document composition;
 each such package stands alone and a given document can use at most one.
-.
-GNU
-.I roff
-provides the following such packages.
 .
 .
 .TP
@@ -1104,7 +1088,7 @@ is a modern package written by Peter Schaffter specifically for GNU
 .IR roff .
 .
 Consult the
-.UR file://\:\%@HTMLDOCDIR@/\:mom/\:toc\:.html
+.UR file://\:@HTMLDOCDIR@/\:mom/\:toc\:.html
 .I mom
 HTML manual
 .UE
@@ -1187,11 +1171,11 @@ programs as well as many extensions.
 The command-line option
 .B \-C
 switches
-.I \%@g@troff
+.I @g@troff
 into
 .IR "compatibility mode" ,
 which tries to emulate AT&T
-.I roff
+.I troff \" AT&T
 as closely as is practical to enable the formatting of documents written
 for the older system.
 .
@@ -1221,7 +1205,7 @@ in a page description language whose syntax is detailed in
 .SS "Output devices"
 .\" ====================================================================
 .
-.I \%@g@troff
+.I @g@troff
 output is formatted for a particular
 .IR "output device" ,
 typically specified by the
@@ -1245,8 +1229,7 @@ also known as US-ASCII.
 .
 .TP
 .B cp1047
-for terminals using the IBM code page 1047 character set and encoding,
-an EBCDIC arrangement of ISO Latin-1.
+for terminals using the IBM code page 1047 character set and encoding.
 .
 .
 .TP
@@ -1340,7 +1323,7 @@ and a
 .\" ====================================================================
 .
 Any program that interprets the output of
-.I \%@g@troff
+.I @g@troff
 is a GNU
 .I roff
 postprocessor.
@@ -1468,7 +1451,8 @@ device.
 adds information to AT&T
 .I troff \" AT&T
 font description files to enable their use with
-.IR @g@troff .
+GNU
+.IR troff .\" GNU
 .
 .
 .TP
@@ -1494,7 +1478,7 @@ printers.
 .
 .TP
 .MR tfmtodit @MAN1EXT@
-creates font description files for TeX DVI device.
+creates font description files for the TeX DVI device.
 .
 .
 .TP
@@ -1590,7 +1574,8 @@ you may wish to re-run the
 command with the
 .B \-V
 option and break the reported pipeline down into separate stages,
-inspecting the exit status and any diagnostic messages of each command.
+inspecting the exit status of and diagnostic messages emitted by each
+command.
 .
 .
 .\" ====================================================================
@@ -1761,7 +1746,7 @@ option overrides
 .I SOURCE_DATE_EPOCH
 A time stamp
 (expressed as seconds since the Unix epoch)
-to use as the creation time stamp in place of the current time.
+to use as the output creation time stamp in place of the current time.
 .
 The time is converted to human-readable form using
 .MR ctime 3
@@ -2084,37 +2069,28 @@ groff page of the GNU website
 .P
 Three
 .I groff
-mailing lists are available:
-.
-.
-.IP
+mailing lists are available
+for
 .MT bug\-groff@\:gnu\:.org
-bug tracker activity (read-only)
-.ME ;
+bug tracker activity
+.ME
+(read-only),
 .
-.
-.IP
 .MT groff@\:gnu\:.org
 general discussion
-.ME ;
+.ME ,
 and
 .
-.
-.IP
 .MT groff\-commit@\:gnu\:.org
-commit activity (read-only)
-.ME ,
-which reports changes to
-.IR groff 's
-source code repository by its developers.
+source code repository commit activity
+.ME
+(read-only).
 .
-.
-.P
-Details on repository access and much more can be found in the file
+Details of repository access and more can be found in the file
 .I README
-at the top directory of the
+in the top-level directory of the
 .I groff
-source package.
+source distribution.
 .
 .
 .P
@@ -2128,13 +2104,13 @@ Ted Faber
 can be found at the
 .UR http://\:www\:.lunabase\:.org/\:\[ti]faber/\:Vault/\:software/\
 \:grap/
-grap website
+.I grap
+website
 .UE .
 .
-This is the only
-.I grap
-supported by
-.IR groff .
+.I groff
+supports only this
+.IR grap .
 .
 .
 .\" ====================================================================
@@ -2169,15 +2145,14 @@ manual.
 You can browse it interactively with \[lq]info groff\[rq].
 .
 .
-.\" groff ships 62 man pages generated from 61 source files.  The
+.\" groff ships 61 man pages generated from 60 source files.  The
 .\" numbered comments refer to their sorting order in the source tree,
 .\" so that it is easier to tell that we've enumerated all of them.
 .TP
 Introduction, \c
 history, \c
 and further reading:
-.MR roff @MAN7EXT@ , \" #23
-.MR ditroff @MAN7EXT@ \" #16
+.MR roff @MAN7EXT@ \" #23
 .
 .
 .TP
@@ -2203,7 +2178,7 @@ Preprocessors:
 .
 .
 .TP
-Macro packages and macro-specific utilities:
+Macro packages and package-specific utilities:
 .MR groff_hdtbl @MAN7EXT@ , \" #9
 .MR groff_man @MAN7EXT@ , \" #55a
 .MR groff_man_style @MAN7EXT@ , \" #55b
@@ -2215,13 +2190,13 @@ Macro packages and macro-specific utilities:
 .MR groff_mom @MAN7EXT@ , \" #13
 .MR pdfmom @MAN1EXT@ , \" #30
 .MR groff_ms @MAN7EXT@ , \" #58
-.MR groff_rfc1345 @MAN7EXT@ , \" added 2021-02-01
-.MR groff_trace @MAN7EXT@ , \" #60
-.MR groff_www @MAN7EXT@ \" #59
+.MR groff_rfc1345 @MAN7EXT@ , \" 16
+.MR groff_trace @MAN7EXT@ , \" #59
+.MR groff_www @MAN7EXT@ \" #60
 .
 .
 .TP
-Bibliographic and index tools:
+Bibliographic database management tools:
 .MR @g@indxbib @MAN1EXT@ , \" #49
 .MR lkbib @MAN1EXT@ , \" #50
 .MR @g@lookbib @MAN1EXT@ \" #51
@@ -2251,7 +2226,7 @@ Formatter program:
 .
 .TP
 Formatter wrappers:
-.\".IR groff (@MAN1EXT@), \" 42 -- this page
+.\".MR groff @MAN1EXT@ , \" 42 -- this page
 .MR @g@nroff @MAN1EXT@ , \" #44
 .MR pdfroff @MAN1EXT@ \" #14
 .

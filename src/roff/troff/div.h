@@ -150,10 +150,10 @@ public:
 extern top_level_diversion *topdiv;
 extern diversion *curdiv;
 
-extern int exit_started;
-extern int done_end_macro;
+extern bool is_exit_underway;
+extern bool is_eoi_macro_finished;
+extern bool seen_last_page_ejector;
 extern int last_page_number;
-extern int seen_last_page_ejector;
 
 void spring_trap(symbol);	// implemented by input.c
 extern int trap_sprung_flag;

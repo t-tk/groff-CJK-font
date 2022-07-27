@@ -67,7 +67,7 @@ like the one you are reading.
 This document presents the macros thematically;
 for those needing only a quick reference,
 the following table lists them alphabetically,
-with cross-references to appropriate subsections below.
+with cross references to appropriate subsections below.
 .
 .
 .P
@@ -84,14 +84,14 @@ _
 \&.EX	Example begin	Document structure macros
 \&.I	Italic	Font style macros
 \&.IB	Italic, bold alternating	Font style macros
-\&.IP	Indented paragraph	Paragraph macros
+\&.IP	Indented paragraph	Paragraphing macros
 \&.IR	Italic, roman alternating	Font style macros
-\&.LP	(Left) paragraph	Paragraph macros
+\&.LP	(Left) paragraph	Paragraphing macros
 \&.ME	Mail-to end	Hyperlink macros
 \&.MR	Man page cross reference	Hyperlink macros
 \&.MT	Mail-to start	Hyperlink macros
-\&.P	Paragraph	Paragraph macros
-\&.PP	Paragraph	Paragraph macros
+\&.P	Paragraphing	Paragraphing macros
+\&.PP	Paragraphing	Paragraphing macros
 \&.RB	Roman, bold alternating	Font style macros
 \&.RE	Relative inset end	Document structure macros
 \&.RI	Roman, italic alternating	Font style macros
@@ -102,8 +102,8 @@ _
 \&.SS	Subsection heading	Document structure macros
 \&.SY	Synopsis start	Command synopsis macros
 \&.TH	Title heading	Document structure macros
-\&.TP	Tagged paragraph	Paragraph macros
-\&.TQ	Supplemental paragraph tag	Paragraph macros
+\&.TP	Tagged paragraph	Paragraphing macros
+\&.TQ	Supplemental paragraph tag	Paragraphing macros
 \&.UE	URI end	Hyperlink macros
 \&.UR	URI start	Hyperlink macros
 \&.YS	Synopsis end	Command synopsis macros
@@ -198,7 +198,7 @@ Optional macro arguments are indicated by surrounding them with square
 brackets.
 .
 If a macro accepts multiple arguments,
-those containing space \" or horizontal tab (in Plan 9 troff [only?])
+those containing space \" or tab (in Plan 9 troff [only?])
 characters must be double-quoted to be interpreted correctly.
 .
 An empty macro argument can be specified with a pair of double-quotes
@@ -273,7 +273,7 @@ macros.
 Define the title of the man page as
 .I title
 and the volume of the manual to which it belongs as
-.IR section .
+.I section.
 .
 This use of \(lqsection\(rq has nothing to do with the section headings
 otherwise discussed in this page;
@@ -316,7 +316,7 @@ except in the continuous-rendering mode enabled by the option
 in which case it is the
 .I title
 and
-.IR section ,
+.I section,
 as in the header.
 .
 .I header-middle
@@ -326,7 +326,7 @@ If
 .I section
 is a simple integer between 1 and\~9 (inclusive),
 there is no need to specify
-.IR header-middle ;
+.I header-middle;
 .I an.tmac
 will supply text for it.
 .
@@ -376,12 +376,10 @@ Set
 .I heading-text
 as a section heading.
 .
-The text following
-.B .SH
-up to the end of the line,
+Its argument,
 or the text on the next input line if
 .B .SH
-is given no arguments,
+is given none,
 is set with no indentation,
 in bold
 (or the font specified by the string
@@ -446,12 +444,10 @@ ordinary paragraph
 See subsection \(lqHorizontal and vertical spacing\(rq below for the
 indentation amount.
 .
-The text following
-.B .SS
-up to the end of the line,
+Its argument,
 or the text on the next input line if
 .B .SS
-is given no arguments,
+is given none,
 is set in bold
 (or the font specified by the string
 .BR HF ).
@@ -493,11 +489,43 @@ Example regions are useful for formatting code,
 shell sessions,
 and text file contents.
 .
+An example region is not
+a \(lqliteral mode\(rq
+of any sort:
+special character escape sequences must still be used to produce correct
+glyphs for
+.BR \(aq ,
+.BR \- ,
+.BR \(rs ,
+.BR \(ha ,
+.BR \(ga ,
+and
+.BR \(ti ,
+and sentence endings are still detected and additional inter-sentence
+space applied.
+.
+If a user
+(or one of
+.IR groff 's
+localization support macro files)
+has changed the additional inter-sentence space amount,
+the latter process can change the rendering of,
+for instance,
+regular expressions using
+.B .\&
+or
+.B ?\&
+followed by multiple spaces.
+.
+Use the non-printing input break escape sequence
+.B \(rs&
+before the spaces.
+.
 .
 .IP
 .\" Also see subsection "History" below...
 These macros are extensions,
-introduced in Version\~9 Research Unix,
+introduced in Ninth Edition Research Unix,
 to the original
 .I man
 package.
@@ -517,7 +545,7 @@ support them.
 .
 To be certain your page will be portable to systems that do not,
 copy their definitions from the
-.I an\-ext.tmac
+.I \%an\-ext.tmac
 file of a
 .I groff
 installation.
@@ -525,10 +553,10 @@ installation.
 .
 .TP
 .BR .RS " ["\c
-.IR indent ]
+.IR indentation ]
 Start a new relative inset level,
 moving the left margin right by
-.IR indent ,
+.I indentation,
 if specified,
 and by a default amount otherwise;
 see subsection \(lqHorizontal and vertical spacing\(rq below.
@@ -549,14 +577,14 @@ calls is\~1.
 .IR level ]
 End a relative inset;
 move the left margin back to that corresponding to inset level
-.IR level .
+.I level.
 .
 If no argument is given,
 move the left margin one level back.
 .
 .
 .\" ====================================================================
-.SS "Paragraph macros"
+.SS "Paragraphing macros"
 .\" ====================================================================
 .
 An ordinary paragraph
@@ -623,17 +651,17 @@ is not.
 .
 .TP
 .BR .TP " ["\c
-.IR indent ]
+.IR indentation ]
 Set a paragraph with a leading tag,
 and the remainder of the paragraph indented.
 .
 The input line following this macro,
 known as the
-.IR tag ,
+.I tag,
 is printed at the current left margin.
 .
 Subsequent text is indented by
-.IR indent ,
+.I indentation,
 if specified,
 and by a default amount otherwise;
 see subsection \(lqHorizontal and vertical spacing\(rq below.
@@ -683,7 +711,7 @@ or
 Solaris
 .IR troff ;
 see
-.I an\-ext.tmac
+.I \%an\-ext.tmac
 in section \(lqFiles\(rq below.
 .
 .
@@ -702,13 +730,13 @@ and
 .TP
 .BR .IP " ["\c
 .IR tag "] "\c
-.RI [ indent ]
+.RI [ indentation ]
 Set an indented paragraph with an optional tag.
 .
 The
 .I tag
 and
-.I indent
+.I indentation
 arguments,
 if present,
 are handled as with
@@ -736,7 +764,7 @@ or
 .B .TP
 paragraph,
 if no
-.I indent
+.I indentation
 argument is given;
 and
 .
@@ -780,7 +808,7 @@ or
 Solaris
 .IR troff ;
 see
-.I an\-ext.tmac
+.I \%an\-ext.tmac
 in section \(lqFiles\(rq below.
 .
 .
@@ -958,17 +986,17 @@ produces the following output.
 Several features of the above example are of note.
 .
 .
-.IP \(bu
+.IP \(bu 2n
 The empty request (.),
 which does nothing,
-is used for vertical spacing in the input file for readability by the
+is used to vertically space the input file for readability by the
 document maintainer.
 .
 Do not put blank (empty) lines in a man page source document.
 .
 .
 .IP \(bu
-The command and option names are presented in
+Command and option names are presented in
 .B bold
 to cue the user that they should be input literally.
 .
@@ -1075,11 +1103,11 @@ or
 Solaris
 .IR troff ; \" Solaris
 see
-.I an\-ext.tmac
+.I \%an\-ext.tmac
 in section \(lqFiles\(rq below.
 .
-Plan\~9
-.I troff \" Plan 9
+The plan9port project's
+.I troff \" plan9port
 implements
 .BR .MR .
 .
@@ -1103,7 +1131,7 @@ URIs can be lengthy;
 rendering them can result in jarring adjustment or variations in line
 length,
 or
-.I \%@g@troff
+.I @g@troff
 warnings when a hyperlink is longer than an output line.
 .
 The application of non-printing break point escape sequences
@@ -1128,10 +1156,15 @@ Thus,
 .RE
 has several potential break points in the URI shown.
 .
-The
+Consider adding break points before or after at signs in email
+addresses,
+and question marks,
+ampersands,
+and number signs in HTTP(S) URIs.
+.
 .B \e:
 escape sequences are ignored when supplied to device control commands
-for embedding in hyperlink-aware output drivers.
+for hyperlink-aware output drivers.
 .
 .
 .TP
@@ -1193,13 +1226,13 @@ An argument to
 is placed at the end of the link text without intervening space.
 .
 .I address
-may not be visible in the rendered document if the output driver
-supports hyperlinks.
+may not be visible in the rendered document if hyperlinks are enabled
+and supported by the output driver.
 .
-If it does not,
+If they are not,
 .I address
 is set in angle brackets after the link text and before
-.IR trailing-text .
+.I trailing-text.
 .
 .
 .IP
@@ -1238,13 +1271,13 @@ An argument to
 is placed at the end of the link text without intervening space.
 .
 .I uri
-may not be visible in the rendered document if the output driver
-supports hyperlinks.
+may not be visible in the rendered document if hyperlinks are enabled
+and supported by the output driver.
 .
-If it does not,
+If they are not,
 .I uri
 is set in angle brackets after the link text and before
-.IR trailing-text .
+.I trailing-text.
 .
 .
 .IP
@@ -1431,7 +1464,7 @@ the text of the next input line is set smaller.
 .
 .
 .IP
-.IR Note :
+.I Note:
 terminals will render
 .I text
 at normal size instead.
@@ -1457,7 +1490,7 @@ the text of the next input line is set smaller and in bold.
 .
 .
 .IP
-.IR Note :
+.I Note:
 terminals will render
 .I text
 in bold at the normal size instead.
@@ -1598,7 +1631,7 @@ alternately.
 The
 \&.I groff
 font file is written to
-\&.IR font .
+\&.I font.
 .EE
 .RE
 .
@@ -1642,16 +1675,16 @@ alternately.
 .\" ====================================================================
 .
 The
-.I indent
+.I indentation
 argument accepted by
 .BR .RS ,
 .BR .IP ,
 .BR .TP ,
 and the deprecated
 .B .HP
-is a number plus an optional scaling indicator.
+is a number plus an optional scaling unit.
 .
-If no scaling indicator is given,
+If no scaling unit is given,
 the
 .I man
 package assumes \(lqn\(rq;
@@ -1668,7 +1701,7 @@ or the deprecated
 .B .HP
 persists until
 (1) another of these macros is called with an explicit
-.I indent
+.I indentation
 argument,
 or
 (2)
@@ -1724,8 +1757,7 @@ are indented 3n
 .B \-rSN
 option).
 .
-However,
-the HTML output device ignores indentation completely.
+The HTML output device ignores indentation completely.
 .
 .
 .P
@@ -1747,17 +1779,15 @@ and
 .BR .SS ,
 which reset it to the default).
 .
-.
-The other kind of indentation is controlled by the paragraphing macros
+Indentation is controlled by the paragraphing macros
 (though,
 again,
 .\".BR .TH ,
 .B .SH
 and
 .B .SS
-reset it).
-.
-Indentation is imposed by the
+reset it);
+it is imposed by the
 .BR .TP ,
 .BR .IP ,
 and deprecated
@@ -1824,8 +1854,8 @@ the left margin and indentation.
 .
 .IP \(bu
 This indented paragraph has a bullet for a tag,
-making it more obvious that the left margin and the paragraph
-indentation are distinct;
+making it more obvious that the left margin and indentation are
+distinct;
 only the former affects the tag,
 but both affect the text of the paragraph.
 .
@@ -1862,7 +1892,7 @@ paragraph.
 .
 .P
 Resist the temptation to mock up tabular or multi-column output with
-horizontal tab characters or the indentation arguments to
+tab characters or the indentation arguments to
 .BR .IP ,
 .BR .TP ,
 .BR .RS ,
@@ -1878,7 +1908,7 @@ can likely meet your needs.
 .
 .
 .P
-The following macros break the output line and insert vertical space:
+Several macros break the output line and insert vertical space:
 .BR .SH ,
 .BR .SS ,
 .BR .TP ,
@@ -1895,16 +1925,16 @@ and 0.4v for typesetter devices
 where 1v is the distance between adjacent text baselines in a
 single-spaced document).
 .
+(The deprecated macro
+.B .PD
+can change this vertical spacing,
+but its use is discouraged.)
+.
 In
 .BR .EX / .EE
 sections,
 the inter-paragraph spacing is 1v regardless of output
 device.
-.
-(The deprecated macro
-.B .PD
-can change this vertical spacing,
-but its use is discouraged.)
 .
 The macros
 .BR .RS ,
@@ -1969,7 +1999,7 @@ respectively.
 .
 .TP
 .B \e*(Tm
-interpolate special character escape sequences for the \(lqtrade mark
+interpolates a special character escape sequence for the \(lqtrade mark
 sign\(rq glyph,
 .BR \e(tm ,
 if available,
@@ -2000,7 +2030,7 @@ Unix systems
 (or Solaris
 .IR troff ,
 though even it supports
-.BR \(rsrg ),
+.BR \(rs(rg ),
 the above strings should be avoided.
 .
 .
@@ -2009,9 +2039,9 @@ the above strings should be avoided.
 .\" ====================================================================
 .
 When a preprocessor like
-.I \%@g@tbl
+.I @g@tbl
 or
-.I \%@g@eqn
+.I @g@eqn
 is needed,
 a hint can be given to the man page librarian by making the first line
 of a man page look like this:
@@ -2034,12 +2064,12 @@ The
 .I word
 consists of one letter for each needed preprocessor:
 \(lqe\(rq for
-.IR \%@g@eqn ,
+.IR @g@eqn ,
 \(lqr\(rq for
-.IR \%@g@refer ,
+.IR @g@refer ,
 and
 \(lqt\(rq for
-.IR \%@g@tbl .
+.IR @g@tbl .
 .
 Modern implementations of the
 .I man
@@ -2069,6 +2099,24 @@ equations.
 .SS Portability
 .\" ====================================================================
 .
+It is wise to quote multi-word section and subsection titles;
+the
+.B .SH
+and
+.B .SS
+macros of
+.MR man 7
+implementations descended from Seventh Edition Unix supported six
+arguments at most.
+.
+A similar restriction applied to the
+.BR .B ,
+.BR .I ,
+.BR .SM ,
+and font style alternation macros.
+.
+.
+.P
 The two major syntactical categories of
 .I roff
 languages are requests and escape sequences.
@@ -2108,7 +2156,7 @@ or presented incomprehensibly.
 .
 .P
 For portability to modern viewers,
-it is best to write your page entirely with the macros described in this
+it is best to write your page solely with the macros described in this
 page
 (except for the ones identified as deprecated,
 which should be avoided).
@@ -2125,7 +2173,7 @@ as they may not yet be built in to some viewer that is important to your
 audience.
 .
 See
-.I an\-ext.tmac
+.I \%an\-ext.tmac
 in section \(lqFiles\(rq below.
 .
 .
@@ -2283,7 +2331,7 @@ or similar.
 .
 .TP
 .B \e(aq
-Basic Latin apostrophe.
+Basic Latin neutral apostrophe.
 .
 Some
 output devices replace
@@ -2295,7 +2343,7 @@ with a right single quotation mark.
 .B \e(oq
 .TQ
 .B \e(cq
-Opening and closing single quotation marks.
+Opening (left) and closing (right) single quotation marks.
 .
 Use these for paired directional single quotes,
 \(oqlike this\(cq.
@@ -2406,25 +2454,25 @@ End a text line without inserting space or attempting a break.
 .\" TODO: When we explain what a "sentence" is, move this parenthetical
 .\" there.
 Normally,
+if filling is enabled,
 the end of a text line is treated like a space;
 .\" end-of-sentence detection is performed, and...
 an output line
 .I may
-be broken there if filling is enabled
+be broken there
 (if not,
-an adjustable space is inserted),
-and
+an adjustable space is inserted);
+if filling is disabled,
+the line
 .I will
-be broken there when filling is disabled,
+be broken there,
 as in
 .BR .EX / .EE
 examples.
 .
-Anything after
+Nothing after
 .B \ec
-on the input line
-.\" ...except for \R, which shouldn't appear in man pages...
-is ignored.
+on the input line is formatted.
 .
 The next line is interpreted as usual and can include a macro call
 (contrast with
@@ -2472,15 +2520,14 @@ Alternatively,
 and perhaps with better portability,
 the
 .B \ef
-font style escape sequence can be used;
+font selection escape sequence can be used;
 see below.
 .
 Using
 .B \ec
-to include the output from more than one input line into the next-line
-argument of a
+to continue a
 .B .TP
-macro will render incorrectly with
+paragraph tag across multiple input lines will render incorrectly with
 .I groff
 1.22.3,
 .I mandoc
@@ -2590,17 +2637,27 @@ administrator in a site's
 file
 (see section \(lqFiles\(rq below).
 .
-The default headers and footers are documented in the description of
+The presentation of
 .B .TH
-above.
+above describes the default headers and footers.
 .
 Because these macros are hooks for
 .I groff man
 internals,
 man pages have no reason to call them.
 .
-A macro definition for these hooks typically consists of a \[lq].tl\[rq]
-request.
+Such hook definitions will likely consist of \[lq].sp\[rq] and
+\[lq].tl\[rq] requests.
+.
+They must also increase the page length with \[lq].pl\[rq] requests in
+continuous rendering mode;
+.B .PT
+furthermore has the responsibility of emitting a PDF bookmark after
+writing the first page header in a document.
+.
+Consult the existing implementations in
+.I an.tmac
+when drafting replacements.
 .
 .
 .TP
@@ -2613,6 +2670,11 @@ Set the page footer text
 .B .PT
 Set the page header text
 (\(lqpage trap\(rq).
+.
+.
+.P
+If you want to remove a page header or footer entirely,
+define the appropriate macro as empty rather than deleting it.
 .
 .
 .\" ====================================================================
@@ -2632,8 +2694,7 @@ overriding any definition of the
 argument to
 .BR .TH .
 .
-This macro exists only for compatibility,
-to render man pages from historical systems.
+This macro exists only to render man pages from historical systems.
 .
 .
 .IP
@@ -2671,12 +2732,8 @@ such as in \(lqSystem\~V Release\~3\(rq.
 .
 .TP
 .B .DT
-Set tab stops every 0.5i (inches).
-.
-Since this macro is called by
-.BR .TH ,
-it would make sense to call it only if a man page changes the tab stops.
-.
+Reset tab stops to the default
+(every 0.5i [inches]).
 .
 .IP
 Use of this presentation-level macro is deprecated.
@@ -2686,23 +2743,23 @@ under which exact space control and tabulation are not readily
 available.
 .
 Thus,
-information or distinctions that you use
-.B .DT
-to express are likely to be lost.
+information or distinctions that you use tab stops to express are likely
+to be lost.
 .
-If you feel tempted to use it,
+If you feel tempted to change the tab stops such that calling this macro
+later is desirable to restore them,
 you should probably be composing a table using
 .MR @g@tbl @MAN1EXT@
-markup instead.
+instead.
 .
 .
 .TP
 .BR .HP " ["\c
-.IR indent ]
+.IR indentation ]
 Set up a paragraph with a hanging left indentation.
 .
 The
-.I indent
+.I indentation
 argument,
 if present,
 is handled as with
@@ -2753,7 +2810,8 @@ It cannot easily be used to annotate options that take optional
 arguments or options whose arguments have internal structure
 (such as a mixture of literal and variable components).
 .
-One could work around these limitations with font escape sequences,
+One could work around these limitations with font selection escape
+sequences,
 but it is preferable to use font style alternation macros,
 which afford greater flexibility.
 .
@@ -2766,7 +2824,7 @@ Define the vertical space between paragraphs or (sub)sections.
 The optional argument
 .I vertical-space
 specifies the amount;
-the default scaling indicator is \(lqv\(rq.
+the default scaling unit is \(lqv\(rq.
 .
 Without an argument,
 the spacing is reset to its default value;
@@ -2795,8 +2853,7 @@ overriding any definition of the
 argument to
 .BR .TH .
 .
-This macro exists only for compatibility,
-to render man pages from historical systems.
+This macro exists only to render man pages from historical systems.
 .
 .
 .IP
@@ -2839,7 +2896,7 @@ can be:
 .SS History
 .\" ====================================================================
 .
-Version\~7 Unix (1979) introduced the
+Unix Version\~7 (1979) introduced the
 .I man
 macro package and supported all of the macros described in this page not
 listed as extensions,
@@ -2865,7 +2922,7 @@ in Unix System\~III (1980).
 .
 .\" This inference is based on RCS idents of "PWB Manual Entry Macros"
 .\" from various forms of "an.src" distributed with System III (an.src
-.\" 1.35, dated 5/6/80, lacks the Tm string), Version 10 Research Unix
+.\" 1.35, dated 5/6/80, lacks the Tm string), Research Unix Version 10
 .\" (1.36, dated 11/11/80, has it), Ultrix 3.1 (1.37, dated 12/19/80,
 .\" retains it) and "pdp11v" (also 1.37).  One source (S. S. Pirzada)
 .\" says PWB 2.0 was released in June 1979.  I found no record of later
@@ -2883,6 +2940,17 @@ and
 .B rq
 strings.
 .
+.\" per <https://minnie.tuhs.org/pipermail/tuhs/2022-March/025544.html>
+.\" and <https://minnie.tuhs.org/pipermail/tuhs/2022-March/025545.html>
+Documenter's Workbench 1.0 (1984) exposed the
+.B IN
+and
+.B LL
+registers,
+which had been internal to Seventh Edition Unix
+.IR man .
+.\" ...as well as a PD register, which we use but don't expose.
+.
 4.3BSD (1986) added
 .\" undocumented .DS and .DE macros for "displays", which are .RS/.RE
 .\" wrappers with filling disabled and vertical space of 1v before and
@@ -2893,7 +2961,7 @@ and
 .
 .\" Per Doug McIlroy in
 .\" <https://lists.gnu.org/archive/html/groff/2019-07/msg00038.html>...
-Version\~9 Research Unix (1986) introduced
+Ninth Edition Research Unix (1986) introduced
 .B .EX
 and
 .BR .EE .
@@ -2905,8 +2973,8 @@ SunOS\~4.0 (1988) may have been the first to support
 .\" time and did not support the macro.  SunOS 4.0.3 (May 1989)
 .\" contained over 2,100 uses of .SB.
 .
-Plan\~9
-.I troff \" Plan 9
+The plan9port project's
+.I troff \" plan9port
 introduced
 .B .MR
 in 2020.
@@ -2932,11 +3000,15 @@ recognized and used by the
 .I man
 macro package.
 .
+To ensure rendering consistent with output device capabilities and
+reader preferences,
+man pages should never manipulate them.
+.
 .
 .TP
 .BI \-dAD= adjustment-mode
 Set line adjustment to
-.IR adjustment-mode ,
+.I adjustment-mode,
 which is typically
 .RB \[lq] b \[rq]
 for adjustment to both margins
@@ -2959,10 +3031,11 @@ for less-common choices.
 .B \-rcR=1
 Enable continuous rendering.
 .
-Do not paginate the output;
-produce one
+Output is not paginated;
+instead,
+one
 (potentially very long)
-output page.
+page is produced.
 .
 This is the default for terminal and HTML devices.
 .
@@ -2973,10 +3046,8 @@ to disable it.
 .
 .TP
 .B \-rC1
-Number output pages continuously.
-.
-If multiple man pages are processed,
-number the output pages in strictly increasing sequence,
+Number output pages continuously,
+in strictly increasing sequence,
 rather than resetting the page number to\~1 at each new
 .I man
 document.
@@ -2984,9 +3055,8 @@ document.
 .
 .TP
 .B \-rCS=1
-Capitalize section headings.
-.
-Set section headings
+Capitalize section headings,
+setting section headings
 (the argument(s) to
 .BR .SH )
 in full capitals.
@@ -2997,9 +3067,8 @@ distinction information.
 .
 .TP
 .B \-rCT=1
-Capitalize titles.
-.
-Set the man page title
+Capitalize titles,
+setting the man page title
 (the first argument to
 .BR .TH )
 in full capitals in headers and footers.
@@ -3010,9 +3079,8 @@ distinction information.
 .
 .TP
 .B \-rD1
-Enable double-sided layout.
-.
-Format footers for even and odd pages differently;
+Enable double-sided layout,
+formatting footers for even and odd pages differently;
 see the description of
 .B .TH
 in subsection \(lqDocument structure macros\(rq above.
@@ -3021,7 +3089,7 @@ in subsection \(lqDocument structure macros\(rq above.
 .TP
 .BI \-rFT= footer-distance
 Set distance of the footer relative to the bottom of the page to
-.IR footer-distance ;
+.I footer-distance;
 this amount is always negative.
 .
 At twice this distance,
@@ -3034,10 +3102,10 @@ The default is \-0.5i.
 .
 .TP
 .BI \-dHF= heading-font
-See the font used for section and subsection headings;
+Set the font used for section and subsection headings;
 the default is
 .RB \(lq B \(rq
-(bold).
+(bold style of the default family).
 .
 Any valid argument to
 .IR groff 's
@@ -3048,27 +3116,19 @@ See
 .
 .
 .TP
-.BI \-rHY= hyphenation-mode
-Set hyphenation mode,
-as documented in section \(lqHyphenation\(rq of
-.MR groff @MAN7EXT@ .
-.
-Use
 .B \-rHY=0
-to disable hyphenation.
+Disable automatic hyphenation.
 .
-The default is\~4 if continuous rendering is enabled
-.RB ( \-rcR=1
-above),
-and\~6 otherwise.
-.
-Any valid argument to
-.IR groff 's
-\[lq].hy\[rq] request may be used.
+Normally,
+it is enabled using a mode appropriate to the
+.I groff
+locale;
+see section \[lq]Localization\[lq] of
+.MR groff @MAN7EXT@ .
 .
 .
 .TP
-.BI \-rIN= standard-indent
+.BI \-rIN= standard-indentation
 Set the amount of indentation used for ordinary paragraphs
 .RB ( .P
 and its synonyms)
@@ -3085,7 +3145,7 @@ default.
 .
 For
 terminal devices,
-.I standard-indent
+.I standard-indentation
 should always be an integer multiple of unit \(lqn\(rq to get consistent
 indentation.
 .
@@ -3122,7 +3182,7 @@ and
 calls;
 the default is
 .RB \(lq I \(rq
-(italic).
+(italic style of the default family).
 .
 Any valid argument to
 .IR groff 's
@@ -3157,9 +3217,9 @@ See subsection \(lqFont style macros\(rq above for the default.
 .
 .
 .TP
-.BI \-rSN= subsection-indent
+.BI \-rSN= subsection-indentation
 Set indentation of subsection headings to
-.IR subsection-indent .
+.I subsection-indentation.
 .
 See subsection \(lqHorizontal and vertical spacing\(rq above for the
 default.
@@ -3222,18 +3282,18 @@ and so on.
 .\" ====================================================================
 .
 .TP
-.I \%@MACRODIR@/\:an\:.tmac
+.I @MACRODIR@/\:an\:.tmac
 Most
 .I man
-macros are contained in this file.
+macros are defined in this file.
 .
-It also loads the extensions from
-.I an\-ext.tmac
+It also loads extensions from
+.I \%an\-ext.tmac
 (see below).
 .
 .
 .TP
-.I \%@MACRODIR@/\:andoc\:.tmac
+.I @MACRODIR@/\:\%andoc\:.tmac
 This brief
 .I groff
 program detects whether the
@@ -3253,7 +3313,7 @@ A
 .I man
 program or user typing,
 for example,
-\(lqgroff \-mandoc page.1\(rq,
+.RB \[lq] "groff \-mandoc page.1" \[rq],
 need not know which package the file
 .I page.1
 uses.
@@ -3266,25 +3326,30 @@ reloads each macro package as necessary.
 .
 .
 .TP
-.I \%@MACRODIR@/\:an\-ext\:.tmac
-The extension macro definitions for
-.BR .SY ,
+.I @MACRODIR@/\:\%an\-ext\:.tmac
+Definitions of macros described above as extensions
+.RB ( .SY ,
 .BR .YS ,
 .BR .TQ ,
 .BR .EX / .EE ,
 .BR .UR / .UE ,
+.BR .MT / .ME ,
 and
-.BR .MT / .ME
+.BR .MR )
 are contained in this file;
-if the formatter is not GNU
-.IR troff , \" GNU
-it also provides an
-.B .MR
-implementation that does not attempt hyperlinking.
+in some cases,
+they are simpler versions of definitions appearing in
+.IR an.tmac ,
+and are ignored if the formatter is GNU
+.IR troff .\" GNU
 .
-These macros are written to be compatible with AT&T
+They are written to be compatible with AT&T
 .I troff \" AT&T
 and permissively licensed\(emnot copylefted.
+.
+To reduce the risk of name space collisions,
+its internal string and register names begin only with
+.RB \[lq] m \[rq] .
 .
 Man page authors concerned about portability to legacy Unix systems are
 encouraged to copy these definitions into their pages,
@@ -3314,19 +3379,19 @@ implementations that may give up their scan for indexing material early.
 .
 .
 .TP
-.I \%@MACRODIR@/\:man\:.tmac
+.I @MACRODIR@/\:man\:.tmac
 This is a wrapper that loads
 .IR an.tmac .
 .
 .
 .TP
-.I \%@MACRODIR@/\:mandoc\:.tmac
+.I @MACRODIR@/\:\%mandoc\:.tmac
 This is a wrapper that loads
 .IR \%andoc.tmac .
 .
 .
 .TP
-.I \%@LOCALMACRODIR@/\:\%man\:\%.local
+.I @LOCALMACRODIR@/\:\%man\:\%.local
 Put site-local changes and customizations into this file.
 .
 .
@@ -3339,7 +3404,7 @@ Put site-local changes and customizations into this file.
 \&.\e" Put only one space after the end of a sentence.
 \&.ss 12 0 \e" See groff(@MAN7EXT@).
 \&.\e" Keep pages narrow even on wide terminals.
-\&.if n .if \(rsn[LL]>78 .nr LL 78n
+\&.if n .if \(rsn[LL]>78n .nr LL 78n
 \&.\e" Ensure hyperlinks are enabled for terminals.
 \&.nr U 1
 .EE
@@ -3393,6 +3458,8 @@ When documenting GNU/Linux command or C language syntax,
 however,
 this translation is sometimes not desirable.
 .
+.br
+.ne 3v
 .TS
 c c
 rfCB lfCB.
@@ -3437,6 +3504,8 @@ Probably not.
 When this seems necessary,
 often a shorter or clearer alternative is available.
 .
+.br
+.ne 3v
 .TS
 c c
 lfCB lfCB.
@@ -3496,7 +3565,7 @@ instead.
 .IP
 In the last example,
 the empty argument does have a subtly different effect than its
-suggested replacement;
+suggested replacement:
 the empty argument causes an additional space character to be
 interpolated between the arguments \(lqtwo\(rq and \(lqthree\(rq\(embut
 it is a regular breaking space,
@@ -3521,12 +3590,15 @@ paragraph
 and its synonyms)
 will be set.
 .
-.BR .RS ,
 .BR .IP ,
 .BR .TP ,
 and the deprecated
 .B .HP
 all use the same default indentation.
+.
+If not given an argument,
+.B .RS
+moves the left margin by this same amount.
 .
 To create an inset relative to an indented paragraph,
 call
@@ -3543,10 +3615,28 @@ See subsection \(lqHorizontal and vertical spacing\(rq above for the
 values.
 .
 .
+.IP
+Another approach you can use with tagged paragraphs is to place an
+.B .RS
+call immediately after the paragraph tag;
+this will also force a break regardless of the width of the tag,
+which some authors prefer.
+.
+Follow-up paragraphs under the tag can then be set with
+.B .P
+instead of
+.BR .IP .
+.
+Remember to use
+.B .RE
+to end the indented region before starting the next tagged paragraph
+(at the appropriate nesting level).
+.
+.
 .TP
 .RB \(bu " .RE" " doesn't move the inset back to the expected level."
 .TQ
-\(bu warning: scaling indicator invalid in context
+\(bu warning: scaling unit invalid in context
 .TQ
 \(bu warning: register \(aqan\-saved\-margin\c
 .IR n "\(aq not defined"
@@ -3562,7 +3652,7 @@ as an argument;
 the
 .B .RE
 macro's argument is a specific
-.IR "inset level" .
+.I inset level.
 .
 .B .RE\~1
 goes to the level before any
@@ -3597,13 +3687,15 @@ is used again.
 .
 .
 .TP
-\(bu Do I need to keep typing the indent in a series of \c
+\(bu Do I need to keep typing the indentation in a series of \c
 .BR .IP " calls?"
 .
-You don't need to if you don't want to change the indentation.
+Not if you don't want to change it.
 .
 Review subsection \(lqHorizontal and vertical spacing\(rq above.
 .
+.br
+.ne 4v
 .TS
 c c
 lfCB lfCB.
@@ -3629,26 +3721,75 @@ implemented,
 and documented the AT&T
 .I man
 macros,
-using them when he edited the first volume of the Version 7 Unix manual,
+employing them to edit the first volume of the Seventh Edition Unix
+manual,
 a compilation of all man pages supplied by the system.
 .
 .
 .P
 The GNU version of the
 .I man
-macro package was written by James Clark and contributors.
+macro package was written by James Clark;
+he added the
+.BR C ,
+.BR D ,
+.BR P ,
+and
+.B X
+registers. \" sometime before 1.02
 .
-The extension macros were written by
 .MT wl@\:gnu\:.org
 Werner Lemberg
-.ME ,
+.ME
+supplied the
+.B S \" 1.16
+and
+.B cR \" 1.17
+registers.
+.
+.MT kollar@\:alltel\:.net
+Larry Kollar
+.ME
+added the
+.BR FT ,
+.BR HY ,
+and
+.B SN
+registers;
+the
+.B HF
+string;
+and the
+.B PT
+and
+.B BT
+macros.
+.
+.MT g.branden\:.robinson@\:gmail\:.com
+G.\& Branden Robinson
+.ME
+implemented the
+.B AD
+and
+.B MF
+strings;
+.BR CS ,
+.BR CT ,
+and
+.B U
+registers;
+and the
+.B MR
+macro. \" all 1.23
+.
+.
+The extension macros were written by
+Lemberg,
 .MT esr@\:thyrsus\:.com
 Eric S.\& Raymond
 .ME ,
 and
-.MT g.branden\:.robinson@\:gmail\:.com
-G.\& Branden Robinson
-.ME .
+Robinson. \" 1.23: the MR for non-groffs
 .
 .
 .P

@@ -341,7 +341,7 @@ static char *get_image_generator(void)
       if(!(' ' == *cursor) || ('\t' == *cursor))
 	continue;
       cursor++;
-      while((cursor < end) && (' ' == *cursor) || ('\t' == *cursor))
+      while((cursor < end) && ((' ' == *cursor) || ('\t' == *cursor)))
 	cursor++;
       if (cursor == end)
 	continue;

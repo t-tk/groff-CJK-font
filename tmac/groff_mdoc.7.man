@@ -1397,7 +1397,7 @@ logical,
 or quotation character sequences:
 .
 .Bd -literal -offset indent-two
-{+,\-,/,*,%,<,>,<=,>=,=,==,&,`,',"}
+{+,\-,/,*,%,<,>,<=,>=,=,==,&,\[ga],\[aq],"}
 .Ed
 .
 .
@@ -2410,10 +2410,14 @@ Part 2: Shell and Utilities
 X/Open
 .Pp
 .Bl -tag -width ".Li \-p1003.1g\-2000" -compact -offset indent
+.It Li \-susv1
+.St -susv1
 .It Li \-susv2
 .St -susv2
 .It Li \-susv3
 .St -susv3
+.It Li \-susv4
+.St -susv4
 .It Li \-svid4
 .St -svid4
 .It Li \-xbd5
@@ -2846,8 +2850,8 @@ Examples of quoting:
 .Dq
 .It Li ".Dq string abc ."
 .Dq string abc .
-.It Li ".Dq \'^[A\-Z]\'"
-.Dq \'^[A-Z]\'
+.It Li ".Dq \[aq]\[rs][ha][A\-Z]\[aq]"
+.Dq '\[ha][A-Z]'
 .It Li ".Ql man mdoc"
 .Ql man mdoc
 .It Li .Qq
@@ -4596,7 +4600,7 @@ String	7-bit	8-bit	UCS	Prefer	Meaning
 >=	>=  	>=	\*[>=]	\[rs](>=	greater than or equal to
 Rq	"  	"	\*[Rq]	\[rs](rq	right double quote
 Lq	"  	"	\*[Lq]	\[rs](lq	left double quote
-ua	^   	^	\*[ua]	\[rs](ua	vertical arrow up
+ua	\[ha]	\[ha]	\*[ua]	\[rs](ua	vertical arrow up
 aa	\[aq]	\'	\*[aa]	\[rs](aa	acute accent
 ga	\`  	\`	\*[ga]	\[rs](ga	grave accent
 q 	\&" 	\&"	\*[q] 	\[rs](dq	neutral double quote
@@ -4782,10 +4786,16 @@ both registers default to 78n for terminal devices and 6.5i otherwise.
 .
 .
 .Pp
-Hyphenation can be disabled with the
+Normally,
+automatic hyphenation is enabled using a mode appropriate to the
+.Nm groff
+locale;
+see section \[lq]Localization\[lq] of
+.Xr groff @MAN7EXT@ .
+.
+It can be disabled by setting the
 .Ql HY
-register
-(though any permissible hyphenation mode may be used).
+register to zero.
 .
 .
 .Pp
@@ -4868,14 +4878,15 @@ Section 3f has not been added to the header routines.
 .
 .
 .Pp
-.Ql \&.Nm
-font should be changed in
+The font used by
+.Ql .Nm
+should be changed in the
 .Em Name
 section.
 .
 .
 .Pp
-.Ql \&.Fn
+.Ql .Fn
 needs to have a check to prevent splitting up the line if its length is
 too short.
 .

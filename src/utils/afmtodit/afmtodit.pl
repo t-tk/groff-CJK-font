@@ -1,4 +1,4 @@
-#! /usr/bin/perl -w
+#! /usr/bin/env perl
 # -*- Perl -*-
 # Copyright (C) 1989-2020 Free Software Foundation, Inc.
 #      Written by James Clark (jjc@jclark.com)
@@ -10,14 +10,15 @@
 # Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# groff is distributed in the hope that it will be useful, but WITHOUT ANY
-# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# groff is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 # FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 # for more details.
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+use warnings;
 use strict;
 
 @afmtodit.tables@
@@ -33,22 +34,25 @@ getopts('a:cd:e:f:i:kmno:svx');
 our ($opt_a, $opt_c, $opt_d, $opt_e, $opt_f, $opt_i, $opt_k,
      $opt_m, $opt_n, $opt_o, $opt_s, $opt_v, $opt_x);
 
+my $afmtodit_version = "GNU afmtodit (groff) version @VERSION@";
+
 if ($opt_v) {
-    print "GNU afmtodit (groff) version @VERSION@\n";
+    print "$afmtodit_version\n";
     exit 0;
 }
 
 if ($#ARGV != 2) {
-    die "usage: $prog [-ckmnsx] [-a ANGLE] [-d DESC-FILE]" .
-	" [-e ENCODING] [-f NAME] [-i N]\n" .
-	" [-o OUT-FILE] AFM-FILE MAP-FILE FONT\n" .
+    die "usage: $prog [-ckmnsx] [-a slant]" .
+	" [-d device-description-file] [-e encoding-file]" .
+	" [-f internal-name] [-i italic-correction-factor]" .
+	" [-o output-file] afm-file map-file font-description-file\n" .
 	"usage: $prog -v\n";
 }
 
 my $afm = $ARGV[0];
 my $map = $ARGV[1];
-my $font = $ARGV[2];
-my $outfile = $opt_o || $font;
+my $fontfile = $ARGV[2];
+my $outfile = $opt_o || $fontfile;
 my $desc = $opt_d || "DESC";
 my $sys_map = $groff_sys_fontdir . "/devps/generate/" . $map;
 my $sys_desc = $groff_sys_fontdir . "/devps/" . $desc;
@@ -420,8 +424,7 @@ foreach my $lig (sort keys %default_ligatures) {
 open(FONT, ">$outfile") || die "$prog: can't open '$outfile' for output: $!\n";
 select(FONT);
 
-print("# This file has been generated with " .
-      "GNU afmtodit (groff) version @VERSION@\n");
+print("# This file was generated with $afmtodit_version.\n");
 print("#\n");
 print("#   $fullname\n") if defined $fullname;
 print("#   $version\n") if defined $version;
@@ -444,7 +447,10 @@ if ($opt_c) {
 
 print("\n");
 
-print("name $font\n");
+my $name = $fontfile;
+$name =~ s@.*/@@;
+
+print("name $name\n");
 print("internalname $psname\n") if $psname;
 print("special\n") if $opt_s;
 printf("slant %g\n", $italic_angle) if $italic_angle != 0;
@@ -592,7 +598,12 @@ for (my $i = 0; $i <= $#encoding; $i++) {
 }
 
 sub conv {
-    $_[0]*$unitwidth*$resolution/(72*1000*$sizescale) + ($_[0] < 0 ? -.5 : .5);
+    $_[0]*$unitwidth*$resolution/(72*1000*$sizescale) +
+      ($_[0] < 0 ? -.5 : .5);
 }
 
-# eof
+# Local Variables:
+# fill-column: 72
+# mode: CPerl
+# End:
+# vim: set cindent noexpandtab shiftwidth=2 softtabstop=2 textwidth=72:

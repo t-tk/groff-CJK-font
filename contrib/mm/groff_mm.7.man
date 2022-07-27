@@ -97,7 +97,7 @@ is designed to be easily localized.
 .
 For languages other than English,
 strings that can appear in output are collected in the file
-.IR @MACRODIR@/ xx .tmac ,
+.IR @MACRODIR@/\: xx \:.tmac ,
 where
 .I xx
 is an ISO\~639 two-letter language identifier.
@@ -113,16 +113,16 @@ not
 .P
 This package can also be localized by site or territory;
 for example,
-.I \%@MACRODIR@/\:@TMAC_M_PREFIX@mse\:.tmac
+.I @MACRODIR@/\:@TMAC_M_PREFIX@mse\:.tmac
 illustrates how to adapt the output to a national standard using its ISO
 3166 territory code.
 .
 Such a package can define a string that causes a macro file
-.IR \%@MACRODIR@/\:mm/\: territory _locale
+.IR @MACRODIR@/\:mm/\:\% territory _locale
 to be loaded at package initialization.
 .
 If this mechanism is not used,
-.I \%@MACRODIR@/\:mm/\:locale
+.I @MACRODIR@/\:mm/\:\%locale
 is loaded instead.
 .
 No diagnostic is produced if these files do not exist.
@@ -187,7 +187,8 @@ sequence as follows.
 .P
 .IR i \~can
 be negative;
-it combines algebraically with the sign in the interpolation escape.
+it combines algebraically with the sign in the interpolation escape
+sequence.
 .
 .
 .P
@@ -238,7 +239,7 @@ Defining a string with the same name as an
 macro is not supported and may cause incorrect rendering,
 the emission of diagnostic messages,
 and an error exit status from
-.IR \%@g@troff .
+.IR @g@troff .
 .
 .
 .\" ====================================================================
@@ -299,7 +300,7 @@ In
 the fonts
 (or rather,
 font styles)
-.BR R \~(normal),
+.BR R \~(roman),
 .BR I \~(italic),
 and
 .BR B \~(bold)
@@ -736,7 +737,7 @@ of a document.
 The argument
 .I style
 is used to construct the file name
-.IR @TMAC_MDIR@/ style .cov
+.IR @TMAC_MDIR@/\: style \:.cov
 and load it with the
 .B mso
 request.
@@ -1149,7 +1150,7 @@ must be inside of a
 pair, except if
 .B EQ
 is used to set options for
-.I \%@g@eqn
+.I @g@eqn
 only.
 .
 The
@@ -2383,7 +2384,7 @@ Memorandum type.
 The argument
 .I number
 is used to construct the file name
-.IR @TMAC_MDIR@/ number .MT
+.IR @TMAC_MDIR@/\:\% number \:.MT
 and load it with the
 .B mso
 request.
@@ -3131,7 +3132,9 @@ It must be scaled, like
 .
 .RS
 .IP
+.EX
 \&.ds Ci .25i .5i .75i 1i 1i
+.EE
 .RE
 .
 .IP
@@ -4296,6 +4299,14 @@ implementation of the memorandum macros.
 .I @MACRODIR@/mm.tmac
 is wrapper to load
 .IR m.tmac .
+.
+.
+.TP
+.I @MACRODIR@/refer\-mm.tmac
+implements
+.MR @g@refer @MAN1EXT@
+support for
+.IR mm .
 .
 .
 .TP

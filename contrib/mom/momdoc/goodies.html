@@ -1571,67 +1571,149 @@ with <kbd>.CENTER_BLOCK/.CENTER_BLOCK OFF</kbd> (or <kbd>QUIT</kbd>,
 </div>
 <br/>
 <div class="box-macro-args">
-Macro: <b>LEFT_HANG</b> <kbd class="macro-args">&lt;character&gt;</kbd>
+Macro: <b>LEFT_HANG</b> <kbd class="macro-args">&lt;character&gt; [ &lt;gutter&gt;</kbd> ]
 </div>
+<p class="requires">
+&bull;&nbsp;left-hung characters
+</p>
 
 <div class="box-macro-args" style="margin-top: 1em">
 Inline: <b>\*[HANG <kbd class="macro-args">&lt;character&gt;</kbd>]</b>
 </div>
-
-
-<p>
-LEFT_HANG hangs its argument to the left of the left margin.
-If enclosed in double-quotes, the argument may contain local
-horizontal motions.
+<p class="requires">
+&bull;&nbsp;right-hung characters
 </p>
 
 <p>
-Input text after LEFT_HANG must begin by repeating the text of the
-argument, including horizontal motions.  If the hung character is
-a left double-quote, <kbd>\[lq]</kbd> must be used in the argument
-and the usual keyboard double-quote (<kbd>"</kbd>) used for the
-input text so as not to confuse SMARTQUOTES.
+Hung characters, frequently punctuation, fall outside the left or
+right margin.  Their purpose is usually to fine-tune justification.
+Consider the following:
+<table style="margin-left: 3%; margin-right: 6%; text-align: justify">
+<tr>
+<td style="padding-right: 1em">
+&#8220;Play the man, Master Ridley; we
+shall this day light such a candle,
+by God's grace, in England, as I
+trust shall never be put out.&#8221;
+</td>
+<td>
+&nbsp;&nbsp;
+</td>
+<td style="margin-right: 0; padding-right: 0">
+&#8220;
+<br/>
+<br/>
+<br/>
+<br/>
+</td>
+<td style="margin-left: 0; padding-left: 0">
+Play the man, Master Ridley; we
+shall this day light such a candle,
+by God's grace, in England, as I
+trust shall never be put out.&#8221;</td>
+</td>
+</tr>
+</table>
 </p>
 
 <p>
+In the right hand example, the opening double-quote hangs outside
+the left margin, creating a uniform left margin for the text.
+</p>
+
+<h4 class="docs">Left hung characters</h4>
+
+<p>
+LEFT_HANG hangs its first argument, the character to be hung, to
+the left of the left margin.  The optional second argument lets you
+specify an amount of space to insert between the hung character and
+the text.
+</p>
+
+<p>
+Input text after LEFT_HANG must begin with the character to be hung
+PLUS a
+<a href="inlines.html#inline-horizontal-mom">horizontal motion</a>
+corresponding to <kbd>&lt;gutter&gt;</kbd> if one was given.
+If the hung character is a left double-quote, <kbd>\[lq]</kbd>
+must be used as the argument to LEFT_HANG and the usual keyboard
+double-quote (<kbd>"</kbd>) entered as the input text so as not to
+confuse
+<a href="goodies.html#smartquotes">SMARTQUOTES</a>
 The following example demonstrates:
 <br>
 <span class="pre-in-pp">
-  .LEFT_HANG "\[lq]\*[FU3]"
-  "\*[FU3]This line will have its opening double-quote
-  plus three kern units of space hung outside the
-  left margin."
+  .LEFT_HANG \[lq] 1p
+  "\*[FWD 1p]This line will have its opening double-quote
+  plus one point of space hung outside the left margin."
 </span>
 </p>
 
 <p style="margin-top: -1em">
-The <kbd>\*[HANG]</kbd> inline escape hangs its single-character
-argument, typically a punctuation mark, outside the right margin of
-justified copy, like this:
-<br>
-<span class="pre-in-pp">
-  This line will have its closing period hung outside
-  the right margin\*[HANG .]
-</span>
-For the exceptionally fussy, <kbd><nobr>\*[HANG]</nobr></kbd> may
-also be used with centred text to centre the text visually without
-taking the hung punctuation into account.
+Note that what follows LEFT_HANG must be an input line and therefore
+it cannot be used to left-hang a
+<a href="docelement.html#heading">HEADING</a>
+character.
 </p>
 
+<div class="box-tip">
+<p class="tip">
+<span class="important">Important:</span>
+Versions of mom lower than 2.5_a that included LEFT_HANG required
+that the character and its gutter be entered as a single,
+concatenated argument, using horizontal motions to establish the
+gutter
+(e.g.
+<a href="inlines.html#inline-horizontal-mom">FWD</a>,
+<a href="inlines.html#inline-horizontal-mom">BCK</a>).
+Documents created with versions prior to 2.5_a may have to be
+updated.
+</p>
+</div>
+
+<h4 class="docs">Right hung characters</h4>
+
 <p>
+The <kbd>\*[HANG&nbsp;c]</kbd> inline escape hangs its argument outside
+the right margin of justified or quad right copy.  The argument may
+be a single character, or a single character preceded by a
+horizontal motion, effectively establishing a gutter between the
+right margin and the hung character:
+<br>
+<span class="pre-in-pp" style="margin-bottom: .25em">
+  This line will have its closing period hung outside
+  the right margin with a one point gutter\*[HANG \*[FWD 1p].]
+</span>
 If the hung character is a right double-quote, <kbd>"\[rq]"</kbd>
-must be used as the argument (that is, the <kbd>\[rq]</kbd> character surrounded
-by double-quotes).  The double-quotes are required for all special
-characters of the form <kbd>\[xx]</kbd>.
+must be used as the argument (that is, the <kbd>\[rq]</kbd>
+character surrounded by double-quotes).  The double-quotes are
+required for all special characters of the form
+<kbd style="whitespace: nowrap">\[name]</kbd>.
+Horizontal motion, if any, must fall inside the double-quotes:
+<br>
+<span class="pre-in-pp">
+   ...and they all lived happily ever after.\*[HANG "\*[FWD 1p]\[rq]"]
+</span>
 </p>
 
 <p>
 If the hung character is a hyphen,
-<kbd><nobr>\*[HANG&nbsp;-]</nobr></kbd> must come at the end of an
+<kbd style="whitespace: nowrap"><nobr>\*[HANG&nbsp;-]</nobr></kbd>
+must come at the end of an
 <a href="definitions.html#inputline">input line</a>.
-All other characters may be used mid-line if groff breaks the line
-naturally at the point the hung character is introduced.
+This restriction does not apply to other characters, which may come
+anywhere in an input line provided that, on output, the line breaks
+at the point you introduced the hung character.
 </p>
+
+<p>
+For the exceptionally fussy, <kbd>\*[HANG]</kbd> may also be used to
+improve visual centring; when text is centred, <kbd
+style="whitespace: nowrap">\*[HANG&nbsp;c]</kbd>
+hangs the character to the right of the centred line instead of the
+margin.
+</p>
+
 <div class="rule-long"><hr/></div>
 
 <!-- Navigation links -->

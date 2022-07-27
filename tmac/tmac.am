@@ -46,13 +46,13 @@ TMACNORMALFILES = \
   tmac/papersize.tmac \
   tmac/62bit.tmac \
   tmac/ec.tmac \
-  tmac/safer.tmac \
   tmac/trace.tmac \
   tmac/ps.tmac \
   tmac/psold.tmac \
   tmac/pdfpic.tmac \
   tmac/pspic.tmac \
   tmac/psatk.tmac \
+  tmac/ptx.tmac \
   tmac/pdf.tmac \
   tmac/dvi.tmac \
   tmac/tty.tmac \
@@ -62,7 +62,6 @@ TMACNORMALFILES = \
   tmac/latin5.tmac \
   tmac/latin9.tmac \
   tmac/cp1047.tmac \
-  tmac/unicode.tmac \
   tmac/X.tmac \
   tmac/Xps.tmac \
   tmac/lj4.tmac \
@@ -174,6 +173,7 @@ tmac_TESTS = \
   tmac/tests/an_no-break-after-short-paragraph-tags.sh \
   tmac/tests/an_page-footers-present.sh \
   tmac/tests/an_page-header-has-current-data.sh \
+  tmac/tests/an_reset-hyphenation-correctly.sh \
   tmac/tests/an_title-abbreviation-works.sh \
   tmac/tests/andoc_clear-doc-traps.sh \
   tmac/tests/andoc_flush-between-packages.sh \
@@ -184,21 +184,33 @@ tmac_TESTS = \
   tmac/tests/doc_accept-mixed-case-section-headings.sh \
   tmac/tests/doc_do-not-loop-infinitely-when-shortening-headers.sh \
   tmac/tests/doc_smoke-test.sh \
+  tmac/tests/e_chapter-titles-work.sh \
   tmac/tests/e_columns-work-on-long-pages.sh \
+  tmac/tests/e_delayed-text-marks-work.sh \
+  tmac/tests/e_footnote-marks-work.sh \
   tmac/tests/e_footnotes-work-with-columns.sh \
+  tmac/tests/e_ld-works.sh \
+  tmac/tests/e_line-numbering-works.sh \
+  tmac/tests/e_rejects-too-short-page-lengths.sh \
+  tmac/tests/localization-works.sh \
+  tmac/tests/pdfpic_does-not-choke-on-bad-pdfinfo-output.sh \
+  tmac/tests/pdfpic_falls-back-to-PSPIC.sh \
   tmac/tests/s_IP-indents-using-paragraph-type-size.sh \
   tmac/tests/s_IP-respects-inter-sentence-space-in-tags.sh \
   tmac/tests/s_PN-works.sh \
   tmac/tests/s_R-handles-its-arguments.sh \
   tmac/tests/s_SH-resets-IP-indentation-amount.sh \
-  tmac/tests/s_TC-works-with-percent-in-custom-titles.sh
+  tmac/tests/s_TC-works-with-percent-in-custom-titles.sh \
+  tmac/tests/s_XA-literal-no-argument-suppresses-leader.sh \
+  tmac/tests/s_rejects-too-short-page-lengths.sh
 TESTS += $(tmac_TESTS)
 EXTRA_DIST += $(tmac_TESTS)
 
 tmac_XFAIL_TESTS = \
   tmac/tests/an-ext_ME-punct-hyphenates.sh \
   tmac/tests/an-ext_UE-punct-hyphenates.sh \
-  tmac/tests/an-ext_UE-breaks-before-long-URIs.sh
+  tmac/tests/an-ext_UE-breaks-before-long-URIs.sh \
+  tmac/tests/e_footnotes-work-with-columns.sh
 XFAIL_TESTS += $(tmac_XFAIL_TESTS)
 
 tmac/www.tmac: tmac/www.tmac.in
@@ -210,7 +222,7 @@ tmac/www.tmac: tmac/www.tmac.in
 
 # Check input file for bare m4 keywords.
 M4WORDS = define|divert|include|index|shift|undefine|undivert
-M4CHECK = tmac/check-groff_man-stamp
+M4CHECK = tmac/groff_man-passed-check-for-m4-keywords-stamp
 
 $(M4CHECK): tmac/groff_man.7.man.in
 	$(AM_V_at)! $(EGREP) \

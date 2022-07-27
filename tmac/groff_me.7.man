@@ -92,41 +92,107 @@ formatter as well as those descended from AT&T
 .
 .
 .P
-Many
-.I roff
-requests are unsafe in conjunction with this package; however, the
-following requests may be used with impunity after the first
-.B pp
-macro call.
+Some formatter requests are unsafe in conjunction with this package;
+however,
+the following may be used with impunity after the first call to a
+paragraphing macro like
+.B lp
+or
+.BR pp .
 .
+Some arguments are optional;
+see
+.MR groff @MAN7EXT@
+for details,
+particularly of requests whose argument list is designated with an
+ellipsis.
+.
+An asterisk
+.B *
+marks
+.I groff
+extensions.
+.
+.
+.P
 .TS
-l l.
-\fB.bp\fP	begin new page
-\fB.br\fP	break output line here
-\fB.sp\fP \fIn\fP	insert \fIn\fP spacing lines
-\fB.ls\fP \fIn\fP	(line spacing) \fIn\fP=1 single, \fIn\fP=2 double
-\fB.na\fP	no alignment of right margin
-\fB.ce\fP \fIn\fP	center next \fIn\fP lines
-\fB.ul\fP \fIn\fP	underline next \fIn\fP lines
+Lb1 Li L.
+ad	c	set text adjustment mode to \fIc
+af	r f	assign format \fIf\fP to register \fIr
+am	m e	append to macro \fIm\fP until \fIe\fP called
+as	s t	append rest of line \fIt\fP to string \fIs
+bp	n	begin new page numbered \fIn
+br	\&	break output line
+ce	n	center next \fIn\fP output lines
+cp	n	en-/disable AT&T \fItroff\fP compatibility mode\fB*
+de	m e	define macro \fIm\fP until \fIe\fP called
+do	t	interpret input \fIt\fP with compatibility mode off\fB*
+ds	s t	define rest of line \fIt\fP as string \fIs
+el	t	interpret \fIt\fP if corresponding \fBie\fP false
+fc	c d	set field delimiter \fIc\fP and padding glyph \fId
+fi	\&	enable filling
+hc	c	set hyphenation character to \fIc
+hy	m	set automatic hyphenation mode to \fIm
+ie	p t	as \fBif\fP, but enable interpretation of later \fBel
+if	p t	if condition \fIp\/\fP, interpret rest of line \fIt
+in	h	set indentation to distance \fIh\fP
+lc	c	set leader repetition glyph to \fIc
+ls	n	set line spacing to \fIn
+mc	c h	set (right) margin glyph to \fIc\fP at distance \fIh
+mk	r	mark vertical position in register \fIr\fP
+na	\&	disable adjustment of text
+ne	v	need vertical space of distance \fIv
+nf	\&	disable filling
+nh	\&	disable automatic hyphenation
+nr	r n i	assign register \fIr\fP value \fIn\fP with \
+auto-increment \fIi
+ns	\&	begin no-space mode
+pl	v	set page length to \fIv
+pn	n	set next page number to \fIn
+po	h	set page offset to \fIh
+rj	n	right-align next \fIn\fP output lines\fB*
+rm	m	remove macro, string, or request \fIm
+rn	m n	rename macro, string, or request \fIm\fP to \fIn
+rr	r	remove register \fIr
+rs	\&	resume spacing (end no-space mode)
+rt	v	return to vertical position set by \fBmk\fP, or \fIv
+so	f	source (interpolate) input file \fIf
+sp	n	insert \fIn\fP lines of vertical space
+ta	\fR.\|.\|.	set tab stops
+tc	c	set tab repetition glyph to \fIc
+ti	h	set temporary indentation (next line only) to \fIh
+tl	\fR.\|.\|.	output three-part title
+tr	\fR.\|.\|.	translate characters
+ul	n	underline next \fIn\fP output lines
 .TE
 .
 .
 .P
-.I Note:
-In contrast to its behavior with other macro packages and \(lqraw\(rq
-.IR roff ,
-when using the
+Except on title pages
+(produced by calling
+.BR tp ),
 .I me
-package,
+suppresses the output of vertical space at the tops of pages;
 the
-.B .sp
-request
-(redefined by
+.B sp
+request will thus not work there.
+.
+You can instead call
+.B bl
+or enclose the desired spacing request in a diversion,
+for instance by calling
+.B (b
+and
+.BR )b .
+.
 .I me
-as a macro)
-will
-.I not
-put space at the top of a page.
+also intercepts the
+.B ll
+request;
+see the
+.RI \[lq] me
+Reference Manual\[rq]
+for details.
 .
 .
 .P
@@ -142,357 +208,245 @@ is acceptable as input.
 .
 .
 .\" ====================================================================
-.SS "Macro reference"
+.SS "Name space"
 .\" ====================================================================
 .
-Numeric arguments to macros are denoted with lowercase letters and
-string arguments with uppercase.
+Objects in
+.I me
+follow a rigid naming convention.
 .
-An optional macro argument such as
-.I x
-appears in brackets,
-.BI [ x ].
+To avoid conflict,
+any user-defined register,
+string,
+or macro
+names should be single numerals or uppercase letters,
+or any longer sequence of letters and numerals
+with at least one uppercase letter.
 .
-Arguments to macros generally must be quoted if they contain spaces or
-tabs.
+(For portability betwen BSD and
+.I groff
+.IR me ,
+limit names to
+two characters,
+and avoid the name
+.B [
+(left square bracket).)
 .
-An exception is the argument to header and footer macros,
-which require some explanation.
-.
-They take the form
-.RI \(lq c
-.I left c middle c right
-.IR c \(rq,
-with spaces added here for clarity.
-.
-The strings
-.IR left ,
-.IR middle ,
-and
-.I right
-correspond to their page placement and can contain unprotected
-spaces and/or tabs,
-but must not contain the (non-space) character
-.IR c ,
-which delimits them.
-.
-For brevity,
-the table presents header and footer arguments as
-.IR clcmcrc .
-.
-Popular choices for
-.I c
-are the neutral apostrophe
-.RB \(lq \(aq \(rq
-and the neutral double quote
-.RB \(lq \(dq \(rq.
+The names employed
+by any preprocessors in use
+should also not be repurposed.
 .
 .
-.P
-This list is incomplete;
-some requests are too complex to summarize in a table,
-and some that are listed below accept additional arguments not shown.
+.\" ====================================================================
+.SS Macros
+.\" ====================================================================
 .
-See the \[lq]\-me Reference Manual\[rq] for further details.
-.
-.
-.P
-.ne 3v \" Keep at least the first entry together with the heading.
+.ne 2v \" Keep at least the first entry together with the heading.
 .TS
-lB lB lB lBx
-lB lB lB lBx
-lB l l lx.
-Macro	Initial	Causes	Explanation
-\^	Value	Break	\^
-_
-\&.(c	\-	yes	T{
-Begin centered block.
-T}
-\&.(d	\-	no	T{
-Begin delayed text.
-T}
-\&.(f	\-	no	T{
-Begin footnote.
-T}
-\&.(l	\-	yes	Begin list.
-\&.(q	\-	yes	T{
-Begin major quote.
-T}
-\&.(x \fR[\fIX\fP]	\-	no	T{
-Begin item in index (named
-.IR X ).
-T}
-\&.(z	\-	no	T{
-Begin floating keep.
-T}
-\&.)c	\-	yes	T{
-End centered block.
-T}
-\&.)d	\-	yes	T{
-End delayed text.
-T}
-\&.)f	\-	yes	T{
-End footnote.
-T}
-\&.)l	\-	yes	End list.
-\&.)q	\-	yes	T{
-End major quote.
-T}
-\&.)x	\-	yes	T{
-End index item.
-T}
-\&.)z	\-	yes	T{
-End floating keep.
-T}
-\&.++ \fIM\fP \fR[\fIclcmcrc\fP]	\-	no	T{
-Define paper section as
-.IR M ,
-which must be one of
-.B C
-(chapter),
-.B A
-(appendix),
-.B P
-(preliminary, i.e., front matter or table of contents),
-.B AB
-(abstract),
-.B B
-(bibliography),
-.B RC
-(chapters renumbered from page one each chapter),
-or
-.B RA
-(appendix renumbered from page one)
-(and set page header to
-.IR clcmcrc ).
-T}
-\&.+c \fR[\fIT\fP]	\-	yes	T{
-Begin chapter (or appendix, etc., as set by
-.BR .++ )
-(with title
-.IR T ).
-T}
-\&.1c	1	yes	T{
-One-column format on a new page.
-T}
-\&.2c	1	yes	T{
-Two-column format.
-T}
-\&.EN	\-	yes	T{
-Space after equation
-produced by
-.I eqn
-or
-.IR neqn .
-T}
-\&.EQ \fR[\fIM\fP [\fIT\fP]]	\-	yes	T{
-Begin displayed equation (with indentation
-.IR M ,
-which must be one of
-.B C
-(centered, default),
-.B I
-(indented),
-or
-.B L
-(justified left) (and title
-.I T
-in right margin)).
-T}
-\&.GE	\-	yes	T{
-End \fIgrn\fP picture,
-leaving the current position at the bottom of the picture.
-T}
-\&.GF	\-	yes	T{
-End \fIgrn\fP picture,
-leaving the current position at the top of the picture.
-T}
-\&.GS	\-	yes	T{
-Begin \fIgrn\fP picture.
-T}
-\&.IE	\-	yes	T{
-End \fIideal\fP picture,
-leaving the current position at the bottom of the picture.
-T}
-\&.IF	\-	yes	T{
-End \fIideal\fP picture,
-leaving the current position at the top of the picture.
-T}
-\&.IS	\-	yes	T{
-Begin \fIideal\fP picture.
-T}
-\&.PE	\-	yes	T{
-End \fIpic\fP picture,
-leaving the current position at the bottom of the picture.
-T}
-\&.PF	\-	yes	T{
-End \fIpic\fP picture,
-leaving the current position at the top of the picture.
-T}
-\&.PS	\-	yes	T{
-Begin \fIpic\fP picture.
-T}
-\&.TE	\-	yes	T{
-End
-.I tbl
-table.
-T}
-\&.TH	\-	yes	T{
-End heading of
-.I tbl
-table.
-T}
-\&.TS \fR[\fBH\fP]	\-	yes	T{
-Begin
-.I tbl
-table; if
-.BR H ,
-table repeats heading on each page.
-T}
-\&.b \fR[\fIX\fP [\fIY\fP]]	\-	no	T{
-Print
-.I X
-in bold (appending
-.I Y
-in the previous font); if no arguments, switch to bold.
-T}
-\&.ba \fIn\fP	0	yes	T{
-Augment the base indent (for regular text, like paragraphs)
-by
-.IR n .
-T}
-\&.bc	\-	yes	T{
-Begin new column.
-T}
-\&.bi \fR[\fIX\fP [\fIY\fP]]	\-	no	T{
-Print
-.I X
-in bold italics (appending
-.I Y
-in the previous font); if no arguments, switch to bold italics.
-T}
-\&.bu	\-	yes	T{
-Begin bulleted paragraph.
-T}
-\&.bx \fR[\fIX\fP [\fIY\fP]]	\-	no	T{
-Print \fIX\fP in a box (with Y appended).
-Renders reliably only if filling disabled.
-T}
-\&.ef \fIclcmcrc\fP	""""	no	T{
-Set even-numbered page footer.
-T}
-\&.eh \fIclcmcrc\fP	""""	no	T{
-Set even-numbered page header.
-T}
-\&.fo \fIclcmcrc\fP	""""	no	T{
-Set page footer.
-T}
-\&.hx	\-	no	T{
-Suppress headers and footers on next page.
-T}
-\&.he \fIclcmcrc\fP	""""	no	T{
-Set page header.
-T}
-\&.hl	\-	yes	T{
-Draw a horizontal line.
-T}
-\&.i \fR[\fIX\fP [\fIY\fP]]	\-	no	T{
-Print
-.I X
-in italics (appending
-.I Y
-in the previous font); if no arguments, switch to italics.
-T}
-\&.ip \fR[\fIX\fP [\fIn\fP]]	\fIn\fP=5n	yes	T{
-Start indented paragraph (with hanging tag
-.I X
-(and indentation
-.IR n )).
-T}
-\&.lp	\-	yes	T{
-Begin paragraph with first line flush left.
-T}
-\&.n1	\-	no	T{
-Number lines from one,
-in margin,
-on each page.
-T}
-\&.n2 \fR[\fIN\fP]	\-	no	T{
-Number lines from \fIN\fP,
-in margin.
+Lb L.
+$0	post-section heading hook
+$1	pre-section depth 1 hook
+$2	pre-section depth 2 hook
+$3	pre-section depth 3 hook
+$4	pre-section depth 4 hook
+$5	pre-section depth 5 hook
+$6	pre-section depth 6 hook
+$C	post-chapter title hook
+$H	page/column heading hook
+$c	output chapter number and title
+$f	output footer
+$h	output header
+$p	output section heading
+$s	output footnote area separator
+(b	begin block
+(c	begin centered block
+(d	begin delayed text
+(f	begin footnote
+(l	begin list
+(q	begin long quotation
+(x	begin index entry
+(z	begin floating keep
+)b	end block
+)c	end centered block
+)d	end delayed text
+)f	end footnote
+)l	end list
+)q	end long quotation
+)x	end index entry
+)z	end floating keep
+++	set document segment type
++c	begin chapter
+1c	end multi-column layout
+2c	begin multi-column layout
+EN	end \fI@g@eqn\fP equation
+EQ	begin \fI@g@eqn\fP equation
+GE	end \fI@g@grn\fP picture with drawing position at bottom
+GF	end \fI@g@grn\fP picture with drawing position at top
+GS	start \fI@g@grn\fP picture
+IE	end \fIideal\fP picture with drawing position at bottom
+IF	end \fIideal\fP picture with drawing position at top
+IS	start \fIideal\fP picture
+PE	end \fI@g@pic\fP picture with drawing position at bottom
+PF	end \fI@g@pic\fP picture with drawing position at top
+PS	start \fI@g@pic\fP picture
+TE	end \fI@g@tbl\fP table
+TH	end heading for multi-page \fI@g@tbl\fP table
+TS	start \fI@g@tbl\fP table
+b	embolden argument
+ba	set base indentation
+bc	begin new column
+bi	embolden and italicize argument
+bx	box argument
+ef	set even-numbered page footer
+eh	set even-numbered page header
+ep	end page
+fo	set footer
+he	set header
+hl	draw horizontal line
+hx	suppress next page's headers/footers
+i	italicize argument
+ip	begin indented paragraph
+ld	reset localization and date registers and strings\fB*
+ll	set line length
+lp	begin fully left-aligned paragraph
+np	begin numbered paragraph
+of	set odd-numbered page footer
+oh	set odd-numbered page header
+pd	output delayed text
+pp	begin first-line indented paragraph
+q	quote argument
+r	set argument in roman
+re	reset tab stops
+sh	begin numbered section
+sm	set argument at smaller type size
+sx	change section depth
+sz	set type size and vertical spacing
+tp	begin title page
+u	underline argument
+uh	begin unnumbered section
+xl	set line length (local)
+xp	output index
+.TE
 .
-Stop numbering if \fIN\fP missing;
-resume where stopped with number \fIN\fP if unsigned,
-or resume with number incremented by \(+-\fIN\fP.
-T}
-\&.np	1	yes	T{
-Start numbered paragraph.
-T}
-\&.of \fIclcmcrc\fP	""""	no	T{
-Set odd-numbered page footer.
-T}
-\&.oh \fIclcmcrc\fP	""""	no	T{
-Set odd-numbered page header.
-T}
-\&.pd	\-	yes	T{
-Print delayed text.
-T}
-\&.pp	\-	yes	T{
-Begin paragraph with indented first line.
-T}
-\&.r \fR[\fIX\fP [\fIY\fP]]	\-	no	T{
-Print
-.I X
-in roman (appending
-.I Y
-in the previous font); if no arguments, switch to roman.
-T}
-\&.re	0.5i	no	T{
-Reset tabs to default values.
-T}
-\&.sh \fR[\fIn\fP [\fIT\fP]]	\fIn\fP=1	yes	T{
-Start numbered section; print section number (set to
-.I n
-(and title
-.IR T ))
-in bold.
-T}
-\&.sk	\-	no	T{
-Leave the next page blank.
-Only one page is remembered ahead.
-T}
-\&.sm \fIX\fP \fR[\fIY\fP]	\-	no	T{
-Print
-.I X
-in a smaller point size (appending
-.I Y
-at the previous size).
-T}
-\&.sz \fIn\fP	10p	no	T{
-Augment the point size by
-.I n
-points.
-T}
-\&.tp	\-	yes	T{
-Begin title page.
-T}
-\&.u \fIX\fP \fR[\fIY\fP]	\-	no	T{
-Underline
-.I X
-(appending
-.I Y
-without underlining).
-Renders reliably only if filling disabled.
-T}
-\&.uh \fR[\fIT\fP]	\-	yes	T{
-Start unnumbered section (and print title
-.I T
-in bold).
-T}
-\&.xp \fR[\fIX\fP]	\-	no	T{
-Print index (named
-.IR X ).
-T}
+.
+.P
+Some macros are provided for \(lqold\(rq
+.MR roff 1
+compatibility.
+.
+The
+.RI \(lq me
+Reference Manual\(rq
+describes alternatives for modern documents.
+.
+.
+.P
+.ne 2v \" Keep at least the first entry together with the heading.
+.TS
+Lb L.
+ar	use Arabic numerals for page numbers
+bl	insert space (even at page top; cf.\& \fBsp\fP)
+ix	set indentation without break
+m1	set page top to header distance
+m2	set header to text distance
+m3	set text to footer distance
+m4	set footer to page bottom distance
+n1	begin output line numbering
+n2	end or alter output line numbering
+pa	begin page
+ro	use Roman numerals for page numbers
+sk	skip next page
+.TE
+.
+.
+.\" ====================================================================
+.SS Registers
+.\" ====================================================================
+.
+.ne 2v \" Keep at least the first entry together with the heading.
+.TS
+Lb L.
+$0	section depth
+$1	first section number component
+$2	second section number component
+$3	third section number component
+$4	fourth section number component
+$5	fifth section number component
+$6	sixth section number component
+$c	current column number
+$d	delayed text number
+$f	footnote number
+$i	paragraph base indentation
+$l	column width
+$m	number of available columns
+$p	numbered paragraph number
+$s	column spacing (indentation)
+bi	display (block) indentation
+bm	distance from text area to page bottom
+bs	display (block) pre/post space
+bt	block threshold for keeps
+ch	current chapter number
+df	display font
+dv	vertical spacing of displayed text (as percentage)\fB*
+es	equation pre/post space
+ff	footnote font
+fi	footnote indentation (first line only)
+fm	footer margin
+fp	footnote type size in points
+fs	footnote prespace
+fu	footnote undent (right indentation)
+hm	header margin
+ii	indented paragraph indentation
+no	line numbering offset\fB*
+pf	paragraph font
+pi	paragraph indentation
+po	page offset
+pp	paragraph type size in points
+ps	paragraph prespace
+qi	long quotation left/right indentation
+qp	long quotation type size in points
+qs	long quotation pre/post space
+sf	section title font
+si	section indentation per level of depth
+so	additional section title offset
+sp	section title type size in points
+ss	section prespace
+sx	super/subscript line height increase\fB*
+tf	title font
+tm	distance from page top to text area
+tp	title type size in points
+tv	vertical spacing of text (as percentage)\fB*
+xs	index entry prespace
+xu	index undent (right indentation)
+y2	year of the century\fB*
+y4	year\fB*
+yr	year minus 1900
+zs	floating keep pre/post space
+.TE
+.
+.
+.\" ====================================================================
+.SS Strings
+.\" ====================================================================
+.
+.ne 2v \" Keep at least the first entry together with the heading.
+.TS
+Lb L.
+#	delayed text marker
+$n	concatenated section number
+*	footnote marker
+\-	em dash
+<	begin subscripting
+>	end subscripting
+dw	weekday name
+lq	left double quotation mark
+mo	month name
+rq	right double quotation mark
+td	date
+wa	term for \(lqappendix\(rq used by \fB.$c*
+wc	term for \(lqchapter\(rq used by \fB.$c*
+{	begin superscripting
+}	end superscripting
 .TE
 .
 .
@@ -500,11 +454,23 @@ T}
 .SH Files
 .\" ====================================================================
 .
-.I @MACRODIR@/me.tmac
-(a wrapper file for
-.IR e.tmac )
-.br
+.TP
 .I @MACRODIR@/e.tmac
+implements the package.
+.
+.
+.TP
+.I @MACRODIR@/refer\-me.tmac
+implements
+.MR @g@refer @MAN1EXT@
+support for
+.IR me .
+.
+.
+.TP
+.I @MACRODIR@/me.tmac
+is a wrapper enabling the package to be loaded with
+.RB \[lq] "groff \-m me" \[rq].
 .
 .
 .\" ====================================================================
@@ -562,7 +528,10 @@ is
 .I Groff
 Using
 .RI \- me \[rq],
-by Eric P.\& Allman and James Clark.
+by Eric P.\& Allman,
+adapted for
+.I groff
+by James Clark.
 .
 .
 .TP
@@ -570,9 +539,12 @@ by Eric P.\& Allman and James Clark.
 .TQ
 .I @DOCDIR@/meref.ps
 is the
-.RI \[lq]\- me
+.RI \[lq] me
 Reference Manual\[rq],
-by Eric P.\& Allman and James Clark.
+by Eric P.\& Allman,
+adapted for
+.I groff
+by James Clark and G.\& Branden Robinson.
 .
 .
 .P
@@ -599,7 +571,8 @@ and
 .
 .P
 .MR groff @MAN1EXT@ ,
-.MR @g@troff @MAN1EXT@
+.MR @g@troff @MAN1EXT@ ,
+.MR groff @MAN7EXT@
 .
 .
 .\" Restore compatibility mode (for, e.g., Solaris 10/11).
@@ -610,6 +583,5 @@ and
 .\" Local Variables:
 .\" fill-column: 72
 .\" mode: nroff
-.\" tab-with: 20
 .\" End:
-.\" vim: set filetype=groff tabstop=20 textwidth=72:
+.\" vim: set filetype=groff textwidth=72:

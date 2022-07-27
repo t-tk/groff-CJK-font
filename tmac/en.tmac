@@ -1,6 +1,7 @@
 .\" English localization for groff
 .\"
-.\" Copyright (C) 2021 Free Software Foundation, Inc.
+.\" Copyright (C) 2021-2022 Free Software Foundation, Inc.
+.\"   Written by G. Branden Robinson <g.branden.robinson.@gmail.com>
 .\"
 .\" This file is part of groff.
 .\"
@@ -24,17 +25,46 @@
 .cp 0
 .
 .
+.\" If changing from an existing locale, we need to preserve the state
+.\" of the "suppress hyphenation before a page location trap" bit.
+.nr locale*use-trap-hyphenation-mode 0
+.if d locale \
+.  if \n[.hy]=\n[\*[locale]*hyphenation-mode-trap] \
+.    nr locale*use-trap-hyphenation-mode 1
+.
+.
 .ds locale english\"
 .
-.\" Set the minimum hyphenation mode that works with the patterns.
-.hy 4
+.ss 12
 .
-.\" Set the hyphenation language to English.
+.\" Set up hyphenation.
+.
+.\" English hyphenation (\lefthyphenmin=2, \righthyphenmin=3)
+.nr \*[locale]*hyphenation-mode-base 4
+.nr \*[locale]*hyphenation-mode-trap 6
+.
+.ie \n[locale*use-trap-hyphenation-mode] \
+.  hy \n[\*[locale]*hyphenation-mode-trap]
+.el \
+.  hy \n[\*[locale]*hyphenation-mode-base]
+.
+.rr locale*use-trap-hyphenation-mode
+.
 .hla en
-.
-.\" Load hyphenation patterns and exceptions.
 .hpf hyphen.en
 .hpfa hyphenex.en
+.
+.
+.\" man package
+.if d an \
+.	an*reset-hyphenation-mode
+.
+.
+.\" me package
+.if d @R \{\
+.	ds _td_format \\*(mo \\n(dy, \\n(y4\"
+.	ld
+.\}
 .
 .
 .cp \n[*groff_en_tmac_C]

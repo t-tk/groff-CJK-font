@@ -445,18 +445,10 @@ void tty_printer::special(char *arg, const environment *env, char type)
     error("empty X command ignored");
     return;
   }
-  if (strncmp(command, "sgr", p - command) == 0) {
-    for (; *p == ' ' || *p == '\n'; p++)
-      ;
-    int n;
-    if (*p != '\0' && sscanf(p, "%d", &n) == 1 && n == 0)
-      use_overstriking_drawing_scheme = true;
-    else
-      use_overstriking_drawing_scheme = false;
-    update_options();
-  }
-  else if (strncmp(command, "link", p - command) == 0)
+  if (strncmp(command, "link", p - command) == 0)
     special_link(p, env);
+  else
+    warning("unrecognized X command '%1' ignored", command);
 }
 
 // Produce an OSC 8 hyperlink.  Given ditroff input of the form:

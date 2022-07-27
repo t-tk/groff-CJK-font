@@ -894,13 +894,13 @@ SUFFIXES += .man
 	     -e "s|[@]DATASUBDIR[@]|`echo $(datasubdir) | sed -f $(makevarescape)`|g" \
 	     -e "s|[@]DEFAULT_INDEX[@]|`echo $(indexdir)/$(indexname) | sed -f $(makevarescape)`|g" \
 	     -e "s|[@]DEFAULT_INDEX_NAME[@]|`echo $(indexname) | sed -f $(makevarescape)`|g" \
-	     -e "s|[@]DEVICE[@]|$(DEVICE)|g" \
+	     -e "s|[@]DEVICE[@]|\\\\%$(DEVICE)|g" \
 	     -e "s|[@]DOCDIR[@]|`echo $(docdir) | sed -f $(makevarescape)`|g" \
 	     -e "s|[@]EXAMPLEDIR[@]|`echo $(exampledir) | sed -f $(makevarescape)`|g" \
 	     -e "s|[@]FONTDIR[@]|`echo $(fontdir) | sed -f $(makevarescape)`|g" \
-	     -e "s|[@]g[@]|$(g)|g" \
+	     -e "s|[@]g[@]|\\\\%$(g)|g" \
 	     -e "s|[@]HTMLDOCDIR[@]|`echo $(htmldocdir) | sed -f $(makevarescape)`|g" \
-	     -e "s|[@]INDEX_SUFFIX[@]|$(indexext)|g" \
+	     -e "s|[@]INDEX_SUFFIX[@]|\\\\%$(indexext)|g" \
 	     -e "s|[@]LEGACYFONTDIR[@]|`echo $(legacyfontdir) | sed -f $(makevarescape)`|g" \
 	     -e "s|[@]LOCALFONTDIR[@]|`echo $(localfontdir) | sed -f $(makevarescape)`|g" \
 	     -e "s|[@]LOCALMACRODIR[@]|`echo $(localtmacdir) | sed -f $(makevarescape)`|g" \
@@ -910,30 +910,22 @@ SUFFIXES += .man
 	     -e "s|[@]MAN7EXT[@]|$(man7ext)|g" \
 	     -e "s|[@]MDATE[@]|`$(PERL) $(top_srcdir)/mdate.pl $<`|g" \
 	     -e "s|[@]OLDFONTDIR[@]|`echo $(oldfontdir) | sed -f $(makevarescape)`|g" \
+	     -e "s|[@]PAGE[@]|\\\\%$(PAGE)|g" \
 	     -e "s|[@]PDFDOCDIR[@]|`echo $(pdfdocdir) | sed -f $(makevarescape)`|g" \
 	     -e "s|[@]SYSTEMMACRODIR[@]|`echo $(systemtmacdir) | sed -f $(makevarescape)`|g" \
-	     -e "s|[@]TMAC_AN_PREFIX[@]|$(tmac_an_prefix)|g" \
-	     -e "s|[@]TMAC_M_PREFIX[@]|$(tmac_m_prefix)|g" \
-	     -e "s|[@]TMAC_MDIR[@]|$(tmacdir)/mm|g" \
-	     -e "s|[@]TMAC_S_PREFIX[@]|$(tmac_s_prefix)|g" \
+	     -e "s|[@]TMAC_AN_PREFIX[@]|\\\\%$(tmac_an_prefix)|g" \
+	     -e "s|[@]TMAC_M_PREFIX[@]|\\\\%$(tmac_m_prefix)|g" \
+	     -e "s|[@]TMAC_MDIR[@]|`echo $(tmacdir) | sed -f $(makevarescape)`/mm|g" \
+	     -e "s|[@]TMAC_S_PREFIX[@]|\\\\%$(tmac_s_prefix)|g" \
 	     -e "s|[@]VERSION[@]|$(VERSION)|g" \
 	     $< \
 	     >$@
 
-# Version files - see script 'build-aux/git-gen-version'
+# Version files - see script 'build-aux/git-version-gen'
 EXTRA_DIST += $(top_srcdir)/.version
 BUILT_SOURCES += $(top_srcdir)/.version
-# Regenerate a temporary version string file on every build, but update
-# the real version file's mtime only if its contents change.
-.PHONY: .version.tree
-.version.tree:
-	@test -f $(distdir)/.tarball-verion || echo $(VERSION) > $@
-$(top_srcdir)/.version: .version.tree
-	@if ! test -f $(distdir)/.tarball-version; then \
-	  test -f $@ || cp .version.tree $@; \
-	  cmp -s .version.tree $@ || cp .version.tree $@; \
-	fi
-MOSTLYCLEANFILES += .version.tree
+$(top_srcdir)/.version:
+	echo $(VERSION) > $@-t && mv $@-t $@
 dist-hook:
 	echo $(VERSION) > $(distdir)/.tarball-version
 

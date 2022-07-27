@@ -419,16 +419,33 @@ AC_DEFUN([GROFF_URW_FONTS_CHECK],
   ])
 
 
+# Check whether the pnm tools accept the -quiet option.
+
+AC_DEFUN([GROFF_PNMTOOLS_CAN_BE_QUIET],
+  [AC_MSG_CHECKING([whether PNM tools accept the -quiet option])
+   if echo P2 2 2 255 0 1 2 0 | pnmtops -quiet > /dev/null 2>&1
+   then
+     AC_MSG_RESULT([yes])
+     pnmtools_quiet=-quiet
+   else
+     AC_MSG_RESULT([no])
+     pnmtools_quiet=
+   fi
+   AC_SUBST([pnmtools_quiet])])
+
+
 # Check whether pnmtops can handle the -nosetpage option.
 
 AC_DEFUN([GROFF_PNMTOPS_NOSETPAGE],
-  [AC_MSG_CHECKING([whether pnmtops can handle the -nosetpage option])
-   if echo P2 2 2 255 0 1 2 0 | pnmtops -nosetpage > /dev/null 2>&1 ; then
+  [AC_REQUIRE([GROFF_PNMTOOLS_CAN_BE_QUIET])
+   AC_MSG_CHECKING([whether pnmtops accepts the -nosetpage option])
+   if echo P2 2 2 255 0 1 2 0 | pnmtops -nosetpage > /dev/null 2>&1
+   then
      AC_MSG_RESULT([yes])
-     pnmtops_nosetpage="pnmtops -nosetpage"
+     pnmtops_nosetpage="pnmtops $pnmtools_quiet -nosetpage"
    else
      AC_MSG_RESULT([no])
-     pnmtops_nosetpage="pnmtops"
+     pnmtops_nosetpage="pnmtops $pnmtools_quiet"
    fi
    AC_SUBST([pnmtops_nosetpage])])
 
