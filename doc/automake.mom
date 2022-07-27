@@ -108,8 +108,8 @@ This will:
 .SHIFT_LIST 1m
 .ITEM
 .SP 3p
-Clone the gnulib repository as a git submodule in 'gnulib',
-add the needed gnulib sources files in `lib', 
+Clone the gnulib repository as a git submodule in `gnulib',
+add the needed gnulib sources files in `lib',
 add the needed gnulib m4 macros in `gnulib_m4'.
 .SP 3p
 .ITEM
@@ -142,7 +142,7 @@ src/include/config.hin
 .
 .WS +2
 .EW .5
-Note that aclocal.m4 is generated and the groff m4 macros are
+The file aclocal.m4 is generated and the groff m4 macros are
 included via the acinclude.m4 file.
 .WS DEFAULT
 .EW 0
@@ -166,7 +166,7 @@ $ ../configure
 $ make
 .CODE OFF
 .QUOTE OFF
-Note that parallel build is also supported and `make' can be invoked
+Parallel build is also supported: `make' can be invoked
 with the -j option, which will greatly speed up the build.
 .
 .HEADING 2 "Automake in the autotools process"
@@ -225,7 +225,7 @@ and then in the final Makefile.
 Previously, when groff used `autoconf' only and not `automake',
 you had to invoke manually the autotools, depending on what you
 modified.  For example, to change the file `aclocal.m4', you had
-to run the shell command 'aclocal -I m4'; to recreate the files
+to run the shell command `aclocal -I m4'; to recreate the files
 `configure' and `Makefile', you had to use the command 'autoreconf
 - I m4'.
 .PP
@@ -245,7 +245,7 @@ to declare a program that should be built, and then list the
 sources of this program in a variable that starts with the name of
 your program and ends with \*[CODE]_SOURCES\*[CODE OFF]\&.  In the
 groff project we have only 1 top-level Makefile.am that includes
-several .am files.
+several \&.am files.
 .PP
 Take for example the build of grolbp, in src/devices/grolbp/grolbp.am. 
 The file starts with:
@@ -255,10 +255,10 @@ bin_PROGRAMS += grolbp
 .CODE OFF
 .QUOTE OFF
 This says that a program named `grolbp' is added to the list of the
-programs that should be built.  Note that \*[CODE]bin_PROGRAMS\*[CODE OFF]
-is initialized to an empty string in the top-level Makefile.am,
-which includes grolbp.am.  (We will see later why we don't write
-directly
+programs that should be built.  The variable
+\*[CODE]bin_PROGRAMS\*[CODE OFF] is initialized to an empty string in
+the top-level Makefile.am, which includes grolbp.am.  (We will see later
+why we don't write directly
 \*[CODE]bin_PROGRAMS\~=\~grolbp\*[CODE OFF] in a Makefile.am in the
 grolbp directory.)
 .PP
@@ -288,7 +288,7 @@ adequate `make' command.  Also, the source files listed in
 the distribution tarball.  That is why the headers are also listed
 in \*[CODE]grolbp_SOURCES\*[CODE OFF]: it is not necessary to add
 them in order to correctly build `grolbp', but this way the headers
-will be distributed.  Note that:
+will be distributed.
 .
 .SP 3p
 .QUAD LEFT
@@ -301,7 +301,7 @@ The path to the files are relative to the top-level directory.
 .ITEM
 The binaries are generated in the top-level build directory.
 .ITEM
-The .o files are generated in the directory where the source files
+The \&.o files are generated in the directory where the source files
 are located, or, in the case of an out-of-source build tree, in a
 directory that is the replication of the source tree directory.
 For example if you built groff in a `build' directory, lbp.o
@@ -357,9 +357,10 @@ gxditview_CPPFLAGS = $(AM_CPPFLAGS) $(X_CFLAGS) -Dlint \\
 .ILQ
 .PP
 The use of specific CPPFLAGS changes the name of the generated objects:
-the .o object files are prefixed with the name of the program.
-For example, the .o file corresponding to src/devices/xditview/device.c
-will be src/devices/xditview/gxditview-device.o.
+the \&.o object files are prefixed with the name of the program.
+For example, the \&.o file corresponding to
+src/devices/xditview/device.c will be
+src/devices/xditview/gxditview-device.o.
 .
 .HEADING 2 "Cleaning"
 .
@@ -414,8 +415,8 @@ Apart from \*[CODE]bin_PROGRAMS\*[CODE OFF], there is another
 similar special variable for scripts:  \*[CODE]bin_SCRIPTS\*[CODE OFF]\&.
 The scripts listed in this variable will automatically be
 built (of course you have to provide your custom rule to build the
-script), installed and uninstalled when invoking 'make', 'make
-install' and 'make uninstall'.  The main difference is that unlike
+script), installed and uninstalled when invoking `make', `make
+install' and `make uninstall'.  The main difference is that unlike
 the programs listed in \*[CODE]bin_PROGRAMS\*[CODE OFF], the scripts
 will not be cleaned by default.  They are not distributed by default
 either.  In the groff project, \*[CODE]bin_SCRIPTS\*[CODE OFF] are
@@ -451,8 +452,8 @@ pdfmom: $(gropdf_dir)/pdfmom.pl $(SH_DEPS_SED_SCRIPT)
 .QUOTE OFF
 .QUOTE_INDENT 2m
 .CODE_SIZE 100
-Note that in this example the '@' symbol is protected by square
-brackets to prevent the substitution of the variable by `automake'.
+In this example, the `@' symbol is protected by square brackets to
+prevent the substitution of the variable by `automake'.
 .
 .HEADING 1 "Non-recursive make schema"
 .
@@ -468,7 +469,7 @@ A top level Makefile.am includes another Makefile.am, using the
 sub-directory lists the programs that should be built.  If we had
 chosen this type of organization, we would have a Makefile.am in
 src/devices/grolbp and in each directory that contain sources to
-build a program (tbl, eqn, troff etc ...).  We would write in the
+build a program (tbl, eqn, troff, and so on).  We would write in the
 top-level Makefile.am:
 .QUOTE
 .IL
@@ -514,10 +515,10 @@ based on the following paper from Peter Miller:
 .PP
 The idea is to have a single Makefile that contains all the rules.
 That is why we have only a single Makefile.am in the top-level
-directory which includes all the .am files that define rules
+directory which includes all the \&.am files that define rules
 to build the various programs.  The inclusion is done with the
 \*[CODE]include\*[CODE OFF] directive, not \*[CODE]SUBDIRS\*[CODE OFF]\&.
-Using 'include' is like copying the contents of the included
+Using `include' is like copying the contents of the included
 file into the top-level Makefile.am, and will not generate other
 Makefile.
 .PP
@@ -527,11 +528,11 @@ We first say in this top-level Makefile.am:
 bin_PROGAMS = 
 .CODE OFF
 .QUOTE OFF
-and then all the .am files that define a program to be built (e.g.
+and then all the \&.am files that define a program to be built (e.g.
 src/devices/grolbp/grolbp.am, src/roff/troff/troff.am, and so on)
 overload this variable, so that at the end, all the programs that
 should be built are listed in this \*[CODE]bin_PROGRAMS\*[CODE OFF]
-variable.  This is the reason why all the paths in the various .am
+variable.  This is the reason why all the paths in the various \&.am
 files are relative to the top-level directory: at the end we will
 have only one Makefile in the top-level directory of the build tree.
 .PP
@@ -587,8 +588,8 @@ devX100fontdir = $(fontdir)/devX100
 .QUOTE OFF
 Because we declared a variable ending with `dir', we are allowed
 to define \*[CODE]devX100font_DATA\*[CODE OFF] (you remove the
-`dir' suffix and add \*[CODE]_DATA\*[CODE OFF]).  Note that
-wildcards are not supported in the special variable that end with
+`dir' suffix and add \*[CODE]_DATA\*[CODE OFF]).  Wildcards are not
+supported in the special variables that end with
 \*[CODE]_DATA\*[CODE OFF]\&.
 .PP
 With these two lines, `make install' will install the files
@@ -717,7 +718,7 @@ There are no garantees on the order of execution of these local
 rules.  An example of local rule is the installation of GXditview.ad
 and GXditview-color.ad files in src/devices/xditview/xditview.am: if
 theses files are already installed, the old files are first saved.
-Also, the final file that is installed is stripped from its .ad
+Also, the final file that is installed is stripped from its \&.ad
 suffix.  Thus the usage of a custom rule rather than the definition
 of a \*[CODE]xxx_DATA\*[CODE OFF] variable:
 .FLEX

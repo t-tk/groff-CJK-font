@@ -43,7 +43,7 @@ An extension in version 1.23.0 of
 the PDF output driver for the
 .I groff
 document formatting system,
-allows coloured rectangles to be created beneath any output created by
+allows coloured rectangles to be placed beneath any output created by
 .I groff .
 The extension can be accessed via a device control escape sequence
 .Lt "\[rs]X\[aq]pdf: background" \~.\|.\|.\|\c
@@ -67,20 +67,20 @@ cmd left top right bottom weight
 .LP
 each produce a background rectangle on the page, where
 .IP \f[I]cmd 8n \" indent enough to fit "bottom" tag
-can be any of
+is the command, which can be any of
 .Qq page|fill|box
 in combination.
-So
+Thus,
 .Qq pagefill
-would draw a rectangle which covers whole current page size (in which
-case the rest of the parameters can be omitted because the box
+would draw a rectangle which covers the whole current page size (in
+which case the rest of the parameters can be omitted because the box
 dimensions are taken from the current media size).
 .Qq boxfill ,
 on the other hand, requires the given dimensions to place the box.
 Including
 .Qq fill
-in the command will fill the rectangle with the current background
-colour (as with
+in the command will paint the rectangle with the current fill colour (as
+with
 .Lt \[rs]M[] )
 and including
 .Qq box
@@ -90,24 +90,28 @@ will give the rectangle a border in the current stroke colour
 .sp \n[PD]u
 .I cmd
 may also be
-.Qq off ,
+.Qq off
 on its own, which will terminate drawing the current box.
 If you have specified a page colour with
-.Lt ".pdfbackground pagefill"
+.Qq pagefill ,
 it is always the first box in the stack, and if you specify it again, it
 will replace the first entry.
-Be aware that the pagefill box renders the page opaque, so tools that
+Be aware that the
+.Qq pagefill
+box renders the page opaque, so tools that
 .Qq watermark
 PDF pages are unlikely to be successful.
-To return the background to transparent, do a
-.Lt ".pdfbackground off"
-with no other boxes open.
+To return the background to transparent, issue an
+.Qq off
+command with no other boxes open.
 .sp \n[PD]u
-Finally, the command may be
+Finally,
+.I cmd
+may be
 .Qq footnote
 followed by a new value for
-.I bottom
-which will be used for all current boxes, just for the current page.
+.I bottom ,
+which will be used for all open boxes on the current page.
 This is to allow room for footnote areas that grow while a page is
 processed (to accommodate multiple footnotes,
 for instance).\m[red]\**\m[]\" FOOTNOTE
@@ -124,26 +128,25 @@ page.
 .nr PD \n[oldPD]
 are the coordinates of the box.
 The
-.Qq top
+.I top
 and
-.Qq bottom
+.I bottom
 coordinates are the minimum and maximum for the box, since the actual
-start of the box is the vertical position of
-.I groff
-when you issue the command and the bottom of the box is the point where
-you turn the box
+start of the box is
+.I groff 's
+drawing position when you issue the command, and the bottom of the box
+is the point where you turn the box
 .Qq off .
-The top and bottom coordinates are only used if the box drawing extends
-onto the next page, so, ordinarily they would be set to the header and
+The top and bottom coordinates are used only if the box drawing extends
+onto the next page; ordinarily, they would be set to the header and
 footer margins.
 .IP \f[I]weight
-If
+provides the line width for the border if
 .Qq box
-is included in the command, then this parameter provides the line width
-for the box border.
+is included in the command.
 .BOXSTOP
 .QE
-For a more convenient interface, include
+For an even more convenient interface, include
 .Lt \-msboxes
 on the
 .I groff
@@ -167,6 +170,7 @@ and
 .I size
 .BOXSTOP
 .LP
+begins a box,
 where the argument after
 .Lt SHADED
 gives the fill colour and that after
@@ -219,7 +223,7 @@ call without borders and with a
 .Lt .BOXSTOP
 .BOXSTOP
 .LP
-This macro takes no parameters.
+takes no parameters.
 It closes the most recently started box at the current vertical position
 after adding its
 .Lt INDENT
@@ -239,7 +243,7 @@ the
 output device is in use.
 .LP
 .I sboxes
-has one further feature: it hooks into the
+furthermore hooks into the
 .I "groff ms"
 package to receive notifications when footnotes are growing, so that it
 can close boxes on a page before footnotes are printed.

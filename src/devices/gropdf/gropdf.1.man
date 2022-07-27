@@ -7,7 +7,7 @@ gropdf \- groff output driver for Portable Document Format
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 2011-2020 Free Software Foundation, Inc.
+.\" Copyright (C) 2011-2022 Free Software Foundation, Inc.
 .\"
 .\" Permission is granted to make and distribute verbatim copies of this
 .\" manual provided the copyright notice and this permission notice are
@@ -73,46 +73,46 @@ gropdf \- groff output driver for Portable Document Format
 .SH Description
 .\" ====================================================================
 .
-.B gropdf
-translates the output of GNU
-.B troff
-to PDF.
+The GNU
+.I roff
+PDF output driver translates the output of
+.MR @g@troff @MAN1EXT@
+into Portable Document Format.
 .
-Normally
-.B gropdf
-should be invoked by using the groff command
-with a
-.B \-Tpdf
+Normally,
+.I gropdf
+is invoked by
+.MR groff @MAN1EXT@
+when the latter is given the
+.RB \[lq] \-T\~pdf \[rq]
 option.
 .
-If no files are given,
-.B gropdf
-reads the standard input.
+(In this installation,
+.B @DEVICE@
+is the default output device.)
 .
-A filename of
-.B \-
-also causes
-.B gropdf
-to read the standard input.
-.
-PDF output is written to the standard output.
-.
-When
-.B gropdf
-is run by
-.B groff
-options can be passed to
-.B gropdf
-using
-.BR groff 's
+Use
+.IR groff 's
 .B \-P
-option.
+option to pass any options shown above to
+.IR gropdf .
+.
+If no
+.I file
+arguments are given,
+or if
+.I file
+is \[lq]\-\[rq],
+.I gropdf
+reads the standard input stream.
+.
+Output is written to the standard output stream.
 .
 .
-.LP
-See section \[lq]Font Installation\[rq] below for a guide how to install
+.P
+See section \[lq]Font Installation\[rq] below for a guide to installing
 fonts for
-.BR gropdf .
+.IR gropdf .
 .
 .
 .\" ====================================================================
@@ -156,12 +156,17 @@ is the name of the device, usually
 This option may be used to add a directory to the search path for
 files named in
 .B \[rs]X\[aq]pdf: pdfpic\[aq]
-escape.
+escape sequences.
 .
-The current directory is always searched first.
+This option may be specified more than once;
+the directories are then searched in the order specified.
 .
-This option may be specified more than once; the directories are then
-searched in the order specified.
+If you want to search the current directory before others,
+add
+.RB \[lq] "\-I .\&" \[rq]
+at the desired place.
+.
+The current working directory is otherwise searched last.
 .
 .
 .TP
@@ -282,7 +287,7 @@ that is different versions of basically the same font.
 During install a
 .I Foundry
 file controls where fonts are found and builds
-.B groff
+.I groff
 fonts from the files it discovers on your system.
 .
 .
@@ -308,7 +313,9 @@ This code can be used with the
 escape sequence in
 .B troff
 to select the character,
-even if the character does not have a groff name.
+even if the character does not have a
+.I groff
+name.
 .
 Every character in the font file must exist in the PostScript font, and
 the widths given in the font file must match the widths used
@@ -345,7 +352,7 @@ Fonts may be in PFA or PFB format.
 Any downloadable fonts which should, when required, be included by
 .B gropdf
 must be listed in the file
-.IR @FONTDIR@/devpdf/download ;
+.IR @FONTDIR@/\:\%devpdf/\:\%download ;
 this should consist of lines of the form
 .
 .IP
@@ -371,7 +378,9 @@ fields must be separated by tabs
 allowed);
 .I filename
 is searched for using the same mechanism that is used
-for groff font metric files.
+for
+.I groff
+font metric files.
 .
 The
 .I download
@@ -731,7 +740,7 @@ Many of the other
 commands are already available in other macro packages.
 .LP
 These commands are implemented with
-.B groff
+.I groff
 X commands:-
 .LP
 .TP
@@ -760,7 +769,7 @@ below, this text is ignored.
 .B \[rs]X\[aq]ps: exec %%%%ENDONCE\[aq]
 This terminates the block defined by %%%%BEGINONCE.
 This pair of commands
-is what implements the .BLOCKS Once/.BLOCKE commands in present.tmac.
+is what implements the \&.BLOCKS Once/.BLOCKE commands in present.tmac.
 .LP
 The
 .B mom
@@ -904,7 +913,7 @@ respectively.
 .
 (These are just convenience macros which emit the corresponding
 .B \[rs]X
-escapes.
+escapes sequence.
 .
 These macros must be used only within page traps.)
 .
@@ -1144,27 +1153,85 @@ not all PDF Readers support any or all these transitions.
 .
 .
 .TP
-.BI "\eX'pdf: background " "cmd left top right bottom weight" \[aq]
-Where:-
+.BI "\eX\[aq]pdf: background\~" "cmd left top right bottom weight" \[aq]
+.TQ
+.B "\eX\[aq]pdf: background off\[aq]"
+.TQ
+.BI "\eX\[aq]pdf: background footnote\~" bottom \[aq]
+produces a background rectangle on the page,
+where
 .RS
 .TP
 .I cmd
-Can be any of "page|fill|box" in combination. So "pagefill" would draw a
-rectangle which covers whole current page size (in which case the rest of the
-parameters can be omitted because the box dimensions are taken from the
-current media size). "boxfill", on the other hand, requires the given
-dimensions to place the box. Including "fill" in the command will make the
-rectangle filled with the current background colour "\eM[colour]" and including
-"box" will give the rectangle a border in the current stroke colour
-"\em[colour]".
-.sp .5v
-The "cmd" may also be "off", on its own, which will terminate drawing the
-current box.
-.sp .5v
-Finally the command may be "footnote" followed by a new value for "bottom"
-which will be used for all current boxes, just for the current page. This is
-to allow room for footnotes which grow during the page.
-.LP
+is the command,
+which can be any of
+.RB \[lq] page | fill | box \[rq]
+in combination.
+.
+Thus,
+.RB \[lq] pagefill \[rq]
+would draw a rectangle which covers the whole current page size
+(in which case the rest of the parameters can be omitted because the box
+dimensions are taken from the current media size).
+.
+.RB \[lq] boxfill \[rq],
+on the other hand,
+requires the given dimensions to place the box.
+.
+Including
+.RB \[lq] fill \[rq]
+in the command will paint the rectangle with the current fill colour
+(as with
+.BR \[rs]M[] )
+and including
+.RB \[lq] box \[rq]
+will give the rectangle a border in the current stroke colour
+(as with
+.BR \[rs]m[] ).
+.
+.
+.IP
+.I cmd
+may also be
+.RB \[lq] off \[rq]
+on its own,
+which will terminate drawing the current box.
+.
+If you have specified a page colour with
+.RB \[lq] pagefill \[rq],
+it is always the first box in the stack,
+and if you specify it again,
+it will replace the first entry.
+.
+Be aware that the
+.RB \[lq]  pagefill \[rq]
+box renders the page opaque,
+so tools that \[lq]watermark\[rq] PDF pages are unlikely to be
+successful.
+.
+To return the background to transparent,
+issue an
+.RB \[lq] off \[rq]
+command with no other boxes open.
+.
+.
+.IP
+Finally,
+.I cmd
+may be
+.RB \[lq] footnote \[rq]
+followed by a new value for
+.IR bottom ,
+which will be used for all open boxes on the current page.
+This is to allow room for footnote areas that grow while a page is
+processed
+(to accommodate multiple footnotes,
+for instance).
+.
+(If the value is negative,
+it is used as an offset from the bottom of the page.)
+.
+.
 .TP
 .I left
 .TQ
@@ -1173,24 +1240,43 @@ to allow room for footnotes which grow during the page.
 .I right
 .TQ
 .I bottom
-Are the coordinates of the box. The "top" and "bottom" coordinates are
-the minimum and maximum for the box, since the actual start of the
-box is the vertical position of groff when you issue the command and the bottom of
-the box is the point where you turn the box "off". The top and bottom
-coordinates are only used if the box drawing extends onto the next page, so,
-ordinarily they would be set to the header and footer margins.
+are the coordinates of the box.
+.
+The
+.I top
+and
+.I bottom
+coordinates are the minimum and maximum for the box,
+since the actual start of the box is
+.IR groff 's
+drawing position when you issue the command,
+and the bottom of the box is the point where you turn the box
+.RB \[lq] off \[rq].
+.
+The top and bottom coordinates are used only if the box drawing extends
+onto the next page;
+ordinarily,
+they would be set to the header and footer margins.
+.
+.
 .TP
 .I weight
-If "box" is included in the command then this parameter provides the line width
-for the box border.
-.RE
-The convenience macro for this escape is
+provides the line width for the border if
+.RB \[lq] box \[rq]
+is included in the command.
+.
+.
+.P
+The convenience macro for this escape sequence is
 .BR .pdfbackground .
-.LP
-There is also a macro file which can be included if you are using the ms macro
-package which can be incorporated by placing -msboxes on the
-.B groff
-command line.
+.
+An
+.I sboxes
+macro file is also available;
+see
+.MR groff_tmac @MAN5EXT@ .
+.RE
+.
 .
 .\" ====================================================================
 .SS "Importing graphics"
@@ -1261,7 +1347,9 @@ as a step-by-step font installation guide for
 .BR gropdf .
 .
 .IP \(bu
-Convert your font to something groff understands.
+Convert your font to something
+.I groff
+understands.
 .
 This is either a PostScript Type\~1 font in either PFA or PFB,
 together with an AFM file.
@@ -1279,7 +1367,9 @@ A PFB file has this also in the first line, but the string is
 preceded with some binary bytes.
 .
 .IP \(bu
-Convert the AFM file to a groff font description file with the
+Convert the AFM file to a
+.I groff
+font description file with the
 .MR afmtodit @MAN1EXT@
 program.
 .
@@ -1291,7 +1381,8 @@ afmtodit Foo\-Bar\-Bold.afm map/textmap FBB
 .RE
 .
 .IP
-which converts the metric file \[oq]Foo\-Bar\-Bold.afm\[cq] to the groff
+which converts the metric file \[oq]Foo\-Bar\-Bold.afm\[cq] to the
+.I groff
 font \[oq]FBB\[cq].
 .
 If you have a font family which comes with normal, bold, italic, and
@@ -1301,13 +1392,19 @@ bold italic faces, it is recommended to use the letters
 .BR I ,
 and
 .BR BI ,
-respectively, as postfixes in the groff font names to make groff's
+respectively, as postfixes in the
+.I groff font names to make
+.IR groff 's
 \[oq].fam\[cq] request work.
 .
-An example is groff's built-in Times-Roman font: The font family
+An example is
+.IR groff 's
+built-in Times-Roman font: The font family
 name is
 .BR T ,
-and the groff font names are
+and the
+.I groff
+font names are
 .BR TR ,
 .BR TB ,
 .BR TI ,
@@ -1315,14 +1412,20 @@ and
 .BR TBI .
 .
 .IP \(bu
-Install both the groff font description files and the fonts in a
-\[oq]devpdf\[cq] subdirectory of the font path which groff finds.
+Install both the
+.I groff
+font description files and the fonts in a
+\[oq]devpdf\[cq] subdirectory of the font path which
+.I groff
+finds.
 .
 See section \[lq]Environment\[rq] in
 .MR @g@troff @MAN1EXT@
 for the actual value of the font path.
 .
-Note that groff doesn't use the AFM files (but it is a good idea to
+Note that
+.I groff
+doesn't use the AFM files (but it is a good idea to
 store them anyway).
 .
 .IP \(bu
@@ -1357,6 +1460,8 @@ field should be null for the default foundry.
 .RE
 .
 .
+.br
+.ne 3v
 .\" ====================================================================
 .SH Environment
 .\" ====================================================================
@@ -1391,7 +1496,7 @@ and produce a normal pdf instead.
 .I SOURCE_DATE_EPOCH
 A timestamp
 (expressed as seconds since the Unix epoch)
-to use as the creation timestamp in place of the current time.
+to use as the output creation timestamp in place of the current time.
 .
 The time is converted to human-readable form using Perl's
 .I localtime()
@@ -1413,41 +1518,83 @@ see
 .\" ====================================================================
 .
 .TP
-.I @FONTDIR@/devpdf/DESC
-Device description file.
+.I @FONTDIR@/\:\%devpdf/\:DESC
+describes the
+.B pdf
+output device.
+.
 .
 .TP
-.IR @FONTDIR@/devpdf/ F
-Font description file for font\~\c
-.IR F .
+.IR @FONTDIR@/\:\%devpdf/ F
+describes the font known
+.RI as\~ F
+on device
+.BR pdf .
+.
 .
 .TP
-.IR @FONTDIR@/devpdf/ U\-F
-Font description file for font\~\c
-.I F
-(using foundry\~\c
-.I U
-rather than the default foundry).
+.IR @FONTDIR@/\:\%devpdf/\:U\- F
+describes the font
+from the URW foundry
+(versus the Adobe default)
+known
+.RI as\~ F
+on device
+.BR pdf .
+.
 .
 .TP
-.I @FONTDIR@/devpdf/download
-List of downloadable fonts.
+.I @FONTDIR@/\:\%devpdf/\%download
+lists fonts available for embedding within the PDF document
+(by analogy to the
+.B ps
+device's downloadable font support).
+.
+.
+.\" XXX: Why are we shipping this but not BuildFoundries.pl?
+.TP
+.I @FONTDIR@/\:\%devpdf/\%Foundry
+is a data file used by the
+.I groff
+build system to locate PostScript Type\~1 fonts.
+.
 .
 .TP
-.I @FONTDIR@/devpdf/Foundry
-A Perl script used during install to locate suitable fonts.
+.I @FONTDIR@/\:\%devpdf/\:enc/\:\%text\:.enc
+describes the encoding scheme used by most PostScript Type\~1 fonts;
+the
+.B \%encoding
+directive of
+font description files for the
+.B pdf
+device refers to it.
+.
 .
 .TP
-.I @FONTDIR@/devpdf/enc/text.enc
-Encoding used for text fonts.
+.I @MACRODIR@/\:pdf\:.tmac
+defines macros for use with the
+.B pdf
+output device.
+.
+It is automatically loaded by
+.I troffrc
+when the
+.B pdf
+output device is selected.
+.
 .
 .TP
-.I @MACRODIR@/pdf.tmac
-Macros for use with
-.BR gropdf ;
-automatically loaded by
-.BR troffrc .
+.I @MACRODIR@/\:\%pdfpic\:.tmac
+defines the
+.B PDFPIC
+macro for embedding images in a document;
+see
+.MR groff_tmac @MAN5EXT@ .
 .
+It is automatically loaded by
+.I troffrc .
+.\"
+.\"
 .\" .TP
 .\" .B @MACRODIR@/pspic.tmac
 .\" Definition of
@@ -1462,6 +1609,19 @@ automatically loaded by
 .SH "See also"
 .\" ====================================================================
 .
+.TP
+.I @DOCDIR@/\:\%sboxes/\:\%msboxes\:.ms
+.TQ
+.I @DOCDIR@/\:\%sboxes/\:\%msboxes\:.pdf
+\[lq]Using PDF boxes with
+.I groff
+and the
+.I ms
+macros\[rq],
+by Deri James.
+.
+.
+.P
 .MR afmtodit @MAN1EXT@ ,
 .MR groff @MAN1EXT@ ,
 .MR @g@troff @MAN1EXT@ ,

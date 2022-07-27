@@ -27,6 +27,10 @@ Much of the code in this macro has come from the excellent original work by
 Keith Marshall (see attribution in the pdfmark.tmac file). I, however,
 am solely responsible for any bugs I may have introduced into this file.
 ..
+.
+.do nr *groff_pdf_tmac_C \n[.cp]
+.cp 0
+.
 .mso ps.tmac
 .
 .de pdf:SS
@@ -65,11 +69,14 @@ am solely responsible for any bugs I may have introduced into this file.
 .de pdfmark
 . nop \!x X ps:exec [\\$* pdfmark
 ..
+.
+.ds pdf pdf.tmac\" for use in diagnostic messages
+.
 .de pdf:warn
-. tm \\n(.F:\\n(.c: macro warning: \\$*
+. tm \\*[pdf]:\\n[.F]:\\n[.c]: warning: \\$*
 ..
 .de pdf:error
-. tm \\n(.F:\\n(.c: macro error: \\$*
+. tm \\*[pdf]:\\n[.F]:\\n[.c]: error: \\$*
 ..
 .de pdfinfo
 .\" -------------------------------------------------------------------
@@ -814,6 +821,9 @@ am solely responsible for any bugs I may have introduced into this file.
 .\" $6=line weight (if box)
 .device pdf: background \\$*
 ..
+.
+.cp \n[*groff_pdf_tmac_C]
+.do rr *groff_pdf_tmac_C
 .
 .\" Local Variables:
 .\" mode: nroff

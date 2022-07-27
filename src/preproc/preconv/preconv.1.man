@@ -113,12 +113,14 @@ or
 options of
 .IR groff .
 .
-If
-.I preconv
-is given no
+If no
 .I file
-operands,
-it reads the standard input stream.
+operands are given on the command line,
+or if
+.I file
+is
+.RB \[lq] \- \[rq],
+the standard input stream is read.
 .
 .
 .PP
@@ -233,11 +235,10 @@ natural language.
 .PP
 Consequently,
 .I preconv
-supports the coding tag convention
-(with some restrictions)
-used by GNU\~Emacs.
+supports the coding tag convention used by GNU\~Emacs
+(with some restrictions).
 .
-These are indicated in specially marked regions of an input file
+This notation appears in specially marked regions of an input file
 designated for \[lq]file-local variables\[rq].
 .
 .
@@ -393,11 +394,10 @@ and UTF-8.
 If
 .I iconv
 support is configured at compile time and available at run time,
-all other encodings are passed to
+all others are passed to
 .I iconv
-library functions.
-.
-The library may recognize many additional encoding strings.
+library functions,
+which may recognize many additional encoding strings.
 .
 The command
 .RB \[lq] preconv\~\-v \[rq]
@@ -445,6 +445,29 @@ US-ASCII and is discarded by
 .
 In the last,
 it is correctly detected and mapped.
+.
+.
+.\" ====================================================================
+.SS Limitations
+.\" ====================================================================
+.
+.I preconv
+cannot perform any transformation on input that it cannot see.
+.
+Examples include files that are interpolated by preprocessors that run
+subsequently,
+including
+.MR @g@soelim @MAN1EXT@ ;
+files included by
+.I @g@troff
+itself through
+.RB \[lq] so \[rq]
+and similar requests;
+and string definitions passed to
+.I @g@troff
+through its
+.B \-d
+command-line option.
 .
 .
 .\" ====================================================================

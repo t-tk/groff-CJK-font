@@ -76,7 +76,7 @@ class index_search_item : public search_item {
 public:
   index_search_item(const char *, int);
   ~index_search_item();
-  const char *check_header(int);
+  const char *check_header(index_header *, unsigned);
   bool load(int fd);
   search_item_iterator *make_search_item_iterator(const char *);
   bool is_valid();
@@ -146,32 +146,40 @@ inline void unused(void *) { }
 // Validate the data reported in the header so that we don't overread on
 // the heap in the load() member function.  Return null pointer if no
 // problems are detected.
-const char *index_search_item::check_header(int size_remaining)
+const char *index_search_item::check_header(index_header *file_header,
+					    unsigned file_size)
 {
-  size_t chunk_size;
-  if (header.tags_size < 0)
-    return "tag list length supposedly negative";
-  chunk_size = header.tags_size * sizeof(tag);
+  if (file_header->tags_size < 0)
+    return "tag list length negative";
+  if (file_header->lists_size < 0)
+    return "reference list length negative";
+  // The table and string pool sizes will not be zero, even in an empty
+  // index.
+  if (file_header->table_size < 1)
+    return "table size nonpositive";
+  if (file_header->strings_size < 1)
+    return "string pool size nonpositive";
+  size_t sz = (file_header->tags_size * sizeof(tag)
+	       + file_header->lists_size * sizeof(int)
+	       + file_header->table_size * sizeof(int)
+	       + file_header->strings_size
+	       + sizeof(file_header));
+  if (sz != file_size)
+    return("size mismatch between header and data");
+  unsigned size_remaining = file_size;
+  unsigned chunk_size = file_header->tags_size * sizeof(tag);
   if (chunk_size > size_remaining)
     return "claimed tag list length exceeds file size";
   size_remaining -= chunk_size;
-  if (header.lists_size < 0)
-    return "reference list length supposedly negative";
-  chunk_size = header.lists_size * sizeof(int);
+  chunk_size = file_header->lists_size * sizeof(int);
   if (chunk_size > size_remaining)
     return "claimed reference list length exceeds file size";
   size_remaining -= chunk_size;
-  // The table and string pool sizes will not be zero, even in an empty
-  // index.
-  if (header.table_size < 1)
-    return "table size supposedly nonpositive";
-  chunk_size = header.table_size * sizeof(int);
+  chunk_size = file_header->table_size * sizeof(int);
   if (chunk_size > size_remaining)
     return "claimed table size exceeds file size";
   size_remaining -= chunk_size;
-  if (header.strings_size < 1)
-    return "string pool size supposedly nonpositive";
-  chunk_size = header.strings_size;
+  chunk_size = file_header->strings_size;
   if (chunk_size > size_remaining)
     return "claimed string pool size exceeds file size";
   return 0;
@@ -191,7 +199,7 @@ bool index_search_item::load(int fd)
     return false;
   }
   mtime = sb.st_mtime;
-  int size = int(sb.st_size);
+  unsigned size = unsigned(sb.st_size); // widening conversion
   if (size == 0) {
     error("index '%1' is an empty file", name);
     return false;
@@ -234,17 +242,7 @@ bool index_search_item::load(int fd)
 	  name, header.version, INDEX_VERSION);
     return false;
   }
-  int sz = (header.tags_size * sizeof(tag)
-	    + header.lists_size * sizeof(int)
-	    + header.table_size * sizeof(int)
-	    + header.strings_size
-	    + sizeof(header));
-  if (sz != size) {
-    error("size of '%1' is wrong: was %2, should be %3",
-	  name, size, sz);
-    return false;
-  }
-  const char *problem = check_header(size);
+  const char *problem = check_header(&header, size);
   if (problem != 0) {
     if (do_verify)
       error("corrupt header in index file '%1': %2", name, problem);
@@ -615,7 +613,7 @@ void index_search_item::read_common_words_file()
   }
   common_words_table_size = 2*header.common + 1;
   while (!is_prime(common_words_table_size))
-    common_words_table_size++;
+    common_words_table_size += 2;
   common_words_table = new char *[common_words_table_size];
   for (int i = 0; i < common_words_table_size; i++)
     common_words_table[i] = 0;

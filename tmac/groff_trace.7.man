@@ -7,7 +7,7 @@ groff_trace \- GNU roff macros for debugging groff documents
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 2002-2020 Free Software Foundation, Inc.
+.\" Copyright (C) 2002-2022 Free Software Foundation, Inc.
 .\"
 .\" This file is part of groff, the GNU roff type-setting system.
 .\"
@@ -40,238 +40,227 @@ groff_trace \- GNU roff macros for debugging groff documents
 .SH Description
 .\" ====================================================================
 .
-The
 .I trace
-macro package of
-.MR groff @MAN1EXT@
-can be a valuable tool for debugging documents written in the
-.I roff
-formatting language.
+is a macro package for the
+.MR groff @MAN7EXT@
+document formatting system,
+designed as an aid for debugging documents written in its language.
 .
-A call stack trace is protocolled on standard error, this is, a
-diagnostic message is emitted on entering and exiting of a macro call.
+It issues a message to the standard error stream upon entry to and exit
+from each macro call.
 .
-This greatly eases to track down an error in some macro.
-.
-.
-.P
-This tracing process is activated by specifying the groff or troff
-command-line option
-.BR \-m\ trace .
-.
-A finer control can be obtained by including the macro file within the
-document by the groff macro call
-.BR .mso\ trace.tmac .
-.
-Only macros that are defined after this line are traced.
+This can ease the process of isolating errors in macro definitions.
 .
 .
 .P
-If the command-line option
-.B \-r\ trace-full=1
-is given (or if this register is set in the document), number and
-string register assignments together with some other requests are
-traced also.
+Activate the package by specifying the command-line option
+.RB \[lq] \-m\~trace \[rq]
+to the formatter program
+(often
+.MR groff @MAN1EXT@ ).
 .
+You can achieve finer control by including the macro file within the
+document;
+invoke the
+.B mso
+request,
+as in
+.RB \[lq] .mso\~trace.tmac \[rq].
 .
-.P
-If some other macro package should be traced as well it must be
-specified after
-.B \-m\ trace
+Only macros that are defined after this invocation are traced.
+.
+If the
+.B trace\-full
+register is set to a true value,
+as with the command-line option
+.RB \[lq] \-r\~trace\-full=1 \[rq],
+register and string assignments,
+along with some other requests,
+are traced also.
+.
+If another macro package should be traced as well,
+specify it after
+.RB \[lq] \-m\~trace \[rq]
 on the command line.
 .
 .
 .P
 The macro file
-.B trace.tmac
+.I trace.tmac
 is unusual because it does not contain any macros to be called by a
 user.
 .
-Instead, the existing macro definition and appending facilities are
-modified such that they display diagnostic messages.
+Instead,
+.IR groff 's
+macro definition and alteration facilities are wrapped such that they
+display diagnostic messages.
 .
 .
 .\" ====================================================================
-.SH Example
-.\" ====================================================================
-.
-In the following examples, a roff fragment is fed into groff via
-standard input.
-.
-As we are only interested in the diagnostic messages (standard error)
-on the terminal, the normal formatted output (standard output) is
-redirected to the nirvana device
-.IR /dev/null .
-.
-The resulting diagnostic messages are displayed directly below the
-corresponding example.
-.
-.
-.\" ====================================================================
-.SS "Command-line option"
-.\" ====================================================================
-.
-Example:
-.
-.RS
-.P
-.EX
-\fIsh#\fP echo \[aq].
-> .de test_macro
-> ..
-> .test_macro
-> .test_macro some dummy arguments
-> \[aq] | groff \-m trace > /dev/null
-.P
-*** .de test_macro
-*** de trace enter: .test_macro
-*** trace exit: .test_macro
-*** de trace enter: .test_macro "some" "dummy" "arguments"
-*** trace exit: .test_macro "some" "dummy" "arguments"
-.EE
-.RE
-.
-.P
-The entry and the exit of each macro call is displayed on the terminal
-(standard output) \[em] together with the arguments (if any).
-.
-.
-.\" ====================================================================
-.SS "Nested macro calls"
-.\" ====================================================================
-.
-Example:
-.
-.RS
-.P
-.EX
-\fIsh#\fP echo \[aq].
-> .de child
-> ..
-> .de parent
-> .child
-> ..
-> .parent
-> \[aq] | groff \-m trace > /dev/null
-.P
-*** .de child
-*** .de parent
-*** de trace enter: .parent
- *** de trace enter: .child
- *** trace exit: .child
-*** trace exit: .parent
-.EE
-.RE
-.
-.P
-This shows that macro calls can be nested.
-.
-This powerful feature can help to tack down quite complex call stacks.
-.
-.
-.\" ====================================================================
-.SS "Activating with .mso"
-.\" ====================================================================
-.
-Example:
-.
-.RS
-.P
-.EX
-\fIsh#\fP echo \[aq].
-> .de before
-> ..
-> .mso trace.tmac
-> .de after
-> ..
-> .before
-> .after
-> .before
-> \[aq] | groff > /dev/null
-.P
-*** de trace enter: .after
-*** trace exit: .after
-.EE
-.RE
-.
-.P
-Here, the tracing is activated within the document, not by a
-command-line option.
-.
-As tracing was not active when macro
-.I before
-was defined, no call of this macro is protocolled; on the other hand,
-the macro
-.I after
-is fully protocolled.
-.
-.
-.\" ====================================================================
-.SH Problems
+.SS Limitations
 .\" ====================================================================
 .
 Because
-.B trace.tmac
+.I trace.tmac
 wraps the
-.B .de
-request (and its cousins), macro arguments are expanded one level more.
+.B de
+request
+(and its cousins),
+macro arguments are expanded one level more.
 .
 This causes problems if an argument contains four backslashes or more
 to prevent too early expansion of the backslash.
 .
-For example, this macro call
+For example,
+the macro call
 .
-.IP
+.RS
 .EX
-\&.foo \e\e\e\en[bar]
+\&.foo \[rs]\[rs]\[rs]\[rs]n[bar]
 .EE
+.RE
+.
+normally passes \[lq]\[rs]\[rs]n[bar]\[rq] to macro \[lq].foo\[rq],
+but with the redefined
+.B de
+request it passes \[lq]\[rs]n[bar]\[rq] instead.
 .
 .
 .P
-normally passes \[oq]\e\en[bar]\[cq] to macro \[oq].foo\[cq], but with
-the redefined
-.B .de
-request it passes \[oq]\en[bar]\[cq] instead.
+The solution to this problem is to use
+.IR groff 's
+.B \[rs]E
+escape sequence,
+an escape character that is not interpreted in copy mode.
+.
+.RS
+.EX
+\&.foo \[rs]En[bar]
+.EE
+.RE
+.
+.
+.\" ====================================================================
+.SH Examples
+.\" ====================================================================
+.
+We will illustrate
+.I trace.tmac
+using the shell's \[lq]here document\[rq] feature to supply
+.I groff
+with a document
+on the standard input stream.
+.
+Since we are interested only in diagnostic messages appearing on the
+standard error stream,
+we discard the formatted output by redirecting the standard output
+stream to
+.IR /dev/null .
+.
+.
+.\" ====================================================================
+.SS "Observing nested macro calls"
+.\" ====================================================================
+.
+Macro calls can be nested,
+even with themselves.
+.
+Tracing recurses along with them;
+this feature can help to detangle complex call stacks.
+.
+.
+.RS
+.P
+.EX
+.RB $\~ "cat <<EOF | groff \-m trace > /dev/null
+.B .de countdown
+.B .  nop \[rs]\[rs]$1
+.B .  nr count (\[rs]\[rs]$1 - 1)
+.B .  if \[rs]\[rs]n[count] .countdown \[rs]\[rs]n[count]
+.B ..
+.B .countdown 3
+.B blastoff
+.B EOF
+\~*** .de countdown
+\~*** de trace enter: .countdown "3"
+\~\~*** de trace enter: .countdown "2"
+\~\~\~*** de trace enter: .countdown "1"
+\~\~\~*** trace exit: .countdown "1"
+\~\~*** trace exit: .countdown "2"
+\~*** trace exit: .countdown "3"
+.EE
+.RE
+.
+.
+.\" ====================================================================
+.SS "Tracing with the mso request"
+.\" ====================================================================
+.
+Now let us activate tracing within the document,
+not with a command-line option.
+.
+We might do this when using a macro package like
+.I ms
+or
+.IR man ,
+where we may not want to be distracted by traces of macros we didn't
+write.
+.
+.
+.RS
+.P
+.EX
+.RB $\~ "cat <<EOF | groff -ms > /dev/null"
+.B .LP
+.B This is my introductory paragraph.
+.B .mso trace.tmac
+.B .de Mymac
+.B ..
+.B .Mymac
+.B .PP
+.B Let us review the existing literature.
+.B EOF
+\~*** .de Mymac
+\~*** de trace enter: .Mymac
+\~*** trace exit: .Mymac
+.EE
+.RE
 .
 .
 .P
-The solution to this problem is to use groff's
-.B \eE
-escape which is an escape character not interpreted in copy mode, for
-example
-.
-.IP
-.EX
-\&.foo \eEn[bar]
-.EE
+As tracing was not yet active when the macros \[lq]LP\[rq] and
+\[lq]PP\[rq] were defined
+(by
+.IR s.tmac ),
+their calls were not traced;
+contrast with the macro \[lq]Mymac\[rq].
 .
 .
+.br
+.ne 3v
 .\" ====================================================================
 .SH Files
 .\" ====================================================================
 .
-The
-.I trace
-macros are kept in the file
-.I trace.tmac
-located in the
-.IR "tmac directory" ;
-see
-.MR groff_tmac @MAN5EXT@
-for details.
+.TP
+.I @MACRODIR@/\:trace\:.tmac
+implements the package.
 .
 .
 .\" ====================================================================
 .SH Authors
 .\" ====================================================================
 .
-The
-.I trace
-macro packages was written by James Clark.
+.I trace.tmac
+was written by James Clark.
 .
 This document was written by
 .MT groff\-bernd\:.warken\-72@\:web\:.de
 Bernd Warken
+.ME
+and
+.MT g.branden\:.robinson@\:gmail\:.com
+G.\& Branden Robinson
 .ME .
 .
 .
@@ -290,23 +279,30 @@ You can browse it interactively with \[lq]info groff\[rq].
 .
 .TP
 .MR groff @MAN1EXT@
-An overview of the groff system.
+gives an overview of the
+.I groff
+document formatting system.
 .
 .
 .TP
 .MR troff @MAN1EXT@
-For details on option
-.BR \-m .
+supplies details of the
+.B \-m
+command-line option.
 .
 .
 .TP
 .MR groff_tmac @MAN5EXT@
-A general description of groff macro packages.
+offers a survey of
+.I groff
+macro packages.
 .
 .
 .TP
 .MR groff @MAN7EXT@
-A short reference for the groff formatting language.
+is a reference manual for the
+.I groff
+language.
 .
 .
 .\" Restore compatibility mode (for, e.g., Solaris 10/11).

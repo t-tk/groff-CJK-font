@@ -371,7 +371,7 @@ ps_output &ps_output::put_symbol(const char *s)
 ps_output &ps_output::put_color(unsigned int c)
 {
   char buf[128];
-  sprintf(buf, "%.3g", double(c) / color::MAX_COLOR_VAL);
+  sprintf(buf, "%.3g", double(c) / double(color::MAX_COLOR_VAL));
   int len = strlen(buf);
   if (col > 0 && col + len + need_space > max_line_length) {
     putc('\n', fp);
@@ -1693,7 +1693,7 @@ void ps_printer::do_import(char *arg, const environment *env)
     p = end;
   }
   if (csalpha(*p) && (p[1] == '\0' || p[1] == ' ' || p[1] == '\n')) {
-    error("scaling indicators not allowed in arguments for X import command");
+    error("scaling units not allowed in arguments for X import command");
     return;
   }
   while (*p == ' ' || *p == '\n')
@@ -1840,7 +1840,7 @@ int main(int argc, char **argv)
       break;
     case 'w':
       if (sscanf(optarg, "%d", &linewidth) != 1 || linewidth < 0) {
-	error("bad linewidth '%1'", optarg);
+	error("invalid line width '%1' ignored", optarg);
 	linewidth = -1;
       }
       break;
@@ -1870,7 +1870,7 @@ static void usage(FILE *stream)
 {
   fprintf(stream,
 "usage: %s [-glm] [-b n] [-c n] [-F dir] [-I dir] [-p paper-format]"
-" [-P prologue] [-w n] [file] ...\n"
+" [-P prologue-file] [-w n] [file ...]\n"
 "usage: %s {-v | --version}\n", program_name, program_name);
 }
 

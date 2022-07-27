@@ -50,7 +50,7 @@ tfmtodit \- adapt TeX Font Metrics files for groff \-Tdvi
 .IR skew-char ]
 .I tfm-file
 .I map-file
-.I font
+.I font-description
 .YS
 .
 .
@@ -72,7 +72,7 @@ tfmtodit \- adapt TeX Font Metrics files for groff \-Tdvi
 .\" ====================================================================
 .
 .I tfmtodit
-creates a font file for use with the
+creates a font description file for use with the
 .B dvi
 output driver of
 .MR groff @MAN1EXT@ .
@@ -83,7 +83,7 @@ is the name of the \*(tx font metric file for the font.
 .I map-file
 is a file giving the
 .I groff
-names for characters in the font;
+special character identifiers for glyphs in the font;
 this file should consist of a sequence of lines of the form
 .
 .RS
@@ -92,57 +92,59 @@ this file should consist of a sequence of lines of the form
 .
 where
 .I i
-is a decimal integer giving the position of the character in the font,
+is a decimal integer giving the position of the glyph in the font,
 and
 .I c1
 through
 .I cn
 are
-are the
 .I groff
-names of the character.
+special character identifiers for the glyph.
 .
-If a character has no
+If a glyph has no
 .I groff
 names but exists in
-.IR tfm-file ,
-then it will be put in the
+.I tfm-file,
+it is put in the
 .I groff
-font file as an unnamed character.
+font description file as an unnamed character.
 .
-The
+Output is written in
+.MR groff_font @MAN5EXT@
+format to
+.I font-description,
+a file named for the intended
 .I groff
-font file is written to
-.IR font .
+font name.
 .
 .
-.LP
+.P
 The
 .B \-s
 option should be given if the font is \[lq]special\[rq],
 meaning that
 .I groff
-should search it whenever a character is not found in the current font.
+should search it whenever a glyph is not found in the current font.
 .
 In that case,
-.I font
+.I font-description
 should be listed as an argument to the
 .B fonts
-directive in the
+directive in the output device's
 .I DESC
 file;
 if it is not special,
-there is no need to list it,
+there is no need to do so,
 since
-.I groff
-can automatically mount it when it is first used.
+.MR @g@troff @MAN1EXT@
+will automatically mount it when it is first used.
 .
 .
 .LP
 To do a good job of math typesetting,
 .I groff
 requires font metric information not present in
-.IR tfm-file .
+.I tfm-file.
 .
 This is because \*(tx has separate math italic fonts,
 whereas
@@ -236,14 +238,14 @@ Use the
 produced by Metafont containing
 .RB \[lq] special \[rq]
 and
-numspecial
+.RB \[lq] numspecial \[rq]
 commands to obtain additional font metric information.
 .
 .
 .TP
 .BI \-k \~skew-char
 The skew charcter of this font is at position
-.IR skew-char .
+.I skew-char.
 .
 .I skew-char
 should be an integer;
@@ -260,8 +262,7 @@ are ignored.
 .B \-s
 Add the
 .B special
-directive to the generated file
-.IR font .
+directive to the font description file.
 .
 .
 .\" ====================================================================
@@ -269,13 +270,18 @@ directive to the generated file
 .\" ====================================================================
 .
 .TP
-.I @FONTDIR@/devdvi/DESC
-Device description file.
+.I @FONTDIR@/\:\%devdvi/\:DESC
+describes the
+.B dvi
+output device.
+.
 .
 .TP
-.IR @FONTDIR@/devdvi/ F
-Font description file for font
-.IR F .
+.IR @FONTDIR@/\:\%devdvi/ F
+describes the font known
+.RI as\~ F
+on device
+.BR dvi .
 .
 .
 .\" ====================================================================

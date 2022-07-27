@@ -1,6 +1,6 @@
 .\" German localization for groff
 .\"
-.\" Copyright (C) 2006-2020 Free Software Foundation, Inc.
+.\" Copyright (C) 2006-2022 Free Software Foundation, Inc.
 .\"   Written by Werner Lemberg (wl@gnu.org)
 .\"
 .\" This file is part of groff.
@@ -25,6 +25,14 @@
 .cp 0
 .
 .
+.\" If changing from an existing locale, we need to preserve the state
+.\" of the "suppress hyphenation before a page location trap" bit.
+.nr locale*use-trap-hyphenation-mode 0
+.if d locale \
+.  if \n[.hy]=\n[\*[locale]*hyphenation-mode-trap] \
+.    nr locale*use-trap-hyphenation-mode 1
+.
+.
 .ds locale german\"
 .
 .
@@ -32,6 +40,7 @@
 .
 .ds \*[locale]-abstract Zusammenfassung\"
 .ds \*[locale]-app Anhang\"
+.ds \*[locale]-appendix_string Anhang\"
 .ds \*[locale]-april April\"
 .ds \*[locale]-attribute_string von\"
 .ds \*[locale]-august August\"
@@ -79,6 +88,15 @@
 .ds \*[locale]-litb Tabelle\"
 .ds \*[locale]-lt Verzeichnis der Tabellen\"
 .ds \*[locale]-lx Verzeichnis der Belege\"
+.ds \*[locale]-man-section1 Handbuch für allgemeine Befehle\"
+.ds \*[locale]-man-section2 Handbuch für Systemaufrufe\"
+.ds \*[locale]-man-section3 Handbuch zu Bibliotheksfunktionen\"
+.ds \*[locale]-man-section4 Handbuch zu Kernel-Schnittstellen\"
+.ds \*[locale]-man-section5 Handbuch zu Dateiformaten\"
+.ds \*[locale]-man-section6 Spielehandbuch\"
+.ds \*[locale]-man-section7 Sonstiges Informationshandbuch\"
+.ds \*[locale]-man-section8 Handbuch des Systemmanagers\"
+.ds \*[locale]-man-section9 Handbuch für Kernel-Entwickler\"
 .ds \*[locale]-march März\"
 .ds \*[locale]-may Mai\"
 .ds \*[locale]-monday Montag\"
@@ -109,7 +127,7 @@
 .	\" update the date
 .	ds DY \n[dy].\~\*[MO] \n[year]
 .	\" set hyphenation flags
-.	nr HY 3 \" 1+2
+.	nr HY 2
 .\}
 .
 .
@@ -134,20 +152,23 @@
 .\}
 .
 .
-.\" me package
-.if d @R \{\
-.	\" date update
-.	ds td \n(dy.\~\*(mo.\& \n(y4
-.\}
-.
-.
 .\" Default encoding
 .mso latin1.tmac
 .
 .ss 12 0
 .
+.\" Set up hyphenation.
+.
 .\" German hyphenation (\lefthyphenmin=2, \righthyphenmin=2)
-.hy 1
+.nr \*[locale]*hyphenation-mode-base 1
+.nr \*[locale]*hyphenation-mode-trap 2
+.
+.ie \n[locale*use-trap-hyphenation-mode] \
+.  hy \n[\*[locale]*hyphenation-mode-trap]
+.el \
+.  hy \n[\*[locale]*hyphenation-mode-base]
+.
+.rr locale*use-trap-hyphenation-mode
 .
 .hcode ä ä  â â  à à  á á  ã ã  å å  æ æ
 .hcode ç ç
@@ -174,8 +195,17 @@
 .  hpf hyphen.det
 .
 .
-.\" man, mdoc and mdoc-old are intentionally left untouched: usually
-.\" these packages are translated in the sources of the documents.
+.\" man package
+.if d an \
+.	an*reset-hyphenation-mode
+.
+.
+.\" me package
+.if d @R \{\
+.	ds _td_format \En(dy.\~\E*(mo.\& \En(y4
+.	ld
+.\}
+.
 .
 .cp \n[*groff_de_tmac_C]
 .do rr *groff_de_tmac_C

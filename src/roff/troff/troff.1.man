@@ -90,7 +90,7 @@ transforms
 .MR groff @MAN7EXT@
 language input into the device-independent output format described in
 .MR groff_out @MAN5EXT@ ;
-.I \%@g@troff
+.I @g@troff
 is thus the heart of the GNU
 .I roff
 document formatting system.
@@ -166,12 +166,12 @@ output are subject to change.
 .TP
 .B \-b
 Write a backtrace reporting the state of
-.IR \%@g@troff 's
+.IR @g@troff 's
 input parser to the standard error stream with each diagnostic message.
 .
 The line numbers given in the backtrace might not always be correct,
 because
-.IR \%@g@troff 's
+.IR @g@troff 's
 idea of line numbers can be confused by requests that append to strings
 or macros.
 .
@@ -220,7 +220,7 @@ identifier.
 .TP
 .B \-E
 Inhibit
-.I \%@g@troff
+.I @g@troff
 error messages;
 implies
 .BR \-Ww .
@@ -277,15 +277,15 @@ those named in
 .RB \[lq] "\[rs]X\[aq]ps: file\[aq]" \[rq],
 and
 .RB \[lq] "\[rs]X\[aq]pdf: pdfpic\[aq]" \[rq]
-escape sequences).
+device control escape sequences).
 .
 This option may be specified more than once;
-the directories are then searched in the order specified.
+the directories are searched in the order specified.
 .
 If you want to search the current directory before others,
 add
 .RB \[lq] "\-I .\&" \[rq]
-at the appropriate place.
+at the desired place.
 .
 The current working directory is otherwise searched last.
 .
@@ -356,7 +356,7 @@ and
 means print every page from
 .IR n \~on.
 .
-.I \%@g@troff
+.I @g@troff
 stops processing and exits after formatting the last page enumerated in
 .IR list .
 .
@@ -364,7 +364,7 @@ stops processing and exits after formatting the last page enumerated in
 .TP
 .BI \-r\~ cn
 .TQ
-.BI \-r\~ reg = n
+.BI \-r\~ reg = expr
 Define
 .I roff
 .RI register\~ c
@@ -426,7 +426,8 @@ These requests are disabled by default because they allow an untrusted
 input document to write to arbitrary file names and run arbitrary
 commands.
 .
-This option also adds the current directory to the macro search path;
+This option also adds the current directory to the macro package search
+path;
 see the
 .B \-m
 option above.
@@ -458,7 +459,7 @@ Suppress formatted output.
 .\" BEGIN Keep parallel with groff.texi node "Warnings".
 .\" Caveat: the Texinfo manual sorts them by number, not name.
 Warning diagnostics emitted by
-.I \%@g@troff
+.I @g@troff
 are divided into named,
 numbered categories.
 .
@@ -488,7 +489,7 @@ Bit@Code@Category@Bit@Code@Category
 _
 0@1@char@10@1024@reg
 1@2@number@11@2048@tab
-2@4@break@12@4096@right-brace
+2@4@break@12@4096@right\-brace
 3@8@delim@13@8192@missing
 4@16@el@14@16384@input
 5@32@scale@15@32768@escape
@@ -501,15 +502,14 @@ _
 .
 .
 .P
-.nr x \w'\fBright-brace'+1n+\w'00000'u
+.nr x \w'\fBright\-brace'+1n+\w'00000'u
 .ta \nxuR
 .
 .
 .TP \nxu+3n
 .BR break "\t4"
-When filling is enabled,
-a line could not be broken such that its length was less than the output
-line length
+A filled output line could not be broken such that its length was less
+than the output line length
 .BR \[rs]n[.l] .
 .
 This category is enabled by default.
@@ -529,10 +529,10 @@ This category is enabled by default.
 .
 .TP
 .BR color "\t524288"
-An undefined color was dereferenced,
+An undefined color name was selected,
 an attempt was made to define a color using an unrecognized color space,
 an invalid component in a color definition was encountered,
-or an attempt was made to redefine the default color.
+or an attempt was made to redefine a default color.
 .
 .
 .TP
@@ -575,7 +575,7 @@ This category is enabled by default.
 .
 .TP
 .BR font "\t131072"
-A non-existent font was dereferenced.
+A non-existent font was selected.
 .
 This category is enabled by default.
 .
@@ -602,7 +602,7 @@ macro,
 or diversion was used.
 .
 When such an object is dereferenced,
-an empty one of that name and type is automatically created.
+an empty one of that name is automatically created.
 .
 So,
 in most cases,
@@ -610,7 +610,8 @@ at most one warning is given for each name.
 .
 .
 .IP
-This warning is also emitted upon an attempt to move an unplanted trap.
+This warning is also emitted upon an attempt to move an unplanted trap
+macro.
 .
 In such cases,
 the unplanted macro is
@@ -647,7 +648,7 @@ So, in most cases, at most one warning is given for each name.
 .
 .
 .TP
-.BR right-brace "\t4096"
+.BR right\-brace "\t4096"
 A right brace escape sequence
 .B \[rs]}
 was encountered where a number was expected.
@@ -655,7 +656,7 @@ was encountered where a number was expected.
 .
 .TP
 .BR scale "\t32"
-An inappropriate scaling indicator was used in a numeric expression.
+An inappropriate scaling unit was used in a numeric expression.
 .
 .
 .TP
@@ -748,7 +749,7 @@ it is a semicolon (;).
 A list of directories in which to seek the selected output device's
 directory of device and font description files.
 .
-.I \%@g@troff
+.I @g@troff
 will scan directories given as arguments to any specified
 .B \-F
 options before these,
@@ -765,7 +766,7 @@ after them.
 .I GROFF_TMAC_PATH
 A list of directories in which to search for macro files.
 .
-.I \%@g@troff
+.I @g@troff
 will scan directories given as arguments to any specified
 .B \-M
 options before these,
@@ -799,7 +800,7 @@ option overrides
 .I SOURCE_DATE_EPOCH
 A timestamp
 (expressed as seconds since the Unix epoch)
-to use as the creation timestamp in place of the current time.
+to use as the output creation timestamp in place of the current time.
 .
 The time is converted to human-readable form using
 .MR ctime 3
@@ -822,7 +823,7 @@ see
 .\" ====================================================================
 .
 .TP
-.I @MACRODIR@/troffrc
+.I @MACRODIR@/\:\%troffrc
 is an initialization macro file loaded before any macro packages
 specified with
 .B \-m
@@ -830,7 +831,7 @@ options.
 .
 .
 .TP
-.I @MACRODIR@/troffrc\-end
+.I @MACRODIR@/\:\%troffrc\-end
 is an initialization macro file loaded after all macro packages
 specified with
 .B \-m
@@ -838,21 +839,19 @@ options.
 .
 .
 .TP
-.IR @MACRODIR@/ name .tmac
-.TQ
-.IR @MACRODIR@/tmac. name
+.IR @MACRODIR@/\: name \:.tmac
 are macro files distributed with
 .IR groff .
 .
 .
 .TP
-.IR @FONTDIR@/dev name /DESC
+.IR @FONTDIR@/\:\%dev name /\:DESC
 describes the output device
 .IR name .
 .
 .
 .TP
-.IR @FONTDIR@/dev name / F
+.IR @FONTDIR@/\:\%dev name / F
 describes the font
 .I F
 of device
@@ -956,7 +955,7 @@ device and font description files.
 .TP
 .MR groff_out @MAN5EXT@
 describes the format of
-.IR \%@g@troff 's
+.IR @g@troff 's
 output.
 .
 .

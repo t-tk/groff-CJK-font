@@ -217,15 +217,17 @@ static int start_number()
   while (tok.is_space())
     tok.next();
   if (tok.is_newline()) {
-    warning(WARN_MISSING, "missing number");
+    warning(WARN_MISSING, "numeric expression missing");
     return 0;
   }
   if (tok.is_tab()) {
-    warning(WARN_TAB, "tab character where number expected");
+    warning(WARN_TAB, "expected numeric expression, got %1",
+	    tok.description());
     return 0;
   }
   if (tok.is_right_brace()) {
-    warning(WARN_RIGHT_BRACE, "'\\}' where number expected");
+    warning(WARN_RIGHT_BRACE, "expected numeric expression, got right"
+	    "brace escape sequence");
     return 0;
   }
   return 1;
@@ -460,7 +462,7 @@ static int parse_term(units *v, int scaling_indicator,
 	scaling_indicator = c;
       }
       else {
-	error("expected ';' after scaling indicator (got %1)",
+	error("expected ';' after scaling unit, got %1",
 	      tok.description());
 	return 0;
       }
@@ -475,7 +477,7 @@ static int parse_term(units *v, int scaling_indicator,
     if (tok.ch() != ')') {
       if (rigid)
 	return 0;
-      warning(WARN_SYNTAX, "missing ')' (got %1)", tok.description());
+      warning(WARN_SYNTAX, "experted ')', got %1", tok.description());
     }
     else
       tok.next();
@@ -528,7 +530,7 @@ static int parse_term(units *v, int scaling_indicator,
     *v = 0;
     return rigid ? 0 : 1;
   default:
-    warning(WARN_NUMBER, "numeric expression expected (got %1)",
+    warning(WARN_NUMBER, "expected numeric expression, got %1",
 	    tok.description());
     return 0;
   }
@@ -553,11 +555,11 @@ static int parse_term(units *v, int scaling_indicator,
   if ((c = tok.ch()) != 0 && strchr(SCALE_INDICATOR_CHARS, c) != 0) {
     switch (scaling_indicator) {
     case 0:
-      warning(WARN_SCALE, "scaling indicator invalid in context");
+      warning(WARN_SCALE, "scaling unit invalid in context");
       break;
     case 'z':
       if (c != 'u' && c != 'z') {
-	warning(WARN_SCALE, "'%1' scaling indicator invalid in context;"
+	warning(WARN_SCALE, "'%1' scaling unit invalid in context;"
 		" convert to 'z' or 'u'", c);
 	break;
       }
@@ -568,7 +570,7 @@ static int parse_term(units *v, int scaling_indicator,
       break;
     default:
       if (c == 'z') {
-	warning(WARN_SCALE, "'z' scaling indicator invalid in context");
+	warning(WARN_SCALE, "'z' scaling unit invalid in context");
 	break;
       }
       si = c;

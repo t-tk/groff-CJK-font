@@ -18,29 +18,37 @@ internet at <http://www.gnu.org/licenses/gpl-2.0.txt>. */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include <assert.h>
 #include <math.h>
 
-int is_prime(unsigned n)
+bool is_prime(unsigned n)
 {
+  assert(n > 1);
   if (n <= 3)
-    return 1;
+    return true;
   if (!(n & 1))
-    return 0;
+    return false;
   if (n % 3 == 0)
-    return 0;
+    return false;
   unsigned lim = unsigned(sqrt((double)n));
   unsigned d = 5;
   for (;;) {
     if (d > lim)
       break;
     if (n % d == 0)
-      return 0;
+      return false;
     d += 2;
     if (d > lim)
       break;
     if (n % d == 0)
-      return 0;
+      return false;
     d += 4;
   }
-  return 1;
+  return true;
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

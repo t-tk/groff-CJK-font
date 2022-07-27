@@ -11,7 +11,7 @@ roff \- concepts and history of roff typesetting
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 2000-2020 Free Software Foundation, Inc.
+.\" Copyright (C) 2000-2022 Free Software Foundation, Inc.
 .\"
 .\" This file is part of groff, the GNU roff type-setting system.
 .\"
@@ -36,73 +36,732 @@ roff \- concepts and history of roff typesetting
 .
 The term
 .I roff
-describes a family of document formatting systems known by names like
+denotes a family of document formatting systems known by names like
 .IR troff ,
 .IR nroff ,
-.IR ditroff ,
 and
-.IR groff .
+.IR ditroff .
 .
 A
 .I roff
-system consists of an extensible text formatting language and a set of
-programs for printing and converting to other text formats.
+system consists of an interpreter for an extensible text formatting
+language and a set of programs for preparing output for various devices
+and file formats.
 .
 Unix-like operating systems often distribute a
 .I roff
-system as a core package.
+system.
+.
+The manual pages on Unix systems
+(\[lq]man\~pages\[rq])
+and bestselling books on software engineering,
+including Kernighan and Ritchie's
+.I The C Programming Language
+and W.\& Richard Stevens's
+.I Advvanced Programming in the Unix Environment
+are written using a
+.I roff
+system.
+.
+GNU
+.IR roff \[em] groff \[em]is
+arguably the most widespread
+.I roff
+implementation.
 .
 .
 .P
-The most common
-.I roff
-system today is GNU
-.IR roff ,
-.MR groff @MAN1EXT@ .
-.
-.I groff
-retains the input conventions and functionality of its ancestors,
-with many extensions.
-.
-The ancestry of
-.I roff
-is described in section \[lq]History\[rq] below.
-.
-In this document,
-the term
-.I roff
-generally refers to this class of programs,
-with the exception of a
-.MR roff 1
-command provided in early Unix systems.
-.
-In spite of its age,
-.I roff
-remains in wide use today;
-for example,
-the manual pages on Unix systems
-(\[lq]man\~pages\[rq]),
-books about software and programming,
-and technical memoranda are written in
-.IR roff .
-.
-.
-.P
-This document describes the history of the development of the \[lq]roff
-system\[rq],
-typographical concepts that form the common background of all
+This document
+presents typographical concepts that form the common background of all
 .I roff
 implementations,
-details on the
+describes some of the development history of
 .I roff
-pipeline
-which is usually hidden behind front ends like
+systems,
+offers details of the
+.I roff
+pipeline which are usually managed by front ends like
 .MR groff @MAN1EXT@ ,
-a general overview of the formatting language,
-some tips for editing
+surveys the formatting language,
+suggests some tips for editing
 .I roff
-files,
-and many suggestions for further reading.
+input files,
+and recommends materials for further reading.
+.
+.
+.\" ====================================================================
+.SH Concepts
+.\" ====================================================================
+.
+.\" BEGIN Keep roughly parallel with groff.texi nodes "Text" through
+.\" "Tab Stops".
+.I roff
+input files contain text interspersed with instructions to control the
+formatter.
+.
+Even in the absence of such instructions,
+a
+.I roff
+formatter still processes its input in several ways,
+by filling,
+hyphenating,
+breaking,
+and adjusting it,
+and supplementing it with inter-sentence space.
+.
+These processes are basic to typesetting,
+and can be controlled at the input document's discretion.
+.
+.
+.P
+The formatter reads its input character by character,
+collecting words as it goes,
+and fits as many words together on an output line as it can\[em]this
+is known as
+.I filling.
+.
+To a
+.I roff
+system,
+a
+.I word
+is any sequence of one or more characters that aren't
+spaces,
+tabs,
+or newlines.
+.
+Words are separated by
+spaces,
+tabs,
+newlines,
+or
+file boundaries.
+.
+.
+.P
+A
+.I roff
+formatter attempts to detect the boundaries between sentences,
+and supplies additional inter-sentence space between them.
+.
+It does this by flagging certain characters
+(normally
+.RB \[lq] !\& \[rq],
+.RB \[lq] ?\& \[rq],
+and
+.RB \[lq] .\& \[rq])
+as potentially ending a sentence.
+.
+When the formatter encounters one of these
+.I end-of-sentence characters
+at the end of a line,
+or one of them is followed by two spaces on the same input line,
+it appends an inter-word space
+followed by an inter-sentence space in the formatted output.
+.
+The non-printing input break escape sequence
+.B \[rs]&
+can be used after an end-of-sentence character to defeat end-of-sentence
+detection on a per-instance basis.
+.
+Normally,
+the occurrence of a visible non-end-of-sentence character
+(as opposed to a space or tab)
+immediately after an end-of-sentence
+character cancels detection of the end of a sentence.
+.
+However,
+several characters are treated
+.I transparently
+after the occurence of an end-of-sentence character.
+.
+That is,
+a
+.I roff
+does not cancel end-of-sentence detection when it processes them.
+.
+This is because such characters are often used as footnote markers or to
+close quotations and parentheticals.
+.
+The default set is
+.BR \[dq] ,
+.BR \[aq] ,
+.BR ) ,
+.BR ] ,
+.BR * ,
+.BR \[rs][dg] ,
+.BR \[rs][dd] ,
+.BR \[rs][rq] ,
+and
+.BR \[rs][cg] .
+.
+The last four are examples of
+.I special characters,
+escape sequences whose purpose is to obtain glyphs that are not easily
+typed at the keyboard,
+or which have special meaning to the formatter
+(like
+.B \[rs]
+itself).
+.
+.
+.P
+When an output line is nearly full,
+it is uncommon for the next word collected from the input to exactly
+fill it\[em]typically,
+there is room left over only for part of the next word.
+.
+The process of splitting a word so that it appears partially on one line
+(with a hyphen to indicate to the reader that the word has been broken)
+with its remainder on the next is
+.I hyphenation.
+.
+Hyphenation points can be manually specified;
+.I groff
+also uses a hyphenation algorithm and language-specific pattern files to
+decide which words can be hyphenated and where.
+.
+Hyphenation does not always occur even when the hyphenation rules for a
+word allow it;
+it can be disabled,
+and when not disabled there are several parameters that can prevent it
+in certain circumstances.
+.
+.
+.P
+Once an output line has been filled,
+whether or not hyphenation has occurred on that line,
+the next word read from the input will be placed on a different output
+line;
+this is called a
+.I break.
+.
+In this document and in
+.I roff
+discussions generally,
+a \[lq]break\[rq] if not further qualified always refers to the
+termination of an output line.
+.
+When the formatter is filling text,
+it introduces breaks automatically to keep output lines from exceeding
+the configured line length.
+.
+After an automatic break,
+a
+.I roff
+formatter
+.I adjusts
+the line if applicable
+(see below),
+and then resumes collecting and filling text on the next output line.
+.
+.
+.br
+.ne 2v
+.P
+Sometimes,
+a line cannot be broken automatically.
+.
+This usually does not happen with natural language text unless the
+output line length has been manipulated to be extremely short,
+but it can with specialized text like program source code.
+.
+.I groff
+provides a means of telling the formatter where the line may be broken
+without hyphens.
+.
+This is done with the non-printing break point escape sequence
+.BR \[rs]: .
+.
+.
+.P
+.\" What if the document author wants to stop filling lines temporarily,
+.\" for instance to start a new paragraph?  There are several solutions.
+There are several ways to cause a break at a predictable location.
+.
+A blank input line not only causes a break,
+but by default it also outputs a one-line vertical space
+(effectively a blank output line).
+.
+Macro packages may discourage or disable this \[lq]blank line
+method\[rq] of paragraphing in favor of their own macros.
+.
+A line that begins with one or more spaces causes a break.
+.
+The spaces are output at the beginning of the next line without being
+.I adjusted
+(see below).
+.
+Again, macro packages may provide other methods of producing indented paragraphs.
+.
+Trailing spaces on
+.I text lines
+(see below)
+are ignored.
+.
+The end of an input file causes a break.
+.
+.
+.P
+After the formatter performs an automatic line break,
+it then tries to
+.I adjust
+the line:
+inter-word spaces are widened until the text reaches the right margin.
+.
+Extra spaces between words are preserved.
+.
+Leading and trailing spaces are handled as noted above.
+.
+Text can be aligned to the left or right margins or centered using
+.I requests.
+.
+.
+.P
+A
+.I roff
+formatter translates horizontal tab characters,
+also called simply \[lq]tabs\[rq],
+in the input into movements to the next tab stop.
+.
+These tab stops are by default located every half inch measured from the
+current position on the input line.
+.
+With them,
+simple tables can be made.
+.
+However,
+this method can be deceptive,
+as the appearance
+(and width)
+of the text in an editor and the results from the formatter can vary
+greatly,
+particularly when proportional typefaces are used.
+.
+A tab character does not cause a break and therefore does not interrupt
+filling.
+.
+The formatter provides facilities for sophisticated table composition;
+there are many details to track
+when using the \[lq]tab\[rq] and \[lq]field\[rq] low-level features,
+so most users turn to the
+.MR @g@tbl @MAN1EXT@
+preprocessor for table construction.
+.\" END Keep roughly parallel with groff.texi nodes "Text" through "Tab
+.\" Stops".
+.
+.
+.\" ====================================================================
+.SS "Page geometry"
+.\" ====================================================================
+.
+.\" BEGIN Keep parallel with groff.texi node "Page Geometry".
+.I roff
+systems format text under certain assumptions about the size of the
+output medium,
+or page.
+.
+For the formatter to correctly break a line it is filling,
+it must know the line length,
+which it derives from the page width.
+.\" (@pxref{Line Layout}).
+.
+For it to decide whether to write an output line to the current page or
+wait until the next one,
+it must know the page length.
+.\" (@pxref{Page Layout}).
+.
+.
+A device's
+.I resolution
+converts practical units like inches or centimeters to
+.I basic units,
+a convenient length measure for the output device or file format.
+.
+The formatter and output driver use basic units to reckon page
+measurements.
+.
+The device description file defines its resolution and page dimensions
+(see
+.MR groff_font @MAN5EXT@ ).
+.\" (@pxref{DESC File Format}).
+.
+.
+.P
+A
+.I page
+is a two-dimensional structure upon which a
+.I roff
+system imposes a coordinate system with its upper left corner as the
+origin.
+.
+Coordinate values are in basic units and increase down and to the right.
+Useful ones are therefore always positive and within numeric ranges
+corresponding to the page boundaries.
+.
+.
+.P
+While the formatter
+(and,
+later,
+output driver)
+is processing a page,
+it keeps track of its
+.I drawing position,
+which is the location at which the next glyph will be written,
+from which the next motion will be measured,
+or where a geometric primitive will commence rendering.
+.
+Notionally,
+glyphs are drawn from the text baseline upward and to the right.
+.RI ( groff
+does not yet support right-to-left scripts.)
+.
+The
+.I text baseline
+is a
+(usually invisible)
+line upon which the glyphs of a typeface are aligned.
+.
+A glyph therefore \[lq]starts\[rq] at its bottom-left corner.
+.
+If drawn at the origin,
+a typical letter glyph would lie partially or wholly off the page,
+depending on whether,
+like \[lq]g\[rq],
+it features a decender below the baseline.
+.
+.
+.P
+Such a situation is nearly always undesirable.
+.
+It is furthermore conventional not to write or draw at the extreme edges
+of the page.
+.
+Therefore the initial drawing position of a
+.I roff
+formatter is not at the origin,
+but down and to the right of it.
+.
+This rightward shift
+from the left edge is known as the
+.I page offset.
+.
+.RI ( groff 's
+terminal output devices have page offsets of zero.)
+.
+The downward shift leaves room for a text output line.
+.
+.
+.P
+Text is arranged on a one-dimensional lattice of text baselines from
+the top to the bottom of the page.
+.
+.I Vertical spacing
+is the distance between adjacent text baselines.
+.
+In ordinary circumstances,
+this quantity is 120% of the type size.
+.
+The initial vertical drawing position is one unit of vertical spacing
+below the page top.
+.
+Typographers have a name for this unit:
+\[lq]vee\[rq].
+.
+.
+.P
+Vertical spacing has an impact on page-breaking decisions.
+.
+Generally,
+when a break occurs,
+the formatter moves the drawing position to the next text baseline
+automatically.
+.
+If the formatter was already writing to the last line that would fit on
+the page,
+advancing by one vee would place the next text baseline off the page.
+.
+Rather than let that happen,
+.I roff
+formatters instruct the output driver to eject the page,
+start a new one,
+and reset the drawing position to one vee below the page top again;
+this is a
+.I page break.
+.
+.
+.P
+When the last line of input text is also the last output line that can
+fit on the page,
+the break caused by the end of the input file
+will also break the page,
+producing a useless blank one.
+.
+Macro packages keep users from having
+to confront this difficulty by setting \[lq]traps\[rq];
+.\" (@pxref{Traps});
+moreover,
+all but the simplest page layouts tend to have headers and footers,
+or at least bear vertical margins larger than one vee.
+.\" END Keep parallel with groff.texi node "Page Geometry".
+.
+.
+.\" ====================================================================
+.SS "Language elements"
+.\" ====================================================================
+.
+Lines of input to any
+.I roff
+formatter can be classified as one of two types:
+control lines and text lines.
+.
+.
+.P
+A
+.I control line
+starts with the
+.I control character,
+a dot
+.RB ( .\& )
+or the
+.I no-break control character,
+a neutral apostrophe
+.RB ( \[aq] ).
+.
+Either control character is followed by zero or more spaces or tabs
+and then an optional
+.I request,
+an instruction built in to the formatter.
+.
+Some requests take one or more
+.I arguments,
+which follow on the same line,
+separated from the request name and each other only by spaces.
+.
+.
+.P
+Any input line that is not a control line is a
+.I text line.
+.
+See section \[lq]Line continuation\[rq] in
+.MR groff @MAN7EXT@
+for an exception to this rule.
+.
+Text lines generally become formatted output.
+.
+To start a text line with the control or no-break control character,
+prefix the character with the
+.B \[rs]&
+escape sequence.
+.
+.
+.P
+.I Escape sequences
+start with the
+.I escape character,
+a backslash
+.BR \[rs] ,
+and are followed by at least one additional character.
+.
+They can appear anywhere in the input.
+.
+.
+.P
+With requests,
+the escape and control characters can be changed;
+further,
+escape sequence recognition can be turned off and back on.
+.
+.
+.P
+.I Macros
+permit the extension or replacement of the request repertoire.
+.
+Certain requests can be invoked to define a macro,
+a user-directed abbreviation for a collection of input lines.
+.
+Macros are called on control lines much as requests are invoked,
+albeit with occasional differences in argument handling.
+.
+When a macro is called,
+its definition
+(or \[lq]body\[rq])
+is
+.I interpolated,
+as if typed at its call site.
+.
+Its contents are then parsed normally.
+.
+.
+.P
+.I Strings
+store character sequences.
+.
+In
+.IR groff ,
+they can be parameterized as macros can.
+.
+.
+.P
+.I Registers
+store numerical values,
+including measurements.
+.
+The latter are generally in basic units;
+.I scaling units
+can be appended to numeric expressions to clarify their meaning when
+stored or interpolated.
+.
+Some read-only predefined registers interpolate text.
+.
+.
+.P
+.I Fonts
+are identified either by a name or by a mounting position
+(a non-negative number).
+.
+Four font styles are available on all devices.
+.
+.B R
+is \[lq]roman\[rq]:
+normal,
+upright text.
+.
+.B B
+is
+.BR bold ,
+an upright typeface with a heavier weight.
+.
+.B I
+is
+.IR italic ,
+a face that is oblique on typesetter output devices and usually
+underlined instead on terminal devices.
+.
+.B BI
+is \f[BI]bold-italic\f[]\/, \" indulging a bit of man(7) evil here
+combining both of the foregoing style variations.
+.
+Typesetter devices typically offer one or more
+.I special
+fonts as well;
+they provide glyphs that are not available in the multiple styles of
+text fonts.
+.
+.
+.P
+.I groff
+supports named
+.I colors
+for glyph rendering and drawing of geometric primitives.
+.
+Stroke and fill colors are distinct;
+the stroke color is used for glyphs.
+.
+.
+.P
+.I Glyphs
+are visual representation forms of
+.I characters.
+.
+In
+.I groff,
+the distinction between those two elements is not always obvious
+(and a full discussion is beyond our scope).
+.
+To roughly characterize,
+\[lq]A\[rq] is a character when we consider it in the abstract:
+to make it a glyph,
+we must select a typeface with which to render it,
+and determine its type size and color.
+.
+The formatting process turns input characters into output glyphs.
+.
+A few characters commonly seen on keyboards are treated
+specially by
+.I roff
+languages and may not look correct in output if used unthinkingly;
+they are
+the (double) quotation mark
+.RB ( \[dq] ),
+the neutral apostrophe
+.RB ( \[aq] ),
+the minus sign
+.RB ( \- ),
+the backslash
+.RB ( \[rs] ),
+the caret or circumflex accent
+.RB ( \[ha] ),
+the grave accent
+.RB ( \[ga] ),
+and the tilde
+.RB ( \[ti] ).
+.
+All are available via
+.I special character
+escape sequences,
+along with numerous other symbols;
+see
+.MR groff_char @MAN7EXT@ .
+.
+.
+.\" BEGIN Keep roughly parallel with first paragraphs of groff.texi node
+.\" "Deferring Output".
+.P
+A further few language elements arise as page layouts become more
+sophisticated and demanding.
+.
+.I Environments
+collect formatting parameters like line length and typeface.
+.
+A
+.I diversion
+stores formatted output for later use.
+.
+A
+.I trap
+is a condition on the input or output,
+tested automatically by the formatter,
+that is associated with a macro,
+causing it to be called when that condition is fulfilled.
+.
+.
+.P
+Footnote support often exercises all three of the foregoing features.
+.
+A simple implementation might work as follows.
+.
+A pair of macros is defined:
+one starts a footnote and the other ends it.
+.
+The author calls the first macro where a footnote marker is desired.
+.
+The macro establishes a diversion so that the footnote text is collected
+at the place in the body text where its corresponding marker appears.
+.
+An environment is created for the footnote so that it is set at a
+smaller typeface.
+.
+The footnote text is formatted in the diversion using that environment,
+but it does not yet appear in the output.
+.
+The document author calls the footnote end macro,
+which returns to the previous environment and ends the diversion.
+.
+Later,
+after much more body text in the document,
+a trap,
+set a small distance above the page bottom,
+is sprung.
+.
+The macro called by the trap draws a line across the page and emits the
+stored diversion.
+.
+Thus,
+the footnote is rendered.
+.\" END Keep roughly parallel with first paragraphs of groff.texi node
+.\" "Deferring Output".
 .
 .
 .\" ====================================================================
@@ -110,11 +769,17 @@ and many suggestions for further reading.
 .\" ====================================================================
 .
 Computer-driven document formatting dates back to the 1960s.
+.\" John Labovitz points out that Peter Samson's TJ-2 dates to 1963,
+.\" but since this is a *roff man page, we do not begin our story there.
+.\" https://johnlabovitz.com/publications/\
+.\" The-electric-typesetter--The-origins-of-computing-in-typography.pdf
 .
 The
 .I roff
 system itself is intimately connected with the Unix operating system,
-but its roots go back to the earlier operating systems CTSS and Multics.
+but its roots go back to the earlier operating systems CTSS,
+GECOS,
+and Multics.
 .
 .
 .\" ====================================================================
@@ -154,15 +819,16 @@ A sample of control words from a
 .I RUNOFF
 manual of December 1966
 .UE
-was documented as follows with only a slight update to parameter syntax.
+was documented as follows
+(with the parameter notation slightly altered).
 .
-They will be familiar to
+The abbreviations will be familiar to
 .I roff
 veterans.
 .
 .
 .P
-.ne 10 \" why is tbl ****ing with me?
+.ne 10v
 .TS
 center;
 r l
@@ -200,10 +866,16 @@ proved influential,
 seeing many ports and derivations elsewhere.
 .
 .
+.\" "Morris did one port and called it roff. I did the BCPL one, adding
+.\" registers, but not macros. Molly Wagner contributed a hyphenation
+.\" algorithm. Ken and/or Dennis redid roff in PDP-11 assembler. Joe
+.\" started afresh for the grander nroff, including macros. Then Joe
+.\" bought a phototypesetter ..."
+.\" -- https://minnie.tuhs.org/pipermail/tuhs/2018-November/017052.html
 .P
 In 1969,
-Doug McIlroy wrote one such reimplementation of
-.I RUNOFF
+Doug McIlroy wrote one such reimplementation,
+adding extensions,
 in the BCPL language for a GE 645 running GECOS at the Bell Labs
 location in Murray Hill,
 New Jersey.
@@ -237,6 +909,21 @@ you had to backspace and underscore in the input yourself).
 .B .fi
 to enable filling of output lines got the name it retains to this day.
 .
+.I roff
+also featured a heuristic system for automatically placing hyphenation
+points,
+designed and implemented by Molly Wagner.
+.
+It furthermore introduced numeric variables,
+termed registers.
+.
+By 1971,
+this program had been ported to Multics and was known as
+.IR roff ,
+a name McIlroy attributes to Bob Morris,
+to distinguish it from CTSS
+.IR RUNOFF .
+.
 .\" GBR can't find a source for this claim (of Bernd's).
 .\"Multics
 .\".I runoff
@@ -249,27 +936,36 @@ to enable filling of output lines got the name it retains to this day.
 .SS "Unix and \f[I]roff\f[]"
 .\" ====================================================================
 .
-By 1971,
 McIlroy's
-.I runoff
-had been rewritten in DEC PDP-11 assembly language
-by Dennis Ritchie
-for the fledgling Unix operating system
-and seen its name shortened to
 .I roff
-(perhaps under the influence of Ken Thompson),
-but had added support for automatic hyphenation with
+was one of the first Unix programs.
+.
+in Dennis Ritchie's term,
+it was \[lq]transliterated\[rq] from BCPL to DEC PDP-7 assembly language
+.\" see "The Evolution of the Unix Time-Sharing System", Ritchie, 1984
+for the fledgling Unix operating system.
+.
+Automatic hyphenation was managed with
 .B .hc
 and
 .B .hy
-requests;
-a generalization of line spacing control with the
+requests,
+line spacing control was generalized with the
 .B .ls
-request;
+request,
 and what later
 .IR roff s
-would call diversions,
-with \[lq]footnote\[rq] requests.
+would call diversions were available via \[lq]footnote\[rq] requests.
+.\" The foregoing features may have been in McIlroy's Multics roff, but
+.\" he no longer has documentation for that--only the GECOS version.
+.\" GBR's guess is that they were, if we take Ritchie's choice of the
+.\" term "transliterated" seriously.  GBR further speculates that there
+.\" is no reason to suppose that McIlroy's roff was stagnant from
+.\" 1969-1971, whereas we have no record of any significant
+.\" post-transliteration development of Unix roff.  Its request list did
+.\" not appear until the 3rd edition manual, and did not change
+.\" thereafter.  In 7th edition, roff was characterized as "utterly
+.\" frozen".
 .
 This
 .I roff
@@ -277,16 +973,16 @@ indirectly funded operating systems research at Murray Hill,
 for it was used to prepare patent applications for AT&T to the U.S.\&
 government.
 .
-This arrangement enabled the group to acquire the aforementioned PDP-11;
+This arrangement enabled the group to acquire a PDP-11;
 .I roff
-promptly proved equal to the task of typesetting the first edition of
-the manual for what would later become known as \[lq]v1 Unix\[rq],
+promptly proved equal to the task of typesetting the manual for what
+would become known as \[lq]First Edition Unix\[rq],
 dated November 1971.
 .
 .
 .P
 Output from all of the foregoing programs was limited to line printers
-and paper terminals such the IBM 2471
+and paper terminals such as the IBM 2471
 (based on the Selectric line of typewriters)
 and the Teletype Corporation Model 37.
 .
@@ -312,11 +1008,13 @@ Joe Ossanna's
 literally a \[lq]new roff\[rq],
 was the outlet for this pressure.
 .
-By the time of Version 3 Unix
+.\" nroff is listed in the table of contents of the Version 2 manual,
+.\" but no man page is present.
+By the time of Unix Version\~3
 (February 1973)\[em]and still in PDP-11 assembly language\[em]it sported
 a swath of features now considered essential to
 .I roff
-systems;
+systems:
 .
 definition of macros
 .RB ( .de ),
@@ -405,11 +1103,6 @@ system call,
 the explosive growth of a componentized system based around it,
 and a \[lq]filter model\[rq] that remains perceptible today.
 .
-Around this time, \" judging by "CSTR #17"
-Michael Lesk developed the
-.I tbl \" AT&T
-preprocessor for formatting tables.
-.
 Equally importantly,
 the Bell Labs site in Murray Hill acquired a Graphic Systems C/A/T
 phototypesetter,
@@ -433,12 +1126,12 @@ the
 .MR troff 1 \" AT&T
 man page in Fourth Edition Unix
 (November 1973)
-does not feature a request list, \" nor does V6 Unix troff(1) (1975)
+does not feature a request list, \" nor does Unix V6 troff(1) (1975)
 unlike
 .MR nroff 1 . \" AT&T
 .
 Apart from typesetter-driven features,
-Version 4 Unix
+Unix Version\~4
 .IR roff s
 added string definitions
 .RB ( .ds );
@@ -495,11 +1188,11 @@ systems have done so in its shadow.
 .P
 A small and simple set of
 .I roff
-macros was first used for the manual pages of Version 4 Unix and
+macros was first used for the manual pages of Unix Version\~4 and
 persisted for two further releases,
 but the first macro package to be formally described and installed was
 .I ms
-by Lesk in Version 6.
+by Michael Lesk in Version\~6.
 .
 He also wrote a manual,
 \[lq]Typing Documents on the Unix System\[rq],
@@ -510,9 +1203,14 @@ and basic
 usage,
 updating it as the package accrued features.
 .
+Sixth Edition additionally saw the debut of the
+.I tbl \" AT&T
+preprocessor for formatting tables,
+also by Lesk.
+.
 .
 .P
-For Version 7 Unix
+For Unix Version\~7
 (January 1979),
 McIlroy designed,
 implemented,
@@ -533,7 +1231,8 @@ edited by Kernighan.
 .P
 Ossanna had passed away unexpectedly in 1977,
 and after the release of Version 7,
-with the C/A/T typesetter becoming supplanted by alternative devices,
+with the C/A/T typesetter becoming supplanted by alternative devices
+such as the Mergenthaler Linotron 202,
 Kernighan undertook a revision and rewrite of
 .I troff
 to generalize its design.
@@ -542,14 +1241,16 @@ To implement this revised architecture,
 he developed the font and device description file formats and the
 device-independent output format that remain in use today.
 .
-He described these novelties in the article \[lq]A
-Typesetter-independent TROFF\[rq],
+He described these novelties in the article
+\[lq]A Typesetter-independent TROFF\[rq],
 last revised in 1982,
 and like the
 .I troff
 manual itself,
 it is widely known by a shorthand,
 \[lq]CSTR #97\[rq].
+.\" Further entertaining reading can be found at:
+.\" <https://www.cs.princeton.edu/~bwk/202/summer.reconstructed.pdf>.
 .
 .
 .P
@@ -1285,76 +1986,204 @@ See
 for more on file name extensions.
 .
 .
+.\" BEGIN Keep parallel with groff.texi node "Input Conventions".
 .\" ====================================================================
-.SH "Editing \f[I]roff\f[]"
+.SH "Input conventions"
 .\" ====================================================================
 .
-All
+Since
+.I @g@troff
+fills text automatically,
+it is common practice in
 .I roff
-formatters provide automated line breaks and horizontal and vertical
-spacing.
+languages to avoid visual composition of text in input files:
+the esthetic appeal of the formatted output is what matters.
 .
-In order to not disturb this, the following tips can be helpful.
-.
-.IP \(bu
-Never include empty or blank lines in a
+Therefore,
 .I roff
-document.
-.
-Instead, use the empty request (a line consisting of a dot only) or a
-line comment
-.B .\[rs]"\""
-if a structuring element is needed.
-.
-.IP \(bu
-Never start a line with whitespace because this can lead to unexpected
-behavior.
-.
-Indented paragraphs can be constructed in a controlled way by
+input should be arranged such that it is easy for authors and
+maintainers to compose and develop the document,
+understand the syntax of
 .I roff
-requests.
+requests,
+macro calls,
+and preprocessor languages used,
+and predict the behavior of the
+formatter.
 .
-.IP \(bu
-Start each sentence on a line of its own, for the spacing after a dot
-is handled differently depending on whether it terminates an
-abbreviation or a sentence.
+Several traditions have accrued in service of these goals.
 .
-To distinguish both cases, do a line break after each sentence.
 .
-.IP \(bu
-To additionally use the auto-fill mode in Emacs, it is best to insert
-an empty
-.I roff
-request (a line consisting of a dot only) after each sentence.
+.IP \[bu] 2n
+Break input lines after sentence-ending punctuation to ease their
+recognition.
+.\" Texinfo: (@pxref{Sentences}).
+It is frequently convenient to break after colons and semicolons as
+well,
+as these typically precede independent clauses.
+.
+Consider breaking after commas;
+they often occur in lists that become easy to scan when itemized by
+line,
+or constitute supplements to the sentence that are added,
+deleted,
+or updated to clarify it.
+.
+Parenthetical and quoted phrases are also good candidates for placement
+on input lines by themselves.
+.
+In filled text,
+spaces and newlines are interchangeable;
+place breaks where it aids your purpose.
+.
+.
+.IP \[bu]
+Set your text editor's line length to 72 characters or fewer;
+see the subsections below.
+.\" Texinfo:
+.\" @footnote{Emacs: @code{fill-column: 72}; Vim: @code{textwidth=72}}
+.
+This limit,
+combined with the previous advice regarding breaking around punctuation,
+makes it less common that an input line will wrap in your text editor,
+and thus will help you perceive excessively long constructions in your
+text.
+.
+Recall that natural languages originate in speech,
+not writing,
+and that punctuation is correlated with pauses for breathing and changes
+in prosody.
+.
+.
+.IP \[bu]
+Use
+.B \[rs]&
+after
+.RB \[lq] !\& \[rq],
+.RB \[lq] ?\& \[rq],
+and
+.RB \[lq] .\& \[rq]
+if they are followed by space,
+tab,
+or newline characters and don't end a sentence.
+.
+.
+.IP \[bu]
+In filled text lines,
+use
+.B \[rs]&
+before
+.RB \[lq] .\& \[rq]
+and
+.RB \[lq] \[aq] \[rq]
+if they are preceded by space,
+so that reflowing the input doesn't turn them into control lines.
+.
+.
+.IP \[bu]
+Do not attempt to format the input in a WYSIWYG manner
+(i.e.,
+don't try using spaces to get proper indentation or align columns of a
+table).
+.
+.
+.IP \[bu]
+Comment your document.
+.
+It is never too soon to apply comments to record information of use to
+future document maintainers
+(including your future self).
+.\" Texinfo: We thus introduce another escape sequence, @code{\"}, which
+The
+.B \[rs]\[dq]
+escape sequence
+causes
+.I @g@troff
+to ignore the remainder of the input line.
+.
+.
+.IP \[bu]
+Use the empty request\[em]a control character followed immediately by a
+newline\[em]to visually manage separation of material in input files.
+.
+Many of the
+.I groff
+project's own documents use an empty request between sentences,
+after macro definitions,
+and where a break is expected,
+and two empty requests between paragraphs or other requests or macro
+calls that will introduce vertical space into the document.
+.
+You can combine the empty request with the comment escape sequence to
+include whole-line comments in your document,
+and even \[lq]comment out\[rq] sections of it.
 .
 .
 .P
-The following example shows judicious line breaking in a
-.I roff
-input file.
+.\" Texinfo: We conclude this section with an example
+An example sufficiently long to illustrate most of the above suggestions
+in practice follows.
 .
+.\" Texinfo: For the purpose of fitting the example between the margins
+.\" of this manual with the font used for its typeset version,
+.\" we have shortened the input line length to 56
+.\" columns.
+.\" Texinfo: As before,
+.
+An arrow \[->] indicates a tab character.
+.
+.
+.P
 .RS
-.P
 .EX
-.\" Keep the text width to 65 columns or fewer in this example so that
-.\" it doesn't overrun the right margin when set in Courier (-Tps,
-.\" -Tpdf).
-This is an example of a
-\&.I roff
-document that you can type into your text editor.
+\&.\[rs]"   nroff this_file.roff | less
+\&.\[rs]"   groff \-T ps this_file.roff > this_file.ps
+\[->]The theory of relativity is intimately connected with
+the theory of space and time.
 \&.
-.
-This is the next sentence in the same paragraph.
+I shall therefore begin with a brief investigation of
+the origin of our ideas of space and time,
+although in doing so I know that I introduce a
+controversial subject.  \[rs]" remainder of paragraph elided
 \&.
-.
-This is a longer sentence stretching over several input lines;
-abbreviations like cf.\& are easily identified because the dot is
-not followed by a line break.
 \&.
-.
-In the output, this sentence continues the same paragraph.
+\&
+\[->]The experiences of an individual appear to us arranged
+in a series of events;
+in this series the single events which we remember
+appear to be ordered according to the criterion of
+\[rs][lq]earlier\[rs][rq] and \[rs][lq]later\[rs][rq], \[rs]" punct \
+swapped
+which cannot be analysed further.
+\&.
+There exists,
+therefore,
+for the individual,
+an I\-time,
+or subjective time.
+\&.
+This itself is not measurable.
+\&.
+I can,
+indeed,
+associate numbers with the events,
+in such a way that the greater number is associated with
+the later event than with an earlier one;
+but the nature of this association may be quite
+arbitrary.
+\&.
+This association I can define by means of a clock by
+comparing the order of events furnished by the clock
+with the order of a given series of events.
+\&.
+We understand by a clock something which provides a
+series of events which can be counted,
+and which has other properties of which we shall speak
+later.
+\&.\[rs]" Albert Einstein, _The Meaning of Relativity_, 1922
 .EE
 .RE
+.\" END Keep parallel with groff.texi node "Input Conventions".
 .
 .
 .\" ====================================================================
@@ -1377,59 +2206,69 @@ This mode can be activated by the following methods.
 .
 .P
 When editing a file within Emacs the mode can be changed by typing
-.RI \[oq] "M-x nroff\-mode" \[cq],
+.RI \[lq] M-x
+.BR nroff\-mode \[rq],
 where
-.B M-x
-means to hold down the
-.B Meta
-key (or
-.BR Alt )
-and press the
-.BR x\~ key
-at the same time.
+.I M-x
+means to hold down the meta key
+(often labelled \[lq]Alt\[rq])
+while pressing and releasing the \[lq]x\[rq] key.
+.\" Why is this sort of thing not in intro(1)?
 .
 .
 .P
-But it is also possible to have the mode automatically selected when
-the file is loaded into the editor.
+It is also possible to have the mode automatically selected when a
+.I roff
+file is loaded into the editor.
 .
-.IP \(bu
-The most general method is to include the following 3 comment lines at
-the end of the file.
+.
+.IP \(bu 2n
+The most general method is to include file-local variables at the end of
+the file;
+we can also configure the fill column this way.
+.
 .
 .RS
 .IP
 .EX
 \&.\[rs]" Local Variables:
+\&.\[rs]" fill\-column: 72
 \&.\[rs]" mode: nroff
 \&.\[rs]" End:
 .EE
 .RE
 .
 .IP \(bu
-There is a set of file name extensions, e.g., the man pages that
+Certain file name extensions,
+such as those commonly used by man pages,
 trigger the automatic activation of the
 .I nroff
 mode.
 .
+.
 .IP \(bu
-Theoretically, it is possible to write the sequence
+Technically,
+having the sequence
+.
 .
 .RS
 .IP
 .EX
-\&.\[rs]" \%\-*\-\ nroff\ \-*\-\""
+\&.\[rs]" \%\-*\- nroff \-*\-
 .EE
 .RE
 .
-.IP
-as the first line of a file to have it started in
-.I nroff
-mode when loaded.
 .
-Unfortunately, some applications such as the
-.B man
-program are confused by this; so this is deprecated.
+.IP
+in the first line of a file will cause Emacs to enter the
+.I nroff
+major mode when it is loaded into the buffer.
+.
+Unfortunately,
+some implementations of the
+.MR man 1
+program are confused by this practice,
+so we discourage it.
 .
 .
 .\" ====================================================================
@@ -1438,11 +2277,10 @@ program are confused by this; so this is deprecated.
 .
 .\" TODO: elvis, vile.  Nvi does not support highlighting at all, and
 .\" gedit does but has no rules for roff yet.  Other editors TBD.
-Besides Emacs,
-some other editors provide
-.I nroff
-style files too,
-e.g.,
+Other editors provide support for
+.IR roff -style
+files too,
+such as
 .MR vim 1 ,
 an extension of the
 .MR vi 1
@@ -1480,7 +2318,7 @@ after any Emacs configuration:
 .RS
 .IP
 .EX
-\&.\[rs]" vim: set filetype=groff:
+\&.\[rs]" vim: set filetype=groff textwidth=72:
 .EE
 .RE
 .
@@ -1504,7 +2342,10 @@ This document was written by
 .MT groff\-bernd\:.warken\-72@\:web\:.de
 Bernd Warken
 .ME ,
-with the section \[lq]History\[rq] revised by
+with the sections \[lq]Concepts\[rq],
+\[lq]History\[rq],
+and \[lq]Input Conventions\[rq]
+mostly written by
 .MT g.branden\:.robinson@\:gmail\:.com
 G.\& Branden Robinson
 .ME .
@@ -1643,23 +2484,19 @@ respectively.
 .
 .
 .P
-\[lq]Troff User's Manual\[rq];
-Computing Science Technical Report #54;
-Joseph F.\& Ossanna;
-AT&T Bell Laboratories;
-1976.
-.
-Revised by Brian Kernighan, November 1992.
+\[lq]Troff User's Manual\[rq]
+by Joseph F.\& Ossanna,
+1976
+(revised by Brian W.\& Kernighan,
+1992),
+AT&T Bell Laboratories Computing Science Technical Report No.\& 54.
 .
 .
 .P
-\[lq]A Typesetter-independent TROFF\[rq];
-Computing Science Technical Report #97;
-Brian W.\& Kernighan;
-AT&T Bell Laboratories;
-1981.
-.
-Revised March 1982.
+\[lq]A Typesetter-independent TROFF\[rq]
+by Brian W.\& Kernighan,
+1982,
+AT&T Bell Laboratories Computing Science Technical Report No.\& 97.
 .
 .
 .P

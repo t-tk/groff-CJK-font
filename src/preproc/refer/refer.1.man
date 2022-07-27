@@ -84,7 +84,7 @@ is part of the
 .MR groff @MAN1EXT@
 document formatting system.
 .
-.I \%@g@refer
+.I @g@refer
 is a
 .MR @g@troff @MAN1EXT@
 preprocessor that prepares bibilographic citations by looking up
@@ -112,7 +112,7 @@ and
 as instructions regarding how citations are to be processed.
 .
 Normally,
-.I \%@g@refer
+.I @g@refer
 is not executed directly by the user,
 but invoked by specifying the
 .B \-R
@@ -144,7 +144,7 @@ A combination of these alternatives is also possible.
 .
 .LP
 For each citation,
-.I \%@g@refer
+.I @g@refer
 can produce a mark in the text.
 .
 This mark consists of some label which can be separated from the text
@@ -156,7 +156,7 @@ language commands that can be used by a macro package to produce a
 formatted reference for each citation.
 .
 The output of
-.I \%@g@refer
+.I @g@refer
 must therefore be processed using a suitable macro package,
 such as
 .\" .IR man ,
@@ -181,7 +181,7 @@ The interpretation of lines between
 .B .R1
 and
 .B .R2
-as prepreocessor commands is a new feature of GNU
+as prepreocessor commands is a feature of GNU
 .IR \%refer . \" GNU
 .
 Documents making use of this feature can still be processed by AT&T
@@ -214,12 +214,12 @@ It is usually more convenient to use commands.
 .
 .
 .LP
-.I \%@g@refer
+.I @g@refer
 generates
 .B .lf
 requests so that file names and line numbers in messages produced by
 commands that read
-.I \%@g@refer
+.I @g@refer
 output will be correct;
 it also interprets lines beginning with
 .B .lf
@@ -583,19 +583,31 @@ if there is more than one occurrence of a particular field in a record,
 only the last such field will be used.
 .
 .
-.LP
+.P
 If accent strings are used,
 they should follow the character to be accented.
-This means that the
-.B .AM
-macro must be used with the
+.
+This means that an
 .I ms
-macros.
+document must call the
+.B .AM
+macro when it initializes.
 .
 Accent strings should not be quoted:
 use one
 .B \e
 rather than two.
+.
+Accent strings are an obsolescent feature of the
+.I me
+and
+.I ms
+macro packages;
+modern documents should use
+.I groff
+special character escape sequences instead;
+see
+.MR groff_char @MAN7EXT@ .
 .
 .
 .\" ====================================================================
@@ -636,7 +648,7 @@ component says to search the bibliographic databases for a reference
 that contains all the words in
 .IR keywords .
 .
-It is an error if more than one reference if found.
+It is an error if more than one reference is found.
 .
 .
 .LP
@@ -836,10 +848,10 @@ nor anything between them,
 is output.
 .
 .
-.LP
+.P
 Commands are separated by newlines or semicolons.
 .
-A hash sign
+A number sign
 .RB ( # )
 introduces a comment that extends to the end of the line,
 but does not conceal the newline.
@@ -857,13 +869,14 @@ If there is no such double quote,
 the word extends to the end of the line.
 .
 Pairs of double quotes in a word beginning with a double quote collapse
-to a single double quote.
+to one double quote.
 .
-Neither a hash sign nor a semicolon is recognized inside double quotes.
+Neither a number sign nor a semicolon is recognized inside double
+quotes.
 .
 A line can be continued by ending it with a backslash
 .RB \[lq] \[rs] \[rq];
-this works everywhere except after a hash sign.
+this works everywhere except after a number sign.
 .
 .
 .LP
@@ -940,7 +953,8 @@ This is mainly useful with numeric labels.
 .
 If
 .I string
-is omitted it defaults to
+is omitted,
+it defaults to
 .RB \[lq] \- \[rq].
 .
 .
@@ -983,7 +997,8 @@ print it at the end of the reference as a paragraph preceded by the line
 .LP
 If
 .I string
-is omitted it will default to
+is omitted,
+it will default to
 .BR AP ;
 if
 .I field
@@ -1043,7 +1058,7 @@ The default behavior is as follows.
 .RS \" RS twice to get inboard of the tagged paragraph indentation.
 .RS
 .EX
-.B bracket-label \e*([. \e*(.] \[dq], \[dq]
+.B bracket\-label \e*([. \e*(.] \[dq], \[dq]
 .EE
 .RE
 .RE
@@ -1074,7 +1089,7 @@ Search each bibliographic database
 For each
 .IR file ,
 if an index
-.IB file @INDEX_SUFFIX@
+.RI file @INDEX_SUFFIX@
 created by
 .MR @g@indxbib @MAN1EXT@
 exists,
@@ -1126,7 +1141,7 @@ The default database should be searched.
 This is the default behavior,
 so the negative version of this command is more useful.
 .
-.I \%@g@refer
+.I @g@refer
 determines whether the default database should be searched
 on the first occasion that it needs to do a search.
 .
@@ -1827,8 +1842,15 @@ Default database.
 Index files.
 .
 .
+.TP
+.I @MACRODIR@/\:refer\:.tmac
+defines macros and strings facilitating integration with macro packages
+that wish to support
+.IR @g@refer .
+.
+.
 .LP
-.I \%@g@refer
+.I @g@refer
 uses temporary files.
 .
 See the
@@ -1852,7 +1874,7 @@ expressions.
 .\" ====================================================================
 .
 We can illustrate the operation of
-.I \%@g@refer
+.I @g@refer
 with a sample bibliographic database containing one entry and a simple
 .I roff
 document to cite that entry.
@@ -1897,7 +1919,7 @@ on your summer vacation.
 .
 .P
 The foregoing shows us that
-.I \%@g@refer
+.I @g@refer
 (a) produces a label \[lq]1\[rq];
 (b) brackets that label with interpolations of the
 .RB \[lq] [. \[rq]
@@ -1945,7 +1967,7 @@ $ \c
 .LP
 .IR ms 's
 automatic footnote numbering mechanism is not aware of
-.IR \%@g@refer 's
+.IR @g@refer 's
 label numbering,
 so we have manually specified a (superscripted) symbolic footnote for
 our non-bibliographic aside.

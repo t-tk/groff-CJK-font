@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 Free Software Foundation, Inc.
+# Copyright (C) 2002-2022 Free Software Foundation, Inc.
 # Original Makefile.sub written by Werner Lemberg <wl@gnu.org>.
 # Adapted to Automake by Bertrand Garrigues
 #   (bertrand.garrigues@laposte.net).
@@ -21,13 +21,17 @@
 doc_srcdir = $(abs_top_srcdir)/doc
 doc_builddir = $(abs_top_builddir)/doc
 
-DOC_SED = $(SED) -e "s;[@]VERSION[@];$(VERSION);"
+DOC_SED = $(SED) \
+  -e "s;[@]VERSION[@];$(VERSION);" \
+  -e "s;[@]g[@];$(g);g;"
 
 DOC_GROFF_ONLY=\
   GROFF_COMMAND_PREFIX= \
   GROFF_BIN_PATH="$(GROFF_BIN_PATH)" \
-  $(GROFFBIN) -I$(abs_top_builddir) -M $(doc_srcdir) \
-	$(TFLAG) $(FFLAG) -pet -ww -b
+  $(GROFFBIN) -M $(doc_srcdir) $(TFLAG) $(FFLAG) -pet -ww -b
+
+# This image file is used by several documents in the groff source tree.
+DOC_GNU_EPS=doc/gnu.eps
 
 # A dance is required to embed a literal newline inside a sed expression
 # inside a shell command executed as part of a Make target rule.
@@ -47,28 +51,39 @@ DOC_GROFF = nlinit=`echo 'nl="'; echo '"'`; eval "$$nlinit"; \
 # Other doc, installed in $(docdir)
 if BUILD_OTHERDOC
 # Files located in the source tree
-DOCFILES= \
+DOCFILES_INST= \
   doc/me-revisions \
-  doc/meintro.me \
-  doc/meintro_fr.me \
-  doc/meref.me \
   doc/ms.ms \
   doc/pic.ms
+DOCFILES_NOINST= \
+  doc/meintro.me.in \
+  doc/meintro_fr.me.in \
+  doc/meref.me.in
+# Files that undergo a transformation prior to groff processing
+GENERATEDDOCFILES = \
+  $(DOC_GNU_EPS) \
+  doc/meintro.me \
+  doc/meintro_fr.me \
+  doc/meref.me
 # Files generated in the build tree
-PROCESSEDDOCFILES = \
+PROCESSEDDOCFILES_PS = \
   doc/meref.ps \
   doc/meintro.ps \
   doc/meintro_fr.ps \
   doc/ms.ps \
   doc/pic.ps
+PROCESSEDDOCFILES = $(PROCESSEDDOCFILES_PS) \
+  doc/groff-man-pages.pdf \
+  doc/groff-man-pages.utf8.txt
 
 otherdocdir = $(docdir)
-dist_otherdoc_DATA = $(DOCFILES)
+dist_otherdoc_DATA = $(DOCFILES_INST) $(GENERATEDDOCFILES)
 nodist_otherdoc_DATA = $(PROCESSEDDOCFILES)
 MOSTLYCLEANFILES += $(PROCESSEDDOCFILES)
 else
-EXTRA_DIST += $(DOCFILES)
+EXTRA_DIST += $(DOCFILES_INST) $(GENERATEDDOCFILES)
 endif
+EXTRA_DIST += $(DOCFILES_NOINST)
 
 # pdf doc, written in mom and therefore using contrib/mom/mom.am
 # definitions
@@ -132,35 +147,144 @@ exampleimagedir = $(exampledir)/img
 MOSTLYCLEANFILES += doc/examples.stamp
 
 EXTRA_DIST += \
-  doc/gnu.xpm \
   doc/txi-en.tex
 
-SUFFIXES += .me .ms .ps .html .txt .texi .dvi .pdf .xhtml
+# Introduce variables to house the groff man pages.  We break the list
+# of page sources into multiple chunks because we have to load Swedish
+# localization before formatting groff_mmse.7 and then reload English
+# localization afterward.  This also serves as a test of groff locale
+# switching; being lazy and shunting groff_mmse.7 off to the end of the
+# document would not achieve this goal (and not loading Swedish
+# localization at all to format it would be gauche).
+GROFF_MAN_PAGES1 = \
+  src/utils/addftinfo/addftinfo.1 \
+  src/utils/afmtodit/afmtodit.1 \
+  contrib/chem/chem.1 \
+  src/preproc/eqn/eqn.1 \
+  contrib/eqn2graph/eqn2graph.1 \
+  contrib/gdiffmk/gdiffmk.1 \
+  contrib/glilypond/glilypond.1 \
+  contrib/gperl/gperl.1 \
+  contrib/gpinyin/gpinyin.1 \
+  contrib/grap2graph/grap2graph.1 \
+  src/preproc/grn/grn.1 \
+  src/devices/grodvi/grodvi.1 \
+  src/roff/groff/groff.1 \
+  src/utils/grog/grog.1 \
+  src/devices/grohtml/grohtml.1 \
+  src/devices/grolbp/grolbp.1 \
+  src/devices/grolj4/grolj4.1 \
+  src/devices/gropdf/gropdf.1 \
+  src/devices/grops/grops.1 \
+  src/devices/grotty/grotty.1 \
+  src/devices/xditview/gxditview.1 \
+  src/utils/hpftodit/hpftodit.1 \
+  src/utils/indxbib/indxbib.1 \
+  src/utils/lkbib/lkbib.1 \
+  src/utils/lookbib/lookbib.1 \
+  contrib/mm/mmroff.1 \
+  src/preproc/eqn/neqn.1 \
+  src/roff/nroff/nroff.1 \
+  src/devices/gropdf/pdfmom.1 \
+  contrib/pdfmark/pdfroff.1 \
+  src/utils/pfbtops/pfbtops.1 \
+  src/preproc/pic/pic.1 \
+  contrib/pic2graph/pic2graph.1 \
+  src/preproc/preconv/preconv.1 \
+  src/preproc/refer/refer.1 \
+  src/preproc/soelim/soelim.1 \
+  src/preproc/tbl/tbl.1 \
+  src/utils/tfmtodit/tfmtodit.1 \
+  src/roff/troff/troff.1 \
+  src/utils/xtotroff/xtotroff.1 \
+  contrib/groff_filenames/groff_filenames.5 \
+  man/groff_font.5 \
+  man/groff_out.5 \
+  man/groff_tmac.5 \
+  src/devices/grolj4/lj4_font.5 \
+  man/groff.7 \
+  man/groff_char.7 \
+  man/groff_diff.7 \
+  contrib/hdtbl/groff_hdtbl.7 \
+  tmac/groff_man.7 \
+  tmac/groff_man_style.7 \
+  tmac/groff_mdoc.7 \
+  tmac/groff_me.7 \
+  contrib/mm/groff_mm.7
+
+GROFF_MAN_PAGES2 = \
+  contrib/mm/groff_mmse.7
+
+GROFF_MAN_PAGES3 = \
+  contrib/mom/groff_mom.7 \
+  tmac/groff_ms.7 \
+  contrib/rfc1345/groff_rfc1345.7 \
+  tmac/groff_trace.7 \
+  tmac/groff_www.7 \
+  man/roff.7
+
+GROFF_MAN_PAGES_ALL = $(GROFF_MAN_PAGES1) $(GROFF_MAN_PAGES2) \
+  $(GROFF_MAN_PAGES3)
+
+# This is a convenience target for (re-)generating all the man pages.
+man-all: $(GROFF_MAN_PAGES_ALL)
+
+# ...and for cleaning them.
+man-clean:
+	$(RM) $(GROFF_MAN_PAGES_ALL)
+
+doc/groff-man-pages.pdf: $(GROFF_MAN_PAGES_ALL)
+	$(GROFF_V)$(DOC_GROFF_ONLY) -Tpdf -P-e -mandoc -rC1 \
+	  -rCHECKSTYLE=3 $(GROFF_MAN_PAGES1) \
+	  $(tmac_srcdir)/sv.tmac $(GROFF_MAN_PAGES2) \
+	  $(tmac_srcdir)/en.tmac $(GROFF_MAN_PAGES3) > $@
+
+doc/groff-man-pages.utf8.txt: $(GROFF_MAN_PAGES_ALL)
+	$(GROFF_V)$(DOC_GROFF_ONLY) -Tutf8 -mandoc \
+	  -rCHECKSTYLE=3 $(GROFF_MAN_PAGES1) \
+	  $(tmac_srcdir)/sv.tmac $(GROFF_MAN_PAGES2) \
+	  $(tmac_srcdir)/en.tmac $(GROFF_MAN_PAGES3) > $@
+
+doc/meintro.me: $(doc_srcdir)/meintro.me.in
+	$(GROFF_V)$(MKDIR_P) `dirname $@` \
+	&& $(DOC_SED) $? >$@
+
+doc/meintro_fr.me: $(doc_srcdir)/meintro_fr.me.in
+	$(GROFF_V)$(MKDIR_P) `dirname $@` \
+	&& $(DOC_SED) $? >$@
+
+doc/meref.me: $(doc_srcdir)/meref.me.in
+	$(GROFF_V)$(MKDIR_P) `dirname $@` \
+	&& $(DOC_SED) $? >$@
+
+$(PROCESSEDDOCFILES_PS): \
+  $(dist_devpsfont_DATA) $(nodist_devpsfont_DATA)
+
+# The me(7) intro French translation gets its own target rule because it
+# needs the "-mfr" option.
+SUFFIXES += _fr.me _fr.ps
+_fr.me._fr.ps:
+	$(GROFF_V)$(MKDIR_P) `dirname $@` \
+	&& $(DOC_GROFF) -k -Tps -me -mfr >$@
 
 # For simplicity, we always call preconv, grn, and eqn.
-.me.txt:
-	$(GROFF_V)$(MKDIR_P) `dirname $@` \
-	&& $(DOC_GROFF) -k -Tutf8 -ge -me >$@
 .me.ps:
 	$(GROFF_V)$(MKDIR_P) `dirname $@` \
 	&& $(DOC_GROFF) -k -Tps -ge -me >$@
 
-.ms.html:
-	$(GROFF_V)$(MKDIR_P) `dirname $@` \
-	&& $(DOC_GROFF) -P-p -P-b -P-I`basename $< \
-	  | sed -e 's|.ms$$||'` -P-D$(imagedir) -Thtml -ms >$@
-.ms.txt:
-	$(GROFF_V)$(MKDIR_P) `dirname $@` \
-	&& $(DOC_GROFF) -Tascii -ms -mwww >$@
 .ms.ps:
 	$(GROFF_V)$(MKDIR_P) `dirname $@` \
-	&& $(DOC_GROFF) -Tps -ms -mwww >$@
+	&& $(DOC_GROFF) -Tps -ms >$@
+
+doc/webpage.ps: $(DOC_GNU_EPS)
+doc/webpage.ps: doc/webpage.ms
+	$(GROFF_V)$(MKDIR_P) `dirname $@` \
+	&& $(DOC_GROFF) -I $(doc_builddir) -I $(doc_srcdir) -Tps -ms \
+	  -mwww >$@
 
 $(PROCESSEDEXAMPLEFILES) $(PROCESSEDDOCFILES): \
   $(bin_PROGRAMS) \
   $(prefixexecbin_PROGRAMS) \
-  gnu.eps \
-  $(dist_devpsfont_DATA) $(nodist_devpsfont_DATA) \
   $(hdtbltmac_DATA) \
   $(dist_tmac_DATA) $(nodist_tmac_DATA)
 
@@ -174,7 +298,7 @@ doc/pic.html: $(doc_srcdir)/pic.ms $(devhtmlfont_DATA)
 	&& nlinit=`echo 'nl="'; echo '"'`; eval "$$nlinit"; \
 	  $(DOC_SED) -e "1i\\$$nl.lf 1 $(doc_srcdir)/pic.ms$$nl" \
 	  $(doc_srcdir)/pic.ms \
-	   | $(DOC_GROFF_ONLY) -P-p -P-Ipic -P-D$(imagedir) -P-jpic \
+	   | $(DOC_GROFF_ONLY) -P-Ipic -P-D$(imagedir) -P-jpic \
 	                       -Thtml -ms > pic.html
 
 doc/examples.stamp: doc/groff.css
@@ -188,17 +312,21 @@ doc/webpage.html: doc/examples.stamp $(devhtmlfont_DATA)
 doc/webpage.html: $(dist_devpsfont_DATA) $(nodist_devpsfont_DATA)
 doc/webpage.html: \
   $(doc_srcdir)/webpage.ms \
-  gnu.eps \
+  $(DOC_GNU_EPS) \
   $(doc_srcdir)/groff.css
 	$(GROFF_V)$(MKDIR_P) doc \
 	&& cd $(doc_builddir) \
 	&& nlinit=`echo 'nl="'; echo '"'`; eval "$$nlinit"; \
 	  $(DOC_SED) -e "1i\\$$nl.lf 1 $(doc_srcdir)/webpage.ms$$nl" \
 	  $(doc_srcdir)/webpage.ms \
-	   | $(DOC_GROFF_ONLY) -P-jwebpage -P-nrpb -P-Iwebpage \
-	                       -P-D$(imagedir) -Thtml -ms > webpage.html
+	   | $(DOC_GROFF_ONLY) -I $(doc_builddir) -I $(doc_srcdir) \
+	     -P-jwebpage -P-nrb -P-Iwebpage -P-D$(imagedir) -Thtml -ms \
+	     > webpage.html
 
-doc/grnexmpl.ps: doc/grnexmpl.me doc/grnexmpl.g
+doc/grnexmpl.ps: $(doc_srcdir)/grnexmpl.me $(doc_srcdir)/grnexmpl.g \
+  grn eqn
+	$(GROFF_V)$(MKDIR_P) `dirname $@` \
+	&& $(DOC_GROFF_ONLY) -Tps -ge -me $(doc_srcdir)/grnexmpl.me >$@
 
 # Note that we remove groff.css only if out-of-source build tree
 mostlyclean-local: mostlyclean_doc
@@ -215,6 +343,7 @@ if BUILD_HTML
 	  for f in $(HTMLDOCIMAGEFILES); do \
 	    $(RM) $$f; \
 	  done; \
+	  rmdir  $(doc_builddir)/$(imagedir) || :; \
 	fi
 endif
 	if test $(top_builddir) != $(top_srcdir); then \
@@ -233,6 +362,7 @@ if BUILD_HTMLEXAMPLES
 	  for f in $(HTMLEXAMPLEIMAGEFILES); do \
 	    $(RM) $$f; \
 	  done; \
+	  rmdir  $(doc_builddir)/$(imagedir) || :; \
 	fi
 endif
 
@@ -252,14 +382,19 @@ if BUILD_HTML
 	  $(DESTDIR)$(htmldocimagedir)
 endif
 
-install-data-hook: install_doc_examples
-install_doc_examples: gnu.eps
-if BUILD_EXAMPLES
-# Prefer gnu.eps in builddir over srcdir.
-	d=.; test -f "gnu.eps" || d=$(doc_srcdir); \
-	  $(RM) $(DESTDIR)$(exampledir)/gnu.eps; \
-	  $(INSTALL_DATA) $$d/gnu.eps $(DESTDIR)$(exampledir)/gnu.eps
-endif
+install-data-hook: install_doc_gnu_eps install_doc_examples
+
+install_doc_gnu_eps: $(DOC_GNU_EPS)
+	for d in $(doc_builddir) $(doc_srcdir); do \
+	  if test -f "$$d/gnu.eps"; then \
+	    $(RM) $(DESTDIR)$(exampledir)/gnu.eps; \
+	    $(INSTALL_DATA) \
+	      $$d/gnu.eps $(DESTDIR)$(exampledir)/gnu.eps; \
+	    break; \
+	  fi; \
+	done
+
+install_doc_examples: $(DOC_GNU_EPS)
 if BUILD_HTMLEXAMPLES
 	cd $(doc_builddir) && \
 	for f in `ls $(HTMLEXAMPLEFILESALL)`; do \
@@ -340,7 +475,7 @@ all: build_infodoc
 EXTRA_DIST += doc/groff.texi doc/fdl.texi
 
 # Define targets to generate GNU Info, plain text, and HTML from .texi.
-build_infodoc: doc/groff.info doc/groff.txt doc/groff.html
+build_infodoc: doc/groff.info doc_txt doc_html
 
 EXTRA_DIST += doc/groff.info
 MAINTAINERCLEANFILES += doc/groff.info
@@ -355,10 +490,8 @@ doc/groff.info: $(doc_srcdir)/groff.texi
 dist-hook: dist-info-bits
 dist-info-bits:
 	chmod u+w $(distdir)/doc
-	for d in $(doc_builddir) $(doc_srcdir); \
-	do \
-	  if [ -f "$$d"/groff.info ]; \
-	  then \
+	for d in $(doc_builddir) $(doc_srcdir); do \
+	  if [ -f "$$d"/groff.info ]; then \
 	    cp -f "$$d"/groff.info-* $(distdir)/doc; \
 	  fi; \
 	  break; \
@@ -430,7 +563,7 @@ else
 endif
 
 doc: doc_all
-doc_all: doc_txt dvi pdf html
+doc_all: dvi pdf
 doc_txt: doc/groff.txt
 dvi: doc_dvi
 doc_dvi: doc/groff.dvi
@@ -441,7 +574,7 @@ doc_html: doc/groff.html
 install-doc: install-pdf install-html
 
 distclean-local: clean_infodoc clean_otherdoc
-maintainer-clean-local: clean_infodoc clean_otherdoc
+maintainer-clean-local: clean_infodoc clean_otherdoc clean_maintdoc
 clean_infodoc:
 	-$(RM) $(doc_builddir)/groff.info*
 	-$(RM) $(doc_builddir)/groff.pdf
@@ -450,16 +583,16 @@ clean_infodoc:
 clean_otherdoc:
 	-cd $(doc_builddir) && \
 	  $(RM) -r *.pdf *.html *.txt *.dvi *.t2p *.t2d
+clean_maintdoc:
+	-$(RM) $(DOC_GNU_EPS)
 
 install-data-local: install_infodoc
 install_infodoc: doc/groff.info
 	-test -d $(DESTDIR)$(infodir) \
 	  || $(mkinstalldirs) $(DESTDIR)$(infodir)
 	$(RM) $(DESTDIR)/doc/groff.info*
-	for d in $(doc_builddir) $(doc_srcdir); \
-	do \
-	  if [ -f "$$d"/groff.info ]; \
-	  then \
+	for d in $(doc_builddir) $(doc_srcdir); do \
+	  if [ -f "$$d"/groff.info ]; then \
 	    cp "$$d"/groff.info* $(DESTDIR)$(infodir); \
 	    $(INSTALL_INFO) --info-file="$$d"/groff.info \
 	      --info-dir=$(DESTDIR)$(infodir); \
@@ -492,11 +625,10 @@ uninstall-pdf:
 uninstall-html:
 	-$(RM) -r $(DESTDIR)$(htmldocdir)/groff.html.*
 
-# File used by contrib/hdtbl and contrib/pdfmark. It is distributed in
-# doc.eps. We try in priority to use the file in 'doc'.
+# An image of a gnu in enscapsulated PostScript is generated during the
+# build process if possible.
 EXTRA_DIST += doc/gnu.xpm
-MOSTLYCLEANFILES += gnu.eps
-gnu.eps:
+$(DOC_GNU_EPS): doc/gnu.xpm
 	$(AM_V_GEN)if test -f $(top_srcdir)/doc/gnu.eps; then \
 	  cp $(top_srcdir)/doc/gnu.eps . ; \
 	elif test -f $(top_builddir)/doc/gnu.eps; then \
@@ -510,7 +642,7 @@ gnu.eps:
 	    echo "program pnmtops is missing; can't generate $@" >&2;\
 	    exit 1; \
 	  fi; \
-	  if test "$(pnmtops_nosetpage)" != "pnmtops -nosetpage"; then \
+	  if ! echo "$(pnmtops_nosetpage)" | grep -q nosetpage; then \
 	    echo "program pnmtops can't handle -nosetpage option;" \
 	      "can't generate $@" >&2;\
 	    exit 1; \
@@ -518,12 +650,19 @@ gnu.eps:
 	  xpmtoppm $(top_srcdir)/doc/gnu.xpm | pnmdepth 15 \
 	    | $(pnmtops_nosetpage) -noturn -rle >$@ ; \
 	fi
+	$(AM_V_GEN)test -f $(top_builddir)/doc/gnu.eps
 
-# Copy gnu.eps in 'doc' directory
+# Provide a copy of the image in the distribution archive to accommodate
+# systems without a tool to generate it from an X pixmap.
 dist-hook: dist-gnueps
 dist-gnueps:
 	chmod u+w $(distdir)/doc
-	cp -f gnu.eps $(distdir)/doc
+	for d in $(doc_builddir) $(doc_srcdir); do \
+	  if [ -f "$$d"/$(DOC_GNU_EPS) ]; then \
+	    cp -f "$$d"/$(DOC_GNU_EPS) $(distdir)/doc; \
+	  fi; \
+	  break; \
+	done
 
 
 # Local Variables:

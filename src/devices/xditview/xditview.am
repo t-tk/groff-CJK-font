@@ -64,7 +64,7 @@ EXTRA_DIST += \
   src/devices/xditview/ad2c \
   src/devices/xditview/ChangeLog \
   src/devices/xditview/DESC.in \
-  src/devices/xditview/FontMap \
+  src/devices/xditview/FontMap-X11 \
   src/devices/xditview/GXditview-color.ad \
   src/devices/xditview/GXditview.ad \
   src/devices/xditview/README \
@@ -90,8 +90,12 @@ install_xditview:
 uninstall_xditview:
 else
 install_xditview: \
+  $(xditview_srcdir)/FontMap-X11 \
   $(xditview_srcdir)/GXditview.ad \
   $(xditview_srcdir)/GXditview-color.ad
+	$(MKDIR_P) $(DESTDIR)$(fontdir)
+	$(INSTALL_DATA) $(xditview_srcdir)/FontMap-X11 \
+	  $(DESTDIR)$(fontdir)/FontMap-X11
 	-test -d $(DESTDIR)$(appresdir) \
 	  || $(mkinstalldirs) $(DESTDIR)$(appresdir)
 	if test -f $(DESTDIR)$(appresdir)/GXditview; then \
@@ -110,6 +114,8 @@ install_xditview: \
 uninstall_xditview:
 	rm -f $(DESTDIR)$(appresdir)/GXditview
 	rm -f $(DESTDIR)$(appresdir)/GXditview-color
+	rm -f $(DESTDIR)$(fontdir)/FontMap-X11
+	-rmdir $(DESTDIR)$(fontdir) 2>/dev/null
 
 endif
 

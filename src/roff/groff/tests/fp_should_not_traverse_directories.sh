@@ -25,12 +25,12 @@ groff="${abs_top_builddir:-.}/test-groff"
 # The `fp` request should not be able to access font description files
 # outside of the device and font description search path (configurable
 # with the -F option and GROFF_FONT_PATH environment variable).
-
+#
 # An absolute file name _won't_ work: it gets dev\*[.T]/ stuck on the
-# front of it by libgroff.  (We have no idea where in a file system we
-# might be getting built anyway.)  So we hunt around for our test
-# artifact directory in some common locations.
-font_dir=
+# front of it by libgroff.
+#
+# Locate directory containing our test artifacts.
+artifact_dir=
 base=src/roff/groff/tests
 device=artifacts
 
@@ -39,13 +39,13 @@ do
     d=$buildroot/$base/$device
     if [ -d "$d" ]
     then
-        font_dir=$d
+        artifact_dir=$d
         break
     fi
 done
 
 # If we can't find it, we can't test.
-test -z "$font_dir" && exit 77 # skip
+test -z "$artifact_dir" && exit 77 # skip
 
 input='.fp 5 ../HONEYPOT
 .ft 5
@@ -56,7 +56,8 @@ word
 my word is able
 .pl \n[nl]u'
 
-output=$(printf "%s" "$input" | "$groff" -b -ww -F "$font_dir" -Tascii)
+output=$(printf "%s" "$input" | "$groff" -b -ww -F "$artifact_dir" \
+    -Tascii)
 echo "$output" | grep -Fx word
 
 # vim:set ai et sw=4 ts=4 tw=72:

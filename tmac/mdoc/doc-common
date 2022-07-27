@@ -392,6 +392,9 @@
 .
 .  if \n[nl] \
 .    bp
+.
+.  if '\*[.T]'pdf' \
+.    pdfbookmark 1 "\*[doc-document-title](\*[doc-section])"
 ..
 .ec
 .
@@ -919,10 +922,11 @@
 .
 .\" NS doc-hyphen-flags global register
 .\" NS   the parameter for the '.hy' request
-.\" NS
-.\" NS override this in 'mdoc.local', if necessary.
-.
-.nr doc-hyphen-flags \n[HY]
+.ie \n[HY] \{\
+.  ie \n[cR] .nr doc-hyphen-flags \n[\*[locale]*hyphenation-mode-base]
+.  el        .nr doc-hyphen-flags \n[\*[locale]*hyphenation-mode-trap]
+.\}
+.el .nr doc-hyphen-flags 0
 .
 .
 .\" NS doc-header macro
@@ -1254,7 +1258,6 @@
 .      nr doc-arg-ptr +1
 .      ie (\n[doc-arg-limit] >= \n[doc-arg-ptr]) \{\
 .        nr doc-curr-font \n[.f]
-.        nr doc-curr-size \n[.ps]
 .        nop \*[doc-Sh-font]\c
 .        doc-print-recursive
 .      \}
@@ -1331,6 +1334,9 @@
 .      ne 3
 .    fi
 .
+.  if '\*[.T]'pdf' \
+.    pdfbookmark 2 "\*[doc-sec-head]"
+.
 .    if t \{\
 .      nr doc-reg-Sh \n[.ss]
 .      nr doc-reg-Sh1 \n[.sss]
@@ -1339,7 +1345,6 @@
 .
 .    nr doc-arg-ptr +1
 .    nr doc-curr-font \n[.f]
-.    nr doc-curr-size \n[.ps]
 .    nop \*[doc-Sh-font]\c
 .    doc-print-recursive
 .
@@ -1361,6 +1366,9 @@
 .\" NS Ss user macro (not callable)
 .\" NS   subsection
 .\" NS
+.\" NS modifies:
+.\" NS   doc-subsection-heading
+.\" NS
 .\" NS local variable:
 .\" NS   doc-reg-Ss
 .\" NS   doc-reg-Ss1
@@ -1376,7 +1384,6 @@
 .      nr doc-arg-ptr +1
 .      ie (\n[doc-arg-limit] >= \n[doc-arg-ptr]) \{\
 .        nr doc-curr-font \n[.f]
-.        nr doc-curr-size \n[.ps]
 .        nop \*[doc-Sh-font]\c
 .        doc-print-recursive
 .      \}
@@ -1397,10 +1404,15 @@
 .    ds doc-macro-name Ss
 .    doc-parse-args \$@
 .
+.    ds doc-subsection-heading \$*
+.
 .    sp
 .    if !\n[cR] \
 .      ne 3
 .    ti -.25i
+.
+.    if '\*[.T]'pdf' \
+.      pdfbookmark 3 "\*[doc-subsection-heading]"
 .
 .    nr doc-reg-Ss \n[.ss]
 .    nr doc-reg-Ss1 \n[.sss]
@@ -1408,7 +1420,6 @@
 .
 .    nr doc-arg-ptr +1
 .    nr doc-curr-font \n[.f]
-.    nr doc-curr-size \n[.ps]
 .    nop \*[doc-Sh-font]\c
 .    doc-print-recursive
 .
@@ -1449,7 +1460,6 @@
 .  \}
 .
 .  tm doc-curr-font == \n[doc-curr-font]
-.  tm doc-curr-size == \n[doc-curr-size]
 .  tm doc-indent-synopsis == \n[doc-indent-synopsis]
 .  tm doc-indent-synopsis-active == \n[doc-indent-synopsis-active]
 .  tm doc-have-decl == \n[doc-have-decl]

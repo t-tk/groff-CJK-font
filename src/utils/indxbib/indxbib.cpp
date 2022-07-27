@@ -142,11 +142,17 @@ int main(int argc, char **argv)
       foption = optarg;
       break;
     case 'h':
-      check_integer_arg('h', optarg, 1, &hash_table_size);
-      if (!is_prime(hash_table_size)) {
-	while (!is_prime(++hash_table_size))
-	  ;
-	warning("%1 not prime: using %2 instead", optarg, hash_table_size);
+      {
+	int requested_hash_table_size;
+	check_integer_arg('h', optarg, 1, &requested_hash_table_size);
+	hash_table_size = requested_hash_table_size;
+	if ((hash_table_size > 2) && (hash_table_size % 2) == 0)
+		hash_table_size++;
+	while (!is_prime(hash_table_size))
+	  hash_table_size += 2;
+	if (hash_table_size != requested_hash_table_size)
+	  warning("requested hash table size %1 is not prime: using %2"
+		  " instead", optarg, hash_table_size);
       }
       break;
     case 'i':
@@ -321,9 +327,11 @@ int main(int argc, char **argv)
 static void usage(FILE *stream)
 {
   fprintf(stream,
-"usage: %s [-vw] [-c file] [-d dir] [-f file] [-h n] [-i XYZ] [-k n]\n"
-"       [-l n] [-n n] [-o base] [-t n] [files...]\n",
-	  program_name);
+"usage: %s [-w] [-c common-words-file] [-d dir] [-f list-file]"
+" [-h min-hash-table-size] [-i excluded-fields]"
+" [-k max-keys-per-record] [-l min-key-length]"
+" [-n threshold] [-o file] [-t max-key-length] [file] ...\n"
+"usage: %s { -v | --version }\n", program_name, program_name);
 }
 
 static void check_integer_arg(char opt, const char *arg, int min, int *res)
@@ -786,3 +794,9 @@ void cleanup()
 }
 
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

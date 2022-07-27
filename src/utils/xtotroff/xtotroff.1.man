@@ -7,7 +7,7 @@ xtotroff \- convert X font metrics into groff font metrics
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 2004-2020 Free Software Foundation, Inc.
+.\" Copyright (C) 2004-2022 Free Software Foundation, Inc.
 .\"
 .\" Permission is granted to make and distribute verbatim copies of this
 .\" manual provided the copyright notice and this permission notice are
@@ -35,10 +35,12 @@ xtotroff \- convert X font metrics into groff font metrics
 .\" ====================================================================
 .
 .SY xtotroff
+.RB [ \-d\~\c
+.IR destination-directory ]
 .RB [ \-r\~\c
 .IR resolution ]
 .RB [ \-s\~\c
-.IR point-size ]
+.IR type-size ]
 .I font-map
 .YS
 .
@@ -114,7 +116,11 @@ For each successful mapping,
 .I xtotroff
 creates a
 .I groff
-font description file in the current working directory named for each
+font description file in the current working directory
+(or that specified by the
+.B -d
+option)
+named for each
 .I groff
 font,
 and reports the mapping to the standard output stream.
@@ -135,6 +141,13 @@ all exit afterward.
 .
 .
 .TP
+.BI \-d\~ destination-directory
+Write font descriptions to
+.I destination-directory
+rather than the current working directory.
+.
+.
+.TP
 .BI \-r\~ resolution
 Set the resolution for all font patterns in
 .IR font-map .
@@ -146,12 +159,26 @@ a resolution of 75dpi is assumed.
 .
 .
 .TP
-.BI \-s\~ point-size
-Set the point size for all font patterns in
+.BI \-s\~ type-size
+Set the type size in points for all font patterns in
 .IR font-map .
 .
 If not specified,
 a size of 10 points is assumed.
+.
+.
+.\" ====================================================================
+.SH Files
+.\" ====================================================================
+.
+.TP
+.I @FONTDIR@/\:\%FontMap\-X11
+is the font mapping file used to produce the pre-generated font
+description files,
+supplied with
+.IR groff ,
+of X11 core fonts corresponding to the 13 base Type\~1 fonts for
+PostScript level 1.
 .
 .
 .\" ====================================================================

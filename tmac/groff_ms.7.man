@@ -68,7 +68,7 @@ and books.
 These
 .I groff
 macros support cover page and table of contents generation,
-automatic section numbering,
+automatically numbered headings,
 several different paragraph styles,
 a variety of text styling options,
 footnotes,
@@ -90,12 +90,12 @@ and standardized bibliographic citations.
 .
 .LP
 This implementation is mostly compatible with the documented interface
-and behavior of AT&T Version\~7 Unix
+and behavior of AT&T Unix Version\~7
 .IR ms .
 .
 Several extensions from 4.2BSD (Berkeley)
 .\" Few changes were made in 4.3, Reno, Tahoe, or 4.4.
-and Version\~10 Research Unix have been recreated.
+and Tenth Edition Research Unix have been recreated.
 .
 .
 .\" ====================================================================
@@ -104,24 +104,32 @@ and Version\~10 Research Unix have been recreated.
 .
 The
 .I ms
-macro package expects files to have a certain amount of structure.
+macro package expects a certain amount of structure:
+a well-formed document contains at least one paragraphing or heading
+macro call.
 .
-The simplest documents can begin with a paragraph macro and consist of
-text separated by paragraph macros or even blank lines.
+To compose a document from scratch,
+begin it by calling
+.B .LP
+or
+.BR .PP .
 .
 Longer documents have a structure as follows.
 .
 .
 .TP
 .B Document type
-If you call the
+Calling the
 .B RP
-macro at the beginning of the document,
-.I groff
-prints the document description on its own page;
-otherwise it prints the information
-(if any)
-on the first page with your document text immediately following.
+macro at the beginning of your document puts the document description
+(see below)
+on a cover page.
+.
+Otherwise,
+.I ms
+places this information
+on the first page,
+followed immediately by the body text.
 .
 Some document types found in other
 .I ms
@@ -133,9 +141,11 @@ and are not supported in
 .TP
 .B "Format and layout"
 By setting registers and strings,
-you can change your document's
-margins, spacing, headers and footers, footnotes,
-and the base point size for the text.
+you can change your document's typeface,
+margins,
+spacing,
+headers and footers,
+and footnotes arrangement.
 .
 See subsection \[lq]Document control settings\[rq] below.
 .
@@ -145,24 +155,62 @@ See subsection \[lq]Document control settings\[rq] below.
 A document description consists of any of:
 a title,
 one or more authors' names and affiliated institutions,
-an abstract, and a date or other identifier.
+an abstract,
+and a date or other identifier.
 .
 See subsection \[lq]Document description macros\[rq] below.
 .
 .
 .TP
-.B "Body"
+.B Body text
 The main matter of your document follows its description
 (if any).
 .
-It consists of paragraphs, headings, and lists.
+.I ms
+supports highly structured text consisting of paragraphs interspersed
+with multi-level headings
+(chapters,
+sections,
+subsections,
+and so forth)
+and augmented by lists,
+footnotes,
+tables,
+diagrams,
+and similar material.
+.
+The preponderance of subsections below covers these matters.
+.
 .
 .TP
 .B "Table of contents"
-Longer documents usually include a table of contents,
-which you can add by placing the
-.B TC
-macro at the end of your document.
+Macros enable the collection of entries for a table of contents
+(or index)
+as the material they discuss appears in the document.
+.
+You then call a macro to emit the table of contents at the end of
+your document.
+.
+The table of contents must necessarily follow the rest of the text since
+GNU
+.I troff \" GNU
+is a single-pass formatter;
+it thus cannot determine the page number of a division of the text until
+it has been set and output.
+.
+Since
+.I ms
+output was designed for the production of hard copy,
+the traditional procedure was to manually relocate the pages containing
+the table of contents between the cover page and the body text.
+.
+Today,
+page resequencing can be done in the digital domain with tools like
+.MR pdfjam 1 .
+.
+An index works similarly,
+but because it typically needs to be sorted after collection,
+its preparation requires separate processing.
 .
 .
 .\" ====================================================================
@@ -262,7 +310,7 @@ Heading settings
 Parameter	Definition	Effective	Default
 _
 \[rs]n[PSINCR]	Point size increment	next heading	1p
-\[rs]n[GROWPS]	Size increase level limit	next heading	0
+\[rs]n[GROWPS]	Size increase depth limit	next heading	0
 \[rs]n[HORPHANS]	# of following lines kept	next heading	1
 \[rs]*[SN\-STYLE]	Numbering style (alias)	next heading	\[rs]*[SN\-DOT]
 _
@@ -364,7 +412,7 @@ macros.
 .
 .
 .\" ====================================================================
-.SS "Fractional point sizes"
+.SS "Fractional type sizes"
 .\" ====================================================================
 .
 AT&T
@@ -457,7 +505,7 @@ collects text on input lines following a call to this macro into the
 title until reaching an
 .BR .AU ,
 .BR .AB ,
-or heading or paragraph macro call.
+or heading or paragraphing macro call.
 .
 .
 .TP
@@ -471,7 +519,7 @@ author's name until reaching an
 .BR .AB ,
 another
 .BR .AU ,
-or heading or paragraph macro call.
+or heading or paragraphing macro call.
 .
 Call it repeatedly to specify multiple authors.
 .
@@ -495,13 +543,13 @@ collects text on input lines following a call to this macro into the
 author's institution until reaching an
 .BR .AU ,
 .BR .AB ,
-or heading or paragraph macro call.
+or heading or paragraphing macro call.
 .
 .
 .TP
 .B .DA\c
 .RI "\~[" x "\~.\|.\|.]"
-Print the current date,
+Typeset the current date,
 or any
 .RI arguments\~ x ,
 in the center footer,
@@ -516,7 +564,7 @@ page.
 .TP
 .B .ND\c
 .RI "\~[" x "\~.\|.\|.]"
-Print the current date,
+Typeset the current date,
 or any
 .RI arguments\~ x ,
 if
@@ -570,22 +618,28 @@ it is set to
 .
 Setting
 .B \[rs]*[FAM]
-before the first call of a sectioning,
+before the first call of a heading,
 paragraphing,
 or (non-date) document description macro also applies it to headers,
 footers,
-and footnotes
-(as well as the body text).
+and footnotes.
 .
 .
 .P
-The hyphenation flags
-(as used by the
-.B hy
-request)
-are set using the
+The
 .B HY
-register.
+register defines the automatic hyphenation mode used with the
+.B hy
+request.
+.
+Setting
+.B \[rs]n[HY]
+.RB to\~ 0
+is equivalent to using the
+.B nh
+request.
+.
+This is a Tenth Edition Research Unix extension.
 .
 .
 .\" ====================================================================
@@ -648,7 +702,7 @@ The optional
 is not indented and is empty by default.
 .
 .I width
-overrides the default indentation amount of
+overrides the indentation amount in
 .BR \[rs]n[PI] ;
 its default unit is
 .RB \[lq] n \[rq].
@@ -709,7 +763,7 @@ macros print headings in
 .B bold
 using the same font family and,
 by default,
-point size as the body text.
+type size as the body text.
 .
 Headings are available with and without automatic numbering.
 .
@@ -719,55 +773,64 @@ rendered on the same output line in the same style.
 .
 .
 .TP
-.BI .NH\~ level
-Automatically numbered heading.
+.B .NH\c
+.RI \~[ depth ]
+Set an automatically numbered heading.
 .
-The
-.I level
-argument instructs
 .I ms
-to number heading in the form
+produces a numbered heading in the form
 .IR a . b . c .\|.\|.,
-to any depth desired,
-with the numbering of each level increasing automatically and being
-reset to zero when a more significant level is increased.
+to any level desired,
+with the numbering of each depth increasing automatically and being
+reset to zero when a more significant depth is increased.
 .
 .RB \[lq] 1 \[rq]\~is
 the most significant or coarsest division of the document.
 .
 Only nonzero values are output.
 .
-If you specify heading levels with a gap in an ascending sequence,
-such as by
+If
+.I depth
+is omitted,
+it is taken to be
+.BR 1 .
+.
+If you specify
+.I depth
+such that an ascending gap occurs relative to the previous
+.B NH
+call\[em]that is,
+you \[lq]skip a depth\[rq],
+as by
 .RB \[lq] ".NH\~1" \[rq]
 and then
-.RB \[lq] ".NH\~3" \[rq]
-as the next such call,
+.RB \[lq] ".NH\~3" \[rq],
 .I groff ms
 emits a warning on the standard error stream.
 .
 .
 .TP
-.BI ".NH S\~" heading-level-index\~\c
+.BI ".NH S\~" heading-depth-index\~\c
 \&.\|.\|.
 Alternatively,
+you can give
+.B NH
 a first argument
-.RB of\~\[lq] S \[rq]
-can be given,
-followed by integral arguments to number the levels of the heading
-explicitly.
+.RB of\~\[lq] S \[rq],
+followed by integers to number the heading depths explicitly.
 .
 Further automatic numbering,
 if used,
-resumes using the specified heading level indices as their predecessors.
+resumes using the specified indices as their predecessors.
 .
 .\" Although undocumented in Tuthill's 4.2BSD ms.diffs paper...
 This feature is a Berkeley extension.
 .
 .
-.PP
-After invocation of
-.BR .NH ,
+.P
+After
+.B .NH
+is called,
 the assigned number is made available in the strings
 .B SN\-DOT
 (as it appears in a printed heading with default formatting,
@@ -779,7 +842,7 @@ and
 These are GNU extensions.
 .
 .
-.PP
+.P
 You can control the style used to print numbered headings by defining an
 appropriate alias for the string
 .BR SN\-STYLE .
@@ -800,7 +863,7 @@ of
 following redefinition of the alias for
 .BR \[rs]*[SN\-STYLE] .
 .
-The formatted number of the current section is available in
+The formatted number of the current heading is available in
 .B \[rs]*[SN]
 (a feature first documented by Berkeley),
 facilitating its inclusion in
@@ -810,34 +873,30 @@ table of contents entries.
 .
 .TP
 .B .SH\c
-.RI " [" level ]
-Unnumbered heading.
+.RI \~[ depth ]
+Set an unnumbered heading.
 .
 The optional
-.I level
-argument is a GNU extension indicating the heading level corresponding
+.I depth
+argument is a GNU extension indicating the heading depth corresponding
 to the
-.I level
+.I depth
 argument of
 .BR .NH .
 .
-It matches the point size at which the heading is printed to that of a
-numbered heading at the same level when the
+It matches the type size at which the heading is set to that of a
+numbered heading at the same depth when the
 .B \[rs]n[GROWPS]
 and
 .B \[rs]n[PSINCR]
 heading size adjustment mechanism is in effect.
 .
 .
-.PP
+.P
 The
 .B PSINCR
-register defines an increment in point size to be applied to a heading
-at a
-.I level
-more significant
-(numerically less)
-than the value specified in
+register defines an increment in type size to be applied to a heading at
+a lesser depth than that specified in
 .BR \[rs]n[GROWPS] .
 .
 The value of
@@ -847,19 +906,17 @@ should be specified in points with the
 scaling indicator and may include a fractional component.
 .
 .
-.PP
+.P
 The
 .B GROWPS
-register defines the heading level at which the point size increment set
-by
+register defines the heading depth above which the type size increment
+set by
 .B \[rs]n[PSINCR]
 becomes effective.
 .
-For each heading
-.I level
-below the value of
+For each heading depth less than the value of
 .BR \[rs]n[GROWPS] ,
-the point size is increased by
+the type size is increased by
 .BR \[rs]n[PSINCR] .
 .
 Setting
@@ -867,28 +924,28 @@ Setting
 to a value less than\~2 disables the incremental heading size feature.
 .
 .
-.PP
+.P
 In other words,
-if the
+if the value of
 .B GROWPS
 register is greater than the
-.I level
+.I depth
 argument to a
 .B .NH
 or
 .B .SH
 call,
-the point size of a heading produced by these macros increases by
+the type size of a heading produced by these macros increases by
 .B \[rs]n[PSINCR]
 units over
 .B \[rs]n[PS]
 multiplied by the difference of
 .B \[rs]n[GROWPS]
 and
-.IR level .
+.IR depth .
 .
 .
-.PP
+.P
 The
 .B \[rs]n[HORPHANS]
 register operates in conjunction with the
@@ -944,7 +1001,7 @@ the first argument.
 If you give this macro no arguments,
 .I groff
 prints all text following in bold until
-the next highlighting, paragraph, or heading macro.
+the next highlighting, paragraphing, or heading macro.
 .
 .TP
 .B .R\c
@@ -977,8 +1034,8 @@ It operates similarly to the
 .B B
 macro otherwise.
 .
-This is a Version\~10 Research Unix extension.
-.\" Possibly V9, but definitely not Berkeley.
+This is a Tenth Edition Research Unix extension.
+.\" possibly 9th, but definitely not Berkeley
 .
 .
 .TP
@@ -991,16 +1048,16 @@ It operates similarly to the
 .B B
 macro otherwise.
 .
-This is a Version\~10 Research Unix extension.
-.\" Possibly V9, but definitely not Berkeley.
+This is a Tenth Edition Research Unix extension.
+.\" possibly 9th, but definitely not Berkeley
 .
 .
 .TP
 .B .BX\c
 .RI " [" txt ]
-Prints
+Typeset
 .I txt
-and draws a box around it.
+and draw a box around it.
 .
 On terminal devices,
 reverse video is used instead.
@@ -1018,37 +1075,47 @@ or
 .TP
 .B .UL\c
 .RI " [" txt " [" post ]]
-Prints its first argument with an underline.
+Typeset
+.I txt
+with an underline.
 .
-If you specify a second argument,
-.I groff
-prints it in the previous font after the underlined text, with no
-intervening space.
+If you specify
+.IR post ,
+.I ms
+sets it in the previous font after the underlined text,
+with no intervening space.
+.
 .
 .TP
 .B .LG
-Prints all text following in larger type
-(2\~points larger than the current point size) until
-the next font size, highlighting, paragraph, or heading macro.
+Set all subsequent text in larger type
+(2\~points larger than the current size) until
+the next font size,
+highlighting,
+paragraphing,
+or heading macro.
 .
-You can specify this macro multiple times to enlarge the point size as
+You can specify this macro multiple times to enlarge the type size as
 needed.
 .
 .TP
 .B .SM
-Prints all text following in
+Set all subsequent text in
 smaller type
-(2\~points smaller than the current point size) until
-the next type size, highlighting, paragraph, or heading macro.
+(2\~points smaller than the current size) until
+the next type size,
+highlighting,
+paragraphing,
+or heading macro.
 .
-You can specify this macro multiple times to reduce the point size as
+You can specify this macro multiple times to reduce the type size as
 needed.
 .
 .TP
 .B .NL
-Prints all text following in
-the normal point size
-(that is, the value of the
+Set all subsequent text at the normal type size
+(that is,
+the value of the
 .B PS
 register).
 .
@@ -1080,9 +1147,8 @@ respectively.
 .SS "Indented regions"
 .\" ====================================================================
 .
-You may need to indent a region of text while still letting
-.I groff
-automatically break lines and fill the text.
+You may need to indent a region of text while otherwise formatting it
+normally.
 .
 .
 .TP
@@ -1288,16 +1354,18 @@ is inserted before and after each pair of display macros;
 this is a Berkeley extension.
 .
 The
-.B \[rs]n[DI]
+.B DI
 register is a GNU extension;
 its value is an indentation applied to displays created with
 .B .DS
-(with no argument),
-.RB \[lq] ".DS\~I" \[rq],
 and
-.BR .ID ;
-and indented equations set with
-.BR .EQ .
+.B .ID
+without arguments,
+to
+.RB \[lq] .DS\~I \[rq]
+without an indentation argument,
+and to equations set with
+.RB \[lq] .EQ\~I \[rq].
 .
 Changes to either register take effect at the next display boundary.
 .
@@ -1309,31 +1377,33 @@ Changes to either register take effect at the next display boundary.
 The
 .I ms
 package is often used with the
-.IR \%@g@tbl ,
-.IR \%@g@pic ,
-.IR \%@g@eqn ,
+.IR @g@tbl ,
+.IR @g@pic ,
+.IR @g@eqn ,
 and
-.I \%@g@refer
+.I @g@refer
 preprocessors.
 .
 The
 .B \[rs]n[DD]
 distance is also applied to regions of the document preprocessed with
-.IR \%@g@eqn ,
-.IR \%@g@pic ,
+.IR @g@eqn ,
+.IR @g@pic ,
 and
-.IR \%@g@tbl .
+.IR @g@tbl .
 .
-Mark text meant for preprocessors by enclosing it in pairs of tags as
+Mark text meant for preprocessors by enclosing it in pairs of tokens as
 follows,
-with no space between the dot and the macro name.
+with nothing between the dot and the macro name.
+.
+The preprocessors match these tokens only at the start of an input line.
 .
 .
 .TP
 .BR .TS " [" H "]
 .TQ
 .B .TE
-Denote a table to be processed by the
+Demarcate a table to be processed by the
 .I tbl
 preprocessor.
 .
@@ -1349,12 +1419,16 @@ calling the
 .B TH
 macro marks the end of such rows.
 .
+.MR @g@tbl @MAN1EXT@
+provides a comprehensive reference to the preprocessor and offers
+examples of its use.
+.
 .
 .TP
 .B .PS
 .TQ
 .B .PE
-Denote a graphic to be processed by the
+Demarcate a diagram to be processed by the
 .I pic
 preprocessor.
 .
@@ -1364,7 +1438,7 @@ preprocessor.
 .RI " [" align ]
 .TQ
 .B .EN
-Denote an equation to be processed by the
+Demarcate an equation to be processed by the
 .I eqn
 preprocessor.
 .
@@ -1386,19 +1460,23 @@ respectively.
 .B .[
 .TQ
 .B .]
-Denote a reference to be processed by the
+Demarcate a bibliographic citation to be processed by the
 .I refer
 preprocessor.
+.
+.MR @g@refer @MAN1EXT@
+provides a comprehensive reference to the preprocessor and the format of
+its bibliographic database.
 .
 .
 .P
 When
-.I \%@g@refer
+.I @g@refer
 emits collected references
 (as might be done on a \[lq]Works Cited\[rq] page),
 it interpolates the string
 .B \[rs]*[REFERENCES]
-as an unnumbered section heading
+as an unnumbered heading
 .RB ( .SH ).
 .
 .
@@ -1641,12 +1719,14 @@ footers for odd or even pages;
 these variables produce four combinations,
 so four macros are available.
 .
-They each take a delimiter separating the left,
+Each takes a delimiter separating the left,
 center,
 and right header or footer texts from each other.
 .
 You can replace the neutral apostrophes (\[aq]) with any character not
 appearing in the header or footer text.
+.
+These macros are Berkeley extensions.
 .
 .
 .TP
@@ -1676,13 +1756,13 @@ macros define footers for the odd and even pages.
 .P
 By default,
 .I ms
-prints no header on any page numbered \[lq]1\[rq]
+places no header on any page numbered \[lq]1\[rq]
 (regardless of its assigned format).
 .
 .
 .TP
 .B .P1
-Print the header on page\~1.
+Typeset the header even on page\~1.
 .
 To be effective,
 this macro must be called before the header trap is sprung on any page
@@ -1710,18 +1790,16 @@ and
 (\[lq]bottom trap\[rq])
 when the footer is to be.
 .
-The
-.I roff
-trap that
+The page location trap that
 .I ms
-sets up to process the header also calls the
+sets up to format the header also calls the
 (normally undefined)
 .B HD
 macro after
 .BR .PT ;
 you can define
 .B .HD
-if you need additional processing after printing the header.
+if you need additional processing after setting the header.
 .
 The
 .B HD
@@ -1773,20 +1851,11 @@ provides the information necessary to derive the right margin.
 .SS "Multiple columns"
 .\" ====================================================================
 .
-The
 .I ms
-macros can set text in as many columns as will reasonably fit on the
-page.
+can set text in as many columns as reasonably fit on the page.
 .
-The following macros are available.
-.
-All of them force a page break if a multi-column mode is already set.
-.
-However,
-if the current mode is single-column,
-starting a multi-column mode does
-.I not
-force a page break.
+The following macros force a page break if a multi-column layout is
+active when they are called.
 .
 .
 .TP
@@ -1849,9 +1918,8 @@ when it requires multiple output lines,
 whether because a heading is too long to fit or because style dictates
 that page numbers not be repeated.
 .
-In a document with a multi-level sectioning structure,
-you may wish to indent the text thus wrapped to correspond to its
-sectioning depth;
+You may wish to indent the text thus wrapped to correspond to its
+heading depth;
 this can be done in the entry text by prefixing it with tabs or
 horizontally spacing escape sequences,
 or by providing a second argument to the
@@ -2052,7 +2120,7 @@ argument,
 the
 .I text
 arguments are augmented,
-by prefixing the current section number,
+by prefixing the current heading number,
 (which is also deduced from the last preceding use of
 .BR .NH ).
 .
@@ -2131,13 +2199,13 @@ The
 macros are a complete re-implementation,
 using no original AT&T code.
 .
-Since they take advantage of the extended features in
+Since they take advantage of the extended features of
 .IR groff ,
 they cannot be used with AT&T
 .IR troff .
 .
 .I groff ms
-supports several features described above as Berkeley and Version 10
+supports several features described above as Berkeley and Tenth Edition
 Research Unix extensions,
 and adds several of its own.
 .
@@ -2174,8 +2242,7 @@ rather than silently to ignore them.
 .
 .
 .IP \[bu]
-Version\~10
-.\" possibly V9
+Tenth Edition \" possibly 9th
 Research Unix supported a pair of
 .B P1
 and
@@ -2225,14 +2292,14 @@ string).
 .
 .
 .IP \[bu]
-Macros that cause
+Many
 .I groff ms
-to internally reset its paragraph rendering parameters
-(paragraphs,
+macros,
+including those for paragraphs,
 headings,
 and displays,
-among others)
-may change the indentation;
+cause a reset of paragraph rendering parameters,
+and may change the indentation;
 they do so not by incrementing or decrementing it,
 but by setting it absolutely.
 .
@@ -2377,9 +2444,23 @@ or another implementation should test this register.
 .SS "Localization strings"
 .\" ====================================================================
 .
-You can redefine the following strings to adapt the
 .I groff ms
-macro package to languages other than English.
+provides several strings that you can customize for your own purposes,
+or redefine to adapt the macro package to languages other than English.
+.
+It is already localized for
+.\" cs, de, fr, it, sv
+Czech,
+German,
+French,
+Italian,
+and
+Swedish.
+.
+Load the desired localization macro package after
+.IR ms ;
+see
+.MR groff_tmac @MAN5EXT@ .
 .
 .RS
 .TS
@@ -2408,7 +2489,7 @@ _
 .
 The default for
 .B ABSTRACT
-includes font style escape sequences to set the word in italics.
+includes font selection escape sequences to set the word in italics.
 .
 .
 .\" TODO: Put this in a legacy feature support section, alongside AT&T
@@ -2512,15 +2593,22 @@ Names containing only uppercase letters and digits.
 .\" ====================================================================
 .
 .TP
-.I \%@MACRODIR@/\:@TMAC_S_PREFIX@s\:.tmac
-.I groff
-implementation of manuscript macros.
+.I @MACRODIR@/\:@TMAC_S_PREFIX@s\:.tmac
+implements the package.
 .
 .
 .TP
-.I \%@MACRODIR@/\:ms\:.tmac
-Wrapper to load
-.IR s.tmac .
+.I @MACRODIR@/refer\-ms.tmac
+implements
+.MR @g@refer @MAN1EXT@
+support for
+.IR ms .
+.
+.
+.TP
+.I @MACRODIR@/\:ms\:.tmac
+is a wrapper enabling the package to be loaded with
+.RB \[lq] "groff \-m ms" \[rq].
 .
 .
 .
@@ -2549,9 +2637,9 @@ it may be compressed and/or available in additional formats.
 .
 .
 .TP
-.I \%@DOCDIR@/\:ms\:.ms
+.I @DOCDIR@/\:ms\:.ms
 .TQ
-.I \%@DOCDIR@/\:ms\:.ps
+.I @DOCDIR@/\:ms\:.ps
 \[lq]Using
 .I groff
 with the
@@ -2561,9 +2649,9 @@ Larry Kollar.
 .
 .
 .TP
-.I \%@DOCDIR@/\:msboxes\:.ms
+.I @DOCDIR@/\:\%msboxes\:.ms
 .TQ
-.I \%@DOCDIR@/\:msboxes\:.pdf
+.I @DOCDIR@/\:\%msboxes\:.pdf
 \[lq]Using PDF boxes with
 .I groff
 and the

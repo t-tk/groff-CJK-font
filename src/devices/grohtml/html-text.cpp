@@ -211,8 +211,8 @@ void html_text::issue_tag (const char *tagname, const char *arg,
 
 void html_text::issue_color_begin (color *c)
 {
+  char buf[(INT_HEXDIGITS * 3) + 1];
   unsigned int r, g, b;
-  char buf[6+1];
 
   out->put_string("<font color=\"#");
   if (c->is_default())

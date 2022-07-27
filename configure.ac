@@ -85,8 +85,9 @@ GROFF_CSH_HACK([SH_SCRIPT_SED_CMD='1s/.*/:/'], [SH_SCRIPT_SED_CMD='1s/a/a/'])
 AC_SUBST([SH_SCRIPT_SED_CMD])
 
 # checks for headers
-AC_CHECK_HEADERS([stddef.h stdlib.h unistd.h dirent.h limits.h sys/dir.h \
-                  string.h strings.h math.h sys/time.h direct.h process.h])
+AC_CHECK_HEADERS([stdbool.h stddef.h stdlib.h unistd.h dirent.h \
+                  limits.h sys/dir.h string.h strings.h math.h \
+                  sys/time.h direct.h process.h])
 GROFF_ISC_SYSV3
 GROFF_POSIX
 
@@ -164,6 +165,7 @@ GROFF_WITH_COMPATIBILITY_WRAPPERS
 GROFF_TARGET_PATH_SEPARATOR
 GROFF_HTML_PROGRAMS
 GROFF_PDFDOC_PROGRAMS
+GROFF_PNMTOOLS_CAN_BE_QUIET
 GROFF_PNMTOPS_NOSETPAGE
 GROFF_MAKE_RM
 GROFF_DIFF_D

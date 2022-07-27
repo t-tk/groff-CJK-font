@@ -120,14 +120,14 @@ public:
 			// (arg2).  Return the distance between the base
 			// line and the top of this rectangle.
 			// This is often also called the 'ascent' of the
-			// glyph.  If the top is above the base line, this
+			// glyph.  If the top is above the baseline, this
 			// value is positive.
   int get_depth(glyph *, int);	// A rectangle represents the shape of the
 			// given glyph (arg1) at the given point size
 			// (arg2).  Return the distance between the base
 			// line and the bottom of this rectangle.
 			// This is often also called the 'descent' of the
-			// glyph.  If the bottom is below the base line,
+			// glyph.  If the bottom is below the baseline,
 			// this value is positive.
   int get_space_width(int);	// Return the normal width of a space at the
 			// given point size.

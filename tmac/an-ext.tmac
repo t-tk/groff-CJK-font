@@ -4,6 +4,7 @@
 .\"
 .\" Written by Eric S. Raymond <esr@thyrsus.com>
 .\"            Werner Lemberg <wl@gnu.org>
+.\"            G. Branden Robinson <g.branden.robinson@gmail.com>
 .\"
 .\" You may freely use, modify and/or distribute this file.
 .\"
@@ -26,6 +27,17 @@
 .if \n(mX>1 \
 .  nx
 .
+.\" Define this to your implementation's constant-width typeface.
+.ds mC CW
+.
+.\" In AT&T troff, there was no register exposing the hyphenation mode,
+.\" and no way to save and restore it.  Set this to a reasonable value
+.\" for your implementation and preference.
+.ie !\n(.g \
+.  nr mJ 1
+.el \
+.  do nr mJ \n[.hy]
+.
 .\" Check if we're using grohtml or grotty, and therefore support URIs.
 .nr mH 0
 .nr mY 0
@@ -45,24 +57,14 @@
 .\}
 .
 .
-.\" Map mono-width fonts to standard fonts for groff's TTY device.
-.if n \{\
-.  do ftr CR R
-.  do ftr CI I
-.  do ftr CB B
-.  do ftr CBI BI
-.\}
-.
 .\" groff has glyph entities for angle brackets.
 .ie \n(.g \{\
-.  ds la \(la\"
-.  ds ra \(ra\"
+.  ds mL \(la\"
+.  ds mR \(ra\"
 .\}
 .el \{\
-.  ds la <\"
-.  ds ra >\"
-.  \" groff's man macros control hyphenation with this register.
-.  nr HY 1
+.  ds mL <\"
+.  ds mR >\"
 .\}
 .
 .nr mS 0
@@ -92,7 +94,7 @@
 .de YS
 .  in \\n(mIu
 .  ad \\n(mA
-.  hy \\n(HY
+.  hy \\n(mJ
 .  nr mS 0
 ..
 .
@@ -143,11 +145,11 @@
 .  \}
 .  el \{\
 .    nh
-\\*(la\\*(m1\\*(ra\\$1
+\\*(mL\\*(m1\\*(mR\\$1
 .    do shift
 .    ie \n(.g .if \n(.$ \&\\$*\"
 .    el .if \n(.$>1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9\"
-.    hy \\n(HY
+.    hy \\n(mJ
 .  \}
 . rr mD
 ..
@@ -199,11 +201,11 @@
 .  \}
 .  el \{\
 .    nh
-\\*(la\\*(m1\\*(ra\\$1
+\\*(mL\\*(m1\\*(mR\\$1
 .    do shift
 .    ie \n(.g .if \n(.$ \&\\$*\"
 .    el .if \n(.$>1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9\"
-.    hy \\n(HY
+.    hy \\n(mJ
 .  \}
 . rr mD
 ..
@@ -211,16 +213,15 @@
 .
 .\" Set a man page cross reference.
 .\" .MR page-title page-section [trailing-text]
-.if !\n(.g \{\
-.  de MR
-.    nh
-.    ie \\n(.$=1 \
-.      I \\$1
-.    el \
-.      IR \\$1 (\\$2)\\$3
-.    hy \\n(HY
+.if \n(.g .ig
+.de MR
+.  nh
+.  ie \\n(.$=1 \
+.    I \\$1
+.  el \
+.    IR \\$1 (\\$2)\\$3
+.  hy \\n(mJ
 ..
-.\}
 .
 .
 .\" Continuation line for .TP header.
@@ -232,27 +233,21 @@
 .
 .
 .\" Start example.
+.if \n(.g .ig
 .de EX
-.  do ds mF \\n[.fam]
 .  nr mE \\n(.f
-.  nr sP \\n(PD \" Save paragraph distance.
+.  nr mP \\n(PD
 .  nr PD 1v
 .  nf
-.  \" Work around Savannah #59522.
-.  ie !'\\*[.T]'dvi' \{\
-.    do fam C
-.    ft R
-.  \}
-.  el \
-.    ft CW
+.  ft \\*(mC
 ..
 .
 .
 .\" End example.
+.if \n(.g .ig
 .de EE
-.  do fam \\*(mF
 .  ft \\n(mE
-.  nr PD \\n(sP \" Restore paragraph distance.
+.  nr PD \\n(mP
 .  fi
 ..
 .

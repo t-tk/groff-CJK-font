@@ -1,9 +1,5 @@
-// -*- C++ -*-
-
-/* <groff_src_dir>/src/libs/libgroff/color.cpp
-
-Copyright (C) 2001-2020 Free Software Foundation, Inc.
-    Written by Gaius Mulley <gaius@glam.ac.uk>
+/* Copyright (C) 2001-2020 Free Software Foundation, Inc.
+     Written by Gaius Mulley <gaius@glam.ac.uk>
 
 This file is part of groff.
 
@@ -373,29 +369,35 @@ char *color::print_color()
     break;
   case RGB:
     sprintf(s, "rgb %.2ff %.2ff %.2ff",
-	    double(Red) / MAX_COLOR_VAL,
-	    double(Green) / MAX_COLOR_VAL,
-	    double(Blue) / MAX_COLOR_VAL);
+	    double(Red) / double(MAX_COLOR_VAL),
+	    double(Green) / double(MAX_COLOR_VAL),
+	    double(Blue) / double(MAX_COLOR_VAL));
     break;
   case CMY:
     sprintf(s, "cmy %.2ff %.2ff %.2ff",
-	    double(Cyan) / MAX_COLOR_VAL,
-	    double(Magenta) / MAX_COLOR_VAL,
-	    double(Yellow) / MAX_COLOR_VAL);
+	    double(Cyan) / double(MAX_COLOR_VAL),
+	    double(Magenta) / double(MAX_COLOR_VAL),
+	    double(Yellow) / double(MAX_COLOR_VAL));
     break;
   case CMYK:
     sprintf(s, "cmyk %.2ff %.2ff %.2ff %.2ff",
-	    double(Cyan) / MAX_COLOR_VAL,
-	    double(Magenta) / MAX_COLOR_VAL,
-	    double(Yellow) / MAX_COLOR_VAL,
-	    double(Black) / MAX_COLOR_VAL);
+	    double(Cyan) / double(MAX_COLOR_VAL),
+	    double(Magenta) / double(MAX_COLOR_VAL),
+	    double(Yellow) / double(MAX_COLOR_VAL),
+	    double(Black) / double(MAX_COLOR_VAL));
     break;
   case GRAY:
     sprintf(s, "gray %.2ff",
-	    double(Gray) / MAX_COLOR_VAL);
+	    double(Gray) / double(MAX_COLOR_VAL));
     break;
   }
   return s;
 }
 
 color default_color;
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

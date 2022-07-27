@@ -49,17 +49,17 @@ echo "testing tbl(1)-using mdoc(7) page $doc" >&2
 "$grog" "$doc" | \
     grep -Fqx 'groff -t -mdoc '"$doc"
 
-doc=$src/doc/meintro.me
+doc=$src/doc/meintro.me.in
 echo "testing me(7) document $doc" >&2
 "$grog" "$doc" | \
     grep -Fqx 'groff -me '"$doc"
 
-doc=$src/doc/meintro_fr.me
+doc=$src/doc/meintro_fr.me.in
 echo "testing tbl(1)-using me(7) document $doc" >&2
 "$grog" "$doc" | \
     grep -Fqx 'groff -t -me '"$doc"
 
-doc=$src/doc/meref.me
+doc=$src/doc/meref.me.in
 echo "testing me(7) document $doc" >&2
 "$grog" "$doc" | \
     grep -Fqx 'groff -me '"$doc"
@@ -140,5 +140,14 @@ echo "testing ms(7) document $doc" >&2
 # BUG: Should detect -mwww (and -mpspic?) too.
 "$grog" "$doc" | \
     grep -Fqx 'groff -ms '"$doc"
+
+# Test manual specification of auxiliary macro packages.
+echo "testing ms(7) document $doc with '-m www' option" >&2
+"$grog" "$doc" -m www | \
+    grep -Fqx 'groff -ms -mwww '"$doc"
+
+echo "testing ms(7) document $doc with '-mwww' option" >&2
+"$grog" "$doc" -mwww | \
+    grep -Fqx 'groff -ms -mwww '"$doc"
 
 # vim:set ai et sw=4 ts=4 tw=72:

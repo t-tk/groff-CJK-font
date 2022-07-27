@@ -49,28 +49,30 @@ This manual page describes the GNU
 .I www
 macro package,
 which is part of the
-.I groff
+.MR groff @MAN7EXT@
 document formatting system.
 .
-The manual page is very a basic guide, and the HTML device driver
-.RI ( \%grohtml )
-has been completely rewritten but still remains as in an alpha state.
-.
-It has been included into the distribution so that a lot of people have
-a chance to test it.
-.
-Note that this macro file is automatically called (via the
+This macro file is automatically loaded by the default
 .I troffrc
-file) if you use
+file when the formatter
+(usually
+.MR groff @MAN1EXT@ )
+is called with either of the options
 .B \-Thtml
 or
 .BR \-Txhtml .
 .
+To see hyperlinks in action,
+format this man page using one of those options.
 .
-.PP
-To see the hyperlinks in action, please format this man page with the
-.I \%grohtml
-device.
+.
+.P
+This document is a basic guide;
+the HTML output driver
+.RI ( \%grohtml )
+remains in an alpha state.
+.
+It has been included with the distribution to encourage testing.
 .
 .
 .PP
@@ -174,10 +176,11 @@ Another method for turning automatic headings off is by issuing the
 command-line switch
 .B \-P\-l
 to
-.BR groff .
+.IR groff .
+.
 .
 .TP
-.B .BCL foreground background active not-visited visited
+.BI .BCL\~ "foreground background active not-visited visited"
 This macro takes five parameters:
 foreground,
 background,
@@ -210,7 +213,7 @@ becomes the anchor text.
 Hyphenation is disabled while printing the actual URL;
 explicit breakpoints should be inserted with the
 .B \[rs]:
-escape.
+escape sequence.
 .
 Here is how to encode
 .UR http://\:foo\:.org/
@@ -273,8 +276,9 @@ can be achieved by the following macro:
 .RE
 .
 .IP
-Note that all the URLs actually are treated as consuming no textual
-space in groff.
+All URLs currently are treated as consuming no textual
+space in
+.IR groff .
 .
 This could be considered as a bug since it causes some problems.
 .
@@ -390,7 +394,8 @@ or
 .B \-Txhtml
 it is necessary to use the
 .B \-U
-option of groff.
+option of
+.IR groff .
 .
 .TP
 .B .MPIMG [\-R|\-L] [\-G gap] filename [width [height]]
@@ -682,16 +687,24 @@ for details of how to switch this off or alter the position).
 .SH "Limitations of \f[I]grohtml\f[]"
 .\" ====================================================================
 .
-.LP
-.B tbl
-information is currently rendered as a PNG image.
+.MR @g@tbl @MAN1EXT@
+tables are rendered as PNG images.
+.
+Paul DuBois's approach with
+.MR tblcvt 1 ,
+part of the
+.UR http://\:www\:.snake\:.net/\:software/\:troffcvt/
+.I troffcvt
+distribution
+.UE ,
+should be explored.
 .
 .
 .\" ====================================================================
 .SH Files
 .\" ====================================================================
 .
-.I @MACRODIR@/www.tmac
+.I @MACRODIR@/\:www\:.tmac
 .
 .
 .\" ====================================================================

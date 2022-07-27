@@ -91,17 +91,47 @@ grolbp \- groff output driver for Canon CaPSL printers
 .SH Description
 .\" ====================================================================
 .
-.B grolbp
-is a driver for
-.B groff
-that produces output in CaPSL and VDM format suitable for Canon LBP-4
-and LBP-8 printers.
+The GNU
+.I roff
+LBP output driver translates the output of
+.MR @g@troff @MAN1EXT@
+into a CaPSL and VDM format suitable for Canon LBP-4 and LBP-8 printers.
+.
+Normally,
+.I grolbp
+is invoked by
+.MR groff @MAN1EXT@
+when the latter is given the
+.RB \[lq] \-T\~lbp \[rq]
+option.
+.
+(In this installation,
+.B @DEVICE@
+is the default output device.)
+.
+Use
+.IR groff 's
+.B \-P
+option to pass any options shown above to
+.IR grolbp .
+.
+If no
+.I file
+arguments are given,
+or if
+.I file
+is \[lq]\-\[rq],
+.I grolbp
+reads the standard input stream.
+.
+Output is written to the standard output stream.
 .
 .
-.LP
+.P
 For compatibility with
-.MR grolj4 @MAN1EXT@
-there is an additional drawing command available:
+.MR grolj4 @MAN1EXT@ ,
+an additional drawing command is available.
+.
 .
 .TP
 .BI \[rs]D\[aq]R\~ "dh dv" \[aq]
@@ -395,12 +425,13 @@ as \(oqSwiss-Bold\(cq, the required
 command line is
 .sp 1
 .in +2m
-.B lbpname Swiss-Bold
+.B lbpname Swiss\-Bold
 .in -2m
 .sp 1
 .
-.PP
-The argument of
+.
+.P
+The argument to
 .B lbpname
 is case sensitive.
 .
@@ -425,18 +456,31 @@ and
 .\" ====================================================================
 .
 .TP
-.I \%@FONTDIR@/\:\%devlbp/\:DESC
-Device description file.
+.I @FONTDIR@/\:\%devlbp/\:DESC
+describes the
+.B lbp
+output device.
+.
 .
 .TP
-.IR \%@FONTDIR@/\:\%devlbp/ F
-Font description file for font
-.IR F .
+.IR @FONTDIR@/\:\%devlbp/ F
+describes the font known
+.RI as\~ F
+on device
+.BR lbp .
+.
 .
 .TP
-.I \%@MACRODIR@/\:lbp\:.tmac
-Macros for use with
-.BR grolbp .
+.I @MACRODIR@/\:lbp\:.tmac
+defines macros for use with the
+.B lbp
+output device.
+.
+It is automatically loaded by
+.I troffrc
+when the
+.B lbp
+output device is selected.
 .
 .
 .\" ====================================================================

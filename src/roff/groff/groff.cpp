@@ -789,7 +789,7 @@ void synopsis(FILE *stream)
 "usage: %s [-abcCeEgGijklNpRsStUVXzZ] [-dCS] [-dNAME=STRING] [-Denc]"
 " [-fFAM] [-Fdir] [-Idir] [-Kenc] [-Larg] [-mNAME] [-Mdir] [-nNUM]"
 " [-oLIST] [-Parg] [-rCN] [-rREG=EXPR] [-Tdev] [-wNAME] [-Wname]"
-" [FILE ...]\n"
+" [file ...]\n"
 "usage: %s {-h | --help | -v | --version}\n",
 	  program_name, program_name);
 }

@@ -83,7 +83,7 @@ dist_hdtblexample_DATA = $(HDTBLEXAMPLEFILES)
 nodist_hdtblexample_DATA = \
   $(HDTBLGENFILES) \
   $(HDTBLPROCESSEDEXAMPLEFILES) \
-  gnu.eps
+  $(DOC_GNU_EPS)
 else
 EXTRA_DIST += $(HDTBLEXAMPLEFILES)
 endif
@@ -116,17 +116,18 @@ SUFFIXES += .roff .in .ps
 
 .roff.ps:
 	$(GROFF_V)$(MKDIR_P) `dirname $@` \
-	&& $(HDTBLGROFF) -Tps \
+	&& $(HDTBLGROFF) -I $(doc_builddir) -I $(doc_srcdir) -Tps \
 	     -dfontpath=$(top_srcdir)/font \
 	     -dsopath=$(hdtbl_srcdir)/ \
 	     -mhdtbl $< >$@
+
 .in.roff:
 	$(AM_V_GEN)$(MKDIR_P) `dirname $@` \
 	&& sed -e "s|[@]fontdir[@]|$(fontdir)|" \
 	       -e "s|[@]EGREP[@]|$(EGREP)|" $< >$@
 
 
-$(HDTBLPROCESSEDEXAMPLEFILES): gnu.eps groff troff eqn pic tbl \
+$(HDTBLPROCESSEDEXAMPLEFILES): $(DOC_GNU_EPS) groff troff eqn pic tbl \
   contrib/hdtbl/examples/common.roff
 
 uninstall_groffdirs: uninstall-hdtbl-hook

@@ -20,6 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 #if !defined(HTML_H)
 #  define HTML_H
 
+const int INT_HEXDIGITS = 16; // enough for 64-bit ints
+
 /*
  *  class and structure needed to buffer words
  */

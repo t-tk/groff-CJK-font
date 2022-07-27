@@ -56,11 +56,9 @@ directory.
 The device description file is called
 .IR DESC ,
 and,
-for each
-.RI font\~ f
-supported by the device,
+for each font supported by the device,
 a font description file is
-.RI called\~\[lq] f \[rq],
+.RI called\~ f,
 where
 .IR f \~is
 usually an abbreviation of a font's name and/or style.
@@ -90,6 +88,17 @@ and bold-italic styles
 and
 .BR BI ,
 respectively).
+.
+.
+.P
+Device and font description files are read both by the formatter,
+.IR @g@troff ,
+and by output drivers.
+.
+The programs delegate these files' processing to an internal
+library,
+.IR libgroff ,
+ensuring their consistent interpretation.
 .
 .
 .\" ====================================================================
@@ -152,7 +161,7 @@ is the number of
 .
 This directive may extend over more than one line.
 .
-A font name of
+A font name
 .RB of\~ 0
 causes no font to be mounted at the corresponding position.
 .
@@ -163,7 +172,8 @@ The horizontal resolution is
 .IR n \~basic
 units.
 .
-All horizontal quantities are rounded to multiples of this value.
+All horizontal quantities are rounded to multiples
+.RI of\~ n.
 .
 .
 .TP
@@ -226,8 +236,7 @@ and the envelope formats
 and
 .BR DL .
 .
-Case is not significant for the argument if it holds predefined paper
-types.
+Matching is performed without regard for lettercase.
 .
 .
 .IP
@@ -265,16 +274,15 @@ the argument can be a file name
 (e.g.,
 .IR /etc/papersize );
 if the file can be opened,
-.I \%@g@troff
-reads the first line and attempts to match either of the other forms.
+the first line is read and a match attempted against each of the other
+forms.
 .
 No comment syntax is supported.
 .
 .
 .IP
 More than one argument can be specified;
-.I \%@g@troff
-scans each in turn and uses the first valid paper specification.
+each is scanned in turn and the first valid paper specification used.
 .
 .
 .TP
@@ -291,15 +299,14 @@ instead).
 .TP
 .B pass_filenames
 Direct
-.I \%@g@troff
+.I @g@troff
 to emit the name of the source file being processed.
 .
 This is achieved with the intermediate output command
-.RB \[lq] "x F" \[rq].
-.
-The
+.RB \[lq] "x F" \[rq],
+which
 .I \%grohtml
-driver uses this directive.
+interprets.
 .
 .
 .TP
@@ -340,7 +347,7 @@ are ignored.
 .
 .TP
 .BI res\~ n
-The device has
+The device resolution is
 .I n
 basic units per inch.
 .
@@ -379,9 +386,9 @@ The default
 .TP
 .BI styles\~ S1\~\c
 .RI .\|.\|.\&\~ Sm
-The first
-.I m
-font positions are associated with styles
+The
+.RI first\~ m
+font mounting positions are associated with styles
 .IR S1 ,
 \&.\|.\|.,
 .IR Sm .
@@ -451,7 +458,7 @@ driver uses this directive.
 .
 .TP
 .B use_charnames_in_special
-.I \%@g@troff
+.I @g@troff
 should encode named glyphs inside device control commands.
 .
 The
@@ -465,12 +472,13 @@ The vertical resolution is
 .IR n \~basic
 units.
 .
-All vertical quantities are rounded to multiples of this value.
+All vertical quantities are rounded to multiples
+.RI of\~ n.
 .
 .
 .TP
 .B charset
-This line and everything following it in the file are ignored.
+This directive and the rest of the file are ignored.
 .
 It is recognized for compatibility with other
 .I troff \" generic
@@ -482,7 +490,7 @@ character set repertoire is described on a per-font basis.
 .
 .
 .P
-.I \%@g@troff
+.I @g@troff
 recognizes but ignores the directives
 .BR spare1 ,
 .BR spare2 ,
@@ -500,11 +508,9 @@ and
 lines are mandatory.
 .
 Directives not listed above are ignored by
-.I \%@g@troff
-but may be used by postprocessors to obtain arbitrary information about
-the device described in the
-.I DESC
-file.
+.I @g@troff
+but may be used by postprocessors to obtain further information about
+the device.
 .
 .
 .\" ====================================================================
@@ -536,16 +542,16 @@ device uses a
 .B unitwidth
 of\~800.
 .
-In its Times roman font
-.RB (\[lq] TR \[rq]),
-its
+Its Times roman font
+.RB (\[lq] TR \[rq])
+has a
 .B spacewidth
-is\~833;
+of\~833;
 this is also the width of its comma,
 period,
 centered period,
 and mathematical asterisk,
-while its \[lq]M\[rq] is 2963 basic units.
+while its \[lq]M\[rq] is 2,963 basic units.
 .
 Thus,
 an \[lq]M\[rq] on the
@@ -608,7 +614,7 @@ units.
 .
 .
 .P
-The directives above are mandatory in the first section;
+The directives above must appear in the first section;
 those below are optional.
 .
 .
@@ -657,9 +663,9 @@ it is sought in any mounted fonts that bear this property.
 .
 .P
 Other directives in this section are ignored by
-.IR \%@g@troff ,
-but may be used by postprocessors to obtain arbitrary information about
-the font described in the file.
+.IR @g@troff ,
+but may be used by postprocessors to obtain further information about
+the font.
 .
 .
 .P
@@ -679,7 +685,7 @@ file contains the
 directive.
 .
 Another subsection,
-.BR kernpairs ,
+.BR \%kernpairs ,
 is optional.
 .
 .
@@ -720,7 +726,7 @@ input
 .
 If
 .I name
-is a character sequence not beginning with
+is a multi-character sequence not beginning with
 .BR \[rs] ,
 it corresponds to the GNU
 .I troff \" GNU
@@ -732,7 +738,7 @@ special character escape sequence
 A name consisting of three minus signs,
 .RB \[lq] \-\-\- \[rq],
 indicates that the glyph is unnamed:
-such glyphs can only be accessed by means of the
+such glyphs can only be accessed by the
 .B \[rs]N
 escape sequence in
 .IR troff . \" generic; \N is portable
@@ -765,6 +771,8 @@ a font can thus customize the widths of these spaces.
 .\" Latin character, is a predefined groff escape sequence.
 .
 .
+.br
+.ne 4v \" Keep next paragraph together with (possibly 2-line) synopsis.
 .P
 The form of the
 .I metrics
@@ -774,12 +782,17 @@ it may be broken here for readability).
 .
 .
 .IP
+.\" XXX: Turning off adjustment is ugly; thanks to meter-long specimens
+.\" like this, we need an escape sequence that selectively disables
+.\" adjustment at the end of a word.
+.na
 .I width\/\c
-.RI [\fB, \:height\/\c
-.RI [\fB, \:depth\/\c
-.RI [\fB, \:\%italic-correction\/\c
-.RI [\fB, \:\%left-italic-correction\/\c
-.RI [\fB, \:\%subscript-correction ]]]]]
+.RI [\fB,\fP[ \:height\/\c
+.RI [\fB,\fP[ \:depth\/\c
+.RI [\fB,\fP[ \:\%italic-correction\/\c
+.RI [\fB,\fP[ \:\%left-italic-correction\/\c
+.RI [\fB,\fP[ \:\%subscript-correction ]]]]]]]]]]
+.ad \*[AD]
 .
 .
 .P
@@ -843,31 +856,58 @@ it should be less than the italic correction.
 .
 .
 .P
-The
+For fonts used with typesetting devices,
+the
 .I type
-field gives a featural description of the glyph.
+field gives a featural description of the glyph:
+it is a bit mask recording whether the glyph is an ascender,
+descender,
+both,
+or neither.
+.
+When a
+.B \[rs]w
+escape sequence is interpolated,
+these values are bitwise or-ed together
+for each glyph
+and stored in the
+.B ct
+register.
+.
+In font descriptions for
+.IR nroff -mode \" generic
+output devices (terminals),
+all glyphs might have a type of zero.
+.
+.
+.TP
+0
+means the glyph lies entirely between the baseline and
+a horizontal line at the \[lq]x-height\[rq] of the font;
+typical examples are \[lq]a\[rq],
+\[lq]c\[rq],
+and
+\[lq]x\[rq];
 .
 .
 .TP
 1
-means the glyph has a descender
-(for example,
-\[lq]p\[rq]);
+means the glyph descends below the baseline,
+like \[lq]p\[rq];
 .
 .
 .TP
 2
-means the glyph has an ascender
-(for example,
+means the glyph ascends above the font's x-height,
+like \[lq]A\[rq] or
 \[lq]b\[rq]);
 and
 .
 .
 .TP
 3
-means the glyph has both an ascender and a descender
-(for example,
-parentheses in some fonts).
+means the glyph is both an ascender and a descender\[em]this is true of
+parentheses in some fonts.
 .
 .
 .P
@@ -894,7 +934,7 @@ The
 .I entity-name
 field defines an identifier for the glyph that the postprocessor
 uses to print the
-.I \%@g@troff
+.I @g@troff
 glyph
 .IR name .
 .
@@ -945,21 +985,22 @@ Such aliases can be chained.
 .
 .P
 The word
-.B kernpairs
-starts a list of kerning adjustments to be made to adjacent glyph pairs.
+.B \%kernpairs
+starts a list of kerning adjustments to be made to adjacent glyph pairs
+from this font.
 .
 It contains a sequence of lines formatted as follows.
 .
 .
 .IP
-.I c1 c2 n
+.I g1 g2 n
 .
 .
 .P
 The foregoing means that when glyph
-.I c1
+.I g1
 is typeset immediately before
-.IR c2 ,
+.IR g2 ,
 the space between them should be increased
 .RI by\~ n .
 .
@@ -968,20 +1009,21 @@ Most kerning pairs should have a negative value
 .\" END Keep parallel with groff.texi node "Device and Font Files".
 .
 .
+.br
+.ne 4v
 .\" ====================================================================
 .SH Files
 .\" ====================================================================
 .
 .TP
-.IR @FONTDIR@/dev name /DESC
+.IR @FONTDIR@/\:\%dev name /\:DESC
 describes the output device
 .IR name .
 .
 .
 .TP
-.IR @FONTDIR@/dev name / F
-describes the font known to
-.I \%@g@troff
+.IR @FONTDIR@/\:\%dev name / F
+describes the font known
 .RI as\~ F
 on device
 .IR name .
@@ -1006,7 +1048,7 @@ by Joseph F.\& Ossanna,
 1976
 (revised by Brian W.\& Kernighan,
 1992),
-AT&T Bell Laboratories Computing Science Techical Report No.\& 54,
+AT&T Bell Laboratories Computing Science Technical Report No.\& 54,
 widely called simply \[lq]CSTR\~#54\[rq],
 documents the language,
 device and font description file formats,
@@ -1021,7 +1063,7 @@ documentation as
 \[lq]A Typesetter-independent TROFF\[rq]
 by Brian W.\& Kernighan,
 1982,
-AT&T Bell Laboratories Computing Science Techical Report No.\& 97,
+AT&T Bell Laboratories Computing Science Technical Report No.\& 97,
 provides additional insights into the
 device and font description file formats
 and device-independent output format.
@@ -1030,10 +1072,10 @@ and device-independent output format.
 .P
 .MR groff @MAN1EXT@ ,
 subsection \[lq]Utilities\[rq],
-lists programs available for preparing font files in a variety of
-formats for use with
+lists programs available for describing fonts in a variety of formats
+such that
 .I groff
-output drivers.
+output drivers can use them.
 .
 .
 .P

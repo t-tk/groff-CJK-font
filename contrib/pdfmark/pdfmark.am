@@ -65,12 +65,14 @@ PDFROFF=\
 
 contrib/pdfmark/pdfmark.pdf: contrib/pdfmark/pdfmark.ms
 	$(GROFF_V)$(MKDIR_P) `dirname $@` \
-	&& $(PDFROFF) -mspdf --stylesheet=$(pdfmark_srcdir)/cover.ms \
-	     $(top_srcdir)/contrib/pdfmark/pdfmark.ms >$@
+	&& $(PDFROFF) -I $(doc_builddir) -I $(doc_srcdir) -mspdf \
+	  --stylesheet=$(pdfmark_srcdir)/cover.ms \
+	  $(top_srcdir)/contrib/pdfmark/pdfmark.ms >$@
 
 # The pdf files use the local script to generate.
-$(PDFDOCFILES): pdfroff groff troff gropdf 
-$(PDFDOCFILES): $(dist_devpsfont_DATA) $(nodist_devpsfont_DATA) gnu.eps
+$(PDFDOCFILES): pdfroff groff troff gropdf
+$(PDFDOCFILES): $(dist_devpsfont_DATA) $(nodist_devpsfont_DATA) \
+  $(DOC_GNU_EPS)
 
 pdfroff: contrib/pdfmark/pdfroff.sh $(SH_DEPS_SED_SCRIPT)
 	$(AM_V_GEN)sed -f $(SH_DEPS_SED_SCRIPT) \

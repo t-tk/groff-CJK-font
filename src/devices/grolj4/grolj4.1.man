@@ -67,15 +67,46 @@ grolj4 \- groff output driver for HP LaserJet 4 family printers
 .SH Description
 .\" ====================================================================
 .
-.B grolj4
-is a driver for
-.B groff
-that produces output in PCL5 format suitable for an HP LaserJet 4
-printer.
+The GNU
+.I roff
+LJ4 output driver translates the output of
+.MR @g@troff @MAN1EXT@
+into a PCL5 format suitable for an HP LaserJet 4 printer.
+.
+Normally,
+.I grolj4
+is invoked by
+.MR groff @MAN1EXT@
+when the latter is given the
+.RB \[lq] \-T\~lj4 \[rq]
+option.
+.
+(In this installation,
+.B @DEVICE@
+is the default output device.)
+.
+Use
+.IR groff 's
+.B \-P
+option to pass any options shown above to
+.IR grolj4 .
+.
+If no
+.I file
+arguments are given,
+or if
+.I file
+is \[lq]\-\[rq],
+.I grolj4
+reads the standard input stream.
+.
+Output is written to the standard output stream.
 .
 .
-.LP
-There is an additional drawing command available:
+.P
+An additional drawing command is available beyond those documented in
+.MR groff @MAN7EXT@ .
+.
 .
 .TP
 .BI \[rs]D\[aq]R\~ "dh dv" \[aq]
@@ -200,30 +231,81 @@ and
 .MR groff_font @MAN5EXT@ .
 .
 .
+.br
 .ne 3v \" Keep section heading and paragraph tag together.
 .\" ====================================================================
 .SH Files
 .\" ====================================================================
 .
 .TP
-.I @FONTDIR@/devlj4/DESC
-Device description file.
+.I @FONTDIR@/\:\%devlj4/\:DESC
+describes the
+.B lj4
+output device.
+.
 .
 .TP
-.IR @FONTDIR@/devlj4/ F
-Font description file for font
-.IR F .
+.IR @FONTDIR@/\:\%devlj4/ F
+describes the font known
+.RI as\~ F
+on device
+.BR lj4 .
+.
 .
 .TP
-.I @MACRODIR@/lj4.tmac
-Macros for use with
-.BR grolj4 .
+.I @FONTDIR@/\:\%devlj4/\:\%generate/\:\%Makefile
+is a
+.MR make 1
+script that uses
+.MR hpftodit @MAN1EXT@
+to prepare the foregoing font description files from HP TFM data;
+in can be used to regenerate the
+.I groff
+font descriptions in the event the TFM files are updated.
+.
+.
+.TP
+.I @FONTDIR@/\:\%devlj4/\:\%generate/\:\%special\:.awk
+is an
+.MR awk 1
+script that corrects the Intellifont-based height metrics for several
+glyphs in the
+.B S
+(special) font for TrueType CG Times used in the HP LaserJet\~4000 and
+later.
+.
+.
+.TP
+.I @FONTDIR@/\:\%devlj4/\:\%generate/\:\%special\:.map
+.TQ
+.I @FONTDIR@/\:\%devlj4/\:\%generate/\:\%symbol\:.map
+.TQ
+.I @FONTDIR@/\:\%devlj4/\:\%generate/\:text\:.map
+.TQ
+.I @FONTDIR@/\:\%devlj4/\:\%generate/\:\%wingdings.map
+map MSL indices and HP Unicode Private Use Area assignments to
+.I groff
+special character identifiers.
+.
+.
+.TP
+.I @MACRODIR@/\:lj4\:.tmac
+defines macros for use with the
+.B lj4
+output device.
+.
+It is automatically loaded by
+.I troffrc
+when the
+.B lj4
+output device is selected.
 .
 .
 .\" ====================================================================
 .SH Bugs
 .\" ====================================================================
 .
+.\" XXX: What does this mean?  The period/full stop glyph?  Flyspecks?
 Small dots.
 .
 .

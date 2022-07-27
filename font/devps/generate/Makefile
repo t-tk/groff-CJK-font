@@ -1,4 +1,4 @@
-# Copyright (C) 1989-2020 Free Software Foundation, Inc.
+# Copyright (C) 1989-2022 Free Software Foundation, Inc.
 #      Written by James Clark (jjc@jclark.com)
 #
 # This file is part of groff.
@@ -28,6 +28,9 @@ SHELL = /bin/sh
 # Either long names (e.g., Times-Roman.afm) or short names (e.g.,
 # timesr.afm) may be used. See the afmname script.
 afmdir=/usr/local/lib/afm
+
+# Write font descriptions to this directory.
+outdir=$(srcdir)/..
 
 # The symbol font which fits to 'Symbol.afm'.  For the creation of
 # 'symbolsl.afm' we need the 'printafm' script from ghostscript.
@@ -69,211 +72,211 @@ all: $(FONTS)
 TR:
 	$(AFMTODIT) $(EFLAG) $(RFLAG) \
 	  `$(AFMNAME) $(afmdir)/Times-Roman.afm` \
-	  $(TEXTMAP) $@
+	  $(TEXTMAP) $(OUTDIR)/$@
 
 TB:
 	$(AFMTODIT) $(EFLAG) $(RFLAG) \
 	  `$(AFMNAME) $(afmdir)/Times-Bold.afm` \
-	  $(TEXTMAP) $@
+	  $(TEXTMAP) $(OUTDIR)/$@
 
 TI:
 	$(AFMTODIT) $(EFLAG) $(IFLAG) -a 7 \
 	  `$(AFMNAME) $(afmdir)/Times-Italic.afm` \
-	  $(TEXTMAP) $@
+	  $(TEXTMAP) $(OUTDIR)/$@
 
 TBI:
 	$(AFMTODIT) $(EFLAG) $(IFLAG) \
 	  `$(AFMNAME) $(afmdir)/Times-BoldItalic.afm` \
-	  $(TEXTMAP) $@
+	  $(TEXTMAP) $(OUTDIR)/$@
 
 HR:
 	$(AFMTODIT) $(EFLAG) $(RFLAG) \
 	  `$(AFMNAME) $(afmdir)/Helvetica.afm` \
-	  $(TEXTMAP) $@
+	  $(TEXTMAP) $(OUTDIR)/$@
 
 HB:
 	$(AFMTODIT) $(EFLAG) $(RFLAG) \
 	  `$(AFMNAME) $(afmdir)/Helvetica-Bold.afm` \
-	  $(TEXTMAP) $@
+	  $(TEXTMAP) $(OUTDIR)/$@
 
 HI:
 	$(AFMTODIT) $(EFLAG) $(IFLAG) \
 	  `$(AFMNAME) $(afmdir)/Helvetica-Oblique.afm` \
-	  $(TEXTMAP) $@
+	  $(TEXTMAP) $(OUTDIR)/$@
 
 HBI:
 	$(AFMTODIT) $(EFLAG) $(IFLAG) \
 	  `$(AFMNAME) $(afmdir)/Helvetica-BoldOblique.afm` \
-	  $(TEXTMAP) $@
+	  $(TEXTMAP) $(OUTDIR)/$@
 
 CR:
 	$(AFMTODIT) $(NOLIGFLAG) $(EFLAG) $(RFLAG) \
 	  `$(AFMNAME) $(afmdir)/Courier.afm` \
-	  $(TEXTMAP) $@
+	  $(TEXTMAP) $(OUTDIR)/$@
 
 CB:
 	$(AFMTODIT) $(NOLIGFLAG) $(EFLAG) $(RFLAG) \
 	  `$(AFMNAME) $(afmdir)/Courier-Bold.afm` \
-	  $(TEXTMAP) $@
+	  $(TEXTMAP) $(OUTDIR)/$@
 
 CI:
 	$(AFMTODIT) $(NOLIGFLAG) $(EFLAG) $(IFLAG) \
 	  `$(AFMNAME) $(afmdir)/Courier-Oblique.afm` \
-	  $(TEXTMAP) $@
+	  $(TEXTMAP) $(OUTDIR)/$@
 
 CBI:
 	$(AFMTODIT) $(NOLIGFLAG) $(EFLAG) $(IFLAG) \
 	  `$(AFMNAME) $(afmdir)/Courier-BoldOblique.afm` \
-	  $(TEXTMAP) $@
+	  $(TEXTMAP) $(OUTDIR)/$@
 
 PR:
 	$(AFMTODIT) $(EFLAG) $(RFLAG) \
 	  `$(AFMNAME) $(afmdir)/Palatino-Roman.afm` \
-	  $(TEXTMAP) $@
+	  $(TEXTMAP) $(OUTDIR)/$@
 
 PB:
 	$(AFMTODIT) $(EFLAG) $(RFLAG) \
 	  `$(AFMNAME) $(afmdir)/Palatino-Bold.afm` \
-	  $(TEXTMAP) $@
+	  $(TEXTMAP) $(OUTDIR)/$@
 
 PI:
 	$(AFMTODIT) $(EFLAG) $(IFLAG) \
 	  `$(AFMNAME) $(afmdir)/Palatino-Italic.afm` \
-	  $(TEXTMAP) $@
+	  $(TEXTMAP) $(OUTDIR)/$@
 
 PBI:
 	$(AFMTODIT) $(EFLAG) $(IFLAG) \
 	  `$(AFMNAME) $(afmdir)/Palatino-BoldItalic.afm` \
-	  $(TEXTMAP) $@
+	  $(TEXTMAP) $(OUTDIR)/$@
 
 NR:
 	$(AFMTODIT) $(EFLAG) $(RFLAG) \
 	  `$(AFMNAME) $(afmdir)/NewCenturySchlbk-Roman.afm` \
-	  $(TEXTMAP) $@
+	  $(TEXTMAP) $(OUTDIR)/$@
 
 NB:
 	$(AFMTODIT) $(EFLAG) $(RFLAG) \
 	  `$(AFMNAME) $(afmdir)/NewCenturySchlbk-Bold.afm` \
-	  $(TEXTMAP) $@
+	  $(TEXTMAP) $(OUTDIR)/$@
 
 NI:
 	$(AFMTODIT) $(EFLAG) $(IFLAG) \
 	  `$(AFMNAME) $(afmdir)/NewCenturySchlbk-Italic.afm` \
-	  $(TEXTMAP) $@
+	  $(TEXTMAP) $(OUTDIR)/$@
 
 NBI:
 	$(AFMTODIT) $(EFLAG) $(IFLAG) \
 	  `$(AFMNAME) $(afmdir)/NewCenturySchlbk-BoldItalic.afm` \
-	  $(TEXTMAP) $@
+	  $(TEXTMAP) $(OUTDIR)/$@
 
 BMR:
 	$(AFMTODIT) $(EFLAG) $(RFLAG) \
 	  `$(AFMNAME) $(afmdir)/Bookman-Light.afm` \
-	  $(TEXTMAP) $@
+	  $(TEXTMAP) $(OUTDIR)/$@
 
 BMB:
 	$(AFMTODIT) $(EFLAG) $(RFLAG) \
 	  `$(AFMNAME) $(afmdir)/Bookman-Demi.afm` \
-	  $(TEXTMAP) $@
+	  $(TEXTMAP) $(OUTDIR)/$@
 
 BMI:
 	$(AFMTODIT) $(EFLAG) $(IFLAG) \
 	  `$(AFMNAME) $(afmdir)/Bookman-LightItalic.afm` \
-	  $(TEXTMAP) $@
+	  $(TEXTMAP) $(OUTDIR)/$@
 
 BMBI:
 	$(AFMTODIT) $(EFLAG) $(IFLAG) \
 	  `$(AFMNAME) $(afmdir)/Bookman-DemiItalic.afm` \
-	  $(TEXTMAP) $@
+	  $(TEXTMAP) $(OUTDIR)/$@
 
 AR:
 	$(AFMTODIT) $(EFLAG) $(RFLAG) \
 	  `$(AFMNAME) $(afmdir)/AvantGarde-Book.afm` \
-	  $(TEXTMAP) $@
+	  $(TEXTMAP) $(OUTDIR)/$@
 
 AB:
 	$(AFMTODIT) $(EFLAG) $(RFLAG) \
 	  `$(AFMNAME) $(afmdir)/AvantGarde-Demi.afm` \
-	  $(TEXTMAP) $@
+	  $(TEXTMAP) $(OUTDIR)/$@
 
 AI:
 	$(AFMTODIT) $(EFLAG) $(IFLAG) \
 	  `$(AFMNAME) $(afmdir)/AvantGarde-BookOblique.afm` \
-	  $(TEXTMAP) $@
+	  $(TEXTMAP) $(OUTDIR)/$@
 
 ABI:
 	$(AFMTODIT) $(EFLAG) $(IFLAG) \
 	  `$(AFMNAME) $(afmdir)/AvantGarde-DemiOblique.afm` \
-	  $(TEXTMAP) $@
+	  $(TEXTMAP) $(OUTDIR)/$@
 
 HNR:
 	$(AFMTODIT) $(EFLAG) $(RFLAG) \
 	  `$(AFMNAME) $(afmdir)/Helvetica-Narrow.afm` \
-	  $(TEXTMAP) $@
+	  $(TEXTMAP) $(OUTDIR)/$@
 
 HNB:
 	$(AFMTODIT) $(EFLAG) $(RFLAG) \
 	  `$(AFMNAME) $(afmdir)/Helvetica-Narrow-Bold.afm` \
-	  $(TEXTMAP) $@
+	  $(TEXTMAP) $(OUTDIR)/$@
 
 HNI:
 	$(AFMTODIT) $(EFLAG) $(IFLAG) \
 	  `$(AFMNAME) $(afmdir)/Helvetica-Narrow-Oblique.afm` \
-	  $(TEXTMAP) $@
+	  $(TEXTMAP) $(OUTDIR)/$@
 
 HNBI:
 	$(AFMTODIT) $(EFLAG) $(IFLAG) \
 	  `$(AFMNAME) $(afmdir)/Helvetica-Narrow-BoldOblique.afm` \
-	  $(TEXTMAP) $@
+	  $(TEXTMAP) $(OUTDIR)/$@
 
 ZCMI:
 	$(AFMTODIT) $(EFLAG) $(IFLAG) \
 	  `$(AFMNAME) $(afmdir)/ZapfChancery-MediumItalic.afm` \
-	  $(TEXTMAP) $@
+	  $(TEXTMAP) $(OUTDIR)/$@
 
 ZD:
 	$(AFMTODIT) -s $(RFLAG) \
 	  `$(AFMNAME) $(afmdir)/ZapfDingbats.afm` \
-	  $(srcdir)/dingbats.map $@
+	  $(srcdir)/dingbats.map $(OUTDIR)/$@
 
-SS: symbolsl.afm
+SS: $(OUTDIR)/symbolsl.afm
 	$(AFMTODIT) -s -x $(IFLAG) \
-	  symbolsl.afm $(srcdir)/lgreekmap $@
+	  $(OUTDIR)/symbolsl.afm $(srcdir)/lgreekmap $(OUTDIR)/$@
 
 S: symbol.afm
 	$(AFMTODIT) -s $(RFLAG) \
-	  symbol.afm symbolmap $@
+	  symbol.afm symbolmap $(OUTDIR)/$@
 
-ZDR: zapfdr.afm
+ZDR: $(OUTDIR)/zapfdr.afm
 	$(AFMTODIT) -s $(RFLAG) \
-	  zapfdr.afm $(srcdir)/dingbats.rmap $@
+	  $(OUTDIR)/zapfdr.afm $(srcdir)/dingbats.rmap $(OUTDIR)/$@
 
 # the map is just a dummy
 EURO: freeeuro.afm
 	$(AFMTODIT) $(RFLAG) \
-	  freeeuro.afm symbolmap $@
+	  freeeuro.afm symbolmap $(OUTDIR)/$@
 
 freeeuro.afm freeeuro.pfa: $(srcdir)/freeeuro.sfd
-	fontforge -script $(srcdir)/sfdtopfa.pe $(srcdir)/freeeuro.sfd
+	fontforge -script $(srcdir)/sfdtopfa.pe $(srcdir)/freeeuro.sfd \
+	  && mv freeeuro.afm freeeuro.pfa $(OUTDIR)
 
 symbol.afm: $(srcdir)/symbol.sed
-	$(RM) $@
 	sed -f $(srcdir)/symbol.sed `$(AFMNAME) $(afmdir)/Symbol.afm` \
-	  >$@
+	  >$(OUTDIR)/$@
 
 symbolsl.afm: $(srcdir)/symbolsl.awk $(srcdir)/../symbolsl.ps
-	$(RM) $@ Fontmap
-	echo "/Symbol-Slanted ($(srcdir)/../symbolsl.ps) ;"  > Fontmap
-	echo "/Symbol         ($(symbolfont)) ;" >> Fontmap
-	$(PRINTAFM) Symbol-Slanted > tmp.afm
-	awk -f $(srcdir)/symbolsl.awk -v SYMAFM=`$(AFMNAME) \
-	  $(afmdir)/Symbol.afm` tmp.afm >$@
-	$(RM) Fontmap tmp.afm
+	$(RM) Fontmap \
+	  && echo "/Symbol-Slanted ($(srcdir)/../symbolsl.ps) ;" \
+	    > Fontmap \
+	  && echo "/Symbol         ($(symbolfont)) ;" >> Fontmap \
+	  && $(PRINTAFM) Symbol-Slanted > tmp.afm \
+	  && awk -f $(srcdir)/symbolsl.awk -v SYMAFM=`$(AFMNAME) \
+	    $(afmdir)/Symbol.afm` tmp.afm >$(OUTDIR)/$@ \
+	  && $(RM) Fontmap tmp.afm
 
-zapfdr.afm: $(srcdir)/zapfdr.sed
-	$(RM) $@
+zapfdr.afm: $(srcdir)/apfdr.sed
 	sed -f $(srcdir)/zapfdr.sed \
-	  `$(AFMNAME) $(afmdir)/ZapfDingbats.afm` >$@
+	  `$(AFMNAME) $(afmdir)/ZapfDingbats.afm` >$(OUTDIR)/$@
 
 ZD: $(srcdir)/dingbats.map
 ZDR: $(srcdir)/dingbats.rmap
@@ -283,16 +286,19 @@ $(GREEKFONTS): $(srcdir)/lgreekmap
 $(FONTS): $(DESC)
 
 symbolmap: $(TEXTMAP) $(srcdir)/symbolchars
-	echo '#' >$@
-	echo '# This is a list of all predefined groff symbols.' >>$@
-	echo '#' >>$@
-	cat $(TEXTMAP) $(srcdir)/symbolchars >>$@
+	printf \
+	  '#\n# This is a list of all predefined groff symbols.\n#\n' \
+	  > $(OUTDIR)/$@ \
+	  && cat $(TEXTMAP) $(srcdir)/symbolchars >>$@
 
 clean:
-	$(RM) symbolmap symbol.afm
+	cd $(OUTDIR) \
+	  && $(RM) freeeuro.afm freeeuro.pfa symbol.afm symbolmap \
+	    symbolsl.afm zapfdr.afm
 
 realclean: clean
-	$(RM) $(FONTS)
+	cd $(OUTDIR) \
+	  && $(RM) $(FONTS)
 
 extraclean: realclean
 	$(RM) core *~ "#*"

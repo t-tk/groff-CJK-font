@@ -20,11 +20,15 @@ for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ..
-.if !\n(.g \
-.  ab groff sboxes macros require groff extensions; aborting
+.if !\n(.g \{\
+.  tm sboxes.tmac: macros require groff extensions; not loading
+.  nx
+.\}
 .
-.if \n(.C \
-.  ab groff sboxes macros do not work in compatibility mode; aborting
+.if \n(.C \{\
+.  tm sboxes.tmac: macros do not work in compatibility mode; not loading
+.  nx
+.\}
 .
 .\" Define a string for use in diagnostic messages.
 .ds bx*name sboxes.tmac\"
@@ -34,8 +38,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .
 .if (\n[.x]\n[.y] < 123) \{\
 .  ds bx*msg \*[bx*name]: groff 1.23 or later is required,\"
-.  as bx*msg " but found groff \n[.x].\n[.y]; aborting\"
-.  ab \*[bx*msg]
+.  as bx*msg " but found groff \n[.x].\n[.y]; not loading\"
+.  tm \*[bx*msg]
+.  nx
 .\}
 .
 .\" See if already loaded.

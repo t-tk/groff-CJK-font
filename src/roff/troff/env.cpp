@@ -1718,7 +1718,7 @@ void environment::newline()
   else if (interrupted) {
     interrupted = 0;
     // see environment::final_break
-    prev_line_interrupted = exit_started ? 2 : 1;
+    prev_line_interrupted = is_exit_underway ? 2 : 1;
   }
   else if (center_lines > 0) {
     --center_lines;

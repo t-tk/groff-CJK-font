@@ -120,8 +120,10 @@ int table_input::get()
       // handle line continuation and uninterpreted leader character
       if ((c = getc(fp)) == '\\') {
 	c = getc(fp);
-	if (c == '\n')
-	  c = getc(fp);		// perhaps state ought to be START now
+	if (c == '\n') {
+	  current_lineno++;
+	  c = getc(fp);
+	}
 	else if (c == 'a' && compatible_flag) {
 	  state = LEADER_1;
 	  return '\\';
@@ -901,7 +903,8 @@ format *process_format(table_input &in, options *opt,
 	  c = in.get();
 	} while (c == ' ' || c == '\t');
 	if (c == EOF) {
-	  error("'f' column modifier missing font name");
+	  error("'f' column modifier missing font name or mounting"
+		" position");
 	  break;
 	}
 	if (c == '(') {

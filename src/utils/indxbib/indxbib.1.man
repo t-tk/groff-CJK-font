@@ -37,25 +37,25 @@
 .SY @g@indxbib
 .RB [ \-w ]
 .RB [ \-c\~\c
-.IR common-words-file ]
+.IR \%common-words-file ]
 .RB [ \-d\~\c
 .IR dir ]
 .RB [ \-f\~\c
-.IR list-file ]
+.IR \%list-file ]
 .RB [ \-h\~\c
-.IR n ]
+.IR \%min-hash-table-size ]
 .RB [ \-i\~\c
-.IR string ]
+.IR \%excluded-fields ]
 .RB [ \-k\~\c
-.IR n ]
+.IR \%max-keys-per-record ]
 .RB [ \-l\~\c
-.IR n ]
+.IR \%min-key-length ]
 .RB [ \-n\~\c
-.IR n ]
+.IR \%threshold ]
 .RB [ \-o\~\c
 .IR file ]
 .RB [ \-t\~\c
-.IR n ]
+.IR \%max-key-length ]
 .RI [ file\~ .\|.\|.]
 .YS
 .
@@ -77,7 +77,7 @@
 .SH Description
 .\" ====================================================================
 .
-.I \%@g@indxbib
+.I @g@indxbib
 makes an inverted index for the bibliographic databases in each
 .I file
 for use with
@@ -118,8 +118,8 @@ character.
 .LP
 The values set by the
 .BR \-c ,
-.BR \-n ,
 .BR \-l ,
+.BR \-n ,
 and
 .B \-t
 options are stored in the index:
@@ -159,7 +159,7 @@ all exit afterward.
 .TP
 .BI \-c\~ common-words-file
 Read the list of common words from
-.I file
+.I common-words-file
 instead of
 .IR \%@COMMON_WORDS_FILE@ .
 .
@@ -168,14 +168,13 @@ instead of
 .BI \-d\~ dir
 Use
 .I dir
-as the pathname of the current working directory to store in the index,
-instead of the path printed by
-.MR pwd 1 .
+as the name of the directory to store in the index,
+instead of that returned by
+.MR getcwd 2 .
 .
-Usually
+Typically,
 .I dir
-will be a symbolic link that points to the directory printed by
-.MR pwd 1 .
+will be a symbolic link whose target is the current working directory.
 .
 .
 .TP
@@ -195,83 +194,78 @@ option can be given at most once.
 .
 .
 .TP
-.BI \-i\~ string
+.BI \-h\~ min-hash-table-size
+Use the first prime number greater than or equal to
+the argument for the size of the hash table.
+.
+Larger values
+will usually make searching faster,
+but will make the index file larger
+and cause
+.I @g@indxbib
+to use more memory.
+.
+The default hash table size is 997.
+.
+.
+.TP
+.BI \-i\~ excluded-fields
 Don't index the contents of fields whose names are in
-.IR string .
+.IR excluded-fields .
 .
 Field names are one character each.
 .
-Initially,
-.I string
-is
-.BR XYZ .
-.
-.
-.TP
-.BI \-h\~ n
-Use the first prime greater than or equal to
-.I n
-for the size of the hash table.
-.
-Larger values of
-.I n
-will usually make searching faster,
-but will make the index larger
+If this option is not present,
+.I @g@indxbib
+excludes fields
+.BR X ,
+.BR Y ,
 and
-.I \%@g@indxbib
-use more memory.
-.
-Initially,
-.I n
-is 997.
+.BR Z .
 .
 .
 .TP
-.BI \-k\~ n
-Use at most
-.I n
-keys per input record.
+.BI \-k\~ max-keys-per-record
+Use no more keys per input record than specified in the argument.
 .
-Initially,
-.I n
-is 100.
+If this option is not present,
+the maximum is 100.
 .
 .
 .TP
-.BI \-l\~ n
-Discard keys that are shorter than
-.IR n .
+.BI \-l\~ min-key-length
+Discard any key whose length in characters is shorter than the value of
+the argument.
 .
-Initially,
-.I n
+If this option is not present,
+the minimum key length
 is 3.
 .
 .
 .TP
-.BI \-n\~ n
+.BI \-n\~ threshold
 Discard the
-.I n
-most common words.
+.I threshold
+most common words from the common words file.
 .
-Initially,
-.I n
-is 100.
+If this option is not present,
+the 100 most common words are discarded.
 .
 .
 .TP
 .BI \-o\~ basename
-The index should be named
+Name the index
 .RI basename @INDEX_SUFFIX@ .
 .
 .
 .TP
-.BI \-t\~ n
+.BI \-t\~ max-key-length
 Truncate keys to
-.IR n .
+.I max-key-length
+in characters.
 .
-Initially,
-.I n
-is 6.
+If this option is not present,
+keys are truncated to 6 characters.
 .
 .
 .TP
@@ -287,17 +281,18 @@ Each file is a separate record.
 .
 .TP
 .RI \%file @INDEX_SUFFIX@
-Index.
+index for
+.I file
 .
 .
 .TP
 .I \%@DEFAULT_INDEX_NAME@@INDEX_SUFFIX@
-Default index name.
+default index name
 .
 .
 .TP
 .I \%@COMMON_WORDS_FILE@
-List of common words.
+contains the list of common words.
 .
 The traditional name,
 .RI \[lq] eign \[rq],
@@ -306,7 +301,7 @@ is an abbreviation of \[lq]English ignored [word list]\[rq].
 .
 .TP
 .IR \%indxbib XXXXXX
-Temporary file.
+temporary file
 .
 .
 .\" ====================================================================

@@ -8,7 +8,7 @@ groff_diff \- differences between GNU roff and AT&T troff
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 1989-2018, 2020-2021 Free Software Foundation, Inc.
+.\" Copyright (C) 1989-2018, 2020-2022 Free Software Foundation, Inc.
 .\"
 .\" This file is part of groff, the GNU roff type-setting system.
 .\"
@@ -75,10 +75,11 @@ features are also noted.
 .I groff
 features identifiers of arbitrary length,
 supports non-integral type sizes,
-adds new escapes and requests,
-provides new conditional tests,
-recognizes additional scaling indicators and numerical operators,
-and extends the function of some escapes and requests already present in
+adds new escape sequences and requests,
+provides new conditional expression operators,
+recognizes additional scaling units and numerical operators,
+and extends the function of some escape sequences and requests already
+present in
 .RI AT&T\~ troff .
 .
 .
@@ -109,7 +110,49 @@ within can be of arbitrary length.
 .
 .
 .\" ====================================================================
-.SS "Fractional type sizes and new scaling indicators"
+.SS Colors
+.\" ====================================================================
+.
+.I groff
+supports color output with a variety of color spaces and up to 16 bits
+per channel.
+.
+Some devices,
+particularly terminals,
+may be more limited.
+.
+When color support is enabled,
+two colors are current at any given time:
+the
+.I stroke color,
+with which glyphs,
+rules (lines),
+and geometric objects like circles and polygons are drawn,
+and the
+.I fill color,
+which can be used to paint the interior of closed geometric figures.
+.
+The
+.BR color ,
+.BR defcolor ,
+.BR gcolor ,
+and
+.B fcolor
+requests;
+.B \[rs]m
+and
+.B \[rs]M
+escape sequences;
+and
+.BR .color ,
+.BR .m ,
+and
+.B .M
+registers exercise color support.
+.
+.
+.\" ====================================================================
+.SS "Fractional type sizes and new scaling units"
 .\" ====================================================================
 .
 A
@@ -123,20 +166,20 @@ is a parameter specified in the device description file,
 .IR DESC ,
 and defaults to\~1.
 .
-A new scale
-.RB indicator\~\[lq] z \[rq]
+A new scaling
+.RB unit\~\[lq] z \[rq]
 has the effect of multiplying by
 .IR sizescale .
 .
-Requests and escapes in
+Requests and escape sequences in
 .I groff
 interpret arguments that represent a type size as being in units of
 scaled points;
 that is,
-they evaluate such arguments using an implied default scaling indicator
+they evaluate such arguments using an implied default scaling unit
 .RB of\~\[lq] z \[rq].
 .
-Arguments treated in this way comprise those to the escapes
+Arguments treated in this way comprise those to the escape sequences
 .B \eH
 and
 .BR \es ,
@@ -180,9 +223,8 @@ returns the type size in scaled points.
 .
 .P
 It makes no sense to use the
-.RB \[lq] z \[rq]\~scale
-indicator in a numeric expression whose default scaling indicator is
-neither
+.RB \[lq] z \[rq]\~scaling
+unit in a numeric expression whose default scaling unit is neither
 .RB \[lq] u \[rq]
 .RB nor\~\[lq] z \[rq],
 so
@@ -190,10 +232,10 @@ so
 disallows this.
 .
 Similarly,
-it is nonsensical to use a scaling indicator other
+it is nonsensical to use a scaling unit other
 .RB than\~\[lq] z \[rq]
 .RB or\~\[lq] u \[rq]
-in a numeric expression whose default scaling indicator
+in a numeric expression whose default scaling unit
 .RB is\~\[lq] z \[rq],
 so
 .I groff
@@ -201,7 +243,7 @@ disallows this as well.
 .
 .
 .P
-Another new scaling indicator,
+Another new scaling unit,
 .RB \[lq] s \[rq],
 multiplies by the number of basic units in a scaled point.
 .
@@ -215,7 +257,7 @@ Do not confuse the
 .RB \[lq] s \[rq]
 and
 .RB \[lq] z \[rq]
-scaling indicators.
+scaling units.
 .
 .
 .P
@@ -226,7 +268,7 @@ are
 which indicates hundredths of an em,
 and
 .RB \[lq] f \[rq],
-which is defined as 65536 basic units.
+which multiplies by 65,536.
 .
 The latter provides convenient fractions for color definitions with the
 .B .defcolor
@@ -266,12 +308,12 @@ Evaluate
 .I e
 using
 .I c
-as the default scaling indicator.
+as the default scaling unit.
 .
 If
 .I c
 is missing,
-ignore scaling indicators in the evaluation
+ignore scaling units in the evaluation
 .RI of\~ e .
 .
 .
@@ -389,7 +431,7 @@ to a form suitable for Versatec and Benson-Varian plotters.)
 introduces several new escape sequences
 and extends the syntax of a few
 .RI AT&T\~ troff
-escapes
+escape sequences
 (namely,
 .BR \[rs]D ,
 .BR \[rs]f ,
@@ -400,10 +442,10 @@ and
 .BR \[rs]* ).
 .
 In the following list,
-escapes are collated alphabetically at first,
+escape sequences are collated alphabetically at first,
 and then by symbol roughly in Unicode code point order.
-.\" Exceptions are made to group closely-related escapes in an order
-.\" more agreeable to the development of a topic.
+.\" Exceptions are made to group closely-related escape sequences in an
+.\" order more agreeable to the development of a topic.
 .
 .
 .TP
@@ -475,16 +517,22 @@ ensures that these definitions work even if
 gets interpreted in copy mode (for example, by being used in a macro
 argument).
 .
+.
 .TP
 .BI \[rs]f[ xxx ]
-Set font
-.IR xxx .
+Select font
+.IR xxx ,
+which may be a font name,
+mounting position,
+or registered style that is then combined with the current font family
+to select the typeface.
 .
-Additionally,
 .B \[rs]f[]
-is a new syntax form equal to
-.BR \[rs]fP ,
-i.e., to return to the previous font.
+is a synonym of
+.BR \[rs]fP ;
+i.e.,
+it selects the previous font.
+.
 .
 .TP
 .BI \[rs]F f
@@ -492,18 +540,18 @@ i.e., to return to the previous font.
 .BI \[rs]F( fm
 .TQ
 .BI \[rs]F[ fam ]
-Change font family.
+Select font family.
 .
 See the
 .B .fam
 request below.
 .
 .B \[rs]F[]
-switches to the previous font family,
-or to the default family if there is none.
+selects the previous font family,
+or the default family if there is none.
 .
 .B \[rs]FP
-won't do this;
+does not;
 it selects font family \[lq]P\[rq] instead.
 .
 .
@@ -516,15 +564,18 @@ Mark horizontal position in register with two-character
 or arbitrarily long
 .RI name\~ reg .
 .
+.
 .TP
 .BI \[rs]m x
 .TQ
 .BI \[rs]m( xx
 .TQ
 .BI \[rs]m[ xxx ]
-Set drawing color.
+Set the stroke color.
+.
 .B \[rs]m[]
-switches back to the previous color.
+restores the previous stroke color.
+.
 .
 .TP
 .BI \[rs]M x
@@ -532,11 +583,11 @@ switches back to the previous color.
 .BI \[rs]M( xx
 .TQ
 .BI \[rs]M[ xxx ]
-Set background color for filled objects drawn with the
-.BR \[rs]D\[aq] .\|.\|.\& \[aq]
-commands.
+Set the fill color.
+.
 .B \[rs]M[]
-switches back to the previous color.
+restores the previous fill color.
+.
 .
 .TP
 .BI \[rs]n[ xxx ]
@@ -549,7 +600,7 @@ Interpolate register
 .BI \[rs]O[ n ]
 Suppress troff output.
 .
-The escapes
+The escape sequences
 .BR \[rs]O2 ,
 .BR \[rs]O3 ,
 .BR \[rs]O4 ,
@@ -598,7 +649,7 @@ encompassing the glyphs previously written since the last call to
 .B \[rs]O3
 Begin a nesting level.
 .
-At start-up,
+At startup,
 .B troff
 is at outer level.
 .
@@ -666,7 +717,7 @@ or increment or decrement it by,
 .I n
 scaled points;
 .I n
-is a numeric expression with a default scaling indicator
+is a numeric expression with a default scaling unit
 .RB of\~\[lq] z \[rq].
 .
 .
@@ -762,7 +813,7 @@ In a macro or string, the concatenation of all the arguments with each
 surrounded by double quotes, and separated by spaces.
 .
 .TP
-.B \[rs]$^
+.B \[rs]$\[ha]
 In a macro, the representation of all parameters as if they were an
 argument to the
 .B ds
@@ -798,7 +849,7 @@ modify the spacing of the preceding glyph so that the distance between
 it and the following glyph is correct if the latter is of upright shape.
 .
 For example,
-if an italic\~\[lq]f\[rq] is immediately followed by a roman right
+if an italic\~\[lq]f\[rq] is followed immediately by a roman right
 parenthesis,
 then in many fonts the top right portion of the\~\[lq]f\[rq] overlaps
 the top left of the right parenthesis,
@@ -855,12 +906,12 @@ immediately by an oblique glyph without any intervening space.
 Insert a non-printing break point.
 .
 That is,
-the word can break there,
+a word can break there,
 but the soft hyphen glyph is not written to the output if it does
 (in contrast to
 .RB \[lq] \[rs]% \[rq]).
 .
-This escape is an input word boundary,
+This escape sequence is an input word boundary,
 so the remainder of the word is subject to hyphenation as normal.
 .
 .
@@ -983,7 +1034,7 @@ causing the names to refer to the same stored object.
 If
 .I old
 is undefined,
-a warning of type
+a warning in category
 .RB \[lq] reg \[rq]
 is generated and the request is ignored.
 .
@@ -1010,9 +1061,10 @@ causing the names to refer to the same stored object.
 If
 .I old
 is undefined,
-a warning of type
+a warning in category
 .RB \[lq] mac \[rq]
-is generated and the request is ignored.
+is produced,
+and the request is ignored.
 .
 The
 .BR .am ,
@@ -1024,7 +1076,7 @@ and
 .B .ds
 requests
 (together with their variants)
-only create a new object if the name of the macro,
+create a new object only if the name of the macro,
 diversion,
 or string is currently undefined
 or if it is defined as a request;
@@ -1032,7 +1084,7 @@ normally,
 they modify the value of an existing object.
 .
 To remove an alias,
-simply call
+call
 .B .rm
 on its name.
 .
@@ -1217,17 +1269,16 @@ discarding any partially collected line in the diversion.
 .
 .TP
 .B .break
-Break out of a while loop.
-.
-See also the
+Exit a
 .B while
-and
-.B continue
-requests.
-.
-Be sure not to confuse this with the
+loop.
+Do not confuse this request with a typographical break or the
 .B br
 request.
+.
+See
+.BR .continue .
+.
 .
 .TP
 .B .brp
@@ -1705,15 +1756,17 @@ if it is used in
 .BR \[rs][ .\|.\|.\& ]
 with more than one component.
 .
+.
 .TP
 .B .continue
-Finish the current iteration of a while loop.
-.
-See also the
+Skip the remainder of a
 .B while
-and
-.B break
-requests.
+loop's body,
+immediately starting the next iteration.
+.
+See
+.BR .break .
+.
 .
 .TP
 .BI .color\~ n
@@ -1737,16 +1790,7 @@ incompatibilities caused by long names do not arise.
 .B .defcolor\~\c
 .IR "ident scheme color-component\~" .\|.\|.
 Define a color named
-.I ident
-for use with the
-.B fcolor
-and
-.B gcolor
-requests and the
-.B \[rs]m
-and
-.B \[rs]M
-escape sequences.
+.I ident.
 .
 .I scheme
 identifies a color space and determines the number of required
@@ -1779,17 +1823,18 @@ the latter the range 0\[en]65535 (0\[en]FFFF).
 Alternatively,
 each color component can be specified as a decimal fraction in the range
 0\[en]1,
-interpreted using a default scaling indicator
+interpreted using a default scaling unit
 .RB of\~\[lq] f \[rq],
-which multiplies its value by 65536.
+which multiplies its value by 65,536
+(but clamps it at 65,535).
 .
 .
 .IP
 Each output device has a color named
-.RB \[lq] default \[rq]
-that cannot be redefined.
+.RB \[lq] default \[rq],
+which cannot be redefined.
 .
-A device's default drawing and fill colors are not necessarily the same.
+A device's default stroke and fill colors are not necessarily the same.
 .
 .
 .TP
@@ -1826,7 +1871,7 @@ is executed.
 .BI .device\~ anything
 This is (almost) the same as the
 .B \[rs]X
-escape.
+escape sequence.
 .I anything
 is read in copy mode; a leading\~\c
 .B \[dq]
@@ -1839,6 +1884,7 @@ This is the same as the
 escape (to embed the contents of a macro into the intermediate
 output preceded with \[oq]x\~X\[cq]).
 .
+.
 .TP
 .BI .do\~ name\~\c
 \&.\|.\|.
@@ -1850,7 +1896,7 @@ or macro
 (along with any arguments)
 with compatibility mode disabled.
 .
-Note that compatibility mode is restored
+Compatibility mode is restored
 (only if it was active)
 when the
 .I expansion
@@ -1949,7 +1995,7 @@ The following environment data are not copied:
 .
 .
 .RS
-.IP \[bu]
+.IP \[bu] 2n
 a partially collected line, if present;
 .
 .
@@ -1964,8 +2010,7 @@ escape sequence);
 the count of remaining lines to center,
 to right-justify,
 or to underline
-(with or without underlined spaces;
-all set to zero);
+(with or without underlined spaces)\[em]these are set to zero;
 .
 .
 .IP \[bu]
@@ -2031,14 +2076,15 @@ font.
 .
 This test happens before checking special fonts.
 .
+.
 .TP
-.BI .fcolor\~ c
-Set the fill color to\~\c
-.IR c .
-If
-.I c
-is missing,
-switch to the previous fill color.
+.BI .fcolor\~ color
+Set the fill color to
+.IR color .
+.
+Without an argument,
+restore the previous fill color.
+.
 .
 .TP
 .BI .fschar\~ f\~c\~string
@@ -2081,21 +2127,24 @@ request.
 Without argument,
 reset the list of global special fonts to be empty.
 .
+.
 .TP
 .BI .ftr\~ f\~g
-Translate font\~\c
-.I f
-to\~\c
-.IR g .
-Whenever a font named\~\c
-.I f
+Translate
+.RI font\~ f
+.RI to\~ g .
+.
+Whenever a font
+.RI named\~ f
 is referred to in an
 .B \[rs]f
-escape sequence, in the
+escape sequence,
+in the
 .B F
 and
 .B S
-conditional operators, or in the
+conditional expression operators,
+or in the
 .BR ft ,
 .BR ul ,
 .BR bd ,
@@ -2106,16 +2155,17 @@ conditional operators, or in the
 .BR fp ,
 or
 .B sty
-requests, font\~\c
-.I g
+requests,
+.RI font\~ g
 is used.
 If
 .I g
-is missing, or equal to\~\c
-.I f
-then font\~\c
-.I f
+is missing or equal
+.RI to\~ f ,
+then
+.RI font\~ f
 is not translated.
+.
 .
 .TP
 .BI .fzoom\~ f\~zoom
@@ -2130,14 +2180,14 @@ no magnification.
 .IR f \~\c
 must be a real font name, not a style.
 .
+.
 .TP
-.BI .gcolor\~ c
-Set the glyph color to\~\c
-.IR c .
-If
-.I c
-is missing,
-switch to the previous glyph color.
+.BI .gcolor\~ color
+Set the stroke color to
+.IR color .
+.
+Without an argument,
+restore the previous stroke color.
 .
 .
 .TP
@@ -2153,18 +2203,18 @@ to
 .IR code2 ,
 and so on.
 .
-A hyphenation code must be a single input character
-(not a special character)
+A hyphenation code must be an ordinary character
+(not a special character escape sequence)
 other than a digit or a space.
 .
-The request is ignored if it has no parameters.
+The request is ignored if given no arguments.
 .
 .
 .IP
 For hyphenation to work,
 hyphenation codes must be set up.
 .
-At start-up,
+At startup,
 .I groff
 assigns hyphenation codes to the letters \[lq]a\[en]z\[rq]
 (mapped to themselves),
@@ -2405,7 +2455,7 @@ If no
 .B .hpf
 request is specified
 (either in the document,
-in a file loaded at start-up,
+in a file loaded at startup,
 or in a macro package),
 .I groff
 won't automatically hyphenate at all.
@@ -2478,7 +2528,7 @@ Without an argument,
 the default hyphenation margin is reset to its default value,
 0.
 .
-The default scaling indicator
+The default scaling unit
 .RB is\~\[lq] m \[rq].
 .
 The hyphenation margin is associated with the environment.
@@ -2486,7 +2536,7 @@ The hyphenation margin is associated with the environment.
 .
 .IP
 A negative argument resets the hyphenation margin to zero,
-emitting a warning of type \[lq]range\[rq].
+emitting a warning in category \[lq]range\[rq].
 .
 .
 .TP
@@ -2504,7 +2554,7 @@ Without an argument,
 the hyphenation space adjustment threshold is set to its default value,
 0.
 .
-The default scaling indicator
+The default scaling unit
 .RB is\~\[lq] m \[rq].
 .
 The hyphenation space adjustment threshold is associated with the
@@ -2513,7 +2563,7 @@ current environment.
 .
 .IP
 A negative argument resets the hyphenation space adjustment threshold to
-zero, emitting a warning of type \[lq]range\[rq].
+zero, emitting a warning in category \[lq]range\[rq].
 .
 .
 .TP
@@ -2661,7 +2711,7 @@ instead and vice versa.
 If
 .I file
 does not exist,
-a warning of type
+a warning in category
 .RB \[lq] file \[rq]
 is emitted
 and the request has no other effect.
@@ -2804,7 +2854,7 @@ can affect the priority of subsequently planted traps.
 .BI .pvs \~\[+-]n
 Set the post-vertical line space to\~\c
 .IR n ;
-default scaling indicator
+default scaling unit
 .RB is\~\[lq] p \[rq].
 .
 This value is added to each line after it has been output.
@@ -3016,7 +3066,7 @@ A negative value is treated as zero;
 an absent argument toggles the warning on and off without changing
 .IR limit .
 .
-The default scaling indicator is
+The default scaling unit is
 .BR m .
 .
 At startup,
@@ -3040,7 +3090,7 @@ causes a warning if
 .B break
 warnings are not suppressed and
 .
-.I \%@g@troff
+.I @g@troff
 must add 0.2\~m or more for each inter-word space in a line.
 .
 See
@@ -3066,17 +3116,17 @@ special characters
 (see
 .MR groff_char @MAN7EXT@ )
 can be used and the output will usually transform in the expected way
-due to the regular naming convention of the special character escapes.
+due to the regular glyph naming convention for accented characters.
 .
 .IP
 .RS
 .RS
 .EX
-.B \&.ds resume R\e[\[aq]e]sum\e[\[aq]e]\e"
+.B .ds resume R\e[\[aq]e]sum\e[\[aq]e]\e"
 .B \e*[resume]
-.B \&.stringdown resume
+.B .stringdown resume
 .B \e*[resume]
-.B \&.stringup resume
+.B .stringup resume
 .B \e*[resume]
 R\['e]sum\['e] r\['e]sum\['e] R\['E]SUM\['E]
 .EE
@@ -3395,7 +3445,7 @@ all warning categories are enabled.
 .
 .TP
 .BI .warnscale\~ si
-Set the scaling indicator used in warnings to
+Set the scaling unit used in warnings to
 .IR si .
 .
 Valid values for
@@ -3422,53 +3472,72 @@ unless and until
 .I cond-expr
 evaluates false.
 .
-See also the
-.B break
-and
-.B continue
-requests.
+.I anything,
+which is often a conditional block,
+is referred to as the
+.B while
+request's
+.I body.
 .
 .
 .IP
-The body of a
+.I @g@troff
+treats the body of a
 .B while
-request is treated like the body of a
+request similarly to that of a
 .B de
-request:
-.I \%@g@troff
-temporarily stores it in a macro that is deleted after the loop exits.
-.
-It can considerably slow down a macro if the body of the
-.B while
 request
-(within the macro)
-is large.
+(albeit one not read in copy mode),
+but stores it under an internal name and deletes it when it exits.
+.
+The operation of a macro containing a
+.B while
+request can slow significantly if the
+.B while
+body is large.
 .
 Each time the macro is executed,
 the
 .B while
-body is parsed and stored again as a temporary macro.
+body is parsed and stored again.
 .
-.
-.IP
-The traditional and often better solution
-(AT&T
+An often better solution\[em]and one that is more portable,
+since AT&T
 .I troff \" AT&T
 lacked the
 .B while
-request)
-is to use a recursive macro instead that is parsed only once during its
-definition.
+request\[em]is to instead write a recursive macro.
 .
-The number of available recursion levels is set to\~1000
-(this is a compile-time constant value of
-.IR \%@g@troff ).
+It will only be parsed once (unless you redefine it).
+.
+To prevent infinite loops,
+the default number of available recursion levels is 1,000 or somewhat
+less (because things other than macro calls can be on the input stack).
+.
+You can disable this protective measure,
+or raise the limit,
+by setting the
+.B slimit
+register.
+.
+See section \[lq]Debugging\[rq] below.
 .
 .
 .IP
-The closing brace of a
+If a
 .B while
-body must end a line.
+body begins with a conditional block,
+its closing brace must end an input line.
+.
+.
+.IP
+The
+.B break
+and
+.B continue
+requests alter a
+.B while
+loop's flow of control.
 .
 .
 .TP
@@ -3795,17 +3864,20 @@ The title length as set by the
 .B lt
 request.
 .
+.
 .TP
 .B \[rs]n[.m]
-The name of the current drawing color.
+The name of the current stroke color.
 .
 This is a string-valued register.
+.
 .
 .TP
 .B \[rs]n[.M]
-The name of the current background color.
+The name of the current fill color.
 .
 This is a string-valued register.
+.
 .
 .TP
 .B \[rs]n[.ne]
@@ -3882,18 +3954,20 @@ The last requested type size in points as a decimal fraction.
 .
 This is a string-valued register.
 .
+.
 .TP
 .B \[rs]n[.ss]
 .TQ
 .B \[rs]n[.sss]
 The values of minimal inter-word spacing and additional inter-sentence
-spacing,
+space,
 respectively,
 in twelfths of the space width of the current font.
 .
 Set by the
 .B .ss
 request.
+.
 .
 .TP
 .B \[rs]n[.sty]
@@ -3930,7 +4004,7 @@ register.
 .B \[rs]n[.U]
 Set to\~1 if in unsafe mode
 (as determined by
-.IR \%@g@troff 's
+.IR @g@troff 's
 .B \-U
 command-line option)
 and 0\~otherwise.
@@ -3954,7 +4028,7 @@ The number associated with each warning is listed in
 .TP
 .B \[rs]n[.x]
 The major version number of the running
-.I \%@g@troff
+.I @g@troff
 formatter.
 .
 For example,
@@ -3967,7 +4041,7 @@ contains\~1.
 .TP
 .B \[rs]n[.y]
 The minor version number of the running
-.I \%@g@troff
+.I @g@troff
 formatter.
 .
 For example,
@@ -3980,7 +4054,7 @@ contains\~23.
 .TP
 .B \[rs]n[.Y]
 The revision number of the running
-.I \%@g@troff
+.I @g@troff
 formatter.
 .
 For example,
@@ -4048,7 +4122,7 @@ is a read-only alias to this register.
 .B \[rs]n[hours]
 The number of hours past midnight.
 .
-Initialized at start-up.
+Initialized at startup.
 .
 .TP
 .B \[rs]n[hp]
@@ -4069,13 +4143,13 @@ respectively.
 .B \[rs]n[minutes]
 The number of minutes after the hour.
 .
-Initialized at start-up.
+Initialized at startup.
 .
 .TP
 .B \[rs]n[seconds]
 The number of seconds after the minute.
 .
-Initialized at start-up.
+Initialized at startup.
 .
 .TP
 .B \[rs]n[systat]
@@ -4088,7 +4162,7 @@ request.
 .B \[rs]n[slimit]
 If greater than\~0,
 sets the maximum quantity of objects on
-.IR \%@g@troff 's
+.IR @g@troff 's
 internal input stack.
 .
 If less than or equal to\~0,
@@ -4128,7 +4202,7 @@ or
 The (read-only) register
 .B \[rs]n[.T]
 interpolates\~1 if
-.I \%@g@troff
+.I @g@troff
 is called with the
 .B \-T
 command-line option,
@@ -4149,7 +4223,7 @@ which can be found in the
 .B \[rs]n[.fp]
 register;
 although
-.I \%@g@troff
+.I @g@troff
 does not enforce that strictly.
 .
 Rather,
@@ -4374,7 +4448,8 @@ Unlike device-independent troff, it is not necessary for drivers to
 search special fonts to find a glyph.
 .
 .P
-For color support, some new commands have been added:
+New commands implement color support.
+.
 .
 .TP
 \f[B]mc \f[I]cyan magenta yellow\f[R]
@@ -4386,13 +4461,14 @@ For color support, some new commands have been added:
 \f[B]mk \f[I]cyan magenta yellow black\f[R]
 .TQ
 \f[B]mr \f[I]red green blue\f[R]
-Set the color components of the current drawing color, using various
-color schemes.
+Set the components of the stroke color with respect to various color
+spaces.
 .
 .B md
-resets the drawing color to the default value.
+resets the stroke color to the default value.
 .
-The arguments are integers in the range 0 to 65536.
+The arguments are integers in the range 0 to 65535.
+.
 .
 .P
 The
@@ -4578,8 +4654,10 @@ $( sum from i=1 to n x sub i , sum from i=1 to n y sub i )$.
 delim off
 .EN
 .
+.
 .P
-Another set of extensions is
+Fill colors are implmenented with another set of extensions.
+.
 .
 .TP
 \f[B]DFc \f[I]cyan magenta yellow\f[R]\*[ic]\[rs]n
@@ -4591,14 +4669,15 @@ Another set of extensions is
 \f[B]DFk \f[I]cyan magenta yellow black\f[R]\*[ic]\[rs]n
 .TQ
 \f[B]DFr \f[I]red green blue\f[R]\*[ic]\[rs]n
-Set the color components of the filling color similar to the
-.BR m \~\c
-commands above.
+Set the components of the fill color similarly to the
+.BR m \~commands
+above.
 .
-.P
-The current position isn't changed by those colour commands
-(contrary to
-.BR Df ).
+.
+.IP
+The drawing position isn't changed by these color commands,
+in contrast to
+.BR Df .
 .
 .
 .\" ====================================================================
@@ -4704,7 +4783,7 @@ When adjusting to both margins,
 AT&T
 .I troff \" AT&T
 at first adjusts spaces starting from the right;
-.I \%@g@troff
+.I @g@troff
 begins from the left.
 .
 Both implementations adjust spaces from opposite ends on alternating
@@ -4808,7 +4887,7 @@ of the
 or
 .B .mso
 requests\[em]you may desire correct operation regardless of
-compatibility mode in the surrounding context.
+compatibility mode enablement in the surrounding context.
 .
 It may occur to you to save the existing value of
 .B \[rs]n(.C
@@ -4946,7 +5025,7 @@ but \[lq]72def\[aq]\[rq] in compatibility mode.
 .
 .P
 Furthermore,
-the escapes
+the escape sequences
 .BR \[rs]f ,
 .BR \[rs]H ,
 .BR \[rs]m ,
@@ -5054,7 +5133,7 @@ In
 .RI AT&T\~ troff
 the
 .B .ps
-request ignores scaling indicators and thus
+request ignores scaling units and thus
 .RB \[lq] .ps\~10u \[rq]
 sets the type size to 10\~points,
 whereas in
@@ -5062,7 +5141,7 @@ whereas in
 it sets the type size to 10\~scaled points.
 .
 See subsection \[lq]Fractional type sizes and new scaling
-indicators\[rq] above.
+units\[rq] above.
 .
 .
 .P
@@ -5084,7 +5163,7 @@ request differs from AT&T
 .IR troff : \" AT&T
 GNU
 .I troff \" GNU
-does not accept a scaling indicator on the argument,
+does not accept a scaling unit on the argument,
 a page number;
 the former
 (somewhat uselessly)
@@ -5117,8 +5196,8 @@ does not ignore the
 .B .ss
 request if the output is a terminal device;
 instead,
-the values of minimal inter-word and additional inter-sentence spacing
-are rounded down to the nearest multiple of\~12.
+the values of minimal inter-word and additional inter-sentence space are
+each rounded down to the nearest multiple of\~12.
 .
 .
 .P
@@ -5218,7 +5297,7 @@ or
 for \[lq]reverse solidus\[rq],
 from its name in the ECMA-6 (ISO/IEC\~646) standard.
 .
-[This character escape is not portable to
+[This escape sequence is not portable to
 .RI AT&T\~ troff ,
 but is to its lineal descendant,
 Heirloom Doctools
@@ -5312,7 +5391,7 @@ by Joseph F.\& Ossanna,
 1976
 (revised by Brian W.\& Kernighan,
 1992),
-AT&T Bell Laboratories Computing Science Techical Report No.\& 54,
+AT&T Bell Laboratories Computing Science Technical Report No.\& 54,
 widely called simply \[lq]CSTR\~#54\[rq],
 documents the language,
 device and font description file formats,
@@ -5327,7 +5406,7 @@ documentation as
 \[lq]A Typesetter-independent TROFF\[rq]
 by Brian W.\& Kernighan,
 1982,
-AT&T Bell Laboratories Computing Science Techical Report No.\& 97,
+AT&T Bell Laboratories Computing Science Technical Report No.\& 97,
 provides additional insights into the
 device and font description file formats
 and device-independent output format.
