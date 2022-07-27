@@ -1,3 +1,330 @@
+2021-11-27  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[troff]: Drop redundant `do_divert()` declaration.
+
+	* src/roff/troff/env.h: Do it.
+
+	Fixes <https://savannah.gnu.org/bugs/?61433>.  Thanks to Bjarni
+	Ingi Gislason for the report.
+
+2021-11-27  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[troff]: Remove `DEBUGGING` preprocessor cruft.
+
+	* src/roff/troff/input.cpp:
+	* src/roff/troff/mtsm.cpp: Stop defining `DEBUGGING`
+	preprocessor macro (as empty).
+
+	* src/roff/troff/input.cpp: Give `DEBUG_OPTION` an empty string
+	value if the former is undefined, so the `getopt_long()` call
+	will compile.
+
+	Fixes <https://savannah.gnu.org/bugs/?61436>.  Thanks to Bjarni
+	Ingi Gislason for the report.
+
+2021-11-26  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[tbl]: Slightly refactor table format column modifier `p` and
+	`v` validation.
+
+	* src/preproc/tbl/main.cpp (process_format): Make code terser by
+	introducing references to `list->point_size` and
+	`list->vertical_spacing`.  Doing this requires a new scope
+	{because a switch case isn't one} so add it, without updating
+	indentation for this commit.  When complaining of out-of-range
+	type size or vertical spacing, report the limit.
+
+2021-11-25  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[tbl]: Improve diagnostic messages.
+
+	Revise diagnostic messages generally to use terminology
+	consistent with the recent rewrite of tbl(1), identify a
+	contextual token when possible, and communicate more helpfully.
+
+	* src/preproc/tbl/main.cpp (process_options): Tell the user
+	which region option is missing a closing parenthesis or cannot
+	accept an empty argument.  Refer to region options as such, not
+	simply "options" (so they can't be confused with command-line
+	options).  Say that input is "invalid" instead of "bad".
+	(process_format): Say "table format specification" instead of
+	just "format".  Say "column classifier" instead of "format".
+	When a column modifier is missing an argument or a closing
+	parenthesis, identify it and refer to it as a "column modifier"
+	instead of omitting context.  Inform user that arguments to `p`
+	and `v` column modifiers must be "(optionally signed) integer"s,
+	not "numbers", lower these diagnostics' levels from error to
+	warning, and indicate that the modifier is ignored.  Clarify
+	diagnostic when extra characters trail `.` at the end of a table
+	format line.
+	(process_data): Say "table entry" instead of "data entry" when
+	discarding an excess one.
+	(process_table): Say we're giving up on "this table region", not
+	this "table", particularly since any table continuations (.T&)
+	are ignored.
+
+2021-11-25  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[tbl]: Fix call to `getopt_long()`.
+
+	* src/preproc/tbl/main.cpp (main): Stop telling `getopt_long()`
+	to look for a `T` option.  Continues b4bbf32e, 16 October 2020.
+
+2021-11-25  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[tbl]: Tweak usage message.
+
+	* src/preproc/tbl/main.cpp (usage): Document `--version`.  Give
+	version retrieval mode separate synopsis.  Use more normative
+	synopsis syntax.
+
+2021-11-25  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[tbl]: Fix code style nits.
+
+	* src/preproc/tbl/main.cpp (process_input_file,
+	entry_format::debug_print, process_data, main): Replace
+	`assert(0)` calls with communicative predicates.
+	(struct input_entry_format, input_entry_foramt::debug_print,
+	process_format): Boolify.  Demote and rename `int`s
+	`last_column` and `equal` to `bool`s named `is_last_column` and
+	`is_equal_width`.  Assign them Boolean literals.
+	(process_format): Boolify.  Demote `have_expand`, `got_format`,
+	and `got_period` from `int` to `bool`.  Use Boolean literals in
+	assignments thereto.
+	(process_options): Swap order of null pointer comparison when a
+	typo or thinko could lead to lvalue assignment.
+	(process_data): Boolify.  Demote `give_up` from `int` to `bool`.
+	Demote and rename `int` `row_comment` to `bool`
+	`seen_row_comment`.  Use Boolean literals in assignments
+	thereto.
+	(main): Use standard C library symbols `EXIT_SUCCESS` and
+	`EXIT_FAILURE` with `exit()` calls instead of `0` and `1`.
+
+2021-11-24  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[grog]: Fix Savannah #61520.
+
+	* src/utils/grog/grog.pl: Move hash `preprocessor_for_macro` to
+	global scope since it is now mutable across `do_line` subroutine
+	calls.
+	(do_line): Adjust regex matching an end macro to work better.
+	Check names of macros being defined by the document; if they
+	start with '[' or ']', stop attempting to detect refer(1) usage,
+	by deleting its key from the `preprocessor_for_macro` hash.
+
+	Fixes <https://savannah.gnu.org/bugs/?61520>.
+
+2021-11-24  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[grog]: Add regression test for Savannah #61520.
+
+	* src/utils/grog/tests/avoid-refer-fakeout.sh: Do it.
+	* src/utils/grog/grog.am (grog_TESTS): Run test.
+
+2021-11-23  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* doc/groff.texi (Page Motions):
+	* man/groff.7.man (Escape short reference): Fix error: the `\r`,
+	`\u`, and `\d` escape sequences move in ems, not vees, despite
+	being vertical motions.  Add discussion and example.  Thanks to
+	Bjarni Ingi Gislason for pointing out the problem in groff(7)
+	and Tadziu Hoffman for his lucid explanation.
+
+2021-11-20  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/include/error.h: Drop `extern` storage class from
+	diagnostic function prototypes.  Drop parameter names from
+	prototypes, in keeping with the Stroustrup-style C++ used in
+	most of groff.
+
+2021-11-20  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/libs/libgroff/font.cpp (font::load): Update diagnostic
+	messages to say "kerning pair" instead of "kern pair".
+
+2021-11-20  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/roff/troff/input.cpp (read_size): Update diagnostic
+	messages to use more normative language: say "type size" instead
+	of "point-size", and "escape sequence" instead of "escape".
+	* src/roff/groff/tests/\
+	use_point_size_escape_with_single_digit_arg.sh: Update expected
+	diagnostic wording in text.
+
+2021-11-20  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/roff/troff/input.cpp (read_size): Boolify.  Update
+	prototype.  Demote return type from `int` to `bool`.  Use
+	Boolean literals for return values.  Similarly demote local
+	variable, rename it from `bad_digit` to
+	`contains_invalid_digit`, and use Boolean literals with it.
+
+2021-11-16  Deri James  <deri@chuzzlewit.myzen.co.uk>
+
+	* src/devices/gropdf/gropdf.pl: Fixes to importing pdf versions
+	> 1.4.
+
+2021-11-15  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[tbl]: If "nowarn", suppress table row warning.
+
+	* src/preproc/tbl/table.cpp (table::init_output): Bracket the
+	generated groff code that emits a warning if a table row
+	overruns a page location trap (usually, is too long to
+	vertically fit on the page) in a test for whether the "nowarn"
+	region option was given, so that this warning is suppressed as
+	well when that option is used.
+	* src/preproc/tbl/tbl.1.man (Region options): Document new
+	"nowarn" behavior.
+
+	{"nokeep" also suppresses this warning, for a different reason;
+	no diversion is created to hold the table row, so its vertical
+	size does not exist to be compared to the distance to the next
+	page trap.}
+
+	Fixes <https://savannah.gnu.org/bugs/?61477>.
+
+2021-11-13  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/preproc/tbl/table.cpp (table::do_vspan): Fix code style
+	nits.  Swap order of null pointer and zero equality comparisons
+	when a typo or thinko could lead to lvalue assignment.  Break a
+	series of 6 and-ed assertion predicates into separate `assert()`
+	calls--sure to be less maddening for anyone who has to debug
+	such a contingency.  Clarify comment since C++98 didn't yet have
+	`nullptr`.
+
+2021-11-13  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[m4]: Clean up shell variable quoting and bracing.
+
+	* m4/groff.m4 (GROFF_PROG_YACC, GROFF_MAKEINFO,
+	GROFF_BROKEN_SPOOLER_FLAGS, GROFF_TARGET_PATH_SEPARATOR): Stop
+	bracing shell variable expansions that don't require it; the
+	shell is not make(1).
+	(GROFF_PROG_YACC, GROFF_MAKEINFO): Double-quote shell variable
+	expansions that might produce whitespace.
+	(GROFF_MAKEINFO): Drop unnecessary leading zeroes from version
+	number component construction.  Drop unnecessary escaping of
+	plus sign in expr(1) input.
+
+2021-11-13  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[m4]: Clean up test(1) usage.
+
+	Get rid of string (non-)nullity tests and comparisons involving
+	concatenation with garbage (usually "x").  Even the GNU Autoconf
+	manual's shell portability material doesn't recommend this.  It
+	must be either a bodge cooked up by shell programmers who
+	couldn't remember to quote variable expansions, or a workaround
+	for shells of such poor quality that they defied the odds and
+	decayed out of usage or got fixed.
+
+	Instead, use double quotes (only where necessary).  Test for
+	non-empty strings with "test -n" and empty strings with "test
+	-z".  Stop quoting literal comparands that obviously have no
+	shell metacharacters in them.
+
+	* m4/groff.m4 (GROFF_PRINT, GROFF_PROG_YACC, GROFF_PERL,
+	GROFF_DOC_CHECK, GROFF_MAKEINFO, GROFF_TEXI2DVI,
+	GROFF_HTML_PROGRAMS, GROFF_PDFDOC_PROGRAMS, GROFF_PAGE,
+	GROFF_TMAC, GROFF_WITH_COMPATIBILITY_WRAPPERS, GROFF_X11,
+	GROFF_APPRESDIR_DEFAULT, GROFF_APPRESDIR_CHECK,
+	GROFF_HAVE_TEST_EF_OPTION, GROFF_BASH, GROFF_UCHARDET,
+	GROFF_UCHARDET_CHECK, GROFF_PDFTOOLS,
+	GROFF_USE_GROFF_ALLOCATOR): Do it.
+
+2021-11-12  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* m4/groff.m4 (GROFF_TEXI2DVI): Add dependency on
+	`GROFF_MAKEINFO` macro.  Rewrite to also test `MAKEINFO`
+	variable, which is empty if the `makeinfo` command is not
+	installed or too old.  Consequently ignore `texi2dvi` if is too
+	old without having to do a version check (since it and
+	`makeinfo` are distributed together, both being part of GNU
+	Texinfo).
+
+	* doc/doc.am (.texi.dvi, .texi.pdf): Update error message to
+	indicate that `texi2dvi` is _either_ missing or too old.
+
+2021-11-12  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* m4/groff.m4 (GROFF_MAKEINFO): Stop throwing a warning if the
+	installed `makeinfo` is old but the distributed Info manual is
+	up to date.  This is not a configure-time problem; the user will
+	be notified when they run 'make' if they modify doc/groff.texi,
+	or if they run 'make doc' (which has required a TeX installation
+	for years).  Empty the `MAKEINFO` variable immediately if a
+	too-old version is detected.  Drop needless `AC_SUBST`itution of
+	the detected `makeinfo` version.
+
+2021-11-12  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* m4/groff.m4 (GROFF_HTML_PROGRAMS): Clarify message; it is only
+	groff-generated HTML that is disabled by the absence of the
+	programs checked for.  (`makeinfo` can still generate our
+	Texinfo manual in HTML format.)
+
+2021-11-11  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[build]: Drop `BUILD_INFODOC` symbol.  Ship manual in GNU Info,
+	text, and HTML forms in distribution archive.
+
+	* Makefile.am (MAINTAINERCLEANFILES): Initialize.
+	(MOSTLYCLEANADD): Drop unused variable.
+	* configure.ac: Drop `AM_CONDITIONAL([BUILD_INFODOC]...`.
+	* doc/doc.am (EXTRA_DIST): Rearrange shipment of our Texinfo
+	manual source files to precede all of the generated forms, for
+	clarity.  Drop all `BUILD_INFODOC` conditionals.  Make
+	`build_infodoc` phony target depend on plain text, GNU Info, and
+	HTML forms of Texinfo manual unconditionally.  Also drop unused
+	variables `groffinfodir`, `groffpdfdir`, and `texi2dvi_missing`.
+	(EXTRA_DIST, MAINTAINERCLEANFILES): Add Info form of manual.
+	Drop glob pattern attempting to match the segments that
+	`makeinfo` breaks it into.  It isn't necessary for
+	MAINTAINERCLEANFILES.
+	(EXTRA_DIST, MAINTAINERCLEANFILES): Add text form of manual.
+	(EXTRA_DIST, MAINTAINERCLEANFILES): Add HTML form of manual.
+	(dist-hook): Depend on new (phony) target `dist-info-bits`.
+	(dist-info-bits): Look for the info document in the build
+	directory, then the source directory.  (It could be in either
+	place depending on whether the build from a Git working tree is
+	being done in or out of a separate build directory.)  When
+	found, copy the segments to the assembly area for the
+	distribution archive.
+	(install_infodoc): Refactor.  Remove any groff info files from
+	the destination info directory using a shell glob directly
+	instead of a partly redundant ls(1) command substitution.
+	Similarly, use a shell glob to cp(1) the info files (including
+	any matched segments) to the destination info directory before
+	running `install-info`.  (In this process I learned that
+	`install-info` doesn't "install" anything; instead, it
+	{de-}registers info files with their top-level catalog.)
+
+2021-11-11  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* doc/doc.am (.texi.txt, .texi.html): Reorder pattern rules to
+	make it clearer which formats require only `makeinfo` and which
+	require `texi2dvi`.  The latter imposes more build dependencies,
+	including a full TeX installation.
+
+2021-11-11  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[mom]: Build more quietly.
+
+	* contrib/mom/mom.am (penguin.{ps,.pdf}: Make targets quiet by
+	default; they are simple file copies.
+
+2021-11-11  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[tests]: Revise a test's setup.
+
+	* src/roff/groff/tests/fp_should_not_traverse_directories.sh:
+	Revise search for device/font description directory to work in
+	within-source-tree builds and (for now) with the approach used
+	by Automake's "distcheck" target.
+
 2021-11-10  G. Branden Robinson <g.branden.robinson@gmail.com>
 
 	[tbl]: Accept `\&` as an empty table entry.
@@ -80,7 +407,7 @@
 	* m4/groff.m4 (GROFF_USE_GROFF_ALLOCATOR): Define new macro to
 	collect user preference.  The default is off.
 	* src/libs/libgroff/libgroff.am (libgroff_a_SOURCES): Build and
-	link new.cpp only if `USE_GROFF_ALLOCATOR`.
+	link new.cpp only if we are to `USE_GROFF_ALLOCATOR`.
 
 	* NEWS: Add item.
 
@@ -163,8 +490,8 @@
 	it.
 	* src/roff/groff/tests/artifacts/HONEYPOT: Add test artifact.
 	* src/roff/groff/tests/artifacts/devascii/README: ...and this;
-	we need an empty directory to make the test work but such things
-	tend to look unintentional.
+	we need a directory to make the test work but empty ones tend to
+	look unintentional.
 	* src/roff/groff/groff.am (groff_TESTS): Run test.
 	(EXTRA_DIST): Ship artifacts.
 
@@ -382,8 +709,8 @@
 	* src/roff/troff/input.cpp (encode_char): Rearrange
 	conditionals.  This is the logic that puts the "whatever" within
 	a \X'whatever' escape sequence into GNU troff's intermediate
-	output.  Handle stretchable and unstretchable space escape
-	sequences ("\ " and \~") first.  Then, if the token is a special
+	output.  Handle adjustable and nonadjustable space escape
+	sequences ("\~" and \ ") first.  Then, if the token is a special
 	character escape sequence, retrieve its "contents" (glyph name).
 	Move the basic Latin mapping for the seven glyph names '-',
 	'aq', 'dq', 'ga', 'ha', 'rs', and 'ti' here, before checking
@@ -441,7 +768,7 @@
 
 	[man]: Warn if `TE` table macro called but `TW` register (set by
 	tbl(1)) undefined.  Arrange it so that we warn only once per
-	man(7) document, not per table.
+	man(7) document, not per table region.
 
 	* tmac/an.tmac (TH): Remove `TW` register when processing new
 	document and clear `an-was-tbl-failure-reported` register.
@@ -4662,14 +4989,6 @@
 	type that is disabled by default.
 	(Escape Sequences/Escape short reference): Fix omissions; \# and
 	\V are interpreted even in copy mode.
-
-2021-05-20  G. Branden Robinson <g.branden.robinson@gmail.com>
-
-	* man/groff.7.man (Escape Sequences/Escape short reference): Fix
-	errors in descriptions of \d, \r, \u escapes; they move in vees,
-	not ems.
-
-	Fixes <https://savannah.gnu.org/bugs/?60602>.
 
 2021-05-20  G. Branden Robinson <g.branden.robinson@gmail.com>
 

@@ -31,11 +31,12 @@ groff="${abs_top_builddir:-.}/test-groff"
 # might be getting built anyway.)  So we hunt around for our test
 # artifact directory in some common locations.
 font_dir=
-subdir=artifacts
+base=src/roff/groff/tests
+device=artifacts
 
-for base in . ../src/roff/groff/tests
+for buildroot in . .. ../..
 do
-    d=$base/$subdir
+    d=$buildroot/$base/$device
     if [ -d "$d" ]
     then
         font_dir=$d

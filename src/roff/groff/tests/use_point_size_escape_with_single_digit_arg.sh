@@ -41,4 +41,4 @@ echo "$DOC" | "$groff" -Z | grep -qx 's3000'
 # Check that we get a diagnostic when relying on the ambiguous form.
 echo "testing for diagnostic on \s36 in compatiblity mode" >&2
 echo "$DOC" | "$groff" -C -Z 2>&1 >/dev/null \
-    | grep -q 'ambiguous point-size escape'
+    | grep -q 'ambiguous type size in escape sequence'

@@ -498,7 +498,7 @@ a face that is oblique on typesetter output devices and usually
 underlined instead on terminal devices.
 .
 .B BI
-is \f[BI]bold-italic\f[]\,, \" indulging a bit of man(7) evil here
+is \f[BI]bold-italic\f[]\/, \" indulging a bit of man(7) evil here
 combining both of the foregoing style variations.
 .
 Typesetter devices typically offer one or more
@@ -1058,9 +1058,7 @@ End expression group of higher precedence
 .
 .
 .P
-In many contexts,
-unary prefix operators are also available in contexts where they make
-sense.
+Unary prefix operators are available in contexts where they make sense.
 .
 .
 .RS
@@ -1218,14 +1216,14 @@ request must be the last such escape sequence on an input line.
 .SS "Conditional expressions"
 .\" ====================================================================
 .
-In
+The
 .request .if ,
 .request .ie ,
 and
 .request .while
-requests,
-in addition to the numeric expressions described above,
-several Boolean operators are available;
+requests can test the truth values of numerical expressions.
+.
+They also support several additional Boolean operators;
 the members of this expanded class are termed
 .IR "conditional expressions" .
 .
@@ -1405,7 +1403,7 @@ depending on its sign.
 .
 .
 .P
-If a numeric expression presented as
+If a numerical expression presented as
 .I \[+-]N
 starts with a
 .squoted_char +
@@ -1865,7 +1863,7 @@ Define or redefine
 .I macro
 until
 .RB \[lq] ..\& \[rq]
-occurs at the start of a control line at the current brace scope.
+occurs at the start of a control line in the current conditional block.
 .
 .
 .TPx
@@ -1874,7 +1872,8 @@ Define or redefine
 .I macro
 until
 .BI . end
-is called at the start of a control line at the current brace scope.
+is called at the start of a control line in the current conditional
+block.
 .
 .
 .TPx
@@ -2411,7 +2410,7 @@ Ignore input
 on auto-incrementing registers)
 until
 .RB \[lq] ..\& \[rq]
-occurs at the start of a control line at the current brace scope.
+occurs at the start of a control line in the current conditional block.
 .
 .
 .TPx
@@ -2422,7 +2421,8 @@ Ignore input
 on auto-incrementing registers)
 until
 .BI . end
-is called at the start of a control line at the current brace scope.
+is called at the start of a control line in the current conditional
+block.
 .
 .
 .TPx
@@ -2893,10 +2893,12 @@ Rename register
 to
 .IR reg2 .
 .
+.
 .TPx
-.REQ .rr "ident"
+.REQ .rr ident
 Remove register
 .IR ident .
+.
 .
 .TPx
 .REQ .rs
@@ -2947,11 +2949,16 @@ positions.
 .TPx
 .REQ .sizes "s1 s2 \fR\&.\|.\|.\&\fP s\fRn\~\c
 [\f[CB]0\f[]]
-Set available font sizes similar to the
+Set available type sizes similarly to the
 .B sizes
-command in a
+directive in a
 .I DESC
 file.
+.
+Each
+.IR s i
+is interpreted in units of scaled points (\c
+.scaleindicator z ).
 .
 .
 .TPx
@@ -2972,16 +2979,34 @@ does not exist.
 .
 .TPx
 .REQ .sp
-Skip one line vertically.
+Move the drawing position down one vee.
+.
 .
 .TPx
-.REQ .sp "N"
-Space vertical distance
-.I N
-up or down according to sign of
+.REQ .sp N
+Move the drawing position vertically by
 .I N
 (default scaling indicator\~\c
 .scaleindicator v ).
+.
+Positive values are downwards.
+.
+Prefixing
+.I N
+with the
+.B |
+operator moves to a position relative to the page top for positive
+.IR N ,
+and the bottom if
+.I N
+is negative;
+in all cases,
+one line height (vee) is added
+.RI to\~ N .
+.
+.I N
+is ignored inside a diversion.
+.
 .
 .TPx
 .REQ .special
@@ -3828,7 +3853,7 @@ vertically.
 .ESCq B anything
 Interpolate 1 if
 .I anything
-is a valid numeric expression,
+is a valid numerical expression,
 and\~0 otherwise.
 .
 .
@@ -3848,9 +3873,10 @@ implementations.
 .
 .TP
 .ESC d
-Move downward \[12]\~vee
+Move downward \[12]\~em
 (\[12]\~line in
-.IR nroff ).
+.I nroff
+contingent on device support).
 .
 .
 .TP
@@ -4043,19 +4069,19 @@ Switch to previous fill color.
 .
 .TP
 .ESC n r
-Interpolate value stored in register with one-character
+Interpolate contents of register with one-character
 .RI name\~ r .
 .
 .
 .TP
 .ESC n( rg
-Interpolate value stored in register with two-character
+Interpolate contents of register with two-character
 .RI name\~ rg .
 .
 .
 .TP
 .ESC[] n reg
-Interpolate value stored in register with arbitrarily long
+Interpolate contents of register with arbitrarily long
 .RI name\~ reg .
 .
 .
@@ -4134,7 +4160,7 @@ adjust if applicable.
 .
 .TP
 .ESC r
-Move \[lq]in reverse\[rq] (upward) 1\~vee
+Move \[lq]in reverse\[rq] (upward) 1\~em
 (reverse linefeed in
 .IR nroff ).
 .
@@ -4223,9 +4249,10 @@ interpolate tab character.
 .
 .TP
 .ESC u
-Move upward \[12]\~vee
+Move upward \[12]\~em
 (\[12]\~line in
-.IR nroff ).
+.I nroff
+contingent on device support).
 .
 .
 .TP
@@ -4420,7 +4447,7 @@ Only one string is predefined by the language.
 .
 .TPx
 .STRING .T
-Contains the name of the output driver
+Contains the name of the output device
 (for example,
 .RB \[lq] utf8 \[rq]
 or

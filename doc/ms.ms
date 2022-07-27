@@ -1926,8 +1926,8 @@ lf(CR) lf(CR) | lx .
 Display macro	Description
 With keep	Without keep
 _
-\&.DS \f[R][\f[]L\f[R]]	\&.LD	Begin left-aligned display.
-\&.DS I \f[R][\,\f[I]indent\/\f[]]	\
+\&.DS L	\&.LD	Begin left-aligned display.
+\&.DS \f[R][\f[]I\f[R] [\,\f[I]indent\/\f[]]]	\
 \&.ID \f[R][\,\f[I]indent\/\f[]]	T{
 Begin display indented by
 .I indent
@@ -1947,7 +1947,7 @@ T}
 _
 .T&
 cf(CR) s | lx .
-\&.ED	End any display.
+\&.DE	End any display.
 .TE
 .
 .
@@ -1959,11 +1959,15 @@ this is a Berkeley extension.
 .
 The
 .CW \[rs]n[DI]
-indentation is applied to only to displays created with
-.CW ".DS I" \[rq] \[lq]
+register is a GNU extension;
+its value is an indentation applied to displays created with
+.CW .DS
+(with no argument),
+.CW ".DS\~I" \[rq], \[lq]
 and
 .CW .ID ;
-this is a GNU extension.
+and indented equations set with
+.CW .EQ .
 .
 Changes to either register take effect at the next display boundary.
 .
@@ -3117,21 +3121,6 @@ but
 .CW .RS
 and
 .CW .RE .
-.
-.
-.PP
-Displays are left-aligned by default,
-not indented.
-.
-In AT&T
-.I ms ,
-.CW .DS
-is synonymous with
-.CW ".DS I" ;
-in
-.I "groff ms" ,
-it is synonymous with
-.CW ".DS L" .
 .
 .
 .PP

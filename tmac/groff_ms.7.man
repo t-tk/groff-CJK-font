@@ -1219,7 +1219,7 @@ layout.
 .
 .
 .TP
-.BR .DS \~[ L ]
+.B .DS L
 .TQ
 .B .LD
 Begin
@@ -1228,8 +1228,9 @@ left-aligned display.
 .
 .
 .TP
-.B .DS I \c
-.RI [ indent ]
+.BR .DS \~\c
+.RB [ I \~\c
+.RI [ indent ]]
 .TQ
 .B .ID \c
 .RI [ indent ]
@@ -1276,7 +1277,7 @@ This is a GNU extension.
 .
 .
 .TP
-.B .ED
+.B .DE
 End any display.
 .
 .
@@ -1288,11 +1289,15 @@ this is a Berkeley extension.
 .
 The
 .B \[rs]n[DI]
-indentation is applied only to displays created with
-.RB \[lq] ".DS I" \[rq]
+register is a GNU extension;
+its value is an indentation applied to displays created with
+.B .DS
+(with no argument),
+.RB \[lq] ".DS\~I" \[rq],
 and
 .BR .ID ;
-this is a GNU extension.
+and indented equations set with
+.BR .EQ .
 .
 Changes to either register take effect at the next display boundary.
 .
@@ -2260,21 +2265,6 @@ This implies that
 should not be used early in the document,
 unless it is changed also:
 accessing an undefined register automatically defines it.
-.
-.
-.IP \[bu]
-Displays are left-aligned by default,
-not indented.
-.
-In AT&T
-.IR ms ,
-.B .DS
-is synonymous with
-.RB \[lq] ".DS I" \[rq];
-in
-.IR "groff ms" ,
-it is synonymous with
-.RB \[lq] ".DS L" \[rq].
 .
 .
 .IP \[bu]

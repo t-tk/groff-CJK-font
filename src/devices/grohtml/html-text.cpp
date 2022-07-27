@@ -39,9 +39,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
 #include "html-text.h"
 
-#undef DEBUGGING
-// #define DEBUGGING
-
 html_text::html_text (simple_output *op, html_dialect d) :
   stackptr(NULL), lastptr(NULL), out(op), dialect(d),
   space_emitted(TRUE), current_indentation(-1),

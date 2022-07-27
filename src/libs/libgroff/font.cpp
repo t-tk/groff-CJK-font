@@ -898,13 +898,14 @@ bool font::load(bool load_header_only)
 	}
 	p = strtok(0, WS);
 	if (0 == p) {
-	  t.error("missing kern amount for kern pair '%1 %2'", c1, c2);
+	  t.error("missing kern amount for kerning pair '%1 %2'", c1,
+		  c2);
 	  return false;
 	}
 	int n;
 	if (sscanf(p, "%d", &n) != 1) {
-	  t.error("invalid kern amount '%1' for kern pair '%2 %3'", p,
-		  c1, c2);
+	  t.error("invalid kern amount '%1' for kerning pair '%2 %3'",
+		  p, c1, c2);
 	  return false;
 	}
 	glyph *g1 = name_to_glyph(c1);

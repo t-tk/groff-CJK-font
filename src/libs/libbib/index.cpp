@@ -245,7 +245,7 @@ bool index_search_item::load(int fd)
     return false;
   }
   const char *problem = check_header(size);
-  if (problem) {
+  if (problem != 0) {
     if (do_verify)
       error("corrupt header in index file '%1': %2", name, problem);
     else

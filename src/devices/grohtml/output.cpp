@@ -37,9 +37,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 #include <unistd.h>
 #endif
 
-#undef DEBUGGING
-// #define DEBUGGING
-
 #if !defined(TRUE)
 #   define TRUE  (1==1)
 #endif

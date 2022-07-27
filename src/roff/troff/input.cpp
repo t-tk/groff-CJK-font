@@ -16,8 +16,6 @@ for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
-#define DEBUGGING
-
 #include "troff.h"
 #include "dictionary.h"
 #include "hvunits.h"
@@ -150,7 +148,7 @@ static int get_delim_number(units *, unsigned char);
 static int get_delim_number(units *, unsigned char, units);
 static symbol do_get_long_name(bool, char);
 static int get_line_arg(units *res, unsigned char si, charinfo **cp);
-static int read_size(int *);
+static bool read_size(int *);
 static symbol get_delim_name();
 static void init_registers();
 static void trapping_blank_line();
@@ -5031,7 +5029,7 @@ static int get_line_arg(units *n, unsigned char si, charinfo **cp)
   return 0;
 }
 
-static int read_size(int *x)
+static bool read_size(int *x)
 {
   tok.next();
   int c = tok.ch();
@@ -5047,7 +5045,7 @@ static int read_size(int *x)
     c = tok.ch();
   }
   int val = 0;		// pacify compiler
-  int bad_digit = 0;
+  bool contains_invalid_digit = false;
   if (c == '(') {
     tok.next();
     c = tok.ch();
@@ -5065,13 +5063,13 @@ static int read_size(int *x)
       }
     }
     if (!csdigit(c))
-      bad_digit = 1;
+      contains_invalid_digit = true;
     else {
       val = c - '0';
       tok.next();
       c = tok.ch();
       if (!csdigit(c))
-	bad_digit = 1;
+	contains_invalid_digit = true;
       else {
 	val = val*10 + (c - '0');
 	val *= sizescale;
@@ -5085,17 +5083,17 @@ static int read_size(int *x)
       tok.next();
       c = tok.ch();
       if (!csdigit(c))
-	bad_digit = 1;
+	contains_invalid_digit = true;
       else {
 	val = val*10 + (c - '0');
-	error("ambiguous point-size escape; rewrite to use '\\s(%1'"
-	      " or similar", val);
+	error("ambiguous type size in escape sequence; rewrite to use"
+	      " '\\s(%1' or similar", val);
       }
     }
     val *= sizescale;
   }
   else if (!tok.usable_as_delimiter(true /* report error */))
-    return 0;
+    return false;
   else {
     token start(tok);
     tok.next();
@@ -5105,22 +5103,22 @@ static int read_size(int *x)
       tok.next();
     }
     if (!get_number(&val, 'z'))
-      return 0;
+      return false;
     if (!(start.ch() == '[' && tok.ch() == ']') && start != tok) {
       if (start.ch() == '[')
-	error("missing ']' in point-size escape");
+	error("missing ']' in type size escape sequence");
       else
-	error("missing closing delimiter in point-size escape");
-      return 0;
+	error("missing closing delimiter in type size escape sequence");
+      return false;
     }
   }
-  if (bad_digit) {
+  if (contains_invalid_digit) {
     if (c)
-      error("bad digit in point-size escape: %1",
+      error("invalid digit in type size escape sequence: %1",
 	    input_char_description(c));
     else
-      error("bad digit in point-size escape");
-    return 0;
+      error("invalid digit in type size escape sequence");
+    return false;
   }
   else {
     switch (inc) {
@@ -5128,7 +5126,7 @@ static int read_size(int *x)
       if (val == 0) {
 	// special case -- point size 0 means "revert to previous size"
 	*x = 0;
-	return 1;
+	return true;
       }
       *x = val;
       break;
@@ -5143,11 +5141,11 @@ static int read_size(int *x)
     }
     if (*x <= 0) {
       warning(WARN_RANGE,
-	      "point-size escape results in non-positive size %1u;"
-	      " set to 1u", *x);
+	      "type size escape sequence results in non-positive size"
+	      " %1u; setting it to 1u", *x);
       *x = 1;
     }
-    return 1;
+    return true;
   }
 }
 
@@ -8030,6 +8028,8 @@ int main(int argc, char **argv)
   };
 #if defined(DEBUGGING)
 #define DEBUG_OPTION "D"
+#else
+#define DEBUG_OPTION ""
 #endif
   while ((c = getopt_long(argc, argv,
 			  "abciI:vw:W:zCEf:m:n:o:r:d:F:M:T:tqs:RU"

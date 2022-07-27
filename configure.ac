@@ -195,7 +195,6 @@ AM_CONDITIONAL([MAKE_DONT_HAVE_RM], [test "x$groff_is_rm_defined" = "xno"])
 # Some programs have a "g" prefix if an existing groff installation is detected
 AM_CONDITIONAL([USEPROGRAMPREFIX], [test x$g = xg])
 
-AM_CONDITIONAL([BUILD_INFODOC], [test -n "$make_infodoc"])
 AM_CONDITIONAL([BUILD_HTML], [test -n "$make_htmldoc"])
 AM_CONDITIONAL([BUILD_HTMLEXAMPLES], [test -n "$make_htmlexamples"])
 AM_CONDITIONAL([BUILD_PDFDOC], [test -n "$make_pdfdoc"])

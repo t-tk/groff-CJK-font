@@ -29,21 +29,21 @@ o A new read-only register `.nm` is implemented.  It reports the
   way to introspect its state, tbl(1) needs to be able to do so, and the
   writable line number register `ln` is not a reliable proxy for it.
 
-o Point-size escape sequences of the form "\sNN", where NN is in the
+o Type size escape sequences of the form "\sNN", where NN is in the
   range 10-39, are now recognized only in compatibility mode ("groff
   -C"); when encountered, an error diagnostic is emitted.  Otherwise,
-  "\sN" is interpreted as setting the point size to the single-digit
-  value N, which ends the escape sequence.  This change eliminates a
-  quirk in the language grammar that dates back to the mid-1970s (AT&T
-  troff by Ossanna) but was not documented in the Troff User's Manual
-  until 1992 when Kernighan updated CSTR #54 for device-independent AT&T
-  troff.
+  "\sN" is interpreted as setting the type size to the single-digit
+  value N (in scaled points), which ends the escape sequence.  This
+  change eliminates a quirk in the language grammar that dates back to
+  the mid-1970s (AT&T troff by Ossanna) but was not documented in the
+  Troff User's Manual until 1992 when Kernighan updated CSTR #54 for
+  device-independent AT&T troff.
 
-  The form "\s(NN" is accepted for two-digit point sizes in all known
-  troffs.  The form "\s[NNN]" accepts a numeric expression of variable
-  length; it has been supported by groff since version 1.02 (June 1991)
-  at the latest and is by current versions of Heirloom Doctools troff
-  and neatroff.  The form "\s'NNN'" is also widely supported.
+  The form "\s(NN" is accepted for two-digit sizes in all known troffs.
+  The form "\s[NNN]" accepts a numeric expression of variable length; it
+  has been supported by groff since version 1.02 (June 1991) at the
+  latest and is by current versions of Heirloom Doctools troff and
+  neatroff.  The form "\s'NNN'" is also widely supported.
 
   Summary: in your documents, rewrite escape sequences beginning with
   "\s1", "\s2", or "\s3" in an unambiguous and portable form.  For
@@ -228,10 +228,10 @@ o The m (mm) macro package now requires a title to be declared when
   memorandum type 5 is used (".MT 5"), just as type 4 has since groff
   1.10 (November 1995).
 
-o The m (mm) and s (ms) macro packages no longer manipulate the warning
-  level.  If you want all warnings on, use the 'warn' request with no
-  arguments in your document or pass "-w w" to groff (see troff(1) or
-  the groff Texinfo manual for more on warnings).
+o The m (mm) and s (ms) macro packages no longer manipulate the set of
+  enabled warning categories.  If you want all warnings on, use the
+  'warn' request with no arguments in your document or pass "-w w" to
+  groff (see troff(1) or the groff Texinfo manual for more on warnings).
 
 o The m (mm) and s (ms) macro packages' 'R' macros now work analogously
   to their 'B' and 'I' macros instead of ignoring their arguments.
@@ -277,7 +277,7 @@ o A new device control command, "background", enables boxes to be drawn
   drawn with a colored border of configurable thickness, and interrupted
   by page breaks with special support for breaking before footnotes and
   similar material.  For convenience, `pdf.tmac` exposes a new macro,
-  'pdfbackground'.
+  'pdfbackground'.  Thanks to Deri James.
 
 grotty
 ------

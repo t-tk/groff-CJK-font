@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 2003-2020 Free Software Foundation, Inc.
      Written by Gaius Mulley (gaius@glam.ac.uk)
 
@@ -17,7 +16,7 @@ for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
-#define DEBUGGING
+// mtsm: minimum troff state machine
 
 extern int debug_state;
 
@@ -634,3 +633,9 @@ units state_set::val(units_value_state)
 {
   return unitsset;
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

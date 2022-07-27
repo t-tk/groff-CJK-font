@@ -1424,21 +1424,23 @@ void table::do_hspan(int r, int c)
 void table::do_vspan(int r, int c)
 {
   assert(r >= 0 && c >= 0 && r < nrows && c < ncolumns);
-  if (r == 0) {
+  if (0 == r) {
     error("first row cannot be vertically spanned");
     return;
   }
   table_entry *e = entry[r][c];
   if (e) {
-    assert(e->start_row <= r && r <= e->end_row
-	   && e->start_col <= c && c <= e->end_col
-	   && e->end_row - e->start_row > 0
-	   && e->end_col - e->start_col > 0);
+    assert(e->start_row <= r);
+    assert(r <= e->end_row);
+    assert(e->start_col <= c);
+    assert(c <= e->end_col);
+    assert((e->end_row - e->start_row) > 0);
+    assert((e->end_col - e->start_col) > 0);
     return;
   }
   e = entry[r-1][c];
-  // e can be 0 if we had an empty entry or an error
-  if (e == 0)
+  // e can be a null pointer if we had an empty entry or an error
+  if (0 == e)
     return;
   if (e->start_col != c) {
     /* l s
@@ -1844,7 +1846,7 @@ void table::init_output()
 	 ".\\}\n"
 	 ".\\}\n"
 	 "..\n");
-  if (!(flags & NOKEEP))
+  if (!(flags & NOKEEP)) {
     prints(".de " KEEP_MACRO_NAME "\n"
 	   ".if '\\n[.z]'' \\{.ds " QUOTE_STRING_NAME " \\\\\n"
 	   ".ds " TRANSPARENT_STRING_NAME " \\!\n"
@@ -1853,7 +1855,7 @@ void table::init_output()
 	   ".in 0\n"
 	   ".\\}\n"
 	   "..\n"
-	   // protect # in macro name against eqn
+	   // Protect '#' in macro name from being interpreted by eqn.
 	   ".ig\n"
 	   ".EQ\n"
 	   "delim off\n"
@@ -1874,15 +1876,16 @@ void table::init_output()
 	   ".sp \\n[.t]u\n"
 	   ".nr " SUPPRESS_BOTTOM_REG " 0\n"
 	   ".mk #T\n"
-	   ".\\}\n"
-	   ".if \\n[.t]<=\\n[" SAVED_DN_REG "] \\{\\\n"
-	   /* Since we turn off traps, it won't get into an infinite
-	      loop when we try and print it; it will just go off the
-	      bottom of the page. */
-	   ".  tmc \\n[.F]: around line \\n[.c]: warning:\n"
-	   ".  tm1 \" table row will not fit on page \\n%\n"
-	   ".\\}\n"
-	   ".nf\n"
+	   ".\\}\n");
+    if (!(flags & NOWARN))
+      prints(".if \\n[.t]<=\\n[" SAVED_DN_REG "] \\{\\\n"
+	     /* Since we turn off traps, it won't get into an infinite
+		loop when we try and print it; it will just go off the
+		bottom of the page. */
+	     ".  tmc \\n[.F]: around line \\n[.c]: warning:\n"
+	     ".  tm1 \" table row will not fit on page \\n%\n"
+	     ".\\}\n");
+    prints(".nf\n"
 	   ".if \\n[.nm] .if \\n[ln] .nm \\n[ln]\n"
 	   ".nr " ROW_MAX_LINE_REG " \\n[ln]\n"
 	   ".ls 1\n"
@@ -1927,6 +1930,7 @@ void table::init_output()
 	   ".nr ln \\n[" ROW_MAX_LINE_REG "]\n"
 	   ".\\}\n"
 	   "..\n");
+  }
   prints(".ec\n"
 	 ".ce 0\n"
 	 ".nf\n");
@@ -2166,7 +2170,8 @@ void table::compute_expand_width()
   prints(".if \\n[" EXPAND_REG "]<0 \\{\\\n");
   entry_list->set_location();
   if (!(flags & NOWARN)) {
-    // protect ` and ' in warning message against eqn
+    // Protect characters in diagnostic message (especially :, [, ])
+    // from being interpreted by eqn.
     prints(".ig\n"
 	   ".EQ\n"
 	   "delim off\n"
@@ -2218,7 +2223,8 @@ void table::compute_separation_factor()
   prints(".ie \\n[" SEPARATION_FACTOR_REG "]<=0 \\{\\\n");
   entry_list->set_location();
   if (!(flags & NOWARN)) {
-    // protect ` and ' in warning message against eqn
+    // Protect characters in diagnostic message (especially :, [, ])
+    // from being interpreted by eqn.
     prints(".ig\n"
 	   ".EQ\n"
 	   "delim off\n"
