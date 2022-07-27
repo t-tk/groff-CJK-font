@@ -110,16 +110,17 @@ glyph names
 .MR groff_char @MAN7EXT@
 for a list).
 .
-The values can be separated by any whitespace;
-the Unicode value must use uppercase digits A\^\[en]\^F,
-and must be without a leading
+The values can be separated by any number of spaces and/or tabs.
+.
+The Unicode value must use uppercase hexadecimal digits A\^\[en]\^F,
+and must lack a leading
 .RB \[lq] 0x \[rq],
 .RB \[lq] u \[rq],
 or
 .RB \[lq] U+ \[rq].
 .
 Unicode values corresponding to composite glyphs are decomposed;
-e.g.,
+that is
 .RB \[lq] u00C0 \[rq]
 becomes
 .RB \[lq] u0041_0300 \[rq].
@@ -132,7 +133,7 @@ if the glyph corresponds to a Unicode value,
 or as an unnamed glyph
 .RB \[lq] \-\-\- \[rq].
 .
-If the given Unicode value is in the Private Use Area
+If the given Unicode value is in the Private Use Area (PUA)
 (0xE000\^\[en]\^0xF8FF),
 the glyph is included as an unnamed glyph.
 .
@@ -141,7 +142,7 @@ Refer to
 for additional information about unnamed glyphs and how to access them.
 .
 .
-.LP
+.P
 Blank lines and lines beginning with
 .RB \[lq] # \[rq]
 are ignored.
@@ -160,7 +161,7 @@ name,
 it must appear first in a list of
 .I groff
 names if a comment is included,
-e.g.,
+as in
 .
 .RS
 .EX
@@ -176,7 +177,7 @@ or
 .EE
 .RE
 .
-rather than
+whereas in
 .
 .RS
 .EX
@@ -184,9 +185,9 @@ rather than
 .EE
 .RE
 .
-which will treat the first
+the first
 .RB \[lq] # \[rq]
-as the beginning of the comment.
+is interpreted as the beginning of the comment.
 .
 .
 .P
@@ -252,13 +253,9 @@ font and which are placed in a special font.
 The presence or absence of the
 .B \-s
 option has some effect on which glyphs are included:
-without the
-.B \-s
-option,
+without it,
 only the \[lq]text\[rq] symbol sets are searched for matching glyphs;
-with the
-.B \-s
-option,
+with it,
 only the \[lq]mathematical\[rq] symbol sets are searched.
 .
 Nonetheless,
@@ -266,20 +263,17 @@ restricting the symbol sets searched isn't very selective\[em]many
 glyphs are placed in both regular and special fonts.
 .
 Normally,
-the
 .B \-a
-option should be used only as a last resort.
+should be used only as a last resort.
 .
 .
 .TP
 .B \-d
 Dump information about the TFM file to the standard output stream;
-this option can be useful for ensuring that a TFM file is a proper match
-for a font,
-and that the contents of the TFM file are suitable.
+use this to ensure that a TFM file is a proper match for a font,
+and that its contents are suitable.
 .
-The information includes the values of important TFM tags,
-and a listing
+The information includes the values of important TFM tags and a listing
 (by MSL number for Intellifont TFM files or by Unicode value for
 TrueType TFM files)
 of the glyphs included in the TFM file.
@@ -329,7 +323,7 @@ italic correction is equal to
 thousandths of an em plus the amount by which the right edge of the
 glyphs's bounding box is to the right of its origin.
 .
-If this would result in a negative italic correction,
+If a negative italic correction would result,
 use a zero italic correction instead.
 .
 .
@@ -337,8 +331,8 @@ use a zero italic correction instead.
 Also generate a subscript correction equal to the product of the tangent
 of the slant of the font and four fifths of the x-height of the font.
 .
-If this would result in a subscript correction greater than the italic
-correction,
+If a subscript correction greater than the italic correction would
+result,
 use a subscript correction equal to the italic correction instead.
 .
 .
@@ -411,10 +405,11 @@ is a
 .MR make 1
 script that uses
 .MR hpftodit @MAN1EXT@
-to prepare the foregoing font description files from HP TFM data;
-in can be used to regenerate the
+to prepare the
 .I groff
-font descriptions in the event the TFM files are updated.
+font description files above from HP TFM data;
+in can be used to regenerate them in the event the TFM files are
+updated.
 .
 .
 .TP
@@ -436,7 +431,7 @@ later.
 .I @FONTDIR@/\:\%devlj4/\:\%generate/\:text\:.map
 .TQ
 .I @FONTDIR@/\:\%devlj4/\:\%generate/\:\%wingdings.map
-map MSL indices and HP Unicode Private Use Area assignments to
+map MSL indices and HP Unicode PUA assignments to
 .I groff
 special character identifiers.
 .

@@ -39,6 +39,17 @@ echo "testing seekability of file operand '-'" >&2
 output=$(printf '' | "$preconv" -d - 2>&1)
 echo "$output" | grep -q "stream is not seekable" || wail
 
+# /dev/stdin might not exist in a chroot.  Or, if it's not (a symbolic
+# link to) a character special device, the next test will not be valid,
+# as when using GNU Make's `-j` option.
+#
+# Similarly, we must have a controlling terminal.
+test -z "$fail"
+echo "skipping if /dev/stdin is not a character device" >&2
+test -c /dev/stdin || exit 77 # skip
+echo "skipping if there is no controlling terminal" >&2
+test "$(tty)" != "not a tty" || exit 77 # skip
+
 echo "testing seekability of standard input stream" >&2
 output=$(printf '' | "$preconv" -d /dev/stdin 2>&1)
 echo "$output" | grep -q "stream is not seekable" || wail

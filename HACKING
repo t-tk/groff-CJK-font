@@ -1,0 +1,70 @@
+    Copyright 2022 Free Software Foundation, Inc.
+
+    Copying and distribution of this file, with or without
+    modification, are permitted in any medium without royalty provided
+    the copyright notice and this notice are preserved.
+
+This file contains advice on developing and contributing to groff.  It
+assumes that developers will install the 'git' revision control
+system and build groff using the instructions in 'INSTALL.repo'.
+
+Automake
+--------
+
+A document explaining the basics of GNU Automake and its usage in groff
+is available in 'doc/automake.mom'; a PDF rendering is built but not
+installed, since it is a developer-facing discussion.  Peruse it in
+'doc/automake.pdf' in your build tree.
+
+
+Testing
+-------
+
+Running the test suite with 'make check' after building any substantive
+change to groff logic is encouraged.  You should certainly do so, and
+confirm that the tests pass, before submitting patches to the groff
+mailing list <groff@gnu.org> or Savannah issue tracker.
+
+If you find a defect in a test script, that can be reported via Savannah
+like any other bug.
+
+
+Documenting changes
+-------------------
+
+The groff project has a long history and a large, varied audience.
+Changes may need to be documented in up to three places depending on
+their impact.
+
+1.  Changes should of course be documented in the Git commit message.
+    If a change alters only comments or formatting of source code, or
+    makes editorial changes to documentation, and does not resolve a
+    Savannah ticket, you can stop at that.
+
+2.  The 'ChangeLog' file follows the format and practices documented in
+    the GNU Coding Standards.
+      https://www.gnu.org/prep/standards/html_node/Change-Logs.html
+
+    The sub-projects in the 'contrib' directory each have their own
+    dedicated ChangeLog files.  The file specifications documented there
+    are relative to the sub-project, not the root of the groff source
+    tree.  When converted to a commit message, add 'contrib/$SUBPROJECT'
+    to the entries.
+
+    Apart from 'contrib', groff uses a single (current) 'ChangeLog' file
+    for the rest of its source tree.
+
+    It is convenient to write the ChangeLog entry or entries first, then
+    construct a commit message from it (or them).
+
+3.  The 'NEWS' file documents changes to groff that a user, not just a
+    developer, would notice, not including the resolution of defects.
+
+    As a hypothetical example, correcting a rendering error in tbl(1)
+    such that any table with more than 20 rows no longer had the text
+    "FOOBAR" spuriously added to some of entries would not be a 'NEWS'
+    item, because the appearance of such text in the first place is a
+    surprising deviation from tbl's ideal and historical behavior.  In
+    contrast, adding a command-line option to tbl, or changing the
+    meaning of its "expand" region option such that it no longer
+    horizontally compresses tables as well, _would_ be 'NEWS'-worthy.

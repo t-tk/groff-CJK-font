@@ -91,11 +91,11 @@ respectively).
 .
 .
 .P
-Device and font description files are read both by the formatter,
+Device and font description files are read by the formatter,
 .IR @g@troff ,
 and by output drivers.
 .
-The programs delegate these files' processing to an internal
+The programs typically delegate these files' processing to an internal
 library,
 .IR libgroff ,
 ensuring their consistent interpretation.
@@ -168,11 +168,11 @@ causes no font to be mounted at the corresponding position.
 .
 .TP
 .BI hor\~ n
-The horizontal resolution is
+The horizontal motion quantum is
 .IR n \~basic
 units.
 .
-All horizontal quantities are rounded to multiples
+Horizontal quantities are rounded to multiples
 .RI of\~ n.
 .
 .
@@ -196,7 +196,7 @@ driver uses this directive.
 .
 .TP
 .BI paperlength\~ n
-The vertical dimension of the physical output medium is
+The vertical dimension of the output medium is
 .IR n \~basic
 units
 (deprecated:
@@ -208,7 +208,7 @@ instead).
 .TP
 .BI papersize\~ format-or-dimension-pair-or-file-name\c
 \~.\|.\|.
-The dimensions of the physical output medium are as according to the
+The dimensions of the output medium are as according to the
 argument,
 which is either
 a standard paper format,
@@ -274,8 +274,7 @@ the argument can be a file name
 (e.g.,
 .IR /etc/papersize );
 if the file can be opened,
-the first line is read and a match attempted against each of the other
-forms.
+the first line is read and a match attempted against each other form.
 .
 No comment syntax is supported.
 .
@@ -287,7 +286,7 @@ each is scanned in turn and the first valid paper specification used.
 .
 .TP
 .BI paperwidth\~ n
-The horizontal dimension of the physical output medium is
+The horizontal dimension of the output medium is
 .IR n \~basic
 units
 (deprecated:
@@ -333,16 +332,14 @@ output devices use this directive.
 .BI print\~  program
 Use
 .I program
-as the spooler program for printing.
+as the print spooler.
 .
 If omitted,
-the
+.IR groff 's
 .B \-l
 and
 .B \-L
-options of
-.I groff
-are ignored.
+options are ignored.
 .
 .
 .TP
@@ -468,11 +465,11 @@ driver uses this directive.
 .
 .TP
 .BI vert\~ n
-The vertical resolution is
+The vertical motion quantum is
 .IR n \~basic
 units.
 .
-All vertical quantities are rounded to multiples
+Vertical quantities are rounded to multiples
 .RI of\~ n.
 .
 .
@@ -717,11 +714,11 @@ spaces or tabs and organized as follows.
 identifies the glyph:
 if
 .I name
-is a single printable
+is a printable
 .RI character\~ c ,
 it corresponds to the
 .I troff \" generic
-input
+ordinary
 .RI character\~ c .
 .
 If
@@ -738,7 +735,7 @@ special character escape sequence
 A name consisting of three minus signs,
 .RB \[lq] \-\-\- \[rq],
 indicates that the glyph is unnamed:
-such glyphs can only be accessed by the
+such glyphs can be accessed only by the
 .B \[rs]N
 escape sequence in
 .IR troff . \" generic; \N is portable
@@ -754,14 +751,16 @@ The
 .RB \[lq] \[rs]\- \[rq]
 defines the minus sign glyph.
 .
+.\" TODO: Withdraw support for this.  No one seems to use it.
 Finally,
 .I name
-can be the unbreakable one-sixth and one-twelfth space escape
-sequences,
-\[rs]| and \[rs]\[ha]
+can be the horizontal motion escape sequences,
+.B \[rs]|
+and
+.B \[rs]\[ha]
 (\[lq]thin\[rq] and \[lq]hair\[rq] spaces,
 respectively),
-in which case only the width metric described below is interpreted;
+in which case only the width metric described below is applied;
 a font can thus customize the widths of these spaces.
 .\" XXX: For exhaustivity purposes...you can define "\whatever", which
 .\" has to be accessed with \C'\\whatever' or \[\\whatever], but the
@@ -798,11 +797,12 @@ it may be broken here for readability).
 .P
 There must not be any spaces,
 tabs,
-or newlines between these subfields.
+or newlines between these
+.I subfields,
 .
-The subfields are in basic units expressed as decimal integers.
+which are in basic units expressed as decimal integers.
 .
-Missing subfields are assumed to
+Unspecified subfields default to
 .RB be\~ 0 .
 .
 Since there is no associated binary format,
@@ -883,8 +883,8 @@ all glyphs might have a type of zero.
 .TP
 0
 means the glyph lies entirely between the baseline and
-a horizontal line at the \[lq]x-height\[rq] of the font;
-typical examples are \[lq]a\[rq],
+a horizontal line at the \[lq]x-height\[rq] of the font,
+as with \[lq]a\[rq],
 \[lq]c\[rq],
 and
 \[lq]x\[rq];

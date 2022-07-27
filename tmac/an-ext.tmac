@@ -102,14 +102,20 @@
 .\" Start URL.
 .de UR
 .  ds m1 \\$1\"
+.  \" Save the line length, which may not be the default, so we can use
+.  \" it in the link text environment.  (groff's `evc` request copies
+.  \" too much, like the indentation amount.)
+.  nr mK \\n(.l
 .  \" We can only hyperlink if we're not in a diversion.
 .  nr mD 0
 .  if '\\n(.z'' .nr mD 1
 .  if \\n(mD&\\nU&\\n(mU \{\
 .    \" Start diversion in a new environment.
 .    do ev link-text-env
+.    do ll \\n(mK
 .    do di link-text-div
 .  \}
+.  rr mK
 ..
 .
 .
@@ -147,25 +153,31 @@
 .    nh
 \\*(mL\\*(m1\\*(mR\\$1
 .    do shift
-.    ie \n(.g .if \n(.$ \&\\$*\"
-.    el .if \n(.$>1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9\"
+.    ie \n(.g .if \\n(.$ \&\\$*\"
+.    el .if \\n(.$>1 \&\\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9\"
 .    hy \\n(mJ
 .  \}
-. rr mD
+.  rr mD
 ..
 .
 .
 .\" Start email address.
 .de MT
 .  ds m1 \\$1\"
+.  \" Save the line length, which may not be the default, so we can use
+.  \" it in the link text environment.  (groff's `evc` request copies
+.  \" too much, like the indentation amount.)
+.  nr mK \\n(.l
 .  \" We can only hyperlink if we're not in a diversion.
 .  nr mD 0
 .  if '\\n(.z'' .nr mD 1
 .  if \\n(mD&\\nU&\\n(mU \{\
 .    \" Start diversion in a new environment.
 .    do ev link-text-env
+.    do ll \\n(mK
 .    do di link-text-div
 .  \}
+.  rr mK
 ..
 .
 .
@@ -203,11 +215,11 @@
 .    nh
 \\*(mL\\*(m1\\*(mR\\$1
 .    do shift
-.    ie \n(.g .if \n(.$ \&\\$*\"
-.    el .if \n(.$>1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9\"
+.    ie \n(.g .if \\n(.$ \&\\$*\"
+.    el .if \\n(.$>1 \&\\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9\"
 .    hy \\n(mJ
 .  \}
-. rr mD
+.  rr mD
 ..
 .
 .

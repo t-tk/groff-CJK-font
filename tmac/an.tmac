@@ -310,7 +310,15 @@
 .    rm an-msg
 .  \}
 .
-.  \" We now have what we need to typeset the (default) page header.
+.  \" Initialize environment for headers and footers.
+.  ev an*env-header-and-footer
+.  ps \\n[PS]u
+.  vs \\n[VS]u
+.  lt \\n[LT]u
+.  an*abbreviate-page-title
+.  \" If AT or UC is called, we will need to abbreviate again.
+.  an*abbreviate-inner-footer
+.  ev
 .
 .  \" HTML gets the title without any abbreviation, since it's metadata.
 .  if \\n[an-is-output-html] \{\
@@ -349,6 +357,9 @@
 .    ie "\\$2"" .ds an-extra2 "System V\"
 .    el         .ds an-extra2 "System V Release \\$2\"
 .  \}
+.  ev an*env-header-and-footer
+.  an*abbreviate-inner-footer
+.  ev
 ..
 .
 .\" Designate a BSD Unix man page.
@@ -361,6 +372,9 @@
 .  if "\\$1"5" .ds an-extra2 "4.2 Berkeley Distribution\"
 .  if "\\$1"6" .ds an-extra2 "4.3 Berkeley Distribution\"
 .  if "\\$1"7" .ds an-extra2 "4.4 Berkeley Distribution\"
+.  ev an*env-header-and-footer
+.  an*abbreviate-inner-footer
+.  ev
 ..
 .
 .\" Restore tab stops to defaults.
@@ -404,18 +418,18 @@
 .de1 BT
 .  if \\n[cR] .pl +1v
 .  ie \\n[D] \{\
-.    if o .tl '\\*[an-ifoot]'\\*[an-extra1]'\\*[an-outer-footer-text]'
-.    if e .tl '\\*[an-outer-footer-text]'\\*[an-extra1]'\\*[an-ifoot]'
+.    if o .tl '\\*[an*ifoot]'\\*[an-extra1]'\\*[an*ofoot]'
+.    if e .tl '\\*[an*ofoot]'\\*[an-extra1]'\\*[an*ifoot]'
 .  \}
 .  el \
-.    tl '\\*[an-ifoot]'\\*[an-extra1]'\\*[an-outer-footer-text]'
+.    tl '\\*[an*ifoot]'\\*[an-extra1]'\\*[an*ofoot]'
 ..
 .
 .\" Abbreviate the page title if it's too long for the header.  Leaves
 .\" string an-pageref defined for use in .PT and .an-footer.  Also
 .\" leaves an-title-abbv for possible use by .PT and .BT re-definers.
 .\" Call this only from within the header/footer environment.
-.de an*prepare-page-title
+.de an*abbreviate-page-title
 .  ds an-title-abbv \\*[an-title]\" might not get abbreviated at all
 .  ds an-title-string \\*[an-title]\"
 .  ds an-ellipsis \|.\|.\|.\|\"
@@ -441,7 +455,7 @@
 .    substring an-suffix (\\n[an-mark2] <? \\n[an-title-length] - 1) -1
 .    ds an-title-string \\*[an-prefix]\\*[an-suffix]\"
 .    ds an-title-abbv \\*[an-prefix]\\*[an-ellipsis]\\*[an-suffix]\"
-.    \" Measure the string again and give up if we made no progress.
+.    \" Remeasure the formatted title; give up if we made no progress.
 .    length an-title-new-length \\*[an-title-string]
 .    ie (\\n[an-title-new-length] >= \\n[an-title-length]) \
 .      break
@@ -462,75 +476,92 @@
 .  rm an-ellipsis
 ..
 .
+.\" Iterate through concatenation of arguments as a string.  If a bare
+.\" backslash is found, make `an*string-contains-backslash` true.  Our
+.\" caller should delete this register when done with it.
+.de an*scan-string-for-backslash
+.  nr an*string-contains-backslash 0
+.  nr an*index 0
+.  length an*max-index \\$*
+.  while (\\n[an*index] < \\n[an*max-index]) \{\
+.    ds an*char \\$*
+.    substring an*char \\n[an*index] \\n[an*index]
+.    ec @
+.    \" Use a weird delimiter to reduce lexical colorizer confusion.
+.    if _@*[an*char]_\\_ .nr an*string-contains-backslash 1
+.    ec
+.    if \\n[an*string-contains-backslash] .break
+.    nr an*index +1
+.  \}
+.  rm an*char
+.  rr an*max-index
+.  rr an*index
+..
+.
 .\" Abbreviate the `an-extra2` string (set by .TH) if it's too long for
-.\" the footer.  By default, `an-extra2` is placed as the inner footer.
-.\" We call it `an-ifoot` here and leave it defined for .BT use.
-.\"
-.\" The method here differs from an-prepare-header, because the
-.\" (default) header is symmetrical, with `an-pageref` on both sides,
-.\" whereas the (default) footer is not.  Our approach is to chop
-.\" `an-extra1` (the default center footer) in half and ensure that the
-.\" formatted `an-ifoot` plus that is less than half the title length.
-.de an-prepare-inner-footer
-.  ds an-half-cfoot \\*[an-extra1]\"
-.  length an-half-cfoot-length \\*[an-half-cfoot]
-.  if \\n[an-half-cfoot-length] \{\
-.    nr an-half-cfoot-length (\\n[an-half-cfoot-length] / 2u)
-.    substring an-half-cfoot 0 \\n[an-half-cfoot-length]
+.\" the footer.  The formatted width of the inner footer plus half that
+.\" of the center footer must be less than half the title width or we
+.\" must abbreviate.  By default, `an-extra2` is placed as the inner
+.\" footer.  We call its (potential) abbreviation `an*ifoot` here and
+.\" leave it defined for .BT use.  (`an*ofoot` is not treated the same
+.\" way.  `an-footer` regenerates it on every page because the page
+.\" number changes if present.)  Shorten the inner footer if necessary
+.\" by trimming characters off the end, replacing them with an ellipsis.
+.de an*abbreviate-inner-footer
+.  ds an*ifoot \\*[an-extra2]\"
+.  nr an*half-title-width (\\n[.lt] / 2u)
+.  nr an*half-cfoot-width (\w'\\*[an-extra1]' / 2u)
+.  nr an*half-footer-width \
+     (\w'\\*[an*ifoot]' + \\n[an*half-cfoot-width])
+.  if (\\n[an*half-footer-width] < \\n[an*half-title-width]) \{\
+.    rr an*half-footer-width
+.    rr an*half-cfoot-width
+.    rr an*half-title-width
+.    return
 .  \}
-.  rr an-half-cfoot-length
-.  ds an-ifoot \\*[an-extra2]\"
-.  nr an-half-title-width (\\n[.lt] / 2u)
-.  nr an-half-footer-width \\w'\\*[an-ifoot]\\*[an-half-cfoot]'
-.  \" If abbreviation is not necessary, skip the remaining work.
-.  if (\\n[an-half-footer-width] <= \\n[an-half-title-width]) .return
-.  ds an-ellipsis \|.\|.\|.\|\"
-.  \" Now divide the inner footer in half.
-.  length an-ifoot-length \\*[an-ifoot]
-.  nr an-mark1 (\\n[an-ifoot-length] / 2)
-.  nr an-mark2 (\\n[an-ifoot-length] / 2 + 1)
-.  rr an-ifoot-length
-.  ds an-ifoot-half1 \\*[an-ifoot]\"
-.  ds an-ifoot-half2 \\*[an-ifoot]\"
-.  substring an-ifoot-half1 0 \\n[an-mark1]
-.  substring an-ifoot-half2 \\n[an-mark2] -1
-.  rr an-mark1
-.  rr an-mark2
-.  \" Reduce the two halves until, when rejoined with each other, the
-.  \" ellipsis, and half of the center footer, they fit the half-title.
-.  nr an-half-footer-width \\w'\\*[an-ifoot-half1]\\*[an-ellipsis]\
-\\*[an-ifoot-half2]\\*[an-half-cfoot]'
-.  while (\\n[an-half-footer-width] > \\n[an-half-title-width]) \{\
-.    length an-half1-length \\*[an-ifoot-half1]
-.    length an-half2-length \\*[an-ifoot-half2]
-.    \" Give up if we'd have to trim ifoot's first or last characters.
-.    if ((\\n[an-half1-length] = 1) : (\\n[an-half2-length] = 1)) \
+.  an*scan-string-for-backslash \\*[an*ifoot]
+.  if \\n[an*string-contains-backslash] \{\
+.    an-warn not abbreviating fourth argument to 'TH' '\\*[an*ifoot]': \
+contains unsupported escape sequence
+.    rr an*string-contains-backslash
+.    rr an*half-footer-width
+.    rr an*half-cfoot-width
+.    rr an*half-title-width
+.    return
+.  \}
+.  ds an*saved-ifoot \\*[an*ifoot]
+.  ds an*ellipsis \|.\|.\|.\|\"
+.  \" Remeasure with ellipsis added to inner footer so that henceforth,
+.  \" the measured width strictly decreases.
+.  nr an*half-footer-width \
+     (\w'\\*[an*ifoot]\\*[an*ellipsis]' + \\n[an*half-cfoot-width])
+.  nr an*end-index (-2)
+.  while (\\n[an*half-footer-width] >= \\n[an*half-title-width]) \{\
+.    ds an*ifoot \\*[an*saved-ifoot]
+.    substring an*ifoot 0 \\n[an*end-index]
+.    \" Measure the string again and give up if we made no progress.
+.    nr an*new-half-footer-width \
+       (\w'\\*[an*ifoot]\\*[an*ellipsis]' + \\n[an*half-cfoot-width])
+.    ie (\\n[an*new-half-footer-width] >= \\n[an*half-footer-width]) \
 .      break
-.    \" Trim a character from half1's end and half2's beginning.
-.    substring an-ifoot-half1 0 (\\n[an-half1-length] - 2)
-.    substring an-ifoot-half2 2 (\\n[an-half2-length] - 1)
-.    nr an-half-footer-width \\w'\\*[an-ifoot-half1]\\*[an-ellipsis]\
-\\*[an-ifoot-half2]\\*[an-half-cfoot]'
+.    nr an*half-footer-width \\n[an*new-half-footer-width]
+.    nr an*end-index -1
 .  \}
-.  ds an-ifoot \\*[an-ifoot-half1]\\*[an-ellipsis]\\*[an-ifoot-half2]\"
-.  rr an-half1-length
-.  rr an-half2-length
-.  rm an-ifoot-half1
-.  rm an-ifoot-half2
-.  rr an-half-footer-width
-.  rr an-half-title-width
-.  rm an-ellipsis
-.  rm an-half-cfoot
+.  ds an*ifoot \\*[an*ifoot]\\*[an*ellipsis]\"
+.  rr an*end-index
+.  rr an*new-half-footer-width
+.  rm an*ellipsis
+.  rm an*saved-ifoot
+.  rr an*string-contains-backslash
+.  rr an*half-footer-width
+.  rr an*half-cfoot-width
+.  rr an*half-title-width
 ..
 .
 .\" Prepare the header for a page of the document.
 .de1 an-header
 .  if \\n[an-suppress-header-and-footer] .return
-.  ev an-env-header-or-footer
-.  ps \\n[PS]u
-.  vs \\n[VS]u
-.  lt \\n[LT]u
-.  an*prepare-page-title
+.  ev an*env-header-and-footer
 .  PT
 .  ev
 .  ns
@@ -545,24 +576,20 @@
 .\" Prepare the footer for a page of the document.
 .de1 an-footer
 .  if \\n[an-suppress-header-and-footer] .return
-.  ev an-env-header-or-footer
-.  ps \\n[PS]u
-.  vs \\n[VS]u
-.  lt \\n[LT]u
+.  ev an*env-header-and-footer
 .  ie \\n[cR] \
-.    ds an-outer-footer-text "\\*[an-pageref]\"
+.    ds an*ofoot "\\*[an-pageref]\"
 .  el \{\
-.    ds an-outer-footer-text \\n[%]\"
+.    ds an*ofoot \\n[%]\"
 .    if r X \{\
 .      if (\\n[%] > \\n[X]) \{\
 .        nr an-page-letter (\\n[%] - \\n[X])
-.        ds an-outer-footer-text \\n[X]\\n[an-page-letter]\"
+.        ds an*ofoot \\n[X]\\n[an-page-letter]\"
 .      \}
 .    \}
 .  \}
-.  an-prepare-inner-footer
 .  BT
-.  rm an-outer-footer-text
+.  rm an*ofoot
 .  ev
 ..
 .
@@ -595,8 +622,9 @@
 .  rr an-tag-fits
 ..
 .
-.\" Handle macros that may take an "argument" on the next input line;
-.\" .SH, .SS, .B, .I, .SM, .SB--and .TP, which does so mandatorily.
+.\" Handle macros that may take an "argument" on the next input line
+.\" producing written or drawn output: .SH, .SS, .B, .I, .SM, .SB--and
+.\" .TP, which does so mandatorily.
 .de1 an-input-trap
 .  if \\n[an-devtag-needs-end-of-heading] .DEVTAG-EO-H
 .  nr an-devtag-needs-end-of-heading 0
@@ -625,7 +653,8 @@
 .  ns
 ..
 .
-.\" Set arguments (or next input line if none) as a section heading.
+.\" Set arguments (or next input line producing written or drawn output
+.\" if none) as a section heading.
 .de1 SH
 .  fam \\*[an*body-family]
 .  an-break-paragraph
@@ -635,7 +664,7 @@
 .  ti 0
 .  nr an-devtag-needs-end-of-heading 1
 .  DEVTAG-SH 1
-.  itc 1 an-input-trap
+.  it 1 an-input-trap
 .  nr an-need-no-space-mode 1
 .  nr an-need-break 1
 .  ps \\n[PS-SH]u
@@ -651,7 +680,8 @@
 .  if \\n[an-remap-I-style-in-headings] .ftr I I
 ..
 .
-.\" Set arguments (or next input line if none) as a subsection heading.
+.\" Set arguments (or next input line producing written or drawn output
+.\" if none) as a subsection heading.
 .de1 SS
 .  fam \\*[an*body-family]
 .  an-break-paragraph
@@ -661,7 +691,7 @@
 .  ti \\n[SN]u
 .  nr an-devtag-needs-end-of-heading 1
 .  DEVTAG-SH 2
-.  itc 1 an-input-trap
+.  it 1 an-input-trap
 .  nr an-need-no-space-mode 1
 .  nr an-need-break 1
 .  ps \\n[PS-SS]u
@@ -676,31 +706,35 @@
 .  if \\n[an-remap-I-style-in-headings] .ftr I I
 ..
 .
-.\" Set arguments (or next input line if none) in bold style.
+.\" Set arguments (or next input line producing written or drawn output
+.\" if none) in bold style.
 .de1 B
-.  itc 1 an-input-trap
+.  it 1 an-input-trap
 .  ft B
 .  if \\n[.$] \&\\$*
 ..
 .
-.\" Set arguments (or next input line if none) in italic style.
+.\" Set arguments (or next input line producing written or drawn output
+.\" if none) in italic style.
 .de1 I
-.  itc 1 an-input-trap
+.  it 1 an-input-trap
 .  ft I
 .  if \\n[.$] \,\\$*\/
 ..
 .
-.\" Set arguments (or next input line if none) at smaller type size.
+.\" Set arguments (or next input line producing written or drawn output
+.\" if none) at smaller type size.
 .de1 SM
-.  itc 1 an-input-trap
+.  it 1 an-input-trap
 .  ps -1
 .  if \\n[.$] \&\\$*
 ..
 .
-.\" Set arguments (or next input line if none) in bold style at smaller
+.\" Set arguments (or next input line producing written or drawn output
+.\" if none) in bold style at smaller
 .\" type size.
 .de1 SB
-.  itc 1 an-input-trap
+.  it 1 an-input-trap
 .  ps -1
 .  ft B
 .  if \\n[.$] \&\\$*
@@ -717,7 +751,8 @@
 .als LP P
 .als PP P
 .
-.\" Set a tagged paragraph.  The tag must be on the next input line.
+.\" Set a tagged paragraph.  The tag must be on the next input line
+.\" producing written or drawn output.
 .\" .TP [indent]
 .de1 TP
 .  an-break-paragraph

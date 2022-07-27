@@ -86,12 +86,12 @@ _
 \&.IB	Italic, bold alternating	Font style macros
 \&.IP	Indented paragraph	Paragraphing macros
 \&.IR	Italic, roman alternating	Font style macros
-\&.LP	(Left) paragraph	Paragraphing macros
+\&.LP	Begin paragraph	Paragraphing macros
 \&.ME	Mail-to end	Hyperlink macros
 \&.MR	Man page cross reference	Hyperlink macros
 \&.MT	Mail-to start	Hyperlink macros
-\&.P	Paragraphing	Paragraphing macros
-\&.PP	Paragraphing	Paragraphing macros
+\&.P	Begin paragraph	Paragraphing macros
+\&.PP	Begin paragraph	Paragraphing macros
 \&.RB	Roman, bold alternating	Font style macros
 \&.RE	Relative inset end	Document structure macros
 \&.RI	Roman, italic alternating	Font style macros
@@ -210,7 +210,7 @@ package is designed such that this should seldom be necessary.
 See section \(lqNotes\(rq below for examples of cases where better
 alternatives to empty arguments in macro calls are available.
 .
-Most macro arguments are strings that will be output as text;
+Most macro arguments wll be formatted as text in the output;
 exceptions are noted.
 .
 .
@@ -334,12 +334,13 @@ The macro package may also abbreviate
 .I title
 and
 .I footer-inside
-with an ellipsis if they overrun the space available in the header and
-footer,
+with ellipses
+.RB ( .\|.\|.\& )
+if they overrun the space available in the header and footer,
 respectively.
 .
 For HTML output,
-headers and footers are completely suppressed.
+headers and footers are suppressed.
 .
 .
 .IP
@@ -817,24 +818,21 @@ in section \(lqFiles\(rq below.
 Begin synopsis.
 .
 A new paragraph is begun at the left margin
-(like
-.B .P
-and its aliases)
+(as with
+.BR .P )
 unless
 .B .SY
 has already been called without a corresponding
 .BR .YS ,
 in which case only a break is performed.
 .
-Hyphenation is turned off.
+Automatic hyphenation is disabled.
 .
-The
 .I command
-argument is set in bold.
+is set in bold.
 .
-The output line is filled as normal,
-but if a break is required,
-subsequent output lines are indented by the width of
+If a break is required,
+lines after the first are indented by the width of
 .I command
 plus a space.
 .
@@ -843,7 +841,8 @@ plus a space.
 .B .YS
 End synopsis.
 .
-Restore previous indentation and initial hyphenation mode.
+The previous indentation amount and initial hyphenation mode are
+restored.
 .
 .
 .P
@@ -1757,7 +1756,7 @@ are indented 3n
 .B \-rSN
 option).
 .
-The HTML output device ignores indentation completely.
+The HTML output device ignores indentation.
 .
 .
 .P
@@ -1880,7 +1879,7 @@ Finally,
 we have ended the relative inset by using
 .BR .RE ,
 which
-(because we only used one
+(because we used only one
 .BR .RS / .RE
 pair)
 has reset the left margin to the default.
@@ -2035,67 +2034,6 @@ the above strings should be avoided.
 .
 .
 .\" ====================================================================
-.SS "Interaction with preprocessors"
-.\" ====================================================================
-.
-When a preprocessor like
-.I @g@tbl
-or
-.I @g@eqn
-is needed,
-a hint can be given to the man page librarian by making the first line
-of a man page look like this:
-.
-.
-.P
-.RS
-.BI "\(aq\e\(dq " word
-.\" AT&T: .BI "'\e"" " word
-.\" ...and good luck with that "'".
-.RE
-.
-.
-.P
-The line starts with an apostrophe (\(aq),
-not a dot,
-and a single space character follows the double quote.
-.
-The
-.I word
-consists of one letter for each needed preprocessor:
-\(lqe\(rq for
-.IR @g@eqn ,
-\(lqr\(rq for
-.IR @g@refer ,
-and
-\(lqt\(rq for
-.IR @g@tbl .
-.
-Modern implementations of the
-.I man
-program can use this information to automatically call the required
-preprocessor(s) in the right order.
-.
-.
-.P
-The usual
-.I tbl
-and
-.I eqn
-macros for table and equation inclusion,
-.BR .TS ,
-.BR .T& ,
-.BR .TE ,
-.BR .EQ ,
-and
-.BR .EN ,
-may be used freely.
-.
-Terminal devices are extremely limited in presentation of mathematical
-equations.
-.
-.
-.\" ====================================================================
 .SS Portability
 .\" ====================================================================
 .
@@ -2117,9 +2055,9 @@ and font style alternation macros.
 .
 .
 .P
-The two major syntactical categories of
+The two major syntactical categories for formatting control in the
 .I roff
-languages are requests and escape sequences.
+language are requests and escape sequences.
 .
 Since the
 .I man
@@ -2166,8 +2104,9 @@ The macros we have described as extensions
 .BR .SY / .YS ,
 .BR .TQ ,
 .BR .UR / .UE ,
+.BR .MT / .ME ,
 and
-.BR .MT / .ME )
+.BR .MR )
 should be used with caution,
 as they may not yet be built in to some viewer that is important to your
 audience.
@@ -2302,10 +2241,10 @@ recognized as such.
 .
 .TP
 .B \e|
-Narrow
+Thin space
 (one-sixth em on typesetters,
-zero-width on terminals)
-non-breaking space.
+zero-width on terminals);
+a non-breaking space.
 .
 Used primarily in ellipses
 (\(lq.\e|.\e|.\(rq)
@@ -2321,9 +2260,9 @@ This escape sequence produces the Unix command-line option dash in the
 output.
 .
 .RB \(lq \- \(rq
-is a hyphen in
+is a hyphen in the
 .I roff
-languages;
+language;
 some output devices replace it with U+2010
 (hyphen)
 or similar.
@@ -2426,9 +2365,9 @@ or similar.
 Reverse solidus
 (backslash).
 .
-The backslash is the default escape character in
+The backslash is the default escape character in the
 .I roff
-languages,
+language,
 so it does not represent itself in output.
 .
 Also see
@@ -2538,7 +2477,8 @@ and perhaps with some other formatters.
 .
 .TP
 .B \ee
-Widely used in man pages to represent a backslash output glyph.
+Format the current escape character on the output;
+widely used in man pages to render a backslash glyph.
 .
 .\" Don't bold the .ec request in this discussion; it's not a major
 .\" topic of _this_ page as it would be in groff(7).  Also, we don't
@@ -2698,9 +2638,8 @@ This macro exists only to render man pages from historical systems.
 .
 .
 .IP
-The first argument
 .I system
-can be:
+can be any of the following.
 .
 .
 .RS \" Invisibly move left margin to current .IP indentation.
@@ -2724,10 +2663,10 @@ System V
 .
 .
 .IP
-The optional second argument
+The optional
 .I release
-specifies the release number,
-such as in \(lqSystem\~V Release\~3\(rq.
+argument specifies the release number,
+as in \(lqSystem\~V Release\~3\(rq.
 .
 .
 .TP
@@ -2857,9 +2796,8 @@ This macro exists only to render man pages from historical systems.
 .
 .
 .IP
-The argument
 .I version
-can be:
+can be any of the following.
 .
 .
 .RS \" Invisibly move left margin to current .IP indentation.
@@ -2898,8 +2836,8 @@ can be:
 .
 Unix Version\~7 (1979) introduced the
 .I man
-macro package and supported all of the macros described in this page not
-listed as extensions,
+macro package and supported the macros listed in this page not described
+as extensions,
 except
 .BR .P ,
 .BR .SB ,
@@ -2972,6 +2910,15 @@ SunOS\~4.0 (1988) may have been the first to support
 .\" 4.4BSD even though BSD was already transitioning to mdoc(7) by that
 .\" time and did not support the macro.  SunOS 4.0.3 (May 1989)
 .\" contained over 2,100 uses of .SB.
+.
+.I groff
+1.20 (2009) originated
+.BR .SY / .YS ,
+.BR .TQ ,
+.BR .MT / .ME ,
+and
+.BR .UR / .UE .
+.\" ...along with implementations of OP, EX, and EE.
 .
 The plan9port project's
 .I troff \" plan9port
@@ -3328,8 +3275,7 @@ reloads each macro package as necessary.
 .TP
 .I @MACRODIR@/\:\%an\-ext\:.tmac
 Definitions of macros described above as extensions
-.RB ( .SY ,
-.BR .YS ,
+.RB ( .SY / .YS ,
 .BR .TQ ,
 .BR .EX / .EE ,
 .BR .UR / .UE ,
@@ -3348,7 +3294,7 @@ They are written to be compatible with AT&T
 and permissively licensed\(emnot copylefted.
 .
 To reduce the risk of name space collisions,
-its internal string and register names begin only with
+string and register names begin only with
 .RB \[lq] m \[rq] .
 .
 Man page authors concerned about portability to legacy Unix systems are
@@ -3505,7 +3451,7 @@ When this seems necessary,
 often a shorter or clearer alternative is available.
 .
 .br
-.ne 3v
+.ne 10v
 .TS
 c c
 lfCB lfCB.
@@ -3555,7 +3501,7 @@ If your page renders adequately without one,
 use the simpler form.
 .
 If you need to indent multiple (unmarked) paragraphs,
-consider setting an indented region with
+consider setting an inset region with
 .B .RS
 and
 .B .RE
@@ -3707,6 +3653,86 @@ _
 \fIanother-paragraph	\fIanother-paragraph
 _
 .TE
+.
+.
+.TP
+\(bu Why doesn't the package provide a string to insert an ellipsis?
+.
+Examples of ellipsis usage are shown above,
+in subsection \[lq]Command synopsis macros\[rq].
+.
+The idiomatic
+.I roff
+ellipsis is three dots (periods)
+with thin space escape sequences
+.B \[rs]|
+internally separating them.
+.
+Since dots both begin control lines and are candidate end-of-sentence
+characters,
+however,
+it is sometimes necessary to prefix and/or suffix an ellipsis with the
+non-printing input break escape sequence
+.BR \[rs]& .
+.
+That fact stands even if a string is defined to contain the sequence;
+moreover,
+if the string included the input breaks,
+end-of-sentence detection would be defeated in the event you used such a
+string at the end of an actual sentence.
+.
+(Ending a sentence thus is often poor style,
+but not always.)
+.
+A hypothetical string
+.B EL
+that contained an ellipsis,
+but not the trailing input break,
+would then need to be suffixed with
+.B \[rs]&
+when not ending a sentence.
+.
+.br
+.ne 4v
+.TS
+C C
+LfCB LfCB.
+Instead of.\|.\|.	.\|.\|.do this.
+_
+\&.ds EL \[rs]&.\[rs]|.\[rs]|.	Arguments are
+Arguments are	.IR src-file\[rs]\[ti] .\[rs]|.\[rs]|.\[rs]&
+\&.IR src-file\[rs]\[ti] \[rs]*(EL\[rs]&	.IR dest-dir .
+\&.IR dest-dir .
+_
+.TE
+.
+.
+.IP
+The first column practices a false economy;
+the savings in typing is offset by the cost of obscuring even the
+suggestion of an ellipsis to a casual reader of the source document,
+and reduced portability to
+.RI non- roff
+man page formatters that cannot handle string definitions.
+.
+.
+.IP
+There is an ellipsis code point in Unicode,
+and some fonts have an ellipsis glyph,
+which some man pages have accessed in a non-portable way with the
+font-dependent
+.B \[rs]N
+escape sequence.
+.
+We discourage the use of these;
+they usually crowd the dots into a single character cell,
+and will not render at all if the output device doesn't have the glyph.
+.
+In syntax synopses,
+missing ellipses can cause great confusion.
+.
+Dots and space are universally supported.
+.\" XXX: Does an unconditional _preceding_ input break cause problems?
 .
 .
 .\" ====================================================================

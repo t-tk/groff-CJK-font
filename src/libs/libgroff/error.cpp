@@ -40,16 +40,16 @@ static void do_error_with_file_and_line(const char *filename,
 					const errarg &arg3)
 {
   bool need_space = false;
-  if (program_name) {
+  if (program_name != 0 /* nullptr */) {
     fputs(program_name, stderr);
     fputc(':', stderr);
     need_space = true;
   }
-  if (filename != 0) {
+  if (filename != 0 /* nullptr */) {
     if (strcmp(filename, "-") == 0)
       filename = "<standard input>";
     fputs(filename, stderr);
-    if (source_filename != 0) {
+    if (source_filename != 0 /* nullptr */) {
       fputs(":(", stderr);
       fputs(source_filename, stderr);
       fputc(')', stderr);
@@ -83,16 +83,16 @@ static void do_error_with_file_and_line(const char *filename,
   if (type == FATAL)
     fatal_error_exit();
 }
-      
 
-static void do_error(error_type type, 
-		     const char *format, 
+static void do_error(error_type type,
+		     const char *format,
 		     const errarg &arg1,
 		     const errarg &arg2,
 		     const errarg &arg3)
 {
   do_error_with_file_and_line(current_filename, current_source_filename,
-			      current_lineno, type, format, arg1, arg2, arg3);
+			      current_lineno, type, format, arg1, arg2,
+			      arg3);
 }
 
 void debug(const char *format,
@@ -103,7 +103,7 @@ void debug(const char *format,
   do_error(DEBUG, format, arg1, arg2, arg3);
 }
 
-void error(const char *format, 
+void error(const char *format,
 	   const errarg &arg1,
 	   const errarg &arg2,
 	   const errarg &arg3)
@@ -111,7 +111,7 @@ void error(const char *format,
   do_error(ERROR, format, arg1, arg2, arg3);
 }
 
-void warning(const char *format, 
+void warning(const char *format,
 	     const errarg &arg1,
 	     const errarg &arg2,
 	     const errarg &arg3)
@@ -119,7 +119,7 @@ void warning(const char *format,
   do_error(WARNING, format, arg1, arg2, arg3);
 }
 
-void fatal(const char *format, 
+void fatal(const char *format,
 	   const errarg &arg1,
 	   const errarg &arg2,
 	   const errarg &arg3)
@@ -134,40 +134,40 @@ void debug_with_file_and_line(const char *filename,
 			      const errarg &arg2,
 			      const errarg &arg3)
 {
-  do_error_with_file_and_line(filename, 0, lineno,
+  do_error_with_file_and_line(filename, 0 /* nullptr */, lineno,
 			      DEBUG, format, arg1, arg2, arg3);
 }
 
 void error_with_file_and_line(const char *filename,
 			      int lineno,
-			      const char *format, 
+			      const char *format,
 			      const errarg &arg1,
 			      const errarg &arg2,
 			      const errarg &arg3)
 {
-  do_error_with_file_and_line(filename, 0, lineno, 
+  do_error_with_file_and_line(filename, 0 /* nullptr */, lineno,
 			      ERROR, format, arg1, arg2, arg3);
 }
 
 void warning_with_file_and_line(const char *filename,
 				int lineno,
-				const char *format, 
+				const char *format,
 				const errarg &arg1,
 				const errarg &arg2,
 				const errarg &arg3)
 {
-  do_error_with_file_and_line(filename, 0, lineno, 
+  do_error_with_file_and_line(filename, 0 /* nullptr */, lineno,
 			      WARNING, format, arg1, arg2, arg3);
 }
 
 void fatal_with_file_and_line(const char *filename,
 			      int lineno,
-			      const char *format, 
+			      const char *format,
 			      const errarg &arg1,
 			      const errarg &arg2,
 			      const errarg &arg3)
 {
-  do_error_with_file_and_line(filename, 0, lineno, 
+  do_error_with_file_and_line(filename, 0 /* nullptr */, lineno,
 			      FATAL, format, arg1, arg2, arg3);
 }
 

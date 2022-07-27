@@ -38,7 +38,7 @@ int pile_box::compute_metrics(int style)
   for (i = 1; i < col.len; i++)
     printf(">?(\\n[" DEPTH_FORMAT "]+\\n[" HEIGHT_FORMAT "]+%dM)",
 	   col.p[i-1]->uid, col.p[i]->uid, default_rule_thickness*5);
-  // round it so that it's a multiple of the vertical resolution
+  // round it so that it's a multiple of the vertical motion quantum
   printf("+(\\n(.V/2)/\\n(.V*\\n(.V\n");
 
   printf(".nr " SUP_RAISE_FORMAT " \\n[" BASELINE_SEP_FORMAT "]*%d/2"
@@ -165,7 +165,7 @@ int matrix_box::compute_metrics(int style)
     for (j = 1; j < p[i]->len; j++)
       printf(">?(\\n[" DEPTH_FORMAT "]+\\n[" HEIGHT_FORMAT "]+%dM)",
 	   p[i]->p[j-1]->uid, p[i]->p[j]->uid, default_rule_thickness*5);
-  // round it so that it's a multiple of the vertical resolution
+  // round it so that it's a multiple of the vertical motion quantum
   printf("+(\\n(.V/2)/\\n(.V*\\n(.V\n");
   printf(".nr " SUP_RAISE_FORMAT " \\n[" BASELINE_SEP_FORMAT "]*%d/2"
 	 "+%dM\n",

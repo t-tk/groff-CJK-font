@@ -8,8 +8,8 @@
 # Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# groff is distributed in the hope that it will be useful, but WITHOUT ANY
-# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# groff is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 # FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 # for more details.
 #
@@ -18,21 +18,23 @@
 #
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT([GNU Troff],
-        m4_esyscmd([build-aux/git-version-gen --prefix "" .tarball-version]),
+AC_INIT([GNU roff],
+        m4_esyscmd([build-aux/git-version-gen --fallback 1.23.0.rc1 \
+          --prefix "" .tarball-version]),
         http://savannah.gnu.org/bugs/?group=groff,
         [groff])
 
 AC_PREREQ([2.64])
 
-# SHORT_VERSION contains only the number of REVISION before the first '.',
-# e.g. if REVISION is '3.real.434-5aafd' then SHORT_VERSION is 'x.yy.3',
-# where x and yy are MAJOR_VERSION and MINOR_VERSION, respectively.
+# SHORT_VERSION contains only the number of REVISION before the first
+# '.'; e.g., if REVISION is '3.real.434-5aafd' then SHORT_VERSION is
+# 'x.yy.3', where x and yy are MAJOR_VERSION and MINOR_VERSION,
+# respectively.
 AC_SUBST([SHORT_VERSION],
 	m4_bregexp(AC_PACKAGE_VERSION,[^\(\w+\.\w+\.\w+\).*$],[\1]))
 
-# Directories where the helper scripts should be found. This must be consistent
-# with the variable build_aux in bootstrap.conf
+# Directories where the helper scripts should be found. This must be
+# consistent with the variable build_aux in bootstrap.conf.
 AC_CONFIG_AUX_DIR([build-aux])
 
 AC_CONFIG_HEADERS([src/include/config.h:src/include/config.hin])
@@ -54,8 +56,8 @@ GROFF_EBCDIC
 GROFF_OS390
 GROFF_CMD_FILES
 GROFF_X11
-GROFF_APPRESDIR_OPTION
-GROFF_APPRESDIR_DEFAULT
+GROFF_APPDEFDIR_OPTION
+GROFF_APPDEFDIR_DEFAULT
 GROFF_LIBPROGRAMDIR_DEFAULT
 GROFF_GLILYPONDDIR_DEFAULT
 GROFF_GPINYINDIR_DEFAULT
@@ -65,9 +67,10 @@ GROFF_PRINT
 GROFF_REFERDIR_DEFAULT
 AC_PROG_EGREP
 GROFF_PROG_YACC
-GROFF_DOC_CHECK
-GROFF_MAKEINFO
-GROFF_TEXI2DVI
+GROFF_PROG_M4
+GROFF_PROG_MAKEINFO
+GROFF_PROG_TEXI2DVI
+GROFF_USE_TEX_CHECK
 AC_PROG_RANLIB
 GROFF_INSTALL_SH
 GROFF_INSTALL_INFO
@@ -77,11 +80,12 @@ AC_PROG_MKDIR_P
 GROFF_PROG_XPMTOPPM
 PKG_PROG_PKG_CONFIG
 GROFF_UCHARDET
-GROFF_PDFTOOLS
+GROFF_POPPLER
 
 # use a dummy substitution if no csh hack is necessary to avoid errors
 # with non-GNU sed programs
-GROFF_CSH_HACK([SH_SCRIPT_SED_CMD='1s/.*/:/'], [SH_SCRIPT_SED_CMD='1s/a/a/'])
+GROFF_CSH_HACK([SH_SCRIPT_SED_CMD='1s/.*/:/'],
+               [SH_SCRIPT_SED_CMD='1s/a/a/'])
 AC_SUBST([SH_SCRIPT_SED_CMD])
 
 # checks for headers
@@ -163,11 +167,11 @@ GROFF_G
 GROFF_TMAC
 GROFF_WITH_COMPATIBILITY_WRAPPERS
 GROFF_TARGET_PATH_SEPARATOR
-GROFF_HTML_PROGRAMS
-GROFF_PDFDOC_PROGRAMS
+GROFF_CHECK_GROHTML_PROGRAMS
+GROFF_CHECK_GROPDF_PROGRAMS
 GROFF_PNMTOOLS_CAN_BE_QUIET
 GROFF_PNMTOPS_NOSETPAGE
-GROFF_MAKE_RM
+GROFF_MAKE_DEFINES_RM
 GROFF_DIFF_D
 GROFF_HAVE_TEST_EF_OPTION
 GROFF_BASH
@@ -175,78 +179,80 @@ GROFF_GHOSTSCRIPT_VERSION_CHECK
 gl_GLIBC21
 gl_LOCALCHARSET
 
-# checks for presence of URW fonts (requires ghostscript, which is
-# checked in GROFF_HTML_PROGRAMS
-GROFF_URW_FONTS
+# Check for presence of URW fonts (these require Ghostscript, which is
+# checked for by GROFF_CHECK_GROHTML_PROGRAMS).
+GROFF_URW_FONTS_CHECK
 
 AM_CONDITIONAL([BUILD_WINSCRIPTS], [test -n "$make_winscripts"])
 
 # If X11 is not available, don't build:
-# font/devX75 
+# font/devX75
 # font/devX75-12
 # font/devX100
 # font/devX100-12
-# src/devices/xditview 
+# src/devices/xditview
 # src/utils/xtotroff
 # src/libs/libxutil
-AM_CONDITIONAL([WITHOUT_X11], [test "x$groff_no_x" = "xyes"])
+AM_CONDITIONAL([WITHOUT_X11], [test "$groff_no_x" = yes])
 
-# make builtin variable RM
-AM_CONDITIONAL([MAKE_DONT_HAVE_RM], [test "x$groff_is_rm_defined" = "xno"])
+AM_CONDITIONAL([MAKE_DEFINES_RM], [test "$groff_make_defines_rm" = yes])
 
-# Some programs have a "g" prefix if an existing groff installation is detected
-AM_CONDITIONAL([USEPROGRAMPREFIX], [test x$g = xg])
+# Some programs have a "g" prefix if an existing troff installation is
+# detected.
+AM_CONDITIONAL([USEPROGRAMPREFIX], [test "$g" = g])
 
-AM_CONDITIONAL([BUILD_HTML], [test -n "$make_htmldoc"])
-AM_CONDITIONAL([BUILD_HTMLEXAMPLES], [test -n "$make_htmlexamples"])
-AM_CONDITIONAL([BUILD_PDFDOC], [test -n "$make_pdfdoc"])
-AM_CONDITIONAL([BUILD_PDFEXAMPLES], [test -n "$make_pdfexamples"])
-AM_CONDITIONAL([BUILD_OTHERDOC], [test -n "$make_otherdoc"])
-AM_CONDITIONAL([BUILD_EXAMPLES], [test -n "$make_examples"])
-AM_CONDITIONAL([USE_GROFF_ALLOCATOR], [test "x$use_groff_allocator" = "xyes"])
-AM_CONDITIONAL([INSTALL_SHIPPED_HTML], [test -n "$make_install_shipped_htmldoc"])
-AM_CONDITIONAL([HAVE_PDFTOOLS], [test "x$groff_have_pdftools" = "xyes" ])
-AM_CONDITIONAL([HAVE_TEXI2DVI], [test "x$groff_have_texi2dvi" = "xyes" ])
+AM_CONDITIONAL([USE_GROHTML], [test "$use_grohtml" = yes])
+AM_CONDITIONAL([USE_GROPDF], [test "$use_gropdf" = yes])
+AM_CONDITIONAL([USE_GROFF_ALLOCATOR],
+               [test "$groff_use_own_allocator" = yes])
+AM_CONDITIONAL([HAVE_URW_FONTS], [test "$groff_have_urw_fonts" = yes ])
+AM_CONDITIONAL([HAVE_PDFTOOLS], [test "$groff_have_pdftools" = yes ])
+AM_CONDITIONAL([HAVE_TEXI2DVI], [test "$groff_have_texi2dvi" = yes ])
+AM_CONDITIONAL([USE_TEX], [test "$groff_use_tex" = yes ])
 
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([test-groff], [chmod +x test-groff])
 AC_OUTPUT
 
 echo "
-${PACKAGE_NAME} version ${PACKAGE_VERSION}
+$PACKAGE_NAME version $PACKAGE_VERSION
 ----------------------------------------------------------------------
- Prefix                          : ${prefix}
- Compiler                        : ${CC} ${CFLAGS} ${CPPFLAGS}"
-if test "x$use_groff_allocator" = "xyes"; then
-echo "\
- Use groff allocator             : yes"
-else
-echo "\
- Use groff allocator             : no"
-fi
-if test "x$groff_no_x" = "xyes"; then
-echo "\
- X11 support                     : no"
-else
-echo "\
- X11 support                     : yes
- X11 resources dir               : $appresdir"
-fi
-if test "x$doc" = x; then
-echo "\
- Doc build                       : no"
-else
-echo "\
- Doc build                       : ${doc} "
+ installation directory prefix    : $prefix"
+if test -n "$g"
+then
+  echo "\
+ command name prefix              : $g"
+  if test -n "$tmac_wrap"
+  then
+  echo "\
+ prefix used for macro packages   : $tmac_wrap"
+  fi
 fi
 echo "\
- URW fonts for pdf               : $groff_have_urw_fonts
- Use uchardet library for preconv: $groff_have_uchardet
- pdftools for distcheck          : $groff_have_pdftools"
+ C++ compiler and options         : $CXX $CXXFLAGS $CPPFLAGS
+ use libgroff's memory allocator  : $groff_use_own_allocator
+ C compiler and options           : $CC $CFLAGS $CPPFLAGS
+ Perl interpreter version         : $perl_version"
+if test "$groff_no_x" = yes
+then
+  echo "\
+ X11 support                      : disabled"
+else
+  echo "\
+ X11 support                      : enabled
+ X11 app defaults directory       : $appdefdir"
+fi
 echo "\
+ 'groff -l' uses print spooler    : $groff_have_spooler
+ use URW fonts for PDF output     : $groff_have_urw_fonts
+ preconv can use uchardet library : $groff_have_uchardet
+ can build groff.dvi, groff.pdf   : $groff_use_tex
+ tests can use poppler PDF tools  : $groff_have_pdftools
 ----------------------------------------------------------------------"
 
-GROFF_APPRESDIR_CHECK
-GROFF_URW_FONTS_CHECK
-GROFF_UCHARDET_CHECK
+GROFF_APPDEFDIR_NOTICE
+GROFF_URW_FONTS_NOTICE
+GROFF_UCHARDET_NOTICE
 GROFF_GHOSTSCRIPT_VERSION_NOTICE
+GROFF_GROHTML_PROGRAM_NOTICE
+GROFF_GROPDF_PROGRAM_NOTICE

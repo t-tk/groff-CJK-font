@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
@@ -875,8 +874,13 @@ int main(int argc, char **argv)
 
 static void usage(FILE *stream)
 {
-  fprintf(stream, "usage: %s [-s] [-g GF-FILE] [-k SKEW-CHAR] TFM-FILE"
-	  " MAP-FILE FONT\n", program_name);
-  fprintf(stream, "usage: %s -v\n", program_name);
-  fprintf(stream, "usage: %s --version\n", program_name);
+  fprintf(stream,
+"usage: %s [-s] [-g gf-file] [-k skew-char] tfm-file map-file font\n"
+"usage: %s { -v | --version }\n", program_name, program_name);
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

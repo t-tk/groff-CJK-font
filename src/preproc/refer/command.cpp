@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
@@ -37,7 +36,7 @@ public:
   int get_char();
   int peek_char();
   void skip_char();
-  int get_location(const char **, int *);
+  void get_location(const char **, int *);
 
   friend class input_stack;
 };
@@ -76,7 +75,7 @@ inline void input_item::skip_char()
   ptr++;
 }
 
-int input_item::get_location(const char **filenamep, int *linenop)
+void input_item::get_location(const char **filenamep, int *linenop)
 {
   *filenamep = filename;
   if (ptr == buffer.contents())
@@ -87,9 +86,10 @@ int input_item::get_location(const char **filenamep, int *linenop)
     for (const char *p = buffer.contents(); p < e; p++)
       if (*p == '\n')
 	ln++;
+    ln--; // Back up to identify line number _before_ last seen newline.
     *linenop = ln;
   }
-  return 1;
+  return;
 }
 
 class input_stack {
@@ -160,11 +160,11 @@ void input_stack::push_file(const char *fn)
     }
   }
   string buf;
-  int bol = 1;
+  bool is_at_beginning_of_line = true;
   int lineno = 1;
   for (;;) {
     int c = getc(fp);
-    if (bol && c == '.') {
+    if (is_at_beginning_of_line && c == '.') {
       // replace lines beginning with .R1 or .R2 with a blank line
       c = getc(fp);
       if (c == 'R') {
@@ -194,15 +194,15 @@ void input_stack::push_file(const char *fn)
       break;
     if (invalid_input_char(c))
       error_with_file_and_line(fn, lineno,
-			       "invalid input character code %1", int(c));
+			       "invalid input character code %1", c);
     else {
       buf += c;
       if (c == '\n') {
-	bol = 1;
+	is_at_beginning_of_line = true;
 	lineno++;
       }
       else
-	bol = 0;
+	is_at_beginning_of_line = false;
     }
   }
   if (fp != stdin)
@@ -226,11 +226,11 @@ void input_stack::error(const char *format, const errarg &arg1,
 {
   const char *filename;
   int lineno;
-  for (input_item *it = top; it; it = it->next)
-    if (it->get_location(&filename, &lineno)) {
-      error_with_file_and_line(filename, lineno, format, arg1, arg2, arg3);
-      return;
-    }
+  for (input_item *it = top; it; it = it->next) {
+    it->get_location(&filename, &lineno);
+    error_with_file_and_line(filename, lineno, format, arg1, arg2, arg3);
+    return;
+  }
   ::error(format, arg1, arg2, arg3);
 }
 
@@ -793,16 +793,22 @@ static void command_loop()
   }
 }
 
-void process_commands(const char *file)
-{
-  input_stack::init();
-  input_stack::push_file(file);
-  command_loop();
-}
-
 void process_commands(string &s, const char *file, int lineno)
 {
+  const char *saved_filename = current_filename;
+  int saved_lineno = current_lineno;
   input_stack::init();
+  current_filename = file;
+  // Report diagnostics with respect to line _before_ last newline seen.
+  current_lineno = lineno - 1;
   input_stack::push_string(s, file, lineno);
   command_loop();
+  current_filename = saved_filename;
+  current_lineno = saved_lineno;
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

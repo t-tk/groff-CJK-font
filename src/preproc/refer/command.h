@@ -17,7 +17,6 @@ for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
-void process_commands(const char *file);
 void process_commands(string &s, const char *file, int lineno);
 
 extern int have_bibliography;

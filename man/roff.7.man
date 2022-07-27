@@ -55,13 +55,13 @@ system.
 The manual pages on Unix systems
 (\[lq]man\~pages\[rq])
 and bestselling books on software engineering,
-including Kernighan and Ritchie's
+including Brian Kernighan and Dennis Ritchie's
 .I The C Programming Language
 and W.\& Richard Stevens's
-.I Advvanced Programming in the Unix Environment
-are written using a
+.I Advanced Programming in the Unix Environment
+have been written using
 .I roff
-system.
+systems.
 .
 GNU
 .IR roff \[em] groff \[em]is
@@ -114,7 +114,23 @@ and can be controlled at the input document's discretion.
 .
 .
 .P
-The formatter reads its input character by character,
+When a device-independent
+.I roff
+formatter starts up,
+it obtains information about the device for which it is preparing
+output from the latter's description file
+(see
+.MR groff_font @MAN5EXT@ ).
+.
+An essential property is the length of the output line,
+such as \[lq]6.5 inches\[rq].
+.
+.
+.P
+The formatter interprets plain text files employing the Unix line-ending
+convention.
+.
+It reads input a character at a time,
 collecting words as it goes,
 and fits as many words together on an output line as it can\[em]this
 is known as
@@ -130,12 +146,7 @@ spaces,
 tabs,
 or newlines.
 .
-Words are separated by
-spaces,
-tabs,
-newlines,
-or
-file boundaries.
+The exceptions separate words.
 .
 .
 .P
@@ -201,8 +212,8 @@ escape sequences whose purpose is to obtain glyphs that are not easily
 typed at the keyboard,
 or which have special meaning to the formatter
 (like
-.B \[rs]
-itself).
+.BR \[rs] ).
+.\" slack wording: itself).
 .
 .
 .P
@@ -297,13 +308,13 @@ Again, macro packages may provide other methods of producing indented paragraphs
 Trailing spaces on
 .I text lines
 (see below)
-are ignored.
+are discarded.
 .
-The end of an input file causes a break.
+The end of input causes a break.
 .
 .
 .P
-After the formatter performs an automatic line break,
+After the formatter performs an automatic break,
 it then tries to
 .I adjust
 the line:
@@ -441,7 +452,7 @@ of the page.
 Therefore the initial drawing position of a
 .I roff
 formatter is not at the origin,
-but down and to the right of it.
+but below and to the right of it.
 .
 This rightward shift
 from the left edge is known as the
@@ -460,8 +471,7 @@ the top to the bottom of the page.
 .I Vertical spacing
 is the distance between adjacent text baselines.
 .
-In ordinary circumstances,
-this quantity is 120% of the type size.
+Typographic tradition sets this quantity to 120% of the type size.
 .
 The initial vertical drawing position is one unit of vertical spacing
 below the page top.
@@ -478,7 +488,7 @@ when a break occurs,
 the formatter moves the drawing position to the next text baseline
 automatically.
 .
-If the formatter was already writing to the last line that would fit on
+If the formatter were already writing to the last line that would fit on
 the page,
 advancing by one vee would place the next text baseline off the page.
 .
@@ -494,8 +504,7 @@ this is a
 .P
 When the last line of input text is also the last output line that can
 fit on the page,
-the break caused by the end of the input file
-will also break the page,
+the break caused by the end of input will also break the page,
 producing a useless blank one.
 .
 Macro packages keep users from having
@@ -591,7 +600,9 @@ is
 .I interpolated,
 as if typed at its call site.
 .
-Its contents are then parsed normally.
+Its contents are then parsed for further request invocations,
+macro calls,
+and escape sequences.
 .
 .
 .P
@@ -706,6 +717,14 @@ see
 .MR groff_char @MAN7EXT@ .
 .
 .
+.P
+.I groff
+offers
+.IR streams ,
+identifiers for writable files,
+but for security reasons this feature is disabled by default.
+.
+.
 .\" BEGIN Keep roughly parallel with first paragraphs of groff.texi node
 .\" "Deferring Output".
 .P
@@ -798,7 +817,7 @@ The program is generally referred to in full capitals,
 both to distinguish it from its many descendants,
 and because bits were expensive in those days;
 five- and six-bit character encodings were still in widespread usage,
-and mixed-case alphabetics seen as a luxury.
+and mixed-case alphabetics in file names seen as a luxury.
 .
 .I RUNOFF
 introduced a syntax of inlining formatting directives amid document
@@ -909,9 +928,8 @@ you had to backspace and underscore in the input yourself).
 .B .fi
 to enable filling of output lines got the name it retains to this day.
 .
-.I roff
-also featured a heuristic system for automatically placing hyphenation
-points,
+McIlroy's program also featured a heuristic system for automatically
+placing hyphenation points,
 designed and implemented by Molly Wagner.
 .
 It furthermore introduced numeric variables,
@@ -940,7 +958,7 @@ McIlroy's
 .I roff
 was one of the first Unix programs.
 .
-in Dennis Ritchie's term,
+In Ritchie's term,
 it was \[lq]transliterated\[rq] from BCPL to DEC PDP-7 assembly language
 .\" see "The Evolution of the Unix Time-Sharing System", Ritchie, 1984
 for the fledgling Unix operating system.
@@ -969,9 +987,8 @@ would call diversions were available via \[lq]footnote\[rq] requests.
 .
 This
 .I roff
-indirectly funded operating systems research at Murray Hill,
-for it was used to prepare patent applications for AT&T to the U.S.\&
-government.
+indirectly funded operating systems research at Murray Hill;
+AT&T prepared patent applications to the U.S.\& government with it.
 .
 This arrangement enabled the group to acquire a PDP-11;
 .I roff
@@ -986,7 +1003,7 @@ and paper terminals such as the IBM 2471
 (based on the Selectric line of typewriters)
 and the Teletype Corporation Model 37.
 .
-Proportionally-spaced type was unknown.
+Proportionally-spaced type was unavailable.
 .
 .
 .\" ====================================================================
@@ -1109,7 +1126,7 @@ phototypesetter,
 and with it came the necessity of expanding the capabilities of a
 .I roff
 system to cope with proportionally-spaced type,
-multiple type sizes,
+multiple sizes,
 and a variety of fonts.
 .
 Ossanna wrote a parallel implementation of
@@ -1145,7 +1162,7 @@ empowered with multiple type sizes,
 italics,
 and a symbol font specially commissioned by Bell Labs from
 Graphic Systems,
-Brian Kernighan and Lorinda Cherry implemented
+Kernighan and Lorinda Cherry implemented
 .I eqn \" AT&T
 for typesetting mathematics.
 .
@@ -1228,6 +1245,22 @@ featured in volume 2,
 edited by Kernighan.
 .
 .
+.\" Thanks to Clem Cole for the following account.
+.\" https://minnie.tuhs.org/pipermail/tuhs/2022-January/025143.html
+.P
+Meanwhile,
+.I troff
+proved popular even at Unix sites that lacked a C/A/T device.
+.
+Tom Ferrin of the University of California at San Francisco combined it
+with Allen Hershey's popular vector fonts to produce
+.IR vtroff ,
+which translated
+.IR troff 's
+output to the command language used by Versatec and Benson-Varian
+plotters.
+.
+.
 .P
 Ossanna had passed away unexpectedly in 1977,
 and after the release of Version 7,
@@ -1270,13 +1303,7 @@ Ossanna's
 with its tight coupling to the capabilities of the C/A/T,
 remained in parallel distribution with device-independent
 .I troff
-throughout the 1980s,
-leading some developers to contrive translators for C/A/T-formatted
-documents to other devices.
-.
-An example was
-.I vtroff
-for Versatec and Benson-Varian plotters.
+throughout the 1980s.
 .
 Today,
 however,
@@ -1858,7 +1885,7 @@ quote to achieve both aims.
 .
 .I groff
 cuts this knot by supporting a special character escape sequence for the
-double quote,
+neutral double quote,
 .RB \[lq] \[rs][dq] \[rq] ,
 which never performs quoting in the typesetting language,
 but is simply a glyph,
@@ -2015,14 +2042,14 @@ Several traditions have accrued in service of these goals.
 .
 .
 .IP \[bu] 2n
-Break input lines after sentence-ending punctuation to ease their
+Follow sentence endings in the input with newlines to ease their
 recognition.
 .\" Texinfo: (@pxref{Sentences}).
-It is frequently convenient to break after colons and semicolons as
-well,
+It is frequently convenient to end input lines after colons and
+semicolons as well,
 as these typically precede independent clauses.
 .
-Consider breaking after commas;
+Consider doing so after commas;
 they often occur in lists that become easy to scan when itemized by
 line,
 or constitute supplements to the sentence that are added,
@@ -2032,10 +2059,6 @@ or updated to clarify it.
 Parenthetical and quoted phrases are also good candidates for placement
 on input lines by themselves.
 .
-In filled text,
-spaces and newlines are interchangeable;
-place breaks where it aids your purpose.
-.
 .
 .IP \[bu]
 Set your text editor's line length to 72 characters or fewer;
@@ -2044,7 +2067,7 @@ see the subsections below.
 .\" @footnote{Emacs: @code{fill-column: 72}; Vim: @code{textwidth=72}}
 .
 This limit,
-combined with the previous advice regarding breaking around punctuation,
+combined with the previous item of advice,
 makes it less common that an input line will wrap in your text editor,
 and thus will help you perceive excessively long constructions in your
 text.
@@ -2081,10 +2104,7 @@ so that reflowing the input doesn't turn them into control lines.
 .
 .
 .IP \[bu]
-Do not attempt to format the input in a WYSIWYG manner
-(i.e.,
-don't try using spaces to get proper indentation or align columns of a
-table).
+Do not use spaces to perform indentation or align columns of a table.
 .
 .
 .IP \[bu]
@@ -2144,7 +2164,7 @@ the theory of space and time.
 I shall therefore begin with a brief investigation of
 the origin of our ideas of space and time,
 although in doing so I know that I introduce a
-controversial subject.  \[rs]" remainder of paragraph elided
+controversial subject.\&  \[rs]" remainder of paragraph elided
 \&.
 \&.
 \&

@@ -145,7 +145,7 @@ you can change your document's typeface,
 margins,
 spacing,
 headers and footers,
-and footnotes arrangement.
+and footnote arrangement.
 .
 See subsection \[lq]Document control settings\[rq] below.
 .
@@ -389,8 +389,8 @@ The
 .B PD
 and
 .B DD
-registers use the larger value if the vertical resolution of the output
-device is too coarse for the smaller one;
+registers use the larger value if the vertical motion quantum of the
+output device is too coarse for the smaller one;
 usually,
 this is the case only for output to terminals and emulators thereof.
 .
@@ -409,34 +409,6 @@ by the
 and
 .B XE
 macros.
-.
-.
-.\" ====================================================================
-.SS "Fractional type sizes"
-.\" ====================================================================
-.
-AT&T
-.I ms
-supported only integer values for the type size and vertical spacing.
-.
-To overcome this restriction,
-for the registers
-.BR PS ,
-.BR VS ,
-.BR FPS ,
-and
-.BR FVS ,
-.I groff ms
-interprets values equal to or larger than\~1000 as decimal fractions
-multiplied by\~1000.
-.
-In
-.I ms
-documents that don't need to be portable to other implementations,
-use of a scaling indicator,
-as in
-.RB \[lq] ".nr PS 10.5p" \[rq],
-is preferable.
 .
 .
 .\" ====================================================================
@@ -547,8 +519,8 @@ or heading or paragraphing macro call.
 .
 .
 .TP
-.B .DA\c
-.RI "\~[" x "\~.\|.\|.]"
+.BR .DA \~[\c
+.IR x \~.\|.\|.]
 Typeset the current date,
 or any
 .RI arguments\~ x ,
@@ -562,8 +534,8 @@ page.
 .
 .
 .TP
-.B .ND\c
-.RI "\~[" x "\~.\|.\|.]"
+.BR .ND \~[\c
+.IR x \~.\|.\|.]
 Typeset the current date,
 or any
 .RI arguments\~ x ,
@@ -609,20 +581,29 @@ End the abstract.
 .
 The
 .B FAM
-string sets the font family for body text.
-.
-If this string is undefined at initialization,
-it is set to
+string sets the font family for body text;
+the default is
 .RB \[lq] T \[rq]
 (Times).
 .
-Setting
-.B \[rs]*[FAM]
-before the first call of a heading,
+The font family setting is ignored on terminal devices.
+.
+The
+.B PS
+and
+.B VS
+registers set the type size and vertical spacing
+(distance between text baselines),
+respectively.
+.
+Setting these parameters before the first call of a heading,
 paragraphing,
-or (non-date) document description macro also applies it to headers,
+or (non-date) document description macro also applies them to headers,
 footers,
-and footnotes.
+and
+(for
+.BR FAM )
+footnotes.
 .
 .
 .P
@@ -640,6 +621,39 @@ is equivalent to using the
 request.
 .
 This is a Tenth Edition Research Unix extension.
+.
+.
+.\" ====================================================================
+.SS "Typographical symbols"
+.\" ====================================================================
+.
+.I ms
+provides a handful of strings to obtain typographical symbols not easily
+entered with the keyboard.
+.
+Many others are available as special character escape sequences\[em]see
+.MR groff_char @MAN7EXT@ .
+.
+.
+.TP
+.B \[rs]*[\-]
+Interpolate an em dash.
+.
+.
+.TP
+.B \[rs]*[Q]
+.TQ
+.B \[rs]*[U]
+Interpolate typographer's quotation marks where available,
+and neutral quotes otherwise.
+.
+.B \[rs]*[Q]
+is the left quote and
+.B \[rs]*[U]
+the right.
+.
+(As a mnemonic,
+think of \[lq]quote\[rq] and \[lq]unquote\[rq].)
 .
 .
 .\" ====================================================================
@@ -667,7 +681,7 @@ except at page or column breaks.
 The
 .B PORPHANS
 register defines the minimum number of initial lines of any paragraph
-that must be kept together to avoid orphaned lines at the bottom of a
+that must be kept together to avoid isolated lines at the bottom of a
 page.
 .
 If a new paragraph is started close to the bottom of a page,
@@ -693,8 +707,8 @@ register.
 .
 .
 .TP
-.B .IP\c
-.RI \~[ marker \~[ width ]]
+.BR .IP \~[\c
+.IR marker \~[ width ]]
 Set a paragraph with a left indentation.
 .
 The optional
@@ -773,8 +787,8 @@ rendered on the same output line in the same style.
 .
 .
 .TP
-.B .NH\c
-.RI \~[ depth ]
+.BR .NH \~[\c
+.IR depth ]
 Set an automatically numbered heading.
 .
 .I ms
@@ -872,8 +886,8 @@ table of contents entries.
 .
 .
 .TP
-.B .SH\c
-.RI \~[ depth ]
+.BR .SH \~[\c
+.IR depth ]
 Set an unnumbered heading.
 .
 The optional
@@ -903,7 +917,7 @@ The value of
 .B \[rs]n[PSINCR]
 should be specified in points with the
 .RB \[lq] p \[rq]
-scaling indicator and may include a fractional component.
+scaling unit and may include a fractional component.
 .
 .
 .P
@@ -952,7 +966,7 @@ register operates in conjunction with the
 .B NH
 and
 .B SH
-macros to inhibit the printing of orphaned headings at the bottom of a
+macros to inhibit the printing of isolated headings at the bottom of a
 page;
 it specifies the minimum number of lines of the subsequent paragraph
 that must be kept on the same page as the heading.
@@ -971,160 +985,177 @@ grouping.
 .
 .
 .\" ====================================================================
-.SS Highlighting
+.SS "Typeface and decoration"
 .\" ====================================================================
 .
+.
+.P
 The
 .I ms
-macros provide a variety of methods to highlight
-or emphasize text:
+macros provide a variety of ways to style text.
 .
-.TP
-.B .B\c
-.RI " [" txt " [" post " [" pre ]]]
-Sets its first argument in
-.BR "bold type" .
+Attend closely to the ordering of arguments labeled
+.I pre
+and
+.I post,
+which is not intuitive.
 .
-If you specify a second argument,
-.I groff
-prints it in the previous font after
-the bold text, with no intervening space
-(this allows you to set punctuation after
-the highlighted text without highlighting
-the punctuation).
-.
-Similarly, it prints the third argument (if any)
-in the previous font
-.B before
-the first argument.
-.
-If you give this macro no arguments,
-.I groff
-prints all text following in bold until
-the next highlighting, paragraphing, or heading macro.
-.
-.TP
-.B .R\c
-.RI " [" txt " [" post " [" pre ]]]
-Sets its first argument in
-roman
-(or regular)
-type.
-.
-It operates similarly to the
-.B B
-macro otherwise.
-.
-.TP
-.B .I\c
-.RI " [" txt " [" post " [" pre ]]]
-Sets its first argument in
-.IR "italic type" .
-It operates similarly to the
-.B B
-macro otherwise.
+Support for
+.I pre
+arguments is a GNU extension.
 .
 .
 .TP
-.B .BI\c
-.RI " [" txt " [" post " [" pre ]]]
-Sets its first argument in bold italic type.
+.BR .B \~[\c
+.IR text \~[ post \~[ pre ]]]
+Style
+.I text
+in bold,
+followed by
+.I post
+in the previous font style without intervening space,
+and preceded by
+.I pre
+similarly.
 .
-It operates similarly to the
-.B B
-macro otherwise.
+Without arguments,
+.I ms
+styles subsequent text in bold
+until the next highlighting,
+paragraphing,
+or heading macro call.
+.
+.
+.TP
+.BR .R \~[\c
+.IR text \~[ post \~[ pre ]]]
+As
+.BR .B ,
+but use the roman style
+(upright text of normal weight)
+instead of bold.
+.
+Arguments are recognized only by
+.I groff ms.
+.
+.
+.TP
+.BR .I \~[\c
+.IR text \~[ post \~[ pre ]]]
+As
+.BR .B ,
+but use an italic or oblique style instead of bold.
+.
+.
+.TP
+.BR .BI \~[\c
+.IR text \~[ post \~[ pre ]]]
+As
+.BR .B ,
+but use a bold italic or bold oblique style instead of upright bold.
 .
 This is a Tenth Edition Research Unix extension.
 .\" possibly 9th, but definitely not Berkeley
 .
 .
 .TP
-.B .CW\c
-.RI " [" txt " [" post " [" pre ]]]
-Sets its first argument in a \[lq]constant-width\[rq] (monospaced) roman
-typeface.
-.
-It operates similarly to the
-.B B
-macro otherwise.
+.BR .CW \~[\c
+.IR text \~[ post \~[ pre ]]]
+As
+.BR .B ,
+but use a constant-width (monospaced) roman typeface instead of bold.
 .
 This is a Tenth Edition Research Unix extension.
 .\" possibly 9th, but definitely not Berkeley
 .
 .
 .TP
-.B .BX\c
-.RI " [" txt ]
+.BR .BX \~[\c
+.IR text ]
 Typeset
-.I txt
+.I text
 and draw a box around it.
 .
 On terminal devices,
 reverse video is used instead.
 .
-If you want the argument to contain space,
-use non-breaking space escape sequences of appropriate width
+If you want
+.I text
+to contain space,
+use horizontal motion escape sequences of appropriate width
 .RB ( \[rs]\[ti] ,
 .BR \[rs]\[ha] ,
 .BR \[rs]| ,
-.BR \[rs]0 ),
+.BR \[rs]0 ,
 or
-.BR \[rs]h .
+.BR \[rs]h ).
 .
 .
 .TP
-.B .UL\c
-.RI " [" txt " [" post ]]
+.BR .UL \~[\c
+.IR text \~[ post ]]
 Typeset
-.I txt
+.I text
 with an underline.
 .
-If you specify
-.IR post ,
-.I ms
-sets it in the previous font after the underlined text,
+Set
+.I post,
+if present,
+after
+.I text
 with no intervening space.
 .
 .
 .TP
 .B .LG
-Set all subsequent text in larger type
-(2\~points larger than the current size) until
-the next font size,
+Set subsequent text in larger type
+(2\~points larger than the current size)
+until the next font size,
 highlighting,
 paragraphing,
-or heading macro.
+or heading macro call.
 .
 You can specify this macro multiple times to enlarge the type size as
 needed.
 .
+.
 .TP
 .B .SM
-Set all subsequent text in
-smaller type
-(2\~points smaller than the current size) until
-the next type size,
+Set subsequent text in smaller type
+(2\~points smaller than the current size)
+until the next type size,
 highlighting,
 paragraphing,
-or heading macro.
+or heading macro call.
 .
 You can specify this macro multiple times to reduce the type size as
 needed.
 .
+.
 .TP
 .B .NL
-Set all subsequent text at the normal type size
-(that is,
-the value of the
-.B PS
-register).
+Set subsequent text at the normal type size
+.RB ( \[rs]n[PS] ).
+.
+.
+.P
+When
+.I pre
+is used,
+a hyphenation control escape sequence
+.B \[rs]%
+that would ordinarily start
+.I text
+must start
+.I pre
+instead.
 .
 .
 .P
 .I groff ms
-also supports strings to begin and end super- and subscripting.
+also offers strings to begin and end super- and subscripting.
 .
-These are all GNU extensions.
+These are GNU extensions.
 .
 .
 .TP
@@ -1155,7 +1186,7 @@ normally.
 .B .RS
 Begin a region where headings,
 paragraphs,
-and displays are indented by
+and displays are indented (further) by
 .BR \[rs]n[PI] .
 .
 .
@@ -1181,7 +1212,7 @@ This can cause a page break to occur earlier than it normally would.
 .
 .P
 You can alternatively specify a
-.IR "floating keep" ;
+.I floating keep:
 if a keep cannot fit on the current page,
 .I ms
 holds its contents and allows text following the keep
@@ -1189,9 +1220,9 @@ holds its contents and allows text following the keep
 to fill in the remainder of the current page.
 .
 When the page breaks,
-whether by an explicit
+whether by reaching the end or
 .B bp
-request or by reaching the end of the page,
+request,
 .I ms
 puts the floating keep at the beginning of the next page.
 .
@@ -1236,7 +1267,7 @@ End boxed keep.
 .
 .
 .P
-Box macros cause line breaks;
+Box macros cause breaks;
 if you need to box a word or phrase within a line,
 see the
 .B BX
@@ -1298,7 +1329,7 @@ left-aligned display.
 .RB [ I \~\c
 .RI [ indent ]]
 .TQ
-.B .ID \c
+.BR .ID \~\c
 .RI [ indent ]
 Begin
 .RB ( DS ": kept)"
@@ -1434,8 +1465,8 @@ preprocessor.
 .
 .
 .TP
-.B .EQ\c
-.RI " [" align ]
+.BR .EQ \~[\c
+.IR align ]
 .TQ
 .B .EN
 Demarcate an equation to be processed by the
@@ -1494,7 +1525,7 @@ option is used.
 .\" ====================================================================
 .
 A footnote is typically anchored to a place in the text with a
-.IR marker ,
+.I marker,
 which is a small integer,
 a symbol,
 or arbitrary user-specified text.
@@ -1502,12 +1533,15 @@ or arbitrary user-specified text.
 .
 .TP
 .B \[rs]**
-Place an automatically numbered footnote marker in the text.
+Place an
+.I automatic number,
+an automatically generated numeric footnote marker,
+in the text.
 .
 Each time this string is interpolated,
 the number it produces increments by one.
 .
-Automatic footnote numbers start at 1.
+Automatic numbers start at 1.
 .
 This is a Berkeley extension.
 .
@@ -1523,8 +1557,8 @@ of a text column or page.
 .
 .
 .TP
-.B .FS\c
-.RI \~[ marker ]
+.BR .FS \~[\c
+.IR marker ]
 Begin a footnote.
 .
 The
@@ -1539,8 +1573,7 @@ which is then also placed at the beginning of the footnote text.
 If
 .I marker
 is omitted,
-the next pending automatic footnote number enqueued by interpolation of
-the
+the next pending automatic number enqueued by interpolation of the
 .B *
 string is used,
 and if none exists,
@@ -1589,35 +1622,31 @@ and
 .BR VS ,
 respectively.
 .
+The
+.BR FPD ,
+.BR FPS ,
+and
+.B FVS
+registers are GNU extensions.
+.
 .
 .P
-Paragraph-level formatting of footnotes is performed by a macro named
-.BR FP ,
-which is called once for each individual footnote.
-A default implementation of
-.B FP
-is provided;
-alternatively,
-you may define your own replacement implementation,
-and so assert your own control over footnote paragraph formatting.
-.
-.P
-When using the default implementation of
-.BR FP ,
-the
+The
 .B FF
-register controls the formatting of automatically numbered footnotes,
+register controls the formatting of automatically numbered footnote
+paragraphs,
 and those for which
 .B .FS
 is given a
 .I marker
 argument,
-at the bottom of a column or page as follows:-
+at the bottom of a column or page as follows.
+.
 .
 .RS
 .TP
 0
-Set an automatically generated number,
+Set an automatic number,
 or a specified
 .B FS
 .I marker
@@ -1627,62 +1656,95 @@ as a superscript
 or surrounded by square brackets
 (on terminals).
 .
-The footnote paragraph is indented if there is an
+The footnote paragraph is indented as with
+.B .PP
+if there is an
 .B .FS
-argument or an automatically generated number.
+argument or an automatic number,
+and as with
+.B .LP
+otherwise.
 .
 This is the default.
 .
 .
 .TP
 1
-Like
+As
 .BR 0 ,
 but set the marker as regular text,
-and follow an automatically generated number with a period.
+and follow an automatic number with a period.
 .
 .
 .TP
 2
-Like
+As
 .BR 1 ,
-but without indentation.
+but without indentation
+(like
+.BR .LP ).
 .
 .
 .TP
 3
-Like
+As
 .BR 1 ,
-but set the footnote paragraph with the marker hanging.
+but set the footnote paragraph with the marker hanging
+(like
+.BR .IP ).
 .RE
 .
-.P
-Conversely,
-if you choose to provide your own
-.B FP
-macro implementation,
-.I you
-have control of how footnote paragraphs will be formatted;
-it is your choice as to how the
-.B FF
-register should be interpreted,
-(if at all).
-For each individual footnote,
-your macro will be called with one argument,
-which represents either an automatically generated footnote number,
-or the verbatim
-.I marker
-argument passed in the initiating
-.B FS
-macro call;
-in the latter case,
-an explicit second argument of
-.RB \[lq] no \[rq]
-will also be present,
-indicating that no embellishment of the footnote
-.I marker
-(as may be appropriate for footnote numbers)
-is required.
+.
+.\" ====================================================================
+.SS "Language and localization"
+.\" ====================================================================
+.
+.I groff ms
+provides several strings that you can customize for your own purposes,
+or redefine to adapt the macro package to languages other than English.
+.
+It is already localized for
+.\" cs, de, fr, it, sv
+Czech,
+German,
+French,
+Italian,
+and
+Swedish.
+.
+Load the desired localization macro package after
+.IR ms ;
+see
+.MR groff_tmac @MAN5EXT@ .
+.
+.RS
+.TS
+cb   cb
+lf(CR) lf(CR).
+String	Default
+_
+\[rs]*[REFERENCES]	References
+\[rs]*[ABSTRACT]	\[rs]f[I]ABSTRACT\[rs]f[]
+\[rs]*[TOC]	Table of Contents
+\[rs]*[MONTH1]	January
+\[rs]*[MONTH2]	February
+\[rs]*[MONTH3]	March
+\[rs]*[MONTH4]	April
+\[rs]*[MONTH5]	May
+\[rs]*[MONTH6]	June
+\[rs]*[MONTH7]	July
+\[rs]*[MONTH8]	August
+\[rs]*[MONTH9]	September
+\[rs]*[MONTH10]	October
+\[rs]*[MONTH11]	November
+\[rs]*[MONTH12]	December
+_
+.TE
+.RE
+.
+The default for
+.B ABSTRACT
+includes font selection escape sequences to set the word in italics.
 .
 .
 .\" ====================================================================
@@ -1729,28 +1791,31 @@ appearing in the header or footer text.
 These macros are Berkeley extensions.
 .
 .
+.br
+.ne 5v
 .TP
-.B .OH \c
-.RI \[aq] left \[aq] center \[aq] right \[aq]
+.BR .OH \~\[aq]\c
+.IR left \[aq] center \[aq] right \[aq]
 .TQ
-.B .OF \c
-.RI \[aq] left \[aq] center \[aq] right \[aq]
+.BR .OF \~\[aq]\c
+.IR left \[aq] center \[aq] right \[aq]
 .TQ
-.B .EH \c
-.RI \[aq] left \[aq] center \[aq] right \[aq]
+.BR .EH \~\[aq]\c
+.IR left \[aq] center \[aq] right \[aq]
 .TQ
-.B .EF \c
-.RI \[aq] left \[aq] center \[aq] right \[aq]
+.BR .EF \~\[aq]\c
+.IR left \[aq] center \[aq] right \[aq]
 The
 .B OH
 and
 .B EH
-macros define headers for the odd and even pages;
+macros define headers for odd- (recto) and even-numbered (verso) pages,
+respectively;
 the
 .B OF
 and
 .B EF
-macros define footers for the odd and even pages.
+macros define footers for them.
 .
 .
 .P
@@ -1870,8 +1935,8 @@ Arrange page text in two columns.
 .
 .
 .TP
-.B .MC\c
-.RI " [" column-width " [" gutter-width ]]
+.BR .MC \~[\c
+.IR column-width " [" gutter-width ]]
 Arrange page text in multiple columns.
 .
 If you specify no arguments,
@@ -1921,7 +1986,7 @@ that page numbers not be repeated.
 You may wish to indent the text thus wrapped to correspond to its
 heading depth;
 this can be done in the entry text by prefixing it with tabs or
-horizontally spacing escape sequences,
+horizontal motion escape sequences,
 or by providing a second argument to the
 .B XA
 macro.
@@ -1948,11 +2013,11 @@ and then calls
 .
 .
 .TP
-.B .XS\c
-.RI \~[ page-number ]
+.BR .XS \~[\c
+.IR page-number ]
 .TQ
-.B .XA\c
-.RI \~[ page-number \~[ indentation ]]
+.BR .XA \~[\c
+.IR page-number \~[ indentation ]]
 .TQ
 .B .XE
 Begin,
@@ -2013,24 +2078,6 @@ and call
 .RB \[lq] no \[rq]
 argument,
 if present).
-.
-.
-.P
-You can customize the style of the leader that bridges each table of
-contents entry with its page number;
-define the
-.B TC\-LEADER
-special character by using the
-.B char
-request.
-.
-A typical leader combines the dot glyph
-.RB \[lq] .\& \[rq]
-with a horizontal space escape sequence to spread the dots.
-.
-The width of the page number field is stored in the
-.B TC\-MARGIN
-register.
 .
 .
 .P
@@ -2190,14 +2237,32 @@ in which use of
 is permitted.
 .
 .
+.P
+You can customize the style of the leader that bridges each table of
+contents entry with its page number;
+define the
+.B TC\-LEADER
+special character by using the
+.B char
+request.
+.
+A typical leader combines the dot glyph
+.RB \[lq] .\& \[rq]
+with a horizontal space escape sequence to spread the dots.
+.
+The width of the page number field is stored in the
+.B TC\-MARGIN
+register.
+.
+.
 .\" ====================================================================
 .SH "Differences from AT&T \f[I]ms\f[]"
 .\" ====================================================================
 .
 The
 .I groff ms
-macros are a complete re-implementation,
-using no original AT&T code.
+macros are an independent reimplementation,
+using no AT&T code.
 .
 Since they take advantage of the extended features of
 .IR groff ,
@@ -2314,6 +2379,31 @@ but
 .B .RS
 and
 .BR .RE .
+.
+.
+.IP \[bu]
+AT&T
+.I ms
+supported only integer values for the type size and vertical spacing.
+.
+To overcome this restriction,
+for the registers
+.BR PS ,
+.BR VS ,
+.BR FPS ,
+and
+.BR FVS ,
+.I groff ms
+interprets values equal to or larger than\~1000 as decimal fractions
+multiplied by\~1000.
+.
+In
+.I ms
+documents that don't need to be portable to other implementations,
+use of a scaling unit,
+as in
+.RB \[lq] ".nr PS 10.5p" \[rq],
+is preferable.
 .
 .
 .IP \[bu]
@@ -2441,90 +2531,101 @@ or another implementation should test this register.
 .
 .
 .\" ====================================================================
-.SS "Localization strings"
+.SH "Legacy features"
 .\" ====================================================================
 .
-.I groff ms
-provides several strings that you can customize for your own purposes,
-or redefine to adapt the macro package to languages other than English.
+.I "groff ms"
+retains support for some legacy features solely to support rendering of
+historical documents;
+contemporary ones should not use them because they can render poorly.
 .
-It is already localized for
-.\" cs, de, fr, it, sv
-Czech,
-German,
-French,
-Italian,
-and
-Swedish.
+See
+.MR groff_char @MAN7EXT@
+instead.
 .
-Load the desired localization macro package after
-.IR ms ;
-see
-.MR groff_tmac @MAN5EXT@ .
 .
-.RS
+.\" ====================================================================
+.SS "AT&T \f[I]ms\f[] accent mark strings"
+.\" ====================================================================
+.
+AT&T
+.I ms
+defined
+accent mark strings as follows.
+.
+.
 .TS
-cb   cb
-lf(CR) lf(CR).
-String	Default
+Cb Lb
+Lf(CR) Lx.
+String	Description
 _
-\[rs]*[REFERENCES]	References
-\[rs]*[ABSTRACT]	\[rs]f[I]ABSTRACT\[rs]f[]
-\[rs]*[TOC]	Table of Contents
-\[rs]*[MONTH1]	January
-\[rs]*[MONTH2]	February
-\[rs]*[MONTH3]	March
-\[rs]*[MONTH4]	April
-\[rs]*[MONTH5]	May
-\[rs]*[MONTH6]	June
-\[rs]*[MONTH7]	July
-\[rs]*[MONTH8]	August
-\[rs]*[MONTH9]	September
-\[rs]*[MONTH10]	October
-\[rs]*[MONTH11]	November
-\[rs]*[MONTH12]	December
-_
+\[rs]*[\[aq]]	Apply acute accent to subsequent glyph.
+\[rs]*[\[ga]]	Apply grave accent to subsequent glyph.
+\[rs]*[:]	Apply dieresis (umlaut) to subsequent glyph.
+\[rs]*[\[ha]]	Apply circumflex accent to subsequent glyph.
+\[rs]*[\[ti]]	Apply tilde accent to subsequent glyph.
+\[rs]*[C]	Apply caron to subsequent glyph.
+.\" \*v was an undocumented (in Lesk 1978-11-13) synonym for \*C.
+\[rs]*[,]	Apply cedilla to subsequent glyph.
 .TE
-.RE
-.
-The default for
-.B ABSTRACT
-includes font selection escape sequences to set the word in italics.
 .
 .
-.\" TODO: Put this in a legacy feature support section, alongside AT&T
-.\" accent marks and .AM.
-.\".PP
-.\"The
-.\".B \[rs]*\-
-.\"string produces an em dash\[em]like this.
-.\".
-.\".
-.\".PP
-.\"Use
-.\".B \[rs]*Q
-.\"and
-.\".B \[rs]*U
-.\"to get a left and right typographer's quote,
-.\"respectively, in
-.\".I troff
-.\"(and plain quotes in
-.\".IR nroff ).
+.\" ====================================================================
+.SS "Berkeley \f[I]ms\f[] accent mark and glyph strings"
+.\" ====================================================================
+.
+Berkeley
+.I ms
+offered an
+.B AM
+macro;
+calling it redefined the AT&T accent mark strings
+(except for
+.BR \[rs]*C ),
+applied them to the
+.I preceding
+glyph,
+and defined additional strings,
+some for spacing glyphs.
 .
 .
-.\" TODO: Put this in a legacy feature support section, alongside AT&T
-.\" accent marks and the \*-, \*Q, \*U strings.
-.\".PP
-.\"Improved accent marks
-.\"(as originally defined in Berkeley's
-.\".I ms
-.\"version)
-.\"are available by specifying the
-.\".B AM
-.\"macro at the beginning of your document.
-.\".
-.\"You can place an accent over most characters by specifying the string
-.\"defining the accent directly after the character.
+.TP
+.B .AM
+Enable alternative accent mark and glyph-producing strings.
+.
+.
+.P
+.TS
+Cb Lb
+Lf(CR) Lx.
+String	Description
+_
+\[rs]*[\[aq]]	Apply acute accent to preceding glyph.
+\[rs]*[\[ga]]	Apply grave accent to preceding glyph.
+\[rs]*[:]	Apply dieresis (umlaut) to preceding glyph.
+\[rs]*[\[ha]]	Apply circumflex accent to preceding glyph.
+\[rs]*[\[ti]]	Apply tilde accent to preceding glyph.
+\[rs]*[,]	Apply cedilla to preceding glyph.
+\[rs]*[/]	Apply stroke (slash) to preceding glyph.
+\[rs]*[v]	Apply caron to preceding glyph.
+\[rs]*[_]	Apply macron to preceding glyph.
+\[rs]*[.]	Apply underdot to preceding glyph.
+\[rs]*[o]	Apply ring accent to preceding glyph.
+_
+\[rs]*[?]	Interpolate inverted question mark.
+\[rs]*[!]	Interpolate inverted exclamation mark.
+\[rs]*[8]	Interpolate small letter sharp s.
+\[rs]*[q]	Interpolate small letter o with hook accent (ogonek).
+\[rs]*[3]	Interpolate small letter yogh.
+\[rs]*[d-]	Interpolate small letter eth.
+\[rs]*[D-]	Interpolate capital letter eth.
+\[rs]*[th]	Interpolate small letter thorn.
+\[rs]*[TH]	Interpolate capital letter thorn.
+\[rs]*[ae]	Interpolate small ae ligature.
+\[rs]*[AE]	Interpolate capital ae ligature.
+\[rs]*[oe]	Interpolate small oe ligature.
+\[rs]*[OE]	Interpolate capital oe ligature.
+.TE
 .
 .
 .\" ====================================================================
@@ -2645,7 +2746,7 @@ it may be compressed and/or available in additional formats.
 with the
 .I ms
 Macro Package\[rq];
-Larry Kollar.
+Larry Kollar and G.\~Branden Robinson.
 .
 .
 .TP

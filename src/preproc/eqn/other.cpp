@@ -653,7 +653,7 @@ void hmotion_box::output()
     p->output();
   }
   else if (output_format == mathml) {
-    printf("<merror>eqn horizontal motion cannot be expessed "
+    printf("<merror>eqn horizontal motion cannot be expressed "
 	   "in MathML</merror>");
     p->output();
   }

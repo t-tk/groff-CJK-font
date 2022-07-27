@@ -266,8 +266,13 @@ see
 .MR groff_font @MAN5EXT@ .
 .
 If no such directive is present for the output device,
+.ie '@PSPRINT@'' \{\
+this option is ignored.
+.\}
+.el \{\
 output is piped to
-.MR lpr 1 .
+.MR @PSPRINT@ 1 .
+.\}
 .
 See options
 .B \-L
@@ -292,6 +297,19 @@ option.
 does not prefix an option dash to
 .I arg
 before passing it to the spooler program.
+.
+.
+.TP
+.B \-M
+Works as
+.IR @g@troff 's
+option
+(see below),
+but is also passed to
+.MR @g@eqn @MAN1EXT@ ,
+.MR grap @MAN1EXT@ ,
+and
+.MR @g@grn @MAN1EXT@ .
 .
 .
 .TP
@@ -524,7 +542,7 @@ for input files.
 .BI \-m\~ name
 Process
 .RI name .tmac
-before any input files.
+before input files.
 .
 .
 .TP
@@ -1472,7 +1490,7 @@ which can then be interpreted by
 .
 .TP
 .MR hpftodit @MAN1EXT@
-creates font description files for the the HP LaserJet\~4 family of
+creates font description files for the HP LaserJet\~4 family of
 printers.
 .
 .
@@ -1654,7 +1672,7 @@ The value of this variable is passed to the
 .IR preconv (@MAN1EXT@)
 preprocessor's
 .B \-e
-option to set the encoding of input files.
+option to select the character encoding of input files.
 .
 This variable's existence implies
 the
@@ -1919,10 +1937,12 @@ On this installation,
 the following locations are used.
 .
 .
+.if !'@APPDEFDIR@'' \{\
 .TP
-.I @APPRESDIR@
+.I @APPDEFDIR@
 Application defaults directory for
 .MR gxditview @MAN1EXT@ .
+.\}
 .
 .
 .TP

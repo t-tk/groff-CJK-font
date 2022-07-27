@@ -24,7 +24,7 @@ groff="${abs_top_builddir:-.}/test-groff"
 # localization rigamarole.
 
 input='.de $C
-.  tm $C: \\\\$@
+.  tm $C: \\$@
 ..
 .++ C
 .+c "The Boy Sickens"
@@ -39,7 +39,7 @@ wail () {
     fail=YES
 }
 
-output=$(echo "$input" | "$groff" -Tascii -P-cbou -me 2>&1)
+output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -me 2>&1)
 
 echo "checking for correct arguments given to \$C hook macro (1)" >&2
 echo "$output" | grep -Fqx '$C: "Chapter" "1" "The Boy Sickens"' || wail

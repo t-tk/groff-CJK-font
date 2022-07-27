@@ -428,7 +428,7 @@ getres()
 {
   int linepiece;
 
-  if (!font::load_desc())
+  if (0 /* nullptr */ == font::load_desc())
     fatal("cannot load 'DESC' description file for device '%1'",
 	  device);
 
@@ -567,8 +567,10 @@ conv(FILE *fp,
       }
       char *path;
       gfp = macro_path.open_file(gremlinfile, &path);
-      if (!gfp)
+      if (0 /* nullptr */ == gfp) {
+	error("cannot open picture file '%1'", gremlinfile);
 	return;
+      }
       PICTURE = DBRead(gfp);	/* read picture file */
       fclose(gfp);
       free(path);

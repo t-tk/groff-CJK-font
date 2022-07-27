@@ -42,7 +42,6 @@ TMACNORMALFILES = \
   tmac/doc.tmac \
   tmac/mdoc.tmac \
   tmac/pic.tmac \
-  tmac/a4.tmac \
   tmac/papersize.tmac \
   tmac/62bit.tmac \
   tmac/ec.tmac \
@@ -167,6 +166,7 @@ tmac_TESTS = \
   tmac/tests/an_TS-do-not-keep-tables-when-cR-set.sh \
   tmac/tests/an_X-register-works.sh \
   tmac/tests/an_avoid-two-font-denial-of-service.sh \
+  tmac/tests/an_do-not-abbreviate-escape-using-TH-arguments.sh \
   tmac/tests/an_font-remapping-does-not-affect-titles.sh \
   tmac/tests/an_handle-degenerate-input-quietly.sh \
   tmac/tests/an_inner-footer-abbreviation-works.sh \
@@ -175,6 +175,7 @@ tmac_TESTS = \
   tmac/tests/an_page-header-has-current-data.sh \
   tmac/tests/an_reset-hyphenation-correctly.sh \
   tmac/tests/an_title-abbreviation-works.sh \
+  tmac/tests/an_use-input-traps-correctly.sh \
   tmac/tests/andoc_clear-doc-traps.sh \
   tmac/tests/andoc_flush-between-packages.sh \
   tmac/tests/doc_CS-works.sh \
@@ -230,11 +231,11 @@ $(M4CHECK): tmac/groff_man.7.man.in
 	  $(tmac_srcdir)/groff_man.7.man.in > $@
 
 tmac/groff_man.7.man: tmac/groff_man.7.man.in $(M4CHECK)
-	$(AM_V_GEN)m4 -D_groff_man_not_style \
+	$(AM_V_GEN)$(M4) -D_groff_man_not_style \
 	  $(tmac_srcdir)/groff_man.7.man.in > $@
 
 tmac/groff_man_style.7.man: tmac/groff_man.7.man.in $(M4CHECK)
-	$(AM_V_GEN)m4 -D_groff_man_style \
+	$(AM_V_GEN)$(M4) -D_groff_man_style \
 	  $(tmac_srcdir)/groff_man.7.man.in > $@
 
 # The installation of groff compatibility wrappers for vendor-provided

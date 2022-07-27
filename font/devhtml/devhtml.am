@@ -44,13 +44,22 @@ $(DEVHTMLFONTSFILES): $(devhtml_srcdir)/R.proto
 	$(AM_V_GEN)$(MKDIR_P) `dirname $@` \
 	&& $(RM) $@ \
 	&& $(SHELL) $(GENFONTSSH) $(devhtml_srcdir)/R.proto \
-	     $(DEVHTMLRES) $(DEVHTMLCPI) `basename $@` > $@
+	  $(DEVHTMLRES) $(DEVHTMLCPI) `basename $@` >$@
 
 font/devhtml/DESC: $(devhtml_srcdir)/DESC.proto
 	$(AM_V_GEN)$(MKDIR_P) `dirname $@` \
 	&& $(SHELL) $(GENDESCSH) $(devhtml_srcdir)/DESC.proto \
-	     $(DEVHTMLRES) $(DEVHTMLCPI) $(DEVHTMLLPI) $(DEVHTMLFONTS) > $@ \
-	&& echo "image_generator $(GHOSTSCRIPT)" >> $@
+	  $(DEVHTMLRES) $(DEVHTMLCPI) $(DEVHTMLLPI) $(DEVHTMLFONTS) \
+	  > $@.tmp \
+	&& echo "image_generator $(GHOSTSCRIPT)" >>$@.tmp \
+	&& mv $@.tmp $@
+
+# HTML documents to be produced by troff should depend on this stamp
+# file to ensure that (post-)grohtml's device and font description files
+# are available.
+MOSTLYCLEANFILES += font/devhtml/stamp
+font/devhtml/stamp: font/devhtml/DESC $(DEVHTMLFONTSFILES)
+	$(AM_V_at)>$@
 
 
 # Local Variables:

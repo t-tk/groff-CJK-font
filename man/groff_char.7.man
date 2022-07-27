@@ -149,7 +149,7 @@ A small number of special characters represent glyphs that are not
 encoded in Unicode;
 examples include the baseline rule
 .B \e[ru]
-and the Bell Systems logo
+and the Bell System logo
 .B \e[bs].
 .
 .
@@ -166,7 +166,7 @@ with the conditional expression operator
 .EX
 \&.ie c \e[bs] \e{Welcome to the \e[bs] Bell System;
 did you get the Wehrmacht helmet or the Death Star?\e}
-\&.el No Bell Systems logo.
+\&.el No Bell System logo.
 .EE
 .RE
 .
@@ -263,7 +263,7 @@ in the next subsection.
 All of the following characters map to glyphs as you would expect.
 .TS
 center box;
-lf(CR).
+Lf(CR).
 ! # $ % & ( ) * + , . / 0 1 2 3 4 5 6 7 8 9 : ; < = > ? @
 A B C D E F G H I J K L M N O P Q R S T U V W X Y Z [ ] _
 a b c d e f g h i j k l m n o p q r s t u v w x y z { | }
@@ -302,15 +302,22 @@ they replace.
 The first,
 the neutral double quote,
 is a partial exception because it does represent itself,
-but since it is also used by
+but since the
 .I roff
-systems to quote macro arguments,
+language also uses it to quote macro arguments,
 .I groff
 supports a special character escape sequence as an alternative form so
 that the glyph can be easily included in macro arguments without
 requiring the user to master the quoting rules that AT&T
 .I troff
 required in that context.
+.
+(Some requests,
+like
+.BR ds ,
+also treat
+.B \[dq]
+non-literally.)
 .
 Furthermore,
 not all of the special character escape sequences are portable to AT&T
@@ -347,24 +354,19 @@ be the case on more-capable devices.
 .
 Review your document using as many different output devices as possible.
 .
-.\" XXX: move these to tty.tmac instead?
-.fchar \[u02C6] ^
-.fchar \[u02DC] ~
 .TS
 center box;
-l l l.
+L L L.
 Keycap	Appearance and meaning	Special character and meaning
 _
-"	" neutral double quote	\f[B]\[rs][dq]\f[] neutral double quote
-\[aq]	\[cq] closing single quote	\f[B]\[rs][aq]\f[] neutral apostrophe
-\-	- hyphen	\f[B]\[rs]\-\f[] or \f[B]\[rs][\-]\f[] minus sign/Unix dash
-\[rs]	(escape character)	\f[B]\[rs]e\f[] or \f[B]\[rs][rs]\f[] reverse solidus
-\[ha]	\[u02C6] modifier circumflex	\f[B]\[rs](ha\f[] circumflex/caret/\[lq]hat\[rq]
-\[ga]	\[oq] opening single quote	\f[B]\[rs](ga\f[] grave accent
-\[ti]	\[u02DC] modifier tilde	\f[B]\[rs](ti\f[] tilde
+"	" neutral double quote	\f[CR]\[rs][dq]\f[] neutral double quote
+\[aq]	\[cq] closing single quote	\f[CR]\[rs][aq]\f[] neutral apostrophe
+\-	- hyphen	\f[CR]\[rs]\-\f[] or \f[CR]\[rs][\-]\f[] minus sign/Unix dash
+\[rs]	(escape character)	\f[CR]\[rs]e\f[] or \f[CR]\[rs][rs]\f[] reverse solidus
+\[ha]	\[u02C6] modifier circumflex	\f[CR]\[rs](ha\f[] circumflex/caret/\[lq]hat\[rq]
+\[ga]	\[oq] opening single quote	\f[CR]\[rs](ga\f[] grave accent
+\[ti]	\[u02DC] modifier tilde	\f[CR]\[rs](ti\f[] tilde
 .TE
-.fchar \[u02C6]
-.fchar \[u02DC]
 .
 .
 .P
@@ -444,14 +446,19 @@ and perhaps on others
 .
 .TS
 tab(@) center box;
-l l.
+L L.
 AT&T \f[I]troff\f[] input@recommended \f[I]groff\f[] input
 _
+.T&
+Lf(CR) Lf(CR).
 A Winter\[aq]s Tale@A Winter\[aq]s Tale
-\[ga]U.K.\& outer quotes\[aq]@\f[B]\[rs][oq]\f[]U.K.\& outer quotes\f[B]\[rs][cq]\f[]
-\[ga]U.K.\& \[ga]\[ga]inner\[aq]\[aq] quotes\[aq]@\f[B]\[rs][oq]\f[]U.K.\& \f[B]\[rs][lq]\f[]inner\f[B]\[rs][rq]\f[] quotes\f[B]\[rs][cq]\f[]
-\[ga]\[ga]U.S.\& outer quotes\[aq]\[aq]@\f[B]\[rs][lq]\f[]U.S.\& outer quotes\f[B]\[rs][rq]\f[]
-\[ga]\[ga]U.S.\& \[ga]inner\[aq] quotes\[aq]\[aq]@\f[B]\[rs][lq]\f[]U.S.\& \f[B]\[rs][oq]\f[]inner\f[B]\[rs][cq]\f[] quotes\f[B]\[rs][rq]\f[]
+\[ga]U.K.\& outer quotes\[aq]@\[rs][oq]U.K.\& outer quotes\[rs][cq]
+\[ga]U.K.\& \[ga]\[ga]inner\[aq]\[aq] quotes\[aq]\
+@\[rs][oq]U.K.\& \[rs][lq]inner\[rs][rq] quotes\[rs][cq]
+\[ga]\[ga]U.S.\& outer quotes\[aq]\[aq]\
+@\[rs][lq]U.S.\& outer quotes\[rs][rq]
+\[ga]\[ga]U.S.\& \[ga]inner\[aq] quotes\[aq]\[aq]\
+@\[rs][lq]U.S.\& \[rs][oq]inner\[rs][cq] quotes\[rs][rq]
 .TE
 .\" paragraph necessary due to tbl spacing bug with box usage; see
 .\" https://lists.gnu.org/archive/html/groff/2020-07/msg00053.html
@@ -538,7 +545,7 @@ shown below.
 .
 .P
 .TS
-l2 l1 l l2 l1 l.
+L2 Lf(CR)1 L L2 Lf(CR)1 L.
 \[r!]	\e[r!]	inverted exclamation mark	\[~N]	\e[\[ti]N]	N tilde
 \[ct]	\e[ct]	cent sign	\[`O]	\e[\[ga]O]	O grave
 \[Po]	\e[Po]	pound sign	\['O]	\e[\[aq]O]	O acute
@@ -735,7 +742,8 @@ see
 is a Unicode numeric special character escape sequence.
 .
 With this form,
-any Unicode point can be indicated using four to six hexadecimal digits,
+any Unicode character can be accessed by code point using four to six
+hexadecimal digits,
 with hexadecimal letters accepted in uppercase form only.
 .
 Thus,
@@ -784,9 +792,9 @@ on ISO Latin-1 systems.)
 .
 .TP
 .BI \[rs][u base-glyph\c
-.RB [ _\c
-.I combining-component\c
-.RB ].\|.\|. ]
+[\c
+.BI _ combining-component\c
+].\|.\|.]
 constructs a composite glyph from Unicode numeric special character
 escape sequences.
 .
@@ -939,9 +947,12 @@ and equals
 signs normally drawn from this range.
 .
 .TS
-l l l lx.
+L L L Lx.
+.ne 3v
 Output	Input	Unicode	Notes
 _
+.T&
+L Lf(CR) L Lx.
 \[dq]	\e[dq]	u0022	neutral double quote
 \[sh]	\e[sh]	u0023	number sign
 \[Do]	\e[Do]	u0024	dollar sign
@@ -981,9 +992,12 @@ but rather to \[lq]SS\[rq].
 see subsection \[lq]Mathematical symbols\[rq] below.
 .
 .TS
-l l l lx.
+L L L Lx.
+.ne 3v
 Output	Input	Unicode	Notes
 _
+.T&
+L Lf(CR) L Lx.
 \[-D]	\e[\-D]	u00D0	uppercase eth
 \[Sd]	\e[Sd]	u00F0	lowercase eth
 \[TP]	\e[TP]	u00DE	uppercase thorn
@@ -999,14 +1013,18 @@ _
 .TE
 .
 .
+.br
+.ne 5v \" This is one more vee than we really need; see Savannah #62265.
 .\" ====================================================================
 .SS "Ligatures and digraphs"
 .\" ====================================================================
 .
 .TS
-l l l lx.
+L L L Lx.
 Output	Input	Unicode	Notes
 _
+.T&
+L Lf(CR) L Lx.
 \[ff]	\e[ff]	u0066_0066	ff ligature +
 \[fi]	\e[fi]	u0066_0069	fi ligature +
 \[fl]	\e[fl]	u0066_006C	fl ligature +
@@ -1050,9 +1068,12 @@ and
 .
 .
 .TS
-l l l lx.
+L L L Lx.
+.ne 3v
 Output	Input	Unicode	Notes
 _
+.T&
+L Lf(CR) L Lx.
 \[a"]	\e[a"]	u030B (u02DD)	double acute accent
 \[a-]	\e[a\-]	u0304 (u00AF)	macron accent
 \[a.]	\e[a.]	u0307 (u02D9)	dot accent
@@ -1078,9 +1099,12 @@ described in subsection \[lq]Special character escape forms\[rq] above;
 the names below are short aliases for convenience.
 .
 .TS
-l l l lx.
+L L L Lx.
+.ne 3v
 Output	Input	Unicode	Notes
 _
+.T&
+L Lf(CR) L Lx.
 \['A]	\e[\[aq]A]	u0041_0301	A acute
 \['C]	\e[\[aq]C]	u0043_0301	C acute
 \['E]	\e[\[aq]E]	u0045_0301	E acute
@@ -1162,9 +1186,12 @@ macro arguments;
 see subsection \[lq]Fundamental character set\[rq] above.
 .
 .TS
-l l l lx.
+L L L Lx.
+.ne 3v
 Output	Input	Unicode	Notes
 _
+.T&
+L Lf(CR) L Lx.
 \[Bq]	\e[Bq]	u201E	low double comma quote
 \[bq]	\e[bq]	u201A	low single comma quote
 \[lq]	\e[lq]	u201C	left double quote
@@ -1193,9 +1220,12 @@ multiplication dot;
 see subsection \[lq]Mathematical symbols\[rq] below.
 .
 .TS
-l l l lx.
+L L L Lx.
+.ne 3v
 Output	Input	Unicode	Notes
 _
+.T&
+L Lf(CR) L Lx.
 \[r!]	\e[r!]	u00A1	inverted exclamation mark
 \[r?]	\e[r?]	u00BF	inverted question mark
 \[pc]	\e[pc]	u00B7	centered period
@@ -1250,24 +1280,24 @@ macro:
 \&.\e" The pile is returned in string \[aq]pile\[aq].
 \&.eo
 \&.de pile\-make
-\&.  nr pile\-wd 0
-\&.  nr pile\-ht 0
-\&.  ds pile\-args
-\&.
-\&.  nr pile\-# \en[.$]
-\&.  while \en[pile\-#] \e{\e
-\&.    nr pile\-wd (\en[pile\-wd] >? \ew\[aq]\e$[\en[pile\-#]]\[aq])
-\&.    nr pile\-ht +(\en[rst] \- \en[rsb])
-\&.    as pile\-args \ev\[aq]\en[rsb]u\[aq]\e"
-\&.    as pile\-args \eZ\[aq]\e$[\en[pile\-#]]\[aq]\e"
-\&.    as pile\-args \ev\[aq]\-\en[rst]u\[aq]\e"
-\&.    nr pile\-# \-1
-\&.  \e}
-\&.
-\&.  ds pile \ev\[aq](\-0.5m + (\en[pile\-ht]u / 2u))\[aq]\e"
-\&.  as pile \e*[pile\-args]\e"
-\&.  as pile \ev\[aq]((\en[pile\-ht]u / 2u) + 0.5m)\[aq]\e"
-\&.  as pile \eh\[aq]\en[pile\-wd]u\[aq]\e"
+\&.\&  nr pile\-wd 0
+\&.\&  nr pile\-ht 0
+\&.\&  ds pile\-args
+\&.\&
+\&.\&  nr pile\-# \en[.$]
+\&.\&  while \en[pile\-#] \e{\e
+\&.\&    nr pile\-wd (\en[pile\-wd] >? \ew\[aq]\e$[\en[pile\-#]]\[aq])
+\&.\&    nr pile\-ht +(\en[rst] \- \en[rsb])
+\&.\&    as pile\-args \ev\[aq]\en[rsb]u\[aq]\e"
+\&.\&    as pile\-args \eZ\[aq]\e$[\en[pile\-#]]\[aq]\e"
+\&.\&    as pile\-args \ev\[aq]\-\en[rst]u\[aq]\e"
+\&.\&    nr pile\-# \-1
+\&.\&  \e}
+\&.\&
+\&.\&  ds pile \ev\[aq](\-0.5m + (\en[pile\-ht]u / 2u))\[aq]\e"
+\&.\&  as pile \e*[pile\-args]\e"
+\&.\&  as pile \ev\[aq]((\en[pile\-ht]u / 2u) + 0.5m)\[aq]\e"
+\&.\&  as pile \eh\[aq]\en[pile\-wd]u\[aq]\e"
 \&..
 \&.ec
 .EE
@@ -1282,7 +1312,7 @@ can be used for other mathematical symbols as well,
 for example
 .B \[rs](lf
 and
-.B \[rs](rf
+.BR \[rs](rf ,
 which provide the floor operator.
 .
 Some output devices,
@@ -1291,24 +1321,27 @@ such as
 don't unify such glyphs.
 .
 For this reason,
-the four glyphs
+the glyphs
 .BR \[rs][lf] ,
 .BR \[rs][rf] ,
 .BR \[rs][lc] ,
 and
-.BR \[rs][rc] ,
+.B \[rs][rc]
 are not unified with similar-looking bracket pieces.
 .
 In
 .IR groff ,
 only glyphs with long names are guaranteed to pile up correctly for all
-devices\[em]provided those glyphs exist.
+devices\[em]provided those glyphs are available.
 .
 .
 .TS
-l l l lx.
+L L L Lx.
+.ne 3v
 Output	Input	Unicode	Notes
 _
+.T&
+L Lf(CR) L Lx.
 \[lB]	[	u005B	left square bracket
 \[lB]	\e[lB]	u005B	left square bracket
 \[rB]	]	u005D	right square bracket
@@ -1355,14 +1388,18 @@ _
 .TE
 .
 .
+.br
+.ne 5v \" This is one more vee than we really need; see Savannah #62265.
 .\" ====================================================================
 .SS Arrows
 .\" ====================================================================
 .
 .TS
-l l l lx.
+L L L Lx.
 Output	Input	Unicode	Notes
 _
+.T&
+L Lf(CR) L Lx.
 \[<-]	\e[<\-]	u2190	horizontal arrow left +
 \[->]	\e[\->]	u2192	horizontal arrow right +
 \[<>]	\e[<>]	u2194	bidirectional horizontal arrow
@@ -1431,9 +1468,12 @@ see subsection \[lq]Mathematical symbols\[rq] below.
 .
 .
 .TS
-l l l lx.
+L L L Lx.
+.ne 3v
 Output	Input	Unicode	Notes
 _
+.T&
+L Lf(CR) L Lx.
 |	|	u007C	bar
 \[ba]	\e[ba]	u007C	bar
 \[br]	\e[br]	u2502	box rule +
@@ -1448,15 +1488,18 @@ _
 .TE
 .
 .
-.
+.br
+.ne 5v \" This is one more vee than we really need; see Savannah #62265.
 .\" ====================================================================
 .SS "Text markers"
 .\" ====================================================================
 .
 .TS
-l l l lx.
+L L L Lx.
 Output	Input	Unicode	Notes
 _
+.T&
+L Lf(CR) L Lx.
 \[ci]	\e[ci]	u25CB	circle +
 \[bu]	\e[bu]	u2022	bullet +
 \[dg]	\e[dg]	u2020	dagger +
@@ -1479,28 +1522,35 @@ _
 .SS "Legal symbols"
 .\" ====================================================================
 .
-The Bell Systems logo is not supported in
+The Bell System logo is not supported in
 .IR groff .
 .
 .TS
-l l l lx.
+L L L Lx.
+.ne 3v
 Output	Input	Unicode	Notes
 _
+.T&
+L Lf(CR) L Lx.
 \[co]	\e[co]	u00A9	copyright sign +
 \[rg]	\e[rg]	u00AE	registered sign +
 \[tm]	\e[tm]	u2122	trade mark sign
-\[bs]	\e[bs]	---	Bell Systems logo +
+\[bs]	\e[bs]	---	Bell System logo +
 .TE
 .
 .
+.br
+.ne 5v \" This is one more vee than we really need; see Savannah #62265.
 .\" ====================================================================
 .SS "Currency symbols"
 .\" ====================================================================
 .
 .TS
-l l l lx.
+L L L Lx.
 Output	Input	Unicode	Notes
 _
+.T&
+L Lf(CR) L Lx.
 \[Do]	$	u0024	dollar sign
 \[Do]	\e[Do]	u0024	dollar sign
 \[ct]	\e[ct]	u00A2	cent sign +
@@ -1512,14 +1562,18 @@ _
 .TE
 .
 .
+.br
+.ne 5v \" This is one more vee than we really need; see Savannah #62265.
 .\" ====================================================================
 .SS Units
 .\" ====================================================================
 .
 .TS
-l l l lx.
+L L L Lx.
 Output	Input	Unicode	Notes
 _
+.T&
+L Lf(CR) L Lx.
 \[de]	\e[de]	u00B0	degree sign +
 \[%0]	\e[%0]	u2030	per thousand, per mille sign
 \[fm]	\e[fm]	u2032	arc minute sign, foot mark +
@@ -1548,9 +1602,12 @@ and
 .BR \[rs][or] .
 .
 .TS
-l l l lx.
+L L L Lx.
+.ne 3v
 Output	Input	Unicode	Notes
 _
+.T&
+L Lf(CR) L Lx.
 \[AN]	\e[AN]	u2227	logical and
 \[OR]	\e[OR]	u2228	logical or
 \[no]	\e[no]	u00AC	logical not + ***
@@ -1623,9 +1680,12 @@ are their counterparts with mathematical spacing.
 .
 .
 .TS
-l l l lx.
+L L L Lx.
+.ne 3v
 Output	Input	Unicode	Notes
 _
+.T&
+L Lf(CR) L Lx.
 \[12]	\e[12]	u00BD	one half symbol +
 \[14]	\e[14]	u00BC	one quarter symbol +
 \[34]	\e[34]	u00BE	three quarters symbol +
@@ -1727,9 +1787,12 @@ and the lowercase ones are slanted.
 .
 .
 .TS
-l l l lx.
+L L L Lx.
+.ne 3v
 Output	Input	Unicode	Notes
 _
+.T&
+L Lf(CR) L Lx.
 \[*A]	\e[*A]	u0391	uppercase alpha +
 \[*B]	\e[*B]	u0392	uppercase beta +
 \[*G]	\e[*G]	u0393	uppercase gamma +
@@ -1788,14 +1851,18 @@ _
 .TE
 .
 .
+.br
+.ne 5v \" This is one more vee than we really need; see Savannah #62265.
 .\" ====================================================================
 .SS "Playing card symbols"
 .\" ====================================================================
 .
 .TS
-l l l lx.
+L L L Lx.
 Output	Input	Unicode	Notes
 _
+.T&
+L Lf(CR) L Lx.
 \[CL]	\e[CL]	u2663	solid club suit
 \[SP]	\e[SP]	u2660	solid spade suit
 \[HE]	\e[HE]	u2665	solid heart suit
@@ -1880,13 +1947,6 @@ A representation of the coverage of the C/A/T's text fonts follows.
 The glyph resembling an underscore is a baseline rule,
 and that resembling a vertical line is a box rule.
 .
-In bold,
-according to some sources,
-the square became filled.
-.\" In the Holt, Reinhart, Winston edition of the _Unix Programmer's
-.\" Manual_, Revised and Expanded Version, Volume 2 (1983), the square
-.\" in Times bold is _not_ shown as filled on page 226.  -- GBR
-.
 In italics,
 the box rule was not slanted.
 .
@@ -1916,22 +1976,20 @@ The plus,
 minus,
 and equals signs appeared in the special font despite availability in
 text fonts \[lq]to insulate the appearance of equations from the choice
-of standard [read: text] fonts\[rq].
-.
-Recall that
+of standard [read: text] fonts\[rq]\[em]a priority since
 .I troff \" AT&T
 was turned to the task of mathematical typesetting as soon as it was
 developed.
 .
 .
 .P
-We note that AT&T took the opportunity to de-unify the apostrophe
-and acute accent
+We note that AT&T took the opportunity to de-unify the apostrophe/right
+single quotation mark from the acute accent
 (a choice ISO later duplicated in its 8859 series of standards).
 .
 A slash intended to be mirror-symmetric with the backslash was also
 included,
-as was the Bell Systems logo;
+as was the Bell System logo;
 we do not attempt to depict the latter.
 .
 .TS
@@ -1946,9 +2004,9 @@ Lf(I),Lf(R).
 .\" We use \[radicalex] instead of \[rn] for more reliable simulation of
 .\" the typeface shown in Table I of CSTR #54 (1976); see subsection
 .\" "Mathematical symbols" above.
-\[sr] \[radicalex] \[>=] \[<=] \[==] \[~=] \[ap] \[!=] \
+\[>=] \[<=] \[==] \[~=] \[ap] \[!=] \
 \[ua] \[da] \[<-] \[->] \[mu] \[di] \[+-] \
-\[if] \[pd] \[gr] \[no] \[is] \[pt] \
+\[if] \[pd] \[gr] \[no] \[is] \[pt] \[sr] \[radicalex] \
 \[cu] \[ca] \[sb] \[sp] \[ib] \[ip] \[es] \[mo]
 \[sc] \[dd] \[lh] \[rh] \[or] \[ci] \
 \[lt] \[lb] \[rt] \[rb] \[lk] \[rk] \[bv] \[lf] \[rf] \[lc] \[rc]
@@ -1959,8 +2017,8 @@ Lf(I),Lf(R).
 One ASCII character as rendered by the Model 37 was apparently
 abandoned.
 .
-That device printed decimal 124 (|) as a broken vertical line,
-like Unicode U+00A6.
+That device printed decimal 124 (\[or]) as a broken vertical line,
+like Unicode U+00A6 (\[bb]).
 .
 No equivalent was available on the C/A/T;
 the box rule
@@ -1973,8 +2031,31 @@ brace vertical extension
 .\" special font, not a bold text font.
 .BR \[rs][bv] ,
 and \[lq]or\[rq] operator
-.BR \[rs][or] ,
-were used as appropriate to the context.
+.B \[rs][or]
+were used as contextually appropriate.
+.
+.
+.P
+.\" In the Holt, Reinhart, Winston edition of the _Unix Programmer's
+.\" Manual_, Revised and Expanded Version, Volume 2 (1983), the square
+.\" \(sq in Times bold is _not_ shown as filled on page 226.
+.\"
+.\" ...but in the AT&T USG Unix 4.0 manual (ca. 1981), typeset on the
+.\" Autologic APS-5, the Times bold \(sq _is_ filled.
+.\"
+.\" https://www.tuhs.org/Archive/Documentation/Manuals/Unix_4.0/
+.\"   Volume_1/00_Annotated_Table_of_Contents.pdf
+.\"   Volume_1/C.1.2_NROFF_TROFF_Users_Manual.pdf
+.\" -- GBR
+Devices supported by AT&T device-independent
+.I troff
+exhibited some differences in glyph detail.
+.
+For example,
+on the Autologic APS-5 phototypesetter,
+the square
+.B \[rs](sq
+became filled in the Times bold face.
 .
 .
 .\" ====================================================================
@@ -2062,13 +2143,14 @@ The Unicode Standard
 .UE
 .
 .
+.br
+.ne 2v
 .P
 .UR https://\:www\:.aivosto\:.com/\:articles/\:charsets\-7bit\:.html
 \[lq]7-bit Character Sets\[rq]
 .UE
-by Tuomas Salste documents the inherent ambiguity and configurability
-(in terms of variable code points)
-of the ASCII encoding standard.
+by Tuomas Salste documents the inherent ambiguity and configurable code
+points of the ASCII encoding standard.
 .
 .
 .P

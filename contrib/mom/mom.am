@@ -20,14 +20,12 @@
 
 mom_srcdir = $(top_srcdir)/contrib/mom
 
-# pdfmom command used to generated .pdf
-MOM_TFLAG = -M$(mom_srcdir)
-MOM_KFLAG = -k -p -e -t
+# pdfmom command used to generate .pdf
 MOMPDFMOM = \
   GROFF_COMMAND_PREFIX= \
   GROFF_BIN_PATH="$(GROFF_BIN_PATH)" \
   PDFMOM_BIN_PATH="$(top_builddir)" \
-  $(PDFMOMBIN) $(FFLAG) $(TFLAG) $(MOM_TFLAG) $(MOM_KFLAG)
+  $(PDFMOMBIN) $(FFLAG) $(MFLAG) -M$(mom_srcdir) -k -p -e -t
 
 man7_MANS += contrib/mom/groff_mom.7
 
@@ -40,7 +38,6 @@ momtmacdir = $(tmacdir)
 dist_momtmac_DATA = $(MOMNORMALFILES)
 
 # Files installed in htmldocdir/mom
-if INSTALL_SHIPPED_HTML
 MOMHTMLDOCFILES=\
   contrib/mom/momdoc/stylesheet.css \
   contrib/mom/momdoc/appendices.html \
@@ -67,7 +64,6 @@ MOMHTMLDOCFILES=\
   contrib/mom/momdoc/version-2.html
 momhtmldir = $(htmldocdir)/mom
 momhtml_DATA = $(MOMHTMLDOCFILES)
-endif
 
 # Files installed in $(examplesdir)/mom.  MOMEXAMPLEFILES are located
 # in the source tree, while MOMPROCESSEDEXAMPLEFILES are generated in
@@ -88,23 +84,21 @@ MOMEXAMPLEFILES=\
   contrib/mom/examples/slide-demo.mom \
   contrib/mom/examples/copyright-default.mom \
   contrib/mom/examples/copyright-chapter.mom
-if BUILD_EXAMPLES
 momexampledir = $(exampledir)/mom
 dist_momexample_DATA = $(MOMEXAMPLEFILES)
-else
-EXTRA_DIST += $(MOMEXAMPLEFILES)
-endif
 
-if BUILD_PDFEXAMPLES
+if USE_GROPDF
 MOMPROCESSEDEXAMPLEFILES = \
   contrib/mom/examples/letter.pdf \
   contrib/mom/examples/mom-pdf.pdf \
   contrib/mom/examples/mon_premier_doc.pdf \
   contrib/mom/examples/sample_docs.pdf \
-  contrib/mom/examples/typesetting.pdf \
   contrib/mom/examples/slide-demo.pdf \
   contrib/mom/examples/copyright-default.pdf \
   contrib/mom/examples/copyright-chapter.pdf
+if HAVE_URW_FONTS
+MOMPROCESSEDEXAMPLEFILES += contrib/mom/examples/typesetting.pdf
+endif
 momprocessedexampledir = $(exampledir)/mom
 nodist_momprocessedexample_DATA = $(MOMPROCESSEDEXAMPLEFILES)
 
@@ -144,15 +138,14 @@ MOSTLYCLEANFILES += \
   penguin.ps \
   penguin.pdf
 
-# Rule to generated .pdf files from .mom files
+# rule to generate .pdf files from .mom files
 SUFFIXES += .mom .pdf
 .mom.pdf:
 	$(GROFF_V)$(MKDIR_P) `dirname $@` \
 	&& LC_ALL=C $(MOMPDFMOM) $< >$@
 
 $(MOMPROCESSEDEXAMPLEFILES): $(MOMNORMALFILES) \
-  groff troff gropdf pdfmom penguin.ps penguin.pdf \
-  font/devpdf/build_font_files
+  groff troff gropdf pdfmom penguin.ps penguin.pdf font/devpdf/stamp
 
 penguin.ps:
 	$(AM_V_at)cp $(mom_srcdir)/examples/penguin.ps $@
@@ -161,7 +154,7 @@ penguin.pdf:
 
 install-data-hook: install_mom
 install_mom:
-if BUILD_PDFEXAMPLES
+if USE_GROPDF
 	for f in $(PDFDOCFILE); do \
 	  $(RM) $(DESTDIR)$(pdfdocdir)/$$f; \
 	  ln -s $(exampledir)/mom/$$f $(DESTDIR)$(pdfdocdir)/$$f; \

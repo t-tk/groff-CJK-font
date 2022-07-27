@@ -26,7 +26,9 @@ extern int debug_state;
 #include "mtsm.h"
 #include "env.h"
 
-static int no_of_statems = 0;	// debugging aid
+#if defined(DEBUGGING)
+static int no_of_statems = 0;
+#endif
 
 int_value::int_value()
 : value(0), is_known(0)
@@ -172,8 +174,10 @@ int string_value::differs(string_value compare)
 
 statem::statem()
 {
+#if defined(DEBUGGING)
   issue_no = no_of_statems;
   no_of_statems++;
+#endif
 }
 
 statem::statem(statem *copy)
@@ -187,7 +191,9 @@ statem::statem(statem *copy)
     units_values[i] = copy->units_values[i];
   for (i = 0; i < LAST_STRING; i++)
     string_values[i] = copy->string_values[i];
+#if defined(DEBUGGING)
   issue_no = copy->issue_no;
+#endif
 }
 
 statem::~statem()
@@ -218,10 +224,12 @@ void statem::flush(FILE *fp, statem *compare)
 			     compare->bool_values[MTSM_EOL]);
   bool_values[MTSM_BR].diff(fp, "devtag:.br",
 			    compare->bool_values[MTSM_BR]);
+#if defined(DEBUGGING)
   if (debug_state) {
     fprintf(stderr, "compared state %d\n", compare->issue_no);
     fflush(stderr);
   }
+#endif
 }
 
 void statem::add_tag(int_value_state t, int v)
@@ -423,9 +431,11 @@ void mtsm::inherit(statem *s, int reset_bool)
       if (reset_bool)
 	sp->state->bool_values[MTSM_BR].set(0);
       s->bool_values[MTSM_BR].set(1);
+#if defined(DEBUGGING)
       if (debug_state)
 	fprintf(stderr, "inherited br from pushed state %d\n",
 		sp->state->issue_no);
+#endif
     }
     else if (s->bool_values[MTSM_BR].is_known
 	     && s->bool_values[MTSM_BR].value)

@@ -341,7 +341,7 @@ void tty_printer::set_char(glyph *g, font *f, const environment *env,
 			   int w, const char *)
 {
   if (w % font::hor != 0)
-    fatal("width of character not a multiple of horizontal resolution");
+    fatal("glyph width is not a multiple of horizontal motion quantum");
   add_char(f->get_code(g), w,
 	   env->hpos, env->vpos,
 	   env->col, env->fill,
@@ -356,7 +356,7 @@ void tty_printer::add_char(output_character c, int w,
 #if 0
   // This is too expensive.
   if (h % font::hor != 0)
-    fatal("horizontal position not a multiple of horizontal resolution");
+    fatal("horizontal position not a multiple of horizontal motion quantum");
 #endif
   int hpos = h / font::hor;
   if (hpos < SHRT_MIN || hpos > SHRT_MAX) {
@@ -368,7 +368,8 @@ void tty_printer::add_char(output_character c, int w,
     vpos = cached_vpos;
   else {
     if (v % font::vert != 0)
-      fatal("vertical position not a multiple of vertical resolution");
+      fatal("vertical position not a multiple of vertical motion"
+	    " quantum");
     vpos = v / font::vert;
     if (vpos > nlines) {
       tty_glyph **old_lines = lines;
@@ -382,7 +383,7 @@ void tty_printer::add_char(output_character c, int w,
     // Note that the first output line corresponds to groff
     // position font::vert.
     if (vpos <= 0) {
-      error("character above first line discarded");
+      error("output above first line discarded");
       return;
     }
     cached_v = v;
@@ -537,8 +538,10 @@ void tty_printer::draw(int code, int *p, int np, const environment *env)
     return;
   if (code == 'l')
     draw_line(p, np, env);
-  if (code == 'p')
+  else if (code == 'p')
     draw_polygon(p, np, env);
+  else
+    warning("ignoring unsupported drawing command '%1'", char(code));
 }
 
 void tty_printer::draw_polygon(int *p, int np, const environment *env)
@@ -588,6 +591,23 @@ void tty_printer::draw_line(int *p, int np, const environment *env)
 void tty_printer::line(int hpos, int vpos, int dx, int dy,
 		       color *col, color *fill)
 {
+  // XXX: zero-length lines get drawn as '+' crossings in nroff, even
+  // when there is no crossing, but they nevertheless occur frequently
+  // in input.  Does tbl produce them?
+#if 0
+  if (0 == dx)
+    fatal("cannot draw zero-length horizontal line");
+  if (0 == dy)
+    fatal("cannot draw zero-length vertical line");
+#endif
+  if ((dx != 0) && (dy != 0))
+    warning("cannot draw diagonal line");
+  if (dx % font::hor != 0)
+    fatal("length of horizontal line %1 is not a multiple of horizontal"
+	" motion quantum %2", dx, font::hor);
+  if (dy % font::vert != 0)
+    fatal("length of vertical line %1 is not a multiple of vertical"
+	" motion quantum %2", dy, font::vert);
   if (dx == 0) {
     // vertical line
     int v = vpos;
@@ -716,7 +736,8 @@ static output_character crossings[4*4] = {
 void tty_printer::end_page(int page_length)
 {
   if (page_length % font::vert != 0)
-    error("vertical position at end of page not multiple of vertical resolution");
+    error("vertical position at end of page not multiple of vertical"
+	  " motion quantum");
   int lines_per_page = page_length / font::vert;
   int last_line;
   for (last_line = nlines; last_line > 0; last_line--)

@@ -37,12 +37,19 @@ $(DEVUTF8FONTSFILES): $(devutf8_srcdir)/R.proto
 	$(AM_V_GEN)$(MKDIR_P) `dirname $@` \
 	&& $(RM) $@ \
 	&& $(SHELL) $(GENFONTSSH) $(devutf8_srcdir)/R.proto \
-	     $(DEVUTF8RES) $(DEVUTF8CPI) `basename $@` > $@
+	  $(DEVUTF8RES) $(DEVUTF8CPI) `basename $@` >$@
 
 font/devutf8/DESC: $(devutf8_srcdir)/DESC.proto
 	$(AM_V_GEN)$(MKDIR_P) `dirname $@` \
 	&& $(SHELL) $(GENDESCSH) $(devutf8_srcdir)/DESC.proto \
-	     $(DEVUTF8RES) $(DEVUTF8CPI) $(DEVUTF8LPI) $(DEVUTF8FONTS) > $@
+	  $(DEVUTF8RES) $(DEVUTF8CPI) $(DEVUTF8LPI) $(DEVUTF8FONTS) >$@
+
+# (UTF-8-encoded) text documents to be produced by troff should depend
+# on this stamp file to ensure that grotty's device and font description
+# files are available.
+MOSTLYCLEANFILES += font/devutf8/stamp
+font/devutf8/stamp: font/devutf8/DESC $(DEVUTF8FONTSFILES)
+	$(AM_V_at)>$@
 
 
 # Local Variables:

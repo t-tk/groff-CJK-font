@@ -28,25 +28,30 @@ refer_SOURCES =  \
   src/preproc/refer/ref.h \
   src/preproc/refer/token.h \
   src/preproc/refer/command.h
+
 PREFIXMAN1 += src/preproc/refer/refer.1
-EXTRA_DIST += src/preproc/refer/TODO src/preproc/refer/refer.1.man
-CLEANFILES += \
-  src/preproc/refer/label.cpp \
-  src/preproc/refer/label.hpp \
-  src/preproc/refer/label.output
-# As refer_CPPFLAGS was set, all the .o have a 'refer-' prefix
+EXTRA_DIST += \
+  src/preproc/refer/TODO \
+  src/preproc/refer/refer.1.man
+
+# Since refer_CPPFLAGS was set, all .o files have a 'refer-' prefix.
 src/preproc/refer/refer-command.$(OBJEXT): defs.h
 src/preproc/refer/refer-ref.$(OBJEXT): defs.h
 src/preproc/refer/refer-refer.$(OBJEXT): defs.h
 src/preproc/refer/refer-token.$(OBJEXT): defs.h
 src/preproc/refer/refer-label.$(OBJEXT): defs.h
 
+MAINTAINERCLEANFILES += \
+  src/preproc/refer/label.cpp \
+  src/preproc/refer/label.hpp \
+  src/preproc/refer/label.output
+
 refer_TESTS = \
   src/preproc/refer/tests/report-correct-line-numbers.sh
 TESTS += $(refer_TESTS)
 EXTRA_DIST += \
   $(refer_TESTS) \
-  src/preproc/refer/tests/artifacts/62124.ref
+  src/preproc/refer/tests/artifacts/62124.bib
 
 
 # Local Variables:

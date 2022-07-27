@@ -4371,9 +4371,9 @@ html_printer::html_printer()
   file_list.add_new_file(xtmpfile());
   html.set_file(file_list.get_file());
   if (font::hor != 24)
-    fatal("horizontal resolution must be 24");
+    fatal("horizontal motion quantum must be 24");
   if (font::vert != 40)
-    fatal("vertical resolution must be 40");
+    fatal("vertical motion quantum must be 40");
 #if 0
   // should be sorted html..
   if (font::res % (font::sizescale*72) != 0)

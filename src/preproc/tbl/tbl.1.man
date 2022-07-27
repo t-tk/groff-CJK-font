@@ -480,8 +480,8 @@ respectively.
 .P
 The row definition with the most column descriptors determines the
 number of columns in the table;
-any row definition with fewer column descriptors is implicitly extended
-on the right-hand side with
+any row definition with fewer is implicitly extended on the right-hand
+side with
 .B L
 classifiers as many times as necessary to make the table rectangular.
 .
@@ -738,9 +738,9 @@ This modifier sets the default line length used in a text block.
 .
 .TP
 .BR f ,\~ F
-Select the font used for the table entry.
+Select the typeface for the table entry.
 .
-This modifier must be followed by a font name
+This modifier must be followed by a font or style name
 (one or two characters not starting with a digit),
 font mounting position
 (a single digit),
@@ -753,8 +753,8 @@ The last form is a GNU extension.
 .B ft
 request.)
 .
-A one-character font name or mounting position not in parentheses must
-be separated by one or more spaces or tabs from whatever follows.
+A one-character argument not in parentheses must be separated by one or
+more spaces or tabs from what follows.
 .
 .
 .TP
@@ -768,7 +768,7 @@ abbreviates
 .BR m ,\~ M
 Call a
 .I groff
-macro before typesetting a text block table entry
+macro before typesetting a text block
 (see subsection \[lq]Text blocks\[rq] below).
 .
 This is a GNU extension.
@@ -777,7 +777,7 @@ This modifier must be followed by a macro name of one or two characters
 or a name of any length in parentheses.
 .
 A one-character macro name not in parentheses must be separated by one
-or more spaces or tabs from whatever follows.
+or more spaces or tabs from what follows.
 .
 The named macro must be defined before the table region containing this
 column modifier is encountered.
@@ -802,7 +802,7 @@ it can thus override other column modifiers.
 .
 .TP
 .BR p ,\~ P
-Set the type size used for the table entry.
+Set the type size for the table entry.
 .
 This modifier must be followed by an
 .RI integer\~ n
@@ -848,8 +848,7 @@ This is a GNU extension.
 .
 .TP
 .BR v ,\~ V
-Set the vertical spacing to be used in a table entry containing a text
-block.
+Set the vertical spacing to be used in a text block.
 .
 (This parameter corresponds to that accepted by the
 .I troff \" generic
@@ -1155,14 +1154,15 @@ it can be placed within a
 .
 .P
 .I @g@tbl
-interprets a table entry of
+interprets a table entry beginning with
 .RB \[lq] T{ \[rq]
 at the end of an input line not as table data,
 but as a token starting a text block.
 .
 Similarly,
 .RB \[lq] T} \[rq]
-at the start of an input line ends a text block.
+at the start of an input line ends a text block;
+it must also end the table entry.
 .
 Text block tokens can share an input line with other table data
 (preceding
@@ -1227,7 +1227,7 @@ the default length of the text block
 the line length used to process the text block diversion)
 is computed as
 .IR L \[tmu] C /( N +1),
-.\" ...and rounded to the horizontal resolution of the output device
+.\" ...and rounded to the horizontal motion quantum of the output device
 where
 .I L
 is the current line length,
@@ -1263,6 +1263,16 @@ token is output so that a
 macro named
 .B TE
 can make use of it.
+.
+.B T.\&
+is a Boolean-valued register indicating whether the bottom of the table
+is being processed.
+.
+The
+.B #T
+register marks the top of the table.
+.
+Avoid using these names for any other purpose.
 .
 .
 .P
@@ -1381,17 +1391,15 @@ Numeric and alphabetic entries may span horizontally.
 GNU
 .I tbl \" GNU
 .\" AT&T tbl used all kinds of registers.
-uses only register,
+internally employs register,
 string,
 macro,
-and diversion names beginning with the
+and diversions having names beginning with the
 .RB digit\~ 3 .
 .
-When using
-GNU
-.IR tbl , \" GNU
-you should avoid defining any identifiers that start with
-.RB \[lq] 3 \[rq].
+A document to be preproccessed with GNU
+.I tbl \" GNU
+should not use any such identifiers.
 .\" XXX: Why are they not named starting with "gtbl*" or something?  GNU
 .\" tbl turns AT&T troff compatibility mode off anyway.
 .

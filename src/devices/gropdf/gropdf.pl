@@ -1,6 +1,6 @@
 #!@PERL@ -w
 #
-#	gropdf		: PDF post processor for groff
+#       gropdf          : PDF post processor for groff
 #
 # Copyright (C) 2011-2020 Free Software Foundation, Inc.
 #      Written by Deri James <deri@chuzzlewit.myzen.co.uk>
@@ -12,8 +12,8 @@
 # Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# groff is distributed in the hope that it will be useful, but WITHOUT ANY
-# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# groff is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 # FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 # for more details.
 #
@@ -29,8 +29,10 @@ use constant
     CHRCODE		=> 1,
     PSNAME		=> 2,
     ASSIGNED		=> 3,
-    USED		=> 4,
+    USED                => 4,
 };
+
+(my $progname=$0) =~s @.*/@@;
 
 my $gotzlib=0;
 
@@ -47,7 +49,8 @@ if($rc)
 }
 else
 {
-    Msg(0,"Perl module Compress::Zlib not available - cannot compress this pdf");
+    Warn("Perl module 'Compress::Zlib' not available; cannot compress"
+         . " this PDF");
 }
 
 my %cfg;
@@ -57,7 +60,7 @@ $cfg{GROFF_FONT_PATH}='@GROFF_FONT_DIR@';
 $cfg{RT_SEP}='@RT_SEP@';
 binmode(STDOUT);
 
-my @obj;	# Array of PDF objects
+my @obj;        # Array of PDF objects
 my $objct=0;	# Count of Objects
 my $fct=0;	# Output count
 my %fnt;	# Used fonts
@@ -143,7 +146,8 @@ my $bgbox='';		# Draw commands for boxes on this page
 
 $noslide=1 if exists($ENV{GROPDF_NOSLIDE}) and $ENV{GROPDF_NOSLIDE};
 
-my %ppsz=(	'ledger'=>[1224,792],
+my %ppsz=(
+	'ledger'=>[1224,792],
 	'legal'=>[612,1008],
 	'letter'=>[612,792],
 	'a0'=>[2384,3370],
@@ -157,20 +161,22 @@ my %ppsz=(	'ledger'=>[1224,792],
 	'a8'=>[148,210],
 	'a9'=>[105,148],
 	'a10'=>[73,105],
-	'isob0'=>[2835,4008],
-	'isob1'=>[2004,2835],
-	'isob2'=>[1417,2004],
-	'isob3'=>[1001,1417],
-	'isob4'=>[709,1001],
-	'isob5'=>[499,709],
-	'isob6'=>[354,499],
+	'b0'=>[2835,4008],
+	'b1'=>[2004,2835],
+	'b2'=>[1417,2004],
+	'b3'=>[1001,1417],
+	'b4'=>[709,1001],
+	'b5'=>[499,709],
+	'b6'=>[354,499],
 	'c0'=>[2599,3677],
 	'c1'=>[1837,2599],
 	'c2'=>[1298,1837],
 	'c3'=>[918,1298],
 	'c4'=>[649,918],
 	'c5'=>[459,649],
-	'c6'=>[323,459] );
+	'c6'=>[323,459],
+	'com10'=>[297,684],
+);
 
 my $ucmap=<<'EOF';
 /CIDInit /ProcSet findresource begin
@@ -206,8 +212,6 @@ my $stats=0;
 my $unicodemap;
 my @idirs;
 
-#Load_Config();
-
 GetOptions("F=s" => \$fd, 'I=s' => \@idirs, 'l' => \$frot, 'p=s' => \$fpsz, 'd!' => \$debug, 'v' => \$version, 'version' => \$version, 'e' => \$embedall, 'y=s' => \$Foundry, 's' => \$stats, 'u:s' => \$unicodemap);
 
 unshift(@idirs,'.');
@@ -226,18 +230,19 @@ if (defined($unicodemap))
     }
     elsif (-r $unicodemap)
     {
-	local $/;
-	open(F,"<$unicodemap") or die "gropdf: Failed to open '$unicodemap'";
-	($ucmap)=(<F>);
-	close(F);
+        local $/;
+        open(F,"<$unicodemap") or Die("failed to open '$unicodemap'");
+        ($ucmap)=(<F>);
+        close(F);
     }
     else
     {
-	Msg(0,"Failed to find '$unicodemap' - ignoring");
+        Warn("failed to find '$unicodemap'; ignoring");
     }
 }
 
-# Search for 'font directory': paths in -f opt, shell var GROFF_FONT_PATH, default paths
+# Search for 'font directory': paths in -f opt, shell var
+# GROFF_FONT_PATH, default paths
 
 my $fontdir=$cfg{GROFF_FONT_PATH};
 $fontdir=$ENV{GROFF_FONT_PATH}.$cfg{RT_SEP}.$fontdir if exists($ENV{GROFF_FONT_PATH});
@@ -418,7 +423,7 @@ foreach my $fontno (sort keys %fontlst)
 
 	push(@{$o->{DIFF}},$psname);
 	push(@{$o->{WIDTH}},$wid);
-	last if $#{$o->{DIFF}} >= 255;
+	last if $#{$o->{DIFF}} >= 256;
     }
     unshift(@{$o->{DIFF}},0);
     my $p=GetObj($fontlst{$fontno}->{OBJ});
@@ -426,8 +431,8 @@ foreach my $fontno (sort keys %fontlst)
     if (exists($p->{LastChar}) and $p->{LastChar} > 255)
     {
 	$p->{LastChar} = 255;
-	splice(@{$o->{DIFF}},256);
-	splice(@{$o->{WIDTH}},256);
+	splice(@{$o->{DIFF}},257);
+	splice(@{$o->{WIDTH}},257);
     }
 }
 
@@ -602,23 +607,8 @@ sub ToPoints
     }
     else
     {
-	Msg(1,"Unknown scaling factor '$unit'");
+        Die("invalid scaling unit '$unit'");
     }
-}
-
-sub Load_Config
-{
-    open(CFG,"<gropdf_config") or die "Can't open config file: $!";
-
-    while (<CFG>)
-    {
-	chomp;
-	my ($key,$val)=split(/ ?= ?/);
-
-	$cfg{$key}=$val;
-    }
-
-    close(CFG);
 }
 
 sub LoadDownload
@@ -650,10 +640,10 @@ sub LoadDownload
 	    $download{"$foundry $name"}=$file;
 	}
 
-	close($f);
+        close($f);
     }
 
-    Msg(1,"Failed to open 'download'") if !$found;
+    Die("failed to open 'download' file") if !$found;
 }
 
 sub OpenFile
@@ -680,7 +670,8 @@ sub LoadDesc
     my $f;
 
     OpenFile(\$f,$fontdir,"DESC");
-    Msg(1,"Failed to open 'DESC'") if !defined($f);
+    Die("failed to open device description file 'DESC'")
+        if !defined($f);
 
     while (<$f>)
     {
@@ -692,6 +683,38 @@ sub LoadDesc
     }
 
     close($f);
+
+    foreach my $directive ('unitwidth', 'res', 'sizescale')
+    {
+        Die("device description file 'DESC' missing mandatory directive"
+            . " '$directive'") if !exists($desc{$directive});
+    }
+
+    foreach my $directive ('unitwidth', 'res', 'sizescale')
+    {
+        my $val=$desc{$directive};
+        Die("device description file 'DESC' directive '$directive'"
+            . " value must be positive; got '$val'")
+            if ($val !~ m/^\d+$/ or $val <= 0);
+    }
+
+    if (exists($desc{'hor'}))
+    {
+        my $hor=$desc{'hor'};
+        Die("device horizontal motion quantum must be 1, got '$hor'")
+            if ($hor != 1);
+    }
+
+    if (exists($desc{'vert'}))
+    {
+        my $vert=$desc{'vert'};
+        Die("device vertical motion quantum must be 1, got '$vert'")
+            if ($vert != 1);
+    }
+
+    my ($res,$ss)=($desc{'res'},$desc{'sizescale'});
+    Die("device resolution must be a multiple of 72*sizescale, got"
+        . " '$res' ('sizescale'=$ss)") if (($res % ($ss * 72)) != 0);
 }
 
 sub rad  { $_[0]*3.14159/180 }
@@ -706,9 +729,10 @@ sub do_x
 
     if ($xcmd eq 'T')
     {
-	Msg(0,"Expecting a pdf pipe (got $xprm[0])") if $xprm[0] ne substr($devnm,3);
+        Warn("expecting a PDF pipe (got $xprm[0])")
+            if $xprm[0] ne substr($devnm,3);
     }
-    elsif ($xcmd eq 'f')	# Register Font
+    elsif ($xcmd eq 'f')        # Register Font
     {
 	$xprm[1]="${Foundry}-$xprm[1]" if $Foundry ne '';
 	LoadFont($xprm[0],$xprm[1]);
@@ -898,16 +922,13 @@ sub do_x
 		    }
 		}
 		elsif ($pdfmark=~m/(.+) \/DEST\s*$/)
-		{
-		    my @xwds=split(' ',"<< $1 >>");
-		    my $dest=ParsePDFValue(\@xwds);
-		    foreach my $v (@{$dest->{View}})
-		    {
-			$v=GraphY(abs($v)) if substr($v,0,1) eq '-';
-		    }
-		    unshift(@{$dest->{View}},"$cpageno 0 R");
+                {
+                    my @xwds=split(' ',"<< $1 >>");
+                    my $dest=ParsePDFValue(\@xwds);
+                    $dest->{View}->[1]=GraphY($dest->{View}->[1]*-1);
+                    unshift(@{$dest->{View}},"$cpageno 0 R");
 
-		    if (!defined($dests))
+                    if (!defined($dests))
 		    {
 			$cat->{Dests}=BuildObj(++$objct,{});
 			$dests=$obj[$objct]->{DATA};
@@ -1049,13 +1070,13 @@ sub do_x
 			}
 
 			$incfil{$fil}=LoadSWF($fil,[$llx,$lly,$urx,$ury],$mat);
-		    }
-		    else
-		    {
-			Msg(0,"Unknown filetype '$fil'");
-			return undef;
-		    }
-		}
+                    }
+                    else
+                    {
+                        Warn("unrecognized 'import' file type '$fil'");
+                        return undef;
+                    }
+                }
 
 		if (defined($incfil{$fil}))
 		{
@@ -1204,27 +1225,30 @@ sub do_x
 					    {
 						$pginsert=$j;
 						last FIND;
-					    }
-					    else
-					    {
-						Msg(0,"Parameter must be top|bottom|before|after not '$ba'");
-						last FIND;
-					    }
-					}
+                                            }
+                                            else
+                                            {
+                                                # XXX: indentation wince
+                                                Warn(
+"expected 'switchtopage' parameter to be one of"
+. "'top|bottom|before|after', got '$ba'");
+                                                last FIND;
+                                            }
+                                        }
 
-				    }
+                                    }
 
-				    Msg(0,"Can't find page ref '$ref'");
-				    last FIND
+                                    Warn("cannot find page ref '$ref'");
+                                    last FIND
 
-				}
+                                }
 			    }
-			}
-			else
-			{
-			    Msg(0,"Can't find page named '$want'");
-			}
-		    }
+                        }
+                        else
+                        {
+                            Warn("cannot find page named '$want'");
+                        }
+                    }
 
 		    if ($pginsert < 0)
 		    {
@@ -1431,10 +1455,12 @@ sub GetPoints
     return $val;
 }
 
-# Although the PDF reference mentions XObject/Form as a way of incorporating an external PDF page into
-# the current PDF, it seems not to work with any current PDF reader (although I am told (by Leonard Rosenthol,
-# who helped author the PDF ISO standard) that Acroread 9 does support it, empiorical observation shows otherwise!!).
-# So... do it the hard way - full PDF parser and merge required objects!!!
+# Although the PDF reference mentions XObject/Form as a way of
+# incorporating an external PDF page into the current PDF, it seems not
+# to work with any current PDF reader (although I am told (by Leonard
+# Rosenthol, who helped author the PDF ISO standard) that Acroread 9
+# does support it, empirical observation shows otherwise!!).  So... do
+# it the hard way - full PDF parser and merge required objects!!!
 
 # sub BuildRef
 # {
@@ -1444,11 +1470,11 @@ sub GetPoints
 # 	my $wid=($bbox->[2]-$bbox->[0])*$mat->[0];
 # 	my $hgt=($bbox->[3]-$bbox->[1])*$mat->[3];
 #
-# 	if (!open(PDF,"<$fil"))
-# 	{
-# 		Msg(0,"Failed to open '$fil'");
-# 		return(undef);
-# 	}
+#       if (!open(PDF,"<$fil"))
+#       {
+#               Warn("failed to open '$fil'");
+#               return(undef);
+#       }
 #
 # 	my (@f)=(<PDF>);
 #
@@ -1501,8 +1527,8 @@ sub LoadSWF
 
     if (!open(PDF,"<$fil"))
     {
-	Msg(0,"Failed to open '$fil'");
-	return(undef);
+        Warn("failed to open SWF '$fil'");
+        return(undef);
     }
 
     my (@f)=(<PDF>);
@@ -1602,8 +1628,8 @@ sub LoadPDF
 
     if (!defined($PD))
     {
-	Msg(0,"Failed to open PDF '$pdfnm'");
-	return undef;
+        Warn("failed to open PDF '$pdfnm'");
+        return undef;
     }
 
     my $hdr=<$PD>;
@@ -1650,13 +1676,13 @@ sub LoadPDF
 		$pdf->[$curobj]->{STREAMPOS}=[tell($PD)+$adj,$strmlen];
 		seek($PD,$strmlen,1);
 		$instream=1;
-	    }
-	    else
-	    {
-		Msg(0,"Parsing PDF '$pdfnm' failed");
-		return undef;
-	    }
-	}
+            }
+            else
+            {
+                Warn("parsing PDF '$pdfnm' failed");
+                return undef;
+            }
+        }
 
 	s/%.*?$//;
 	$pdftxt.=$_.' ';
@@ -1795,10 +1821,12 @@ sub LoadStream
 
     $l=$pdf->[$$l]->{OBJ} if (defined($l) && ref($l) eq 'OBJREF');
 
-    Msg(1,"Unable to determine length of stream \@$o->{STREAMPOS}->[0]") if !defined($l);
+    Die("unable to determine length of stream \@$o->{STREAMPOS}->[0]")
+        if !defined($l);
 
     sysseek(PD,$o->{STREAMPOS}->[0],0);
-    Msg(0,'Failed to read all the stream') if $l != sysread(PD,$o->{STREAM},$l);
+    Warn("failed to read all of the stream")
+        if $l != sysread(PD,$o->{STREAM},$l);
 
     if ($gotzlib and exists($o->{OBJ}->{'Filter'}) and $o->{OBJ}->{'Filter'} eq '/FlateDecode')
     {
@@ -1826,7 +1854,7 @@ sub BuildStream
     }
     else
     {
-	Msg(0,"unexpected 'Contents'");
+        Warn("unexpected 'Contents'");
     }
 
     foreach my $o (@{$objs})
@@ -2024,12 +2052,12 @@ sub ParsePDFHash
 
 	my (@w)=split('/',$wd,3);
 
-	if ($w[0])
-	{
-	    Msg(0,"PDF Dict Key '$wd' does not start with '/'");
-	    exit 1;
-	}
-	else
+        if ($w[0])
+        {
+            Warn("PDF Dict Key '$wd' does not start with '/'");
+            exit 1;
+        }
+        else
 	{
 	    unshift(@{$pdfwds},"/$w[2]") if $w[2];
 	    $wd=$w[1];
@@ -2178,13 +2206,34 @@ sub ParsePDFArray
     return($rtn);
 }
 
+sub Warn
+{
+    Msg(0,(@_));
+}
+
+sub Die
+{
+    Msg(1,(@_));
+}
+
 sub Msg
 {
-    my ($lev,$msg)=@_;
+    my ($fatal,$msg)=@_;
 
+    print STDERR "$progname:";
     print STDERR "$env{SourceFile}: " if exists($env{SourceFile});
+
+    if ($fatal)
+    {
+        print STDERR "fatal error: ";
+    }
+    else
+    {
+        print STDERR "warning: ";
+    }
+
     print STDERR "$msg\n";
-    exit 1 if $lev;
+    exit 1 if $fatal;
 }
 
 sub PutXY
@@ -2314,10 +2363,10 @@ sub LoadFont
     {
 	# Try with no foundry
 	$fontnm=~s/.*?-//;
-	OpenFile(\$f,$fontdir,$fontnm);
+        OpenFile(\$f,$fontdir,$fontnm);
     }
 
-    Msg(1,"Failed to open font '$ofontnm'") if !defined($f);
+    Die("failed to open font '$ofontnm'") if !defined($f);
 
     my $foundry='';
     $foundry=$1 if $fontnm=~m/^(.*?)-/;
@@ -2409,12 +2458,13 @@ sub LoadFont
 
     if (exists($download{$fontkey}))
     {
-	# Not a Base Font
-	my ($l1,$l2,$l3,$t1stream)=GetType1($download{$fontkey});
-	Msg(0,"Incorrect font format for '$fontkey' ($l1)") if !defined($t1stream);
-	$fno=++$objct;
-	$fontlst{$fontno}->{OBJ}=BuildObj($objct,
-			{'Type' => '/Font',
+        # Not a Base Font
+        my ($l1,$l2,$l3,$t1stream)=GetType1($download{$fontkey});
+        Warn("incorrect font format for '$fontkey' ($l1)")
+            if !defined($t1stream);
+        $fno=++$objct;
+        $fontlst{$fontno}->{OBJ}=BuildObj($objct,
+                        {'Type' => '/Font',
 			'Subtype' => '/Type1',
 			'BaseFont' => '/'.$fnt{internalname},
 			'Widths' => $fnt{WIDTH},
@@ -2456,6 +2506,9 @@ sub LoadFont
     }
     else
     {
+	Warn("unable to embed font file for '$fnt{internalname}'"
+	    . " ($ofontnm) (missing entry in 'download' file?)")
+	    if $embedall;
 	$fno=++$objct;
 	$fontlst{$fontno}->{OBJ}=BuildObj($objct,
 			{'Type' => '/Font',
@@ -2516,7 +2569,7 @@ sub GetType1
     my $f;
 
     OpenFile(\$f,$fontdir,"$file");
-    Msg(1,"Failed to open '$file'") if !defined($f);
+    Die("failed to open '$file'") if !defined($f);
 
     $head=GetChunk($f,1,"currentfile eexec");
     $body=GetChunk($f,2,"00000000") if !eof($f);
@@ -2560,21 +2613,17 @@ sub GetChunk
 		}
 
 		$type=$chunktype;
-		return if $chunktype == 3;
+                return if $chunktype == 3;
 
-		$ct=read($F,$hdr,4);
-
-		Msg(1,"Failed to read binary segment length"), return if $ct != 4;
-
-		my $sl=unpack('V',$hdr);
-		my $data;
-		my $chk=read($F,$data,$sl);
-
-		Msg(1 ,"Failed to read binary segment"), return if $chk != $sl;
-
-		$chunk.=$data;
-	    }
-	    else
+                $ct=read($F,$hdr,4);
+                Die("failed to read binary segment length") if $ct != 4;
+                my $sl=unpack('V',$hdr);
+                my $data;
+                my $chk=read($F,$data,$sl);
+                Die("failed to read binary segment") if $chk != $sl;
+                $chunk.=$data;
+            }
+            else
 	    {
 		# ascii chunk
 
@@ -3738,8 +3787,8 @@ sub RemapChr
     }
     else
     {
-	Msg(0,"Too many glyphs used in font '$cft'");
-	return(32);
+        Warn("too many glyphs used in font '$cft'");
+        return(32);
     }
 }
 
@@ -3760,8 +3809,8 @@ sub do_N
 
     if (!defined($fnt->{NO}->[$par]))
     {
-	Msg(0,"No chr($par) in font $fnt->{internalname}");
-	return;
+        Warn("no chr($par) in font $fnt->{internalname}");
+        return;
     }
 
     my $chnm=$fnt->{NO}->[$par]->[0];
@@ -3778,8 +3827,10 @@ sub do_n
     PutHotSpot($xpos) if defined($mark);
 }
 
-
 1;
+
 # Local Variables:
+# fill-column: 72
 # mode: CPerl
 # End:
+# vim: set cindent noexpandtab shiftwidth=4 softtabstop=4 textwidth=72:

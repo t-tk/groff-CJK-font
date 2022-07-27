@@ -30,7 +30,7 @@ input='.nr yr 108
 .++ C
 .+c "Fleeing the Impoverished, Drunken Countryside for Dublin"
 .pp
-The day was \\*(dw, \\*(td.
+The day was \*(dw, \*(td.
 .++ A
 .+c "How to Write for The Toast"
 .pp
@@ -43,12 +43,12 @@ wail () {
     fail=YES
 }
 
-output=$(echo "$input" | "$groff" -Tascii -P-cbou -me)
-output_cs=$(echo "$input" | "$groff" -Tutf8 -P-cbou -me -mcs)
-output_de=$(echo "$input" | "$groff" -Tutf8 -P-cbou -me -mde)
-output_fr=$(echo "$input" | "$groff" -Tutf8 -P-cbou -me -mfr)
-output_it=$(echo "$input" | "$groff" -Tutf8 -P-cbou -me -mit)
-output_sv=$(echo "$input" | "$groff" -Tutf8 -P-cbou -me -msv)
+output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -me)
+output_cs=$(printf "%s\n" "$input" | "$groff" -Tutf8 -P-cbou -me -mcs)
+output_de=$(printf "%s\n" "$input" | "$groff" -Tutf8 -P-cbou -me -mde)
+output_fr=$(printf "%s\n" "$input" | "$groff" -Tutf8 -P-cbou -me -mfr)
+output_it=$(printf "%s\n" "$input" | "$groff" -Tutf8 -P-cbou -me -mit)
+output_sv=$(printf "%s\n" "$input" | "$groff" -Tutf8 -P-cbou -me -msv)
 
 echo 'checking that `td` string updated correctly for English' >&2
 echo "$output" | grep -q 'The day was Monday, December 15, 2008\.$' \

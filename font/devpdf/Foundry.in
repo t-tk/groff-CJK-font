@@ -10,21 +10,26 @@
 # Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# groff is distributed in the hope that it will be useful, but WITHOUT ANY
-# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# groff is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 # FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 # for more details.
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#=====================================================================
-#Foundry|Name|Searchpath
+#=======================================================================
+#Foundry|Name|Search path
 foundry||(gs)
 
-# These are just copies of the grops fonts so MUST not have any flags etc set
+# Enable the font description files for grops (generated from Adobe
+# foundry font files) to be used with gropdf.  afmtodit must not be
+# called with any flags.  URW fonts are substituted for Adobe fonts in
+# the download file by default.  If you have Adobe Type 1 fonts, you can
+# update the foundry search path above if necessary and replace the
+# contents of the file fields below with their file names.
 
-#Font|IsBase14|Flags|Map|Encoding|File(!file...)
+#Font|IsBase14|Flags|Map|Encoding|File(!file)...
 AB|N||||URWGothic-Demi.t1!URWGothic-Demi!URWGothicL-Demi!a010015l.pfb
 ABI|N||||URWGothic-DemiOblique.t1!URWGothic-DemiOblique!URWGothicL-DemiObli!a010035l.pfb
 AI|N||||URWGothic-BookOblique.t1!URWGothic-BookOblique!URWGothicL-BookObli!a010033l.pfb
@@ -62,18 +67,21 @@ ZCMI|N||||Z003-MediumItalic.t1!Z003-MediumItalic!URWChanceryL-MediItal!z003034l.
 ZD|Y||||D050000L!D050000L.t1!Dingbats!d050000l.pfb
 EURO|N||||*../devps/freeeuro.pfa
 
-#======================================================================
+# BEGIN URW ============================================================
 
-#Foundry|Name|Searchpath
-foundry|U|(gs):@urwfontsdir@ :/usr/share/fonts/type1/gsfonts :/opt/local/share/fonts/urw-fonts # the URW fonts delivered with ghostscript (may be different)
-#Define Flags for afmtodit
+# URW fonts are typically shipped with Ghostscript, but can be replaced.
+
+#Foundry|Name|Search path
+foundry|U|@urwfontsdir@:/usr/share/fonts/type1/gsfonts:/usr/share/fonts/default/Type1:/usr/share/fonts/default/Type1/adobestd35:/usr/share/fonts/type1/urw-base35:/opt/local/share/fonts/urw-fonts:(gs)
+
+# Define flags for afmtodit.
 
 r=-i 0 -m
 i=-i 50
 n=-n
 s=-s
 
-#Font|IsBase14|Flags|Map|Encoding|File(!file...)
+#Font|IsBase14|Flags|Map|Encoding|File(!file)...
 AB|N|r|textmap|text.enc|URWGothic-Demi.t1!URWGothic-Demi!URWGothicL-Demi!a010015l.pfb
 ABI|N|i|textmap|text.enc|URWGothic-DemiOblique.t1!URWGothic-DemiOblique!URWGothicL-DemiObli!a010035l.pfb
 AI|N|i|textmap|text.enc|URWGothic-BookOblique.t1!URWGothic-BookOblique!URWGothicL-BookObli!a010033l.pfb
@@ -110,4 +118,4 @@ TR|N|r|textmap|text.enc|NimbusRoman-Regular.t1!NimbusRoman-Regular!NimbusRomNo9L
 ZCMI|N|i|textmap|text.enc|Z003-MediumItalic.t1!Z003-MediumItalic!URWChanceryL-MediItal!z003034l.pfb
 ZD|N|sr|dingbats.map||D050000L!D050000L.t1!Dingbats!d050000l.pfb
 
-#======================================================================
+# END URW ==============================================================
