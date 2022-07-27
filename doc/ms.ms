@@ -22,8 +22,8 @@
 .nr TC-MARGIN \w'00' \" expect 2-digit page numbers at most
 .ie t .nr PI 3.5n
 .el   .nr PI 4n
-.ND March 2022
-.EH '%''March 2022'
+.ND June 2022
+.EH '%''June 2022'
 .EF ''''
 .OH 'Using \f[I]groff\f[] with the \f[I]ms\f[] macros''%'
 .OF ''''
@@ -37,6 +37,10 @@ Macro Package
 Larry Kollar
 .AI
 kollar@alltel.net
+.AU
+G.\& Branden Robinson
+.AI
+g.branden.robinson@gmail.com
 .AB no
 The
 .I ms
@@ -106,10 +110,10 @@ Bell Labs internal memorandum.
 .
 While the
 .I man
-package was designed for brief documents to be perused at a terminal,
+package was designed for brief reference documents,
 the
 .I ms
-macros are also suitable for longer documents intended for printing and
+macros are also suitable for longer works intended for printing and
 possible publication.
 .
 .
@@ -118,6 +122,7 @@ In this document,
 a right arrow (\[->]) is used to indicate a tab character in the input.
 .
 .
+.KS
 .NH 2
 Basic information
 .XS
@@ -127,25 +132,97 @@ Basic information
 .
 .LP
 .I ms
+documents are plain text files;
+prepare them with your preferred text editor.
+.
+If you're in a hurry to get started,
+be advised that
+.I ms
+needs one of its macros called at the beginning of a document so that it
+can initialize.
+.
+Put a macro call on a line by itself.
+.
+Use
+.CW .PP
+if you want your paragraph's first line to be indented,
+or
+.CW .LP
+if you don't.
+.KE
+.
+.
+.PP
+After that,
+start typing normally.
+.
+It is a good practice to start each sentence on a new line,
+or to put two spaces after sentence-ending puncutation,
+so that the formatter knows where the sentence boundaries are.
+.
+You can separate paragraphs with further paragraphing macro calls,
+or with blank lines,
+and you can indent with tabs.
+.
+When you need one of the features mentioned earlier,
+return to this manual.
+.
+.
+.PP
+Format the document with the
+.I groff (1)
+command.
+.
+.I nroff (1)
+can be useful for previewing.
+.
+.
+.TS
+box center;
+lf(CB).
+\f[CR]$\f[] vi radical.ms
+\f[CR]$\f[] nroff \-ms radical.ms | less \-R
+\f[CR]$\f[] groff \-ms radical.ms > radical.ps
+\f[CR]$\f[] see radical.ps
+.TE
+.
+.
+.PP
+Our
+.CW radical.ms
+document might look like this.
+.
+.
+.TS
+box center;
+Lf(CR).
+\&.LP
+Radical novelties are so disturbing that they tend to be
+suppressed or ignored, to the extent that even the
+possibility of their existence in general is more often
+denied than admitted.
+.sp
+\[->]That\[aq]s what Dijkstra said, anyway.
+.TE
+.
+.
+.LP
+.I ms
 exposes many aspects of document layout to user control via
 .I groff
 registers and strings.
 .
-Most
-.I registers
-have a default unit of measurement.
-.
-Specifying a unit explicitly does not cause problems,
-and can avoid them in complex situations.
-.
-The following table summarizes typical units.
+Measurements in
+.I groff
+are expressed with a suffix called a
+.I "scaling unit."
 .
 .
 .TS
 box center;
 cb cb
 cf(CR) l .
-Unit	Description
+Scaling unit	Description
 _
 i	inches (\[sd])
 c	centimeters
@@ -159,18 +236,118 @@ m	\[lq]ems\[rq]; width of an \[lq]M\[rq] using the current font
 .
 .PP
 Set registers with the
-.CW .nr
+.CW nr
 request
 and strings with the
-.CW .ds
+.CW ds
 request.
+.
+Requests are like macro calls;
+they go on lines by themselves and start with the control character,
+a dot
+.CW . ). (
+.
+The difference is that they directly instruct the formatter program,
+rather than the macro package.
+.
+It is wise to specify a scaling unit when setting any register that
+represents a length,
+size,
+or distance.
 .
 .
 .TS
 box center;
 lf(CR).
-\&.nr PS 12 \[rs]" Use 12-point type.
-\&.ds FAM P \[rs]" Use Palatino font family.
+\&.nr PS 10.5p \[rs]" Use 10.5\-point type.
+\&.ds FAM P    \[rs]" Use Palatino font family.
+.TE
+.
+.
+.LP
+In the foregoing,
+we see that
+.CW \[rs]"
+begins a comment.
+.
+This is an example of an escape sequence,
+the other kind of formatting instruction.
+.
+Escape sequences can appear anywhere.
+.
+They begin with the escape character
+.CW \[rs] ) (
+and are followed by at least one more character.
+.
+.I ms
+documents like this one tend to use only a few of
+.I groff 's
+many requests and escape sequences;
+see the
+.I groff (7)
+man page for complete lists.
+.
+.
+.TS
+box center;
+Cb Cb
+Lf(CR) Lx .
+Escape sequence	Description
+_
+\[rs]"	Begin comment; ignore remainder of line.
+\[rs]n[\f[I]reg\f[]]	T{
+Interpolate value of register
+.I reg .
+T}
+\[rs]*[\f[I]str\f[]]	T{
+Interpolate contents of string
+.I str .
+T}
+\[rs]*\f[I]s	T{
+abbreviation of
+.CW \[rs]*[\f[I]s\f[]];
+the name
+.I s
+must be only one character
+T}
+\[rs][\f[I]char\f[]]	T{
+Interpolate glyph of special character named
+.I char .
+T}
+\[rs]&	non-printing, zero-width dummy character
+\[rs]\[ti]	T{
+Move horizontally by the current font's space width
+(\[lq]non-breaking space\[rq]).
+T}
+\[rs]|	T{
+Move horizontally by one-sixth em
+(\[lq]thin space\[rq]).
+T}
+.TE
+.
+.
+.PP
+.CW \[rs]&
+has two important uses:
+put it before a word starting with a dot
+.CW .\& ) (
+if that word is at the beginning of an input line
+(or might become that way in editing)
+to prevent the dot from being interpreted as the control character,
+and after
+.CW . ,
+.CW ? ,
+and
+.CW !\&
+when needed to cancel end-of-sentence detection.
+.
+.
+.TS
+box center;
+lf(CR).
+After the criticality accident, Dr.\[rs]&
+Wallace said my exposure had been
+\[rs]&.5 to \[rs]&.6 Sv of neutrons.
 .TE
 .
 .
@@ -205,7 +382,7 @@ Longer documents have a structure as follows.
 .
 .IP "\fBDocument type\fP"
 Calling the
-.CW .RP
+.CW RP
 macro at the beginning of your document puts the document description
 (see below)
 on a cover page.
@@ -317,7 +494,7 @@ macro other than
 .CW RP .
 .
 The \[lq]Next\[rq] heading indicates that changes to the parameter are
-effective as of the the next listed element encountered.
+effective as of the next listed element encountered.
 .
 For entries marked
 .I special ,
@@ -398,47 +575,10 @@ The
 .CW PD
 and
 .CW DD
-registers use the larger value if the vertical resolution of the output
-device is too coarse for the smaller one;
+registers use the larger value if the vertical motion quantum of the
+output device is too coarse for the smaller one;
 usually,
 this is the case only for output to terminals and emulators thereof.
-.
-.
-.\" ------------------------
-.NH 2
-Fractional type sizes
-.XS
-	Fractional type sizes
-.XE
-.
-.
-.LP
-AT&T
-.I ms
-supported only integer values for the type size and vertical spacing.
-.
-To overcome this restriction,
-for the registers
-.CW PS ,
-.CW VS ,
-.CW FPS ,
-and
-.CW FVS ,
-.I "groff ms"
-interprets values equal to or larger than\~1000 as decimal fractions
-multiplied by\~1000.
-.
-For example,
-.CW ".nr PS 10500" \[rq] \[lq]
-sets the document's type size to 10.5\~points.
-.
-In
-.I ms
-documents that don't need to be portable to other implementations,
-using a scaling indicator,
-as in
-.CW ".nr PS 10.5p" \[rq], \[lq]
-is preferable.
 .
 .
 .\" ------------------------
@@ -701,20 +841,29 @@ Text settings
 .LP
 The
 .CW FAM
-string sets the font family for body text.
-.
-If this string is undefined at initialization,
-it is set to
+string sets the font family for body text;
+the default is
 .CW T \[rq] \[lq]
 (Times).
 .
-Setting
-.CW \[rs]*[FAM]
-before the first call of a heading,
+The font family setting is ignored on terminal devices.
+.
+The
+.CW PS
+and
+.CW VS
+registers set the type size and vertical spacing
+(distance between text baselines),
+respectively.
+.
+Setting these parameters before the first call of a heading,
 paragraphing,
-or (non-date) document description macro also applies it to headers,
+or (non-date) document description macro also applies them to headers,
 footers,
-and footnotes.
+and
+(for
+.CW FAM )
+footnotes.
 .
 .
 .PP
@@ -732,6 +881,49 @@ is equivalent to using the
 request.
 .
 This is a Tenth Edition Research Unix extension.
+.KE
+.
+.
+.KS
+.NH 2
+Typographical symbols
+.XS
+	Typographical symbols
+.XE
+.
+.
+.LP
+.I ms
+provides a handful of strings to obtain typographical symbols not easily
+entered with the keyboard.
+.
+Many others are available as special character escape sequences\*[-]see
+the
+.I groff_char (7)
+man page.
+.
+.TS
+box center;
+cb lb
+Lf(CR) Lx.
+String	Description
+_
+\[rs]*[\-]	Interpolate an em dash.
+_
+\[rs]*[Q]	T{
+Interpolate typographer's quotation marks where available,
+and neutral quotes otherwise.
+.
+.CW \[rs]*[Q]
+is the left quote and
+.CW \[rs]*[U]
+the right.
+.
+(As a mnemonic,
+think of \*[Q]quote\*[U] and \*[Q]unquote\*[U].)
+T}
+\[rs]*[U]	\^
+.TE
 .KE
 .
 .
@@ -766,7 +958,7 @@ except at page or column breaks.
 The
 .CW PORPHANS
 register defines the minimum number of initial lines of any paragraph
-that must be kept together to avoid orphaned lines at the bottom of a
+that must be kept together to avoid isolated lines at the bottom of a
 page.
 .
 If a new paragraph is started close to the bottom of a page,
@@ -788,10 +980,8 @@ _
 \&.LP	Set a paragraph without any (additional) indentation.
 _
 \&.PP	T{
-Set a paragraph with a first-line left indentation in the amount stored
-in the
-.CW PI
-register.
+Set a paragraph with a first-line left indentation of
+.CW \[rs]n[PI] .
 T}
 _
 \&.IP \f[R][\f[I]marker\f[] [\f[I]width\f[]]]	T{
@@ -1124,7 +1314,7 @@ The value of
 .CW \[rs]n[PSINCR]
 should be specified in points with the
 .CW p
-scaling indicator and may include a fractional component;
+scaling unit and may include a fractional component;
 for example,
 .
 .
@@ -1217,7 +1407,7 @@ register operates in conjunction with the
 .CW NH
 and
 .CW SH
-macros to inhibit the printing of orphaned headings at the bottom of a
+macros to inhibit the printing of isolated headings at the bottom of a
 page;
 it specifies the minimum number of lines of the subsequent paragraph
 that must be kept on the same page as the heading.
@@ -1231,7 +1421,9 @@ Any display macro or
 .I pic ,
 or
 .I eqn
-region between the heading and the subsequent paragraph suppresses this
+region
+(see subsequent sections)
+between the heading and the subsequent paragraph suppresses this
 grouping.
 .
 .
@@ -1241,16 +1433,42 @@ grouping.
 .br
 .ne (\n[.p]u / 2u)
 .NH 2
-Highlighting
+Typeface and decoration
 .XS
-	Highlighting
+	Typeface and decoration
 .XE
 .
 .
 .LP
 The
 .I ms
-macros provide a variety of methods to highlight or emphasize text.
+macros provide a variety of ways to style text.
+.
+Attend closely to the ordering of arguments labeled
+.I pre
+and
+.I post,
+which is not intuitive.
+.
+Support for
+.I pre
+arguments is a GNU extension.\**
+.FS
+This idiosyncrasy arose through feature accretion;
+for example,
+the
+.CW B
+macro in Version\~6 Unix
+.I ms
+(1975) accepted only one argument,
+the text to be set in boldface.
+.
+By Version\~7 (1979) it recognized a second argument;
+in 1990,
+.I "groff ms"
+added a \*[Q]pre\*[U] argument,
+placing it third to avoid breaking support for older documents.
+.FE
 .
 .
 .TS H
@@ -1260,92 +1478,70 @@ lf(CR) lx.
 Macro	Description
 _
 .TH
-\&.B [txt [post [pre]]]	T{
-Sets its first argument in
-.B "bold type" .
+\&.B \f[R][\f[I]text\f[] [\f[I]post\f[] [\f[I]pre\f[]]]]	T{
+Style
+.I text
+in
+.B bold ,
+followed by
+.I post
+in the previous font style without intervening space,
+and preceded by
+.I pre
+similarly.
 .
-If you specify a second argument,
-.I groff
-prints it in the previous font after the bold text,
-with no intervening space
-(this allows you to set punctuation after the highlighted text without
-highlighting the punctuation).
-.
-Similarly,
-it prints the third argument
-(if any)
-in the previous font
-.B before
-the first argument.
-.
-For example,
-.
-.
-.sp \n[PD]u
-.ti +3n
-\&.B foo ) (
-.
-.
-.sp \n[PD]u
-prints
-.B foo ). (
-.
-.
-.sp \n[PD]u
-If you give this macro no arguments,
-.I groff
-prints all text following in bold until the next highlighting,
+Without arguments,
+.I ms
+styles subsequent text in bold
+until the next highlighting,
 paragraphing,
-or heading macro.
+or heading macro call.
 T}
 _
-\&.R [txt [post [pre]]]	T{
-Sets its first argument in roman
-(or regular)
-type.
+\&.R \f[R][\f[I]text\f[] [\f[I]post\f[] [\f[I]pre\f[]]]]	T{
+As
+.CW .B ,
+but use the roman style
+(upright text of normal weight)
+instead of bold.
 .
-It operates similarly to the
-.CW .B
-macro otherwise.
+Arguments are recognized only by
+.I "groff ms."
 T}
 _
-\&.I [txt [post [pre]]]	T{
-Sets its first argument in
-.I "italic type" .
-.
-It operates similarly to the
-.CW .B
-macro otherwise.
+\&.I \f[R][\f[I]text\f[] [\f[I]post\f[] [\f[I]pre\f[]]]]	T{
+As
+.CW .B ,
+but use an
+.I italic
+or oblique style instead of bold.
 T}
 _
-\&.BI [txt [post [pre]]]	T{
-Sets its first argument in
-.BI "bold italic type" .
-.
-It operates similarly to the
-.CW .B
-macro otherwise.
+\&.BI \f[R][\f[I]text\f[] [\f[I]post\f[] [\f[I]pre\f[]]]]	T{
+As
+.CW .B ,
+but use a
+.BI "bold italic"
+or bold oblique style instead of upright bold.
 .
 This is a Tenth Edition Research Unix extension.
 .\" possibly 9th, but definitely not Berkeley
 T}
 _
-\&.CW [txt [post [pre]]]	T{
-Sets its first argument in a
+\&.CW \f[R][\f[I]text\f[] [\f[I]post\f[] [\f[I]pre\f[]]]]	T{
+As
+.CW .B ,
+but use a
 .CW constant-width
-(monospaced) roman typeface.
-.
-It operates similarly to the
-.CW .B
-macro otherwise.
+(monospaced) roman typeface instead of bold.
 .
 This is a Tenth Edition Research Unix extension.
 .\" possibly 9th, but definitely not Berkeley
 T}
 _
-\&.BX [txt]	T{
+\&.BX \f[R][\f[I]text\f[]]	T{
 Typeset
-.I txt
+.I text
 and draw a
 .BX box
 around it.
@@ -1354,31 +1550,34 @@ On terminal devices,
 reverse video is used instead
 (see the implementation note below).
 .
-If you want the argument to contain space,
-use non-breaking space escape sequences of appropriate width
+If you want
+.I text
+to contain space,
+use horizontal motion escape sequences of appropriate width
 .CW \[rs]\[ti] , (
 .CW \[rs]\[ha] ,
 .CW \[rs]| ,
-.CW \[rs]0 ),
+.CW \[rs]0 ,
 or
-.CW \[rs]h .
+.CW \[rs]h ).
 T}
 _
-\&.UL [txt [post]]	T{
+\&.UL \f[R][\f[I]text\f[] [\f[I]post\f[]]]	T{
 Typeset
-.I txt
+.I text
 with an
 .UL underline .
 .
-If you specify
-.I post ,
-.I ms
-sets it in the previous font after the underlined text,
+Set
+.I post,
+if present,
+after
+.I text
 with no intervening space.
 T}
 _
 \&.LG	T{
-Set all subsequent text in
+Set subsequent text in
 .LG
 larger type
 .NL
@@ -1387,7 +1586,7 @@ until
 the next font size,
 highlighting,
 paragraphing,
-or heading macro.
+or heading macro call.
 .
 You can
 .LG
@@ -1399,7 +1598,7 @@ to enlarge the type size as needed.
 T}
 _
 \&.SM	T{
-Set all subsequent text in
+Set subsequent text in
 .SM
 smaller type
 .NL
@@ -1408,7 +1607,7 @@ until
 the next type size,
 highlighting,
 paragraphing,
-or heading macro.
+or heading macro call.
 .
 You can
 .SM
@@ -1420,13 +1619,81 @@ to reduce the type size as needed.
 T}
 _
 \&.NL	T{
-Set all subsequent text at the normal type size
-(that is,
-the value of the
-.CW PS
-register).
+Set subsequent text at the normal type size
+.CW \[rs]n[PS] ). (
 T}
 .TE
+.
+.
+.PP
+.I pre
+and
+.I post
+arguments
+are typically used to simplify the attachment of punctuation to styled
+words.
+When
+.I pre
+is used,
+a hyphenation control escape sequence
+.CW \[rs]%
+that would ordinarily start
+.I text
+must start
+.I pre
+instead to have the desired effect.
+.
+.TS
+box center;
+Cb Cb
+Lf(CR) L.
+Input	Result
+T{
+The course\[aq]s students found one C language keyword
+.br
+\&.CW static ) \[rs]%(
+.br
+most troublesome.
+T}	T{
+The course's students found one C language keyword
+.CW static ) \%(
+most troublesome.
+T}
+.TE
+.
+.KS
+You might prefer to use the output line continuation escape sequence
+.CW \[rs]c
+to achieve the same result.
+.
+It is also portable to older
+.I ms
+implementations.
+.
+.TS
+box center;
+Cb Cb
+Lf(CR) L.
+Input	Result
+T{
+The course\[aq]s students found one C language keyword
+.br
+(\[rs]c
+.br
+\&.CW \[rs]%static\[rs]c
+.br
+\&.R
+.br
+) most troublesome.
+T}	T{
+The course's students found one C language keyword
+(\c
+.CW \%static\c
+.R
+) most troublesome.
+T}
+.TE
+.KE
 .
 .
 .PP
@@ -1457,11 +1724,12 @@ and
 .I groff .
 .
 .
+.KS
 .PP
 .I "groff ms"
-also supports strings to begin and end super- and subscripting.
+also offers strings to begin and end super- and subscripting.
 .
-These are all GNU extensions.
+These are GNU extensions.
 .
 .
 .TS
@@ -1476,6 +1744,7 @@ _
 \[rs]*<	Begin subscripting.
 \[rs]*>	End subscripting.
 .TE
+.KE
 .
 .
 .nr PS -2
@@ -1731,7 +2000,7 @@ _
 \&.RS	T{
 Begin a region where headings,
 paragraphs,
-and displays are indented by
+and displays are indented (further) by
 .CW \[rs]n[PI] .
 T}
 \&.RE	T{
@@ -1821,9 +2090,8 @@ or a paragraph that refers to a table,
 list,
 or figure adjacent to the item it discusses.
 .
-The
 .I ms
-macros provide the
+provides the
 .CW KS
 and
 .CW KE
@@ -1832,7 +2100,7 @@ macros for this purpose.
 .
 .PP
 You can alternatively specify a
-.I "floating keep" ;
+.I "floating keep:"
 if a keep cannot fit on the current page,
 .I ms
 holds its contents and allows material following the keep
@@ -1840,9 +2108,9 @@ holds its contents and allows material following the keep
 to fill the remainder of the current page.
 .
 When the page breaks,
-whether by an explicit
+whether by reaching the end or
 .CW bp
-request or by reaching the end of the page,
+request,
 .I ms
 puts the floating keep at the beginning of the next page.
 .
@@ -1895,11 +2163,11 @@ _
 .
 .
 .LP
-Box macros cause line breaks;
+Box macros cause breaks;
 if you need to box a word or phrase within a line,
 see the
 .CW BX
-macro in section \[lq]Highlighting\[rq] above.
+macro in section \[lq]Typeface and decoration\[rq] above.
 .
 Box lines are drawn as close as possible to the text they enclose so
 that they are usable within paragraphs.
@@ -2011,7 +2279,6 @@ and to equations set with
 Changes to either register take effect at the next display boundary.
 .
 .
-.\" ----------------------------
 .KS
 .NH 2
 Tables, figures, equations, and references
@@ -2213,17 +2480,16 @@ Footnotes
 .\" The following sentence is used below as an example as well.  Keep it
 .\" in sync.
 A footnote is typically anchored to a place in the text with a
-.I marker ,
-which is a small integer\**,
+.I marker,
+which is a small integer,\**
 .FS
 like this numeric footnote
 .FE
-a symbol\[dg],
+a symbol,\*{\[dg]\*}
 .FS \[dg]
 like this symbolic footnote
 .FE
 or arbitrary user-specified text.
-.KE
 .
 .
 .TS
@@ -2233,16 +2499,20 @@ lf(CR) lx.
 String	Description
 _
 \[rs]**	T{
-Place an automatically numbered footnote marker in the text.
+Place an
+.I "automatic number,"
+an automatically updated numeric footnote marker,
+in the text.
 .
 Each time this string is interpolated,
 the number it produces increments by one.
 .
-Automatic footnote numbers start at 1.
+Automatic numbers start at 1.
 .
 This is a Berkeley extension.
 T}
 .TE
+.KE
 .
 .
 .PP
@@ -2276,8 +2546,7 @@ which is then also placed at the beginning of the footnote text.
 If
 .I marker
 is omitted,
-the next pending automatic footnote number enqueued by interpolation of
-the
+the next pending automatic number enqueued by interpolation of the
 .CW *
 string is used,
 and if none exists,
@@ -2359,12 +2628,12 @@ section.
 box center;
 lfCR.
 A footnote is anchored to a place in the text with a
-\&.I marker ,
-which is a small integer\[rs]**,
+\&.I marker,
+which is a small integer,\[rs]**
 \&.FS
 like this numeric footnote
 \&.FE
-a symbol\[rs][dg],
+a symbol,\[rs]*{\[rs][dg]\[rs]*}
 \&.FS \[rs][dg]
 like this symbolic footnote
 \&.FE
@@ -2413,15 +2682,25 @@ and
 .CW VS ,
 respectively.
 .
+The
+.CW FPD ,
+.CW FPS ,
+and
+.CW FVS
+registers are GNU extensions.
+.
 .
 .KS
 .PP
 The
 .CW FF
-register controls the formatting of automatically numbered footnotes,
+register controls the formatting of automatically numbered footnote
+paragraphs,
 and those for which
 .CW .FS
-is given a marker argument,
+is given a
+.I marker
+argument,
 at the bottom of a column or page as follows.
 .
 .
@@ -2437,27 +2716,36 @@ Set an automatic number as a superscript
 or surrounded by square brackets
 (on terminals).
 .
-The footnote paragraph is indented if there is an
+The footnote paragraph is indented as with
+.CW .PP
+if there is an
 .CW .FS
-argument or an automatic number.
+argument or an automatic number,
+and as with
+.CW .LP
+otherwise.
 .
 This is the default.
 T}
 1	T{
-Like
+As
 .CW 0 ,
 but set the marker as regular text,
 and follow an automatic number with a period.
 T}
 2	T{
-Like
+As
 .CW 1 ,
-but without indentation.
+but without indentation
+(like
+.CW .LP ).
 T}
 3	T{
-Like
+As
 .CW 1 ,
-but set the footnote paragraph with the marker hanging.
+but set the footnote paragraph with the marker hanging
+(like
+.CW .IP ).
 T}
 .TE
 .KE
@@ -2480,11 +2768,9 @@ Unix
 Version\~7
 .I ms ,
 its descendants,
-and GNU
-.I ms
-prior to
-.I groff
-version 1.23.0
+and
+.I "groff ms"
+prior to version 1.23.0
 .FE
 an
 .CW FL
@@ -2513,9 +2799,9 @@ The footnote line length is effectively computed as
 .CW "\~*\~\[rs]*[FR]" \[rq].
 .
 If an absolute footnote line length is required,
-recall that arithmetic expressions in
+recall that arithmetic expressions in the
 .I roff
-languages are evaluated strictly from left to right,
+language are evaluated strictly from left to right,
 with no operator precedence
 (parentheses are honored).
 .
@@ -2534,6 +2820,116 @@ take effect with the next footnote written in single-column
 arrangements,
 but on the next page in multiple-column contexts.
 .
+.
+.KS
+.NH 2
+Language and localization
+.XS
+	Language and localization
+.XE
+.
+.
+.LP
+.I "groff ms"
+provides several strings that you can customize for your own purposes,
+or redefine to adapt the macro package to languages other than English.
+.
+It is already localized for
+.\" cs, de, fr, it, sv
+Czech,
+German,
+French,
+Italian,
+and
+Swedish.
+.
+Load the desired localization macro package after
+.I ms ;
+see the
+.I groff_tmac (5)
+man page.
+.
+.
+.TS
+box center;
+lf(CR).
+$ \f[CB]groff \-ms \-mfr bienvenue.ms
+.TE
+.
+.
+.PP
+The following strings are available.
+.
+.TS
+box center;
+cb lb
+lf(CR) lf(CR) .
+String	Default
+_
+\[rs]*[REFERENCES]	References
+\[rs]*[ABSTRACT]	\[rs]f[I]ABSTRACT\[rs]f[]
+\[rs]*[TOC]	Table of Contents
+\[rs]*[MONTH1]	January
+\[rs]*[MONTH2]	February
+\[rs]*[MONTH3]	March
+\[rs]*[MONTH4]	April
+\[rs]*[MONTH5]	May
+\[rs]*[MONTH6]	June
+\[rs]*[MONTH7]	July
+\[rs]*[MONTH8]	August
+\[rs]*[MONTH9]	September
+\[rs]*[MONTH10]	October
+\[rs]*[MONTH11]	November
+\[rs]*[MONTH12]	December
+.TE
+.
+.
+.PP
+The default for
+.CW \[rs]*[ABSTRACT]
+includes font selection escape sequences to set the word in italics.
+.KE
+.
+.
+.KS
+.NH 2
+Glyphs for special characters
+.XS
+	Glyphs for special characters
+.XE
+.
+.
+.LP
+Some of the special character escape sequences used in this document
+are listed below.
+.
+The minus sign glyph can also be accessed by the shorthand
+.CW \[rs]\[mi] .
+.
+These and many others are documented in the
+.I groff_char (7)
+man page.
+.
+.
+.TS
+box center;
+Cb Lb Lb
+Lf(CR) L L .
+Input	Appearance	Description
+_
+\[rs][\-]	\[mi]	minus sign
+\[rs][\->]	\[->]	right arrow
+\[rs][bu]	\[bu]	bullet
+\[rs][dg]	\[dg]	dagger
+\[rs][em]	\[em]	em dash
+\[rs][ha]	\[ha]	circumflex accent (caret)
+\[rs][lg]	\[lq]	left double quotation mark
+\[rs][rq]	\[rq]	right double quotation mark
+\[rs][rs]	\[rs]	reverse solidus (backslash)
+\[rs][sd]	\[sd]	seconds (double prime) mark
+\[rs][ti]	\[ti]	tilde
+.TE
+.KE
 .
 .\" ------------------------
 .if t .bp
@@ -2613,19 +3009,19 @@ Macro	Description
 _
 \&.OH \[aq]\f[I]left\f[]\[aq]\f[I]center\f[]\[aq]\f[I]right\f[]\[aq]\
 	T{
-Set the left, center, and right headers on odd-numbered pages.
+Set the left, center, and right headers on odd-numbered (recto) pages.
 T}
 \&.OF \[aq]\f[I]left\f[]\[aq]\f[I]center\f[]\[aq]\f[I]right\f[]\[aq]\
 	T{
-Set the left, center, and right footers on odd-numbered pages.
+Set the left, center, and right footers on odd-numbered (recto) pages.
 T}
 \&.EH \[aq]\f[I]left\f[]\[aq]\f[I]center\f[]\[aq]\f[I]right\f[]\[aq]\
 	T{
-Set the left, center, and right headers on even-numbered pages.
+Set the left, center, and right headers on even-numbered (verso) pages.
 T}
 \&.EF \[aq]\f[I]left\f[]\[aq]\f[I]center\f[]\[aq]\f[I]right\f[]\[aq]\
 	T{
-Set the left, center, and right footers on even-numbered pages.
+Set the left, center, and right footers on even-numbered (verso) pages.
 T}
 .TE
 .
@@ -2703,7 +3099,6 @@ even-,
 or first-numbered pages.
 .
 .
-.\" ------------------------
 .KS
 .NH 2
 Tab stops
@@ -2736,7 +3131,6 @@ T}
 .KE
 .
 .
-.\" ------------------------
 .KS
 .NH 2
 Margins
@@ -2870,7 +3264,7 @@ that page numbers not be repeated.
 You may wish to indent the text thus wrapped to correspond to its
 heading depth;
 this can be done in the entry text by prefixing it with tabs or
-horizontally spacing escape sequences,
+horizontal motion escape sequences,
 or by providing a second argument to the
 .CW XA
 macro.
@@ -2969,39 +3363,16 @@ T}
 .TE
 .
 .
-.PP
-You can customize the style of the leader that bridges each table of
-contents entry with its page number;
-define the
-.CW TC\-LEADER
-special character by using the
-.CW char
-request.
-.
-A typical leader combines the dot glyph
-.CW .\& \[rq] \[lq]
-with a horizontal space escape sequence to spread the dots.
-.
-The width of the page number field is stored in the
-.CW TC\-MARGIN
-register.
-.
-.
 .KS
 .PP
 Here's an example of typical
 .I ms
 table of contents preparation and
-(a simulation of)
 its result.
 .
-.ds DOT \h'1m'.\"
 .TS
 box center;
-cb | cb
-l | c.
-Input	Result
-_
+L.
 T{
 .nf
 .CW
@@ -3017,8 +3388,9 @@ Introduction
 Methodology
 \&.XS
 \[->]Methodology
-\&.XA
+\&.XA no
 \[->]\[->]Fassbinder\[aq]s Approach
+\&.XA no
 \[->]\[->]Kahiu\[aq]s Approach
 \&.XE
 .R
@@ -3034,26 +3406,55 @@ Findings
 .CW
 \&.TC
 .fi
-T}	T{
-.sp 1v
-.nf
-.LG
-.\" Manual centering--ugh!
-.B "\h'2m'Table of Contents"
-.NL
-.sp 2v
-.\" Use absolute motions to gets the dots aligned.
-Introduction\h'|4.5m'\*[DOT]\*[DOT]\*[DOT]\*[DOT]\*[DOT]\*[DOT]\01
-\h'1m'Methodology\h'|4.5m'\*[DOT]\*[DOT]\*[DOT]\*[DOT]\*[DOT]\*[DOT]\02
-\h'2m'Fassbinder's Approach
-\h'2m'Kahiu's Approach
-\&.\|.\|.
-.\" XXX: Why doesn't \h'|3.5m' achieve alignment?
-Findings\h'|3.2m'\*[DOT]\*[DOT]\*[DOT]\*[DOT]\*[DOT]\*[DOT]\*[DOT]\08
 T}
 .TE
-.rm DOT
 .KE
+.
+.nr SavedPageNumber \n%
+.nr SavedH1 \n[H1] \" groff ms internal name
+.nr SavedH2 \n[H2] \" groff ms internal name
+.nr % 1
+.rr H1
+.rr H2
+.als SavedTOC toc*div \" groff ms internal name
+.rm toc*div
+.di ThrowAway
+.NH 1
+Introduction
+.XS
+Introduction
+.XE
+.nr % 2
+.NH 2
+Methodology
+.XS
+	Methodology
+.XA no
+		Fassbinder's Approach
+.XA no
+		Kahiu's Approach
+.XE
+.nr % 5
+.NH 1
+Findings
+.XS
+Findings
+.XE
+.br
+.di
+.\" We can't emit the TOC inside a B1/B2 box, so use lines instead.
+.R
+\l'\n[.l]u'
+.PX
+\l'\n[.l]u'
+.als toc*div SavedTOC
+.rm SavedTOC
+.nr % \n[SavedPageNumber]
+.nr H1 \n[SavedH1]
+.nr H2 \n[SavedH2]
+.rr SavedPageNumber
+.rr SavedH1
+.rr SavedH2
 .
 .
 .PP
@@ -3076,7 +3477,26 @@ but could save a great deal of time in the long run if you use
 regularly.
 .
 .
+.PP
+You can customize the style of the leader that bridges each table of
+contents entry with its page number;
+define the
+.CW TC\-LEADER
+special character by using the
+.CW char
+request.
+.
+A typical leader combines the dot glyph
+.CW .\& \[rq] \[lq]
+with a horizontal space escape sequence to spread the dots.
+.
+The width of the page number field is stored in the
+.CW TC\-MARGIN
+register.
+.
+.
 .\" ------------------------
+.if t .bp
 .NH 1
 Differences from AT&T
 .BI ms
@@ -3087,8 +3507,8 @@ Differences from AT&T
 .LP
 The
 .I "groff ms"
-macros are a complete re-implementation,
-using no original AT&T code.
+macros are an independent reimplementation,
+using no AT&T code.
 .
 Since they take advantage of the extended features of
 .I groff ,
@@ -3096,15 +3516,15 @@ they cannot be used with AT&T
 .I troff .
 .
 .I "groff ms"
-supports several features described above as Berkeley and Tenth Edition
-Research Unix extensions,
+supports features described above as Berkeley and Tenth Edition Research
+Unix extensions,
 and adds several of its own.
 .
 .
 .PP
 The internals of
 .I "groff ms"
-differ from the internals of AT&T
+differ from those of AT&T
 .I ms .
 .
 Documents that depend upon implementation details of AT&T
@@ -3177,6 +3597,35 @@ but
 .CW .RS
 and
 .CW .RE .
+.
+.
+.PP
+AT&T
+.I ms
+supported only integer values for the type size and vertical spacing.
+.
+To overcome this restriction,
+for the registers
+.CW PS ,
+.CW VS ,
+.CW FPS ,
+and
+.CW FVS ,
+.I "groff ms"
+interprets values equal to or larger than\~1000 as decimal fractions
+multiplied by\~1000.
+.
+For example,
+.CW ".nr PS 10500" \[rq] \[lq]
+sets the document's type size to 10.5\~points.
+.
+In
+.I ms
+documents that don't need to be portable to other implementations,
+using a scaling unit,
+as in
+.CW ".nr PS 10.5p" \[rq], \[lq]
+is preferable.
 .
 .
 .PP
@@ -3287,7 +3736,6 @@ Documents that need to determine whether they are being formatted with
 or another implementation should test this register.
 .
 .
-.\" ------------------------
 .NH 2
 AT&T
 .BI ms
@@ -3336,106 +3784,126 @@ macros for setting code examples;
 does not.
 .
 .
-.NH 2
-.BI "groff ms"
-macros not appearing in
-AT&T
-.BI ms
-.XS
-	\c
-.I "groff ms"
-macros not appearing in
-AT&T
-.I ms
-.XE
-.
-.
-.LP
-The
-.I "groff ms"
-macros have some minor extensions,
-not already discussed above,
-compared to the AT&T
-.I ms
-macros.
-.
-.IP \&.AM 0.5i
-Improved accent marks.
-.
-.
-.IP \&.IX
-Indexing term
-(printed on standard error).
-.
-.
 .\" ------------------------
-.KS
-.NH 2
-Localization strings
+.if t .bp
+.NH 1
+Legacy features
 .XS
-	Localization strings
+Legacy features
 .XE
 .
 .
 .LP
 .I "groff ms"
-provides several strings that you can customize for your own purposes,
-or redefine to adapt the macro package to languages other than English.
+retains support for some legacy features solely to support rendering of
+historical documents;
+contemporary ones should not use them because they can render poorly.
 .
-It is already localized for
-.\" cs, de, fr, it, sv
-Czech,
-German,
-French,
-Italian,
-and
-Swedish.
-.
-Load the desired localization macro package after
-.I ms ;
-see the
-.I groff_tmac (5)
-man page.
-.
-.TS
-box center;
-lf(CR).
-$ \f[CB]groff \-ms \-mfr bienvenue.ms
-.TE
+See
+.I groff_char (7)
+instead.
 .
 .
-.PP
-The following strings are available.
+.NH 2
+AT&T
+.I ms
+accent mark strings
+.XS
+	AT&T
+.I ms
+accent mark strings
+.XE
+.LP
+AT&T
+.I ms
+defined
+accent mark strings as follows.
+.
 .
 .TS
 box center;
-cb lb
-lf(CR) lf(CR) .
-String	Default
+Cb Lb
+Lf(CR) Lx.
+String	Description
 _
-\[rs]*[REFERENCES]	References
-\[rs]*[ABSTRACT]	\[rs]f[I]ABSTRACT\[rs]f[]
-\[rs]*[TOC]	Table of Contents
-\[rs]*[MONTH1]	January
-\[rs]*[MONTH2]	February
-\[rs]*[MONTH3]	March
-\[rs]*[MONTH4]	April
-\[rs]*[MONTH5]	May
-\[rs]*[MONTH6]	June
-\[rs]*[MONTH7]	July
-\[rs]*[MONTH8]	August
-\[rs]*[MONTH9]	September
-\[rs]*[MONTH10]	October
-\[rs]*[MONTH11]	November
-\[rs]*[MONTH12]	December
+\[rs]*[\[aq]]	Apply acute accent to subsequent glyph.
+\[rs]*[\[ga]]	Apply grave accent to subsequent glyph.
+\[rs]*[:]	Apply dieresis (umlaut) to subsequent glyph.
+\[rs]*[\[ha]]	Apply circumflex accent to subsequent glyph.
+\[rs]*[\[ti]]	Apply tilde accent to subsequent glyph.
+\[rs]*[C]	Apply caron to subsequent glyph.
+.\" \*v was an undocumented (in Lesk 1978-11-13) synonym for \*C.
+\[rs]*[,]	Apply cedilla to subsequent glyph.
 .TE
 .
 .
-.PP
-The default for
-.CW \[rs]*[ABSTRACT]
-includes font selection escape sequences to set the word in italics.
-.KE
+.NH 2
+Berkeley
+.I ms
+accent mark and glyph strings
+.XS
+	Berkeley
+.I ms
+accent mark and glyph strings
+.XE
+.LP
+Berkeley
+.I ms
+offered an
+.CW AM
+macro;
+calling it redefined the AT&T accent mark strings
+(except for
+.CW \[rs]*C ),
+applied them to the
+.I preceding
+glyph,
+and defined additional strings,
+some for spacing glyphs.
+.
+.
+.TS
+box;
+cb cb
+lf(CR) lx .
+Macro	Description
+_
+\&.AM	Enable alternative accent mark and glyph-producing strings.
+.TE
+.
+.
+.TS
+box center;
+Cb Lb
+Lf(CR) Lx.
+String	Description
+_
+\[rs]*[\[aq]]	Apply acute accent to preceding glyph.
+\[rs]*[\[ga]]	Apply grave accent to preceding glyph.
+\[rs]*[:]	Apply dieresis (umlaut) to preceding glyph.
+\[rs]*[\[ha]]	Apply circumflex accent to preceding glyph.
+\[rs]*[\[ti]]	Apply tilde accent to preceding glyph.
+\[rs]*[,]	Apply cedilla to preceding glyph.
+\[rs]*[/]	Apply stroke (slash) to preceding glyph.
+\[rs]*[v]	Apply caron to preceding glyph.
+\[rs]*[_]	Apply macron to preceding glyph.
+\[rs]*[.]	Apply underdot to preceding glyph.
+\[rs]*[o]	Apply ring accent to preceding glyph.
+_
+\[rs]*[?]	Interpolate inverted question mark.
+\[rs]*[!]	Interpolate inverted exclamation mark.
+\[rs]*[8]	Interpolate small letter sharp s.
+\[rs]*[q]	Interpolate small letter o with hook accent (ogonek).
+\[rs]*[3]	Interpolate small letter yogh.
+\[rs]*[d-]	Interpolate small letter eth.
+\[rs]*[D-]	Interpolate capital letter eth.
+\[rs]*[th]	Interpolate small letter thorn.
+\[rs]*[TH]	Interpolate capital letter thorn.
+\[rs]*[ae]	Interpolate small ae ligature.
+\[rs]*[AE]	Interpolate capital ae ligature.
+\[rs]*[oe]	Interpolate small oe ligature.
+\[rs]*[OE]	Interpolate capital oe ligature.
+.TE
 .
 .
 .\" ------------------------

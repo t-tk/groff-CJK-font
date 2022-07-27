@@ -163,7 +163,7 @@ using position zero
 may produce unexpected results
 in a font selection escape sequence such as
 .b \ef0 ,
-because those are interpeted directly by \*T.
+because those are interpreted directly by \*T.
 \*(ME's type size registers support only integral values in points.
 Changes to parameters
 that affect the layout of the page
@@ -171,7 +171,7 @@ that affect the layout of the page
 should be done before calling
 any paragraphing or sectioning macros.
 Normally,
-vertical spacing is suppressed at the top of a page
+vertical space is suppressed at the top of a page
 if no text has yet appeared
 (page headings notwithstanding).
 .pp
@@ -221,7 +221,7 @@ letters as long as at least one letter is uppercase.\**
 For portability betwen BSD and \*G \*(ME,
 limit names to
 two characters,
-and avoid the name
+and avoid names starting with
 .b [
 (left square bracket).
 .)f
@@ -331,6 +331,8 @@ Like
 except that the tag is a bullet (\(bu).
 No vertical space is inserted
 between adjacent bulleted paragraphs,
+.\" TODO: Move the following application note to meintro.me.in or some
+.\" future non-introductory me(7) usage manual.
 enabling the construction of compact itemized lists.
 .sh 1 "Sectioning"
 .pp
@@ -424,6 +426,8 @@ is an underscore
 the section depth and numbering are reset,
 the base indentation is not,
 and nothing is output\(em\c
+.\" TODO: Move the following application note to meintro.me.in or some
+.\" future non-introductory me(7) usage manual.
 this is useful to automatically
 coordinate section numbers with
 chapter numbers.
@@ -468,7 +472,7 @@ These parameters are not always present;
 .b .sh
 passes all three,
 .b .uh
-passes only the first,
+only the first,
 and
 .b .sx
 all three,
@@ -499,6 +503,8 @@ and
 after they call
 .b .$p ,
 and is passed the same arguments.
+.\" TODO: Move the following application note to meintro.me.in or some
+.\" future non-introductory me(7) usage manual.
 You can define it to,
 for instance,
 automatically put
@@ -522,6 +528,8 @@ just before it outputs
 a section heading
 of depth
 .i n.
+.\" TODO: Move the following application note to meintro.me.in or some
+.\" future non-introductory me(7) usage manual.
 They could be used
 to obtain section depth-dependent spacing.
 .sh 1 "Headers and Footers"
@@ -554,7 +562,9 @@ at size
 Each title definition
 applies starting with the
 .i next
-page.
+page;
+titles intended for output on the first page
+should be defined prior to any sectioning or paragraphing macro calls.
 A title
 must be quoted
 if it contains more than two adjacent spaces
@@ -662,9 +672,10 @@ This hook macro is called
 at the top of each page
 (after the header and any
 pending floating keeps are emitted)
-and of each column when in multi-column mode.
-It can be used for column headings
-and the like.
+and of each column in multi-column mode.
+.\" TODO: Move the following application note to meintro.me.in or some
+.\" future non-introductory me(7) usage manual.
+Use it for column headings.
 .sh 1 "Displays"
 .pp
 Display macros enclose material;
@@ -774,29 +785,28 @@ Begin a block,
 a form of
 .i keep:
 \*(ME tries to avoid breaking a page
-(or column)
-between
+or column between
 .b .(b
 and
 .b .)b .
-A page break is allowed anyway
+Such a break is allowed anyway
 if respecting the keep
 would leave more than
 .NR (bt
 [0]
 vees of blank space
-at the bottom of the page.
+below it.
 If
 .NR (bt
 is zero,
-the threshold feature
-is turned off,
-and a page break will not occur within the keep.
-The font and handling of
+this threshold feature
+is disabled:
+the break will not occur within the keep.
+The font and
 .i A
 and
 .i F
-are as in
+arguments are handled as with
 .b .(l .
 .TL
 .b .)b
@@ -818,12 +828,11 @@ defaults to
 .b M
 and the keep
 .i floats
-to the bottom of the page
+to the bottom of the page or column
 if it fits,
 or the top of the next otherwise.
-Therefore,
-its position relative to adjacent formatted text
-is flexible.
+Its position relative to adjacent formatted text
+is thus flexible.
 .NR (zs
 [1v]
 space
@@ -839,9 +848,11 @@ End floating keep.
 Begin centered block.
 Input until
 .b .)c
-is centered as a block,
-rather than on a line-by-line basis
-as with \(lq\c
+is collected,
+its longest output line centered,
+and the remainder aligned with respect to that line;
+contrast with the line-by-line centering obtained with
+\(lq\c
 .b ".(b C" \(rq.
 .TL
 .b .)c
@@ -865,6 +876,8 @@ the number is kept in
 .NR ($d
 and in the associated string
 .ST # .
+.\" TODO: Move the following application note to meintro.me.in or some
+.\" future non-introductory me(7) usage manual.
 Endnotes are one application.
 .TL
 .b .)d
@@ -881,6 +894,8 @@ output everything accumulated with
 since the last call to
 .b .pd .
 The delayed text number is reset to 1.
+.\" TODO: Move the following application note to meintro.me.in or some
+.\" future non-introductory me(7) usage manual.
 This might be used
 at the end of each chapter.
 .TL
@@ -1099,7 +1114,7 @@ Similarly,
 and
 .NR (tp
 (title point size)
-define the type size set in their corresponding contexts.
+set the type size of their corresponding contexts.
 .lp
 The following macros
 style or decorate an argument
@@ -1180,15 +1195,20 @@ It has no effect in \*N mode.
 .DE
 Underline
 .i W.
-This is true underlining,
+On typesetting output devices,
+this is true underlining,
 in contrast to the
 .b .ul
 request,
 which changes to the
 .q "underline font"
 (usually italics in \*G).
+On terminal output devices,
 .i W
-should not be adjusted, hyphenated, or otherwise broken;
+is surrounded by underscores.
+This argument should not be subject to adjustment,
+hyphenation,
+or breaking;
 .b .u
 is reliable only when filling is disabled.
 .TL
@@ -1199,15 +1219,22 @@ is reliable only when filling is disabled.
 Set
 .i W
 in a box.
+On typesetting output devices,
 .i W
-should not be adjusted, hyphenated, or otherwise broken;
-.b .bx
-is reliable only when filling is disabled,
-is simulated with ISO\~6429 color escape sequences in \*N mode,
-and is ignored by
+is surrounded by rules (lines).
+On terminal output devices,
+.i W
+is simulated with ISO\~6429 color escape sequences
+or surrounded by vertical bars.
+It is not marked specially on
 .i groff 's
 .b html
 output device.
+This argument should not be subject to adjustment,
+hyphenation,
+or breaking;
+.b .bx
+is reliable only when filling is disabled.
 .sh 1 "Preprocessor Support"
 .TL
 .b .EQ
@@ -1250,16 +1277,13 @@ If
 .i C
 is
 .b C ,
-the equation must be continued
-by immediately following it
-with another
+and the equation is followed immediately
+by another
 .b .EQ ,
-the text of which
-can be centered
-along with this one.
+the texts of each are centered together.
 Otherwise,
 the equation is typeset
-on a single page
+within the page or column
 with
 .NR (es
 [0.5v]
@@ -1275,17 +1299,13 @@ table.
 Tables are preceded and followed by
 .NR (bs
 of space.
-If you have a large table
-that will not fit on one page
-and want to repeat a table heading
-on each subsequent page,
-specify
+Specify
 .b H
 for
 .i H
 and call
 .b .TH
-within the table data after the heading rows.
+subsequently to repeat a table header across columns or pages.
 If you want a table to float,
 surround the
 .b .TS
@@ -1418,9 +1438,9 @@ Begin a
 of an organized document,
 affecting the values and formatting
 of chapter and page numbers.
-Reset the chapter number in
+The chapter number in
 .NR (ch
-to\~0.
+is reset to\~0.
 A segment uses Arabic numerals
 for chapter and page numbers
 except where noted.
@@ -1529,30 +1549,31 @@ a segment type of
 .b C
 is assumed.
 If a header is defined,
-replace the footer with it
+the footer is replaced with it
 on the first page
 of each chapter.
 If a title
 .i T
 [empty]
 is supplied,
-call
-.b .$c .
+.b .$c
+is called.
 .TL
 .b .$c
 .i T
 .DE
 Format a chapter heading
 centered in boldface.
-Output the text in
+The text is
 .ST (wc
 [\c
 .b Chapter ]
+is output
 if the segment type is
 .b C
 or
 .b RC,
-or the text in
+or that in
 .ST (wa
 [\c
 .b Appendix ]
@@ -1565,7 +1586,7 @@ and output the chapter number.
 If a chapter title
 .i T
 is present,
-format it the same way,
+it is formatted the same way,
 preceded by vertical space.
 If the segment type is any of
 .b C ,
@@ -1573,8 +1594,8 @@ If the segment type is any of
 .b A ,
 or
 .b RA ,
-call
-.b $C .
+.b $C
+is called.
 .TL
 .b .$C
 .i K
@@ -1582,8 +1603,10 @@ call
 .i T
 .DE
 This hook macro
-can be used to insert chapter titles
-into a table of contents.
+is called by
+.b .+c
+and
+.b .$c .
 .i K
 is the chapter or appendix term supplied by
 .b $c ,
@@ -1592,6 +1615,10 @@ is the chapter or appendix number,
 and
 .i T
 is its title.
+.\" TODO: Move the following application note to meintro.me.in or some
+.\" future non-introductory me(7) usage manual.
+This hook can be used to insert chapter titles
+into a table of contents.
 .sh 1 "Miscellaneous"
 .TL
 .b .ld
@@ -1647,23 +1674,22 @@ Set line length to
 to
 .i n
 [6.0i]
-in all environments used by \*(ME.\**
+in all environments used by \*(ME,\**
 .(f
 \**
 \*(ME uses only the three environments of AT&T \*T,
 but in GNU \*T,
 the user can create additional ones.
-.
 .b .ll
 works like
 .b .xl
 for the latter.
 .)f
+and store it in
+.NR ($l .
 This macro should not be used
 after output has begun,
 and particularly not in multi-column layouts.
-The current line length is stored in
-.NR ($l .
 .TL
 .b .hl
 .DE
@@ -1932,16 +1958,16 @@ and
 .TL
 .ST (wa
 .DE
-The term the
+The term
 .b .$c
-macro uses for
+uses for
 .q appendix .
 .TL
 .ST (wc
 .DE
-The term the
+The term
 .b .$c
-macro uses for
+uses for
 .q chapter .
 .)b
 .sh 1 "Special Characters"
@@ -1958,8 +1984,8 @@ the macro package defines several strings that construct accent marks
 and two symbols from mathematical set theory.
 These strings are limited in multiple respects:
 they can have a crude appearance,
-they are unrecognizable on character-cell terminals because they rely on
-overstriking,
+they are unrecognizable on character-cell video terminals
+because they rely on overstriking,
 and they cannot in general be \(lqstacked\(rq,
 as is required to correctly render words in
 (for example)

@@ -36,28 +36,25 @@
 # This program needs a C preprocessor.
 #
 
-CPP=cpp
-
-prog="$0"
-
-if test $# -ne 3; then
-  echo "usage: $0 UnicodeData.txt <version-string> glyphlist.txt >" \
-    "afmtodit.in"
-  exit 1
+if [ $# -ne 3 ]
+then
+  echo "usage: $0 UnicodeData.txt UNICODE-VERSION-STRING" \
+    "glyphlist.txt > afmtodit.tables"
+  exit 2
 fi
 
 unicode_data="$1"
-version_string="$2"
+unicode_version="$2"
 glyph_list="$3"
 
-if test ! -f "$1"; then
-  echo "File '$1' doesn't exist" >&2
-  exit 2
-fi
-if test ! -f "$3"; then
-  echo "File '$3' doesn't exist" >&2
-  exit 2
-fi
+for f in "$1" "$3"
+do
+  if ! [ -r "$f" ]
+  then
+    echo "$0: '$f' does not exist or is not readable" >&2
+    exit 1
+  fi
+done
 
 # Handle UnicodeData.txt.
 #
@@ -79,7 +76,7 @@ cat $$1 \
 | sed -e 's/^\([^;]*\);.*$/\1 u\1/' >> $$2
 
 # Run C preprocessor to recursively decompose.
-$CPP $$2 $$3
+"${CPP:-cpp}" $$2 $$3
 
 # Convert it back to original format.
 cat $$3 \
@@ -92,8 +89,8 @@ cat $$3 \
 
 # Write comment.
 cat <<END
-# This table has been algorithmically derived from the file
-# UnicodeData.txt, version $version_string, available from unicode.org,
+# This table was algorithmically derived from the file 'UnicodeData.txt'
+# for Unicode $unicode_version, available from unicode.org,
 # on `date '+%Y-%m-%d'`.
 END
 
@@ -107,9 +104,11 @@ echo ''
 
 # Write comment.
 cat <<END
-# This table has been algorithmically derived from the file
-# glyphlist.txt, version 2.0, available from partners.adobe.com,
-# on `date '+%Y-%m-%d'`.  See "groff:" comments for altered mappings.
+# This table was algorithmically derived from the Adobe Glyph List (AGL)
+# file 'glyphlist.txt' from the GitHub Adobe Type Tools agl-aglfn
+# project, on `date '+%Y-%m-%d'`.
+#
+# See "groff:" comments for altered mappings.
 END
 
 # Convert AGL syntax to a chunk of Perl.

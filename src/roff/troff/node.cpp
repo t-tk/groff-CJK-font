@@ -5949,13 +5949,13 @@ static bool mount_font_no_translate(int n, symbol name,
   // We store the address of this char in `font_dictionary` to indicate
   // that we've previously tried to mount the font and failed.
   static char a_char;
-  font *fm = 0;
+  font *fm = 0 /* nullptr */;
   void *p = font_dictionary.lookup(external_name);
-  if (p == 0) {
+  if (0 /* nullptr */ == p) {
     fm = font::load_font(external_name.contents(), check_only);
     if (check_only)
-      return fm != 0;
-    if (!fm) {
+      return fm != 0 /* nullptr */;
+    if (0 /* nullptr */ == fm) {
       (void)font_dictionary.lookup(external_name, &a_char);
       return false;
     }
@@ -5975,7 +5975,7 @@ static bool mount_font_no_translate(int n, symbol name,
     }
     grow_font_table(n);
   }
-  else if (font_table[n] != 0)
+  else if (font_table[n] != 0 /* nullptr */)
     delete font_table[n];
   font_table[n] = new font_info(name, n, external_name, fm);
   font_family::invalidate_fontno(n);
@@ -6049,9 +6049,15 @@ void font_position()
       symbol internal_name = get_name(true /* required */);
       if (!internal_name.is_null()) {
 	symbol external_name = get_long_name();
-	if (!mount_font(n, internal_name, external_name))
-	  error("cannot load font '%1' for mounting",
-		internal_name.contents());
+	if (!mount_font(n, internal_name, external_name)) {
+	  string msg;
+	  if (external_name != 0 /* nullptr */)
+	    msg += string(" from file '") + external_name.contents()
+	      + string("'");
+	  msg += '\0';
+	  error("cannot load font '%1'%2 for mounting",
+		internal_name.contents(), msg.contents());
+	}
       }
     }
   }

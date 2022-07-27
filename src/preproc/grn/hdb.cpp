@@ -96,18 +96,31 @@ DBRead(FILE *file)
 
   SUNFILE = FALSE;
   elist = DBInit();
-  (void) fscanf(file, "%" MAXSTRING_S "s%*[^\n]\n", string);
+  int nitems = fscanf(file, "%" MAXSTRING_S "s%*[^\n]\n", string);
+  if (nitems != 1) {
+    error_with_file_and_line(gremlinfile, lineno,
+			     "malformed input; giving up on this"
+			     " picture");
+    return (elist);
+  }
   lineno++;
   if (strcmp(string, "gremlinfile")) {
     if (strcmp(string, "sungremlinfile")) {
       error_with_file_and_line(gremlinfile, lineno,
-			       "not a gremlin file");
+			       "not a gremlin file; giving up on this"
+			       " picture");
       return (elist);
     }
     SUNFILE = TRUE;
   }
 
-  (void) fscanf(file, "%d%lf%lf\n", &size, &x, &y);
+  nitems = fscanf(file, "%d%lf%lf\n", &size, &x, &y);
+  if (nitems != 3) {
+    error_with_file_and_line(gremlinfile, lineno,
+			     "malformed input; giving up on this"
+			     " picture");
+    return (elist);
+  }
   lineno++;
   /* ignore orientation and file positioning point */
 
@@ -120,7 +133,8 @@ DBRead(FILE *file)
 		      MAXSTRING_S
 		     "[^\n]%*[^\n]\n", string) == EOF) {
       lineno++;
-      error_with_file_and_line(gremlinfile, lineno, "error in format");
+      error_with_file_and_line(gremlinfile, lineno, "error in format;"
+			       " giving up on this picture");
       return (elist);
     }
     lineno++;
@@ -129,10 +143,17 @@ DBRead(FILE *file)
     if (type < 0) {		/* no more data */
       done = TRUE;
     } else {
+      /* always one point */
 #ifdef UW_FASTSCAN
-      (void) xscanf(file, &x, &y);		/* always one point */
+      (void) xscanf(file, &x, &y);
 #else
-      (void) fscanf(file, "%lf%lf\n", &x, &y);	/* always one point */
+      nitems = fscanf(file, "%lf%lf\n", &x, &y);
+      if (nitems != 2) {
+	error_with_file_and_line(gremlinfile, lineno,
+				 "malformed input; giving up on this"
+				 " picture");
+	return (elist);
+      }
       lineno++;
 #endif	/* UW_FASTSCAN */
       plist = PTInit();		/* NULL point list */
@@ -154,14 +175,23 @@ DBRead(FILE *file)
 #else
 	lastpoint = FALSE;
 	do {
-	  fgets(string, MAXSTRING, file);
+	  char *cp = fgets(string, MAXSTRING, file);
+	  if (0 /* nullptr */ == cp) {
+	    error_with_file_and_line(gremlinfile, lineno,
+				     "premature end-of-file or error"
+				     " reading input; giving up on this"
+				     " picture");
+	    return(elist);
+	  }
 	  lineno++;
 	  if (string[0] == '*') {	/* SUN gremlin file */
 	    lastpoint = TRUE;
 	  } else {
 	    if (!sscanf(string, "%lf%lf", &x, &y)) {
-	      error("expected coordinate pair, got '%1';"
-		    " giving up on this picture", string);
+	      error_with_file_and_line(gremlinfile, lineno,
+				       "expected coordinate pair, got"
+				       " '%1'; giving up on this"
+				       " picture", string);
 	      return(elist);
 	    }
 	    if ((x == -1.00 && y == -1.00) && (!SUNFILE))
@@ -189,7 +219,14 @@ DBRead(FILE *file)
 	  (void) PTMakePoint(nx, y, &plist);
 	  savebounds(nx, y);
 
-	  fgets(string, MAXSTRING, file);
+	  char *cp = fgets(string, MAXSTRING, file);
+	  if (0 /* nullptr */ == cp) {
+	    error_with_file_and_line(gremlinfile, lineno,
+				     "premature end-of-file or error"
+				     " reading input; giving up on this"
+				     " picture");
+	    return(elist);
+	  }
 	  lineno++;
 	  if (string[0] == '*') {	/* SUN gremlin file */
 	    lastpoint = TRUE;
@@ -201,15 +238,29 @@ DBRead(FILE *file)
 	}
 #endif	/* UW_FASTSCAN */
       }
-      (void) fscanf(file, "%d%d\n", &brush, &size);
+      nitems = fscanf(file, "%d%d\n", &brush, &size);
+      if (nitems != 2) {
+	error_with_file_and_line(gremlinfile, lineno,
+				 "malformed input; giving up on this"
+				 " picture");
+	return (elist);
+      }
       lineno++;
-      (void) fscanf(file, "%d", &len);	/* text length */
+      nitems = fscanf(file, "%d", &len);	/* text length */
+      if (nitems != 1) {
+	error_with_file_and_line(gremlinfile, lineno,
+				 "malformed input; giving up on this"
+				 " picture");
+	return (elist);
+      }
       (void) getc(file);		/* eat blank */
       lineno++;				/* advance line counter early */
       if (len < 0) {
-	fatal_with_file_and_line(gremlinfile, lineno,
-				"length claimed for text is nonsense:"
-				" '%1'", len);
+	error_with_file_and_line(gremlinfile, lineno,
+				 "length claimed for text is nonsense:"
+				 " '%1'; giving up on this picture",
+				 len);
+	return (elist);
       }
       txt = (char *) grnmalloc((unsigned) len + 1, "element text");
       for (i = 0; i < len; ++i) {	/* read text */
@@ -219,9 +270,11 @@ DBRead(FILE *file)
 	txt[i] = c;
       }
       if (feof(file)) {
-	fatal_with_file_and_line(gremlinfile, lineno,
+	error_with_file_and_line(gremlinfile, lineno,
 				 "end of file while reading text of"
-				 " length %1", len);
+				 " length %1; giving up on this"
+				 " picture", len);
+	return (elist);
       }
       txt[len] = '\0';
       (void) DBCreateElt(type, plist, brush, size, txt, &elist);
@@ -272,9 +325,9 @@ DBGetType(char *s)
     case 'R':
       return (CENTRIGHT);
     default:
-      fatal_with_file_and_line(gremlinfile, lineno,
+      error_with_file_and_line(gremlinfile, lineno,
 			       "unknown element type '%1'", s);
-      // fatal_with_file_and_line() does not return
+      return -1;
     }
   case 'B':
     switch (s[3]) {
@@ -285,9 +338,9 @@ DBGetType(char *s)
     case 'R':
       return (BOTRIGHT);
     default:
-      fatal_with_file_and_line(gremlinfile, lineno,
+      error_with_file_and_line(gremlinfile, lineno,
 			       "unknown element type '%1'", s);
-      // fatal_with_file_and_line() does not return
+      return -1;
     }
   case 'T':
     switch (s[3]) {
@@ -298,16 +351,15 @@ DBGetType(char *s)
     case 'R':
       return (TOPRIGHT);
     default:
-      fatal_with_file_and_line(gremlinfile, lineno,
+      error_with_file_and_line(gremlinfile, lineno,
 			       "unknown element type '%1'", s);
-      // fatal_with_file_and_line() does not return
+      return -1;
     }
   default:
-    fatal_with_file_and_line(gremlinfile, lineno,
+    error_with_file_and_line(gremlinfile, lineno,
 			     "unknown element type '%1'", s);
+    return -1;
   }
-
-  return 0;				/* never reached */
 }
 
 #ifdef UW_FASTSCAN

@@ -35,7 +35,7 @@ dist_pdfmarktmac_DATA = $(TMACFILES)
 # Files installed in $(pdfdocdir)
 PDFDOCFILES = \
   contrib/pdfmark/pdfmark.pdf
-if BUILD_PDFDOC
+if USE_GROPDF
 pdfmarkpdfdocdir = $(pdfdocdir)
 nodist_pdfmarkpdfdoc_DATA = $(PDFDOCFILES)
 MOSTLYCLEANFILES += $(PDFDOCFILES)
@@ -53,15 +53,13 @@ EXTRA_DIST += \
   contrib/pdfmark/pdfroff.1.man \
   contrib/pdfmark/pdfroff.sh
 
-PDFMARK_PFLAG =-dpaper=$(PAGE) -P-p$(PAGE)
-PDFMARK_TFLAG = -M$(pdfmark_srcdir)
 PDFROFF=\
   GROFF_TMPDIR=. \
   GROFF_COMMAND_PREFIX= \
   GROFF_BIN_DIR="$(GROFF_BIN_DIR)" \
   GROFF_BIN_PATH="$(GROFF_BIN_PATH)" \
   ./pdfroff \
-  $(FFLAG) $(TFLAG) $(PDFMARK_TFLAG) $(PDFMARK_PFLAG)
+  $(FFLAG) $(MFLAG) -dpaper=$(PAGE) -P-p$(PAGE) -M$(pdfmark_srcdir)
 
 contrib/pdfmark/pdfmark.pdf: contrib/pdfmark/pdfmark.ms
 	$(GROFF_V)$(MKDIR_P) `dirname $@` \
@@ -89,7 +87,7 @@ mostlyclean_pdfmark:
 
 uninstall_groffdirs: uninstall-pdfmark-hook
 uninstall-pdfmark-hook:
-if BUILD_PDFDOC
+if USE_GROPDF
 	if test -d $(DESTDIR)$(pdfmarkpdfdocdir); then \
 	  rmdir $(DESTDIR)$(pdfmarkpdfdocdir); \
 	fi

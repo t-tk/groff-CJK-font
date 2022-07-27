@@ -122,7 +122,7 @@ This option produces a sort of abstract preview of the formatted output.
 .
 .
 .RS
-.IP \[bu]
+.IP \[bu] 2n
 Page breaks are marked by a phrase in angle brackets;
 for example,
 \[lq]<beginning of page>\[rq].
@@ -209,9 +209,13 @@ Due to
 .MR getopt_long 3
 limitations,
 .IR c\~ cannot
-be and
+be,
+and
+.I s
+and
 .I name
-cannot contain an equals sign,
+cannot contain,
+an equals sign,
 even though that is a valid character in a
 .I roff
 identifier.
@@ -229,7 +233,7 @@ This option does
 .I not
 suppress messages sent to the standard error stream by documents or
 macro packages using
-.B .tm
+.B tm
 or related requests.
 .
 .
@@ -261,33 +265,34 @@ processed.
 .
 .TP
 .BI \-I\~ dir
-Search
+Search the directory
 .I dir
-for input files
-(those on the command line,
-those named in
-.BR .psbb ,
-.BR .so ,
+for files
+(those named on the command line;
+in
+.BR psbb ,
+.BR so ,
 and
-.B .soquiet
-requests,
-and
-those named in
+.B soquiet
+requests;
+and in
 .RB \[lq] "\[rs]X\[aq]ps: import\[aq]" \[rq],
 .RB \[lq] "\[rs]X\[aq]ps: file\[aq]" \[rq],
 and
 .RB \[lq] "\[rs]X\[aq]pdf: pdfpic\[aq]" \[rq]
 device control escape sequences).
 .
-This option may be specified more than once;
-the directories are searched in the order specified.
+.B \-I
+may be specified more than once;
+each
+.I dir
+is searched in the given order.
 .
-If you want to search the current directory before others,
+To search the current working directory before others,
 add
 .RB \[lq] "\-I .\&" \[rq]
-at the desired place.
-.
-The current working directory is otherwise searched last.
+at the desired place;
+it is otherwise searched last.
 .
 .B \-I
 works similarly to,
@@ -300,11 +305,9 @@ option of Unix C compilers.
 .BI \-m\~ name
 Process
 .RI name .tmac
-before any input files.
+before input files.
 .
-If
-.RI name .tmac
-is not found,
+If not found,
 .IR tmac. name
 is attempted.
 .
@@ -339,7 +342,7 @@ Number the first page
 .BI \-o\~ list
 Output only pages in
 .IR list ,
-which is a comma-separated list of page ranges;
+which is a comma-separated list of inclusive page ranges;
 .I n
 means print page
 .IR n ,
@@ -383,9 +386,13 @@ Due to
 .MR getopt_long 3
 limitations,
 .IR c\~ cannot
-be and
+be,
+and
+.I n
+and
 .I reg
-cannot contain an equals sign,
+cannot contain,
+an equals sign,
 even though that is a valid character in a
 .I roff
 identifier.
@@ -413,18 +420,16 @@ see
 .B \-U
 Operate in
 .IR "unsafe mode" ,
-which enables the
-.BR .open ,
-.BR .opena ,
-.BR .pi ,
-.BR .pso ,
+enableing the
+.BR open ,
+.BR opena ,
+.BR pi ,
+.BR pso ,
 and
-.B .sy
-requests.
-.
-These requests are disabled by default because they allow an untrusted
-input document to write to arbitrary file names and run arbitrary
-commands.
+.B sy
+requests,
+which are disabled by default because they allow an untrusted input
+document to write to arbitrary file names and run arbitrary commands.
 .
 This option also adds the current directory to the macro package search
 path;
@@ -441,7 +446,7 @@ Enable
 .RB ( \-w )
 or inhibit
 .RB ( \-W )
-emission of warnings in category
+warnings in category
 .IR name .
 .
 See section \[lq]Warnings\[rq] below.
@@ -517,7 +522,7 @@ This category is enabled by default.
 .
 .TP
 .BR char "\t1"
-An undefined glyph was requested for output.
+No mounted font defines the glyph requested for formatting.
 .
 .RB (\[lq] char \[rq]
 is a misnomer since it reports missing glyphs\[em]there are no
@@ -575,7 +580,10 @@ This category is enabled by default.
 .
 .TP
 .BR font "\t131072"
-A non-existent font was selected.
+A non-existent font was selected,
+or the selection was ignored because a font selection escape sequence
+was used after the output line continuation escape sequence on an input
+line.
 .
 This category is enabled by default.
 .
@@ -709,7 +717,7 @@ and
 .BR reg .
 .
 This shorthand is intended to produce all warnings that are useful with
-macro packages written for AT&T
+macro packages and documents written for AT&T
 .I troff \" AT&T
 and its descendants,
 which have less fastidious diagnostics than GNU

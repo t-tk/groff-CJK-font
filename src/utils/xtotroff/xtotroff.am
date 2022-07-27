@@ -15,9 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-if !WITHOUT_X11
+if WITHOUT_X11
+XTOTROFF_MAN1 =
+else
+XTOTROFF_MAN1 = src/utils/xtotroff/xtotroff.1
 bin_PROGRAMS += xtotroff
-man1_MANS += src/utils/xtotroff/xtotroff.1
+man1_MANS += $(XTOTROFF_MAN1)
 xtotroff_SOURCES = src/utils/xtotroff/xtotroff.c
 XLIBS=$(LIBXUTIL) $(LIBGROFF)
 xtotroff_LDADD = libxutil.a libgroff.a $(X_LIBS) $(X_PRE_LIBS) \

@@ -97,20 +97,40 @@ and pager to versions which can handle SGR.
 
 ----------------------------------------------------------------------
 
-* The UTF-8 output of grotty has strange characters for the minus, the
-  hyphen, and the right quote.  Why?
+* When viewing man pages, some characters on my UTF-8 terminal emulator
+  look funny or copy-and-paste wrong.  Why?
 
-The used Unicode characters (U+2212 for the minus sign and U+2010 for
-the hyphen) are the correct ones, but many programs can't search them
-properly.  The same is true for the right quote (U+201D).  To map
-those characters back to the ASCII characters, insert the following
-code snippet into the `troffrc' configuration file:
+Some Unicode Basic Latin ("ASCII") input characters are mapped to
+non-Basic Latin code points in output for consistency with other output
+devices, like PDF.  See groff_man_style(7) and groff_char(7) for correct
+input conventions and background.  If you use the correct groff special
+character escape sequences to input them, you will get correct output no
+matter what device the input is formatted for.
 
+However, many man pages are written in ignorance of the correct special
+characters to obtain the desired glyphs.  You can conceal these errors
+by adding the following to your site-local man(7) configuration.  The
+file is called "man.local"; its installation directory depends on how
+groff was configured when it was built.
+
+--- start ---
 .if '\*[.T]'utf8' \{\
-.  char \- \N'45'
-.  char  - \N'45'
-.  char  ' \N'39'
+.  char ' \[aq]
+.  char - \-
+.  char ^ \[ha]
+.  char ` \[ga]
+.  char ~ \[ti]
 .\}
+--- end ---
+
+You may also wish to do the same for "mdoc.local".
+
+In man pages (only), groff maps the minus sign special character '\-' to
+the Basic Latin hyphen-minus (U+002D) because man pages require this
+glyph and there is no historically established *roff input character,
+ordinary or special, for obtaining it when a hyphen and minus sign are
+both separately available.  To obtain a true minus sign, use the special
+character escape sequences '\(mi' or '\[mi]'.
 
 ----------------------------------------------------------------------
 
@@ -431,18 +451,18 @@ available in the devps directory.
   that the length of a page (as returned by `\n(.p') is 11 inches.
 
 This is intentional.  The PAGE option during configuration is used
-only by grops.  For compatibility with ditroff, the default page
-length in gtroff is always 11 inches.  The page length can be changed
+only by grops.  For compatibility with AT&T troff, the default page
+length in GNU troff is always 11 inches.  The page length can be changed
 with the `pl' request.
 
 A convenient way to set paper dimensions is to use the -dpaper option
 of groff, together with proper -P options for the postprocessor
-(overriding the default).  For example, use the following for PS
-output on A4 paper in landscape orientation:
+(overriding the default).  For example, use the following command for
+PostScript output on A4 paper in landscape orientation.
 
   groff -Tps -dpaper=a4l -P-pa4 -P-l -ms foo.ms > foo.ps
 
-See groff_tmac(5) for more information.
+See groff(1) and groff_tmac(5) for more information.
 
 ----------------------------------------------------------------------
 
@@ -459,11 +479,11 @@ Make sure that the paper size is `letter'.  See groff_tmac(5).
 This error means you haven't correctly installed the application
 defaults file, GXditview.ad; `make install' does this for you
 automatically, so either you didn't do `make install', or you haven't
-passed a good `--appresdir=<DIR>' argument to groff's configure
+passed a good `--appdefdir=<DIR>' argument to groff's configure
 script.
 
 See the X(7) man page for information how and where application
-resource files have to be located.  Look for the XAPPLRESDIR and
+defaults files have to be located.  Look for the XAPPLRESDIR and
 XUSERFILESEARCHPATH environment variables.
 
 ----------------------------------------------------------------------
@@ -717,6 +737,50 @@ Compilation Problems
 ====================
 
 
+
+* I get warnings about special characters in the groff_char(7) man page.
+
+troff:man/groff_char.7:1000: warning: can't find special character '.j'
+troff:man/groff_char.7:1407: warning: can't find special character 'vA'
+troff:man/groff_char.7:1531: warning: can't find special character 'bs'
+troff:man/groff_char.7:1697: warning: can't find special character '-+'
+troff:man/groff_char.7:1746: warning: can't find special character 'coproduct'
+troff:man/groff_char.7:1839: warning: can't find special character '+e'
+
+You can ignore these.  groff defines a handful of special characters for
+which historical PostScript fonts usually did not possess glyphs.
+Except for 'bs' (the Bell System logo), we hope to provide fallbacks or
+a supplementary PostScript font in groff in the future (as was done for
+the Euro glyph).
+
+----------------------------------------------------------------------
+
+* I get warnings about the "vasnprintf" function.
+
+lib/vasnprintf.c: In function 'vasnprintf':
+lib/vasnprintf.c:5268:27: warning: format not a string literal, argument types not checked [-Wformat-nonliteral]
+(and similar)
+
+The groff source tree includes gnulib, the GNU portability library
+<https://www.gnu.org/software/gnulib/>.  These warnings are about its
+source code and that project's responsibility to resolve.  We expect a
+future release of gnulib to do so.
+
+----------------------------------------------------------------------
+
+* I am building from the Git repository, using 'autoreconf' from a GNU
+  Autoconf release earlier than 2.69, and I get this.
+
+  /usr/share/aclocal/gtkglextmm-1.2.m4:225:
+    warning: underquoted definition of AC_GTKGLEXTMM_SUPPORTS_MULTIHEAD
+  /usr/share/aclocal/gtkglextmm-1.2.m4:225:
+    run info '(automake)Extending aclocal'
+  /usr/share/aclocal/gtkglextmm-1.2.m4:225:
+    or see http://www.gnu.org/software/automake/manual/automake.html#Extending-aclocal
+
+Ignore this.  It doesn't occur in more recent versions of 'autoreconf'.
+
+----------------------------------------------------------------------
 
 * Compilation dies with
 
@@ -999,4 +1063,4 @@ Local Variables:
 fill-column: 72
 mode: text
 End:
-vim: set textwidth=72:
+vim: set autoindent textwidth=72:

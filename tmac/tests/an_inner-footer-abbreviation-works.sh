@@ -44,7 +44,7 @@ fi
 
 echo 'testing long inner footer with insufficient space to set it' >&2
 OUTPUT=$(echo "$INPUT" | "$groff" -Tascii -P-cbou -man -rLL=60n)
-PATTERN='groff 1\.23\.0\.\.\.449-84949 +2021-10-26 +foo\(1\)'
+PATTERN='groff 1\.23\.0\.rc1\.1449\.\.\. +2021-10-26 +foo\(1\)'
 
 if ! echo "$OUTPUT" | grep -Eq "$PATTERN"
 then

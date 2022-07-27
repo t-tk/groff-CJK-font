@@ -615,11 +615,14 @@ ps_printer::ps_printer(double pl)
   if (linewidth < 0)
     linewidth = DEFAULT_LINEWIDTH;
   if (font::hor != 1)
-    fatal("horizontal resolution must be 1");
+    fatal("device horizontal motion quantum must be 1, got %1",
+	font::hor);
   if (font::vert != 1)
-    fatal("vertical resolution must be 1");
+    fatal("device vertical motion quantum must be 1, got %1",
+	font::vert);
   if (font::res % (font::sizescale*72) != 0)
-    fatal("res must be a multiple of 72*sizescale");
+    fatal("device resolution must be a multiple of 72*'sizescale', got"
+	" %1 ('sizescale'=%2)", font::res, font::sizescale);
   int r = font::res;
   int point = 0;
   while (r % 10 == 0) {

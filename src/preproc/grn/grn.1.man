@@ -408,11 +408,13 @@ line.
 Since
 .I @g@grn
 is a preprocessor,
-it doesn't know about current indentation,
-point sizes,
-margins,
-registers,
-and so on.
+it has no access to elements of formatter state,
+such as
+indentation,
+line length,
+type size,
+or
+register values.
 .
 Consequently,
 no
@@ -425,7 +427,7 @@ macros.
 .
 However,
 .I gremlin
-text is now processed by
+text elements are subsequently processed by
 .IR @g@troff ,
 so anything valid in a single line of
 .I @g@troff
@@ -463,6 +465,9 @@ to avoid overworking
 .
 .MR @g@eqn @MAN1EXT@
 should always be run last.
+.
+.MR groff @MAN1EXT@
+will automatically run preprocessors in the correct order.
 .
 .
 .PP
@@ -528,11 +533,12 @@ Sun/X11 format is the use of names for picture objects
 .BR CURVE )
 instead of numbers.
 .
-Files representing the same picture are shown in Table 1 in each format.
+Files representing the same picture are shown below.
 .
 .
 .PP
-.if t .ne 20v
+.ie t .ne 18v
+.el   .ne 19v
 .TS
 center, tab(@);
 l lw(0.1i) l.
@@ -554,14 +560,10 @@ POLYGON@@6
 5 1@@5 1
 0@@0
 \-1@@\-1
-.T&
-css.
-.sp
-Table 1.  File examples
 .TE
 .
 .
-.IP \[bu]
+.IP \[bu] 2n
 The first line of each
 .I gremlin
 file contains either the string
@@ -628,13 +630,14 @@ Lines longer than 127 characters are truncated to that length.
 .SS "Element specifications"
 .\" ====================================================================
 .
-.IP \[bu]
+.IP \[bu] 2n
 The first line of each element contains a single decimal number giving
 the type of the element (AED) or its name (Sun/X11).
 .
 .
 .IP
-.if t .ne 20v
+.ie t .ne 18v
+.el   .ne 19v
 .TS
 center, tab(@);
 css
@@ -658,10 +661,6 @@ AED Number@Sun/X11 Name@Description
 13@CENTLEFT@left-center-justified text
 14@CENTRIGHT@right-center-justified text
 15@BOTCENT@bottom-center-justified text
-.T&
-css.
-.sp
-Table 2.  Type Specifications in \f[I]gremlin\f[] Files
 .TE
 .
 .

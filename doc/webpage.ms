@@ -621,10 +621,10 @@ This allows reliable modification of requests.
 .ft C
 \&.als bp@orig bp
 \&.de bp
-\&.  tm before bp
-\&.  ie \e\en[.br] .bp@orig
-\&.  el \[aq]bp@orig
-\&.  tm after bp
+\&.\&  tm before bp
+\&.\&  ie \e\en[.br] .bp@orig
+\&.\&  el \[aq]bp@orig
+\&.\&  tm after bp
 \&..
 .ft P
 .fi
@@ -859,8 +859,8 @@ For example, a table with two cells and two rows looks like this:
 .nf
 .ft C
 \&.TBL cols=2
-\&.  TR .TD 1*1 .TD 1*2
-\&.  TR .TD 2*1 .TD 2*2
+\&.\&  TR .TD 1*1 .TD 1*2
+\&.\&  TR .TD 2*1 .TD 2*2
 \&.ETB
 .ft P
 .fi
@@ -1568,8 +1568,9 @@ compatibility.
 Consequently, the intermediate output command `Df' also moves the
 position horizontally again.
 
-\eD'f\~.\|.\|.\&' is deprecated since it depends on the horizontal resolution
-of the output device (given with the `hor' parameter in the DESC file).
+\eD'f\~.\|.\|.\&' is deprecated since it depends on the horizontal
+motion quanum of the output device (given with the `hor' parameter in
+the DESC file).
 Use the new \eD'Fg\~.\|.\|.\&' escape instead.
 
 .LI
@@ -2432,7 +2433,7 @@ insert the following at the start of your document:
 .nf
 .ft C
 \&.if \[aq]\e*[.T]\[aq]dvi\[aq] \e
-\&.  sizes 500 600 700 800 900 1000 1095 1200 1400 1440 1600 \e
+\&.\&  sizes 500 600 700 800 900 1000 1095 1200 1400 1440 1600 \e
 \&         1728 1800 2000 2074 2200 2400 2488 2800 3600
 .ft P
 .fi

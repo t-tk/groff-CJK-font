@@ -496,13 +496,15 @@ static node *do_underline_special(bool do_underline_spaces)
   return new special_node(m, 1);
 }
 
-void environment::set_font(symbol nm)
+bool environment::set_font(symbol nm)
 {
-  if (interrupted)
-    return;
+  if (interrupted) {
+    warning(WARN_FONT, "ignoring font selection on interrupted line");
+    return true; // "no operation" is successful
+  }
   if (nm == symbol("P") || nm.is_empty()) {
     if (family->make_definite(prev_fontno) < 0)
-      return;
+      return false;
     int tem = fontno;
     fontno = prev_fontno;
     prev_fontno = tem;
@@ -513,10 +515,10 @@ void environment::set_font(symbol nm)
     if (n < 0) {
       n = next_available_font_position();
       if (!mount_font(n, nm))
-	return;
+	return false;
     }
     if (family->make_definite(n) < 0)
-      return;
+      return false;
     fontno = n;
   }
   if (underline_spaces && fontno != prev_fontno) {
@@ -525,18 +527,22 @@ void environment::set_font(symbol nm)
     if (prev_fontno == get_underline_fontno())
       add_node(do_underline_special(false));
   }
+  return true;
 }
 
-void environment::set_font(int n)
+bool environment::set_font(int n)
 {
   if (interrupted)
-    return;
+    return false;
   if (is_good_fontno(n)) {
     prev_fontno = fontno;
     fontno = n;
   }
-  else
+  else {
     warning(WARN_FONT, "no font mounted at position %1", n);
+    return false;
+  }
+  return true;
 }
 
 void environment::set_family(symbol fam)
@@ -1186,22 +1192,25 @@ static symbol P_symbol("P");
 void font_change()
 {
   symbol s = get_name();
-  int is_number = 1;
+  bool is_number = true;
   if (s.is_null() || s == P_symbol) {
     s = P_symbol;
-    is_number = 0;
+    is_number = false;
   }
   else {
     for (const char *p = s.contents(); p != 0 && *p != 0; p++)
       if (!csdigit(*p)) {
-	is_number = 0;
+	is_number = false;
 	break;
       }
   }
+  // environment::set_font warns if a bogus mounting position is
+  // requested.  We must warn here if a bogus font name is selected.
   if (is_number)
-    curenv->set_font(atoi(s.contents()));
+    (void) curenv->set_font(atoi(s.contents()));
   else
-    curenv->set_font(s);
+    if (!curenv->set_font(s))
+      warning(WARN_FONT, "cannot select font '%1'", s.contents());
   skip_line();
 }
 
@@ -1348,7 +1357,7 @@ void line_length()
   if (has_arg() && get_hunits(&temp, 'm', curenv->line_length)) {
     if (temp < minimum_length) {
       warning(WARN_RANGE, "invalid line length %1u rounded to device"
-			  " horizontal resolution", temp.to_units());
+			  " horizontal motion quantum", temp.to_units());
       temp = minimum_length;
     }
   }
@@ -1367,7 +1376,7 @@ void title_length()
   if (has_arg() && get_hunits(&temp, 'm', curenv->title_length)) {
     if (temp < minimum_length) {
       warning(WARN_RANGE, "invalid title length %1u rounded to device"
-			  " horizontal resolution", temp.to_units());
+			  " horizontal motion quantum", temp.to_units());
       temp = minimum_length;
     }
   }
@@ -1971,7 +1980,7 @@ breakpoint *environment::choose_breakpoint()
   }
   if (best_bp) {
     if (!best_bp_fits)
-      output_warning(WARN_BREAK, "can't break line");
+      output_warning(WARN_BREAK, "cannot break line");
     return best_bp;
   }
   return 0;

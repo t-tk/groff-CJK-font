@@ -2425,8 +2425,11 @@ in=\\n[.i] fi=\\n[.u] .d=\\n[.d] nl=\\n[nl] pg=\\n[%]
 \h'|0'\\*[eq*label]
 .	\}
 .	el \{\
-.		\"	label to the right
-\h'|\\n[.l]u-\w'\\*[eq*label]'u'\\*[eq*label]
+.		\"	label to the right, possibly compensating for
+.		\"	indented display
+.		ie \\n[ds*format]=1 \
+\h'|\\n[.l]u-\w'\\*[eq*label]'u+\\n(Sin'\\*[eq*label]
+.		el \h'|\\n[.l]u-\w'\\*[eq*label]'u'\\*[eq*label]
 .	\}
 .	rt
 .\}

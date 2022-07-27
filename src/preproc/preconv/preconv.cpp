@@ -404,9 +404,13 @@ unicode_entity(int u)
   if (u < 0x80)
     putchar(u);
   else {
-    // Handle soft hyphen specially -- it is an input character only,
-    // not a glyph.
-    if (u == 0xAD) {
+    // Handle no-break space and soft hyphen specially--they are input
+    // characters only, not glyphs.  See groff_char(7).
+    if (u == 0xA0) {
+      putchar('\\');
+      putchar('~');
+    }
+    else if (u == 0xAD) {
       putchar('\\');
       putchar('%');
     }

@@ -45,12 +45,14 @@ eqn_SOURCES = \
 PREFIXMAN1 += src/preproc/eqn/eqn.1 src/preproc/eqn/neqn.1
 EXTRA_DIST += \
   src/preproc/eqn/TODO \
-  src/preproc/eqn/neqn.sh \
   src/preproc/eqn/eqn.1.man \
-  src/preproc/eqn/neqn.1.man
+  src/preproc/eqn/neqn.1.man \
+  src/preproc/eqn/neqn.sh
 
+# Since eqn_CPPFLAGS was set, all .o files have an 'eqn-' prefix.
 src/preproc/eqn/eqn-lex.$(OBJEXT): src/preproc/eqn/eqn.hpp
-CLEANFILES += \
+
+MAINTAINERCLEANFILES += \
   src/preproc/eqn/eqn.hpp \
   src/preproc/eqn/eqn.cpp \
   src/preproc/eqn/eqn.output
@@ -60,8 +62,9 @@ neqn: $(top_srcdir)/src/preproc/eqn/neqn.sh $(SH_DEPS_SED_SCRIPT)
 	       -f $(SH_DEPS_SED_SCRIPT) \
 	       -e $(SH_SCRIPT_SED_CMD) \
 	       $(top_srcdir)/src/preproc/eqn/neqn.sh \
-	       >$@ \
-	&& chmod +x $@
+	       >$@.tmp \
+	&& chmod +x $@.tmp \
+	&& mv $@.tmp $@
 
 
 # Local Variables:

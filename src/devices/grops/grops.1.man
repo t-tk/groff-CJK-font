@@ -130,7 +130,7 @@ previewer.
 .
 .
 .P
-See section \[lq]Font Installation\[rq] below for a guide to installing
+See section \[lq]Font installation\[rq] below for a guide to installing
 fonts for
 .IR grops .
 .
@@ -280,22 +280,25 @@ U.S.\& letter and A4 paper formats without change.
 .
 .TP
 .BI \-I\~ dir
-This option may be used to add a directory to the search path for
-files on the command line and files named in
-.B \[rs]X\[aq]ps: \%import\[aq]
-and
+Search the directory
+.I dir
+for files named in
 .B \[rs]X\[aq]ps: file\[aq]
+and
+.B \[rs]X\[aq]ps: import\[aq]
 escape sequences.
 .
-This option may be specified more than once;
-the directories are then searched in the order specified.
+.B \-I
+may be specified more than once;
+each
+.I dir
+is searched in the given order.
 .
-If you want to search the current directory before others,
+To search the current working directory before others,
 add
 .RB \[lq] "\-I .\&" \[rq]
-at the desired place.
-.
-The current working directory is otherwise searched last.
+at the desired place;
+it is otherwise searched last.
 .
 .
 .TP
@@ -1198,7 +1201,7 @@ has been defined via a
 .RB \[lq] "ps: def" \[rq]
 or
 .RB \[lq] "ps: mdef" \[rq]
-device command,
+device control command,
 it is executed at the beginning of every page
 (before anything is drawn or written by
 .IR groff ).
@@ -1376,35 +1379,45 @@ option.
 .SH "Font installation"
 .\" ====================================================================
 .
-This section summarizes the above explanations;
-it can serve as a step-by-step font-installation guide for
-.IR grops .
+The following is a step-by-step font installation guide for
+.I grops.
 .
 .
-.IP \(bu 2n
+.IP \[bu] 2n
 Convert your font to something
 .I groff
 understands.
 .
-This is either a PostScript Type\~1 font in PFA format or a PostScript
+This is a PostScript Type\~1 font in PFA format or a PostScript
 Type\~42 font,
 together with an AFM file.
 .
 A PFA file begins as follows.
 .
 .RS
-.RS \" We need two RS calls to get inboard of the paragraph indentation.
+.RS \" two RS calls to get inboard of IP indentation
 .EX
 %!PS\-AdobeFont\-1.0:
 .EE
 .RE
 .
-A PFB file similar,
-but the string is preceded with some binary bytes.
+A PFB file contains this string as well,
+preceded by some non-printing bytes.
+.
+If your font is in PFB format,
+use
+.IR groff 's
+.MR pfbtops @MAN1EXT@
+program to convert it to PFA.
+.
+For TrueType and other font formats,
+we recommend
+.IR fontforge ,
+which can convert most outline font formats.
 .
 A Type\~42 font file begins as follows.
 .
-.RS \" We need two RS calls to get inboard of the paragraph indentation.
+.RS
 .EX
 %!PS\-TrueTypeFont
 .EE
@@ -1415,53 +1428,48 @@ This is a wrapper format for TrueType fonts.
 Old PostScript printers might not support them
 (that is,
 they might not have a built-in TrueType font interpreter).
-.RE
+.
+In the following example steps,
+we will consider the use of CTAN's
+.UR https://\:ctan.org/\:tex\-archive/\:fonts/\:brushscr
+BrushScriptX-Italic
+.UE
+font in PFA format.
+.RE \" now restore left margin
 .
 .
-.IP
-If your font is in PFB format
-(such fonts normally have a file extension of
-.IR .pfb ),
-you might use
-.IR groff 's
-.MR pfbtops @MAN1EXT@
-program to convert it to PFA.
-.
-For TrueType and other font formats,
-we recommend
-.IR fontforge ,
-which can convert most outline font formats.
-.
-.
-.IP \(bu
+.IP \[bu]
 Convert the AFM file to a
 .I groff
 font description file with the
 .MR afmtodit @MAN1EXT@
 program.
 .
-For example,
-the invocation
+For instance,
 .
 .RS
-.RS \" We need two RS calls to get inboard of the paragraph indentation.
+.RS \" two RS calls to get inboard of IP indentation
 .EX
 $ \c
-.B afmtodit Foo\-Bar\-Bold.afm textmap FBB
+.B afmtodit BrushScriptX\-Italic.afm textmap BSI
 .EE
 .RE
 .
-converts the metric file
-.I Foo\-Bar\-Bold.afm
+converts the Adobe Font Metric file
+.I BrushScriptX\-Italic.afm
 to the
 .I groff
-font description
-.IR FBB .
+font description file
+.IR BSI .
+.RE \" now restore left margin
 .
-If you have a font family which comes with normal,
+.
+.IP
+If you have a font family which provides regular upright (roman),
 bold,
 italic,
-and bold-italic faces
+and
+bold-italic styles
 (where \[lq]italic\[rq] may be \[lq]oblique\[rq] or \[lq]slanted\[rq]),
 we recommend using the letters
 .BR R ,
@@ -1470,62 +1478,110 @@ we recommend using the letters
 and
 .BR BI ,
 respectively,
-as suffixes in their
+as suffixes to the
 .I groff
-font names to enable
+font family name to enable
 .IR groff 's
-font family and style composition feature to work.
-.RE
+font family and style selection features.
 .
-.
-.IP \(bu
-Install both the
+An example is
+.IR groff 's
+built-in support for Times:
+the font family
+name is abbreviated as
+.BR T ,
+and the
 .I groff
-font description files and the fonts in a
+font names are therefore
+.BR TR ,
+.BR TB ,
+.BR TI ,
+and
+.BR TBI .
+.
+In our example,
+however,
+the BrushScriptX font is available in a single style only,
+italic.
+.
+.
+.IP \[bu]
+Install the
+.I groff
+font description file(s) in a
 .I devps
-subdirectory of the font path which
+subdirectory in the search path that
 .I groff
-finds.
+uses for device and font file descriptions.
 .
-See section \[lq]Environment\[rq] in
+See the
+.I GROFF_FONT_PATH
+entry in section \[lq]Environment\[rq] of
 .MR @g@troff @MAN1EXT@
-for the actual value of the font path.
+for the current value of the font search path.
 .
+While
 .I groff
-doesn't use the AFM files,
-but it is a good idea to store them anyway.
+doesn't directly use AFM files,
+it is a good idea to store them alongside its font description files.
 .
 .
-.IP \(bu
-Register all fonts which must be downloaded to the printer in the
+.IP \[bu]
+Register fonts in the
 .I devps/download
-file.
+file so they can be located for embedding in PostScript files
+.I grops
+generates.
 .
-Only the first occurrence of this file in the font path is read.
-.
-This means that you should copy the default
+Only the first
 .I download
-file to the first directory in your font path and add your fonts there.
+file encountered in the font search path is read.
 .
-To continue the above example,
-we assume that the PostScript font name for
-.I Foo-Bar-Bold.pfa
-is \[lq]XY\-Foo\-Bar\-Bold\[rq]\[em]the PostScript font name is supplied
-by the
+If in doubt,
+copy the default
+.I download
+file
+(see section \[lq]Files\[rq] below)
+to the first directory in the font search path and add your fonts there.
+.
+The PostScript font name used by
+.I grops
+is stored in the
 .B internalname
-directive in the
-.I FBB
-file\[em]
-thus the following line should be added to
+field in the
+.I groff
+font description file.
+.
+(This name does not necessarily resemble the font's file name.)
+.
+We add the following line to
 .IR download .
 .
 .RS
-.RS \" We need two RS calls to get inboard of the paragraph indentation.
+.RS \" two RS calls to get inboard of IP indentation
 .EX
-XY\-Foo\-Bar\-Bold Foo\-Bar\-Bold.pfa
+BrushScriptX\-Italic\[->]BrushScriptX\-Italic.pfa
+.EE
+.RE \" but only one to get back to it
+.
+A tab character,
+depicted as \[->],
+separates the fields.
+.RE \" now restore left margin
+.
+.
+.IP \[bu]
+Test the selection and embedding of the new font.
+.
+.RS
+.RS \" two RS calls to get inboard of IP indentation
+.EX
+printf "\[rs]\[rs]f[BSI]Hello, world!\[rs]n" \
+| groff \-T ps \-P \-e >hello.ps
+see hello.pdf
 .EE
 .RE
-.RE
+.RE \" now restore left margin
 .
 .
 .\" ====================================================================
@@ -1609,7 +1665,7 @@ then
 uses the file
 .I foo
 (in the font path) instead of the default prologue file
-.BR prologue .
+.IR prologue .
 .
 The option
 .B \-P
@@ -1707,7 +1763,7 @@ see
 .MR groff_tmac @MAN5EXT@ .
 .
 It is automatically loaded by
-.I troffrc .
+.I troffrc.
 .
 .
 .TP

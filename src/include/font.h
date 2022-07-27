@@ -223,7 +223,7 @@ public:
 
   // Open the DESC file (depending on the device) and initialize some
   // static variables with info from there.
-  static bool load_desc();
+  static const char *load_desc();
   static FONT_COMMAND_HANDLER
     set_unknown_desc_command_handler(FONT_COMMAND_HANDLER);	// Register
 			// a function which defines the semantics of

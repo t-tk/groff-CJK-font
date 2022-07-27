@@ -1061,13 +1061,15 @@ static struct {
   { "sizescale", &font::sizescale },
   };
 
-bool font::load_desc()
+// Return file specification of DESC file for selected output device if
+// it can be located and is valid, and a null pointer otherwise.
+const char *font::load_desc()
 {
   int nfonts = 0;
   FILE *fp;
   char *path;
   if ((fp = open_file("DESC", &path)) == 0)
-    return false;
+    return 0 /* nullptr */;
   text_file t(fp, path);
   while (t.next_line()) {
     char *p = strtok(t.buf, WS);
@@ -1082,12 +1084,12 @@ bool font::load_desc()
       char *q = strtok(0, WS);
       if (0 == q) {
 	t.error("missing value for directive '%1'", p);
-	return false;
+	return 0 /* nullptr */;
       }
       int val;
       if (sscanf(q, "%d", &val) != 1) {
 	t.error("'%1' directive given invalid number '%2'", p, q);
-	return false;
+	return 0 /* nullptr */;
       }
       if ((strcmp(p, "res") == 0
 	   || strcmp(p, "hor") == 0
@@ -1099,7 +1101,7 @@ bool font::load_desc()
 	  && val < 1) {
 	t.error("expected argument to '%1' directive to be a"
 		" positive number, got '%2'", p, val);
-	return false;
+	return 0 /* nullptr */;
       }
       *(table[idx-1].ptr) = val;
     }
@@ -1107,7 +1109,7 @@ bool font::load_desc()
       p = strtok(0, WS);
       if (0 == p) {
 	t.error("'family' directive requires an argument");
-	return false;
+	return 0 /* nullptr */;
       }
       char *tem = new char[strlen(p)+1];
       strcpy(tem, p);
@@ -1117,12 +1119,12 @@ bool font::load_desc()
       p = strtok(0, WS);
       if (0 == p) {
 	t.error("'fonts' directive requires arguments");
-	return false;
+	return 0 /* nullptr */;
       }
       if (sscanf(p, "%d", &nfonts) != 1 || nfonts <= 0) {
 	t.error("expected first argument to 'fonts' directive to be a"
 		" non-negative number, got '%1'", p);
-	return false;
+	return 0 /* nullptr */;
       }
       font_name_table = (const char **)new char *[nfonts+1];
       for (int i = 0; i < nfonts; i++) {
@@ -1130,7 +1132,7 @@ bool font::load_desc()
 	while (0 == p) {
 	  if (!t.next_line()) {
 	    t.error("unexpected end of file while reading font list");
-	    return false;
+	    return 0 /* nullptr */;
 	  }
 	  p = strtok(t.buf, WS);
 	}
@@ -1142,7 +1144,7 @@ bool font::load_desc()
       if (p != 0) {
 	t.error("font count does not match declared number of fonts"
 		" ('%1')", nfonts);
-	return false;
+	return 0 /* nullptr */;
       }
       font_name_table[nfonts] = 0;
     }
@@ -1150,12 +1152,12 @@ bool font::load_desc()
       if (0 == res) {
 	t.error("'res' directive must precede 'papersize' in device"
 		" description file");
-	return false;
+	return 0 /* nullptr */;
       }
       p = strtok(0, WS);
       if (0 == p) {
 	t.error("'papersize' directive requires an argument");
-	return false;
+	return 0 /* nullptr */;
       }
       bool found_paper = false;
       char *savedp = strdup(p);
@@ -1177,7 +1179,7 @@ bool font::load_desc()
       if (!found_paper) {
 	t.error("unable to determine a paper format from '%1'", savedp);
 	free(savedp);
-	return false;
+	return 0 /* nullptr */;
       }
       free(savedp);
     }
@@ -1194,7 +1196,7 @@ bool font::load_desc()
 	while (0 == p) {
 	  if (!t.next_line()) {
 	    t.error("list of sizes must be terminated by '0'");
-	    return false;
+	    return 0 /* nullptr */;
 	  }
 	  p = strtok(t.buf, WS);
 	}
@@ -1209,7 +1211,7 @@ bool font::load_desc()
 	  // fall through
 	default:
 	  t.error("invalid size range '%1'", p);
-	  return false;
+	  return 0 /* nullptr */;
 	}
 	if (i + 2 > n) {
 	  int *old_sizes = sizes;
@@ -1225,7 +1227,7 @@ bool font::load_desc()
       }
       if (i == 1) {
 	t.error("must have some sizes");
-	return false;
+	return 0 /* nullptr */;
       }
     }
     else if (strcmp("styles", p) == 0) {
@@ -1265,7 +1267,7 @@ bool font::load_desc()
       p = strtok(0, WS);
       if (0 == p) {
 	t.error("'image_generator' directive requires an argument");
-	return false;
+	return 0 /* nullptr */;
       }
       image_generator = strsave(p);
     }
@@ -1281,21 +1283,21 @@ bool font::load_desc()
   t.lineno = 0;
   if (res == 0) {
     t.error("device description file missing 'res' directive");
-    return false;
+    return 0 /* nullptr */;
   }
   if (unitwidth == 0) {
     t.error("device description file missing 'unitwidth' directive");
-    return false;
+    return 0 /* nullptr */;
   }
   if (font_name_table == 0) {
     t.error("device description file missing 'fonts' directive");
-    return false;
+    return 0 /* nullptr */;
   }
   if (sizes == 0) {
     t.error("device description file missing 'sizes' directive");
-    return false;
+    return 0 /* nullptr */;
   }
-  return true;
+  return path;
 }
 
 void font::handle_unknown_font_command(const char *, const char *,

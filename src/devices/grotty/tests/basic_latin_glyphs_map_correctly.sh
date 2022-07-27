@@ -165,7 +165,7 @@ do
 #0000320   e   :     342 200 230  \n   m   o   d   i   f   i   e   r
 #0000340   t   i   l   d   e   :     313 234  \n
 #0000352
-        output_od=$(echo "$output" | od -t c)
+        output_od=$(echo "$output" | LC_ALL=C od -t c)
         printf "' " >&2
         printf '%s\n' "$output_od" \
             | grep -Eq '0000200 +q +u +o +t +e +: +342 +200 +231' \

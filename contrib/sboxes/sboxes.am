@@ -1,7 +1,6 @@
 # Copyright (C) 2021 Free Software Foundation, Inc.
 #      Written by Bertrand Garrigues <bertrand.garrigues@laposte.net>
 #
-#
 # This file is part of groff.
 #
 # groff is free software; you can redistribute it and/or modify it under
@@ -34,7 +33,7 @@ SBOXES_EXAMPLEFILES = $(sboxes_srcdir)/msboxes.ms.in
 sboxesotherdocdir = $(docdir)
 nodist_sboxesotherdoc_DATA = $(sboxes_builddir)/msboxes.ms
 
-if BUILD_PDFDOC
+if USE_GROPDF
 sboxespdfdocdir = $(pdfdocdir)
 nodist_sboxespdfdoc_DATA = $(sboxes_builddir)/msboxes.pdf
 endif
@@ -55,8 +54,8 @@ $(sboxes_builddir)/msboxes.ms: $(SBOXES_EXAMPLEFILES) $(sboxesnotquine)
 	$(AM_V_GEN)mv $@.tmp $@
 
 $(sboxes_builddir)/msboxes.pdf: $(sboxes_builddir)/msboxes.ms \
-  $(dist_sboxestmac_DATA) groff troff gropdf font/devpdf/build_font_files
-	$(GROFF_V)$(DOC_GROFF_ONLY) -M$(sboxes_srcdir) -ms -msboxes -Tpdf \
+  $(dist_sboxestmac_DATA) groff troff gropdf font/devpdf/stamp
+	$(GROFF_V)$(DOC_GROFF) -M$(sboxes_srcdir) -ms -msboxes -Tpdf \
 	  $(sboxes_builddir)/msboxes.ms > $@
 
 uninstall_groffdirs: uninstall_sboxes

@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
@@ -293,11 +292,13 @@ char *string::extract() const
     if (p[i] == '\0')
       nnuls++;
   char *q =(char*)malloc(n + 1 - nnuls);
-  char *r = q;
-  for (i = 0; i < n; i++)
-    if (p[i] != '\0')
-      *r++ = p[i];
-  *r = '\0';
+  if (q != 0 /* nullptr */) {
+    char *r = q;
+    for (i = 0; i < n; i++)
+      if (p[i] != '\0')
+	*r++ = p[i];
+    *r = '\0';
+  }
   return q;
 }
 
@@ -346,3 +347,8 @@ string as_string(int i)
   return string(buf);
 }
 
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

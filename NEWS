@@ -68,7 +68,7 @@ o New requests `stringdown` and `stringup` are available.  These change
   its lowercase or uppercase version (if any), respectively.  groff
   special characters (see the groff_char(7) man page) can be used and
   the output will often transform in the expected way due to the
-  regular naming convention of the special character escapes sequences
+  regular naming convention of the special character escape sequences
   for accented letters.
 
 o The `ab` request no longer writes "User Abort." to the standard error
@@ -103,8 +103,12 @@ groff
 o The -I option now implies -g (run the grn(1) preprocessor), and
   supplies grn an -M option with the argument to -I.
 
-Macro Packages
+Macro packages
 --------------
+
+o mom version 2.5 is distributed with this release.  New features
+  include shaded backgrounds, frames, and colored pages.  Thanks to
+  Peter Schaffter.
 
 o English localization has been split into a dedicated macro file,
   `en.tmac`, for better parallelism with other localization files and to
@@ -125,7 +129,7 @@ o The hyphenation patterns for English have been updated using the
   new patterns likely _will_ change the automatic hyphenation break
   points of your English documents.
 
-o The `PDPFPIC` macro (provided by the `pdfpic` package), no longer
+o The `PDPFPIC` macro (provided by the `pdfpic` package) no longer
   aborts upon encountering trouble.  Instead, it reports an error and
   abandons processing of its argument(s).  It is also more sensitive to
   other kinds of problems and handles them the same way, by issuing a
@@ -268,13 +272,13 @@ o The e (me) macro package now uses strings `wa` and `wc` to store the
 
 o The e (me) macro package has a new macro, `ld`, which "re-localizes
   the date"; if you modify troff registers `dw`, `mo`, and `yr` (to
-  record a document's date of composition, for instance), call `ld`
+  record a document's date of revision, for instance), call `ld`
   afterward to update the package's `y2` and `y4` registers and the
   localized strings `dw` and `mo` for the names of the weekday and
   month.  `ld` is also used internally to simplify the use of the
   package with languages other than English; it thus updates the `wa`
-  and `wc` strings as well.  If you want to customize these strings,
-  do so after any `ld` call you make.
+  and `wc` strings as well.  If you want to customize these strings, do
+  so after any `ld` call you make.
 
 o The e (me) macro package now has a register `sx` that eases the
   configuration of space added to the line height above/below when
@@ -338,6 +342,10 @@ o The s (ms) macro package has added a hook macro, `FS-MARK`, which is
   distributed with groff as `pdfmark.ms`, uses this technique.  Thanks
   to Keith Marshall.
 
+o The "a4.tmac" file has been dropped from the distribution.  Its
+  successor, "papersize.tmac", has been present and documented for
+  nearly 20 years.  See subsection "Paper size" of groff(1).
+
 o The "safer.tmac" file has been dropped from the distribution.  It was
   present only to support man(1) programs that unconditionally passed
   the formatter the "-msafer" option, and has contained only comments
@@ -345,22 +353,8 @@ o The "safer.tmac" file has been dropped from the distribution.  It was
   can create an empty file of this name in groff's macro file search
   path (see troff(1)) or consider migrating to man-db man(1).
 
-gropdf
-------
-
-o A new device control command, "background", enables boxes to be drawn
-  underneath other page content.  The boxes can be shaded with colors,
-  drawn with a colored border of configurable thickness, and interrupted
-  by page breaks with special support for breaking before footnotes and
-  similar material.  For convenience, `pdf.tmac` exposes a new macro,
-  `pdfbackground`.  Thanks to Deri James.
-
-grotty
-------
-
-o A new device control command, "link", generates OSC 8 hyperlinks.
-  This means that groff documents can produce clickable links in the
-  terminal window for emulators that support such escape sequences.
+Output drivers
+--------------
 
 o On output devices using the Latin-1 character encoding ("groff -T
   latin1" and the X11 devices) the special character escape sequence
@@ -377,14 +371,80 @@ o On output devices using the Latin-1 character encoding ("groff -T
   sequences like `this' in the input (character remapping with 'char'
   requests and similar notwithstanding).
 
+gropdf
+------
+
+o A new device control command, "background", enables boxes to be drawn
+  underneath other page content.  The boxes can be shaded with colors,
+  drawn with a colored border of configurable thickness, and interrupted
+  by page breaks with special support for breaking before footnotes and
+  similar material.  For convenience, `pdf.tmac` exposes a new macro,
+  `pdfbackground`.  Thanks to Deri James.
+
+grotty
+------
+
+o The "utf8" output device now maps the input characters '^' (caret,
+  circumflex accent, or "hat") and '~' (tilde) to U+02C6 (modifier
+  letter circumflex accent) and U+02DC (small tilde), respectively, for
+  consistency with groff's other output devices.  This change is
+  expected to expose glyph usage errors in man pages.  See the
+  "PROBLEMS" file for a recipe that will conceal these errors.  A better
+  long-term approach is for man pages to adopt correct input practices;
+  the man pages groff_man_style(7), groff_char(7), and man-pages(7)
+  (subsection "Generating optimal glyphs"; from the Linux man-pages
+  project) contain such instructions.
+
+  If you maintain a generator of man(7) or mdoc(7) documents (such as a
+  tool that converts other formats to them), and need assistance, please
+  contact the groff@gnu.org mailing list and describe your situation.
+
+o A new device control command, "link", generates OSC 8 hyperlinks.
+  This means that groff documents can produce clickable links in the
+  terminal window for emulators that support such escape sequences.
+
 o The "sgr" device control command, which dynamically configured support
-  for ISO 6429/EMA-48 SGR escape sequences (and restored traditional
+  for ISO 6429/ECMA-48 SGR escape sequences (and restored traditional
   overstriking behavior if disabled), has been removed.  It took effect
   only at page boundaries.  grotty's "-c" command-line option and the
   GROFF_NO_SGR environment variable remain supported.
 
+Documentation
+-------------
+
+o groff's Texinfo manual is included in the distribution archive in
+  several formats, including GNU Info, HTML, TeX DVI, PDF, and plain
+  text.  Many sections have been extensively revised and corrected, and
+  much material added to help the learner acquire the groff formatting
+  language (see, for instance, the section/node "Text").
+
+o A compilation of all of groff's man pages in PDF and UTF-8-encoded
+  plain text is produced by the build.  Many of the documents in this
+  380+-page document have been heavily revised or rewritten, including
+  tbl(1), groff(1), groff_font(5), groff(7), groff_char(7), and roff(7).
+  The PDF version uses pdfmark extensions to produce an internal
+  bookmark for every man page document, section heading, and subsection
+  heading.
+
+o Larry Kollar's "Using groff with the ms Macro Package" has been
+  resurrected after 20+ years, revised, and updated.
+
+o Eric Allman's "me Reference Manual" has been revised in detail.
+
 Miscellaneous
 -------------
+
+o Because all generated forms of groff's Texinfo manual are now included
+  in the distribution archive, building from that archive no longer
+  depends on GNU Texinfo or a TeX installation (the latter was only
+  required for the "doc" target, which had to be explicitly given).
+
+o Building groff from its distribution archive no longer requires byacc
+  (or GNU Bison) to be installed.
+
+o m4 is now required to build.  Any m4 that implements the features
+  documented in the Version 7 Unix m4(1) man page, and the `-D` option,
+  should suffice.
 
 o New 'configure' options --{en,dis}able-groff-allocator control whether
   groff uses its own malloc/free-wrapping allocator to implement all C++
@@ -394,6 +454,9 @@ o New 'configure' options --{en,dis}able-groff-allocator control whether
   groff, use
     configure --enable-groff-allocator
   to re-enable groff's traditional allocator.
+
+o The 'configure' option '--with-appresdir' has been renamed to
+  '--with-appdefdir'.
 
 o Italian language input documents are now supported, including
   hyphenation patterns from the hyph-utf8 project and localized strings
@@ -419,6 +482,33 @@ o The semantics of the environment variable SOURCE_DATE_EPOCH (support
 
 o xtotroff now supports a "-d" option to specify the directory in which
   to generate font description files.
+
+o The 'configure' option --with-doc that was introduced in version
+  1.22.3 has been deleted again.  Its basic idea was misguided because
+  each of the documents is only available in a subset of the output
+  formats, so in contrast to the documentation, the option not only
+  affected which output formats were generated, but also restricted the
+  documentation content the user would get in erratic and surprising
+  ways.  The option was also ill-designed insofar as the "examples"
+  keyword did not represent an output format.  Some example files were
+  controlled by the "examples" keyword alone, some by the respective
+  format keywords alone, and some by a combination of both.  The
+  implementation of the option was full of bugs, but few, if any, of
+  these bugs were ever reported by users, giving the impression that
+  few, if any, users ever attempted to use the option, and those who did
+  likely remained unaware that doing so deprived them of parts of the
+  content of the documentation.  Experience has demonstrated that
+  properly maintaining and testing the option exceeds the amount of
+  effort the GNU troff team is able to invest.  Finally, GNU standards
+  contain no recommendation to support this option, and indeed, few, if
+  any, GNU packages apart from groff support it.
+
+o The 'doc' Make target has been eliminated.  'all' (the default Make
+  target) assumes responsibility for generating the groff Texinfo manual
+  in all formats supported by the build host.  This change is only
+  significant when building from a Git checkout or if our Texinfo
+  manual's sources are modified; the distribution archive now provides
+  copies of the manual in Info, plain text, HTML, DVI, and PDF.
 
 o groffer has been deleted from the distribution.
 
@@ -1347,9 +1437,9 @@ o In groff versions 1.18 and 1.18.1, \D'f ...' didn't move the current
   reverted for backwards compatibility.  Consequently, the intermediate
   output command `Df' also moves the position horizontally again.
 
-  \D'f ...' is deprecated since it depends on the horizontal resolution
-  of the output device (given with the `hor' parameter in the DESC
-  file).  Use the new \D'Fg ...' escape instead.
+  \D'f ...' is deprecated since it depends on the horizontal motion
+  quantum of the output device (given with the `hor' parameter in the
+  DESC file).  Use the new \D'Fg ...' escape instead.
 
 o For orthogonality, new \D subcommands to change the fill color are
   available:

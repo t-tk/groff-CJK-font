@@ -499,7 +499,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .als EF OH
 .aln PN % \" Lesk 1978 documents PN.
 .de PT
-.\" To compare the page number to 1, we need it in decimal.
+.\" To compare the page number to 1, we need it in Arabic format.
 .ds pg*saved-page-number-format \\g%\"
 .af % 0
 .nr pg*page-number-in-decimal \\n%
@@ -510,6 +510,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .	ie o .tl \\*[pg*OH]
 .	el .tl \\*[pg*EH]
 .\}
+.rm pg*saved-page-number-format
 ..
 .de BT
 .fam \\*[pg@titles-font-family]
@@ -1568,7 +1569,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .\" underline a word
 .de UL
 .if \En[.$]>2 .@warning excess arguments to .UL ignored
-\Z'\\$1'\v'.25m'\D'l \w'\\$1'u 0'\v'-.25m'\\$2
+.	ie t .do nop \Z'\\$1'\v'.25m'\D'l \w'\\$1'u 0'\v'-.25m'\\$2
+.	el \(ul\\$1\(ul\\$2
 ..
 .\" box a word
 .de BX
@@ -1738,7 +1740,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .	br
 .	par@reset
 .	na
-.	ll -8n \" XXX: take TC-MARGIN into account?
 .	in (n;0\\$2)
 .\}
 .el .@error .XA without .XS
@@ -1768,7 +1769,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .\" .XH-UPDATE-TOC <outline-level> [<section-number>] <text>
 .\" (<section-number> present only when called by XN)
 .XS
-.shift\" don't use <outline-level> in rudimentary style
+.in (\\$1u - 1u * 2n)
+.shift
 \&\\$*\" capture <section-number> (if present) and <text>
 .XE
 ..
@@ -1788,9 +1790,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .de XN de
 .\" .XN <text>
 .ie \\n[nh*hl] .toc*xn-init \\$@
-.el \{ .@error .XN is not allowed before .NH
-.      nop \&\\$*
-.   \}
+.el \{\
+.	@error .XN is not allowed before .NH
+.	nop \&\\$*
+.\}
 .de toc*xn-init de
 .rn XN-REPLACEMENT XN
 .XN \\$@
@@ -2132,10 +2135,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .\" ****************************
 .\" Emulate Bell Labs localisms. Note, (a) they're not documented, and
 .\" (b) the .P1 and .UC macros collide with different ones in Berkeley
-.\" ms.  We hack around this by conditionalizing the behavior of P1; UC
-.\" was not defined by groff and will be a no-op if called Berkeley
-.\" style with no arguments, so there is no problem with hijacking it
-.\" here.
+.\" ms.
+.\"
+.\" [Correction 2022-04-17: 10th Edition AT&T ms also collides with
+.\" Berkeley's (undocumented) FP macro.]
+.\"
+.\" We hack around this by conditionalizing the behavior of P1; UC was
+.\" not defined by groff and will be a no-op if called Berkeley style
+.\" with no arguments, so there is no problem with hijacking it here.
 .\"
 .\" What's done here is sufficient to give back the Guide to EQN (1976)
 .\" its section headings and restore some text that had gone missing as

@@ -1508,6 +1508,18 @@ void table::add_entry(int r, int c, const string &str,
 {
   allocate(r);
   table_entry *e = 0;
+  char *s = str.extract();
+  if (str.search('\n') >= 0) {
+    bool was_changed = false;
+    for (int i = 0; s[i] != '\0'; i++)
+      if ((i > 0) && (s[(i - 1)] == '\\') && (s[i] == 'R')) {
+	s[i] = '&';
+	was_changed = true;
+      }
+    if (was_changed)
+      error_with_file_and_line(fn, ln, "repeating a glyph with '\\R'"
+			       " is not allowed in a text block");
+  }
   if (str == "\\_") {
     e = new short_line_entry(this, f);
   }
@@ -1546,17 +1558,8 @@ void table::add_entry(int r, int c, const string &str,
     else
       do_vspan(r, c);
   }
-  else if (str.length() > 2 && str[0] == '\\' && str[1] == 'R') {
-    if (str.search('\n') >= 0)
-      error_with_file_and_line(fn, ln, "bad repeated character");
-    else {
-      char *s = str.substring(2, str.length() - 2).extract();
-      e = new repeated_char_entry(this, f, s);
-    }
-  }
   else {
     int is_block = str.search('\n') >= 0;
-    char *s;
     switch (f->type) {
     case FORMAT_SPAN:
       assert(str.empty());
@@ -1564,7 +1567,6 @@ void table::add_entry(int r, int c, const string &str,
       break;
     case FORMAT_LEFT:
       if (!str.empty()) {
-	s = str.extract();
 	if (is_block)
 	  e = new left_block_entry(this, f, s);
 	else
@@ -1575,7 +1577,6 @@ void table::add_entry(int r, int c, const string &str,
       break;
     case FORMAT_CENTER:
       if (!str.empty()) {
-	s = str.extract();
 	if (is_block)
 	  e = new center_block_entry(this, f, s);
 	else
@@ -1586,7 +1587,6 @@ void table::add_entry(int r, int c, const string &str,
       break;
     case FORMAT_RIGHT:
       if (!str.empty()) {
-	s = str.extract();
 	if (is_block)
 	  e = new right_block_entry(this, f, s);
 	else
@@ -1597,7 +1597,6 @@ void table::add_entry(int r, int c, const string &str,
       break;
     case FORMAT_NUMERIC:
       if (!str.empty()) {
-	s = str.extract();
 	if (is_block) {
 	  error_with_file_and_line(fn, ln, "can't have numeric text block");
 	  e = new left_block_entry(this, f, s);
@@ -1615,7 +1614,6 @@ void table::add_entry(int r, int c, const string &str,
       break;
     case FORMAT_ALPHABETIC:
       if (!str.empty()) {
-	s = str.extract();
 	if (is_block)
 	  e = new alphabetic_block_entry(this, f, s);
 	else

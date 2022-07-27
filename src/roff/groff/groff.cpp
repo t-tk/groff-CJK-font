@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
@@ -49,7 +48,8 @@ extern "C" {
 }
 #endif /* NEED_DECLARATION_PUTENV */
 
-// The number of commands must be in sync with MAX_COMMANDS in pipeline.h
+// The number of commands must be in sync with MAX_COMMANDS in
+// pipeline.h.
 
 // grap, chem, and ideal must come before pic;
 // tbl must come before eqn
@@ -82,7 +82,7 @@ public:
   void set_name(const char *);
   void set_name(const char *, const char *);
   const char *get_name();
-  void append_arg(const char *, const char * = 0);
+  void append_arg(const char *, const char * = 0 /* nullptr */);
   void insert_arg(const char *);
   void insert_args(string s);
   void clear_args();
@@ -93,9 +93,13 @@ public:
 extern "C" const char *Version_string;
 
 int lflag = 0;
-char *spooler = 0;
-char *postdriver = 0;
-char *predriver = 0;
+char *spooler = 0 /* nullptr */;
+char *postdriver = 0 /* nullptr */;
+char *predriver = 0 /* nullptr */;
+bool need_postdriver = true;
+char *saved_path = 0 /* nullptr */;
+char *groff_bin_path = 0 /* nullptr */;
+char *groff_font_path = 0 /* nullptr */;
 
 possible_command commands[NCOMMANDS];
 
@@ -108,6 +112,31 @@ const char *xbasename(const char *);
 
 void usage(FILE *stream);
 void help();
+
+static char *xstrdup(const char *s) {
+  if (0 /* nullptr */ == s)
+    return const_cast<char *>(s);
+  char *str = strdup(s);
+  if (0 /* nullptr */ == str)
+    fatal("unable to copy string: %1", strerror(errno));
+  return str;
+}
+
+static void xputenv(const char *s) {
+  if (putenv(const_cast<char *>(s)) != 0)
+    fatal("unable to write to environment: %1", strerror(errno));
+  return;
+}
+
+static void xexit(int status) {
+  free(spooler);
+  free(predriver);
+  free(postdriver);
+  free(saved_path);
+  free(groff_bin_path);
+  free(groff_font_path);
+  exit(status);
+}
 
 int main(int argc, char **argv)
 {
@@ -140,7 +169,8 @@ int main(int argc, char **argv)
   };
   while ((opt = getopt_long(
 		  argc, argv,
-		  "abcCd:D:eEf:F:gGhiI:jJkK:lL:m:M:n:No:pP:r:RsStT:UvVw:W:XzZ",
+		  "abcCd:D:eEf:F:gGhiI:jJkK:lL:m:M:"
+		  "n:No:pP:r:RsStT:UvVw:W:XzZ",
 		  long_options, NULL))
 	 != EOF) {
     char buf[3];
@@ -211,6 +241,7 @@ int main(int argc, char **argv)
       // fall through
     case 'Z':
       zflag++;
+      need_postdriver = false;
       break;
     case 'l':
       lflag++;
@@ -222,7 +253,7 @@ int main(int argc, char **argv)
       vflag = 1;
       printf("GNU groff version %s\n", Version_string);
       printf(
-	"Copyright (C) 2020 Free Software Foundation, Inc.\n"
+	"Copyright (C) 2022 Free Software Foundation, Inc.\n"
 	"GNU groff comes with ABSOLUTELY NO WARRANTY.\n"
 	"You may redistribute copies of groff and its subprograms\n"
 	"under the terms of the GNU General Public License.\n"
@@ -324,10 +355,11 @@ int main(int argc, char **argv)
       break;
     case 'X':
       Xflag++;
+      need_postdriver = false;
       break;
     case '?':
       usage(stderr);
-      exit(EXIT_FAILURE);
+      xexit(EXIT_FAILURE);
       break;
     default:
       assert(0 == "no case to handle option character");
@@ -346,12 +378,13 @@ int main(int argc, char **argv)
     commands[PIC_INDEX].append_arg("-U");
   }
   font::set_unknown_desc_command_handler(handle_unknown_desc_command);
-  if (!font::load_desc())
+  const char *desc = font::load_desc();
+  if (0 /* nullptr */ == desc)
     fatal("cannot load 'DESC' description file for device '%1'",
 	  device);
-  if (!postdriver)
-    fatal("no 'postpro' directive in 'DESC' file for device '%1'",
-          device);
+  if (need_postdriver && (0 /* nullptr */ == postdriver))
+    fatal_with_file_and_line(desc, 0, "device description file missing"
+			     " 'postpro' directive");
   if (predriver && !zflag) {
     commands[TROFF_INDEX].insert_arg(commands[TROFF_INDEX].get_name());
     commands[TROFF_INDEX].set_name(predriver);
@@ -362,7 +395,7 @@ int main(int argc, char **argv)
     if (vflag)
       commands[TROFF_INDEX].insert_arg("-v");
   }
-  const char *real_driver = 0;
+  const char *real_driver = 0 /* nullptr */;
   if (Xflag) {
     real_driver = postdriver;
     postdriver = (char *)GXDITVIEW;
@@ -413,8 +446,8 @@ int main(int argc, char **argv)
     commands[SPOOL_INDEX].append_arg(Largs.contents());
   }
   if (zflag) {
-    commands[POST_INDEX].set_name(0);
-    commands[SPOOL_INDEX].set_name(0);
+    commands[POST_INDEX].set_name(0 /* nullptr */);
+    commands[SPOOL_INDEX].set_name(0 /* nullptr */);
   }
   commands[TROFF_INDEX].append_arg("-T", device);
   if (strcmp(device, "html") == 0) {
@@ -440,7 +473,7 @@ int main(int argc, char **argv)
 
   int first_index;
   for (first_index = 0; first_index < TROFF_INDEX; first_index++)
-    if (commands[first_index].get_name() != 0)
+    if (commands[first_index].get_name() != 0 /* nullptr */)
       break;
   if (optind < argc) {
     if (argv[optind][0] == '-' && argv[optind][1] != '\0')
@@ -460,20 +493,20 @@ int main(int argc, char **argv)
       e += fontpath;
     }
     e += '\0';
-    if (putenv(strsave(e.contents())))
-      fatal("putenv failed");
+    groff_font_path = xstrdup(e.contents());
+    xputenv(groff_font_path);
   }
   {
     // we save the original path in GROFF_PATH__ and put it into the
     // environment -- troff will pick it up later.
     char *path = getenv("PATH");
-    string e = "GROFF_PATH__";
-    e += '=';
+    string g = "GROFF_PATH__";
+    g += '=';
     if (path && *path)
-      e += path;
-    e += '\0';
-    if (putenv(strsave(e.contents())))
-      fatal("putenv failed");
+      g += path;
+    g += '\0';
+    saved_path = xstrdup(g.contents());
+    xputenv(saved_path);
     char *binpath = getenv("GROFF_BIN_PATH");
     string f = "PATH";
     f += '=';
@@ -488,22 +521,22 @@ int main(int argc, char **argv)
       f += path;
     }
     f += '\0';
-    if (putenv(strsave(f.contents())))
-      fatal("putenv failed");
+    groff_bin_path = xstrdup(f.contents());
+    xputenv(groff_bin_path);
   }
   if (Vflag)
     print_commands(Vflag == 1 ? stdout : stderr);
   if (Vflag == 1)
-    exit(EXIT_SUCCESS);
-  return run_commands(vflag);
+    xexit(EXIT_SUCCESS);
+  xexit(run_commands(vflag));
 }
 
 const char *xbasename(const char *s)
 {
   if (!s)
-    return 0;
-  // DIR_SEPS[] are possible directory separator characters, see nonposix.h
-  // We want the rightmost separator of all possible ones.
+    return 0 /* nullptr */;
+  // DIR_SEPS[] are possible directory separator characters; see
+  // nonposix.h.  We want the rightmost separator of all possible ones.
   // Example: d:/foo\\bar.
   const char *p = strrchr(s, DIR_SEPS[0]), *p1;
   const char *sep = &DIR_SEPS[1];
@@ -521,41 +554,38 @@ const char *xbasename(const char *s)
 void handle_unknown_desc_command(const char *command, const char *arg,
 				 const char *filename, int lineno)
 {
+  current_filename = filename;
+  current_lineno = lineno;
   if (strcmp(command, "print") == 0) {
-    if (arg == 0)
-      error_with_file_and_line(filename, lineno,
-			       "'print' command requires an argument");
+    if (arg == 0 /* nullptr */)
+      error("'print' directive requires an argument");
     else
-      spooler = strsave(arg);
+      spooler = xstrdup(arg);
   }
   if (strcmp(command, "prepro") == 0) {
-    if (arg == 0)
-      error_with_file_and_line(filename, lineno,
-			       "'prepro' command requires an argument");
+    if (arg == 0 /* nullptr */)
+      error("'prepro' directive requires an argument");
     else {
       for (const char *p = arg; *p; p++)
 	if (csspace(*p)) {
-	  error_with_file_and_line(filename, lineno,
-				   "invalid 'prepro' argument '%1'"
-				   ": program name required", arg);
+	  error("invalid 'prepro' directive argument '%1':"
+		" program name required", arg);
 	  return;
 	}
-      predriver = strsave(arg);
+      predriver = xstrdup(arg);
     }
   }
   if (strcmp(command, "postpro") == 0) {
-    if (arg == 0)
-      error_with_file_and_line(filename, lineno,
-			       "'postpro' command requires an argument");
+    if (arg == 0 /* nullptr */)
+      error("'postpro' directive requires an argument");
     else {
       for (const char *p = arg; *p; p++)
 	if (csspace(*p)) {
-	  error_with_file_and_line(filename, lineno,
-				   "invalid 'postpro' argument '%1'"
-				   ": program name required", arg);
+	  error("invalid 'postpro' directive argument '%1':"
+		" program name required", arg);
 	  return;
 	}
-      postdriver = strsave(arg);
+      postdriver = xstrdup(arg);
     }
   }
 }
@@ -564,10 +594,10 @@ void print_commands(FILE *fp)
 {
   int last;
   for (last = SPOOL_INDEX; last >= 0; last--)
-    if (commands[last].get_name() != 0)
+    if (commands[last].get_name() != 0 /* nullptr */)
       break;
   for (int i = 0; i <= last; i++)
-    if (commands[i].get_name() != 0)
+    if (commands[i].get_name() != 0 /* nullptr */)
       commands[i].print(i == last, fp);
 }
 
@@ -578,7 +608,7 @@ int run_commands(int no_pipe)
   char **v[NCOMMANDS];
   int j = 0;
   for (int i = 0; i < NCOMMANDS; i++)
-    if (commands[i].get_name() != 0)
+    if (commands[i].get_name() != 0 /* nullptr */)
       v[j++] = commands[i].get_argv();
   return run_pipeline(j, v, no_pipe);
 }
@@ -597,7 +627,7 @@ possible_command::~possible_command()
 void possible_command::set_name(const char *s)
 {
   free(name);
-  name = strsave(s);
+  name = xstrdup(s);
 }
 
 void possible_command::clear_name()
@@ -670,7 +700,7 @@ void possible_command::build_argv()
   // Count the number of arguments.
   int len = args.length();
   int argc = 1;
-  char *p = 0;
+  char *p = 0 /* nullptr */;
   if (len > 0) {
     p = &args[0];
     for (int i = 0; i < len; i++)
@@ -684,20 +714,21 @@ void possible_command::build_argv()
     argv[i] = p;
     p = strchr(p, '\0') + 1;
   }
-  argv[argc] = 0;
+  argv[argc] = 0 /* nullptr */;
 }
 
 void possible_command::print(int is_last, FILE *fp)
 {
   build_argv();
   if (IS_BSHELL(argv[0])
-      && argv[1] != 0 && strcmp(argv[1], BSHELL_DASH_C) == 0
-      && argv[2] != 0 && argv[3] == 0)
+      && argv[1] != 0 /* nullptr */
+      && strcmp(argv[1], BSHELL_DASH_C) == 0
+      && argv[2] != 0 /* nullptr */ && argv[3] == 0 /* nullptr */)
     fputs(argv[2], fp);
   else {
     fputs(argv[0], fp);
     string str;
-    for (int i = 1; argv[i] != 0; i++) {
+    for (int i = 1; argv[i] != 0 /* nullptr */; i++) {
       str.clear();
       append_arg_to_string(argv[i], str);
       put_string(str, fp);
@@ -799,11 +830,11 @@ void help()
   synopsis(stdout);
   fputs("\n"
 "-a\tproduce approximate description of output\n"
-"-b\tprint backtraces with errors or warnings\n"
-"-c\tdisable color output\n"
-"-C\tenable compatibility mode\n"
-"-d CS\tdefine one-character string name C as string S\n"
-"-d NAME=STRING\n\tdefine string NAME as STRING\n"
+"-b\treport backtraces with errors or warnings\n"
+"-c\tstart with color output disabled\n"
+"-C\tstart with AT&T troff compatibility mode enabled\n"
+"-d ST\tstore text T to string S (one character)\n"
+"-d STRING=TEXT\n\tstore TEXT to string STRING\n"
 "-D ENC\tfall back to ENC as default input encoding; implies -k\n"
 "-e\tpreprocess with eqn\n"
 "-E\tsuppress error diagnostics; implies -Ww\n"
@@ -818,8 +849,8 @@ void help()
 // "-J\tpreprocess with gideal\n"
 "-k\tpreprocess with preconv\n"
 "-K ENC\tuse ENC as input encoding; implies -k\n"
-"-l\tspool the output\n"
-"-L ARG\tpass ARG to the print spooler\n"
+"-l\tsend postprocessed output to print spooler\n"
+"-L ARG\tpass ARG to print spooler\n"
 "-m NAME\tread macro file NAME.tmac\n"
 "-M DIR\tsearch DIR for macro files\n"
 "-N\tdon't allow newlines within eqn delimiters\n"
@@ -827,21 +858,21 @@ void help()
 "-o LIST\toutput only page in LIST (\"1\"; \"2,4\"; \"3,7-11\")\n"
 "-p\tpreprocess with pic\n"
 "-P ARG\tpass ARG to the postprocessor\n"
-"-r CN\tdefine one-character register name C as numeric expression N\n"
-"-r REG=EXPR\n\tdefine register REG as numeric expression EXPR\n"
+"-r CN\tstore numeric expression N in register C (one character)\n"
+"-r REG=EXPR\n\tstore numeric expression EXPR in register REG\n"
 "-R\tpreprocess with refer\n"
 "-s\tpreprocess with soelim\n"
-"-S\tenable safer mode (the default)\n"
+"-S\tenable safer mode (default)\n"
 "-t\tpreprocess with tbl\n"
 "-T DEV\tprepare output for device DEV\n"
-"-U\tenable unsafe mode\n"
+"-U\taccept unsafe input (disable safer mode)\n"
 "-v\toutput version information and pass -v to commands to be run\n"
 "-V\twrite commands to standard output instead of running them\n"
 "-w NAME\tenable warning type NAME\n"
 "-W NAME\tinhibit warning type NAME\n"
 "-X\trun gxditview previewer instead of normal postprocessor\n"
 "-z\tsuppress formatted output\n"
-"-Z\tdon't postprocess\n"
+"-Z\tdo not run postprocessor\n"
 "\n"
 "See groff(1) for details.\n",
 	stdout);
@@ -868,3 +899,9 @@ void c_fatal(const char *format, const char *arg1, const char *arg2,
 }
 
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

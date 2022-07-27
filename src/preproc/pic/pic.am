@@ -16,6 +16,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 prefixexecbin_PROGRAMS += pic
+pic_CPPFLAGS = $(AM_CPPFLAGS) \
+  -I $(top_srcdir)/src/preproc/pic \
+  -I $(top_builddir)/src/preproc/pic
 pic_LDADD = libgroff.a $(LIBM) lib/libgnu.a
 pic_SOURCES = \
   src/preproc/pic/pic.ypp \
@@ -32,16 +35,15 @@ pic_SOURCES = \
   src/preproc/pic/output.h \
   src/preproc/pic/object.h
 
-pic_CPPFLAGS = $(AM_CPPFLAGS) \
-  -I $(top_srcdir)/src/preproc/pic \
-  -I $(top_builddir)/src/preproc/pic
 PREFIXMAN1 += src/preproc/pic/pic.1
-
-src/preproc/pic/pic-lex.$(OBJEXT): src/preproc/pic/pic.hpp
 EXTRA_DIST += \
-  src/preproc/pic/pic.1.man \
-  src/preproc/pic/TODO
-CLEANFILES += \
+  src/preproc/pic/TODO \
+  src/preproc/pic/pic.1.man
+
+# Since pic_CPPFLAGS was set, all .o files have a 'pic-' prefix.
+src/preproc/pic/pic-lex.$(OBJEXT): src/preproc/pic/pic.hpp
+
+MAINTAINERCLEANFILES += \
   src/preproc/pic/pic.cpp \
   src/preproc/pic/pic.hpp \
   src/preproc/pic/pic.output

@@ -69,7 +69,7 @@ DEVPSFONTFILES_GENERATED = \
   font/devps/zapfdr.pfa \
   font/devps/symbolsl.pfa
 devpsfontdir = $(fontdir)/devps
-dist_devpsfont_DATA = $(DEVPSFONTFILES) 
+dist_devpsfont_DATA = $(DEVPSFONTFILES)
 nodist_devpsfont_DATA = $(DEVPSFONTFILES_GENERATED)
 
 # these files will be installed in oldfontdir
@@ -140,15 +140,24 @@ EXTRA_DIST += \
 
 font/devps/DESC: $(devps_srcdir)/DESC.in
 	$(AM_V_GEN)$(MKDIR_P) font/devps \
-	&& cat $(devps_srcdir)/DESC.in >$@ \
-	&& echo broken $(BROKEN_SPOOLER_FLAGS) >>$@ \
+	&& cat $(devps_srcdir)/DESC.in >$@.tmp \
+	&& echo broken $(BROKEN_SPOOLER_FLAGS) >>$@.tmp \
 	&& if test "$(PAGE)" = A4; then \
-	     echo "papersize a4" >>$@; \
+	     echo "papersize a4" >>$@.tmp; \
 	   else \
-	     echo "papersize letter" >>$@; \
+	     echo "papersize letter" >>$@.tmp; \
 	   fi \
 	&& (test -z '$(PSPRINT)' \
-	    || echo print '$(PSPRINT)' >>$@)
+	    || echo print '$(PSPRINT)' >>$@.tmp)
+	$(AM_V_at)mv $@.tmp $@
+
+# PostScript documents to be produced by troff should depend on this
+# stamp file to ensure that grops's device and font description files
+# are available.
+MOSTLYCLEANFILES += font/devps/stamp
+font/devps/stamp: font/devps/DESC \
+  $(DEVPSFONTFILES) $(DEVPSFONTFILES_GENERATED)
+	$(AM_V_at)>$@
 
 maintainer-font-descriptions: devps_font-descriptions
 # This target generates font descriptions from installed Type 1 AFM

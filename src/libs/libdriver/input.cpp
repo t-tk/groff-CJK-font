@@ -1601,7 +1601,7 @@ do_file(const char *filename)
     char *tmp_dev = get_string_arg();
     if (pr == 0) {		// note: 'pr' initialized after prologue
       device = tmp_dev;
-      if (!font::load_desc())
+      if (0 /* nullptr */ == font::load_desc())
 	fatal("cannot load description of '%1' device", tmp_dev);
     }
     else {

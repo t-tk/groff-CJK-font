@@ -1,4 +1,4 @@
-/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2022 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
 This file is part of groff.
@@ -1744,6 +1744,12 @@ void token::next()
     if (cc != escape_char || escape_char == 0) {
     handle_normal_char:
       switch(cc) {
+      case INPUT_NO_BREAK_SPACE:
+	  type = TOKEN_STRETCHABLE_SPACE;
+	  return;
+      case INPUT_SOFT_HYPHEN:
+	  type = TOKEN_HYPHEN_INDICATOR;
+	  return;
       case PUSH_GROFF_MODE:
 	input_stack::save_compatible_flag(compatible_flag);
 	compatible_flag = 0;
@@ -2046,10 +2052,16 @@ void token::next()
 	  for (p = s.contents(); *p != '\0'; p++)
 	    if (!csdigit(*p))
 	      break;
-	  if (*p || s.is_empty())
-	    curenv->set_font(s);
+	  // environment::set_font warns if a bogus mounting position is
+	  // requested.  We must warn here if a bogus font name is
+	  // selected.
+	  if (*p != 0 /* nullptr */ || s.is_empty()) {
+	    if (!curenv->set_font(s))
+	      warning(WARN_FONT, "cannot select font '%1'",
+		      s.contents());
+	  }
 	  else
-	    curenv->set_font(atoi(s.contents()));
+	    (void) curenv->set_font(atoi(s.contents()));
 	  if (!compatible_flag)
 	    have_input = 1;
 	  break;
@@ -3573,9 +3585,9 @@ int string_iterator::get_location(int allow_macro,
 
 void string_iterator::backtrace()
 {
-  if (program_name)
-    fprintf(stderr, "%s: ", program_name);
   if (mac.filename) {
+    if (program_name)
+      fprintf(stderr, "%s: ", program_name);
     errprint("backtrace: '%1':%2", mac.filename,
 	     mac.lineno + lineno - 1);
     if (how_invoked) {
@@ -5829,8 +5841,8 @@ int do_if_request()
       for (;;) {
 	tok.next();
 	if (tok.is_newline() || tok.is_eof()) {
-	  warning(WARN_DELIM, "missing closing delimiter in conditional"
-		  " expression (got %1)", tok.description());
+	  warning(WARN_DELIM, "missing closing delimiter in output"
+		  " comparison operator (got %1)", tok.description());
 	  tok.next();
 	  curenv = oldenv;
 	  return 0;
@@ -8154,7 +8166,7 @@ int main(int argc, char **argv)
   set_string(".T", device);
   init_charset_table();
   init_hpf_code_table();
-  if (!font::load_desc())
+  if (0 /* nullptr */ == font::load_desc())
     fatal("cannot load 'DESC' description file for device '%1'",
 	  device);
   units_per_inch = font::res;
@@ -8656,7 +8668,7 @@ static void read_color_draw_node(token &start)
   while (tok != start) {
     if (tok.is_newline() || tok.is_eof()) {
       warning(WARN_DELIM, "missing closing delimiter in color drawing"
-	      " device command (got %1)", tok.description());
+	      " command (got %1)", tok.description());
       input_stack::push(make_temp_iterator("\n"));
       break;
     }
