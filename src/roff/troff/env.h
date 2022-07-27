@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
@@ -139,8 +138,6 @@ void title();
 #ifdef WIDOW_CONTROL
 void widow_control_request();
 #endif /* WIDOW_CONTROL */
-
-void do_divert(int append, int boxing);
 
 class environment {
   int dummy;			// dummy environment used for \w
@@ -415,3 +412,9 @@ extern symbol default_family;
 extern int translate_space_to_dummy;
 
 extern unsigned char hpf_code_table[];
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

@@ -1462,18 +1462,17 @@ prefixexecbin_PROGRAMS = eqn$(EXEEXT) grn$(EXEEXT) pic$(EXEEXT) \
 @BUILD_PDFDOC_TRUE@am__append_15 = doc/automake.pdf
 @BUILD_EXAMPLES_TRUE@am__append_16 = $(PROCESSEDEXAMPLEFILES)
 @BUILD_EXAMPLES_FALSE@am__append_17 = $(EXAMPLEFILES)
-@BUILD_INFODOC_TRUE@am__append_18 = doc/groff.info doc/groff.info-[0-9]
-@USE_GROFF_ALLOCATOR_TRUE@am__append_19 = \
+@USE_GROFF_ALLOCATOR_TRUE@am__append_18 = \
 @USE_GROFF_ALLOCATOR_TRUE@  src/libs/libgroff/new.cpp
 
-@WITHOUT_X11_FALSE@am__append_20 = libxutil.a
-@WITHOUT_X11_TRUE@am__append_21 = $(GXDITVIEWSOURCES)
-@WITHOUT_X11_FALSE@am__append_22 = gxditview
-@WITHOUT_X11_FALSE@am__append_23 = $(XDITVIEW_GENHDRS)
-@WITHOUT_X11_FALSE@am__append_24 = src/devices/xditview/gxditview.1
-@WITHOUT_X11_FALSE@am__append_25 = xtotroff
-@WITHOUT_X11_FALSE@am__append_26 = src/utils/xtotroff/xtotroff.1
-@USEPROGRAMPREFIX_FALSE@am__append_27 = $(PREFIXMAN1)
+@WITHOUT_X11_FALSE@am__append_19 = libxutil.a
+@WITHOUT_X11_TRUE@am__append_20 = $(GXDITVIEWSOURCES)
+@WITHOUT_X11_FALSE@am__append_21 = gxditview
+@WITHOUT_X11_FALSE@am__append_22 = $(XDITVIEW_GENHDRS)
+@WITHOUT_X11_FALSE@am__append_23 = src/devices/xditview/gxditview.1
+@WITHOUT_X11_FALSE@am__append_24 = xtotroff
+@WITHOUT_X11_FALSE@am__append_25 = src/utils/xtotroff/xtotroff.1
+@USEPROGRAMPREFIX_FALSE@am__append_26 = $(PREFIXMAN1)
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/gnulib_m4/00gnulib.m4 \
@@ -3363,7 +3362,6 @@ make_uninstall_pdfdoc = @make_uninstall_pdfdoc@
 make_uninstall_pdfexamples = @make_uninstall_pdfexamples@
 make_uninstall_shipped_htmldoc = @make_uninstall_shipped_htmldoc@
 make_winscripts = @make_winscripts@
-makeinfo_version_numeric = @makeinfo_version_numeric@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
@@ -3823,6 +3821,9 @@ bin_SCRIPTS = $(am__append_2) eqn2graph gdiffmk glilypond gperl \
 	gpinyin grap2graph mmroff pdfroff pic2graph gropdf pdfmom \
 	afmtodit grog
 dist_bin_SCRIPTS = 
+# stuff that should be in distribution archives but not in source repo
+MAINTAINERCLEANFILES = doc/groff.info doc/groff.txt doc/groff.html \
+	doc/groff.html.node
 MOSTLYCLEANFILES = lib/core lib/*.stackdump lib/alloca.h \
 	lib/alloca.h-t lib/errno.h lib/errno.h-t lib/float.h \
 	lib/float.h-t lib/limits.h lib/limits.h-t lib/math.h \
@@ -3837,23 +3838,22 @@ MOSTLYCLEANFILES = lib/core lib/*.stackdump lib/alloca.h \
 	$(am__append_9) $(MOMPROCESSEDEXAMPLEFILES) penguin.ps \
 	penguin.pdf $(am__append_10) msboxes.ms \
 	$(SBOXES_PROCESSEDEXAMPLEFILES) $(am__append_13) \
-	$(am__append_15) $(am__append_16) doc/examples.stamp \
-	$(am__append_18) gnu.eps $(DEVASCIIFONTSFILES) \
-	font/devascii/DESC $(DEVCP1047FONTSFILES) font/devcp1047/DESC \
-	font/devdvi/DESC $(DEVHTMLFONTSFILES) font/devhtml/DESC \
-	$(DEVLATIN1FONTSFILES) font/devlatin1/DESC font/devlbp/DESC \
-	font/devlj4/DESC font/devpdf/download font/devpdf/DESC \
-	font/devpdf/Foundry font/devpdf/build_font_files \
-	font/devpdf/util/BuildFoundries $(DEVPSFONTFILES_GENERATED) \
-	$(DEVUTF8FONTSFILES) font/devutf8/DESC tmac/groff_man.7.man \
+	$(am__append_15) $(am__append_16) doc/examples.stamp gnu.eps \
+	$(DEVASCIIFONTSFILES) font/devascii/DESC \
+	$(DEVCP1047FONTSFILES) font/devcp1047/DESC font/devdvi/DESC \
+	$(DEVHTMLFONTSFILES) font/devhtml/DESC $(DEVLATIN1FONTSFILES) \
+	font/devlatin1/DESC font/devlbp/DESC font/devlj4/DESC \
+	font/devpdf/download font/devpdf/DESC font/devpdf/Foundry \
+	font/devpdf/build_font_files font/devpdf/util/BuildFoundries \
+	$(DEVPSFONTFILES_GENERATED) $(DEVUTF8FONTSFILES) \
+	font/devutf8/DESC tmac/groff_man.7.man \
 	tmac/groff_man_style.7.man tmac/www.tmac tmac/*-stamp \
 	tmac/stamp-wrap tmac/*-wrap $(prefixexecbin_SCRIPTS) \
 	$(bin_SCRIPTS) $(man1_MANS) $(man5_MANS) $(man7_MANS) \
 	$(PREFIXMAN1) test-groff .version.tree
-MOSTLYCLEANADD = 
 # No GNU Make output.
 noinst_LIBRARIES = lib/libgnu.a libbib.a libdriver.a libgroff.a \
-	$(am__append_20)
+	$(am__append_19)
 
 # Case of out-of-source build: we must create the 'man' directory.
 
@@ -3878,7 +3878,7 @@ BUILT_SOURCES = $(ALLOCA_H) $(ERRNO_H) $(FLOAT_H) $(LIMITS_H) \
 	$(LIBUNISTRING_UNIWIDTH_H) lib/wchar.h lib/wctype.h man defs.h \
 	test-groff $(top_srcdir)/.version
 CLEANFILES = defs.h src/libs/libgroff/version.cpp charset.alias \
-	ref-add.sed ref-del.sed $(am__append_23) \
+	ref-add.sed ref-del.sed $(am__append_22) \
 	src/preproc/eqn/eqn.hpp src/preproc/eqn/eqn.cpp \
 	src/preproc/eqn/eqn.output src/preproc/pic/pic.cpp \
 	src/preproc/pic/pic.hpp src/preproc/pic/pic.output \
@@ -3888,6 +3888,12 @@ CLEANFILES = defs.h src/libs/libgroff/version.cpp charset.alias \
 
 # pdf doc, written in mom and therefore using contrib/mom/mom.am
 # definitions
+
+# Provide the manual in source form.
+
+# Generate HTML, both split into several files, and as a single file.
+# 'html' and its installation counterpart 'install-html' are standard
+# Automake targets.
 
 # File used by contrib/hdtbl and contrib/pdfmark. It is distributed in
 # doc.eps. We try in priority to use the file in 'doc'.
@@ -3973,12 +3979,13 @@ EXTRA_DIST = gnulib_m4/gnulib-cache.m4 lib/alloca.in.h lib/errno.in.h \
 	contrib/sboxes/ChangeLog contrib/sboxes/notquine.sed \
 	$(am__append_12) $(am__append_14) doc/automake.mom \
 	$(am__append_17) doc/gnu.xpm doc/txi-en.tex doc/groff.texi \
-	doc/fdl.texi doc/gnu.xpm $(DEVX100FONTS) $(DEVX10012FONTS) \
-	$(DEVX75FONTS) $(DEVX7512FONTS) font/devascii/R.proto \
-	font/devascii/DESC.proto font/devcp1047/R.proto \
-	font/devcp1047/DESC.proto $(DEVDVIFONTFILES) $(DEVDVIGENFILES) \
-	font/devdvi/DESC.in font/devhtml/R.proto \
-	font/devhtml/DESC.proto font/devhtml/R.in \
+	doc/fdl.texi doc/groff.info doc/groff.txt doc/groff.html \
+	doc/groff.html.node doc/gnu.xpm $(DEVX100FONTS) \
+	$(DEVX10012FONTS) $(DEVX75FONTS) $(DEVX7512FONTS) \
+	font/devascii/R.proto font/devascii/DESC.proto \
+	font/devcp1047/R.proto font/devcp1047/DESC.proto \
+	$(DEVDVIFONTFILES) $(DEVDVIGENFILES) font/devdvi/DESC.in \
+	font/devhtml/R.proto font/devhtml/DESC.proto font/devhtml/R.in \
 	font/devlatin1/R.proto font/devlatin1/DESC.proto \
 	$(DEVLBPFONTFILES) font/devlbp/DESC.in font/devlj4/DESC.in \
 	font/devpdf/DESC.in font/devpdf/Foundry.in \
@@ -4011,7 +4018,7 @@ EXTRA_DIST = gnulib_m4/gnulib-cache.m4 lib/alloca.in.h lib/errno.in.h \
 	src/devices/gropdf/pdfmom.1.man src/devices/grops/grops.1.man \
 	src/devices/grops/psfig.diff src/devices/grops/TODO \
 	src/devices/grotty/grotty.1.man src/devices/grotty/TODO \
-	$(grotty_TESTS) $(am__append_21) src/devices/xditview/ad2c \
+	$(grotty_TESTS) $(am__append_20) src/devices/xditview/ad2c \
 	src/devices/xditview/ChangeLog src/devices/xditview/DESC.in \
 	src/devices/xditview/FontMap \
 	src/devices/xditview/GXditview-color.ad \
@@ -4076,12 +4083,12 @@ man1_MANS = contrib/chem/chem.1 contrib/eqn2graph/eqn2graph.1 \
 	src/devices/grolbp/grolbp.1 src/devices/grolj4/grolj4.1 \
 	src/devices/gropdf/gropdf.1 src/devices/gropdf/pdfmom.1 \
 	src/devices/grops/grops.1 src/devices/grotty/grotty.1 \
-	$(am__append_24) src/preproc/preconv/preconv.1 \
+	$(am__append_23) src/preproc/preconv/preconv.1 \
 	src/roff/groff/groff.1 src/utils/addftinfo/addftinfo.1 \
 	src/utils/afmtodit/afmtodit.1 src/utils/grog/grog.1 \
 	src/utils/hpftodit/hpftodit.1 src/utils/lkbib/lkbib.1 \
 	src/utils/pfbtops/pfbtops.1 src/utils/tfmtodit/tfmtodit.1 \
-	$(am__append_26) $(am__append_27)
+	$(am__append_25) $(am__append_26)
 man5_MANS = contrib/groff_filenames/groff_filenames.5 man/groff_font.5 \
 	man/groff_out.5 man/groff_tmac.5 src/devices/grolj4/lj4_font.5
 man7_MANS = contrib/hdtbl/groff_hdtbl.7 contrib/mm/groff_mm.7 \
@@ -4614,14 +4621,11 @@ EXAMPLEFILES = \
 imagedir = img
 htmldocimagedir = $(htmldocdir)/img
 exampleimagedir = $(exampledir)/img
-@BUILD_INFODOC_TRUE@groffinfodir = $(infodir)
-@BUILD_INFODOC_TRUE@groffpdfdir = $(infodir)
 
-# GNU Make has a built-in variable TEXI2DVI but it is not the case of
-# all 'make' implementation.  As it default to 'texi2dvi' we simply
-# redefine it here.
+# GNU Make has a built-in variable TEXI2DVI, but that is not true of
+# all 'make' implementations.  As it defaults to 'texi2dvi', we (at
+# worst) harmlessly redefine it here.
 TEXI2DVI = texi2dvi
-texi2dvi_missing = no
 DEVX100FONTS = \
   font/devX100/DESC \
   font/devX100/TR \
@@ -5094,7 +5098,7 @@ libgroff_a_SOURCES = src/libs/libgroff/assert.cpp \
 	src/libs/libgroff/symbol.cpp src/libs/libgroff/tmpfile.cpp \
 	src/libs/libgroff/tmpname.cpp src/libs/libgroff/unicode.cpp \
 	src/libs/libgroff/uniglyph.cpp src/libs/libgroff/uniuni.cpp \
-	src/libs/libgroff/relocatable.h $(am__append_19)
+	src/libs/libgroff/relocatable.h $(am__append_18)
 nodist_libgroff_a_SOURCES = src/libs/libgroff/version.cpp
 
 # Data for localcharset.c.  Taken from libiconv/libcharset.
@@ -5367,6 +5371,7 @@ afmtodit_srcdir = $(top_srcdir)/src/utils/afmtodit
 grog_srcdir = $(top_srcdir)/src/utils/grog
 grog_TESTS = \
   src/utils/grog/tests/PF-does-not-start-pic-region.sh \
+  src/utils/grog/tests/avoid-refer-fakeout.sh \
   src/utils/grog/tests/preserve-groff-options.sh \
   src/utils/grog/tests/recognize-perl-pod.sh \
   src/utils/grog/tests/smoke-test.sh
@@ -9881,6 +9886,13 @@ src/utils/grog/tests/PF-does-not-start-pic-region.sh.log: src/utils/grog/tests/P
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
+src/utils/grog/tests/avoid-refer-fakeout.sh.log: src/utils/grog/tests/avoid-refer-fakeout.sh
+	@p='src/utils/grog/tests/avoid-refer-fakeout.sh'; \
+	b='src/utils/grog/tests/avoid-refer-fakeout.sh'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 src/utils/grog/tests/preserve-groff-options.sh.log: src/utils/grog/tests/preserve-groff-options.sh
 	@p='src/utils/grog/tests/preserve-groff-options.sh'; \
 	b='src/utils/grog/tests/preserve-groff-options.sh'; \
@@ -10517,8 +10529,7 @@ maintainer-clean-generic:
 	-rm -f src/preproc/refer/label.cpp
 	-rm -f src/preproc/refer/label.hpp
 	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
-@BUILD_INFODOC_FALSE@install-html-local:
-@BUILD_INFODOC_FALSE@install-pdf-local:
+	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
@@ -10696,11 +10707,7 @@ distclean: distclean-am
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-hdr distclean-local distclean-tags
 
-@BUILD_INFODOC_FALSE@dvi: dvi-am
-
 dvi-am:
-
-@BUILD_INFODOC_FALSE@html: html-am
 
 html-am:
 
@@ -10945,8 +10952,6 @@ mostlyclean: mostlyclean-am
 
 mostlyclean-am: mostlyclean-compile mostlyclean-generic \
 	mostlyclean-local
-
-@BUILD_INFODOC_FALSE@pdf: pdf-am
 
 pdf-am:
 
@@ -12198,9 +12203,9 @@ $(MOMPROCESSEDEXAMPLEFILES): $(MOMNORMALFILES) \
   gnu.eps font/devpdf/build_font_files
 
 penguin.ps:
-	cp $(mom_srcdir)/examples/penguin.ps $@
+	$(AM_V_at)cp $(mom_srcdir)/examples/penguin.ps $@
 penguin.pdf:
-	cp $(mom_srcdir)/examples/penguin.pdf $@
+	$(AM_V_at)cp $(mom_srcdir)/examples/penguin.pdf $@
 
 install-data-hook: install_mom
 install_mom:
@@ -12471,15 +12476,21 @@ uninstall_doc_htmldoc:
 @BUILD_HTML_TRUE@	-rmdir $(DESTDIR)$(htmldocdir)/$(imagedir)
 @BUILD_HTML_TRUE@	-rmdir $(DESTDIR)$(htmldocdir)
 
-# Texinfo doc
+# groff Texinfo manual
 #
-# Users who want to print out the groff manual are expected to have a
-# working TeX installation.  Note that texi2dvi properly honours the
-# `MAKEINFO' environment variable.
+# We can produce some formats of the manual using only 'makeinfo': GNU
+# info, plain text, and HTML.  Produce all of these by default and ship
+# them in the distribution archive ('make dist') so that people don't
+# need to have 'makeinfo' available.
 #
-# We can't use automake's facilities because the `dist` target attempts
-# to generate a PDF version of groff.texi by invoking texi2dvi without
-# the -e option, which is needed to build this file.
+# Other formats are suitable for hard copy and require a working TeX
+# installation.  We can't use Automake's facilities for PDF production
+# because the 'dist' target attempts to generate 'groff.pdf' by invoking
+# 'texi2dvi' without the '-E' option (use 'makeinfo' to expand macros),
+# which is needed to build this file.  'texi2dvi' honors the 'MAKEINFO'
+# environment variable.
+#
+# Were the foregoing not true, we would simply say this:
 #info_TEXINFOS = doc/groff.texi
 #doc_groff_TEXINFOS = doc/fdl.texi
 #
@@ -12489,47 +12500,34 @@ uninstall_doc_htmldoc:
 # to configure.
 
 all: build_infodoc
-@BUILD_INFODOC_TRUE@build_infodoc: doc/groff.info
-@BUILD_INFODOC_TRUE@doc/groff.info: $(doc_srcdir)/groff.texi
-@BUILD_INFODOC_TRUE@	$(AM_V_at)$(MKDIR_P) $(doc_builddir)
-@BUILD_INFODOC_TRUE@	$(AM_V_GEN)LANG=C \
-@BUILD_INFODOC_TRUE@	LC_ALL=C \
-@BUILD_INFODOC_TRUE@	$(MAKEINFO) -o doc/groff.info --enable-encoding \
-@BUILD_INFODOC_TRUE@	  -I$(doc_srcdir) $(doc_srcdir)/groff.texi
-@BUILD_INFODOC_FALSE@build_infodoc:
-# Rules to generate various doc files from .texi files.
+
+# Define targets to generate GNU Info, plain text, and HTML from .texi.
+build_infodoc: doc/groff.info doc/groff.txt doc/groff.html
+doc/groff.info: $(doc_srcdir)/groff.texi
+	$(AM_V_at)$(MKDIR_P) $(doc_builddir)
+	$(AM_V_GEN)LANG=C \
+	LC_ALL=C \
+	$(MAKEINFO) -o doc/groff.info --enable-encoding \
+	  -I$(doc_srcdir) $(doc_srcdir)/groff.texi
+
+# Distribute the Info files.
+dist-hook: dist-info-bits
+dist-info-bits:
+	chmod u+w $(distdir)/doc
+	for d in $(doc_builddir) $(doc_srcdir); \
+	do \
+	  if [ -f "$$d"/groff.info ]; \
+	  then \
+	    cp -f "$$d"/groff.info-* $(distdir)/doc; \
+	  fi; \
+	  break; \
+	done
 .texi.txt:
 	$(AM_V_at)$(MKDIR_P) $(doc_builddir)
 	$(AM_V_GEN)LANG=C \
 	LC_ALL=C \
 	$(MAKEINFO) --enable-encoding -I$(doc_srcdir) --plaintext \
 	  -o $@ $<
-
-.texi.dvi:
-@HAVE_TEXI2DVI_TRUE@	$(AM_V_at)$(MKDIR_P) $(doc_builddir)
-@HAVE_TEXI2DVI_TRUE@	$(AM_V_GEN)LANG=C \
-@HAVE_TEXI2DVI_TRUE@	LC_ALL=C \
-@HAVE_TEXI2DVI_TRUE@	TEXINPUTS="$(top_srcdir)/build-aux:$(TEXINPUTS)" \
-@HAVE_TEXI2DVI_TRUE@	MAKEINFO='$(MAKEINFO) -I $(doc_srcdir)' \
-@HAVE_TEXI2DVI_TRUE@	FORCE_SOURCE_DATE=1 \
-@HAVE_TEXI2DVI_TRUE@	$(TEXI2DVI) -e --batch --build-dir=doc/`basename $@`.t2d \
-@HAVE_TEXI2DVI_TRUE@	  -o $@ $<
-@HAVE_TEXI2DVI_FALSE@	@echo "program texi2dvi is missing; cannot generate $@" >&2; \
-@HAVE_TEXI2DVI_FALSE@	exit 1
-
-.texi.pdf:
-@HAVE_TEXI2DVI_TRUE@	$(AM_V_at)$(MKDIR_P) $(doc_builddir)
-@HAVE_TEXI2DVI_TRUE@	$(AM_V_GEN)LANG=C \
-@HAVE_TEXI2DVI_TRUE@	LC_ALL=C \
-@HAVE_TEXI2DVI_TRUE@	TEXINPUTS="$(top_srcdir)/build-aux:$(TEXINPUTS)" \
-@HAVE_TEXI2DVI_TRUE@	MAKEINFO='$(MAKEINFO) -I $(doc_srcdir)' \
-@HAVE_TEXI2DVI_TRUE@	$(TEXI2DVI) -e --batch --pdf --build-dir=doc/`basename $@`.t2p \
-@HAVE_TEXI2DVI_TRUE@	  -o $@ $<
-@HAVE_TEXI2DVI_FALSE@	@echo "program texi2dvi is missing; cannot generate $@" >&2; \
-@HAVE_TEXI2DVI_FALSE@	exit 1
-
-# This will generate both html split into several files and html doc
-# in a single file.
 .texi.html:
 	$(AM_V_at)$(MKDIR_P) $(doc_builddir)/
 	$(AM_V_GEN)LANG=C \
@@ -12541,21 +12539,45 @@ all: build_infodoc
 	$(MAKEINFO) --html -I $(doc_srcdir) --no-split \
 	  -o $@ $<
 
-# Targets to make all the doc in all formats. These doc are not built
-# by default. pdf, dvi, ps, html and their install equivalent
-# install-pdf, install-dvi, install-ps, install-html are standard
+# Define pattern rules to make our Texinfo manual in DVI and PDF
+# formats.  These are not built by default.  'pdf' and 'dvi' and their
+# installation counterparts 'install-pdf' and 'install-dvi' are standard
 # Automake targets.
+.texi.dvi:
+@HAVE_TEXI2DVI_TRUE@	$(AM_V_at)$(MKDIR_P) $(doc_builddir)
+@HAVE_TEXI2DVI_TRUE@	$(AM_V_GEN)LANG=C \
+@HAVE_TEXI2DVI_TRUE@	LC_ALL=C \
+@HAVE_TEXI2DVI_TRUE@	TEXINPUTS="$(top_srcdir)/build-aux:$(TEXINPUTS)" \
+@HAVE_TEXI2DVI_TRUE@	MAKEINFO='$(MAKEINFO) -I $(doc_srcdir)' \
+@HAVE_TEXI2DVI_TRUE@	FORCE_SOURCE_DATE=1 \
+@HAVE_TEXI2DVI_TRUE@	$(TEXI2DVI) -e --batch --build-dir=doc/`basename $@`.t2d \
+@HAVE_TEXI2DVI_TRUE@	  -o $@ $<
+@HAVE_TEXI2DVI_FALSE@	@echo "program texi2dvi is missing or too old;" \
+@HAVE_TEXI2DVI_FALSE@	  "cannot generate $@" >&2; \
+@HAVE_TEXI2DVI_FALSE@	exit 1
 
-@BUILD_INFODOC_TRUE@doc: doc_all
-@BUILD_INFODOC_TRUE@doc_all: doc_txt dvi pdf html
-@BUILD_INFODOC_TRUE@doc_txt: doc/groff.txt
-@BUILD_INFODOC_TRUE@dvi: doc_dvi
-@BUILD_INFODOC_TRUE@doc_dvi: doc/groff.dvi
-@BUILD_INFODOC_TRUE@pdf: doc_pdf
-@BUILD_INFODOC_TRUE@doc_pdf: doc/groff.pdf
-@BUILD_INFODOC_TRUE@html: doc_html
-@BUILD_INFODOC_TRUE@doc_html: doc/groff.html
-@BUILD_INFODOC_TRUE@install-doc: install-pdf install-html
+.texi.pdf:
+@HAVE_TEXI2DVI_TRUE@	$(AM_V_at)$(MKDIR_P) $(doc_builddir)
+@HAVE_TEXI2DVI_TRUE@	$(AM_V_GEN)LANG=C \
+@HAVE_TEXI2DVI_TRUE@	LC_ALL=C \
+@HAVE_TEXI2DVI_TRUE@	TEXINPUTS="$(top_srcdir)/build-aux:$(TEXINPUTS)" \
+@HAVE_TEXI2DVI_TRUE@	MAKEINFO='$(MAKEINFO) -I $(doc_srcdir)' \
+@HAVE_TEXI2DVI_TRUE@	$(TEXI2DVI) -e --batch --pdf --build-dir=doc/`basename $@`.t2p \
+@HAVE_TEXI2DVI_TRUE@	  -o $@ $<
+@HAVE_TEXI2DVI_FALSE@	@echo "program texi2dvi is missing or too old;" \
+@HAVE_TEXI2DVI_FALSE@	  "cannot generate $@" >&2; \
+@HAVE_TEXI2DVI_FALSE@	exit 1
+
+doc: doc_all
+doc_all: doc_txt dvi pdf html
+doc_txt: doc/groff.txt
+dvi: doc_dvi
+doc_dvi: doc/groff.dvi
+pdf: doc_pdf
+doc_pdf: doc/groff.pdf
+html: doc_html
+doc_html: doc/groff.html
+install-doc: install-pdf install-html
 
 distclean-local: clean_infodoc clean_otherdoc
 maintainer-clean-local: clean_infodoc clean_otherdoc
@@ -12569,42 +12591,45 @@ clean_otherdoc:
 	  $(RM) -r *.pdf *.html *.txt *.dvi *.t2p *.t2d
 
 install-data-local: install_infodoc
-@BUILD_INFODOC_TRUE@install_infodoc: doc/groff.info
-@BUILD_INFODOC_TRUE@	-test -d $(DESTDIR)$(infodir) \
-@BUILD_INFODOC_TRUE@	  || $(mkinstalldirs) $(DESTDIR)$(infodir)
-@BUILD_INFODOC_TRUE@	  for p in doc/groff.info `ls doc/groff.info*`; do \
-@BUILD_INFODOC_TRUE@	    f=`basename $$p`; \
-@BUILD_INFODOC_TRUE@	    $(RM) $(DESTDIR)$(infodir)/$$f; \
-@BUILD_INFODOC_TRUE@	    $(INSTALL_DATA) $$p $(DESTDIR)$(infodir)/$$f; \
-@BUILD_INFODOC_TRUE@	  done
-@BUILD_INFODOC_TRUE@	$(INSTALL_INFO) --info-dir=$(DESTDIR)$(infodir) \
-@BUILD_INFODOC_TRUE@	  $(DESTDIR)$(infodir)/groff.info
-@BUILD_INFODOC_TRUE@install-pdf-local: doc/groff.pdf
-@BUILD_INFODOC_TRUE@	-test -d $(DESTDIR)$(pdfdocdir) \
-@BUILD_INFODOC_TRUE@	  || $(mkinstalldirs) $(DESTDIR)$(pdfdocdir)
-@BUILD_INFODOC_TRUE@	cp $(top_builddir)/doc/groff.pdf $(DESTDIR)$(pdfdocdir)
-@BUILD_INFODOC_TRUE@install-html-local: doc/groff.html
-@BUILD_INFODOC_TRUE@	-test -d $(DESTDIR)$(htmldocdir)/groff.html.mono \
-@BUILD_INFODOC_TRUE@	  || $(mkinstalldirs) $(DESTDIR)$(htmldocdir)/groff.html.mono
-@BUILD_INFODOC_TRUE@	cp -r $(top_builddir)/doc/groff.html \
-@BUILD_INFODOC_TRUE@	  $(DESTDIR)$(htmldocdir)/groff.html.mono
-@BUILD_INFODOC_TRUE@	cp -r $(top_builddir)/doc/groff.html.node \
-@BUILD_INFODOC_TRUE@	  $(DESTDIR)$(htmldocdir)
-@BUILD_INFODOC_FALSE@install_infodoc:
+install_infodoc: doc/groff.info
+	-test -d $(DESTDIR)$(infodir) \
+	  || $(mkinstalldirs) $(DESTDIR)$(infodir)
+	$(RM) $(DESTDIR)/doc/groff.info*
+	for d in $(doc_builddir) $(doc_srcdir); \
+	do \
+	  if [ -f "$$d"/groff.info ]; \
+	  then \
+	    cp "$$d"/groff.info* $(DESTDIR)$(infodir); \
+	    $(INSTALL_INFO) --info-file="$$d"/groff.info \
+	      --info-dir=$(DESTDIR)$(infodir); \
+	  fi; \
+	  break; \
+	done
+install-pdf-local: doc/groff.pdf
+	-test -d $(DESTDIR)$(pdfdocdir) \
+	  || $(mkinstalldirs) $(DESTDIR)$(pdfdocdir)
+	cp $(top_builddir)/doc/groff.pdf $(DESTDIR)$(pdfdocdir)
+install-html-local: doc/groff.html
+	-test -d $(DESTDIR)$(htmldocdir)/groff.html.mono \
+	  || $(mkinstalldirs) $(DESTDIR)$(htmldocdir)/groff.html.mono
+	cp -r $(top_builddir)/doc/groff.html \
+	  $(DESTDIR)$(htmldocdir)/groff.html.mono
+	cp -r $(top_builddir)/doc/groff.html.node \
+	  $(DESTDIR)$(htmldocdir)
 
 uninstall-local: uninstall_infodoc uninstall-pdf uninstall-html
 uninstall_doc: uninstall-local
 uninstall-doc: uninstall-local
 uninstall_infodoc:
-@BUILD_INFODOC_TRUE@	-$(INSTALL_INFO) --remove --info-dir=$(DESTDIR)$(infodir) \
-@BUILD_INFODOC_TRUE@	  $(DESTDIR)$(infodir)/groff.info
-@BUILD_INFODOC_TRUE@	-for f in `ls $(DESTDIR)$(infodir)/groff.info*`; do \
-@BUILD_INFODOC_TRUE@	  $(RM) $$f; \
-@BUILD_INFODOC_TRUE@	done
+	-$(INSTALL_INFO) --remove --info-dir=$(DESTDIR)$(infodir) \
+	  $(DESTDIR)$(infodir)/groff.info
+	-for f in `ls $(DESTDIR)$(infodir)/groff.info*`; do \
+	  $(RM) $$f; \
+	done
 uninstall-pdf:
-@BUILD_INFODOC_TRUE@	-$(RM) -f $(DESTDIR)$(pdfdocdir)/groff.pdf 
+	-$(RM) -f $(DESTDIR)$(pdfdocdir)/groff.pdf 
 uninstall-html:
-@BUILD_INFODOC_TRUE@	-$(RM) -r $(DESTDIR)$(htmldocdir)/groff.html.*
+	-$(RM) -r $(DESTDIR)$(htmldocdir)/groff.html.*
 gnu.eps:
 	$(AM_V_GEN)if test -f $(top_srcdir)/doc/gnu.eps; then \
 	  cp $(top_srcdir)/doc/gnu.eps . ; \

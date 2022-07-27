@@ -40,7 +40,7 @@ AC_DEFUN([GROFF_PRINT],
    # Figure out DVIPRINT from PSPRINT.
    AC_MSG_CHECKING([for command to use for printing dvi files])
    if test -n "$PSPRINT" && test -z "$DVIPRINT"; then
-     if test "x$PSPRINT" = "xlpr"; then
+     if test "$PSPRINT" = lpr; then
        DVIPRINT="lpr -d"
      else
        DVIPRINT="$PSPRINT"
@@ -57,7 +57,7 @@ AC_DEFUN([GROFF_PRINT],
 
 AC_DEFUN([GROFF_PROG_YACC],
   [AC_CHECK_PROGS([YACC], [byacc 'bison -y' yacc], [missing])
-  if test "x$YACC" = "xmissing" -a -d ${srcdir}/.git; then
+  if test "$YACC" = missing -a -d "$srcdir"/.git; then
     AC_MSG_ERROR([Could not find 'yacc' or 'bison'], 1)
   fi
   ])
@@ -68,7 +68,7 @@ AC_DEFUN([GROFF_PROG_YACC],
 AC_DEFUN([GROFF_PERL],
   [PERLVERSION=v5.6.1
    AC_PATH_PROG([PERL], [perl], [no])
-   if test "x$PERL" = "xno"; then
+   if test "$PERL" = no; then
      AC_MSG_ERROR([perl binary not found], 1)
    fi
    AX_PROG_PERL_VERSION([$PERLVERSION], true, \
@@ -86,8 +86,8 @@ AC_DEFUN([GROFF_DOC_CHECK],
        'examples', to restrict what is produced])],
     [doc="$withval"],
     [doc=yes])
-  test "x$doc" = xno && doc=''
-  if test "x$doc" = xyes; then
+  test "$doc" = no && doc=''
+  if test "$doc" = yes; then
     doc_dist_target_ok=yes
     docadd_html=yes
     docadd_info=yes
@@ -108,11 +108,11 @@ AC_DEFUN([GROFF_DOC_CHECK],
     IFS=$OFS
     for i
     do
-      test "x$i" = xhtml     && { docadd_html=yes; continue; }
-      test "x$i" = xinfo     && { docadd_info=yes; continue; }
-      test "x$i" = xother    && { docadd_other=yes; continue; }
-      test "x$i" = xpdf      && { docadd_pdf=yes; continue; }
-      test "x$i" = xexamples && { docadd_examples=yes; continue; }
+      test "$i" = html     && { docadd_html=yes; continue; }
+      test "$i" = info     && { docadd_info=yes; continue; }
+      test "$i" = other    && { docadd_other=yes; continue; }
+      test "$i" = pdf      && { docadd_pdf=yes; continue; }
+      test "$i" = examples && { docadd_examples=yes; continue; }
       AC_MSG_WARN([Invalid '--with-doc' argument:] $i)
     done
   fi
@@ -132,7 +132,7 @@ AC_DEFUN([GROFF_DOC_CHECK],
     make_install_otherdoc=
     make_uninstall_otherdoc=
   fi
-  if test $docadd_examples = yes; then
+  if test "$docadd_examples" = yes; then
     make_examples=examples
     make_install_examples=install_examples
     make_uninstall_examples=uninstall_examples
@@ -160,38 +160,36 @@ AC_DEFUN([GROFF_MAKEINFO],
   # src dir>/build-aux/missing makeinfo.  As we need a more precise
   # check of makeinfo version, we don't use it.
   [MAKEINFO=
-   if test $docadd_info = yes; then
+   if test "$docadd_info" = yes; then
      missing=
      AC_CHECK_PROG([MAKEINFO], [makeinfo], [makeinfo])
      if test -z "$MAKEINFO"; then
        missing="missing 'makeinfo'"
      else
        AC_MSG_CHECKING([for makeinfo version])
-       # We need an additional level of quoting to make sed's regexps work.
+       # We need an additional level of quoting to make sed's regexps
+       # work.
        [makeinfo_version=`$MAKEINFO --version 2>&1 \
         | sed -e 's/^.* \([^ ][^ ]*\)$/\1/' -e '1q'`]
        AC_MSG_RESULT([$makeinfo_version])
        # Consider only the first two numbers in version number string.
-       makeinfo_version_major=`IFS=.; set x $makeinfo_version; echo 0${2}`
-       makeinfo_version_minor=`IFS=.; set x $makeinfo_version; echo 0${3}`
+       makeinfo_version_major=`IFS=.; set x $makeinfo_version; echo ${2}`
+       makeinfo_version_minor=`IFS=.; set x $makeinfo_version; echo ${3}`
        makeinfo_version_numeric=`
-         expr ${makeinfo_version_major}000 \+ ${makeinfo_version_minor}`
+         expr ${makeinfo_version_major}000 + $makeinfo_version_minor`
        if test $makeinfo_version_numeric -lt 5000; then
          missing="'makeinfo' is too old."
+         MAKEINFO=
        fi
      fi
 
      if test -n "$missing"; then
        infofile=doc/groff.info
-       test -f ${infofile} || infofile=${srcdir}/${infofile}
-       if test ! -f ${infofile} \
-	|| test ${srcdir}/doc/groff.texi -nt ${infofile}; then
+       test -f $infofile || infofile="$srcdir"/$infofile
+       if test ! -f $infofile \
+	|| test "$srcdir"/doc/groff.texi -nt $infofile; then
 	 AC_MSG_ERROR($missing
 [Get the 'texinfo' package version 5.0 or newer.])
-       else
-	 AC_MSG_WARN($missing
-[Get the 'texinfo' package version 5.0 or newer if you want to convert
-'groff.texi' into a PDF or HTML document.])
        fi
      fi
 
@@ -202,22 +200,22 @@ AC_DEFUN([GROFF_MAKEINFO],
      make_infodoc=
      make_install_infodoc=
      make_uninstall_infodoc=
-     MAKEINFO=
    fi
    AC_SUBST([MAKEINFO])
    AC_SUBST([make_infodoc])
    AC_SUBST([make_install_infodoc])
-   AC_SUBST([make_uninstall_infodoc])
-   AC_SUBST([makeinfo_version_numeric])])
+   AC_SUBST([make_uninstall_infodoc])])
 
+# 'makeinfo' and 'texi2dvi' are distributed together, so if the former
+# is too old, the latter is too.
 AC_DEFUN([GROFF_TEXI2DVI],
-  [AC_CHECK_PROG([PROG_TEXI2DVI], [texi2dvi], [found], [missing])
-   if test "x$PROG_TEXI2DVI" = "xfound"; then
-      groff_have_texi2dvi=yes;
-   else
-      groff_have_texi2dvi=no;
-   fi
-   ])
+  [AC_REQUIRE([GROFF_MAKEINFO])
+   AC_CHECK_PROG([PROG_TEXI2DVI], [texi2dvi], [found], [missing])
+   groff_have_texi2dvi=no
+   if test "$PROG_TEXI2DVI" = found && test -n "$MAKEINFO"
+   then
+      groff_have_texi2dvi=yes
+   fi])
 
 # The following programs are needed for grohtml.
 
@@ -245,7 +243,7 @@ AC_DEFUN([GROFF_HTML_PROGRAMS],
        make_htmldoc=htmldoc
        make_install_htmldoc=install_htmldoc
        make_uninstall_htmldoc=uninstall_htmldoc
-       if test $docadd_examples = yes; then
+       if test "$docadd_examples" = yes; then
          make_htmlexamples=html_examples
          make_install_htmlexamples=install_htmlexamples
          make_uninstall_htmlexamples=uninstall_htmlexamples
@@ -268,8 +266,8 @@ AC_DEFUN([GROFF_HTML_PROGRAMS],
 
      docnote=.
      test $docadd_html = yes && docnote=';
-  therefore, it will neither be possible to prepare, nor to install,
-  documentation in HTML format.'
+  therefore, it will be possible neither to prepare, nor to install,
+  groff-generated documentation in HTML format.'
 
      AC_MSG_WARN([missing program$plural:
 
@@ -307,7 +305,7 @@ AC_DEFUN([GROFF_PDFDOC_PROGRAMS],
        make_pdfdoc=pdfdoc
        make_install_pdfdoc=install_pdfdoc
        make_uninstall_pdfdoc=uninstall_pdfdoc
-       if test $docadd_examples = yes; then
+       if test "$docadd_examples" = yes; then
          make_pdfexamples=pdfexamples
          make_install_pdfexamples=install_pdfexamples
          make_uninstall_pdfexamples=uninstall_pdfexamples
@@ -315,7 +313,7 @@ AC_DEFUN([GROFF_PDFDOC_PROGRAMS],
      fi
    else
      plural=`set $missing; test $[#] -eq 2 && echo s`
-     test x$plural = xs \
+     test "$plural" = s \
        && missing=`set $missing; echo "$[1] and $[2]"` \
        || missing=`echo $missing`
 
@@ -874,7 +872,7 @@ main()
 
 AC_DEFUN([GROFF_BROKEN_SPOOLER_FLAGS],
   [AC_MSG_CHECKING([default value for grops -b option])
-   test -n "${BROKEN_SPOOLER_FLAGS}" || BROKEN_SPOOLER_FLAGS=0
+   test -n "$BROKEN_SPOOLER_FLAGS" || BROKEN_SPOOLER_FLAGS=0
    AC_MSG_RESULT([$BROKEN_SPOOLER_FLAGS])
    AC_SUBST([BROKEN_SPOOLER_FLAGS])])
 
@@ -882,7 +880,7 @@ AC_DEFUN([GROFF_BROKEN_SPOOLER_FLAGS],
 AC_DEFUN([GROFF_PAGE],
   [AC_MSG_CHECKING([default paper size])
    groff_prefix=$prefix
-   test "x$prefix" = "xNONE" && groff_prefix=$ac_default_prefix
+   test "$prefix" = NONE && groff_prefix=$ac_default_prefix
    if test -z "$PAGE" && test -r /etc/papersize; then
      PAGE=`cat /etc/papersize | sed -e 's/^[ ]*#.*//g' | tr -d "\n" | awk '{ print $1 }'`
    fi
@@ -931,7 +929,7 @@ AC_DEFUN([GROFF_PAGE],
    fi
 
    test -n "$PAGE" || PAGE=letter
-   if test "x$PAGE" = "xA4"; then
+   if test "$PAGE" = A4; then
      AC_DEFINE([PAGEA4], [1],
        [Define if the printer's page size is A4.])
    fi
@@ -1029,14 +1027,14 @@ AC_DEFUN([GROFF_TMAC],
      done
    done
    sys_tmac_prefix_result=none
-   test "x$sys_tmac_prefix" = "x" \
+   test -z "$sys_tmac_prefix" \
 	|| sys_tmac_prefix_result="$sys_tmac_prefix"
    AC_MSG_RESULT([$sys_tmac_prefix_result])
    AC_SUBST([sys_tmac_prefix])
 
    AC_MSG_CHECKING([which system macro packages should be made available])
    tmac_wrap=
-   if test "x$sys_tmac_file_prefix" = "xtmac."; then
+   if test "$sys_tmac_file_prefix" = tmac.; then
      for f in $sys_tmac_prefix*; do
        suff=`echo $f | sed -e "s;$sys_tmac_prefix;;"`
        case "$suff" in
@@ -1077,7 +1075,7 @@ AC_DEFUN([GROFF_TMAC],
      rm -f conftest.sol
    fi
    tmac_wrap_result="none found"
-   test "x$tmac_wrap" = "x" || tmac_wrap_result="$tmac_wrap"
+   test -z "$tmac_wrap" || tmac_wrap_result="$tmac_wrap"
    AC_MSG_RESULT([$tmac_wrap_result])
    AC_SUBST([tmac_wrap])])
 
@@ -1086,7 +1084,7 @@ AC_DEFUN([GROFF_TMAC],
 # \n[.g] is always 1 in GNU Troff.
 AC_DEFUN([GROFF_G],
   [AC_MSG_CHECKING([for existing troff installation])
-   if test "x`(echo .tm '|n(.g' | tr '|' '\\\\' | troff -z -i 2>&1) 2>/dev/null`" = x0; then
+   if test "`(echo .tm '|n(.g' | tr '|' '\\\\' | troff -z -i 2>&1) 2>/dev/null`" = 0; then
      AC_MSG_RESULT([yes])
      g=g
    else
@@ -1211,28 +1209,28 @@ AC_DEFUN([GROFF_WITH_COMPATIBILITY_WRAPPERS],
     [compatibility_wrappers="$withval"],
     [compatibility_wrappers="check"])
 
-    if test "x$compatibility_wrappers" != "xcheck"  -a \
-            "x$compatibility_wrappers" != "xyes"    -a \
-            "x$compatibility_wrappers" != "xno"     -a \
-            "x$compatibility_wrappers" != "xmanual"
+    if test "$compatibility_wrappers" != check  -a \
+            "$compatibility_wrappers" != yes    -a \
+            "$compatibility_wrappers" != no     -a \
+            "$compatibility_wrappers" != manual
     then
          AC_MSG_WARN([Invalid '--with-compatibility-wrappers' argument: '$compatibility_wrappers' - assuming 'check' requested.])
          compatibility_wrappers="check"
     fi
 
-    if test "x$tmac_wrap" = "x"
+    if test -z "$tmac_wrap"
     then
         # No Operating System Macro Sets Present
-        if   test "x$compatibility_wrappers" = "xcheck"
+        if   test "$compatibility_wrappers" = check
         then
             compatibility_wrappers="no"
-        elif test "x$compatibility_wrappers" = "xyes"
+        elif test "$compatibility_wrappers" = yes
         then
             AC_MSG_ERROR([No non-GNU macro sets found - cannot create and install compatibility wrappers])
-        elif test "x$compatibility_wrappers" = "xno"
+        elif test "$compatibility_wrappers" = no
         then
             : # No action required
-        elif test "x$compatibility_wrappers" = "xmanual"
+        elif test "$compatibility_wrappers" = manual
         then
             # 'manual' allows quiet conversion to 'no' to support
             # cross-platform build instructions
@@ -1240,7 +1238,7 @@ AC_DEFUN([GROFF_WITH_COMPATIBILITY_WRAPPERS],
         fi
     else
         # One or more Operating System Macro Sets Present
-        if   test "x$compatibility_wrappers" = "xcheck"
+        if   test "$compatibility_wrappers" = check
         then
             compatibility_wrappers="yes"
         fi
@@ -1492,11 +1490,11 @@ AC_DEFUN([GROFF_UINTMAX_T],
 # MS-DOS/Win32=';').
 #
 # The logic to resolve this test is already encapsulated in
-# '${srcdir}/src/include/nonposix.h'.
+# '$srcdir/src/include/nonposix.h'.
 
 AC_DEFUN([GROFF_TARGET_PATH_SEPARATOR],
   [AC_MSG_CHECKING([separator character to use in groff search paths])
-   cp ${srcdir}/src/include/nonposix.h conftest.h
+   cp "$srcdir"/src/include/nonposix.h conftest.h
    AC_COMPILE_IFELSE([
        AC_LANG_PROGRAM([[
 	
@@ -1566,7 +1564,7 @@ AC_DEFUN([GROFF_X11],
      LIBS=$OLDLIBS
    fi
 
-   if test "x$groff_no_x" = "xyes"; then
+   if test "$groff_no_x" = yes; then
      AC_MSG_NOTICE([gxditview and xtotroff won't be built])
    else
      XDEVDIRS="font/devX75 font/devX75-12 font/devX100 font/devX100-12"
@@ -1600,8 +1598,8 @@ AC_DEFUN([GROFF_APPRESDIR_OPTION],
 
 AC_DEFUN([GROFF_APPRESDIR_DEFAULT],
   [if test -z "$groff_no_x"; then
-     if test "x$with_appresdir" = "x"; then
-       if test "x$prefix" = "xNONE"; then
+     if test -z "$with_appresdir"; then
+       if test "$prefix" = NONE; then
          appresdir=$ac_default_prefix/lib/X11/app-defaults
        else
          appresdir=$prefix/lib/X11/app-defaults
@@ -1616,7 +1614,7 @@ AC_DEFUN([GROFF_APPRESDIR_DEFAULT],
 
 AC_DEFUN([GROFF_APPRESDIR_CHECK],
   [if test -z "$groff_no_x"; then
-     if test "x$with_appresdir" = "x"; then
+     if test -z "$with_appresdir"; then
        AC_MSG_NOTICE([
   The application resource files for gxditview (GXditview and
   GXditview-color) will be installed in:
@@ -1716,7 +1714,7 @@ AC_DEFUN([GROFF_HAVE_TEST_EF_OPTION],
 # is not available it will use /bin/sh.
 AC_DEFUN([GROFF_BASH],
   [AC_PATH_PROGS([BASH_PROG], [bash], [no])
-  if test x$BASH_PROG = xno; then
+  if test "$BASH_PROG" = no; then
      BASH_PROG=/bin/sh
   fi
   AC_SUBST([BASH_PROG])])
@@ -1727,14 +1725,14 @@ AC_DEFUN([GROFF_UCHARDET],
                AS_HELP_STRING([--with-uchardet],
                               [Build 'preconv' with uchardet library for file \
                                encoding automatic detection [=auto|no|yes]]))
-   AS_IF([test "x$with_uchardet" != "xno"],
+   AS_IF([test "$with_uchardet" != no],
          [PKG_CHECK_MODULES([UCHARDET],
                             [uchardet >= 0.0.1],
                             [AC_DEFINE([HAVE_UCHARDET],
                                        [1],
                                        [uchardet library availability])
                              groff_have_uchardet=yes],
-                            [if test "x$with_uchardet" = "xyes"; then
+                            [if test "$with_uchardet" = yes; then
                                AC_MSG_FAILURE([Could not found uchardet library])
                              else
                                AC_MSG_WARN([uchardet library not found, preconv \
@@ -1746,7 +1744,7 @@ might not work properly])
 
 # Warning if uchardet library was not found
 AC_DEFUN([GROFF_UCHARDET_CHECK],
-  [if test "x$groff_have_uchardet" = "xno" -a "x$with_uchardet" != "xno"; then
+  [if test "$groff_have_uchardet" = no -a "$with_uchardet" != no; then
   AC_MSG_WARN([
   uchardet library was not found; preprocessor 'preconv' will skip
   this method of attempting to determine the input encoding.  (To
@@ -1761,7 +1759,7 @@ AC_DEFUN([GROFF_PDFTOOLS],
   [AC_CHECK_PROG([PDFINFO], [pdfinfo], [found], [missing])
    AC_CHECK_PROG([PDFFONTS], [pdffonts], [found], [missing])
    AC_CHECK_PROG([PDFIMAGES], [pdfimages], [found], [missing])
-   if test "x$PDFINFO" = "xfound" -a "x$PDFFONTS" = "xfound" -a "x$PDFIMAGES" = "xfound"; then
+   if test "$PDFINFO" = found -a "$PDFFONTS" = found -a "$PDFIMAGES" = found; then
       groff_have_pdftools=yes;
    else
       groff_have_pdftools=no;
@@ -1772,6 +1770,6 @@ AC_DEFUN([GROFF_USE_GROFF_ALLOCATOR],
   [AC_ARG_ENABLE([groff-allocator],
    [AS_HELP_STRING([--enable-groff-allocator], [enable groff's own \
 allocator for C++ new/delete])],
-   [test "x$enableval" = "xyes" && use_groff_allocator=yes],
+   [test "$enableval" = yes && use_groff_allocator=yes],
    [use_groff_allocator=]
 )])

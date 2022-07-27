@@ -46,6 +46,20 @@ my $selected_main_package;	# full-service package we go with
 my $do_run = 0;			# run generated 'groff' command
 my $use_compatibility_mode = 0;	# is -C being passed to groff?
 
+my %preprocessor_for_macro = (
+  'EQ', 'eqn',
+  'G1', 'grap',
+  'GS', 'grn',
+  'PS', 'pic',
+  '[',  'refer',
+  #'so', 'soelim', # Can't be inferred this way; see grog man page.
+  'TS', 'tbl',
+  'cstart',   'chem',
+  'lilypond', 'glilypond',
+  'Perl',     'gperl',
+  'pinyin',   'gpinyin',
+);
+
 my $program_name = $0;
 {
   my ($v, $d, $f) = File::Spec->splitpath($program_name);
@@ -237,20 +251,6 @@ sub do_line {
   # compatibility mode, no space (or newline!) is required after the
   # macro name, either.  We mimic the preprocessors themselves; eqn(1),
   # for instance, does not recognize '.EN' if '.EQ' has not been seen.
-  my %preprocessor_for_macro = (
-    'EQ', 'eqn',
-    'G1', 'grap',
-    'GS', 'grn',
-    'PS', 'pic',
-    '[',  'refer',
-    #'so', 'soelim', # Can't be inferred this way; see grog man page.
-    'TS', 'tbl',
-    'cstart',   'chem',
-    'lilypond', 'glilypond',
-    'Perl',     'gperl',
-    'pinyin',   'gpinyin',
-  );
-
   my $boundary = '\\b';
   $boundary = '' if ($use_compatibility_mode);
 
@@ -338,7 +338,11 @@ sub do_line {
   if ($command =~ /^(de|am)1?$/) {
     my $name = $args;
     # Strip off any end macro.
-    $name =~ s/\W*$//;
+    $name =~ s/\s+.*$//;
+    # Handle special cases of macros starting with '[' or ']'.
+    if ($name =~ /^[][]/) {
+      delete $preprocessor_for_macro{'['};
+    }
     # XXX: If the macro name shadows a standard macro name, maybe we
     # should delete the latter from our lists and hashes.  This might
     # depend on whether the document is trying to remain compatibile

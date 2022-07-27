@@ -1652,6 +1652,7 @@ sub LoadPDF
 	    }
 	}
 
+	s/%.*?$//;
 	$pdftxt.=$_.' ';
     }
 
@@ -1673,7 +1674,7 @@ sub LoadPDF
 	    $pdf->[$curobj]->{OBJ}=ParsePDFObj(\@pdfwds);
             my $o=$pdf->[$curobj];
 
-            if (ref($o->{obj}) eq "HASH" and exists($o->{OBJ}->{Type}) and $o->{OBJ}->{Type} eq '/ObjStm')
+            if (ref($o->{OBJ}) eq 'HASH' and exists($o->{OBJ}->{Type}) and $o->{OBJ}->{Type} eq '/ObjStm')
             {
                 LoadStream($o,$pdf);
                 my $pos=$o->{OBJ}->{First};
@@ -1691,7 +1692,7 @@ sub LoadPDF
                 $pdf->[$curobj]=undef;
             }
 
-            $root=$curobj if ref($o->{obj}) eq "HASH" and exists($pdf->[$curobj]->{OBJ}->{Type}) and $pdf->[$curobj]->{OBJ}->{Type} eq '/XRef';
+            $root=$curobj if ref($o->{OBJ}) eq 'HASH' and exists($o->{OBJ}->{Type}) and $o->{OBJ}->{Type} eq '/XRef';
 	}
 	elsif ($wd eq 'trailer' and !exists($pdf->[0]->{OBJ}))
 	{

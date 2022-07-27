@@ -23,9 +23,9 @@ These man pages serve multiple goals, one of which is to serve as a
 model for good man page writing by people who examine their sources.
 
 After processing by m4, both child pages in the above case will carry \c
-escapes followed by text lines starting with punctuation one normally
-does not find in that position (and in the case of the period, which has
-to be protected from interpretation as a control line).
+escape sequences followed by text lines starting with punctuation one
+normally does not find in that position (and in the case of the period,
+which has to be protected from interpretation as a control line).
 
 This is ugly, fragile, and unnecessary; all of these traits are
 offensive to good pedagogy.
@@ -219,7 +219,7 @@ and employ the Unix line-ending convention
 .\" The above distinction works well with filling.
 .\" Don't fill your input text yourself; let groff do the work.
 .\" Also good for diffs.
-.\" escapes--pretty much just "see Portability"
+.\" escape sequences--pretty much just "see Portability"
 .\"
 .\" ====================================================================
 .\" .SS "Why have a tutorial and style guide?"
@@ -385,8 +385,8 @@ is positioned at the bottom left.
 .
 Otherwise,
 .I footer-inside
-appears at the bottom left on odd-numbered (recto) pages,
-and at the bottom right on even-numbered (verso) pages.
+appears at the bottom left on recto (odd-numbered) pages,
+and at the bottom right on verso (even-numbered) pages.
 .
 The outside footer is the page number,
 except in the continuous-rendering mode enabled by the option
@@ -499,7 +499,7 @@ must be the first section after the
 .B .TH
 call,
 and must contain only a line of the form
-.RS \" Invisibly move left margin to current .IP indent.
+.RS \" Invisibly move left margin to current .IP indentation.
 .RS \" Now indent further, visibly.
 .IR topic [\c
 .BI , " another-topic"\c
@@ -819,8 +819,8 @@ Two convenient uses for
 are
 .
 .
-.RS \" Invisibly move left margin to current .IP indent.
-.RS \" Now indent further, visibly.
+.RS \" Invisibly move left margin to current .IP indentation.
+.RS 4n \" Now indent further, visibly.
 .IP (1) 4n
 to start a new paragraph with the same indentation as an immediately
 preceding
@@ -1240,7 +1240,9 @@ _endif()dnl
 .BI .MR "\~page-title manual-section"\c
 .RI \~[ trailing-text ]
 Set a man page cross reference as
-.RI \[lq] page-title ( manual-section )\[rq].
+\[lq]\c
+.IB page-title ( manual-section )\c
+\[rq].
 .
 If
 .I trailing-text
@@ -1506,14 +1508,11 @@ _ifstyle()dnl
 Use italics
 for file and path names,
 for environment variables,
+for C data types,
 for enumeration or preprocessor constants in C,
 for variable (user-determined) portions of syntax synopses,
 for the first occurrence (only) of a technical concept being introduced,
-for names of works of software
-(including commands and functions,
-.\" The following is an interesting exception that seems to have arisen
-.\" organically and nearly universally.
-but excluding names of operating systems or their kernels),
+for names of journals and of literary works longer than an article,
 and anywhere a parameter requiring replacement by the user is
 encountered.
 .
@@ -1588,13 +1587,13 @@ it will be hidden from readers using such devices.
 .
 .
 .P
-Note what is
+Observe what is
 .I not
 prescribed for setting in bold or italics above:
 elements of \(lqsynopsis language\(rq such as ellipses and brackets
 around options;
 proper names and adjectives;
-titles of anything other than works of literature or software;
+titles of anything other than major works of literature;
 identifiers for standards documents or technical reports such as
 CSTR\~#54,
 RFC\~1918,
@@ -1604,17 +1603,12 @@ POSIX.1-2017;
 acronyms;
 and occurrences after the first of a technical term or piece of jargon.
 .
-Again,
-the names of operating systems and their kernels are,
-by practically universal convention,
-set in roman.
-.
 .
 .P
 Be frugal with italics for emphasis,
 and particularly with bold.
 .
-Brief runs of literal text,
+Article titles and brief runs of literal text,
 such as references to individual characters or short strings,
 including section and subsection headings of man pages,
 are suitable objects for quotation;
@@ -1624,7 +1618,7 @@ see the
 .BR \e(oq ,
 and
 .B \e(cq
-escapes in subsection \(lqPortability\(rq below.
+escape sequences in subsection \(lqPortability\(rq below.
 .
 .
 _endif()dnl
@@ -2236,13 +2230,13 @@ _ifstyle()dnl
 .
 The two major syntactical categories of
 .I roff
-languages are requests and escapes.
+languages are requests and escape sequences.
 .
 Since the
 .I man
 macros are implemented in terms of
 .I groff
-requests and escapes,
+requests and escape sequences,
 one can,
 in principle,
 supplement the functionality of
@@ -2295,7 +2289,7 @@ in section \(lqFiles\(rq below.
 .
 .
 .P
-Similar caveats apply to escapes.
+Similar caveats apply to escape sequences.
 .
 Some escape sequences are however required for correct typesetting
 even in man pages and usually do not cause portability problems.
@@ -2306,8 +2300,9 @@ in the Unicode basic Latin range
 that are handled specially in
 .I roff
 input;
-the escapes below must be used to render them correctly and portably
-when documenting material that uses them syntactically\(emnamely,
+the escape sequences below must be used to render them correctly and
+portably when documenting material that uses them
+syntactically\(emnamely,
 any of the set
 .B \(aq \- \(rs \(ha \(ga \(ti
 (apostrophe,
@@ -2437,8 +2432,9 @@ This escape sequence produces the Unix command-line option dash in the
 output.
 .
 .RB \(lq \- \(rq
-is a hyphen to
-.IR roff ;
+is a hyphen in
+.I roff
+languages;
 some output devices replace it with U+2010
 (hyphen)
 or similar.
@@ -2541,9 +2537,9 @@ or similar.
 Reverse solidus
 (backslash).
 .
-The backslash is the default
-.I groff
-escape character,
+The backslash is the default escape character in
+.I roff
+languages,
 so it does not represent itself in output.
 .
 Also see
@@ -2586,7 +2582,7 @@ examples.
 Anything after
 .B \ec
 on the input line
-.\" ...except for \R escapes, which shouldn't appear in man pages...
+.\" ...except for \R, which shouldn't appear in man pages...
 is ignored.
 .
 The next line is interpreted as usual and can `include' a macro call
@@ -2695,13 +2691,13 @@ is needed when three different font styles are required in a word.
 .
 .
 .IP
-Style escapes may be more portable than
+Style escape sequences may be more portable than
 .BR \ec .
 .
 As shown above,
 it is up to you to account for italic corrections with
-.\" Normally we don't quote escapes, but these use potentially-confusing
-.\" prose punctuation.
+.\" Normally we don't quote escape sequences, but these use
+.\" potentially-confusing prose punctuation.
 .RB \(lq \e/ \(rq
 and
 .RB \(lq \e, \(rq,
@@ -2730,7 +2726,7 @@ usually result in more readable
 .I roff
 source than
 .B \ef
-escapes do.
+escape sequences do.
 .
 .
 .P
@@ -2806,7 +2802,7 @@ The first argument
 can be:
 .
 .
-.RS \" Invisibly move left margin to current .IP indent.
+.RS \" Invisibly move left margin to current .IP indentation.
 .RS \" Now indent further, visibly.
 .TP
 3
@@ -2969,7 +2965,7 @@ The argument
 can be:
 .
 .
-.RS \" Invisibly move left margin to current .IP indent.
+.RS \" Invisibly move left margin to current .IP indentation.
 .RS \" Now indent further, visibly.
 .TP
 3
@@ -3121,7 +3117,7 @@ for less-common choices.
 .
 .TP
 .B \-rcR=1
-Continuous rendering.
+Enable continuous rendering.
 .
 Do not paginate the output;
 produce one
@@ -3184,10 +3180,9 @@ in subsection \(lqDocument structure macros\(rq above.
 .
 .TP
 .BI \-rFT= footer-distance
-Set distance of the footer,
-relative to the bottom of the page if negative or top if positive,
-to
-.IR footer-distance .
+Set distance of the footer relative to the bottom of the page to
+.IR footer-distance ;
+this amount is always negative.
 .
 At twice this distance,
 the page text is broken before writing the footer.
@@ -3470,9 +3465,9 @@ so they will replace any macros of the same names preceding it in your
 file.
 .
 If you use your own implementations of these macros,
-they must be defined after calling
+they must be defined after
 .B .TH
-to have any effect.
+is called to have any effect.
 .
 Furthermore,
 it is wise to `define' such page-local macros

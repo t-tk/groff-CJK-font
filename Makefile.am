@@ -529,14 +529,15 @@ GROFF_V = $(GROFF_V_@AM_V@)
 GROFF_V_ = $(GROFF_V_@AM_DEFAULT_V@)
 GROFF_V_0 = @echo "  GROFF   " $@;
 
-# The following Automake variables will be overloaded by the various
-# .am files
+# The following Automake variables will be supplemented by the various
+# .am files.
 bin_PROGRAMS =
 nobase_bin_PROGRAMS =
 bin_SCRIPTS =
 dist_bin_SCRIPTS =
+# stuff that should be in distribution archives but not in source repo
+MAINTAINERCLEANFILES =
 MOSTLYCLEANFILES =
-MOSTLYCLEANADD =
 noinst_LIBRARIES =
 BUILT_SOURCES =
 CLEANFILES =

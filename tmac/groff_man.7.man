@@ -240,8 +240,8 @@ is positioned at the bottom left.
 .
 Otherwise,
 .I footer-inside
-appears at the bottom left on odd-numbered (recto) pages,
-and at the bottom right on even-numbered (verso) pages.
+appears at the bottom left on recto (odd-numbered) pages,
+and at the bottom right on verso (even-numbered) pages.
 .
 The outside footer is the page number,
 except in the continuous-rendering mode enabled by the option
@@ -343,7 +343,7 @@ must be the first section after the
 .B .TH
 call,
 and must contain only a line of the form
-.RS \" Invisibly move left margin to current .IP indent.
+.RS \" Invisibly move left margin to current .IP indentation.
 .RS \" Now indent further, visibly.
 .IR topic [\c
 .BI , " another-topic"\c
@@ -750,7 +750,9 @@ particularly the hyphen-minus.
 .BI .MR "\~page-title manual-section"\c
 .RI \~[ trailing-text ]
 Set a man page cross reference as
-.RI \[lq] page-title ( manual-section )\[rq].
+\[lq]\c
+.IB page-title ( manual-section )\c
+\[rq].
 .
 If
 .I trailing-text
@@ -1313,7 +1315,7 @@ The first argument
 can be:
 .
 .
-.RS \" Invisibly move left margin to current .IP indent.
+.RS \" Invisibly move left margin to current .IP indentation.
 .RS \" Now indent further, visibly.
 .TP
 3
@@ -1476,7 +1478,7 @@ The argument
 can be:
 .
 .
-.RS \" Invisibly move left margin to current .IP indent.
+.RS \" Invisibly move left margin to current .IP indentation.
 .RS \" Now indent further, visibly.
 .TP
 3
@@ -1628,7 +1630,7 @@ for less-common choices.
 .
 .TP
 .B \-rcR=1
-Continuous rendering.
+Enable continuous rendering.
 .
 Do not paginate the output;
 produce one
@@ -1691,10 +1693,9 @@ in subsection \(lqDocument structure macros\(rq above.
 .
 .TP
 .BI \-rFT= footer-distance
-Set distance of the footer,
-relative to the bottom of the page if negative or top if positive,
-to
-.IR footer-distance .
+Set distance of the footer relative to the bottom of the page to
+.IR footer-distance ;
+this amount is always negative.
 .
 At twice this distance,
 the page text is broken before writing the footer.
@@ -1957,9 +1958,9 @@ so they will replace any macros of the same names preceding it in your
 file.
 .
 If you use your own implementations of these macros,
-they must be defined after calling
+they must be defined after
 .B .TH
-to have any effect.
+is called to have any effect.
 .
 Furthermore,
 it is wise to define such page-local macros
