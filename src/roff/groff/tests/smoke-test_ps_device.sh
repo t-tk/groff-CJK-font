@@ -20,6 +20,7 @@
 
 groff="${abs_top_builddir:-.}/test-groff"
 
+set -e
 
 # test for PostScript with Japanese, preprocessor
 echo "testing -Kutf8 -Tps -Z" >&2
