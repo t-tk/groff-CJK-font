@@ -477,7 +477,7 @@ static int parse_term(units *v, int scaling_indicator,
     if (tok.ch() != ')') {
       if (rigid)
 	return 0;
-      warning(WARN_SYNTAX, "experted ')', got %1", tok.description());
+      warning(WARN_SYNTAX, "expected ')', got %1", tok.description());
     }
     else
       tok.next();

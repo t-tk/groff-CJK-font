@@ -282,8 +282,10 @@ if (!$opt_x) {
 	if ($nmap{$ch}) {
 	    for (my $j = 0; $j < $nmap{$ch}; $j++) {
 		if (defined $mapped{$map{$ch, $j}}) {
-		    warn "$prog: both $mapped{$map{$ch, $j}} and $ch " .
-			 "map to $map{$ch, $j}";
+		    print STDERR "$prog: AGL name"
+			 . " '$mapped{$map{$ch, $j}}' already mapped to"
+			 . " groff name '$map{$ch, $j}'; ignoring AGL"
+			 . " name '$ch'\n";
 		}
 		else {
 		    $mapped{$map{$ch, $j}} = $ch;

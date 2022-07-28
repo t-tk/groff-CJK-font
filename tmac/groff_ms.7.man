@@ -8,7 +8,7 @@ groff_ms \- GNU roff manuscript macro package for formatting documents
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 1989-2021 Free Software Foundation, Inc.
+.\" Copyright (C) 1989-2022 Free Software Foundation, Inc.
 .\"
 .\" Permission is granted to make and distribute verbatim copies of this
 .\" manual provided the copyright notice and this permission notice are
@@ -72,8 +72,7 @@ automatically numbered headings,
 several different paragraph styles,
 a variety of text styling options,
 footnotes,
-multi-column page layouts,
-and indexing.
+and multi-column page layouts.
 .
 .I ms
 supports the
@@ -108,7 +107,9 @@ macro package expects a certain amount of structure:
 a well-formed document contains at least one paragraphing or heading
 macro call.
 .
-To compose a document from scratch,
+.\" This sentence is unique to the man page because we omit the "Basic
+.\" information" section from ms.ms.
+To compose a simple document from scratch,
 begin it by calling
 .B .LP
 or
@@ -217,12 +218,12 @@ its preparation requires separate processing.
 .SS "Document control settings"
 .\" ====================================================================
 .
-The following tables list the document control registers and strings.
+The following tables list the document control registers,
+strings,
+and special characters.
 .
 For any parameter whose default is unsatisfactory,
-define its register,
-string,
-or special character before calling any
+define it before calling any
 .I ms
 macro other than
 .BR RP .
@@ -444,28 +445,44 @@ is called.
 .
 .
 .TP
-.BR ".RP\~" [ no ]
+.BR .RP\~ [ no\-repeat\-info ]\~[ no\-renumber ]
 Use the \[lq]report\[rq]
 (AT&T: \[lq]released paper\[rq])
 format for your document,
 creating a separate cover page.
 .
-The default arrangement is to print most of the document description
+The default arrangement is to place most of the document description
 (title,
 author names and institutions,
 and abstract,
 but not the date)
-at the top of page\~1.
+at the top of the first page.
 .
 If the optional
-.RB \[lq] no \[rq]
+.B no\-repeat\-info
 argument is given,
 .I ms
-prints a cover page but does not repeat any of its information on
-page\~1
+produces a cover page but does not repeat any of its information on
+subsequently
 (but see the
 .B DA
 macro below regarding the date).
+.
+Normally,
+.B .RP
+sets the page number following the cover page to\~1.
+.
+Specifying the optional
+.B no\-renumber
+argument suppresses this alteration.
+.
+Optional arguments can occur in any order.
+.\" Including the next sentence harms U.S. letter pagination... :-/
+.\"
+.\".RB \[lq] no \[rq]
+.\"is recognized as a synonym of
+.\".B no\-repeat\-info
+.\"for AT&T compatibility.
 .
 .
 .TP
@@ -583,10 +600,7 @@ The
 .B FAM
 string sets the font family for body text;
 the default is
-.RB \[lq] T \[rq]
-(Times).
-.
-The font family setting is ignored on terminal devices.
+.RB \[lq] T \[rq].
 .
 The
 .B PS
@@ -595,6 +609,8 @@ and
 registers set the type size and vertical spacing
 (distance between text baselines),
 respectively.
+.
+The font family and type size are ignored on terminal devices.
 .
 Setting these parameters before the first call of a heading,
 paragraphing,
@@ -606,6 +622,8 @@ and
 footnotes.
 .
 .
+.br
+.ne 2v
 .P
 The
 .B HY
@@ -645,15 +663,12 @@ Interpolate an em dash.
 .TQ
 .B \[rs]*[U]
 Interpolate typographer's quotation marks where available,
-and neutral quotes otherwise.
+and neutral double quotes otherwise.
 .
 .B \[rs]*[Q]
 is the left quote and
 .B \[rs]*[U]
 the right.
-.
-(As a mnemonic,
-think of \[lq]quote\[rq] and \[lq]unquote\[rq].)
 .
 .
 .\" ====================================================================
@@ -879,8 +894,12 @@ following redefinition of the alias for
 .
 The formatted number of the current heading is available in
 .B \[rs]*[SN]
-(a feature first documented by Berkeley),
-facilitating its inclusion in
+(a feature first documented by Berkeley);
+this string facilitates its inclusion in,
+for example,
+table captions,
+equation labels,
+and
 .BR .XS / .XA / .XE
 table of contents entries.
 .
@@ -975,7 +994,7 @@ If insufficient space remains on the current page to accommodate the
 heading and this number of lines of paragraph text,
 a page break is forced before the heading is printed.
 .
-Any display macro or
+Any display macro call or
 .IR tbl ,
 .IR pic ,
 or
@@ -1035,8 +1054,7 @@ but use the roman style
 (upright text of normal weight)
 instead of bold.
 .
-Arguments are recognized only by
-.I groff ms.
+Argument recognition is a GNU extension.
 .
 .
 .TP
@@ -1082,8 +1100,10 @@ reverse video is used instead.
 If you want
 .I text
 to contain space,
-use horizontal motion escape sequences of appropriate width
+use unbreakable space or horizontal motion escape sequences
 .RB ( \[rs]\[ti] ,
+.BI \[rs] space\c
+,
 .BR \[rs]\[ha] ,
 .BR \[rs]| ,
 .BR \[rs]0 ,
@@ -1251,9 +1271,9 @@ vertical space specified in its argument remaining on the page.
 .
 .
 .PP
-A keep can also be boxed.
-.
-Text in a box is automatically placed in a diversion (keep).
+A keep have a frame drawn around it;
+this is called a
+.I boxed keep.
 .
 .
 .TP
@@ -1267,7 +1287,7 @@ End boxed keep.
 .
 .
 .P
-Box macros cause breaks;
+Boxed keep macros cause breaks;
 if you need to box a word or phrase within a line,
 see the
 .B BX
@@ -1276,16 +1296,18 @@ macro in section \[lq]Highlighting\[rq] above.
 Box lines are drawn as close as possible to the text they enclose so
 that they are usable within paragraphs.
 .
-If you wish to box one or more paragraphs,
-you may improve the appearance by calling
+If you wish to place one or more paragraphs in a boxed keep,
+you may improve their appearance by calling
 .B .B1
 after the first paragraphing macro,
 and by adding a small amount of vertical space before calling
 .B .B2 .
 .
 .
+.br
+.ne 2v
 .P
-If you want a box to float,
+If you want a boxed keep to float,
 you will need to enclose the
 .B .B1
 and
@@ -1381,7 +1403,8 @@ End any display.
 .P
 The distance stored in
 .B \[rs]n[DD]
-is inserted before and after each pair of display macros;
+is inserted before and after each pair of display macros,
+replacing any adjacent inter-paragraph distance;
 this is a Berkeley extension.
 .
 The
@@ -1466,25 +1489,29 @@ preprocessor.
 .
 .TP
 .BR .EQ \~[\c
-.IR align ]
+.IR align \~[\c]
+.IR label ]]
 .TQ
 .B .EN
 Demarcate an equation to be processed by the
 .I eqn
 preprocessor.
 .
-The equation is center-aligned by default;
-the optional
+The equation is centered by default;
 .I align
-argument can be
+can be
 .BR C ,
 .BR L ,
 .RB or\~ I
-to center,
+to (explicitly) center,
 left-align,
 or indent it by
 .BR \[rs]n[DI] ,
 respectively.
+.
+If specified,
+.I label
+is set right-aligned.
 .
 .
 .TP
@@ -1620,14 +1647,12 @@ correspond to
 .BR PS ,
 and
 .BR VS ,
-respectively.
-.
-The
+respectively;
 .BR FPD ,
 .BR FPS ,
 and
 .B FVS
-registers are GNU extensions.
+are GNU extensions.
 .
 .
 .P
@@ -1771,22 +1796,20 @@ to set the left,
 center,
 and right footers similarly.
 .
-This approach works best for documents that do not distinguish odd and
-even pages.
+This approach works best for documents that do not distinguish odd- and
+even-numbered pages.
 .
 .
 .P
-Another method is to call macros with arguments that set headers or
-footers for odd or even pages;
-these variables produce four combinations,
-so four macros are available.
+Another method is to call macros that set headers or footers for odd- or
+even-numbered pages.
 .
-Each takes a delimiter separating the left,
+Each such macro takes a delimited argument separating the left,
 center,
 and right header or footer texts from each other.
 .
-You can replace the neutral apostrophes (\[aq]) with any character not
-appearing in the header or footer text.
+You can replace the neutral apostrophes (\[aq]) shown below with any
+character not appearing in the header or footer text.
 .
 These macros are Berkeley extensions.
 .
@@ -1866,6 +1889,7 @@ you can define
 .B .HD
 if you need additional processing after setting the header.
 .
+.\" Although undocumented in Tuthill's 4.2BSD ms.diffs paper...
 The
 .B HD
 hook is a Berkeley extension.
@@ -1873,7 +1897,7 @@ hook is a Berkeley extension.
 Any such macros you (re)define must implement any desired specialization
 for odd-,
 even-,
-or first-numbered pages.
+or first numbered pages.
 .
 .
 .\" ====================================================================
@@ -1922,6 +1946,19 @@ can set text in as many columns as reasonably fit on the page.
 The following macros force a page break if a multi-column layout is
 active when they are called.
 .
+.B \[rs]n[MINGW]
+is the default minimum gutter width;
+it is a GNU extension.
+.
+When multiple columns are in use,
+keeps
+and the
+.B \%HORPHANS
+and
+.B \%PORPHANS
+registers
+work with respect to column breaks instead of page breaks.
+.
 .
 .TP
 .B .1C
@@ -1949,10 +1986,6 @@ Otherwise,
 is the width of each column and
 .I gutter-width
 is the minimum distance between columns.
-.
-.B \[rs]n[MINGW]
-is the default minimum gutter width;
-it is a GNU extension.
 .
 .
 .\" ====================================================================
@@ -2010,6 +2043,8 @@ resets the page number
 (Roman numeral one),
 and then calls
 .BR PX .
+.
+All of these macros are Berkeley extensions.
 .
 .
 .TP
@@ -2425,6 +2460,15 @@ accessing an undefined register automatically defines it.
 .
 .
 .IP \[bu]
+AT&T
+.IR ms 's
+.B AU
+macro supported arguments used with some document types;
+.I groff ms
+does not.
+.
+.
+.IP \[bu]
 Right-aligned displays are available.
 .
 The AT&T
@@ -2531,11 +2575,53 @@ or another implementation should test this register.
 .
 .
 .\" ====================================================================
+.SS "Unix Version\~7 macros not implemented by \f[I]groff ms\f[]"
+.\" ====================================================================
+.
+Several macros described in the Unix Version\~7
+.I ms
+documentation are unimplemented by
+.I groff ms
+because they are specific to the requirements of documents produced
+internally by Bell Laboratories,
+some of which also require a glyph for the Bell System logo that
+.I groff
+does not support.
+.
+These include macros implementing several document type formats
+(\c
+.BR EG , \" engineer's notes
+.BR IM , \" internal memorandum
+.BR MF , \" memorandum for file
+.BR MR , \" memorandum for record
+.BR TM , \" technical memorandum
+.BR TR ), \" technical report
+were meaningful only in conjunction with the use of certain document
+types
+(\c
+.BR AT , \" attachments
+.BR CS , \" cover sheet info for `TM` documents
+.BR CT , \" copies to
+.BR OK , \" "other keywords" for `TM` documents
+.BR SG ), \" signatures for `TM` documents
+stored the postal addresses of Bell Labs sites
+(\c
+.BR HO , \" Holmdel
+.BR IH , \" Naperville
+.BR MH , \" Murray Hill
+.BR PY , \" Piscataway
+.BR WH ), \" Whippany
+or lack a stable definition historically
+(\c
+.BR UX ). \" Unix; on 1st use, add footnote identifying trademark owner
+.
+.
+.\" ====================================================================
 .SH "Legacy features"
 .\" ====================================================================
 .
 .I "groff ms"
-retains support for some legacy features solely to support rendering of
+retains support for some legacy features solely to support formatting of
 historical documents;
 contemporary ones should not use them because they can render poorly.
 .

@@ -288,10 +288,8 @@ AC_DEFUN([GROFF_URW_FONTS_PATH], [
 ])
 
 # Check availability of URW fonts in the search path given by 'gs -h'
-# supplemented with
-# /usr/share/fonts/type1/gsfonts/:/opt/local/share/fonts/urw-fonts
-# (where font/devpdf/Foundry.in expects them), or in the custom
-# directory passed to 'configure'.
+# supplemented with the paths where font/devpdf/Foundry.in expects them,
+# or in the custom directory passed to 'configure'.
 
 AC_DEFUN([GROFF_URW_FONTS_CHECK], [
   AC_REQUIRE([GROFF_AWK_PATH])
@@ -301,8 +299,13 @@ AC_DEFUN([GROFF_URW_FONTS_CHECK], [
   then
     AC_MSG_CHECKING([for URW fonts in Type 1/PFB format])
     _list_paths=`$GHOSTSCRIPT -h | $AWK 'BEGIN { found = 0 } /Search path:/ { found = 1 } /^[ ]*\// { print $'0' }'| tr : ' '`
-    _list_paths="$_list_paths /usr/share/fonts/type1/gsfonts/ \
-      /opt/local/share/fonts/urw-fonts/"
+    _list_paths="$_list_paths \
+      /usr/share/fonts/type1/gsfonts/ \
+      /usr/share/fonts/default/Type1/ \
+      /usr/share/fonts/default/Type1/adobestd35/ \
+      /usr/share/fonts/type1/urw-base35/ \
+      /opt/local/share/fonts/urw-fonts/ \
+      /usr/local/share/fonts/ghostscript/"
     if test -n "$urwfontsdir"
     then
       _list_paths="$ _list_paths $urwfontsdir"
@@ -854,64 +857,82 @@ AC_DEFUN([GROFF_BROKEN_SPOOLER_FLAGS],
    AC_SUBST([BROKEN_SPOOLER_FLAGS])])
 
 
-AC_DEFUN([GROFF_PAGE],
-  [AC_MSG_CHECKING([default paper size])
-   groff_prefix=$prefix
-   test "$prefix" = NONE && groff_prefix=$ac_default_prefix
-   if test -z "$PAGE" && test -r /etc/papersize; then
-     PAGE=`cat /etc/papersize | sed -e 's/^[ ]*#.*//g' | tr -d "\n" | awk '{ print $1 }'`
-   fi
-   if test -z "$PAGE"; then
-     descfile=
-     if test -r "$groff_prefix"/share/groff/font/devps/DESC; then
-       descfile=$groff_prefix/share/groff/font/devps/DESC
-     elif test -r "$groff_prefix"/lib/groff/font/devps/DESC; then
-       descfile=$groff_prefix/lib/groff/font/devps/DESC
-     else
-       for f in "$groff_prefix"/share/groff/*/font/devps/DESC; do
-	 if test -r "$f"; then
-	   descfile=$f
-	   break
-	 fi
-       done
-     fi
+AC_DEFUN([GROFF_PAGE], [
+  AC_MSG_CHECKING([default paper size])
+  groff_prefix=$prefix
+  test "$prefix" = NONE && groff_prefix=$ac_default_prefix
+  if test -z "$PAGE" && test -r /etc/papersize
+  then
+    sedexpr='s/#.*//;s/[ \t]\+/ /;s/ \+$//;s/^ \+//;/^$/d;p'
+    PAGE=`sed -n "$sedexpr" /etc/papersize`
+  fi
+  if test -z "$PAGE"
+  then
+    descfile=
+    if test -r "$groff_prefix"/share/groff/font/devps/DESC
+    then
+      descfile=$groff_prefix/share/groff/font/devps/DESC
+    elif test -r "$groff_prefix"/lib/groff/font/devps/DESC
+    then
+      descfile=$groff_prefix/lib/groff/font/devps/DESC
+    else
+      for f in "$groff_prefix"/share/groff/*/font/devps/DESC
+      do
+	if test -r "$f"
+	then
+	  descfile=$f
+	  break
+	fi
+      done
+    fi
 
-     if test -n "$descfile"; then
-       if grep ['^paperlength[	 ]\+841890'] "$descfile" >/dev/null 2>&1; then
-	 PAGE=A4
-       elif grep ['^papersize[	 ]\+[aA]4'] "$descfile" >/dev/null 2>&1; then
-	 PAGE=A4
-       fi
-     fi
-   fi
+    if test -n "$descfile"
+    then
+      if grep -q ['^paperlength[	 ]\+841890'] "$descfile"
+      then
+	PAGE=A4
+      elif grep -q ['^papersize[	 ]\+[aA]4'] "$descfile"
+      then
+	PAGE=A4
+      fi
+    fi
+  fi
 
-   if test -z "$PAGE"; then
-     dom=`awk '([$]1 == "dom" || [$]1 == "search") { print [$]2; exit}' \
-	 /etc/resolv.conf 2>/dev/null`
-     if test -z "$dom"; then
-       dom=`(domainname) 2>/dev/null | tr -d '+'`
-       if test -z "$dom" \
-	  || test "$dom" = '(none)'; then
-	 dom=`(hostname) 2>/dev/null | grep '\.'`
-       fi
-     fi
-     # If the top-level domain is two letters and it's not 'us' or 'ca'
-     # then they probably use A4 paper.
-     case "$dom" in
-     [*.[Uu][Ss]|*.[Cc][Aa])]
-       ;;
-     [*.[A-Za-z][A-Za-z])]
-       PAGE=A4 ;;
-     esac
-   fi
+  if test -z "$PAGE"
+  then
+    domains=
+    if test -r /etc/resolv.conf
+    then
+      sedexpr='s/#.*//;s/[ \t]\+/ /;s/ \+$//;s/^ \+//;/^$/d;
+/^\(domain\|search\)/!d;s/\(domain\|search\) //;p'
+      domains=`sed -n "$sedexpr" /etc/resolv.conf`
+    fi
+    if test -z "$domains"
+    then
+      domains=`(domainname) 2>/dev/null | tr -d '+'`
+      if test -z "$domains" || test "$domains" = '(none)'
+      then
+        domains=`(hostname) 2>/dev/null | grep '\.'`
+      fi
+    fi
+    # resolv.conf's "search" directive might return multiple domains.
+    # If any top-level domain is two letters and it's not 'us' or 'ca',
+    # assume the system uses A4 paper.
+    for d in $domains
+    do
+      case "$d" in
+      [*.[Uu][Ss]|*.[Cc][Aa])]
+        ;;
+      [*.[A-Za-z][A-Za-z])]
+        PAGE=A4 ;;
+      esac
+    done
+  fi
 
-   test -n "$PAGE" || PAGE=letter
-   if test "$PAGE" = A4; then
-     AC_DEFINE([PAGEA4], [1],
-       [Define if the printer's page size is A4.])
-   fi
-   AC_MSG_RESULT([$PAGE])
-   AC_SUBST([PAGE])])
+  test -n "$PAGE" || PAGE=letter
+  AC_MSG_RESULT([$PAGE])
+  AC_SUBST([PAGE])
+])
 
 
 AC_DEFUN([GROFF_CXX_CHECK],

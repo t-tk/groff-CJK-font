@@ -7,8 +7,8 @@
 .  \" Redefine CW to use bold instead for a visible font change.
 .  als CW B
 .\}
-.\" This document doesn't require the minus sign but we do want a copy-
-.\" and-pastable hyphen-minus.
+.\" This document doesn't require the minus sign (in Times) but we do
+.\" want a copy- and-pastable hyphen-minus.
 .char \- \N'45'
 .\" A very limited output device might not have a dagger glyph.
 .fchar \[dg] *
@@ -22,8 +22,8 @@
 .nr TC-MARGIN \w'00' \" expect 2-digit page numbers at most
 .ie t .nr PI 3.5n
 .el   .nr PI 4n
-.ND June 2022
-.EH '%''June 2022'
+.ND July 2022
+.EH '%''July 2022'
 .EF ''''
 .OH 'Using \f[I]groff\f[] with the \f[I]ms\f[] macros''%'
 .OF ''''
@@ -57,8 +57,7 @@ automatically numbered headings,
 several different paragraph styles,
 a variety of text styling options,
 footnotes,
-multi-column page layouts,
-and indexing.
+and multi-column page layouts.
 .
 .I ms
 supports the
@@ -141,6 +140,11 @@ be advised that
 needs one of its macros called at the beginning of a document so that it
 can initialize.
 .
+A
+.I macro
+is a formatting instruction to
+.I ms.
+.
 Put a macro call on a line by itself.
 .
 Use
@@ -182,7 +186,7 @@ box center;
 lf(CB).
 \f[CR]$\f[] vi radical.ms
 \f[CR]$\f[] nroff \-ms radical.ms | less \-R
-\f[CR]$\f[] groff \-ms radical.ms > radical.ps
+\f[CR]$\f[] groff \-T ps \-ms radical.ms > radical.ps
 \f[CR]$\f[] see radical.ps
 .TE
 .
@@ -209,8 +213,12 @@ denied than admitted.
 .LP
 .I ms
 exposes many aspects of document layout to user control via
-.I groff
-registers and strings.
+.I groff 's
+.I registers
+and
+.I strings,
+which store numbers and text,
+respectively.
 .
 Measurements in
 .I groff
@@ -242,8 +250,10 @@ and strings with the
 .CW ds
 request.
 .
-Requests are like macro calls;
-they go on lines by themselves and start with the control character,
+.I Requests
+are like macro calls;
+they go on lines by themselves and start with the
+.I "control character,"
 a dot
 .CW . ). (
 .
@@ -270,7 +280,8 @@ we see that
 .CW \[rs]"
 begins a comment.
 .
-This is an example of an escape sequence,
+This is an example of an
+.I "escape sequence,"
 the other kind of formatting instruction.
 .
 Escape sequences can appear anywhere.
@@ -305,7 +316,7 @@ Interpolate contents of string
 T}
 \[rs]*\f[I]s	T{
 abbreviation of
-.CW \[rs]*[\f[I]s\f[]];
+.CW \[rs]*[\f[I]s\f[]] ;
 the name
 .I s
 must be only one character
@@ -316,8 +327,7 @@ Interpolate glyph of special character named
 T}
 \[rs]&	non-printing, zero-width dummy character
 \[rs]\[ti]	T{
-Move horizontally by the current font's space width
-(\[lq]non-breaking space\[rq]).
+Insert an unbreakble space that is adjustable like a normal space.
 T}
 \[rs]|	T{
 Move horizontally by one-sixth em
@@ -327,18 +337,23 @@ T}
 .
 .
 .PP
-.CW \[rs]&
-has two important uses:
-put it before a word starting with a dot
+Prefix any words that start with a dot
 .CW .\& ) (
-if that word is at the beginning of an input line
+or neutral apostrophe
+.CW \[aq] ) (
+with
+.CW \[rs]&
+if they are at the beginning of an input line
 (or might become that way in editing)
-to prevent the dot from being interpreted as the control character,
-and after
+to prevent the them from being interpreted as macro calls or requests.
+.
+Suffix
 .CW . ,
 .CW ? ,
 and
 .CW !\&
+with
+.CW \[rs]&
 when needed to cancel end-of-sentence detection.
 .
 .
@@ -370,12 +385,6 @@ The
 macro package expects a certain amount of structure:
 a well-formed document contains at least one paragraphing or heading
 macro call.
-.
-To compose a document from scratch,
-begin it by calling
-.CW .LP
-or
-.CW .PP .
 .
 Longer documents have a structure as follows.
 .
@@ -442,7 +451,7 @@ and similar material.
 See section \[lq]Body text\[rq] below.
 .
 .
-.IP "\fBTables of contents and indexes\fP"
+.IP "\fBTables of contents\fP"
 Macros enable the collection of entries for a table of contents
 (or index)
 as the material they discuss appears in the document.
@@ -482,8 +491,8 @@ Document control settings
 .
 .
 .LP
-The following list of document parameters is presented in the syntax
-used to interpolate them.
+The document parameters below are presented in the syntax
+used to interpolate their values.
 .
 For any unsatisfactory default,
 define its register,
@@ -494,11 +503,11 @@ macro other than
 .CW RP .
 .
 The \[lq]Next\[rq] heading indicates that changes to the parameter are
-effective as of the next listed element encountered.
+effective as of the next new element processed of the listed type.
 .
 For entries marked
 .I special ,
-see the discussion in the applicable section below.
+see the discussion in the applicable section.
 .
 .
 .TS H
@@ -644,28 +653,43 @@ lf(CR) lx.
 Macro	Description
 _
 .TH
-\&.RP \f[R][\f[]no\f[R]]	T{
+\&.RP \f[R][\f[I]option\f[] .\|.\|.]	T{
 Use the \[lq]report\[rq]
 (AT&T: \[lq]released paper\[rq])
 format for your document,
 creating a separate cover page.
 .
-The default arrangement is to print most of the document description
+The default arrangement is to place most of the document description
 (title,
 author names and institutions,
 and abstract,
 but not the date)
-at the top of page\~1.
+at the top of the first page.
 .
 If the optional
-.CW no
+.CW no\-repeat\-info
 argument is given,
 .I ms
-prints a cover page but does not repeat any of its information on
-page\~1
+produces a cover page but does not repeat any of its information
+subsequently
 (but see the
 .CW DA
 macro below regarding the date).
+.
+Normally,
+.CW .RP
+sets the page number following the cover page to\~1.
+.
+Specifying the optional
+.CW no\-renumber
+argument suppresses this alteration.
+.
+Optional arguments can occur in any order.
+.
+.CW no
+is recognized as a synonym of
+.CW no\-repeat\-info
+for AT&T compatibility.
 T}
 _
 \&.TL	T{
@@ -824,7 +848,8 @@ registers,
 and strings can be used to structure and style the body of your
 document.
 .
-Examples include paragraphs,
+They organize your text into
+paragraphs,
 headings,
 footnotes,
 and inclusions of material such as tables and figures.
@@ -843,10 +868,7 @@ The
 .CW FAM
 string sets the font family for body text;
 the default is
-.CW T \[rq] \[lq]
-(Times).
-.
-The font family setting is ignored on terminal devices.
+.CW T \[rq] \[lq].
 .
 The
 .CW PS
@@ -856,6 +878,8 @@ registers set the type size and vertical spacing
 (distance between text baselines),
 respectively.
 .
+The font family and type size are ignored on terminal devices.
+.
 Setting these parameters before the first call of a heading,
 paragraphing,
 or (non-date) document description macro also applies them to headers,
@@ -864,6 +888,24 @@ and
 (for
 .CW FAM )
 footnotes.
+.
+.
+.PP
+Which font families are available depends on the output device;
+as a convention,
+.CW T
+selects a serif family (\[lq]Times\[rq]),
+.CW H
+a sans-serif family (\[lq]Helvetica\[rq]),
+and
+.CW C
+a monospaced family (\[lq]Courier\[rq]).
+.
+The man page for the output driver documents its font repertoire.
+.
+Consult the
+.I groff (1)
+man page for lists of available output devices and their drivers.
 .
 .
 .PP
@@ -912,15 +954,12 @@ _
 _
 \[rs]*[Q]	T{
 Interpolate typographer's quotation marks where available,
-and neutral quotes otherwise.
+and neutral double quotes otherwise.
 .
 .CW \[rs]*[Q]
 is the left quote and
 .CW \[rs]*[U]
 the right.
-.
-(As a mnemonic,
-think of \*[Q]quote\*[U] and \*[Q]unquote\*[U].)
 T}
 \[rs]*[U]	\^
 .TE
@@ -1268,8 +1307,12 @@ following redefinition of the alias for
 .
 The formatted number of the current heading is available in
 .CW \[rs]*[SN]
-(a feature first documented by Berkeley),
-facilitating its inclusion in
+(a feature first documented by Berkeley);
+this string facilitates its inclusion in,
+for example,
+table captions,
+equation labels,
+and
 .CW .XS /\c
 .CW .XA /\c
 .CW .XE
@@ -1416,7 +1459,7 @@ If insufficient space remains on the current page to accommodate the
 heading and this number of lines of paragraph text,
 a page break is forced before the heading is printed.
 .
-Any display macro or
+Any display macro call or
 .I tbl ,
 .I pic ,
 or
@@ -1505,8 +1548,7 @@ but use the roman style
 (upright text of normal weight)
 instead of bold.
 .
-Arguments are recognized only by
-.I "groff ms."
+Argument recognition is a GNU extension.
 T}
 _
 \&.I \f[R][\f[I]text\f[] [\f[I]post\f[] [\f[I]pre\f[]]]]	T{
@@ -1553,8 +1595,10 @@ reverse video is used instead
 If you want
 .I text
 to contain space,
-use horizontal motion escape sequences of appropriate width
+use unbreakable space or horizontal motion escape sequences
 .CW \[rs]\[ti] , (
+.CW \[rs]\c
+.I space ,
 .CW \[rs]\[ha] ,
 .CW \[rs]| ,
 .CW \[rs]0 ,
@@ -1649,6 +1693,7 @@ Cb Cb
 Lf(CR) L.
 Input	Result
 T{
+.na
 The course\[aq]s students found one C language keyword
 .br
 \&.CW static ) \[rs]%(
@@ -1662,7 +1707,7 @@ T}
 .TE
 .
 .KS
-You might prefer to use the output line continuation escape sequence
+You can use the output line continuation escape sequence
 .CW \[rs]c
 to achieve the same result.
 .
@@ -1676,20 +1721,18 @@ Cb Cb
 Lf(CR) L.
 Input	Result
 T{
+.na
 The course\[aq]s students found one C language keyword
 .br
 (\[rs]c
 .br
-\&.CW \[rs]%static\[rs]c
-.br
-\&.R
+\&.CW \[rs]%static \[rs]c
 .br
 ) most troublesome.
 T}	T{
 The course's students found one C language keyword
 (\c
-.CW \%static\c
-.R
+.CW \%static \c
 ) most troublesome.
 T}
 .TE
@@ -1702,8 +1745,7 @@ Rather than calling the
 macro,
 in
 .I "groff ms"
-you might prefer to change the font family to Courier\[em]a monospaced
-typeface\[em]by setting
+you might prefer to change the font family to Courier by setting
 .CW \[rs]*[FAM]
 to
 .CW C \[rq]. \[lq]
@@ -1926,12 +1968,11 @@ or label
 breaks the line.
 .
 Finally,
-you may append unbreakable horizontal space to the term or label with
-the
+you may append a horizontal motion to the marker with the
 .CW \[rs]h
 escape sequence;
-using the same amount as the indentation will ensure that it's too wide
-for
+using the same amount as the indentation will ensure that the marker is
+too wide for
 .I groff
 to treat it as \[lq]fitting\[rq] on the same line as the paragraph text.
 .
@@ -2145,10 +2186,9 @@ included later.
 .
 .
 .PP
-A keep can also be
-.I boxed .
-.
-Text in a box is automatically placed in a diversion (keep).
+A keep have a frame drawn around it;
+this is called a
+.I "boxed keep."
 .
 .
 .TS
@@ -2162,8 +2202,9 @@ _
 .TE
 .
 .
+.KS
 .LP
-Box macros cause breaks;
+Boxed keep macros cause breaks;
 if you need to box a word or phrase within a line,
 see the
 .CW BX
@@ -2172,8 +2213,8 @@ macro in section \[lq]Typeface and decoration\[rq] above.
 Box lines are drawn as close as possible to the text they enclose so
 that they are usable within paragraphs.
 .
-If you wish to box one or more paragraphs,
-you may improve the appearance by calling
+If you wish to place one or more paragraphs in a boxed keep,
+you may improve their appearance by calling
 .CW .B1
 after the first paragraphing macro,
 and by adding a small amount of vertical space before calling
@@ -2187,13 +2228,14 @@ lf(CR).
 \&.B1
 \&.I Warning:
 Happy Fun Ball may suddenly accelerate to dangerous speeds.
-\&.sp \[rs]n[PD]/2
+\&.sp \[rs]n[PD]/2 \[rs]" space by half the inter-paragraph distance
 \&.B2
 .TE
+.KE
 .
 .
 .LP
-If you want a box to float,
+If you want a boxed keep to float,
 you will need to enclose the
 .CW .B1
 and
@@ -2259,7 +2301,8 @@ cf(CR) s | lx .
 .PP
 The distance stored in
 .CW \[rs]n[DD]
-is inserted before and after each pair of display macros;
+is inserted before and after each pair of display macros,
+replacing any adjacent inter-paragraph distance;
 this is a Berkeley extension.
 .
 The
@@ -2367,7 +2410,8 @@ _
 T{
 \&.EQ
 .R
-.I align ] [
+.I align \~[\c [
+.I label ]]
 .CW
 .br
 \&.EN
@@ -2376,19 +2420,22 @@ Demarcate an equation to be processed by the
 .I eqn
 preprocessor.
 .
-The equation is center-aligned by default;
-the optional
+The equation is centered by default;
 .I align
-argument can be
+can be
 .CW C ,
 .CW L ,
 or
 .CW I
-to center,
+to (explicitly) center,
 left-align,
 or indent it by
 .CW \[rs]n[DI] ,
 respectively.
+.
+If specified,
+.I label
+is set right-aligned.
 T}
 _
 T{
@@ -2421,14 +2468,7 @@ as an unnumbered heading
 .
 .
 .KS
-.NH 3
-An example multi-page table
-.XS
-		An example multi-page table
-.XE
-.
-.
-.LP
+.PP
 The following is an example of how to set up a table that may print
 across two or more pages.
 .
@@ -2458,7 +2498,6 @@ T}
 .TE
 .
 .
-.PP
 Attempting to place a multi-page table inside a keep can lead to
 unpleasant results,
 particularly if the
@@ -2466,6 +2505,56 @@ particularly if the
 .CW allbox
 option is used.
 .KE
+.
+.
+.PP
+Mathematics can be typeset using the language of the
+.I eqn
+preprocessor.
+.
+.
+.TS
+box center;
+Lf(CR).
+\&.EQ C (\[rs]*[SN\-NO\-DOT]a)
+p \[ti] = \[ti] q sqrt { ( 1 + \[ti] ( x / q sup 2 ) }
+\&.EN
+.TE
+.
+.
+This input formats a labelled equation.
+.
+We used the
+.CW SN\-NO\-DOT
+string to base the equation label on the current heading number,
+giving us more flexibility to reorganize the document.
+.
+.
+.EQ C (\*[SN-NO-DOT]a)
+p ~ = ~ q sqrt { ( 1 + ~ ( x / q sup 2 ) }
+.EN
+.
+.
+.PP
+Remember to run any desired preprocessors on the input;
+.I groff
+options
+will take care of this.
+.
+Use
+.CW \-e
+for
+.I eqn ,
+.CW \-p
+for
+.I pic ,
+.CW \-R
+for
+.I refer ,
+and
+.CW \-t
+for
+.I tbl.
 .
 .
 .KS
@@ -2680,14 +2769,12 @@ correspond to
 .CW PS ,
 and
 .CW VS ,
-respectively.
-.
-The
+respectively;
 .CW FPD ,
 .CW FPS ,
 and
 .CW FVS
-registers are GNU extensions.
+are GNU extensions.
 .
 .
 .KS
@@ -2981,22 +3068,20 @@ to set the left,
 center,
 and right footers similarly.
 .
-This approach works best for documents that do not distinguish odd and
-even pages.
+This approach works best for documents that do not distinguish odd- and
+even-numbered pages.
 .
 .
 .PP
-Another method is to call macros with arguments that set headers or
-footers for odd or even pages;
-these variables produce four combinations,
-so four macros are available.
+Another method is to call macros that set headers or footers for odd- or
+even-numbered pages.
 .
-Each takes a delimiter separating the left,
+Each such macro takes a delimited argument separating the left,
 center,
 and right header or footer texts from each other.
 .
-You can replace the neutral apostrophes (\[aq]) with any character not
-appearing in the header or footer text.
+You can replace the neutral apostrophes (\[aq]) shown below with any
+character not appearing in the header or footer text.
 .
 These macros are Berkeley extensions.
 .
@@ -3089,6 +3174,7 @@ if you need additional processing after setting the header
 (for example,
 to draw a line below it).
 .
+.\" Although undocumented in Tuthill's 4.2BSD ms.diffs paper...
 The
 .CW HD
 hook is a Berkeley extension.
@@ -3096,7 +3182,7 @@ hook is a Berkeley extension.
 Any such macros you (re)define must implement any desired specialization
 for odd-,
 even-,
-or first-numbered pages.
+or first numbered pages.
 .
 .
 .KS
@@ -3169,6 +3255,19 @@ can set text in as many columns as reasonably fit on the page.
 The following macros force a page break if a multi-column layout is
 active when they are called.
 .
+.CW \[rs]n[MINGW]
+is the default minimum gutter width;
+it is a GNU extension.
+.
+When multiple columns are in use,
+keeps
+and the
+.CW \%HORPHANS
+and
+.CW \%PORPHANS
+registers
+work with respect to column breaks instead of page breaks.
+.
 .
 .TS
 box;
@@ -3197,10 +3296,6 @@ Otherwise,
 is the width of each column and
 .I gutter-width
 is the minimum distance between columns.
-.
-.CW \[rs]n[MINGW]
-is the default minimum gutter width;
-it is a GNU extension.
 T}
 .TE
 .KE
@@ -3289,8 +3384,6 @@ resets the page number
 and then calls
 .CW PX .
 .
-.
-.PP
 All of these macros are Berkeley extensions.
 .
 .TS
@@ -3629,6 +3722,15 @@ is preferable.
 .
 .
 .PP
+AT&T
+.I ms 's
+.CW AU
+macro supported arguments used with some document types;
+.I "groff ms"
+does not.
+.
+.
+.PP
 Right-aligned displays are available.
 .
 The AT&T
@@ -3737,51 +3839,81 @@ or another implementation should test this register.
 .
 .
 .NH 2
-AT&T
+Unix Version\~7
 .BI ms
-macros not appearing in
+macros not implemented by
 .BI "groff ms"
 .XS
-	AT&T
+	Unix Version 7
 .I ms
-macros not appearing in
+macros not implemented by
 .I "groff ms"
 .XE
 .LP
-Macros missing from
+Several macros described in the Unix Version\~7
+.I ms
+documentation are unimplemented by
 .I "groff ms"
-are cover page macros specific to
-Bell Labs.
-The macros known to be missing are:
-.IP \&.TM 0.5i
-Technical memorandum; a cover sheet style
-.IP \&.IM
-Internal memorandum; a cover sheet style
-.IP \&.MR
-Memo for record; a cover sheet style
-.IP \&.MF
-Memo for file; a cover sheet style
-.IP \&.EG
-Engineer's notes; a cover sheet style
-.IP \&.TR
-Computing Science Tech Report; a cover sheet style
-.IP \&.OK
-Other keywords
-.IP \&.CS
-Cover sheet information
-.IP \&.MH
-A cover sheet macro
+because they are specific to the requirements of documents produced
+internally by Bell Laboratories,
+some of which also require a glyph for the Bell System logo that
+.I groff
+does not support.
+.
+These include macros implementing several document type formats
+(\c
+.CW EG , \" engineer's notes
+.CW IM , \" internal memorandum
+.CW MF , \" memorandum for file
+.CW MR , \" memorandum for record
+.CW TM , \" technical memorandum
+.CW TR ), \" technical report
+were meaningful only in conjunction with the use of certain document
+types
+(\c
+.CW AT , \" attachments
+.CW CS , \" cover sheet info for `TM` documents
+.CW CT , \" copies to
+.CW OK , \" "other keywords" for `TM` documents
+.CW SG ), \" signatures for `TM` documents
+stored the postal addresses of Bell Labs sites
+(\c
+.CW HO , \" Holmdel
+.CW IH , \" Naperville
+.CW MH , \" Murray Hill
+.CW PY , \" Piscataway
+.CW WH ), \" Whippany
+or lack a stable definition historically
+(\c
+.CW UX ). \" Unix; on 1st use, add footnote identifying trademark owner
+.
+To compatibly render historical
+.I ms
+documents using these macros,
+we advise your documents to invoke the
+.CW rm
+request to remove any such macros it uses and then define replacements
+with an authentically typeset original at hand.\**
+.FS
+The removal beforehand is necessary because
+.I "groff ms"
+aliases these macros to a diagnostic macro,
+and you want to redefine the aliased name,
+not its target.
+.FE
+.
+For informal purposes,
+a simple definition of
+.CW UX
+should maintain the readability of the document's substance.
 .
 .
-.LP
-Tenth Edition \" possibly 9th
-Research Unix supported a pair of
-.CW P1
-and
-.CW P2
-macros for setting code examples;
-.I "groff ms"
-does not.
+.TS
+box center;
+lf(CR).
+\&.rm UX
+\&.ds UX Unix\[rs]"
+.TE
 .
 .
 .\" ------------------------
@@ -3795,7 +3927,7 @@ Legacy features
 .
 .LP
 .I "groff ms"
-retains support for some legacy features solely to support rendering of
+retains support for some legacy features solely to support formatting of
 historical documents;
 contemporary ones should not use them because they can render poorly.
 .

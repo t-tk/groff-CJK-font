@@ -1,16 +1,548 @@
+2022-07-23  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* m4/groff.m4 (GROFF_PAGE): Use 'grep -q' instead of redirecting
+	standard output to null device.  The '-q' option was
+	standardized in POSIX Issue 5 (1997).  Also drop the redirection
+	of the standard error stream; we have already checked the file
+	named in "$descfile" for existence and readability.  grep should
+	not emit diagnostic messages.
+
+2022-07-22  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* m4/groff.m4 (GROFF_PAGE): Macro used awk(1) without
+	`AC_REQUIRE`-ing a relevant macro or checking for its existence.
+	Fortunately, sed is powerful enough for our needs.  Remove
+	dependency on awk.  Cope with "search" directive in resolv.conf
+	having multiple arguments.  Match "domain" directive in same
+	file instead of "dom", which I cannot find attested (this logic
+	dates to 1991).  Rename `dom` shell variable to `domains` for
+	clarity, since its multiplicity could be greater than 1.
+
+2022-07-22  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* m4/groff.m4 (GROFF_PAGE): Refactor: drop AC_DEFINE of
+	`PAGEA4`.  This symbol appears to be a relic; it is nowhere
+	tested or dereferenced.
+
+2022-07-15  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/tty-char.tmac: Drop definition of \[sd] special
+	character.  This was superseded by commit 78e666246c, 8 May,
+	which defined a fallback for the character in tty.tmac instead.
+	Thanks to Dave Kemper for the catch.
+
+2022-07-15  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/tests/pdfpic_does-not-choke-on-bad-pdfinfo-output.sh:
+	Skip test if "pdfinfo" command not available.
+
+2022-07-14  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[build]: Add sanity checks for font description file generation
+	for PDF output device, prompted by discussion with Ingo
+	Schwarze.  See <https://lists.gnu.org/archive/html/groff/\
+	2022-06/msg00094.html>.
+
+	* font/devpdf/tests/basic-fonts-present.sh:
+	* font/devpdf/tests/urw-fonts-present.sh: Add files.
+
+	* font/devpdf/devpdf.am (font_devpdf_TESTS): Add the former test
+	unconditionally, and the latter only if `HAVE_URW_FONTS`.
+
+2022-07-14  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* font/devpdf/devpdf.am: Refactor to simplify.  Now that
+	symbol.map lives in the "devpdf/generate" directory along with
+	the other map files, it doesn't need a dedicated Makefile target
+	to produce it.
+	(DEVPDFFONTMAP_1, DEVPDFFONTMAP_2): Coalesce and rename to...
+	(devpdffontmapdata): ...this.
+	(font/devpdf/map/symbol.map:): Drop target.
+	(devpdffontmap_DATA, font/devpdf/download): Update dependencies.
+
+2022-07-13  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* font/devpdf/util/BuildFoundries.pl (LoadFoundry): Recast
+	diagnostic message so that the user understands the consequence
+	of failure to locate a Type 1 font file (that isn't one of the
+	base 14 PostScript level 1 fonts): the font will be unavailable
+	for the "pdf" output device.
+
+2022-07-13  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* font/devpdf/util/BuildFoundries.pl (LoadFoundry): Separate
+	lists of Type 1 font names with spaces as well as commas, for
+	better diagnostic message readability.  Also begin message in
+	lowercase (per GNU Coding Standards).
+
+2022-07-13  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* font/devpdf/util/BuildFoundries.pl (LoadFoundry): Verify that
+	`$foundrypath->[$j]` is defined before operating on it.
+
+2022-07-10  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[afmtodit]: Clarify diagnostic message.
+
+	* src/utils/afmtodit/afmtodit.pl: When we have excess Adobe
+	Glyph List mappings for a groff special character identifier
+	{making the reverse mapping from groff special character to font
+	glyph name ambiguous}, report that we're ignoring the excess.
+	Use "print STDERR" instead of Perl "warn" built-in since we want
+	diagnostic messages to start with the name of the program
+	emitting them.
+
+2022-07-10  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[build]: Name and place PS->groff glyph name maps consistently.
+
+	* font/devps/symbolmap: Rename from this...
+	* font/devps/generate/symbol.map: ...to this.
+
+	* font/devpdf/devpdf.am (font/devpdf/map/symbolmap): Rename
+	target...
+	(font/devpdf/map/symbol.map): ...to this.
+	(font/devpdf/map/symbol.map): Copy "devps" version of file from
+	its new location in the "generate" subdirectory.
+
+	* font/devpdf/Foundry.in: Reflect rename.
+
+	* font/devps/generate/Makefile (symbolmap): Rename target...
+	($(srcdir)/symbol.map): ...to this.
+
+	* font/devps/devps.am (DEVPSGENFILES, EXTRA_DIST):
+	* font/devps/generate/Makefile (S, EURO $(SPECIALFONTS), clean):
+	* src/utils/afmtodit/afmtodit.1.man: Reflect rename and
+	relocation.
+
+	* font/devps/generate/dingbats.rmap: Rename from this...
+	* font/devps/generate/dingbats-reversed.map: ...to this.
+
+	* font/devps/devps.am (DEVPSGENFILES):
+	* font/devps/generate/Makefile (ZDR):
+	* src/utils/afmtodit/afmtodit.1.man: Reflect rename.
+
+	* font/devps/generate/lgreekmap: Rename from this...
+	* font/devps/generate/slanted-symbol.map: ...to this.
+
+	* font/devps/devps.am (DEVPSGENFILES):
+	* font/devps/generate/Makefile (SS):
+	* src/utils/afmtodit/afmtodit.1.man: Reflect rename.
+
+	* font/devps/generate/textmap: Rename from this...
+	* font/devps/generate/text.map: ...to this.
+
+	* font/devpdf/Foundry.in:
+	* font/devpdf/devpdf.am (DEVPDFFONTMAP_1):
+	* font/devps/devps.am (DEVPSGENFILES):
+	* font/devps/generate/Makefile (TEXTMAP):
+	* src/devices/gropdf/gropdf.1.man:
+	* src/devices/grops/grops.1.man:
+	* src/utils/afmtodit/afmtodit.1.man: Reflect rename.
+
+2022-07-10  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* doc/doc.am (doc/ms.ps): Add dependency on "eqn", and call
+	groff with "-e" option.
+	* src/utils/grog/tests/smoke-test.sh: Update expected "grog"
+	output for the ms.ms document.
+
+2022-07-09  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* doc/doc.am (doc/ms.ps): Add dependency on "tbl".
+
+2022-07-08  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/roff/troff/node.cpp (suppress_node::tprint): Add source
+	file line number after its name when emitting "grohtml-info", to
+	aid debugging.
+
+2022-07-08  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/roff/troff/node.cpp (get_register, get_string): Reorder
+	null pointer inequality comparisons; they don't need to be in a
+	funny order because it's pretty hard to mistype `!=` as an
+	assignment operator.  Annotate them as null pointers to ease any
+	future migration to ISO C++11.  Use primitive type constructor
+	instead of C-style cast operator; this seems more idiomatic.
+
+2022-07-08  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/preproc/html/pre-html.cpp (generateImages): Flush the
+	standard error stream after writing to it in a loop.
+
+2022-07-08  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/s.tmac (RP): Recognize new optional arguments
+	`no-renumber` and `no-repeat-info`, the latter as a synonym for
+	the existing `no`.  The former suppresses the page number
+	manipulation that normally occurs.  Drop now-unnecessary `pn 0`
+	request.
+	(top level, cov*first-page-init, RP, cov*print): Rename
+	`cov*rp-format` to `cov*use-rp-format` for clarity.
+	(cov*break-page): New macro breaks the cover page at the end,
+	resetting next page number to 1 only if desired by user.
+	(cov*print, cov*rp-print): Call `cov*break-page` instead of
+	invoking `bp`.
+
+	* doc/groff.texi (Document Description Macros) <RP>:
+	* doc/ms.ms (Document description macros) <RP>:
+	* tmac/groff_ms.7.man (Document description macros) <RP>:
+	Document them.
+
+	* NEWS: Add item.
+
+2022-07-08  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/s.tmac: Rename register `cov*rp-no` to
+	`cov*rp-no-repeat-info`.
+
+2022-07-08  Deri James  <deri@chuzzlewit.myzen.co.uk>
+
+	* font/devpdf/util/BuildFoundries.pl (LocateFile): Some systems
+	store .afm files in a parallel directory to the Type 1 files,
+	restore original path after checking for parallel directory.
+
+2022-07-07  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* font/devpdf/devpdf.am (font/devpdf/download): Call
+	"BuildFoundries" with new `--strict` option so that the build
+	fails if the AFM files for the URW fonts can't be found.
+
+2022-07-07  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* font/devpdf/util/BuildFoundries.pl: Add Boolean-valued scalar
+	`beStrict` (defaults false) and new command-line option
+	`--strict` to make it true.
+	(LoadFoundry): Check return value of subroutine `LocateAF`.
+	Emit diagnostic if it is null, as a warning if not "strict", and
+	fatal if so.
+
+2022-07-07  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* font/devpdf/devpdf.am (font/devpdf/util/BuildFoundries): Add
+	dependency on "afmtodit" since "BuildFoundries" calls this
+	program when generating groff font description files from URW
+	fonts.
+
+2022-07-06  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[ms]: Fix Savannah #62690.
+
+	* tmac/s.tmac (P1, SC, UC, P2): Drop undocumented support for
+	document-private macros used by Kernighan & Cherry's
+	"Typesetting Mathematics -- User's Guide (Second Edition)".
+
+	Fixes <https://savannah.gnu.org/bugs/?62690>.
+
+2022-07-06  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[ms]: Fix Savannah #62688.
+
+	* tmac/s.tmac (DE): Set no-space mode when ending displays.
+	(@EN): Set no-space mode after outputting the display distance
+	so that it doesn't combine with inter-paragraph space.
+
+	Fixes <https://savannah.gnu.org/bugs/?62688>.
+
+2022-07-06  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[ms]: Regression-test Savannah #62688.
+
+	* tmac/tests/s_no-excess-space-around-displays.tmac: Do it.
+	* tmac/tmac.am (tmac_TESTS): Run test.
+
+2022-07-06  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[ms]: Fix Savannah #62687.
+
+	* tmac/s.tmac (@MC): Honor `MINGW` register even when setting
+	only two columns, as clearly implied by our documentation.
+
+	Fixes <https://savannah.gnu.org/bugs/?62687>.
+
+2022-07-06  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[ms]: Regression-test Savannah #62687.
+
+	* tmac/tests/s_honor-MINGW-when-two-columns.sh: Do it.
+	* tmac/tmac.am (tmac_TESTS): Run test.
+
+2022-07-06  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[ms]: Fix Savannah #62686.
+
+	* tmac/s.tmac (@MC): Set no-space mode before doing a paragraph
+	reset, not after: we don't want vertical space at the top of the
+	first column when entering multi-column mode, because then it
+	doesn't align with the tops of subsequent columns.
+
+	Fixes <https://savannah.gnu.org/bugs/?62686>.
+
+2022-07-06  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[ms]: Regression-test Savannah #62686.
+
+	* tmac/tests/s_mark-column-start-correctly.sh: Do it.
+	* tmac/tmac.am (tmac_TESTS): Run test.
+
+2022-07-06  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/s.tmac (IX): Drop.
+	* NEWS: Add item.
+
+2022-07-06  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/s.tmac: Add "sorry" implementations for documented but
+	unsupported Unix Version 7 ms macros.  This way it's easier to
+	tell when a historical document needs one and this case is
+	distinguishable from a document-private macro warned about with
+	"groff -w mac".
+
+2022-07-06  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/s.tmac (UX): Drop undocumented support for this macro.
+	This implementation isn't consistent with historical ones, which
+	identified the trademark holder.  But doing that is a problem,
+	so just stop trying to cope.  Also, spelling Unix in full caps
+	was an imposition by the AT&T legal department on the CSRC.
+
+	"The name Unix is a trademark, originally owned by Bell Labs and
+	subsequently traded off like a baseball card among a number of
+	companies." -- Ben Klemens
+
+2022-07-06  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[ms]: Replace incomplete documentation of unimplemented macros.
+
+	* doc/groff.texi (Missing ms Macros):
+	* doc/ms.ms (AT&T ms macros not appearing in groff ms): Drop,
+	replacing with...
+
+	* doc/groff.texi (Unix Version 7 ms Macros Not Implemented by
+	groff ms):
+	* doc/ms.ms (Unix Version 7 ms macros not implemented by groff
+	ms):
+	* tmac/groff_ms.7.man (Unix Version 7 macros not implemented by
+	groff ms): ...these.
+
+2022-07-06  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/roff/troff/input.cpp (do_translate): Throw an error
+	diagnostic when the user attempts to translate space characters.
+	{By contrast, translating _to_ [unbreakable, unadjustable]
+	spaces is an old troff hack often seen as ".tr ~ ", and largely
+	superseded by groff's "\~" escape sequence, now widely supported
+	by troffs.}
+
+	Fixes <https://savannah.gnu.org/bugs/?60803>.  Thanks to T. Kurt
+	Bond and Oliver Corff for the report.
+
+2022-07-01  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/roff/groff/pipeline.c: Refactor.  Drop function rename via
+	preprocessor macro usage.  Declare and define `c_error` by its
+	correct name.
+	(run_pipeline): Update call sites.  Stop flushing standard error
+	stream after calling libgroff's `error` function (which
+	`c_error` wraps); libgroff already guarantees this operation.
+
+2022-07-01  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/roff/troff/input.cpp (abort_request): Flush the standard
+	error stream before exiting, to improve chances of user seeing
+	any message as arguments to the `ab` request.
+
+2022-06-28  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/preproc/html/pre-html.cpp
+	(char_buffer::run_output_filter): Die if platform supports
+	neither `fork()` nor `spawn()` for child process creation.
+
+2022-06-27  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/preproc/html/pre-html.cpp (cleanup): Add function to tidy
+	memory before exiting.
+	(main): Register aforementioned function with `atexit()`.  Die
+	if registration fails.
+
+2022-06-27  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/preproc/html/pre-html.cpp (do_file): Die if `fclose()`
+	fails; such a situation suggests a pretty hosed environment.
+
+2022-06-27  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/preproc/html/pre-html.cpp (checkImageDir): If `mkdir()`
+	fails, use `strerror()` to report the underlying problem.
+
+2022-06-27  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/preproc/html/pre-html.cpp: Refactor.  Drop unnecessary
+	prototype for static function.  Use idiomatic C++98 null pointer
+	constant.  Annotate it as null pointer to ease any future
+	migration to ISO C++11.  Boolify.  Use C++98 bool data type
+	instead of preprocessor macros `TRUE` and `FALSE`.  Demote some
+	global Boolean variables from `int` to `bool` and rename some to
+	be more clear: `show_progress` -> `want_progress_report`;
+	`debugging`; `eqn_flag` -> `need_eqn`.
+	(make_message): Rename this...
+	(make_string): ...to this.  Align more closely with contemporary
+	version of example from Linux man-pages printf(3) page.  Use
+	`vsnprintf()` to determine size of memory buffer needed prior to
+	allocation instead of iteratively growing it until it is large
+	enough.  Always die if `vsnprintf()` fails: this function now
+	always returns a valid pointer if it returns at all.
+	(makeFileName, setupAntiAlias, imageList::createPage,
+	imageList::createImage): Update call sites to use
+	`make_string()`.
+	(char_buffer::can_see): Demote return type from `int` to `bool`.
+	(char_buffer::skip_spaces): Drop unused member function.
+	(char_buffer::read_file, makeTempFiles): Demote return type from
+	`int` to `void`.  Stop returning after calling functions that
+	don't return.
+	(char_buffer::read_file): Call `sys_fatal()` if `fread()`
+	returns an error, similarly to other calls into the standard C
+	library that this file makes.  Improve check for error from
+	`fread()` by not regarding a return value of zero when the
+	end-of-file indicator is set as an error condition.
+	(makeFileName, checkImageDir, char_buffer::run_output_filter,
+	scanArguments): Call `fatal()` instead of `error()` and then
+	`exit(1)`.
+	(makeFileName, scanArguments): Dismiss Shlemiel the Painter:
+	save return value of `strlen()` and call `strcpy()` multiple
+	times instead of mixing `strcpy()` and `strcat()`; the latter
+	approach rescans the string unnecessarily.
+	(char_buffer::run_output_filter): Stop passing unnecessary null
+	pointer argument to diagnostic message functions.  Stop calling
+	`fflush()` after libgroff diagnostic function, which always
+	{ultimately} flushes the standard error stream itself.
+	(makeTempFiles, do_file, main): Boolify.
+	(makeTempFiles, do_file): Reorder null pointer equality
+	comparisons to avoid inadvertent lvalue assignment.
+	(scanArguments, main): Use `EXIT_SUCCESS` and `EXIT_FAILURE`
+	constants from C library instead of integer literals for exit
+	status.
+	(do_file): Demote return type from `int` to `bool`.  Return
+	Boolean literals.  Drop conditional with empty consequent.
+	(main): Declare local variables closer to the points of use.
+	Stop trying to be a register allocator: stop reusing loop index
+	variable `i` as integer storage for another (albeit related)
+	purpose; introduce `operand_index` instead.  Clarify logic by
+	splitting combined initialization and comparison operations, and
+	by testing function return value directly instead of storing it
+	in a pointless temporary.  Use `EXIT_SUCCESS` and `EXIT_FAILURE`
+	constants from C library instead of integer literals for exit
+	status.
+
+2022-06-27  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/roff/groff/groff.cpp (run_commands): Trivially refactor.
+	Rename variable for clarity; add comment.
+
+2022-06-27  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/preproc/html/pre-html.cpp
+	(char_buffer::run_output_filter): Return wait status of child
+	process.
+	(char_buffer::run_output_filter, main): Rename local variable
+	`status` to `wstatus` to recognize distinction between exit
+	status (a 7-bit quantity) and wait status (a wider type).
+	(main): Issue fatal diagnostic if child process exited with
+	nonzero status.  Since the child's output to the standard error
+	stream is lost, advise re-running with different output driver
+	to see them.  This unhappy shortcoming is filed as Savannah
+	#62673.  Explicitly return zero otherwise.
+
+	Fixes <https://savannah.gnu.org/bugs/?60782>.
+
+2022-06-22  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/roff/groff/tests/ab_works.sh: Add regression test for
+	Savannah #60782.
+
+2022-06-22  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[troff]: Trivially refactor.
+
+	* src/roff/troff/input.cpp (token::next): Rename statement label
+	to use documentary terminology.
+	* src/roff/troff/node.cpp (make_composite_node)
+	(make_glyph_node): Make functions static since nothing outside
+	this translation unit calls them.
+	* src/roff/troff/node.cpp (make_glyph_node): Refactor optional
+	argument and its usage.  Put it down, flip it, and reverse it.
+	That is, demote its type from `int` to `bool`, invert its sense,
+	and rename it since it affects warning, not error, diagnostics.
+	(character_exists): Update only call site of `make_glyph_node()`
+	that uses non-default argument value.
+
+2022-06-22  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[troff]: Adjust diagnostic message text to clarify and better
+	match terminology used in documentation.
+
+	* src/roff/troff/input.cpp (set_escape_char, do_overstrike)
+	(do_bracket, do_name_test, do_width, do_special):
+	* src/roff/troff/node.cpp (suppress_node::tprint): Migrate from
+	"escape" to "escape sequence".
+
+	* src/roff/troff/node.cpp (make_composite_node)
+	(make_glyph_node): Clarify what went wrong.
+
+	* src/roff/troff/input.cpp (token::get_char)
+	(check_missing_character): Migrate from "normal character" to
+	"ordinary character" (see groff_char(7)).
+
+2022-06-22  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[troff]: Rename a function for clarity.
+
+	* src/roff/troff/input.cpp (add_to_node_list): Rename this...
+	(add_to_zero_width_node_list): ...to this.
+	(do_zero_width): Update call site.
+	* src/roff/troff/token.h: Update declaration.
+
+2022-06-22  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/roff/groff/groff.cpp (handle_unknown_desc_command):
+	Refactor to skip unnecessary string comparisons.  We explicitly
+	return in the final case instead of falling off the end of this
+	void function for consistency if additional cases are added.
+
+2022-06-22  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/roff/groff/groff.cpp (handle_unknown_desc_command):
+	Partially revert commit 64dc40d23a, 19 June.  I forgot to save
+	and restore the previous values of the globals
+	`current_filename` and `current_lineno`, and, noticing that this
+	function has 3 return paths, decided that it's cheaper just to
+	go back to `error_with_file_and_line()`.
+
+2022-06-21  Deri James  <deri@chuzzlewit.myzen.co.uk>
+
+	[gropdf]: Add more search paths to the Foundry file.
+
+	* font/devpdf/Foundry.in: Use the directory specified with the
+	config flag --with-urw-fonts-dir to populate the default foundry
+	as well as the U foundry. Important to populate the download
+	file with font files to embed the fonts not part of the base
+	pdf fonts or if user wants all fonts embedded.
+
 2022-06-21  G. Branden Robinson <g.branden.robinson@gmail.com>
 
 	* tmac/an-ext.tmac (UR, MT): Fix problem with hyphenation
-	occuring before the end of the line when the line length was not
-	the device default (common for man pages at the terminal) and
-	hyperlinks were enabled.  The issue is that the new environment
-	we created inherits the default environment's line length (its
-	state at troff initialization, prior to macro package loading
-	and configuration).  This latent issue was exposed by post-groff
-	1.22.4 changes to enable the hyphenation of link text and add
-	the hyperlink feature.  Fix it by copying the line length at the
-	time the macro is called, which is necessarily after man(7)
-	sets up the line length, to the new environment.
+	occurring before the end of the line when the line length was
+	not the device default (common for man pages at the terminal)
+	and hyperlinks were enabled.  The issue is that the new
+	environment we created inherits the default environment's line
+	length (its state at troff initialization, prior to macro
+	package loading and configuration).  This latent issue was
+	exposed by post-groff 1.22.4 changes to enable the hyphenation
+	of link text and add the hyperlink feature.  Fix it by copying
+	the line length at the time the macro is called, which is
+	necessarily after man(7) sets up the line length, to the new
+	environment.
 
 2022-06-21  G. Branden Robinson <g.branden.robinson@gmail.com>
 
@@ -148,14 +680,14 @@
 	* src/roff/groff/groff.cpp (help): Revise usage message for
 	expressiveness and clarity.
 
-2022-06-10  Deri James  <deri@chuzzlewit.myzen.co.uk>
+2022-06-21  Deri James  <deri@chuzzlewit.myzen.co.uk>
 
 	[gropdf]: Correct display of pathnames used.
 
 	* font/devpdf/util/BuildFoundries.pl: Convert array to
 	string of pathnames.
 
-2022-06-10  Deri James  <deri@chuzzlewit.myzen.co.uk>
+2022-06-21  Deri James  <deri@chuzzlewit.myzen.co.uk>
 
 	[gropdf]: Fix to gropdf.
 
@@ -180,7 +712,7 @@
 
 2022-06-15  G. Branden Robinson <g.branden.robinson@gmail.com>
 
-	[docs]: Revise introduction of vertical spacing context to avoid
+	[docs]: Revise introduction of vertical spacing concept to avoid
 	render inference that the formatter will compute a vertical
 	spacing appropriate to the type size automagically--it will not.
 
@@ -308,8 +840,8 @@
 	* src/devices/grohtml/post-html.cpp
 	(html_printer::html_printer):
 	* src/devices/grops/ps.cpp (ps_printer::ps_printer):
-	* src/devices/grotty/tty.cpp (tty_printer::set_char,
-	tty_printer::add_char, tty_printer::end_page):
+	* src/devices/grotty/tty.cpp (tty_printer::set_char)
+	(tty_printer::add_char, tty_printer::end_page):
 	* src/roff/troff/env.cpp (line_length, title_length): Do it.
 
 2022-06-04  G. Branden Robinson <g.branden.robinson@gmail.com>
@@ -461,18 +993,18 @@
 
 2022-06-01  G. Branden Robinson <g.branden.robinson@gmail.com>
 
-	* m4/groff.m4 (GROFF_URW_FONTS_PATH,
-	GROFF_WITH_COMPATIBILITY_WRAPPERS, GROFF_APPDEFDIR_OPTION,
-	GROFF_UCHARDET): Recast help strings to more closely parallel
+	* m4/groff.m4 (GROFF_URW_FONTS_PATH)
+	(GROFF_WITH_COMPATIBILITY_WRAPPERS, GROFF_APPDEFDIR_OPTION)
+	(GROFF_UCHARDET): Recast help strings to more closely parallel
 	structure and style of Autoconf's own help strings.
 	(GROFF_WITH_COMPATIBILITY_WRAPPERS): Recast to tighten wording.
 
 2022-06-01  G. Branden Robinson <g.branden.robinson@gmail.com>
 
 	* configure.ac:
-	* m4/groff.m4 (GROFF_APPDEFDIR_OPTION, GROFF_APPDEFDIR_DEFAULT,
-	GROFF_APPDEFDIR_CHECK): Rename m4 macros and shell variable from
-	"*appres*" to "*appdef*.  Update interpolation sites.
+	* m4/groff.m4 (GROFF_APPDEFDIR_OPTION, GROFF_APPDEFDIR_DEFAULT)
+	(GROFF_APPDEFDIR_CHECK): Rename m4 macros and shell variable
+	from "*appres*" to "*appdef*.  Update interpolation sites.
 
 	* configure.ac:
 	* m4/groff.m4 (GROFF_APPDEFDIR_CHECK): Further rename this...
@@ -678,8 +1210,8 @@
 
 2022-05-24  G. Branden Robinson <g.branden.robinson@gmail.com>
 
-	* m4/groff.m4 (GROFF_PROG_YACC, GROFF_URW_FONTS_CHECK,
-	GROFF_WITH_COMPATIBILITY_WRAPPERS, GROFF_UCHARDET_NOTICE):
+	* m4/groff.m4 (GROFF_PROG_YACC, GROFF_URW_FONTS_CHECK)
+	(GROFF_WITH_COMPATIBILITY_WRAPPERS, GROFF_UCHARDET_NOTICE):
 	Improve shell code portability.  Per the GNU Autoconf manual,
 	"The -a, -o, '(', and ')' operands are not present in all
 	implementations, and have been marked obsolete by Posix 2008.
@@ -780,8 +1312,8 @@
 
 2022-05-21  G. Branden Robinson <g.branden.robinson@gmail.com>
 
-	* m4/groff.m4 (GROFF_PNMTOOLS_CAN_BE_QUIET,
-	GROFF_PNMTOPS_NOSETPAGE): Skip check if prerequisite not met.
+	* m4/groff.m4 (GROFF_PNMTOOLS_CAN_BE_QUIET)
+	(GROFF_PNMTOPS_NOSETPAGE): Skip check if prerequisite not met.
 
 2022-05-21  G. Branden Robinson <g.branden.robinson@gmail.com>
 
@@ -878,8 +1410,8 @@
 	* m4/groff.m4 (GROFF_PROG_M4): Define new macro to perform the
 	check and error out if the program is missing.
 	* configure.ac: Call the new macro.
-	* tmac/tmac.am (tmac/groff_man.7.man,
-	tmac/groff_man_style.7.man): Use the new implicitly AC_SUBST-ed
+	* tmac/tmac.am (tmac/groff_man.7.man)
+	(tmac/groff_man_style.7.man): Use the new implicitly AC_SUBST-ed
 	variable `M4` to run the program.
 
 2022-05-20  G. Branden Robinson <g.branden.robinson@gmail.com>
@@ -1222,8 +1754,8 @@
 
 	[build]: Fix problems exposed by high build parallelism.
 
-	* font/devpdf/devpdf.am (font/devpdf/util/BuildFoundries,
-	font/devpdf/DESC, font/devpdf/Foundry): Drop
+	* font/devpdf/devpdf.am (font/devpdf/util/BuildFoundries)
+	(font/devpdf/DESC, font/devpdf/Foundry): Drop
 	unnecessary removal of target prior to creating it.
 	(font/devpdf/Foundry): Add creation of destination build
 	directory as other targets do.
@@ -1244,8 +1776,8 @@
 
 	[build]: Tweak diagnostic messages in BuildFoundries script.
 
-	* font/devpdf/util/BuildFoundries.pl (LoadFoundry,
-	WriteDownload, CheckFoundry): Recast for specificity and
+	* font/devpdf/util/BuildFoundries.pl (LoadFoundry)
+	(WriteDownload, CheckFoundry): Recast for specificity and
 	consistent style.
 	(Die): Stop reporting line number with fatal errors; none of the
 	call sites are parsing input.
@@ -1260,7 +1792,7 @@
 	so that we report the line number as it was before the last
 	newline character seen.  This off-by-one error was partially
 	masked by...
-	* src/preproc/refer/refer.cpp (do_file): ...initialzation of
+	* src/preproc/refer/refer.cpp (do_file): ...initialization of
 	`current_lineno` to zero.  However, for syntax problems (as
 	opposed to the semantic problems of refer(1) command
 	processing), this could result in complaints about the line
@@ -1323,8 +1855,8 @@
 
 	* .gitignore: Drop old name of devpdf stamp file.
 	* doc/.gitignore: Drop now-unused "example.stamp" file.
-	* doc/doc.am (PROCESSEDDOCFILES_HTML, PROCESSEDDOCFILES_PDF,
-	PROCESSEDDOCFILES_TXT): Add new macros grouping targets by the
+	* doc/doc.am (PROCESSEDDOCFILES_HTML, PROCESSEDDOCFILES_PDF)
+	(PROCESSEDDOCFILES_TXT): Add new macros grouping targets by the
 	format/output driver used to produce them, to better organize
 	dependencies for their generation.
 	(PROCESSEDDOCFILES): Redefine as simply the expansions of the
@@ -1364,8 +1896,8 @@
 	(doc/pic.html, doc/webpage.html): Add explicit dependency on
 	required preprocessors.  Drop redundant and spurious
 	dependencies.
-	* font/devhtml/devhtml.am (MOSTLYCLEANFILES,
-	font/devhtml/stamp): Generate and remove stamp file to enable
+	* font/devhtml/devhtml.am (MOSTLYCLEANFILES)
+	(font/devhtml/stamp): Generate and remove stamp file to enable
 	reliable target dependencies for build-time generation of HTML
 	documents by groff.
 	* font/devpdf/devpdf.am (MOSTLYCLEANFILES, font/devpdf/stamp):
@@ -1375,8 +1907,8 @@
 	Generate and remove stamp file to enable reliable target
 	dependencies for build-time generation of PostScript documents
 	by groff.
-	* font/devutf8/devutf8.am (MOSTLYCLEANFILES,
-	font/devutf8/stamp): Generate and remove stamp file to enable
+	* font/devutf8/devutf8.am (MOSTLYCLEANFILES)
+	(font/devutf8/stamp): Generate and remove stamp file to enable
 	reliable target dependencies for build-time generation of
 	UTF-8-encoded text documents by groff.
 
@@ -2051,8 +2583,8 @@
 
 2022-03-29  G. Branden Robinson <g.branden.robinson@gmail.com>
 
-	* src/devices/grodvi/dvi.cpp (dvi_printer::set_color,
-	draw_dvi_printer::fill_next):
+	* src/devices/grodvi/dvi.cpp (dvi_printer::set_color)
+	(draw_dvi_printer::fill_next):
 	* src/devices/grops/ps.cpp (output::put_color):
 	* src/libs/libgroff/color.cpp (color::print_color): Construct
 	doubles instead of casting to them.
@@ -2275,8 +2807,8 @@
 
 2022-03-15  G. Branden Robinson <g.branden.robinson@gmail.com>
 
-	* src/devices/grodvi/dvi.cpp (dvi_printer::set_color,
-	draw_dvi_printer::fill_next):
+	* src/devices/grodvi/dvi.cpp (dvi_printer::set_color)
+	(draw_dvi_printer::fill_next):
 	* src/devices/grops/ps.cpp (output::put_color):
 	* src/libs/libgroff/color.cpp (color::print_color): Explicitly
 	cast `enum` divisors to `double`; quietens
@@ -2564,8 +3096,8 @@
 	messages this function helps produce.
 	(non_empty_name_warning): Use zero copula for economy.
 
-	* src/roff/troff/input.cpp (empty_name_warning, read_size,
-	token::get_char, check_missing_character):
+	* src/roff/troff/input.cpp (empty_name_warning, read_size)
+	(token::get_char, check_missing_character):
 	* src/roff/troff/number.cpp (start_number, parse_term): Recast
 	messages to more consistently use the form "expected X, got Y"
 	where feasible.
@@ -2818,12 +3350,12 @@
 	`doc-curr-size` register.  It is no longer needed since nothing
 	internal to the package now changes the type size.
 
-	* tmac/doc.tmac (Fl, doc-print-recursive, doc-print-prefixes,
-	doc-generic-macro, Ar, Cd, doc-do-func-decl, Fd, In, Nm, Pa, Tn,
-	doc-enclose-string, Ef, Bd, doc-save-global-vars,
-	doc-restore-global-vars, doc-diag-list, Xr, Dl, Vt, Ft, Fa,
-	doc-do-func, Fn, doc-do-func-args, Fo, Fc, %A, %B, %C, %D, %I,
-	%J, %N, %O, %P, %Q, %R, %T, %U, %V, doc-do-reference, Hf, An,
+	* tmac/doc.tmac (Fl, doc-print-recursive, doc-print-prefixes)
+	(doc-generic-macro, Ar, Cd, doc-do-func-decl, Fd, In, Nm, Pa)
+	(Tn, doc-enclose-string, Ef, Bd, doc-save-global-vars)
+	(doc-restore-global-vars, doc-diag-list, Xr, Dl, Vt, Ft, Fa)
+	(doc-do-func, Fn, doc-do-func-args, Fo, Fc, %A, %B, %C, %D, %I)
+	(%J, %N, %O, %P, %Q, %R, %T, %U, %V, doc-do-reference, Hf, An)
 	Lk):
 	* tmac/mdoc/doc-common (Sh, Ss, Rd):
 	* tmac/mdoc/doc-syms (Ux, Bx, At, Dx, Fx, Nx, Ox, Bsx, St, Lb):
@@ -3720,13 +4252,13 @@
 
 	[grohtml]: Update diagnostic messages.
 
-	* src/devices/grohtml/post-html.cpp (assert_state::add,
-	assert_state::compare, replace_negate_str,
-	assert_state::check_value_error, make_val): Make format of
+	* src/devices/grohtml/post-html.cpp (assert_state::add)
+	(assert_state::compare, replace_negate_str)
+	(assert_state::check_value_error, make_val): Make format of
 	internal assertion system messages shorter and more mutually
 	parallel.
-	(html_printer::set_char, html_printer::set_numbered_char,
-	html_printer::set_char_and_width): Parallelize diagnostic
+	(html_printer::set_char, html_printer::set_numbered_char)
+	(html_printer::set_char_and_width): Parallelize diagnostic
 	messages with libdriver; see yesterday's commit.
 	(main): Put information in argument to `assert()`; see commit
 	11b43053, 24 November.
@@ -4624,8 +5156,8 @@
 
 	[tbl]: Fix code style nits.
 
-	* src/preproc/tbl/main.cpp (process_input_file,
-	entry_format::debug_print, process_data, main): Replace
+	* src/preproc/tbl/main.cpp (process_input_file)
+	(entry_format::debug_print, process_data, main): Replace
 	`assert(0)` calls with communicative predicates.
 	(struct input_entry_format, input_entry_foramt::debug_print,
 	process_format): Boolify.  Demote and rename `int`s
@@ -4741,8 +5273,8 @@
 
 	[m4]: Clean up shell variable quoting and bracing.
 
-	* m4/groff.m4 (GROFF_PROG_YACC, GROFF_MAKEINFO,
-	GROFF_BROKEN_SPOOLER_FLAGS, GROFF_TARGET_PATH_SEPARATOR): Stop
+	* m4/groff.m4 (GROFF_PROG_YACC, GROFF_MAKEINFO)
+	(GROFF_BROKEN_SPOOLER_FLAGS, GROFF_TARGET_PATH_SEPARATOR): Stop
 	bracing shell variable expansions that don't require it; the
 	shell is not make(1).
 	(GROFF_PROG_YACC, GROFF_MAKEINFO): Double-quote shell variable
@@ -4768,14 +5300,14 @@
 	-z".  Stop quoting literal comparands that obviously have no
 	shell metacharacters in them.
 
-	* m4/groff.m4 (GROFF_PRINT, GROFF_PROG_YACC, GROFF_PERL,
-	GROFF_DOC_CHECK, GROFF_MAKEINFO, GROFF_TEXI2DVI,
-	GROFF_HTML_PROGRAMS, GROFF_PDFDOC_PROGRAMS, GROFF_PAGE,
-	GROFF_TMAC, GROFF_WITH_COMPATIBILITY_WRAPPERS, GROFF_X11,
-	GROFF_APPRESDIR_DEFAULT, GROFF_APPRESDIR_CHECK,
-	GROFF_HAVE_TEST_EF_OPTION, GROFF_BASH, GROFF_UCHARDET,
-	GROFF_UCHARDET_CHECK, GROFF_PDFTOOLS,
-	GROFF_USE_GROFF_ALLOCATOR): Do it.
+	* m4/groff.m4 (GROFF_PRINT, GROFF_PROG_YACC, GROFF_PERL)
+	(GROFF_DOC_CHECK, GROFF_MAKEINFO, GROFF_TEXI2DVI)
+	(GROFF_HTML_PROGRAMS, GROFF_PDFDOC_PROGRAMS, GROFF_PAGE)
+	(GROFF_TMAC, GROFF_WITH_COMPATIBILITY_WRAPPERS, GROFF_X11)
+	(GROFF_APPRESDIR_DEFAULT, GROFF_APPRESDIR_CHECK)
+	(GROFF_HAVE_TEST_EF_OPTION, GROFF_BASH, GROFF_UCHARDET)
+	(GROFF_UCHARDET_CHECK, GROFF_PDFTOOLS)
+	(GROFF_USE_GROFF_ALLOCATOR): Do it.
 
 2021-11-12  G. Branden Robinson <g.branden.robinson@gmail.com>
 
@@ -5601,8 +6133,8 @@
 
 2021-10-20  G. Branden Robinson <g.branden.robinson@gmail.com>
 
-	* tmac/tmac.am (tmac/groff_man.7.man,
-	tmac/groff_man_style.7.man): Be quieter by default; use
+	* tmac/tmac.am (tmac/groff_man.7.man)
+	(tmac/groff_man_style.7.man): Be quieter by default; use
 	$(AM_V_GEN) more consistently with the rest of the build.
 
 2021-10-19  G. Branden Robinson <g.branden.robinson@gmail.com>
@@ -6301,8 +6833,8 @@
 
 	[libgroff]: Tweak code style.
 
-	* src/libs/libgroff/font.cpp (trim_args, font::load,
-	font::load_desc): Compare pointer explicitly to null pointer
+	* src/libs/libgroff/font.cpp (trim_args, font::load)
+	(font::load_desc): Compare pointer explicitly to null pointer
 	literal `0` instead of using logical complementation.
 	(font::load, font::load_desc): Swap order of null pointer
 	equality comparisons when a typo or thinko could lead to lvalue
@@ -6312,13 +6844,13 @@
 
 	[libgroff]: Use idiomatic C++98 null pointer constant.
 
-	* src/libs/libgroff/font.cpp (text_file::error,
-	glyph_to_unicode, font::get_special_device_encoding,
-	font::load):
+	* src/libs/libgroff/font.cpp (text_file::error)
+	(glyph_to_unicode, font::get_special_device_encoding)
+	(font::load):
 	* src/libs/libgroff/fontfile.cpp (font::image_generator):
-	* src/libs/libgroff/nametoindex.cpp (class charinfo,
-	character_indexer::named_char_glyph,
-	character_indexer::numbered_char_glyph):
+	* src/libs/libgroff/nametoindex.cpp (class charinfo)
+	(character_indexer::named_char_glyph)
+	(character_indexer::numbered_char_glyph):
 	* src/libs/libgroff/string.cpp (string::clear):
 	* src/libs/libgroff/tmpfile.cpp (temp_init::temp_init):
 	* src/libs/libgroff/tmpname.cpp (gen_tempname): Use `0` literal
@@ -6327,9 +6859,9 @@
 	groff.  Also swap order of null pointer equality comparisons
 	when a typo or thinko could lead to lvalue assignment.
 
-	* src/roff/troff/input.cpp (input_stack::diversion_state,
-	input_stack::get_diversion_state, charinfo::contains,
-	glyph_to_name): Similar.
+	* src/roff/troff/input.cpp (input_stack::diversion_state)
+	(input_stack::get_diversion_state, charinfo::contains)
+	(glyph_to_name): Similar.
 
 2021-09-17  G. Branden Robinson <g.branden.robinson@gmail.com>
 
@@ -6521,9 +7053,9 @@
 
 2021-09-12  G. Branden Robinson <g.branden.robinson@gmail.com>
 
-	* src/libs/libbib/index.cpp (index_search_item::load,
-	index_search_item::get_invalidity_reason,
-	index_search_item::add_out_of_date_file): Clarify diagnostic
+	* src/libs/libbib/index.cpp (index_search_item::load)
+	(index_search_item::get_invalidity_reason)
+	(index_search_item::add_out_of_date_file): Clarify diagnostic
 	messages.  Make it more obvious when we're complaining of a
 	problem in an indexed bibliographic database file (rather than a
 	plain text one).  Dial down the amount of Unix jargon a little.
@@ -6626,8 +7158,8 @@
 	[troff]: Update exit status literals.
 
 	* src/roff/troff/div.cpp (top_level_diversion::begin_page):
-	* src/roff/troff/input.cpp (exit_troff, abort_request, do_error,
-	fatal_with_file_and_line): Use standard C library preprocessor
+	* src/roff/troff/input.cpp (exit_troff, abort_request, do_error)
+	(fatal_with_file_and_line): Use standard C library preprocessor
 	symbols `EXIT_SUCCESS` and `EXIT_FAILURE` instead of 0 and 1
 	literals, respectively.
 
@@ -6687,39 +7219,39 @@
 	prevailing style (familiar from Stroustrup) is not to use them.
 	(token::is_special): Simplify implementation.
 
-	* src/roff/troff/input.cpp (has_arg,
-	token::usable_as_delimiter): Update definitions of above member
+	* src/roff/troff/input.cpp (has_arg)
+	(token::usable_as_delimiter): Update definitions of above member
 	functions not defined in token.h.
 
-	* src/roff/troff/div.cpp (begin_page, space_request, need_space,
-	output_saved_vertical_space, flush_output):
-	* src/roff/troff/env.cpp (fill, no_fill, center,
-	right_justify, indent, temporary_indent, margin_character,
-	number_lines, do_break_request, hyphen_word):
-	* src/roff/troff/input.cpp (next_file, do_overstrike,
-	do_bracket, do_name_test, do_expr_test, do_zero_width,
-	token::skip, has_arg, skip_line, empty_name_warning,
-	non_empty_name_warning, do_get_long_name, process_input_stack,
-	flush_pending_lines, decode_args, read_request,
-	do_define_string, do_define_character, remove_character,
-	do_define_macro, length_request, get_delim_number, get_line_arg,
-	read_size, get_delim_name, do_register, do_width,
-	read_title_parts, encode_char, do_special, device_request,
-	output_request, skip_alternative, begin_alternative,
-	nop_request, do_if_request, do_source, pipe_source,
-	ps_bbox_request, tag, taga, do_terminal, do_translate,
-	hyphenation_code, hyphenation_patterns_file_code, define_class,
-	get_optional_char, check_missing_character, abort_request,
-	copy_file, transparent_file, do_macro_source,
-	charinfo_to_node_list, read_draw_node, read_color_draw_node):
-	* src/roff/troff/node.cpp (get_fontno,
-	remove_font_special_character, bold_font):
+	* src/roff/troff/div.cpp (begin_page, space_request, need_space)
+	(output_saved_vertical_space, flush_output):
+	* src/roff/troff/env.cpp (fill, no_fill, center)
+	(right_justify, indent, temporary_indent, margin_character)
+	(number_lines, do_break_request, hyphen_word):
+	* src/roff/troff/input.cpp (next_file, do_overstrike)
+	(do_bracket, do_name_test, do_expr_test, do_zero_width)
+	(token::skip, has_arg, skip_line, empty_name_warning)
+	(non_empty_name_warning, do_get_long_name, process_input_stack)
+	(flush_pending_lines, decode_args, read_request)
+	(do_define_string, do_define_character, remove_character)
+	(do_define_macro, length_request, get_delim_number)
+	(get_line_arg, read_size, get_delim_name, do_register, do_width)
+	(read_title_parts, encode_char, do_special, device_request)
+	(output_request, skip_alternative, begin_alternative)
+	(nop_request, do_if_request, do_source, pipe_source)
+	(ps_bbox_request, tag, taga, do_terminal, do_translate)
+	(hyphenation_code, hyphenation_patterns_file_code, define_class)
+	(get_optional_char, check_missing_character, abort_request)
+	(copy_file, transparent_file, do_macro_source)
+	(charinfo_to_node_list, read_draw_node, read_color_draw_node):
+	* src/roff/troff/node.cpp (get_fontno)
+	(remove_font_special_character, bold_font):
 	* src/roff/troff/number.cpp (start_number, parse_term):
 	* src/roff/troff/reg.cpp (define_number_reg, alter_format):
 	Update call sites to use new names.
 
-	* src/roff/troff/input.cpp (token::usable_as_delimiter,
-	read_draw_node): Return Boolean, not integer, literals.
+	* src/roff/troff/input.cpp (token::usable_as_delimiter)
+	(read_draw_node): Return Boolean, not integer, literals.
 
 2021-09-06  G. Branden Robinson <g.branden.robinson@gmail.com>
 
@@ -6892,96 +7424,97 @@
 	* src/include/lib.h (a_delete): Drop symbol definition.
 
 	* src/devices/grohtml/output.cpp (word::~word):
-	* src/devices/grohtml/post-html.cpp (char_block::char_block,
-	assert_state::~assert_state, assert_state::add,
-	assert_state::close, replace_negate_str):
-	* src/devices/grops/ps.cpp (ps_font::ps_font,
-	subencoding::subencoding, ps_printer::define_encoding,
-	ps_printer::encode_fonts):
-	* src/devices/grops/psrm.cpp (resource_manager::document_setup,
-	resource_manager::supply_resource):
-	* src/devices/grotty/tty.cpp (tty_printer::tty_color,
-	tty_printer::tty_printer, tty_printer::color_to_idx,
-	tty_printer::add_char):
-	* src/include/itable.h (ITABLE(T)::~ITABLE(T),
-	ITABLE(T)::define):
-	* src/include/ptable.h (PTABLE(T)::~PTABLE(T),
-	PTABLE(T)::define):
+	* src/devices/grohtml/post-html.cpp (char_block::char_block)
+	(assert_state::~assert_state, assert_state::add)
+	(assert_state::close, replace_negate_str):
+	* src/devices/grops/ps.cpp (ps_font::ps_font)
+	(subencoding::subencoding, ps_printer::define_encoding)
+	(ps_printer::encode_fonts):
+	* src/devices/grops/psrm.cpp (resource_manager::document_setup)
+	(resource_manager::supply_resource):
+	* src/devices/grotty/tty.cpp (tty_printer::tty_color)
+	(tty_printer::tty_printer, tty_printer::color_to_idx)
+	(tty_printer::add_char):
+	* src/include/itable.h (ITABLE(T)::~ITABLE(T))
+	(ITABLE(T)::define):
+	* src/include/ptable.h (PTABLE(T)::~PTABLE(T))
+	(PTABLE(T)::define):
 	* src/libs/libbib/index.cpp
 	(index_search_item::~index_search_item, make_index_search_item,
 	index_search_item_iterator::index_search_item_iterator,
 	index_search_item::get_tag, index_search_item::munge_filename,
 	index_search_item::search):
-	* src/libs/libbib/linear.cpp (bmpattern::~bmpattern,
-	file_buffer::file_buffer, file_buffer::load,
-	linear_searcher::linear_searcher,
-	linear_searcher::~linear_searcher):
+	* src/libs/libbib/linear.cpp (bmpattern::~bmpattern)
+	(file_buffer::file_buffer, file_buffer::load)
+	(linear_searcher::linear_searcher)
+	(linear_searcher::~linear_searcher):
 	* src/libs/libbib/search.cpp
-	(search_list_iterator::search_list_iterator,
-	search_item::search_item):
-	* src/libs/libdriver/input.cpp (IntArray::~IntArray,
-	IntArray::append, StringBuf::~StringBuf, StringBuf::append,
-	get_integer_arg, parse_x_command, do_file):
-	* src/libs/libdriver/printer.cpp (printer::printer,
-	printer::load_font, text_file::~text_file, text_file::next,
-	font::~font, font_widths_cache::~font_widths_cache,
-	font:alloc_ch_index, font::extend_ch, font::compact,
-	font::load_desc):
+	(search_list_iterator::search_list_iterator)
+	(search_item::search_item):
+	* src/libs/libdriver/input.cpp (IntArray::~IntArray)
+	(IntArray::append, StringBuf::~StringBuf, StringBuf::append)
+	(get_integer_arg, parse_x_command, do_file):
+	* src/libs/libdriver/printer.cpp (printer::printer)
+	(printer::load_font, text_file::~text_file, text_file::next)
+	(font::~font, font_widths_cache::~font_widths_cache)
+	(font:alloc_ch_index, font::extend_ch, font::compact)
+	(font::load_desc):
 	* src/libs/libgroff/fontfile.cpp (font::open_file):
-	* src/libs/libgroff/relocate.cpp (searchpath, searchpathext,
-	set_current_prefix):
-	* src/libs/libgroff/searchpath.cpp (search_path::search_path,
-	search_path::command_line_dir, search_path::open_file,
-	search_path::open_file_cautious):
-	* src/libs/libgroff/string.cpp (sfree, srealloc,
-	string::remove_spaces):
+	* src/libs/libgroff/relocate.cpp (searchpath, searchpathext)
+	(set_current_prefix):
+	* src/libs/libgroff/searchpath.cpp (search_path::search_path)
+	(search_path::command_line_dir, search_path::open_file)
+	(search_path::open_file_cautious):
+	* src/libs/libgroff/string.cpp (sfree, srealloc)
+	(string::remove_spaces):
 	* src/libs/libgroff/symbol.cpp (symbol::symbol, concat):
-	* src/libs/libgroff/tmpfile.cpp (temp_init::temp_init,
-	xtmpfile_list_init::~xtmpfile_list_init, xtmpfile):
-	* src/preproc/eqn/box.cpp (set_gfont, set_grfont, set_gbfont,
-	box_list::append, box_list::~box_list):
-	* src/preproc/eqn/delim.cpp (make_delim_box,
-	delim_box::~delim_box):
+	* src/libs/libgroff/tmpfile.cpp (temp_init::temp_init)
+	(xtmpfile_list_init::~xtmpfile_list_init, xtmpfile):
+	* src/preproc/eqn/box.cpp (set_gfont, set_grfont, set_gbfont)
+	(box_list::append, box_list::~box_list):
+	* src/preproc/eqn/delim.cpp (make_delim_box)
+	(delim_box::~delim_box):
 	* src/preproc/eqn/eqn.ypp (number):
-	* src/preproc/eqn/lex.ypp (file_input::~file_input,
-	argument_macro_input::~argument_macro_input):
-	* src/preproc/eqn/pile.ypp (matrix_box::~matrix_box,
-	matrix_box::append):
+	* src/preproc/eqn/lex.ypp (file_input::~file_input)
+	(argument_macro_input::~argument_macro_input):
+	* src/preproc/eqn/pile.ypp (matrix_box::~matrix_box)
+	(matrix_box::append):
 	* src/preproc/eqn/special.cpp (special_box::~special_box):
 	* src/preproc/eqn/text.ypp (set_char_type):
 	* src/preproc/html/pre-html.cpp (get_line, scanArguments):
-	* src/preproc/pic/object.cpp (output::~output,
-	output::set_args, text_item::~text_item,
-	object_spec::~object_spec, command_object::~command_object,
-	line_object::~line_object):
-	* src/preproc/pic/pic.ypp (placeless_element, reset_variables,
-	print_args, text_expr, object_spec, text, sprintf_args, path):
-	* src/preproc/refer/command.cpp (input_item::~input_item,
-	input_item::peek_char):
+	* src/preproc/pic/object.cpp (output::~output)
+	(output::set_args, text_item::~text_item)
+	(object_spec::~object_spec, command_object::~command_object)
+	(line_object::~line_object):
+	* src/preproc/pic/pic.ypp (placeless_element, reset_variables)
+	(print_args, text_expr, object_spec, text, sprintf_args, path):
+	* src/preproc/refer/command.cpp (input_item::~input_item)
+	(input_item::peek_char):
 	* src/preproc/refer/label.ypp (lookup_label):
 	* src/preproc/refer/refer.cpp (store_citation, store_reference):
 	* src/preproc/tbl/main.cpp (format::add_rows, format::~format):
-	* src/preproc/tbl/table.cpp (block_entry::~block_entry,
-	table::~table, table::allocate):
-	* src/roff/groff/groff.cpp (possible_command::~possible_command,
-	possible_command::clear_name):
+	* src/preproc/tbl/table.cpp (block_entry::~block_entry)
+	(table::~table, table::allocate):
+	* src/roff/groff/groff.cpp (possible_command::~possible_command)
+	(possible_command::clear_name):
 	* src/roff/troff/column.cpp
-	(justification_spec::~justification_spec,
-	justification_spec::append):
+	((justification_spec::~justification_spec)
+	(justification_spec::append):
 	* src/roff/troff/dictionary.cpp (dictionary::lookup):
-	* src/roff/troff/env.cpp (override_sizes, tab_stops::to_string,
-	hyphen_word, hyphen_trie::insert_hyphenation):
-	* src/roff/troff/input.cpp (read_long_escape_name, token::next,
-	do_get_long_name, temp_iterator::~temp_iterator, get_delim_name,
-	pipe_source, read_string, pipe_output, system_request,
-	open_mac_file, do_macro_source, do_register_assignment,
-	do_string_assignment, read_draw_node, copy_mode_error):
-	* src/roff/troff/node.cpp (troff_output_file::set_font,
-	troff_output_file::~troff_output_file, draw_node::is_tag,
-	grow_font_table, font_family::~font_family,
-	font_family::make_definite):
-	* src/utils/hpftodit/hpftodit.cpp (name_list::~name_list,
-	read_map):
+	* src/roff/troff/env.cpp (override_sizes, tab_stops::to_string)
+	(hyphen_word, hyphen_trie::insert_hyphenation):
+	* src/roff/troff/input.cpp (read_long_escape_name, token::next)
+	(do_get_long_name, temp_iterator::~temp_iterator)
+	(get_delim_name, pipe_source, read_string, pipe_output)
+	(system_request, open_mac_file, do_macro_source)
+	(do_register_assignment, do_string_assignment, read_draw_node)
+	(copy_mode_error):
+	* src/roff/troff/node.cpp (troff_output_file::set_font)
+	(troff_output_file::~troff_output_file, draw_node::is_tag)
+	(grow_font_table, font_family::~font_family)
+	(font_family::make_definite):
+	* src/utils/hpftodit/hpftodit.cpp (name_list::~name_list)
+	(read_map):
 	* src/utils/indxbib/indxbib.cpp (main, get_cwd):
 	* src/utils/tfmtodit/tfmtodit.cpp (tfm::~tfm, tfm::load): Port
 	uses of `a_delete` to `delete[]`.
@@ -6995,9 +7528,9 @@
 	* src/include/lib.h (ad_delete): Drop symbol definition.
 
 	* src/preproc/pic/object.cpp (graphic_object::print_text):
-	* src/preproc/refer/ref.cpp (reference::reference,
-	reference::merge, reference::insert_field,
-	reference::delete_field):
+	* src/preproc/refer/ref.cpp (reference::reference)
+	(reference::merge, reference::insert_field)
+	(reference::delete_field):
 	* src/preproc/tbl/main.cpp (format::add_rows): Port uses of
 	`ad_delete` to `delete[]`.
 
@@ -7596,11 +8129,11 @@
 	requested data.
 
 	* src/roff/troff/reg.h (reg, variable_reg):
-	* src/roff/troff/div.cpp (page_offset_reg, page_length_reg,
-	vertical_position_reg, high_water_mark_reg,
-	distance_to_next_trap_reg, page_number_reg, no_space_mode_reg):
-	* src/roff/troff/env.cpp (int_env_reg, vunits_env_reg,
-	hunits_env_reg, horizontal_place_reg):
+	* src/roff/troff/div.cpp (page_offset_reg, page_length_reg)
+	(vertical_position_reg, high_water_mark_reg)
+	(distance_to_next_trap_reg, page_number_reg, no_space_mode_reg):
+	* src/roff/troff/env.cpp (int_env_reg, vunits_env_reg)
+	(hunits_env_reg, horizontal_place_reg):
 	* src/roff/troff/input.cpp (writable_lineno_reg):
 	* src/roff/troff/reg.cpp (reg, number_reg, variable_reg): Update
 	class and member function definitions to reflect the new type.
@@ -7769,8 +8302,8 @@
 
 2021-07-26  G. Branden Robinson <g.branden.robinson@gmail.com>
 
-	* src/utils/hpftodit/hpftodit.cpp (hp_msl_to_ucode_name,
-	unicode_to_ucode_name): Hush "format nonliteral" compiler
+	* src/utils/hpftodit/hpftodit.cpp (hp_msl_to_ucode_name)
+	(unicode_to_ucode_name): Hush "format nonliteral" compiler
 	warnings by using a preprocessor-defined string literal as an
 	sprintf() format string instead of a C++ variable that just
 	compared identically to the same thing.
@@ -8142,27 +8675,27 @@
 
 	* src/roff/troff/token.h (get_name, get_long_name): Change type
 	of parameter from `int` to `bool` and default from 0 to `false`.
-	* src/roff/troff/input.cpp (do_get_long_name,
-	empty_name_warning, get_name, get_long_name): Change type of
+	* src/roff/troff/input.cpp (do_get_long_name)
+	(empty_name_warning, get_name, get_long_name): Change type of
 	parameter from `int` to `bool` in declarations and definitions.
 	* src/roff/troff/column.cpp (column_justify):
 	* src/roff/troff/div.cpp (diversion_trap):
-	* src/roff/troff/env.cpp (environment_switch, environment_copy,
-	do_input_trap, set_hyphenation_language,
-	do_hyphenation_patterns_file):
-	* src/roff/troff/input.cpp (define_color, composite_request,
-	do_define_string, do_define_macro, rename_macro, alias_macro,
-	chop_macro, do_string_case_transform, substring_request,
-	length_request, asciify_macro, unformat_macro, do_register,
-	device_macro_request, do_if_request, do_source, ps_bbox_request,
-	do_open, close_request, do_write_request, write_macro_request,
-	define_class, copy_file, vjustify, transparent_file,
-	do_macro_source):
-	* src/roff/troff/node.cpp (font_translate, font_position, style,
-	get_fontno):
-	* src/roff/troff/reg.cpp (define_number_reg, inline_define_reg,
-	alter_format, alias_reg, rename_reg): Update call sites.  Add
-	comment indicating meaning of parameter.
+	* src/roff/troff/env.cpp (environment_switch, environment_copy)
+	(do_input_trap, set_hyphenation_language)
+	(do_hyphenation_patterns_file):
+	* src/roff/troff/input.cpp (define_color, composite_request)
+	(do_define_string, do_define_macro, rename_macro, alias_macro)
+	(chop_macro, do_string_case_transform, substring_request)
+	(length_request, asciify_macro, unformat_macro, do_register)
+	(device_macro_request, do_if_request, do_source)
+	(ps_bbox_request, do_open, close_request, do_write_request)
+	(write_macro_request, define_class, copy_file, vjustify)
+	(transparent_file, do_macro_source):
+	* src/roff/troff/node.cpp (font_translate, font_position, style)
+	(get_fontno):
+	* src/roff/troff/reg.cpp (define_number_reg, inline_define_reg)
+	(alter_format, alias_reg, rename_reg): Update call sites.  Add
+	(comment indicating meaning of parameter.
 
 	Do similarly for token::delimiter() member function.
 
@@ -8172,8 +8705,8 @@
 	to `false`.
 	* src/roff/troff/input.cpp (token::delimiter): Change type of
 	parameter from `int` to `bool` in definition.
-	* src/roff/troff/input.cpp (do_expr_test, get_delim_number,
-	get_line_arg, read_size, do_register, read_draw_node):
+	* src/roff/troff/input.cpp (do_expr_test, get_delim_number)
+	(get_line_arg, read_size, do_register, read_draw_node):
 	* src/roff/troff/reg.cpp (inline_define_reg): Update call sites.
 	Add comment indicating meaning of parameter.
 
@@ -8848,11 +9381,11 @@
 	* src/roff/troff/input.cpp (token::get_char): Update definition.
 	* src/roff/troff/env.cpp (hyphen_word):
 	* src/roff/troff/node.cpp (remove_font_special_character):
-	* src/roff/troff/input.cpp (do_overstrike, do_bracket, next,
-	do_define_character, remove_character, get_line_arg,
-	encode_char, do_if_request, do_translate, char_flags,
-	hyphenation_code, define_class): Update call sites.  Add comment
-	indicating meaning of parameter.
+	* src/roff/troff/input.cpp (do_overstrike, do_bracket, next)
+	(do_define_character, remove_character, get_line_arg)
+	(encode_char, do_if_request, do_translate, char_flags)
+	(hyphenation_code, define_class): Update call sites.  Add
+	comment indicating meaning of parameter.
 
 2021-06-25  G. Branden Robinson <g.branden.robinson@gmail.com>
 
@@ -9208,8 +9741,8 @@
 	files from distribution.  They are not needed by any live code
 	in the tree; possibly only groffer ever used them.
 
-	* src/roff/groff/groff.am (GROFF_OPTS_OUTPUT, groffoptsdir,
-	groffopts_DATA): Delete variables.
+	* src/roff/groff/groff.am (GROFF_OPTS_OUTPUT, groffoptsdir)
+	(groffopts_DATA): Delete variables.
 	(MOSTLYCLEANFILES): Stop adding to target.
 	(groff_opts.tmp, groff_opts_no_arg.txt,
 	groff_opts_with_arg.txt): Delete targets.
@@ -9257,9 +9790,9 @@
 
 2021-06-03  G. Branden Robinson <g.branden.robinson@gmail.com>
 
-	* src/roff/troff/input.cpp (else_request, while_request,
-	pipe_source, open_request, opena_request, pipe_output,
-	system_request): Update diagnostic messages to not presume the
+	* src/roff/troff/input.cpp (else_request, while_request)
+	(pipe_source, open_request, opena_request, pipe_output)
+	(system_request): Update diagnostic messages to not presume the
 	identities of the control or escape characters.
 
 2021-06-01  G. Branden Robinson <g.branden.robinson@gmail.com>
@@ -10139,8 +10672,8 @@
 
 2021-04-19  G. Branden Robinson <g.branden.robinson@gmail.com>
 
-	* src/roff/troff/input.cpp (source, source_quietly,
-	macro_source, macro_source_quietly): Use idiomatic Boolean
+	* src/roff/troff/input.cpp (source, source_quietly)
+	(macro_source, macro_source_quietly): Use idiomatic Boolean
 	literals.
 
 2021-04-17  G. Branden Robinson <g.branden.robinson@gmail.com>
@@ -10420,8 +10953,8 @@
 
 2021-03-02  G. Branden Robinson <g.branden.robinson@gmail.com>
 
-	* doc/groff.texi (Identifiers, Strings, Writing Macros,
-	Diversions): Improve cross-linkage of documentation regarding
+	* doc/groff.texi (Identifiers, Strings, Writing Macros)
+	(Diversions): Improve cross-linkage of documentation regarding
 	shared name space of macros, strings, diversions, and boxes.
 
 	Fixes <https://savannah.gnu.org/bugs/?58995>.
@@ -10454,8 +10987,8 @@
 	tbl(1) table rows to spontaneously become numbered.  Use new
 	\n[.nm] register to determine whether line numbering is enabled.
 
-	* src/preproc/tbl/table.cpp (table::init_output, table::do_row,
-	table::do_bottom): Predicate all conditions on \n[ln]
+	* src/preproc/tbl/table.cpp (table::init_output, table::do_row)
+	(table::do_bottom): Predicate all conditions on \n[ln]
 	additionally on \n[.nm].
 
 	Thanks to Olle Lögdahl for the report.  Problem appears to date
@@ -10512,8 +11045,8 @@
 
 2021-02-14  G. Branden Robinson <g.branden.robinson@gmail.com>
 
-	* src/libs/libgroff/searchpath.cpp (search_path::open_file,
-	search_path::open_file_cautious): Save errno before calling
+	* src/libs/libgroff/searchpath.cpp (search_path::open_file)
+	(search_path::open_file_cautious): Save errno before calling
 	free() and restore it afterwards.  A future version of POSIX
 	will require that free() not change errno if it succeeds[1];
 	some C library implementations, including recent versions of
@@ -11063,8 +11596,8 @@
 
 2020-12-01  G. Branden Robinson <g.branden.robinson@gmail.com>
 
-	* src/utils/xtotroff/xtotroff.c (CanonicalizeFontName,
-	FontNamesAmbiguous, MapFont, main): Format diagnostic messages
+	* src/utils/xtotroff/xtotroff.c (CanonicalizeFontName)
+	(FontNamesAmbiguous, MapFont, main): Format diagnostic messages
 	more consistently with GNU Coding Standards.  Prefix with name
 	of complaining command.  Put argument literals in quotation
 	marks.  Put each messge on one line only.
@@ -11289,11 +11822,11 @@
 
 2020-10-31  G. Branden Robinson <g.branden.robinson@gmail.com>
 
-	* src/roff/troff/input.cpp (do_overstrike, do_bracket,
-	do_name_test, do_expr_test, do_zero_width, do_width, do_special,
-	do_if_request, read_color_draw_node): Improve diagnostic
-	messages for missing closing delimiters by describing the
-	incomplete structure and the problem token.
+	* src/roff/troff/input.cpp (do_overstrike, do_bracket)
+	(do_name_test, do_expr_test, do_zero_width, do_width)
+	(do_special, do_if_request, read_color_draw_node): Improve
+	diagnostic messages for missing closing delimiters by describing
+	the incomplete structure and the problem token.
 	(read_rgb, read_cmy, read_cmyk, read_gray): Improve English
 	syntax of diagnostic message when color definition missing.
 
@@ -11411,14 +11944,15 @@
 
 2020-10-22  G. Branden Robinson <g.branden.robinson@gmail.com>
 
-	Use only malloc() and free() to manage memory of paths opened by
-	the parser instead of mixing in C++ new/delete management under
-	some runtime-dependent circumstances.
+	Use only `malloc()` and `free()` to manage memory of paths
+	opened by the parser instead of mixing in C++ new/delete
+	management under some runtime-dependent circumstances.
 
-	* src/libs/libgroff/relocate.cpp (relocatep): Use malloc(), not
-	new.
-	* src/roff/troff/input.cpp (process_macro_file,
-	process_startup_file, macro_source): Use free(), not (a_)delete.
+	* src/libs/libgroff/relocate.cpp (relocatep): Use `malloc()`,
+	not new.
+	* src/roff/troff/input.cpp (process_macro_file)
+	(process_startup_file, macro_source): Use `free()`, not
+	`{a_,}delete()`.
 
 	Thanks to an anonymous contributor for the report and patch.
 

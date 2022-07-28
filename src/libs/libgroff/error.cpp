@@ -127,6 +127,12 @@ void fatal(const char *format,
   do_error(FATAL, format, arg1, arg2, arg3);
 }
 
+// Use the functions below when it's more costly to save and restore the
+// globals current_filename, current_source_filename, and current_lineno
+// than to specify additional arguments.  For instance, a function that
+// would need to temporarily change their values and has multiple return
+// paths might prefer these to the simpler variants above.
+
 void debug_with_file_and_line(const char *filename,
 			      int lineno,
 			      const char *format,

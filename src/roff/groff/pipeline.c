@@ -75,8 +75,6 @@ extern char *strerror();
 
 #include "pipeline.h"
 
-#define error c_error
-
 /* Prototype */
 int run_pipeline(int, char ***, int);
 
@@ -84,8 +82,10 @@ int run_pipeline(int, char ***, int);
 extern "C" {
 #endif
 
-extern void error(const char *, const char *, const char *, const char *);
-extern void c_fatal(const char *, const char *, const char *, const char *);
+extern void c_error(const char *, const char *, const char *,
+		    const char *);
+extern void c_fatal(const char *, const char *, const char *,
+		    const char *);
 extern const char *i_to_a(int);		/* from libgroff */
 
 #ifdef __cplusplus
@@ -305,9 +305,8 @@ int run_pipeline(int ncommands, char ***commands, int no_pipe)
       }
     }
     if ((pid = spawnvp(_P_NOWAIT, commands[i][0], commands[i])) < 0) {
-      error("couldn't exec %1: %2",
-	    commands[i][0], strerror(errno), (char *)0);
-      fflush(stderr);			/* just in case error() doesn't */
+      c_error("couldn't exec %1: %2",
+	      commands[i][0], strerror(errno), (char *)0);
       _exit(EXEC_FAILED_EXIT_STATUS);
     }
     pids[i] = pid;
@@ -415,13 +414,12 @@ int run_pipeline(int ncommands, char ***commands, int no_pipe)
     exit_status = spawnvp(P_WAIT, commands[i][0], commands[i]);
     signal(SIGINT, prev_handler);
     if (child_interrupted) {
-      error("%1: Interrupted", commands[i][0], (char *)0, (char *)0);
+      c_error("%1: Interrupted", commands[i][0], (char *)0, (char *)0);
       ret |= 2;
     }
     else if (exit_status < 0) {
-      error("couldn't exec %1: %2",
-	    commands[i][0], strerror(errno), (char *)0);
-      fflush(stderr);			/* just in case error() doesn't */
+      c_error("couldn't exec %1: %2",
+	      commands[i][0], strerror(errno), (char *)0);
       ret |= 4;
     }
     if (exit_status != 0)
@@ -485,9 +483,8 @@ int run_pipeline(int ncommands, char ***commands, int no_pipe)
 	  sys_fatal("close");
       }
       execvp(commands[i][0], commands[i]);
-      error("couldn't exec %1: %2",
-	    commands[i][0], strerror(errno), (char *)0);
-      fflush(stderr);			/* just in case error() doesn't */
+      c_error("couldn't exec %1: %2",
+	      commands[i][0], strerror(errno), (char *)0);
       _exit(EXEC_FAILED_EXIT_STATUS);
     }
     /* in the parent */
@@ -535,10 +532,10 @@ int run_pipeline(int ncommands, char ***commands, int no_pipe)
 	  else
 #endif /* SIGPIPE */
 	  {
-	    error("%1: %2%3",
-		  commands[i][0],
-		  xstrsignal(sig),
-		  WCOREDUMP(status) ? " (core dumped)" : "");
+	    c_error("%1: %2%3",
+		    commands[i][0],
+		    xstrsignal(sig),
+		    WCOREDUMP(status) ? " (core dumped)" : "");
 	    ret |= 2;
 	  }
 	}
@@ -551,7 +548,8 @@ int run_pipeline(int ncommands, char ***commands, int no_pipe)
 	    ret |= 1;
 	}
 	else
-	  error("unexpected status %1",	i_to_a(status), (char *)0, (char *)0);
+	  c_error("unexpected status %1", i_to_a(status), (char *)0,
+		  (char *)0);
 	break;
       }
   }
@@ -583,3 +581,9 @@ static const char *xstrsignal(int n)
   sprintf(buf, "Signal %d", n);
   return buf;
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

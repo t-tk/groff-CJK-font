@@ -170,10 +170,10 @@ The highest level of organization of a man page is determined by this
 group of macros.
 .
 .B .TH
-(title heading) identifies the document as a man page and defines
-information enabling its indexing by
+(title heading)
+identifies the document as a man page and defines information enabling
 .MR mandb 8
-or a similar tool.
+or a similar tool to index it.
 .
 Section headings
 .RB ( .SH ),
@@ -300,11 +300,14 @@ Set
 .I heading-text
 as a section heading.
 .
-Its argument,
-or the text on the next input line if
-.B .SH
-is given none,
-is set with no indentation,
+If no argument is given,
+a one-line input trap is planted;
+text on the next line
+.\", which can be formatted with a macro, \" true but discouraged
+becomes
+.I heading-text.
+.
+This text is set at the left margin,
 in bold
 (or the font specified by the string
 .BR HF )
@@ -319,11 +322,9 @@ use of an italic style in
 .I heading-text
 is mapped to the bold-italic style if available in the font family.
 .
-Additionally,
-the left margin and indentation affecting subsequent text are reset to
-their default values.
+The inset level is reset to 1 and paragraph indentation to the default.
 .
-Text on input lines after
+Text after
 .I heading-text
 is set as an ordinary paragraph
 .RB ( .P ).
@@ -370,11 +371,14 @@ ordinary paragraph
 See subsection \(lqHorizontal and vertical spacing\(rq below for the
 indentation amount.
 .
-Its argument,
-or the text on the next input line if
-.B .SS
-is given none,
-is set in bold
+If no argument is given,
+a one-line input trap is planted;
+text on the next line
+.\", which can be formatted with a macro, \" true but discouraged
+becomes
+.I subheading-text.
+.
+This text is set in bold
 (or the font specified by the string
 .BR HF ).
 .
@@ -382,14 +386,12 @@ If the heading font
 .B \[rs]*[HF]
 is bold,
 use of an italic style in
-.I heading-text
+.I subheading-text
 is mapped to the bold-italic style if available in the font family.
 .
-Additionally,
-the left margin and indentation affecting subsequent text are reset to
-their default values.
+The inset level is reset to 1 and paragraph indentation to the default.
 .
-Text on input lines after
+Text after
 .I subheading-text
 is set as an ordinary paragraph
 .RB ( .P ).
@@ -477,9 +479,7 @@ move the left margin one level back.
 .
 An ordinary paragraph
 .RB ( .P )
-is set without a first-line indentation at the current left margin,
-which by default is indented from the leftmost position of the output
-device.
+is set without a first-line indentation at the current left margin.
 .
 In man pages and other technical literature,
 definition lists are frequently encountered;
@@ -542,10 +542,11 @@ is not.
 Set a paragraph with a leading tag,
 and the remainder of the paragraph indented.
 .
-The input line following this macro,
-known as the
-.I tag,
-is printed at the current left margin.
+A one-line input trap is planted;
+text on the next line,
+which can be formatted with a macro,
+becomes the tag,
+which is placed at the current left margin.
 .
 Subsequent text is indented by
 .I indentation,
@@ -572,8 +573,7 @@ Set an additional tag for a paragraph tagged with
 .
 The pending output line is broken.
 .
-The tag on the input line following this macro and subsequent lines are
-handled as with
+A one-line input trap is planted as with
 .BR .TP .
 .
 .
@@ -645,7 +645,7 @@ in section \(lqFiles\(rq below.
 .BI .SY " command"
 Begin synopsis.
 .
-A new paragraph is begun at the left margin
+A new paragraph begins at the left margin
 unless
 .B .SY
 has already been called without a corresponding
@@ -898,8 +898,11 @@ Set
 .I text
 in bold.
 .
-If the macro is given no arguments,
-the text of the next input line is set in bold.
+If no argument is given,
+a one-line input trap is planted;
+text on the next line,
+which can be further formatted with a macro,
+is set in bold.
 .
 .
 .TP
@@ -907,10 +910,13 @@ the text of the next input line is set in bold.
 .IR text ]
 Set
 .I text
-in italics.
+in an italic or oblique face.
 .
-If the macro is given no arguments,
-the text of the next input line is set in italics.
+If no argument is given,
+a one-line input trap is planted;
+text on the next line,
+which can be further formatted with a macro,
+is set in an italic or oblique face.
 .
 .
 .TP
@@ -920,8 +926,11 @@ Set
 .I text
 one point smaller than the default type size on typesetter devices.
 .
-If the macro is given no arguments,
-the text of the next input line is set smaller.
+If no argument is given,
+a one-line input trap is planted;
+text on the next line,
+which can be further formatted with a macro,
+is set smaller.
 .
 .
 .TP
@@ -933,8 +942,11 @@ in bold and
 (on typesetter devices)
 one point smaller than the default type size.
 .
-If the macro is given no arguments,
-the text of the next input line is set smaller and in bold.
+If no argument is given,
+a one-line input trap is planted;
+text on the next line,
+which can be further formatted with a macro,
+is set smaller and in bold.
 .
 .
 .P
@@ -1075,10 +1087,10 @@ footers
 .BR .TH ),
 and section headings
 .RB ( .SH )
-are set with no indentation
+are set at the left margin,
 and subsection headings
 .RB ( .SS )
-are indented 3n
+indented from it by 3n
 (but see the
 .B \-rSN
 option).
@@ -1731,11 +1743,10 @@ and 6.5i for typesetter devices.
 Set the line length for titles.
 .
 By default,
-the line length
+it is set to the line length
 (see
 .B \-rLL
-above)
-is used for the title length.
+above).
 .
 .
 .TP

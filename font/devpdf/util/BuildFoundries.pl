@@ -28,8 +28,10 @@ my $pathsep='@PATH_SEPARATOR@';
 
 my $check=0;
 my $dirURW='';
+my $beStrict=0;
 
-GetOptions("check" => \$check, "dirURW=s" => \$dirURW);
+GetOptions("check" => \$check, "dirURW=s" => \$dirURW,
+	   "strict" => \$beStrict);
 
 (my $progname = $0) =~s @.*/@@;
 my $where=shift||'';
@@ -93,7 +95,8 @@ sub LoadFoundry
 	    push(@{$foundrypath},(split(':',$r[2])),@{$devps});
 	    foreach my $j (0..$#{$foundrypath})
 	    {
-		if ($foundrypath->[$j]=~m'\s*\(gs\)')
+		if (defined($foundrypath->[$j])
+		    && $foundrypath->[$j]=~m'\s*\(gs\)')
 		{
 		    splice(@{$foundrypath},$j,1,@{$GSpath});
 		}
@@ -113,23 +116,28 @@ sub LoadFoundry
 
 	    if ($r[2] eq '')
 	    {
-		# Don't run afmtodit, just copy the grops font file
-
+		# Don't run afmtodit; just copy the groff font
+		# description file for grops.
 		my $gotf=1;
 		my $gropsfnt=LocateFile($devps,$r[0],0);
-
 		if ($gropsfnt ne '' and -r "$gropsfnt")
 		{
 		    my $psfont=UseGropsVersion($gropsfnt);
-		    if (!PutDownload($psfont,LocatePF($foundrypath,$r[5]),uc($r[1])))
+		    # To be embeddable in PDF, the font file name itself
+		    # needs to be located and written to "download".
+		    if (!PutDownload($psfont,
+				     LocatePF($foundrypath,$r[5]),
+					      uc($r[1])))
 		    {
 			if (uc($r[1]) ne 'Y')
 			{
 			    $gotf=0;
-			    my $fns=join(',',split('!',$r[5]));
-			    Warn("Unable to locate font(s) $fns");
+			    my $fns=join(', ',split('!',$r[5]));
+			    Warn("groff font '$gfont' will not be"
+				 . " available for PDF output; unable"
+				 . " to locate font file(s): $fns");
 			    $notFoundFont=1;
-			    unlink $gfont;	# Unable to find the postscript file for the font just created by afmtodit
+			    unlink $gfont;
 			}
 		    }
 		    Notice("Copied grops font $gfont...") if $gotf;
@@ -142,8 +150,15 @@ sub LoadFoundry
 	    }
 	    else
 	    {
-		# We need to run afmtodit to create this groff font
-		my $psfont=RunAfmtodit($gfont,LocateAF($foundrypath,$r[5]),$r[2],$r[3],$r[4]);
+		# Use afmtodit to create a groff font description file.
+		my $afmfile=LocateAF($foundrypath,$r[5]);
+		if (!$afmfile) {
+		    my $sub=\&Warn;
+		    $sub=\&Die if ($beStrict);
+		    &$sub("cannot locate AFM file for font '$gfont'");
+		    next;
+		}
+		my $psfont=RunAfmtodit($gfont,$afmfile,$r[2],$r[3],$r[4]);
 
 		if ($psfont)
 		{
@@ -297,11 +312,13 @@ sub LocateFile
                 return("$p/$file");
             }
 
-            if ($tryafm and $p=~s'type1/'afm/'i)
+            my $ap=$p;
+
+            if ($tryafm and $ap=~s'type1/'afm/'i)
             {
-                if (-r "$p/$file")
+                if (-r "$ap/$file")
                 {
-                    return("$p/$file");
+                    return("$ap/$file");
                 }
             }
         }

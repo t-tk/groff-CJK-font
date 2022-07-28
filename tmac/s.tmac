@@ -55,17 +55,36 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .	@diag warning: \\$*
 ..
 .
+.de @nop
+..
+.
 .de @not-implemented
 .@error sorry, .\\$0 not implemented
 .als \\$0 @nop
 ..
 .
-.\" AT&T technical memorandum/Berkeley thesis mode
-.als TM @not-implemented
-.\" Chapter titles for Berkeley thesis mode
-.als CT @not-implemented
-.de @nop
-..
+.\" documented Unix Version 7 ms macros that we don't implement
+.als EG @not-implemented \" engineer's notes
+.als IM @not-implemented \" internal memorandum
+.als MF @not-implemented \" memorandum for file
+.als MR @not-implemented \" memorandum for record
+.als TM @not-implemented \" technical memorandum
+.als TR @not-implemented \" technical report
+.als AT @not-implemented \" attachments
+.als CS @not-implemented \" cover sheet info for `TM` documents
+.als CT @not-implemented \" copies to
+.als OK @not-implemented \" "other keywords" for `TM` documents
+.als SG @not-implemented \" signatures for `TM` documents
+.als HO @not-implemented \" Holmdel
+.als IH @not-implemented \" Naperville
+.als MH @not-implemented \" Murray Hill
+.als PY @not-implemented \" Piscataway
+.als WH @not-implemented \" Whippany
+.als UX @not-implemented \" Unix w/ footnote trademark
+.
+.\" 4.2BSD ms macros documented by Tuthill 1983 that we don't implement
+.\"als TM @not-implemented \" thesis mode (already handled)
+.\"als CT @not-implemented \" chapter title for thesis (already handled)
 .
 .\" Wrap the .di request to save the name of the file being processed
 .\" when a diversion is started.  This aids diagnostics when diversions
@@ -109,10 +128,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .de DA
 .if \\n[.$] .ds DY "\\$*
 .ds CF \\*[DY]
-..
-.\" indexing
-.de IX
-.tm \\$1\t\\$2\t\\$3\t\\$4 ... \\n[%]
 ..
 .\" print an error message and then try to recover
 .de @error-recover
@@ -172,7 +187,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .par@init
 .als RP cov*err-not-after-first-page
 .@init
-.ie \\n[cov*rp-format] \{\
+.ie \\n[cov*use-rp-format] \{\
 .	pg@cs-top
 .	als FS cov*FS
 .	als FE cov*FE
@@ -191,14 +206,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .br
 \\*[FS]\\
 ..
-.nr cov*rp-format 0
-.nr cov*rp-no 0
-.\" released paper format
+.nr cov*use-rp-format 0
+.\" If we add more cover page formats, these behaviors and names could
+.\" be generalized.
+.nr cov*rp-no-repeat-info 0
+.nr cov*rp-no-renumber 0
+.\" report (AT&T: "released paper") document type
 .de RP
-.nr cov*rp-format 1
-.if \\n[.$] .if '\\$1'no' .nr cov*rp-no 1
+.nr cov*use-rp-format 1
+.while \\n[.$] \{\
+.	if '\\$1'no' .nr cov*rp-no-repeat-info 1
+.	if '\\$1'no-repeat-info' .nr cov*rp-no-repeat-info 1
+.	if '\\$1'no-renumber' .nr cov*rp-no-renumber 1
+.	shift
+.\}
 .if rPO .po \\n(POu
-.pn 0
 ..
 .de TL
 .br
@@ -310,10 +332,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .par@ab-indent
 .par@reset
 .if !'\\$1'no' \{\
-.       if '\*(.T'html'  \{\
+.	if '\*(.T'html' \{\
 .		nf
 .		sp
-.       \}
+.	\}
 .	ft I
 .	ce 1
 \\*[ABSTRACT]
@@ -350,16 +372,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .de @div-end!cov*ab-div
 .AE
 ..
+.de cov*break-page
+.ie \\n[cov*rp-no-renumber] .bp
+.el .bp 1
+..
 .de cov*print
 .als cov*print @nop
 .ie d cov*tl-div \{\
-.	ie \\n[cov*rp-format] .cov*rp-print
+.	ie \\n[cov*use-rp-format] .cov*rp-print
 .	el .cov*draft-print
 .\}
 .el \{\
-.	if \\n[cov*rp-format] \{\
+.	if \\n[cov*use-rp-format] \{\
 .		@warning .RP format but no .TL
-.		bp 1
+.		.cov*break-page
 .		als FS @FS
 .		als FE @FE
 .		CHECK-FOOTER-AND-KEEP
@@ -387,7 +413,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .	ev nf
 .	cov*fn-div
 .	ev
-.	ie \\n[cov*rp-no] .rm cov*fn-div
+.	ie \\n[cov*rp-no-repeat-info] .rm cov*fn-div
 .	el \{\
 .		rn cov*fn-div fn@overflow-div
 .		nr fn@have-overflow 1
@@ -401,8 +427,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .if -\\n[FM]/2+1v+\\n[cov*page-length]<\\n[nl] \
 .	@error cover sheet overflow
 .pl \\n[cov*page-length]u
-.bp 1
-.if !\\n[cov*rp-no] .cov*tl-au-print
+.cov*break-page
+.if !\\n[cov*rp-no-repeat-info] .cov*tl-au-print
 .rs
 .sp 1
 ..
@@ -422,17 +448,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .sp 3
 .ce 9999
 .if d cov*tl-div \{\
-.    cov*tl-div
-.    DEVTAG-EO-TL
+.	cov*tl-div
+.	DEVTAG-EO-TL
 .\}
 .nr cov*i 1
 .nr cov*sp 1v
 .while \\n[cov*i]<=\\n[cov*n-au] \{\
-.       ie '\*(.T'html' .br
+.	ie '\*(.T'html' .br
 .	el .sp \\n[cov*sp]u
 .	cov*au-div!\\n[cov*i]
 .	ie d cov*ai-div!\\n[cov*i] \{\
-.		sp .5v	
+.		sp .5v
 .		cov*ai-div!\\n[cov*i]
 .		nr cov*sp 1v
 .	\}
@@ -519,11 +545,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ..
 .nr pg*P1 0
 .de P1
-.ie r bell_localisms \{\
-.	DS L
-.	ft CW
-.\}
-.el .nr pg*P1 1
+.nr pg*P1 1
 ..
 .wh -\n[FM]u pg@bottom
 .wh -\n[FM]u/2u pg*footer
@@ -541,8 +563,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .	\}
 .\}
 .ie !\\n(.$ \{\
-.	nr pg@colw \\n[LL]*7/15
-.	nr pg*gutw \\n[LL]-(2*\\n[pg@colw])
+.	nr pg*gutw \\n[MINGW]
+.	nr pg@colw \\n[LL]-\\n[pg*gutw]/2u
 .	nr pg@ncols 2
 .\}
 .el \{\
@@ -555,10 +577,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .	el .nr pg*gutw 0
 .\}
 .DEVTAG ".mc \\n[pg@ncols] \\n[pg@colw] \\n[pg*gutw]"
-.ns
 .nr pg*col-num 0
 .nr pg@fn-colw \\n[pg@colw]*\\*[FR]
 .par@reset
+.ns
 .mk pg*col-top
 ..
 .de 2C
@@ -976,6 +998,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .de DE
 .ds*end!\\n[\\n[.ev]:ds-type]
 .nr \\n[.ev]:ds-type 0
+.ns
 ..
 .de ds@auto-end
 .if \\n[\\n[.ev]:ds-type] \{\
@@ -1584,12 +1607,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .\}
 .el \m[black]\M[white]\Z'\\$1'\h'\\n[par*bxw]u'\m[]\M[]
 ..
-.\" The first time UX is used, put a registered mark after it.
-.ds par*ux-rg \(rg
-.de UX
-\s[\\n[.s]*8u/10u]UNIX\s0\\$1\\*[par*ux-rg]
-.ds par*ux-rg
-..
 .\" superscript
 .ds par@sup-start \v'-.9m\s'\En[.s]*7u/10u'+.7m'
 .als { par@sup-start
@@ -1884,13 +1901,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .	if !'\\*[eqn*num]'' .nr eqn*have-num 1
 .	ie \\n[dl]:\\n[eqn*have-num] \{\
 .		sp \\n[DD]u
+.		ns
 .		par@reset
 .		ds eqn*tabs \\n[.tabs]
 .		nf
 .		ie \\n[dl] \{\
-.\"                     --fixme-- this really should not be necessary
-.\"                     and indicates that there is extra space creeping
-.\"                     into an equation when ps4html is enabled..
+.\"			XXX: This really should not be necessary and
+.\"			indicates that there is extra space creeping
+.\"			into an equation when ps4html is enabled.
 .			ie r ps4html .ds@need \\n[dn]u-1v+\n[.V]u+1i
 .			el .ds@need \\n[dn]u-1v+\n[.V]u
 .			chop eqn*div
@@ -1912,6 +1930,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .		\}
 .\".		if !'\*(.T'html' .sp \\n[DD]u
 .		sp \\n[DD]u
+.		ns
 .		ta \\*[eqn*tabs]
 .	\}
 .	el \{\
@@ -2130,41 +2149,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .\}
 ..
 .par@load-init
-.\" ****************************
-.\" ******** module bell ********
-.\" ****************************
-.\" Emulate Bell Labs localisms. Note, (a) they're not documented, and
-.\" (b) the .P1 and .UC macros collide with different ones in Berkeley
-.\" ms.
-.\"
-.\" [Correction 2022-04-17: 10th Edition AT&T ms also collides with
-.\" Berkeley's (undocumented) FP macro.]
-.\"
-.\" We hack around this by conditionalizing the behavior of P1; UC was
-.\" not defined by groff and will be a no-op if called Berkeley style
-.\" with no arguments, so there is no problem with hijacking it here.
-.\"
-.\" What's done here is sufficient to give back the Guide to EQN (1976)
-.\" its section headings and restore some text that had gone missing as
-.\" macro arguments; no warranty express or implied is given as to how
-.\" well the typographic details these produce match the original Bell
-.\" Labs macros.
-.\"
-.\" P1 is now defined in module pg.
-.de SC
-.nr bell_localisms 1
-.NH 
-\\$*
-..
-.de UC
-.if r bell_localisms \f(CR\\$*\fP
-..
-.de P2
-.if r bell_localisms \{\
-.	ft
-.	DE
-.\}
-..
 .\" Local Variables:
 .\" mode: nroff
 .\" fill-column: 72
