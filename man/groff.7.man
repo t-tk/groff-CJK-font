@@ -855,8 +855,9 @@ and
 rounds to the integer nearer to zero,
 no matter how large the fractional portion.
 .
-Overflow and division by zero are errors and abort evaluation of a
-numeric expression.
+Overflow and division
+(or modulo)
+by zero are errors and abort evaluation of a numeric expression.
 .
 .
 .P
@@ -1468,8 +1469,6 @@ not an algebraic sign.
 .
 To assign a register a negative value or the negated value of another
 register,
-enclose
-.squoted_char \-
 enclose it with its operand in
 parentheses or subtract it from zero.
 .
@@ -4697,7 +4696,7 @@ results from request calls.
 .TPx
 .REG $$
 The process ID of
-.BR troff .
+.IR @g@troff .
 .
 .TPx
 .REG .$
@@ -4711,11 +4710,11 @@ Post-line extra line-space most recently utilized using
 .TPx
 .REG .A
 Set to\~1 in
-.B troff
+.I @g@troff
 if option
 .option \-A
 is used; always\~1 in
-.BR nroff .
+.IR @g@nroff .
 .
 .TPx
 .REG .b
@@ -5014,7 +5013,7 @@ The current post-vertical line spacing.
 .TPx
 .REG .R
 The count of available unused registers;
-always 10000 in GNU
+always 10,000 in GNU
 .IR troff . \" GNU
 .
 .
@@ -6000,63 +5999,42 @@ copies a named environment's contents to the current one.
 .SH Underlining
 .\" ====================================================================
 .
-In the
+In
 .I RUNOFF
-language, the underlining was quite easy.
+(see
+.MR roff @MAN7EXT@ ),
+underlining,
+even of lengthy passages,
+was straightforward because only fixed-pitch printing devices were
+targeted.
 .
-But in
-.I roff
-this is much more difficult.
-.
-.
-.\" ====================================================================
-.SS "Underlining with .ul"
-.\" ====================================================================
+Typesetter output posed a greater challenge.
 .
 There exists a
 .I groff
 request
 .B .ul
-(see above) that can underline the next or further source lines in
-.BR nroff ,
-but in
-.B troff
-it produces only a font change into
-.IR italic .
-.
-So this request is not really useful.
+(see above)
+that underlines subsequent source lines on terminal devices,
+but on typesetters,
+it selects an italic font style instead.
 .
 .
-.\" ====================================================================
-.SS "Underlining with .UL from \f[I]ms\f[]"
-.\" ====================================================================
-.
-In the \[oq]ms\[cq] macro package in tmac/s.tmac
-.MR groff_ms @MAN7EXT@ ,
-there is the macro
-.BR .UL .
-.
-But this works only in
-.BR troff ,
-not in
-.BR nroff .
-.
-.
-.\" ====================================================================
-.SS "Underlining macro definitions"
-.\" ====================================================================
-.
-So one can use the
-.I italic
-.B nroff
-idea from
-.B .ul
-and the
-.B troff
-definition
-in
+The
 .I ms
-for writing a useful new macro, something like
+macro package
+(see
+.MR groff_ms @MAN7EXT@ )
+offers a macro
+.BR .UL ,
+but it too produces the desired effect only on typesetters,
+and has other limitations.
+.
+.
+.P
+One could adapt
+.IR ms 's
+approach to the construction of a macro as follows.
 .
 .RS
 .EX

@@ -62,7 +62,7 @@ RFLAG=-i 0 -m
 NOLIGFLAG=-n
 TEXTENC=$(srcdir)/../text.enc
 EFLAG=-e $(TEXTENC)
-TEXTMAP=$(srcdir)/textmap
+TEXTMAP=$(srcdir)/text.map
 AFMNAME=$(srcdir)/afmname
 
 RM=rm -f
@@ -241,20 +241,22 @@ ZD:
 
 SS: $(OUTDIR)/symbolsl.afm
 	$(AFMTODIT) -s -x $(IFLAG) \
-	  $(OUTDIR)/symbolsl.afm $(srcdir)/lgreekmap $(OUTDIR)/$@
+	  $(OUTDIR)/symbolsl.afm $(srcdir)/slanted-symbol.map \
+	  $(OUTDIR)/$@
 
 S: symbol.afm
 	$(AFMTODIT) -s $(RFLAG) \
-	  symbol.afm symbolmap $(OUTDIR)/$@
+	  symbol.afm $(srcdir)/symbol.map $(OUTDIR)/$@
 
 ZDR: $(OUTDIR)/zapfdr.afm
 	$(AFMTODIT) -s $(RFLAG) \
-	  $(OUTDIR)/zapfdr.afm $(srcdir)/dingbats.rmap $(OUTDIR)/$@
+	  $(OUTDIR)/zapfdr.afm $(srcdir)/dingbats-reversed.map \
+	  $(OUTDIR)/$@
 
 # the map is just a dummy
 EURO: freeeuro.afm
 	$(AFMTODIT) $(RFLAG) \
-	  freeeuro.afm symbolmap $(OUTDIR)/$@
+	  freeeuro.afm $(srcdir)/symbol.map $(OUTDIR)/$@
 
 freeeuro.afm freeeuro.pfa: $(srcdir)/freeeuro.sfd
 	fontforge -script $(srcdir)/sfdtopfa.pe $(srcdir)/freeeuro.sfd \
@@ -279,13 +281,13 @@ zapfdr.afm: $(srcdir)/apfdr.sed
 	  `$(AFMNAME) $(afmdir)/ZapfDingbats.afm` >$(OUTDIR)/$@
 
 ZD: $(srcdir)/dingbats.map
-ZDR: $(srcdir)/dingbats.rmap
+ZDR: $(srcdir)/dingbats-reversed.map
 $(TEXTFONTS): $(TEXTMAP) $(TEXTENC)
-$(SPECIALFONTS): symbolmap
-$(GREEKFONTS): $(srcdir)/lgreekmap
+$(SPECIALFONTS): $(srcdir)/symbol.map
+$(GREEKFONTS): $(srcdir)/slanted-symbol.map
 $(FONTS): $(DESC)
 
-symbolmap: $(TEXTMAP) $(srcdir)/symbolchars
+$(srcdir)/symbol.map: $(TEXTMAP) $(srcdir)/symbolchars
 	printf \
 	  '#\n# This is a list of all predefined groff symbols.\n#\n' \
 	  > $(OUTDIR)/$@ \
@@ -293,8 +295,8 @@ symbolmap: $(TEXTMAP) $(srcdir)/symbolchars
 
 clean:
 	cd $(OUTDIR) \
-	  && $(RM) freeeuro.afm freeeuro.pfa symbol.afm symbolmap \
-	    symbolsl.afm zapfdr.afm
+	  && $(RM) freeeuro.afm freeeuro.pfa symbol.afm \
+	    $(srcdir)/symbol.map symbolsl.afm zapfdr.afm
 
 realclean: clean
 	cd $(OUTDIR) \

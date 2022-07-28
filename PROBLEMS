@@ -738,6 +738,28 @@ Compilation Problems
 
 
 
+* I get warnings from afmtodit about names already being mapped.
+
+afmtodit: AGL name 'Delta' already mapped to groff name '*D'; ignoring AGL name 'uni0394'
+
+You can ignore these if they're in the form shown above, where the
+ignored AGL name is 'uniXXXX' and 'XXXX' is four hexadecimal digits.
+The Adobe Glyph List (AGL) has its own names for glyphs; they are often
+different from groff's special character names.  The afmtodit program is
+constructing a mapping from groff special character names to AGL names;
+this can be a one-to-one or many-to-one mapping, but one-to-many will
+not work, so afmtodit discards the excessive mappings.  The example you
+see above is telling you that the groff font description that afmtodit
+is writing cannot map the groff special character '*D' to both 'Delta'
+and 'uni0394'.
+
+Which, if any, such warnings you see depends on the version of the URW
+fonts you are builing groff against.  See the '--with-urw-fonts-dir'
+option to the "configure" script, and the afmtodit(1) and groff_char(7)
+man pages for more background.
+
+----------------------------------------------------------------------
+
 * I get warnings about special characters in the groff_char(7) man page.
 
 troff:man/groff_char.7:1000: warning: can't find special character '.j'

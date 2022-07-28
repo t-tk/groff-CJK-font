@@ -725,7 +725,7 @@ class real_output_file : public output_file {
   int piped;
 #endif
   int printing;		// decision via optional page list
-  int output_on;	// \O[0] or \O[1] escape calls
+  int output_on;	// \O[0] or \O[1] escape sequences
   virtual void really_transparent_char(unsigned char) = 0;
   virtual void really_print_line(hunits x, vunits y, node *n,
 				 vunits before, vunits after, hunits width) = 0;
@@ -4030,23 +4030,25 @@ int tag_node::ends_sentence()
   return 2;
 }
 
-// Get contents of register `p`--used only by suppress_node::tprint().
+// Get contents of register `p` as integer.
+// Used only by suppress_node::tprint().
 static int get_register(const char *p)
 {
-  assert(0 != p);
+  assert(p != 0 /* nullptr */);
   reg *r = (reg *)number_reg_dictionary.lookup(p);
-  assert(0 != r);
+  assert(r != 0 /* nullptr */);
   units value;
   assert(r->get_value(&value));
-  return (int)value;
+  return int(value);
 }
 
-// Get contents of string `p`--used only by suppress_node::tprint().
+// Get contents of register `p` as string.
+// Used only by suppress_node::tprint().
 static const char *get_string(const char *p)
 {
-  assert(0 != p);
+  assert(p != 0 /* nullptr */);
   reg *r = (reg *)number_reg_dictionary.lookup(p);
-  assert(0 != r);
+  assert(r != 0 /* nullptr */);
   return r->get_string();
 }
 
@@ -4135,8 +4137,8 @@ void suppress_node::tprint(troff_output_file *out)
 	// Ensure the new string fits with room for a terminal '\0'.
 	const size_t len = strlen(new_name);
 	if (len > (namebuflen - 1))
-	  error("constructed file name in suppressed output escape is"
-		" too long (>= %1 bytes); skipping image",
+	  error("constructed file name in suppressed output escape"
+		" sequence is too long (>= %1 bytes); skipping image",
 		(int)namebuflen);
 	else
 	  strncpy(name, new_name, (namebuflen - 1));
@@ -4145,8 +4147,8 @@ void suppress_node::tprint(troff_output_file *out)
       }
       else {
 	if (image_filename_len > (namebuflen - 1))
-	  error("file name in suppressed output escape is too long"
-		" (>= %1 bytes); skipping image", (int)namebuflen);
+	  error("file name in suppressed output escape sequence is too"
+		" long (>= %1 bytes); skipping image", (int)namebuflen);
 	else
 	  strcpy(name, image_filename);
       }
@@ -4186,17 +4188,17 @@ void suppress_node::tprint(troff_output_file *out)
 	//		      " suppress_start_page = %d\n",
 	//	  topdiv->get_page_number(), suppress_start_page);
 
-	// remember that the filename will contain a %d in which the
-	// image_no is placed
+	// `name` will contain a "%d" in which the image_no is placed.
 	fprintf(stderr,
 		"grohtml-info:page %d  %d  %d  %d  %d  %d  %s  %d  %d"
-		"  %s\n",
+		"  %s:%s\n",
 		topdiv->get_page_number(),
 		get_register("opminx"), get_register("opminy"),
 		get_register("opmaxx"), get_register("opmaxy"),
 		// page offset + line length
 		get_register(".o") + get_register(".l"),
-		name, hresolution, vresolution, get_string(".F"));
+		name, hresolution, vresolution, get_string(".F"),
+		get_string(".c"));
 	fflush(stderr);
       }
     }
@@ -4889,11 +4891,11 @@ void composite_node::tprint(troff_output_file *out)
     out->right(track_kern);
 }
 
-node *make_composite_node(charinfo *s, environment *env)
+static node *make_composite_node(charinfo *s, environment *env)
 {
   int fontno = env_definite_font(env);
   if (fontno < 0) {
-    error("no current font");
+    error("cannot format composite glyph: no current font");
     return 0;
   }
   assert(fontno < font_table_size && font_table[fontno] != 0);
@@ -4908,11 +4910,12 @@ node *make_composite_node(charinfo *s, environment *env)
   return new composite_node(n, s, tf, 0, 0, 0);
 }
 
-node *make_glyph_node(charinfo *s, environment *env, int no_error_message = 0)
+static node *make_glyph_node(charinfo *s, environment *env,
+			     bool want_warnings = true)
 {
   int fontno = env_definite_font(env);
   if (fontno < 0) {
-    error("no current font");
+    error("cannot format glyph: no current font");
     return 0;
   }
   assert(fontno < font_table_size && font_table[fontno] != 0);
@@ -4923,9 +4926,9 @@ node *make_glyph_node(charinfo *s, environment *env, int no_error_message = 0)
     if (mac && s->is_fallback())
       return make_composite_node(s, env);
     if (s->numbered()) {
-      if (!no_error_message)
-	warning(WARN_CHAR, "can't find numbered character %1",
-		s->get_number());
+      if (want_warnings)
+	warning(WARN_CHAR, "character code %1 not defined in current"
+		" font", s->get_number());
       return 0;
     }
     special_font_list *sf = font_table[fontno]->sf;
@@ -4967,19 +4970,20 @@ node *make_glyph_node(charinfo *s, environment *env, int no_error_message = 0)
 	}
     }
     if (!found) {
-      if (!no_error_message && s->first_time_not_found()) {
+      if (want_warnings && s->first_time_not_found()) {
 	unsigned char input_code = s->get_ascii_code();
 	if (input_code != 0) {
 	  if (csgraph(input_code))
-	    warning(WARN_CHAR, "can't find character '%1'", input_code);
+	    warning(WARN_CHAR, "character '%1' not defined",
+		    input_code);
 	  else
-	    warning(WARN_CHAR, "can't find character with input code %1",
-		    int(input_code));
+	    warning(WARN_CHAR, "character with input code %1 not"
+		    " defined", int(input_code));
 	}
 	else if (s->nm.contents()) {
 	  const char *nm = s->nm.contents();
 	  const char *backslash = (nm[1] == 0) ? "\\" : "";
-	  warning(WARN_CHAR, "can't find special character '%1%2'",
+	  warning(WARN_CHAR, "special character '%1%2' not defined",
 		  backslash, nm);
 	}
       }
@@ -5031,7 +5035,7 @@ int character_exists(charinfo *ci, environment *env)
     ci = tem;
   if (ci->get_macro())
     return 1;
-  node *nd = make_glyph_node(ci, env, 1);
+  node *nd = make_glyph_node(ci, env, false /* don't want warnings */);
   if (nd) {
     delete nd;
     return 1;

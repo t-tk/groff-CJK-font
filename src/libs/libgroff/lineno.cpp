@@ -15,4 +15,6 @@ for more details.
 The GNU General Public License version 2 (GPL2) is available in the
 internet at <http://www.gnu.org/licenses/gpl-2.0.txt>. */
 
+// This global stores the line number of the input file being
+// processed by troff, an output driver, or other program.
 int current_lineno = 0;

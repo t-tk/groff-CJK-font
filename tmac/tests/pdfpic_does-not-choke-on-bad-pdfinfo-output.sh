@@ -24,11 +24,15 @@ gnu_pdf="${abs_top_builddir:-.}/doc/gnu-no-choke-on-pdfinfo.pdf"
 
 # Regression-test Savannah #58206.
 
-if ! command -v gs >/dev/null
-then
-    echo "cannot locate 'gs' command" >&2
-    exit 77 # skip
-fi
+# We need gs(1) and pdfpic.tmac needs pdfinfo(1).
+for cmd in gs pdfinfo
+do
+    if ! command -v $cmd >/dev/null
+    then
+        echo "cannot locate '$cmd' command" >&2
+        exit 77 # skip
+    fi
+done
 
 # Locate directory containing our test artifacts.
 artifact_dir=

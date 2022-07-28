@@ -165,7 +165,7 @@ void set_escape_char()
 {
   if (has_arg()) {
     if (tok.ch() == 0) {
-      error("bad escape character");
+      error("invalid escape character");
       escape_char = '\\';
     }
     else
@@ -1440,8 +1440,8 @@ node *do_overstrike()
   for (;;) {
     tok.next();
     if (tok.is_newline() || tok.is_eof()) {
-      warning(WARN_DELIM, "missing closing delimiter in"
-	      " overstrike escape (got %1)", tok.description());
+      warning(WARN_DELIM, "missing closing delimiter in overstrike"
+	     " escape sequence (got %1)", tok.description());
       input_stack::push(make_temp_iterator("\n"));
       break;
     }
@@ -1478,7 +1478,8 @@ static node *do_bracket()
     tok.next();
     if (tok.is_eof() || tok.is_newline()) {
       warning(WARN_DELIM, "missing closing delimiter in"
-	      " bracket-building escape (got %1)", tok.description());
+	      " bracket-building escape sequence (got %1)",
+	      tok.description());
       // XXX: Most other places we miss a closing delimiter, we push a
       // temp iterator for the EOF case too.  What's special about \b?
       // Exceptions: \w, \X are like this too.
@@ -1509,8 +1510,9 @@ static int do_name_test()
   for (;;) {
     tok.next();
     if (tok.is_newline() || tok.is_eof()) {
-      warning(WARN_DELIM, "missing closing delimiter in"
-	      " name test escape (got %1)", tok.description());
+      warning(WARN_DELIM, "missing closing delimiter in identifier"
+	      " validation escape sequence (got %1)",
+	      tok.description());
       input_stack::push(make_temp_iterator("\n"));
       break;
     }
@@ -1612,7 +1614,7 @@ static node *do_zero_width()
     if (tok == start
 	&& (compatible_flag || input_stack::get_level() == start_level))
       break;
-    if (!tok.add_to_node_list(&rev))
+    if (!tok.add_to_zero_width_node_list(&rev))
       error("invalid token in argument to \\Z");
   }
   node *n = 0;
@@ -1742,7 +1744,7 @@ void token::next()
     node *n = 0;
     int cc = input_stack::get(&n);
     if (cc != escape_char || escape_char == 0) {
-    handle_normal_char:
+    handle_ordinary_char:
       switch(cc) {
       case INPUT_NO_BREAK_SPACE:
 	  type = TOKEN_STRETCHABLE_SPACE;
@@ -2298,12 +2300,12 @@ void token::next()
 	  type = TOKEN_SPECIAL;
 	  return;
 	}
-	goto handle_normal_char;
+	goto handle_ordinary_char;
       default:
 	if (cc != escape_char && cc != '.')
 	  warning(WARN_ESCAPE, "escape character ignored before %1",
 		  input_char_description(cc));
-	goto handle_normal_char;
+	goto handle_ordinary_char;
       }
     }
   }
@@ -2605,8 +2607,6 @@ void exit_troff()
     tok.next();
     process_input_stack();
   }
-  // This will only happen if a trap-called macro starts a diversion,
-  // or if vertical position traps have been disabled.
   cleanup_and_exit(EXIT_SUCCESS);
 }
 
@@ -5265,7 +5265,7 @@ static void do_width()
     tok.next();
     if (tok.is_eof() || tok.is_newline()) {
       warning(WARN_DELIM, "missing closing delimiter in"
-	      " width escape (got %1)", tok.description());
+	      " width computation escape sequence (got %1)", tok.description());
       // XXX: Most other places we miss a closing delimiter, we push a
       // temp iterator for the EOF case too.  What's special about \w?
       // Exception: \b, \X are like this too.
@@ -5479,8 +5479,8 @@ node *do_special()
        tok != start || input_stack::get_level() != start_level;
        tok.next()) {
     if (tok.is_eof() || tok.is_newline()) {
-      warning(WARN_DELIM, "missing closing delimiter in"
-	      " device special escape (got %1)", tok.description());
+      warning(WARN_DELIM, "missing closing delimiter in device control"
+	      " escape sequence (got %1)", tok.description());
       // XXX: Most other places we miss a closing delimiter, we push a
       // temp iterator for the EOF case too.  What's special about \X?
       // Exceptions: \b, \w are like this too.
@@ -6982,6 +6982,7 @@ static void do_translate(int translate_transparent, int translate_input)
       translate_space_to_dummy = tok.is_dummy();
       if (tok.is_newline() || tok.is_eof())
 	break;
+      error("cannot translate space character; ignoring");
       tok.next();
       continue;
     }
@@ -7229,15 +7230,19 @@ charinfo *token::get_char(bool required)
     if (escape_char != 0)
       return charset_table[escape_char];
     else {
-      error("'\\e' used while no current escape character");
+      // XXX: Is this possible?  token::add_to_zero_width_node_list()
+      // and token::process() don't add this token type if the escape
+      // character is null.  If not, this should be an assert().  Also
+      // see escape_off().
+      error("'\\e' used while escape sequences disabled");
       return 0;
     }
   }
   if (required) {
     if (type == TOKEN_EOF || type == TOKEN_NEWLINE)
-      warning(WARN_MISSING, "missing normal or special character");
+      warning(WARN_MISSING, "missing ordinary or special character");
     else
-      error("expected normal or special character, got %1",
+      error("expected ordinary or special character, got %1",
 	    description());
   }
   return 0;
@@ -7259,13 +7264,13 @@ void check_missing_character()
 {
   if (!tok.is_newline() && !tok.is_eof() && !tok.is_right_brace()
       && !tok.is_tab())
-    error("expected normal or special character, got %1; treated as"
+    error("expected ordinary or special character, got %1; treated as"
 	  " missing", tok.description());
 }
 
 // this is for \Z
 
-int token::add_to_node_list(node **pp)
+int token::add_to_zero_width_node_list(node **pp)
 {
   hunits w;
   int s;
@@ -7552,6 +7557,7 @@ void abort_request()
       fputs(asciify(c), stderr);
     fputc('\n', stderr);
   }
+  fflush(stderr);
   cleanup_and_exit(EXIT_FAILURE);
 }
 

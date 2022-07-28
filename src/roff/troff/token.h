@@ -92,7 +92,7 @@ public:
   int operator!=(const token &); // ditto
   unsigned char ch();
   charinfo *get_char(bool = false);
-  int add_to_node_list(node **);
+  int add_to_zero_width_node_list(node **);
   void make_space();
   void make_newline();
   const char *description();

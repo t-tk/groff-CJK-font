@@ -554,13 +554,13 @@ const char *xbasename(const char *s)
 void handle_unknown_desc_command(const char *command, const char *arg,
 				 const char *filename, int lineno)
 {
-  current_filename = filename;
-  current_lineno = lineno;
   if (strcmp(command, "print") == 0) {
     if (arg == 0 /* nullptr */)
-      error("'print' directive requires an argument");
+      error_with_file_and_line(filename, lineno, "'print' directive"
+			       " requires an argument");
     else
       spooler = xstrdup(arg);
+    return;
   }
   if (strcmp(command, "prepro") == 0) {
     if (arg == 0 /* nullptr */)
@@ -568,25 +568,29 @@ void handle_unknown_desc_command(const char *command, const char *arg,
     else {
       for (const char *p = arg; *p; p++)
 	if (csspace(*p)) {
-	  error("invalid 'prepro' directive argument '%1':"
-		" program name required", arg);
-	  return;
+	  error_with_file_and_line(filename, lineno, "invalid 'prepro'"
+				   " directive argument '%1': program"
+				   " name required", arg);
 	}
       predriver = xstrdup(arg);
     }
+    return;
   }
   if (strcmp(command, "postpro") == 0) {
     if (arg == 0 /* nullptr */)
-      error("'postpro' directive requires an argument");
+      error_with_file_and_line(filename, lineno, "'postpro' directive"
+			       " requires an argument");
     else {
       for (const char *p = arg; *p; p++)
 	if (csspace(*p)) {
-	  error("invalid 'postpro' directive argument '%1':"
-		" program name required", arg);
+	  error_with_file_and_line(filename, lineno, "invalid 'postpro'"
+				   " directive argument '%1': program"
+				   " name required", arg);
 	  return;
 	}
       postdriver = xstrdup(arg);
     }
+    return;
   }
 }
 
@@ -605,12 +609,12 @@ void print_commands(FILE *fp)
 
 int run_commands(int no_pipe)
 {
-  char **v[NCOMMANDS];
-  int j = 0;
+  char **v[NCOMMANDS]; // vector of argv arrays to pipe together
+  int ncommands = 0;
   for (int i = 0; i < NCOMMANDS; i++)
     if (commands[i].get_name() != 0 /* nullptr */)
-      v[j++] = commands[i].get_argv();
-  return run_pipeline(j, v, no_pipe);
+      v[ncommands++] = commands[i].get_argv();
+  return run_pipeline(ncommands, v, no_pipe);
 }
 
 possible_command::possible_command()

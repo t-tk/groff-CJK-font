@@ -147,10 +147,16 @@ position
 .SH Options
 .\" ====================================================================
 .
-Note that there can be whitespace between a one-letter option and its
-argument;
-on the other hand, there must be whitespace and/or an equal sign
-(\(oq=\(cq) between a long-name option and its argument.
+.B \-h
+and
+.B \-\-help
+display a usage message,
+while
+.B \-v
+and
+.B \-\-version
+show version information;
+all exit afterward.
 .
 .
 .TP
@@ -172,13 +178,6 @@ to the search path for font and device description files;
 .I name
 is the name of the device, usually
 .BR lbp .
-.
-.
-.TP
-.B \-h
-.TQ
-.B \-\-help
-Print a short help text.
 .
 .
 .TP
@@ -208,41 +207,41 @@ which must be a valid paper size description as indicated in section
 .
 .
 .TP
-.B \-v
-.TQ
-.B \-\-version
-Print the version number.
-.
-.
-.TP
 .BI \-w " width"
 .TQ
 .BI \-\-linewidth= width
 Set the default line thickness to
 .I width
-thousandths of an em.
-.
-If this option isn't specified, the line thickness defaults to 0.04\~em.
+thousandths of an em;
+the default is 0.04\~em.
 .
 .
 .\" ====================================================================
 .SH Typefaces
 .\" ====================================================================
 .
-The driver supports the Dutch, Swiss and Swiss-Narrow scalable
-typefaces, each one in the Regular, Bold, Italic and Bold-Italic styles.
+The driver supports the Dutch,
+Swiss,
+and Swiss-Narrow scalable typefaces,
+each in the regular,
+bold,
+italic,
+and bold-italic styles.
 .
-Additionally, the Courier and Elite monospaced typefaces at the sizes 8
-and 12 points (for Courier) resp.\& 8 and 10 points (for Elite) are
-supported, each one in the Regular, Bold and Italic styles.
+Additionally,
+the bitmapped,
+monospaced Courier and Elite typefaces are available in regular,
+bold,
+and
+italic styles;
+Courier at 8 and 12 points,
+Elite at 8 and 10 points.
+.
+The following chart summarizes the
+.I groff
+font names used to access them.
 .
 .
-.PP
-The following chart summarizes the font names you can use to access
-these fonts:
-.
-.
-.PP
 .TS
 tab(|) allbox center;
 c c c c c
@@ -264,54 +263,53 @@ Elite | ER | EB | EI |
 The paper size can be set in the
 .I DESC
 file or with command-line options to
-.BR grolbp .
-If the paper size is specified both ways, the command-line options take
+.I grolbp.
+If the paper size is specified both ways,
+the command-line options take
 precedence over the contents of the
 .I DESC
-file (this applies to the page orientation too).
+file
+(this applies to the page orientation too).
 .
-.
-.PP
-See
 .MR groff_font @MAN5EXT@
-how to set the paper dimensions in the
+describes how to set the paper dimensions in the
 .I DESC
 file.
 .
-.
-.PP
-To set the paper size in the command line, add
-.sp 1
-.in +2m
-.BI \-p \ paper-size
-.in -2m
-.sp 1
+To set the paper size on the command line,
+add
+.RS
+.EX
+.BI \-p\~ paper-size
+.EE
+.RE
 or
-.sp 1
-.in +2m
+.RS
+.EX
 .BI \-\-papersize= paper-size
-.in -2m
-.sp 1
+.EE
+.RE
 to the other
-.B grolbp
-options, where
+.I grolbp
+options,
+where
 .I paper-size
 is in the same format as in the
 .I DESC
 file.
 .
-.
-.PP
 If no paper size is specified in the
 .I DESC
-file or the command line, a default size of A4 is used.
+file or on the command line,
+a default size of A4 is used.
 .
 .
 .\" ====================================================================
 .SH "Page orientation"
 .\" ====================================================================
 .
-As with the page size, the orientation of the printed page
+As with the page size,
+the orientation of the page
 .RB ( portrait
 or
 .BR landscape )
@@ -319,121 +317,144 @@ can be set in the
 .I DESC
 file or with command-line options.
 .
-It is also case insensitive.
+These keywords are case insensitive.
 .
-.
-.PP
 To set the orientation in the
 .I DESC
-file, insert a line with the following content:
-.sp 1
-.in +2m
-.B orientation
-.RB [ portrait | landscape ]
-.in -2m
-.sp 1
+file,
+insert a line
+.RS
+.EX
+orientation portrait
+.EE
+.RE
+or
+.RS
+.EX
+orientation landscape
+.EE
+.RE
+as desired.
 .
-Only the first valid orientation command in the
+The first valid orientation command in the
 .I DESC
 file is used.
 .
 .
-.PP
 To set the page orientation with command-line options you can use the
 .B \-o
 or
 .B \-\-orientation
-option with the same parameters
+options with the same parameters
 .RB ( portrait
 or
 .BR landscape )
 as in the
 .I DESC
-file.
-Or you can use the
+file,
+or the
 .B \-l
-option to force the pages to be printed in landscape.
+option to select landscape orientation.
 .
 .
 .\" ====================================================================
-.SH "Font file format"
+.SH "Font description files"
 .\" ====================================================================
 .
-In addition to the usual commands described in
+In addition to the font description file directives documented in
 .MR groff_font @MAN5EXT@ ,
-.B grolbp
-provides the command
-.I lbpname
-which sets the font name sent to the printer when requesting this font.
+.I grolbp
+recognizes
+.BR lbpname ,
+which maps the
+.I groff
+font name to the font name used internally by the printer.
 .
-The syntax of this command is:
-.sp 1
-.in +2m
-.B lbpname
-.I printer_font_name
-.in -2m
+Its syntax is as follows.
+.RS
+.EX
+.RI lbpname\~ printer-font-name
+.EE
+.RE
 .
-.IP \(bu
+.
+.BR lbpname 's
+argument is case-sensitive.
+.
+The printer's font names are encoded as follows.
+.
+.
+.P
 For bitmapped fonts,
-.I printer_font_name
+.I printer-font_name
 has the form
-.sp 1
-.in +2m
-.RI N\(la base_fontname \(ra\(la font_style \(ra
-.in -2m
-.sp 1
-.I base_fontname
-is the font name as it appears in the printers font listings without the
-first letter, up to (but not including) the font size.
-.I font_style
+.RS
+.EX
+.RI N\[la] base-font-name \[ra]\[la] font-style \[ra]
+.EE
+.RE
+.I base-font-name
+is the font name as it appears in the printer's font listings without
+the first letter,
+up to
+(but not including)
+the font size.
+.
+.I font-style
 can be one of the letters
 .BR R ,
 .BR I ,
 or
 .BR B ,
-indicating the font styles Roman, Italic and Bold respectively.
+.\" XXX: what about "BI"?
+indicating the roman,
+italic,
+and bold styles,
+respectively.
 .
-.IP
-For instance, if the printer's
-.I font listing A
-shows font \(oqNelite12I.ISO_USA\(cq, the corresponding entry in the
+For instance,
+if the printer's \[lq]font listing A\[rq]
+shows \[lq]Nelite12I.ISO_USA\[rq],
+the corresponding entry in the
+.I groff
 font description file is
-.sp 1
-.in +2m
-.B lbpname NeliteI
-.in -2m
+.RS
+.EX
+lbpname NeliteI
+.EE
+.RE
 .
-.IP
-Note that you may need to modify
-.B grolbp
-to add support for new bitmapped fonts, since the available font names
-and font sizes of bitmapped fonts (as documented above) are hard-coded
-into the program.
-.
-.IP \(bu
-For scalable fonts,
-.I printer_font_name
-is identical to the font name as it appears in the printer's
-.IR "font listing A" .
-.
-.IP
-For instance, to select the \(oqSwiss\(cq font in bold style, which
-appears in the printer's
-.I font listing A
-as \(oqSwiss-Bold\(cq, the required
-.B lbpname
-command line is
-.sp 1
-.in +2m
-.B lbpname Swiss\-Bold
-.in -2m
-.sp 1
+You may need to modify
+.I grolbp
+to add support for new bitmapped fonts,
+since the available font names and font sizes of bitmapped fonts
+(as documented above)
+are hard-coded into the program.
 .
 .
 .P
-The argument to
-.B lbpname
-is case sensitive.
+For scalable fonts,
+.I printer-font-name
+is identical to the font name as it appears in the printer's \[lq]font
+listing A\[rq].
+.
+For instance,
+to select the \[lq]Swiss\[rq] font in bold-italic style,
+which appears in the font listing
+as \[lq]Swiss\-BoldOblique\[rq],
+.RS
+.EX
+lbpname Swiss\-BoldOblique
+.EE
+.RE
+is the required directive,
+and this is what we find in the
+.I groff
+font description file
+.I HBI
+for the
+.B lbp
+device.
 .
 .
 .\" ====================================================================

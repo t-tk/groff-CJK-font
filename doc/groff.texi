@@ -2432,8 +2432,8 @@ The @file{ms} (``manuscript'') package is suitable for the preparation
 of letters, memoranda, reports, and books.  These @code{groff}
 macros feature cover page and table of contents generation,
 automatically numbered headings, several different paragraph styles, a
-variety of text styling options, footnotes, multi-column page layouts,
-and indexing.  @file{ms} supports the @command{tbl}, @command{eqn},
+variety of text styling options, footnotes, and multi-column page
+layouts.  @file{ms} supports the @command{tbl}, @command{eqn},
 @command{pic}, and @command{refer} preprocessors for inclusion of
 tables, mathematical equations, diagrams, and standardized bibliographic
 citations.  This implementation is mostly compatible with the documented
@@ -2479,9 +2479,10 @@ longer works intended for printing and possible publication.
 @file{ms} documents are plain text files; prepare them with your
 preferred text editor.  If you're in a hurry to get started, be advised
 that @file{ms} needs one of its macros called at the beginning of a
-document so that it can initialize.  Put a macro call on a line by
-itself.  Use @samp{.PP} if you want your paragraph's first line to be
-indented, or @samp{.LP} if you don't.
+document so that it can initialize.  A @dfn{macro} is a formatting
+instruction to @file{ms}.  Put a macro call on a line by itself.  Use
+@samp{.PP} if you want your paragraph's first line to be indented, or
+@samp{.LP} if you don't.
 
 After that, start typing normally.  It is a good practice to start each
 sentence on a new line, or to put two spaces after sentence-ending
@@ -2497,7 +2498,7 @@ can be useful for previewing.
 @CartoucheExample
 $ vi radical.ms
 $ nroff -ms radical.ms | less -R
-$ groff -ms radical.ms > radical.ps
+$ groff -T ps -ms radical.ms > radical.ps
 $ see radical.ps
 @endCartoucheExample
 
@@ -2514,10 +2515,9 @@ denied than admitted.
 @endCartoucheExample
 
 @file{ms} exposes many aspects of document layout to user control via
-@code{groff} registers and strings.  Most registers have a default unit
-of measurement.  Specifying a unit explicitly does not cause problems,
-and can avoid them in complex situations.  The following table
-summarizes typical units.
+@code{groff}'s @dfn{registers} and @dfn{strings}, which store numbers
+and text, respectively.  Measurements in @code{groff} are expressed with
+a suffix called a @dfn{scaling unit}.
 
 @table @code
 @item i
@@ -2543,10 +2543,10 @@ ems; width of an ``M'' using the current font
 @end table
 
 Set registers with the @code{nr} request and strings with the @code{ds}
-request.  Requests are like macro calls; they go on lines by themselves
-and start with the control character, a dot (@code{.}).  The difference
-is that they directly instruct the formatter program, rather than the
-macro package.
+request.  @dfn{Requests} are like macro calls; they go on lines by
+themselves and start with the @dfn{control character}, a dot (@code{.}).
+The difference is that they directly instruct the formatter program,
+rather than the macro package.
 
 @CartoucheExample
 .nr PS 10.5p \" Use 10.5-point type.
@@ -2555,10 +2555,10 @@ macro package.
 
 @noindent
 In the foregoing, we see that @code{\"} begins a comment.  This is an
-example of an escape sequence, the other kind of formatting instruction.
-Escape sequences can appear anywhere.  They begin with the escape
-character (@code{\}) and are followed by at least one more character.
-@file{ms} documents
+example of an @dfn{escape sequence}, the other kind of formatting
+instruction.  Escape sequences can appear anywhere.  They begin with the
+escape character (@code{\}) and are followed by at least one more
+character.  @file{ms} documents
 @c like this one
 tend to use only a few of @code{groff}'s many requests and escape
 sequences; see @ref{Request Index} and @ref{Escape Sequence Index} or
@@ -2585,18 +2585,17 @@ Interpolate glyph of special character named @var{char}.
 non-printing, zero-width dummy character
 
 @item \~
-Move horizontally by the current font's space width (``non-breaking
-space'').
+Insert an unbreakble space that is adjustable like a normal space.
 
 @item \|
 Move horizontally by one-sixth em (``thin space'').
 @end table
 
-@code{\&} has two important uses: put it before a word starting with a
-dot @samp{.} if that word is at the beginning of an input line (or might
-become that way in editing) to prevent the dot from being interpreted as
-the control character, and after @samp{.}, @samp{?}, and @samp{!}, when
-needed to cancel end-of-sentence detection.
+Prefix any words that start with a dot @samp{.} or neutral apostrophe
+@samp{'} with @code{\&} if they are at the beginning of an input line
+(or might become that way in editing) to prevent them from being
+interpreted as macro calls or requests.  Suffix @samp{.}, @samp{?}, and
+@samp{!} with @code{\&} when needed to cancel end-of-sentence detection.
 
 @CartoucheExample
 After the criticality accident, Dr.\&
@@ -2612,8 +2611,7 @@ Wallace said my exposure had been
 
 The @file{ms} macro package expects a certain amount of structure:
 a well-formed document contains at least one paragraphing or heading
-macro call.  To compose a document from scratch, begin it by calling
-@code{LP} or @code{PP}.  Longer documents have a structure as follows.
+macro call.  Longer documents have a structure as follows.
 
 @table @strong
 @item Document type
@@ -2641,7 +2639,7 @@ interspersed with multi-level headings (chapters, sections, subsections,
 and so forth) and augmented by lists, footnotes, tables, diagrams, and
 similar material.  @xref{ms Body Text}.
 
-@item Tables of contents and indexes
+@item Tables of contents
 Macros enable the collection of entries for a table of contents (or
 index) as the material they discuss appears in the document.  You then
 call a macro to emit the table of contents at the end of your document.
@@ -2677,10 +2675,9 @@ Set string @var{name} to @var{contents}.  If @var{name} exists, it is
 removed first.
 @endDefreq
 
-A list of document control registers and strings follows.  They are
-presented in the syntax used to interpolate them.  For any parameter
-whose default is unsatisfactory, define its register or string before
-calling any @file{ms} macro other than @code{RP}.
+A list of document control registers and strings follows.  For any
+parameter whose default is unsatisfactory, define its register or string
+before calling any @file{ms} macro other than @code{RP}.
 
 @unnumberedsubsubsec Margin settings
 
@@ -3069,14 +3066,19 @@ except that @code{TL} is mandatory if any of @code{RP}, @code{AU},
 @code{AI}, or @code{AB} is called, and @code{AE} is mandatory if
 @code{AB} is called.
 
-@Defmac {RP, [@code{no}], ms}
+@Defmac {RP, [@code{no-repeat-info}] [@code{no-renumber}], ms}
 Use the ``report'' (@acronym{AT&T}: ``released paper'') format for your
 document, creating a separate cover page.  The default arrangement is to
-print most of the document description (title, author names and
-institutions, and abstract, but not the date) at the top of page@tie{}1.
-If the optional @code{no} argument is given, @file{ms} prints a cover
-page but does not repeat any of its information on page@tie{}1 (see the
-@code{DA} macro below regarding the date).
+place most of the document description (title, author names and
+institutions, and abstract, but not the date) at the top of the first
+page.  If the optional @code{no-repeat-info} argument is given,
+@file{ms} produces a cover page but does not repeat any of its
+information subsequently (but see the @code{DA} macro below regarding
+the date).  Normally, @code{RP} sets the page number following the cover
+page to@tie{}1.  Specifying the optional @code{no-renumber} argument
+suppresses this alteration.  Optional arguments can occur in any order.
+@code{no} is recognized as a synonym of @code{no-repeat-info} for
+@code{AT&T} compatibility.
 @endDefmac
 
 @Defmac {TL, , ms}
@@ -3164,8 +3166,9 @@ added features are more in line with user demand.
 @cindex @file{ms} macros, body text
 
 A variety of macros, registers, and strings can be used to structure and
-style the body of your document.  Examples include paragraphs, headings,
-footnotes, and inclusions of material such as tables and figures.
+style the body of your document.  They organize your text into
+paragraphs, headings, footnotes, and inclusions of material such as
+tables and figures.
 
 @menu
 * Text settings in ms::
@@ -3177,7 +3180,6 @@ footnotes, and inclusions of material such as tables and figures.
 * Indented regions in ms::
 * ms keeps and displays::
 * ms Insertions::
-* Example multi-page table::
 * ms Footnotes::
 * ms language and localization::
 @end menu
@@ -3189,13 +3191,24 @@ footnotes, and inclusions of material such as tables and figures.
 @cindex @file{ms} macros, text settings
 
 The @code{FAM} string sets the font family for body text; the default is
-@samp{T} (Times).  The font family setting is ignored on terminal
-devices.  Setting the @code{FAM} string before the first call of a
-heading, paragraphing, or (non-date) document description macro also
-applies it to headers, footers, and (for @code{FAM}) footnotes.
+@samp{T}.  The @code{PS} and @code{VS} registers set the type
+size and vertical spacing (distance between text baselines),
+respectively.  The font family and type size are ignored on terminal
+devices.  Setting these parameters before the first call of a heading,
+paragraphing, or (non-date) document description macro also applies them
+to headers, footers, and (for @code{FAM}) footnotes.
+
+Which font families are available depends on the output device; as a
+convention, @code{T} selects a serif family (``Times''), @code{H} a
+sans-serif family (``Helvetica''), and @code{C} a monospaced family
+(``Courier'').  The man page for the output driver documents its font
+repertoire.  Consult the @cite{groff@r{(1)}} man page for lists of
+available output devices and their drivers.
 
 The hyphenation mode (as used by the @code{hy} request) is set from the
-@code{HY} register.
+@code{HY} register.  Setting @code{HY} to @samp{0} is equivalent to
+using the @code{nh} request.  This is a Tenth Edition Research Unix
+extension.
 
 @c ---------------------------------------------------------------------
 
@@ -3215,8 +3228,8 @@ Interpolate an em dash.
 @DefmpstrList {Q, ms}
 @DefmpstrListEndx {U, ms}
 Interpolate typographer's quotation marks where available, and neutral
-quotes otherwise.  @code{\*Q} is the left quote and @code{\*U} the
-right.  (As a mnemonic, think of ``quote'' and ``unquote''.)
+double quotes otherwise.  @code{\*Q} is the left quote and @code{\*U}
+the right.
 @endDefmpstr
 
 @c ---------------------------------------------------------------------
@@ -3394,9 +3407,9 @@ define the alias as follows.
 Any such change in numbering style becomes effective from the next use
 of @code{NH} following redefinition of the alias for @code{SN-STYLE}.
 The formatted number of the current heading is available in the
-@code{SN} string (a feature first documented by Berkeley), facilitating
-its inclusion in @code{XS}/@code{XA}/@code{XE} table of contents
-entries.
+@code{SN} string (a feature first documented by Berkeley); this string
+facilitates its inclusion in, for example, table captions, equation
+labels, and @code{XS}/@code{XA}/@code{XE} table of contents entries.
 @endDefmpstr
 
 @Defmac {SH, [@Var{depth}], ms}
@@ -3446,9 +3459,9 @@ immediately subsequent paragraph that must be kept on the same page as
 the heading.  If insufficient space remains on the current page to
 accommodate the heading and this number of lines of paragraph text, a
 page break is forced before the heading is printed.  Any display macro
-or @code{tbl}, @code{pic}, or @code{eqn} region between the heading and
-the subsequent paragraph suppresses this grouping.  @xref{ms keeps and
-displays} and @ref{ms Insertions}.
+call or @code{tbl}, @code{pic}, or @code{eqn} region between the heading
+and the subsequent paragraph suppresses this grouping.  @xref{ms keeps
+and displays} and @ref{ms Insertions}.
 
 @c ---------------------------------------------------------------------
 
@@ -3475,7 +3488,7 @@ until the next highlighting, paragraphing, or heading macro call.
 
 @Defmac {R, [@Var{text} [@Var{post} [@Var{pre}]]], ms}
 As @code{B}, but use the roman style (upright text of normal weight)
-instead of bold.
+instead of bold.  Argument recognition is a GNU extension.
 @endDefmac
 
 @Defmac {I, [@Var{text} [@Var{post} [@Var{pre}]]], ms}
@@ -3497,9 +3510,9 @@ instead of bold.  This is a Tenth Edition Research Unix extension.
 @Defmac {BX, [@Var{text}], ms}
 Typeset @var{text} and draw a box around it.  On terminal devices,
 reverse video is used instead (see the implementation note below).
-If you want @var{text} to contain space, use horizontal motion escape
-sequences of appropriate width (@code{\~}, @code{\^}, @code{\|},
-@code{\0} or @code{\h}).
+If you want @var{text} to contain space, use unbreakable space or
+horizontal motion escape sequences (@code{\~}, @code{\SP}, @code{\^},
+@code{\|}, @code{\0} or @code{\h}).
 @endDefmac
 
 @Defmac {UL, [@Var{text} [@Var{post}]], ms}
@@ -3545,15 +3558,14 @@ The foregoing example produces output as follows.
 troublesome.}
 @endCartoucheExample
 
-You might prefer to use the output line continuation escape sequence
-@code{\c} to achieve the same result (@pxref{Line Continuation}).  It is
-also portable to older @file{ms} implementations.
+You can use the output line continuation escape sequence @code{\c} to
+achieve the same result (@pxref{Line Continuation}).  It is also
+portable to older @file{ms} implementations.
 
 @CartoucheExample
 The course's students found one C language keyword
 (\c
-.CW \%static\c
-.R
+.CW \%static \c
 ) most troublesome.
 @endCartoucheExample
 
@@ -3571,13 +3583,13 @@ Begin and end subscripting, respectively.
 @endDefmpstr
 
 Rather than calling the @code{CW} macro, in @code{groff} @file{ms} you
-might prefer to change the font family to Courier---a monospaced
-typeface---by setting the @code{FAM} string to @samp{C}.  You can then
-use all four style macros above, returning to the default family (Times)
-with @samp{.ds FAM T}.  Because changes to @code{FAM} take effect only
-at the next paragraph, @code{CW} remains useful to ``inline'' a change
-to the font family, similarly to the practice of this document in noting
-syntactical elements of @file{ms} and @code{groff}.
+might prefer to change the font family to Courier by setting the
+@code{FAM} string to @samp{C}.  You can then use all four style macros
+above, returning to the default family (Times) with @samp{.ds FAM T}.
+Because changes to @code{FAM} take effect only at the next paragraph,
+@code{CW} remains useful to ``inline'' a change to the font family,
+similarly to the practice of this document in noting syntactical
+elements of @file{ms} and @code{groff}.
 
 @c ---------------------------------------------------------------------
 
@@ -3697,10 +3709,10 @@ line as the term or label (if it fits) @emph{then} breaks the line.
 \p Firearms,
 @endCartoucheExample
 
-Finally, you may append unbreakable horizontal space to the term or
-label with the @code{\h} escape sequence; using the same amount as the
-indentation will ensure that it's too wide for @code{groff} to treat it
-as ``fitting'' on the same line as the paragraph text.
+Finally, you may append a horizontal motion to the marker with the
+@code{\h} escape sequence; using the same amount as the indentation will
+ensure that the marker is too wide for @code{groff} to treat it as
+``fitting'' on the same line as the paragraph text.
 
 @CartoucheExample
 .IP guns\h'0.4i'
@@ -3819,8 +3831,7 @@ One application of @code{ne} is to reserve space on the page for a
 figure or illustration to be included later.
 
 @cindex boxes [@file{ms}]
-A keep can also be @dfn{boxed}.  Text in a box is automatically placed
-in a diversion (keep).
+A keep have a frame drawn around it; this is called a @dfn{boxed keep}.
 
 @DefmacList {B1, , ms}
 @DefmacListEndx {B2, , ms}
@@ -3828,27 +3839,28 @@ in a diversion (keep).
 boxed keep.
 @endDefmac
 
-Box macros cause breaks; if you need to box a word or phrase within a
-line, see the @code{BX} macro in @ref{Typeface and decoration}.  Box
-lines are drawn as close as possible to the text they enclose so that
-they are usable within paragraphs.  If you wish to box one or more
+Boxed keep macros cause breaks; if you need to box a word or phrase
+within a line, see the @code{BX} macro in @ref{Typeface and decoration}.
+Box lines are drawn as close as possible to the text they enclose so
+that they are usable within paragraphs.  If you wish to box one or more
 paragraphs, you may improve the appearance by calling @code{B1} after
 the first paragraphing macro, and by adding a small amount of vertical
 space before calling @code{B2}.
 
-@c Wrap example at 56 columns.
+@c Wrap example at 58 columns.
 @CartoucheExample
 .LP
 .B1
 .I Warning:
 Happy Fun Ball may suddenly accelerate to dangerous
 speeds.
-.sp \n[PD]/2
+.sp \n[PD]/2 \" space by half the inter-paragraph distance
 .B2
 @endCartoucheExample
 
-If you want a box to float, you will need to enclose the @code{B1} and
-@code{B2} calls within a pair of @code{KF} and @code{KE} calls.
+If you want a boxed keep to float, you will need to enclose the
+@code{B1} and @code{B2} calls within a pair of @code{KF} and @code{KE}
+calls.
 
 @cindex displays [@file{ms}]
 @dfn{Displays} turn off filling; lines of verse or program code are
@@ -3894,16 +3906,17 @@ End any display.
 @endDefmac
 
 The distance stored in the @code{DD} register is inserted before and
-after each pair of display macros; this is a Berkeley extension.  The
-@code{DI} register is a GNU extension; its value is an indentation
-applied to displays created with @samp{.DS} and @samp{.ID} without
-arguments, to @samp{.DS I} without an indentation argument, and to
-indented equations set with @samp{.EQ}.  Changes to either register take
-effect at the next display boundary.
+after each pair of display macros, replacing any adjacent
+inter-paragraph distance; this is a Berkeley extension.  The @code{DI}
+register is a GNU extension; its value is an indentation applied to
+displays created with @samp{.DS} and @samp{.ID} without arguments, to
+@samp{.DS I} without an indentation argument, and to indented equations
+set with @samp{.EQ}.  Changes to either register take effect at the next
+display boundary.
 
 @c ---------------------------------------------------------------------
 
-@node ms Insertions, Example multi-page table, ms keeps and displays, ms Body Text
+@node ms Insertions, ms Footnotes, ms keeps and displays, ms Body Text
 @subsubsection Tables, figures, equations, and references
 @cindex @file{ms} macros, tables
 @cindex @file{ms} macros, figures
@@ -3942,13 +3955,13 @@ can create @code{pic} input manually or by using a program such as
 @code{xfig}.
 @endDefmac
 
-@DefmacList {EQ, [@Var{align}], ms}
+@DefmacList {EQ, [@Var{align} [@Var{label}], ms}
 @DefmacListEndx {EN, , ms}
 Demarcate an equation to be processed by the @code{eqn} preprocessor.
-The equation is center-aligned by default; the optional @var{align}
-argument can be @samp{C}, @samp{L}, or @samp{I} to center, left-align,
-or indent it by the amount stored in the @code{DI} register,
-respectively.
+The equation is centered by default; @var{align} can be @samp{C},
+@samp{L}, or @samp{I} to (explicitly) center, left-align, or indent it
+by the amount stored in the @code{DI} register, respectively.  If
+specified, @var{label} is set right-aligned.
 @endDefmac
 
 @DefmacList {[, , ms}
@@ -3964,17 +3977,8 @@ When @code{refer} emits collected references (as might be done on a
 ``Works Cited'' page), it interpolates the @code{REFERENCES} string as
 an unnumbered heading (@code{SH}).
 
-@menu
-* Example multi-page table::
-@end menu
-
-@c ---------------------------------------------------------------------
-
-@node Example multi-page table, ms Footnotes, ms Insertions, ms Body Text
-@subsubsection An example multi-page table
-@cindex example markup, multi-page table [@file{ms}]
-@cindex multi-page table, example markup [@file{ms}]
-
+@cindex table, multi-page, example [@file{ms}]
+@cindex multi-page table example [@file{ms}]
 The following is an example of how to set up a table that may print
 across two or more pages.
 
@@ -3991,13 +3995,34 @@ GH-1978@arrow{}Fribulating gonkulator
 .TE
 @endCartoucheExample
 
+@noindent
 Attempting to place a multi-page table inside a keep can lead to
 unpleasant results, particularly if the @code{tbl} @code{allbox} option
 is used.
 
+@cindex equation example [@file{ms}]
+Mathematics can be typeset using the language of the @code{eqn}
+preprocessor.
+
+@CartoucheExample
+.EQ C (\*[SN-NO-DOT]a)
+p ~ = ~ q sqrt @{ ( 1 + ~ ( x / q sup 2 ) @}
+.EN
+@endCartoucheExample
+
+@noindent
+This input formats a labelled equation.  We used the @code{SN-NO-DOT}
+string to base the equation label on the current heading number, giving
+us more flexibility to reorganize the document.
+
+Remember to run any desired preprocessors on the input; @command{groff}
+options will take care of this.  Use @option{-e} for @command{geqn},
+@option{-p} for @command{gpic}, @option{-R} for @command{grefer}, and
+@option{-t} for @command{gtbl}.
+
 @c ---------------------------------------------------------------------
 
-@node ms Footnotes,  , Example multi-page table, ms Body Text
+@node ms Footnotes, , ms Insertions, ms Body Text
 @subsubsection Footnotes
 @cindex @file{ms} macros, footnotes
 @cindex footnotes [@file{ms}]
@@ -4064,8 +4089,7 @@ corresponding @code{FS} call as long as each @code{FS} call occurs
 Footnote text is formatted as paragraphs are, using analogous
 parameters.  The registers @code{FI}, @code{FPD}, @code{FPS}, and
 @code{FVS} correspond to @code{PI}, @code{PD}, @code{PS}, and @code{CS},
-respectively. The @code{FPD}, @code{FPS}, and @code{FVS} registers are
-GNU extensions.
+respectively; @code{FPD}, @code{FPS}, and @code{FVS} are GNU extensions.
 
 The @code{FF} register controls the formatting of automatically numbered
 footnote paragraphs and those for which @code{FS} is given a marker
@@ -4183,16 +4207,15 @@ There are multiple ways to produce headers and footers.  One is to
 define the strings @code{LH}, @code{CH}, and @code{RH} to set the left,
 center, and right headers, respectively; and @code{LF}, @code{CF}, and
 @code{RF} to set the left, center, and right footers similarly.  This
-approach works best for documents that do not distinguish odd and even
-pages.
+approach works best for documents that do not distinguish odd- and
+even-numbered pages.
 
-Another method is to call macros with arguments that set headers or
-footers for odd or even pages; these variables produce four
-combinations, so four macros are available.  Each takes a delimiter
+Another method is to call macros that set headers or footers for odd- or
+even-numbered pages.  Each such macro takes a delimited argument
 separating the left, center, and right header or footer texts from each
-other.  You can replace the neutral apostrophes (@code{'}) with any
-character not appearing in the header or footer text.  These macros are
-Berkeley extensions.
+other.  You can replace the neutral apostrophes (@code{'}) shown below
+with any character not appearing in the header or footer text.  These
+macros are Berkeley extensions.
 
 @DefmacList {OH, @code{'}@Var{left}@code{'}@Var{center}@code{'}@Var{right}@code{'}, ms}
 @DefmacItemx {EH, @code{'}@Var{left}@code{'}@Var{center}@code{'}@Var{right}@code{'}, ms}
@@ -4222,9 +4245,11 @@ be written, and @code{BT} (``bottom trap'') when the footer is to be.
 The page location trap that @file{ms} sets up to format the header also
 calls the (normally undefined) @code{HD} macro after @code{PT}; you can
 define @code{HD} if you need additional processing after setting the
-header (for example, to draw a line below it).  The @code{HD} hook is a
-Berkeley extension.  Any such macros you (re)define must implement any
-desired specialization for odd-, even-, or first-numbered pages.
+header (for example, to draw a line below it).
+@c Although undocumented in Tuthill's 4.2BSD ms.diffs paper...
+The @code{HD} hook is a Berkeley extension.  Any such macros you
+(re)define must implement any desired specialization for odd-, even-, or
+first numbered pages.
 
 @c ---------------------------------------------------------------------
 
@@ -4260,7 +4285,10 @@ margin.
 
 @file{ms} can set text in as many columns as reasonably fit on the page.
 The following macros force a page break if a multi-column layout is
-active when they are called.
+active when they are called.  The @code{MINGW} register stores the
+default minimum gutter width; it is a GNU extension.  When multiple
+columns are in use, keeps and the @code{HORPHANS} and @code{PORPHANS}
+registers work with respect to column breaks instead of page breaks.
 
 @Defmac {1C, , ms}
 Arrange page text in a single column (the default).
@@ -4274,8 +4302,7 @@ Arrange page text in two columns.
 Arrange page text in multiple columns.  If you specify no arguments, it
 is equivalent to the @code{2C} macro.  Otherwise, @var{column-width} is
 the width of each column and @var{gutter-width} is the minimum distance
-between columns.  The @code{MINGW} register stores the default minimum
-gutter width; it is a GNU extension.
+between columns.
 @endDefmac
 
 @c ---------------------------------------------------------------------
@@ -4307,15 +4334,12 @@ to fit or because style dictates that page numbers not be repeated.  You
 may wish to indent the text thus wrapped to correspond to its heading
 depth; this can be done in the entry text by prefixing it with tabs or
 horizontal motion escape sequences, or by providing a second argument to
-the @code{XA} macro.
-
-@code{XS} and @code{XA} automatically associate the page number where
-they are called with the text following them, but they accept arguments
-to override this behavior.  At the end of the document, call @code{TC}
-or @code{PX} to emit the table of contents; @code{TC} resets the page
-number to @samp{i} (Roman numeral one), and then calls @code{PX}.
-
-All of these macros are Berkeley extensions.
+the @code{XA} macro.  @code{XS} and @code{XA} automatically associate
+the page number where they are called with the text following them, but
+they accept arguments to override this behavior.  At the end of the
+document, call @code{TC} or @code{PX} to emit the table of contents;
+@code{TC} resets the page number to @samp{i} (Roman numeral one), and
+then calls @code{PX}.  All of these macros are Berkeley extensions.
 
 @DefmacList {XS, [@Var{page-number}], ms}
 @DefmacItemx {XA, [@Var{page-number} [@Var{indentation}]], ms}
@@ -4447,6 +4471,10 @@ multiplied by 1000.  See the @code{PS} register in @ref{ms Document
 Control Settings}.
 
 @item
+@acronym{AT&T} @file{ms}'s @code{AU} macro supported arguments used with
+some document types; @code{groff} @file{ms} does not.
+
+@item
 Right-aligned displays are available.  The @acronym{AT&T} @file{ms}
 manual observes that ``it is tempting to assume that @samp{.DS R} will
 right adjust lines, but it doesn't work''.  In @code{groff} @file{ms},
@@ -4489,71 +4517,54 @@ register.
 @endDefmpreg
 
 @menu
-* Missing ms Macros::
-* Additional ms Macros::
+* Unix Version 7 ms Macros Not Implemented by groff ms::
 @end menu
 
 @c ---------------------------------------------------------------------
 
-@node Missing ms Macros, Additional ms Macros, Differences from AT&T ms, Differences from AT&T ms
-@subsubsection @acronym{AT&T} @file{ms} macros not appearing in @code{groff} @file{ms}
+@node Unix Version 7 ms Macros Not Implemented by groff ms, , Differences from AT&T ms, Differences from AT&T ms
+@subsubsection Unix Version 7 @file{ms} macros not implemented by @code{groff} @file{ms}
 
-Macros missing from @code{groff} @file{ms} are specific to Bell Labs and
-Berkeley.  The macros known to be missing are:
+Several macros described in the Unix Version@tie{}7 @file{ms}
+documentation are unimplemented by @code{groff} @file{ms} because they
+are specific to the requirements of documents produced internally by
+Bell Laboratories, some of which also require a glyph for the Bell
+System logo that @code{groff} does not support.  These include macros
+implementing several document type formats
+(@code{EG}, @c engineer's notes
+@code{IM}, @c internal memorandum
+@code{MF}, @c memorandum for file
+@code{MR}, @c memorandum for record
+@code{TM}, @c technical memorandum
+@code{TR}), @c technical report
+were meaningful only in conjunction with the use of certain document
+types
+(@code{AT}, @c attachments
+@code{CS}, @c cover sheet info for `TM` documents
+@code{CT}, @c copies to
+@code{OK}, @c "other keywords" for `TM` documents
+@code{SG}), @c signatures for `TM` documents
+stored the postal addresses of Bell Labs sites
+(@code{HO}, @c Holmdel
+@code{IH}, @c Naperville
+@code{MH}, @c Murray Hill
+@code{PY}, @c Piscataway
+@code{WH}), @c Whippany
+or lack a stable definition historically
+(@code{UX}). @c Unix; on 1st use, add footnote id'ing trademark owner
+To compatibly render historical @file{ms} documents using these macros,
+we advise your documents to invoke the @code{rm} request to remove any
+such macros it uses and then define replacements with an authentically
+typeset original at hand.@footnote{The removal beforehand is necessary
+because @code{groff} @file{ms} aliases these macros to a diagnostic
+macro, and you want to redefine the aliased name, not its target.}  For
+informal purposes, a simple definition of @code{UX} should maintain the
+readability of the document's substance.
 
-@table @code
-@item .TM
-Technical memorandum; a cover sheet style
-
-@item .IM
-Internal memorandum; a cover sheet style
-
-@item .MR
-Memo for record; a cover sheet style
-
-@item .MF
-Memo for file; a cover sheet style
-
-@item .EG
-Engineer's notes; a cover sheet style
-
-@item .TR
-Computing Science Technical Report; a cover sheet style
-
-@item .OK
-Other keywords
-
-@item .CS
-Cover sheet information
-
-@item .MH
-Murray Hill Bell Laboratories postal address
-@end table
-
-Tenth Edition @c possibly 9th
-Research Unix supported a pair of @code{P1} and @code{P2} macros for
-setting code examples; @code{groff} @file{ms} does not.
-
-@c ---------------------------------------------------------------------
-
-@node Additional ms Macros,  , Missing ms Macros, Differences from AT&T ms
-@subsubsection @code{groff} @file{ms} macros not appearing in @acronym{AT&T} @file{ms}
-
-The @code{groff} @file{ms} macros have a few minor extensions to the
-@acronym{AT&T} @file{ms} macros.
-
-@Defmac {CW, , ms}
-Set text in a @code{constant-width} (monospaced) typeface.  This is a
-Tenth Edition Research Unix extension.
-@endDefmac
-
-@Defmac {IX, , ms}
-Write an indexing term to the standard error stream.  You can write a
-script to capture and process an index generated in this manner.
-@endDefmac
-
-Several new strings are available as well.  You can change these to
-handle (for example) the local language.  @xref{ms Legacy Features}.
+@CartoucheExample
+.rm UX
+.ds UX Unix\"
+@endCartoucheExample
 
 @c ---------------------------------------------------------------------
 
@@ -4567,7 +4578,7 @@ handle (for example) the local language.  @xref{ms Legacy Features}.
 @cindex strings [@file{ms}]
 
 @code{groff} @file{ms} retains support for some legacy features solely
-to support rendering of historical documents; contemporary ones should
+to support formatting of historical documents; contemporary ones should
 not use them because they can render poorly.  See the
 @cite{groff_char@r{(7)}} man page.
 
@@ -5063,11 +5074,11 @@ Sometimes, a line cannot be broken automatically.  This usually does
 not happen with natural language text unless the output line length has
 been manipulated to be extremely short, but it can with specialized
 text like program source code.  We can use @code{perl} at the shell
-prompt to contrive an example of failure to break the output line.  The
-regular output is omitted below.
+prompt to contrive an example of failure to break the line.  We also
+employ the @option{-z} option to suppress normal output.
 
 @Example
-$ perl -e 'print "#" x 80, "\n";' | nroff
+$ perl -e 'print "#" x 80, "\n";' | nroff -z
     @error{} warning: cannot break line
 @endExample
 
@@ -5469,12 +5480,12 @@ traditions have accrued in service of these goals.
 @item
 Follow sentence endings in the input with newlines to ease their
 recognition (@pxref{Sentences}).  It is frequently convenient to end
-input lines after colons and semicolons as well, as these typically
+text lines after colons and semicolons as well, as these typically
 precede independent clauses.  Consider doing so after commas; they often
 occur in lists that become easy to scan when itemized by line, or
 constitute supplements to the sentence that are added, deleted, or
 updated to clarify it.  Parenthetical and quoted phrases are also good
-candidates for placement on input lines by themselves.
+candidates for placement on text lines by themselves.
 
 @item
 Set your text editor's line length to 72 characters or
@@ -5645,8 +5656,8 @@ next text baseline automatically.  If the formatter were already writing
 to the last line that would fit on the page, advancing by one vee would
 place the next text baseline off the page.  Rather than let that happen,
 @code{roff} formatters instruct the output driver to eject the page,
-start a new one, and reset the drawing position to one vee below the
-page top again; this is a @dfn{page break}.
+start a new one, and again set the drawing position to one vee below the
+page top; this is a @dfn{page break}.
 
 When the last line of input text is also the last output line that can
 fit on the page, the break caused by the end of input will also break
@@ -5875,8 +5886,8 @@ to their left and right; they are @code{+} (addition), @code{-}
 (subtraction), @code{*} (multiplication), @code{/} (truncating
 division), and @code{%} (modulo).  @dfn{Truncating division} rounds to
 the integer nearer to zero, no matter how large the fractional portion.
-Overflow and division by zero are errors and abort evaluation of a
-numeric expression.
+Overflow and division (or modulo) by zero are errors and abort
+evaluation of a numeric expression.
 @cindex unary arithmetic operators
 @cindex operators, unary arithmetic
 @cindex negation
@@ -6130,8 +6141,9 @@ likely undesirable, results.  On the @samp{ps} output device, it
 underlines the period.
 
 For vertical movements, the @code{|} operator specifies a distance from
-the first text baseline on the page or in the current diversion, using
-the current vertical spacing.
+the first text baseline on the page or in the current diversion.  The
+default scaling unit is vees, computed in terms of the current
+vertical spacing (not necessarily that at the top of the page).
 
 @Example
 A
@@ -6169,10 +6181,10 @@ Register Formats}.
 
 @cindex space characters, in expressions
 @cindex expressions, and space characters
-Due to the way arguments are parsed, spaces are not allowed in numeric
-expressions unless the (sub)expression containing them is surrounded by
-parentheses.  @xref{Request and Macro Arguments}, and @ref{Conditionals
-and Loops}.
+Because spaces separate arguments to requests, spaces are not allowed in
+numeric expressions unless the (sub)expression containing them is
+surrounded by parentheses.  @xref{Request and Macro Arguments}, and
+@ref{Conditionals and Loops}.
 
 @Example
 .nf
@@ -6405,13 +6417,13 @@ available via both requests and escape sequences.
 @cindex control character, no-break (@code{'})
 A request invocation begins with a control character, which is either a
 single quote (@samp{'}, the @dfn{no-break control character}) or a
-period (@samp{.}, the normal @dfn{control character}).  These can be
-changed; see @ref{Character Translations}, for details.  After this
-there may be optional tabs or spaces followed by an identifier, which is
-the name of the request.  If the request is given arguments, they must
-be separated from the request name and each other by spaces; GNU
-@code{troff} does not allow tabs for argument
-separation.@footnote{Plan@tie{}9 @code{troff} does.}
+period (@samp{.}, the normal @dfn{control character}).  Either can be
+changed; see @ref{Request and Macro Arguments}, for details.  After it
+come optional tabs and/or spaces and then an identifier naming the
+request.  If the request is given arguments, they must be separated from
+the request name and each other by spaces; GNU @code{troff} does not
+allow tabs for argument separation.@footnote{Plan@tie{}9 @code{troff}
+does.}
 
 @cindex structuring source code of documents or macro packages
 @cindex documents, structuring the source of
@@ -6434,8 +6446,8 @@ macro files.
 
 @cindex blank line
 @cindex blank line macro (@code{blm})
-Another possibility is to use the blank line macro request @code{blm} by
-assigning an empty macro to it.
+Instead of the empty request, you can separate macro definitions (or any
+control lines) with blank lines if you assign an empty blank line macro.
 
 @Example
 .de do-nothing

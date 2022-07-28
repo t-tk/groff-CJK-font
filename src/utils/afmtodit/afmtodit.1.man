@@ -189,11 +189,18 @@ it is best to access them with glyph names only.
 .
 .
 .P
-If the font is downloadable to the device as a file,
-it may be listed in the file
-.IR @FONTDIR@/\:\%devps/\:\%download ;
-see
-.MR grops @MAN1EXT@ .
+If the font file proper
+(not just its metrics)
+is available,
+listing it in the files
+.I @FONTDIR@/\:\%devps/\:\%download
+and/or
+.IR @FONTDIR@/\:\%devpdf/\:\%download ;
+enables it to be embedded in the output produced by
+.MR grops @MAN1EXT@
+and
+.MR gropdf @MAN1EXT@ ,
+respectively.
 .
 .
 .P
@@ -455,21 +462,35 @@ lists fonts available for embedding within the PostScript document
 .
 .
 .TP
-.I @FONTDIR@/\:\%devps/\:text.enc
-describes the encoding scheme used by most PostScript Type\~1 fonts;
-the
-.B \%encoding
-directive of
-font description files for the
-.B ps
-device refers to it.
-.
-.
-.TP
-.I @FONTDIR@/\:\%devps/\:\%generate/\:\%textmap
-maps names in the Adobe Glyph List to
+.I @FONTDIR@/\:\%devps/\:\%generate/\:\%dingbats.map
+.TQ
+.I @FONTDIR@/\:\%devps/\:\%generate/\:\%dingbats\-reversed.map
+.TQ
+.I @FONTDIR@/\:\%devps/\:\%generate/\:\%slanted\-symbol.map
+.TQ
+.I @FONTDIR@/\:\%devps/\:\%generate/\:\%symbol.map
+.TQ
+.I @FONTDIR@/\:\%devps/\:\%generate/\:\%text.map
+map names in the Adobe Glyph List to
 .I groff
-special character identifiers.
+special character identifiers for Zapf Dingbats
+.RB ( ZD ),
+reversed Zapf Dingbats
+.RB ( ZDR ),
+symbol
+.RB ( S ),
+slanted symbol
+.RB ( SS ),
+and text fonts,
+respectively.
+.
+These
+.IR map-file s
+are used to produce the font description files provided with
+.I groff
+for the
+.I \%grops
+output driver.
 .
 .
 .\" ====================================================================
