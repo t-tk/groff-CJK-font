@@ -40,8 +40,8 @@
 
 I used following fonts distributed by Ubuntu apt package manager.
 
-* fonts-ipaexfont-gothic: Japanese OpenType font, IPAex Gothic Font
 * fonts-ipaexfont-mincho: Japanese OpenType font, IPAex Mincho Font
+* fonts-ipaexfont-gothic: Japanese OpenType font, IPAex Gothic Font
 * fonts-unfonts-core: Un series Korean TrueType fonts
 * fonts-arphic-uming: "AR PL UMing" Chinese Unicode TrueType font collection Mingti style
 * fonts-arphic-ukai: "AR PL UKai" Chinese Unicode TrueType font collection Kaiti style
