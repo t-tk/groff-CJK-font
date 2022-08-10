@@ -1572,21 +1572,27 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .if \En[.$] .@warning arguments to .LG ignored
 .ps +2
 ..
-.\" par*define-font-macro macro font
+.\" par*define-font-macro macro font apply-italic-corrections
 .de par*define-font-macro
 .de \\$1
+.ds par*lic \" empty
+.ds par*ic \" empty
+.if \\n[.$]>2 \{\
+.	as par*lic \,\"
+.	as par*ic \/\"
+.\}
 .if \En[.$]>3 .@warning excess arguments to .\\$1 ignored
 .ie \En[.$] \{\
 .	nr par*prev-font \En[.f]
-\&\E$3\f[\\$2]\E$1\f[\En[par*prev-font]]\E$2
+\&\E$3\E*[par*lic]\f[\\$2]\E$1\f[\En[par*prev-font]]\E*[par*ic]\E$2
 .\}
 .el .ft \\$2
 \\..
 ..
 .par*define-font-macro R R
 .par*define-font-macro B B
-.par*define-font-macro I I
-.par*define-font-macro BI BI
+.par*define-font-macro I I yes
+.par*define-font-macro BI BI yes
 .ie n .par*define-font-macro CW R
 .el   .par*define-font-macro CW CR
 .\" underline a word

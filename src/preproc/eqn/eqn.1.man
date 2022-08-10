@@ -216,7 +216,6 @@ or
 .SS "Controlling delimiters"
 .\" ====================================================================
 .
-If not in compatibility mode,
 .I eqn
 recognizes
 .RB \[lq] "delim on" \[rq]
@@ -225,7 +224,7 @@ disabled with a call to
 .RB \[lq] "delim off" \[rq].
 .
 If delimiters haven't been specified,
-the call has no effect.
+these commands have no effect.
 .
 .
 .\" ====================================================================
@@ -1318,10 +1317,7 @@ Recognize
 .B .EQ
 and
 .B .EN
-even when followed by a character other than space or newline,
-and do not handle the
-.RB \[lq] "delim on" \[rq]
-statement specially.
+even when followed by a character other than space or newline.
 .
 .
 .TP
@@ -1333,28 +1329,31 @@ for the left and right ends,
 respectively,
 of inline equations.
 .
+.I x
+and
+.I y
+need not be distinct.
+.
 Any
 .B delim
-statements in the source file override this.
+.I xy
+statements in the source file override this option.
 .
 .
 .TP
 .BI \-f\~ F
-This is equivalent to a
+is equivalent to
 .RB \[lq] gfont
-.IR F \[rq]
-command.
+.IR F \[rq].
 .
 .
 .TP
 .BI \-m\~ n
-Set the minimum point size
-.RI to\~ n .
+Set the minimum type size to
+.IR n \~points.
 .
 .I @g@eqn
-will not reduce the size of subscripts or superscripts to
-a smaller size
-.RI than\~ n .
+will not reduce the size of sub- or superscripts beyond this size.
 .
 .
 .TP
@@ -1363,12 +1362,12 @@ Search
 .I dir
 for
 .I eqnrc
-before the default directories.
+before those listed in section \[lq]Description\[rq] above.
 .
 .
 .TP
 .B \-N
-Don't allow newlines within delimiters.
+Prohibit newlines within delimiters.
 .
 This option allows
 .I @g@eqn
@@ -1377,21 +1376,21 @@ to recover better from missing closing delimiters.
 .
 .TP
 .BI \-p\~ n
-This says that subscripts and superscripts should be
+Set sub- and superscripts
 .IR n \~points
 smaller than the surrounding text.
 .
 This option is deprecated.
 .
-Normally,
 .I @g@eqn
-sets subscripts and superscripts at 70% of the size of the surrounding
-text.
+normally sets sub- and superscripts at 70% of the type size of the
+surrounding text.
 .
 .
 .TP
 .B \-r
-Only one size reduction.
+Reduce the type size of subscripts at most once relative to the base
+type size for the equation.
 .
 .
 .TP
@@ -1408,34 +1407,35 @@ This is equivalent to a
 command.
 .
 This option is deprecated.
+.
 .I @g@eqn
-normally sets equations at whatever the current point size is when the
-equation is encountered.
+normally sets equations at the type size current when the equation is
+encountered.
 .
 .
 .TP
 .BI \-T\~ name
-The output is for output driver
+Prepare output for the device
 .IR name .
 .
-Normally,
-the only effect of this is to define a macro
+In most cases,
+the effect of this is to define a macro
 .I name
 with a value
 .RB of\~ 1 ;
 .I eqnrc
-uses this to provide definitions appropriate for the output driver.
+uses this to provide definitions appropriate for the device.
 .
 However,
 if the specified driver is \[lq]MathML\[rq],
 the output is MathML markup rather than
 .I @g@troff
-commands,
+input,
 and
 .I eqnrc
 is not loaded at all.
 .
-The default output driver is
+The default output device is
 .BR @DEVICE@ .
 .
 .

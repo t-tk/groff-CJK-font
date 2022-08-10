@@ -54,7 +54,7 @@ These
 .I groff
 macros feature cover page and table of contents generation,
 automatically numbered headings,
-several different paragraph styles,
+several paragraph styles,
 a variety of text styling options,
 footnotes,
 and multi-column page layouts.
@@ -184,7 +184,8 @@ can be useful for previewing.
 .TS
 box center;
 lf(CB).
-\f[CR]$\f[] vi radical.ms
+\f[CR]$\f[] editor radical.ms
+\f[CR]$\f[] nroff -ww -z -ms radical.ms # check for errors
 \f[CR]$\f[] nroff \-ms radical.ms | less \-R
 \f[CR]$\f[] groff \-T ps \-ms radical.ms > radical.ps
 \f[CR]$\f[] see radical.ps
@@ -345,7 +346,7 @@ with
 .CW \[rs]&
 if they are at the beginning of an input line
 (or might become that way in editing)
-to prevent the them from being interpreted as macro calls or requests.
+to prevent them from being interpreted as macro calls or requests.
 .
 Suffix
 .CW . ,
@@ -412,7 +413,7 @@ and are not supported by
 .
 .IP "\fBFormat and layout\fP"
 By setting registers and strings,
-you can change your document's typeface,
+you can configure your document's typeface,
 margins,
 spacing,
 headers and footers,
@@ -868,7 +869,7 @@ The
 .CW FAM
 string sets the font family for body text;
 the default is
-.CW T \[rq] \[lq].
+.CW T \[rq]. \[lq]
 .
 The
 .CW PS
@@ -1086,7 +1087,7 @@ T}
 .
 .KS
 .PP
-The following example illustrates several different paragraphing macros.
+The following example illustrates the use of paragraphing macros.
 .
 .
 .TS
@@ -1150,9 +1151,8 @@ type size as the body text.
 .
 Headings are available with and without automatic numbering.
 .
-Text lines immediately after heading macro calls are treated as part of
-the heading,
-rendered on the same output line in the same style.
+Text on input lines following the macro call becomes the heading's
+title.
 .
 .
 .TS
@@ -2186,9 +2186,9 @@ included later.
 .
 .
 .PP
-A keep have a frame drawn around it;
-this is called a
-.I "boxed keep."
+A
+.I "boxed keep"
+has a frame drawn around it.
 .
 .
 .TS
@@ -2377,7 +2377,7 @@ The optional
 argument to
 .CW .TS
 instructs
-.I groff
+.I ms
 to repeat table rows
 (often column headings)
 at the top of each new page the table spans,
@@ -3581,7 +3581,7 @@ request.
 .
 A typical leader combines the dot glyph
 .CW .\& \[rq] \[lq]
-with a horizontal space escape sequence to spread the dots.
+with a horizontal motion escape sequence to spread the dots.
 .
 The width of the page number field is stored in the
 .CW TC\-MARGIN
@@ -3695,7 +3695,7 @@ and
 .PP
 AT&T
 .I ms
-supported only integer values for the type size and vertical spacing.
+supported only integral values for the type size and vertical spacing.
 .
 To overcome this restriction,
 for the registers

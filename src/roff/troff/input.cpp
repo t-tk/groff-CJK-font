@@ -2363,7 +2363,7 @@ bool token::usable_as_delimiter(bool report_error)
     case ')':
     case '.':
       if (report_error)
-        error("cannot use character '%1' as a starting delimiter",
+        error("character '%1' not allowed as starting delimiter",
 	      char(c));
       return false;
     default:
@@ -2381,7 +2381,7 @@ bool token::usable_as_delimiter(bool report_error)
   case TOKEN_TAB:
   case TOKEN_NEWLINE:
     if (report_error)
-      error("cannot use %1 as a starting delimiter", description());
+      error("%1 not allowed as starting delimiter", description());
     return false;
   default:
     return true;
@@ -4353,7 +4353,7 @@ static void interpolate_arg(symbol nm)
 {
   const char *s = nm.contents();
   if (!s || *s == '\0')
-    copy_mode_error("missing argument name");
+    copy_mode_error("missing positional argument number");
   else if (s[1] == 0 && csdigit(s[0]))
     input_stack::push(input_stack::get_arg(s[0] - '0'));
   else if (s[0] == '*' && s[1] == '\0') {
@@ -4421,7 +4421,7 @@ static void interpolate_arg(symbol nm)
     for (p = s; *p && csdigit(*p); p++)
       ;
     if (*p)
-      copy_mode_error("bad argument name '%1'", s);
+      copy_mode_error("invalid positional argument number '%1'", s);
     else
       input_stack::push(input_stack::get_arg(atoi(s)));
   }
@@ -5399,7 +5399,7 @@ static node *do_non_interpreted()
     else
       mac.append(c);
   if (c == EOF || c == '\n') {
-    error("missing \\?");
+    error("unterminated transparent embedding escape sequence");
     return 0;
   }
   return new non_interpreted_node(mac);
@@ -6651,7 +6651,10 @@ const char *input_char_description(int c)
   case '\0':
     return "node";
   }
-  static char buf[sizeof("magic character code ") + 1 + INT_DIGITS];
+  size_t bufsz = sizeof "magic character code "  + INT_DIGITS + 1;
+  // repeat expression; no VLAs in ISO C++
+  static char buf[sizeof "magic character code "  + INT_DIGITS + 1];
+  (void) memset(buf, 0, bufsz);
   if (invalid_input_char(c)) {
     const char *s = asciify(c);
     if (*s) {

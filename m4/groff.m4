@@ -393,7 +393,7 @@ AC_DEFUN([GROFF_PNMTOOLS_CAN_BE_QUIET], [
 # Check whether pnmtops can handle the -nosetpage option.
 #
 # We require this both for grohtml operation and generation of
-# doc/gnu.eps from repository/snapshot archive builds.
+# doc/gnu.eps from repository builds.
 
 AC_DEFUN([GROFF_PNMTOPS_NOSETPAGE], [
   pnmtops_nosetpage="pnmtops $pnmtools_quiet"

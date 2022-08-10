@@ -3025,6 +3025,15 @@ void table::do_bottom()
 	   ".\\}\n");
   if (flags & DOUBLEBOX)
     prints(".sp " DOUBLE_LINE_SEP "\n");
+  // Horizontal box lines take up an entire row on nroff devices (maybe
+  // a half-row if we ever support [emulators of] devices like the
+  // Teletype Model 37 with half-line motions).
+  if (flags & (BOX | DOUBLEBOX | ALLBOX))
+    prints(".if n .sp\n");
+  // Space again for the doublebox option, until we can draw that more
+  // attractively; see Savannah #43637.
+  if (flags & DOUBLEBOX)
+    prints(".if n .sp\n");
   prints("." RESET_MACRO_NAME "\n"
 	 ".fc\n"
 	 ".cp \\n(" COMPATIBLE_REG "\n");

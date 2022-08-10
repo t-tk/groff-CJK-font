@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
@@ -1079,7 +1078,7 @@ void do_delim()
       end_delim_saved = end_delim;
       start_delim = end_delim = '\0';
     }
-    else if (c == 'o' && d == 'n' && !compatible_flag) {
+    else if (c == 'o' && d == 'n') {
       start_delim = start_delim_saved;
       end_delim = end_delim_saved;
     }
@@ -1222,3 +1221,8 @@ void yyerror(const char *s)
   show_context();
 }
 
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

@@ -65,21 +65,21 @@ FDL in the main directory of the groff source package.
     <li><a href="#covertitle">COVERTITLE</a></li>
     <li><a href="#doc-covertitle">DOC_COVERTITLE</a></li>
     <li><a href="#pdftitle">PDF_TITLE</a></li>
-    <li><a href="#toc-heading">TOC_HEADING</li>
+    <li><a href="#toc-heading">TOC_HEADING</a></li>
   </ul></li>
   <li><a href="#docstyle-macros"><b>The docstyle macros (templates)</b></a>
   <ul class="toc-docproc">
     <li><a href="#doctype">DOCTYPE (default, chapter, letter, named, slides)</a></li>
-    <li><a href="#slides">DOCTYPE SLIDES</a></li>
+    <li><a href="#slides">DOCTYPE SLIDES</a>
     <ul class="toc-docproc">
     <li><a href="#newslide">NEWSLIDE</a></li>
       <li><a href="#pause">PAUSE</a></li>
       <li><a href="#transition">TRANSITION</a></li>
-    </ul>
+    </ul></li>
     <li><a href="#printstyle">PRINTSTYLE</a></li>
     <li><a href="#copystyle">COPYSTYLE</a></li>
   </ul></li>
-  <li><a href="cover.html"><b>Cover pages</b></a>
+  <li><a href="cover.html"><b>Cover pages</b></a></li>
   <li><a href="#docheader"><b>Managing the document header</b></a>
   <ul class="toc-docproc">
     <li><a href="#docheader">DOCHEADER</a></li>
@@ -259,8 +259,8 @@ blockquotes so that they adhere to it.  (Prior to invoking
 the document leading is set with the
 <a href="typesetting.html#macros-typesetting">typesetting macro</a>
 <a href="typesetting.html#leading">LS</a>,
-afterwards with the document
-<a href="definitions.html#controlmacro">control macro</a>
+afterwards with the
+<a href="definitions.html#controlmacro">document control macro</a>
 <a href="#doc-lead">DOC_LEAD</a>.)
 </p>
 
@@ -286,8 +286,8 @@ and
 <a href="definitions.html#preprocessor">pre-processor material</a>.
 In addition, the
 <a href="#shim">SHIM</a>
-macro can be inserted into a document to make sure that the
-text following falls on the baseline grid.
+macro can be inserted into a document at any point to make sure
+the text following falls on the baseline grid.
 </p>
 
 <p>
@@ -405,7 +405,7 @@ The solution is simply to add <kbd>.SPACE&nbsp;-1v</kbd> or
 </div>
 
 <div class="box-macro-args">
-Macro: <b>NO_SHIM</b> <kbd class="macro-args">&lt;none&gt; | &lt;anything&gt;
+Macro: <b>NO_SHIM</b> <kbd class="macro-args">&lt;none&gt; | &lt;anything&gt;</kbd>
 </div>
 
 <p>
@@ -900,7 +900,7 @@ processing macros.
 </div>
 
 <div class="box-macro-args">
-Macro: <b>TITLE</b> <kbd class=marco-args>[COVER | DOC_COVER] &quot;&lt;title string&gt;&quot; [&quot;&lt;2nd line&gt;&quot; [&quot;&lt;3rd line&gt;&quot; ... ] ]</kbd> 
+Macro: <b>TITLE</b> <kbd class="macro-args">[COVER | DOC_COVER] &quot;&lt;title string&gt;&quot; [&quot;&lt;2nd line&gt;&quot; [&quot;&lt;3rd line&gt;&quot; ... ] ]</kbd> 
 </div>
 <p class="requires">
 &bull;&nbsp;Arguments must be enclosed in double-quotes
@@ -1246,7 +1246,7 @@ what it is with the CHAPTER_STRING macro, like this:
 <p>
 If you would like a blank chapter string, i.e., you&#8217;d like the
 chapter number to appear without &#8220;Chapter&#8221; beforehand,
-enter <kbd>.CHAPTER_STRING "\&"</kbd>.
+enter <kbd>.CHAPTER_STRING "\&amp;"</kbd>.
 </p>
 
 <!-- -CHAPTER_TITLE- -->
@@ -1779,7 +1779,7 @@ TOC_HEADING_STYLE accepts as many or as few arguments as you need:
 <a href="color.html#newcolor">NEWCOLOR</a>
 or
 <a href="color.html#xcolor">XCOLOR</a>.
-</br>
+<br/>
 ** <kbd>SPACE_ABOVE</kbd> and <kbd>SPACE_BENEATH</kbd> require a
 <a href="definitions.html#unitofmeasure">unit of measure</a>
 to be appended to their numeric argument.
@@ -1822,7 +1822,7 @@ and revision information in the headers) or a final copy.
 <div class="macro-list-container">
 <h3 id="index-docstyle" class="macro-list">Docstyle macros</h3>
 <ul class="macro-list">
-  <li><a href="#doctype">DOCTYPE</a>
+  <li><a href="#doctype">DOCTYPE</a></li>
   <li><a href="#printstyle">PRINTSTYLE</a> &ndash; non-optional macro required for document processing
   <ul style="margin-left: -.5em; list-style-type: disc;">
     <li><a href="#typeset-defaults">Defaults for PRINTSTYLE TYPESET</a></li>
@@ -1921,8 +1921,8 @@ for how mom outputs each part of the page header.)
 <br/>
 <kbd>DOCTYPE NAMED "string"</kbd> no longer accepts a colour
 argument after <kbd>"string"</kbd>.  Setting the colour
-of the string is now done with <kbd><nobr>DOCTYPE_COLOR
-&lt;color&gt;</nobr></kbd>.  Default underscoring of
+of the string is now done with <kbd><span class="nobr">DOCTYPE_COLOR
+&lt;color&gt;</span></kbd>.  Default underscoring of
 <kbd>"string"</kbd> in the docheader and on covers
 has been removed.  Use <kbd>DOCTYPE_UNDERSCORE</kbd>,
 <kbd>DOC_COVER_DOCTYPE_UNDERSCORE</kbd> and/or
@@ -2021,7 +2021,7 @@ numbered, the slide number must be given to one of the header/footer
 parts with the
 <a href="definitions.html#inlines">inline escape</a>
 <br/>
-<kbd><nobr>\*[SLIDE#]</nobr></kbd>.  For example:
+<kbd><span class="nobr">\*[SLIDE#]</span></kbd>.  For example:
 <span class="pre-in-pp">
   HEADER "" "My slide presentation" "" \
   FOOTER "" "" "\*[SLIDE#]"
@@ -2063,12 +2063,11 @@ black and two points larger, this is how you&#8217;d do it:
 <p class="tip">
 <span class="note">Note:</span>
 Do not use mom&#8217;s
-<a href="inlines.html#inline-size-mom"><kbd><nobr>\*[SIZE&nbsp;&plusmn;n]</nobr></kbd></a>
+<a href="inlines.html#inline-size-mom"><kbd><span class="nobr">\*[SIZE&nbsp;&plusmn;n]</span></kbd></a>
 inline escape to change point size in the strings
 passed to HEADER or FOOTER.  Prefer either mom&#8217;s
-<kbd><nobr>\*S[&plusmn;n]</nobr></kbd> or groff&#8217;s
-<kbd><nobr>\s[&plusmn;n]</nobr></kbd>.
-</span>
+<kbd><span class="nobr">\*S[&plusmn;n]</span></kbd> or groff&#8217;s
+<kbd><span class="nobr">\s[&plusmn;n]</span></kbd>.
 </p>
 </div>
 
@@ -2123,7 +2122,6 @@ Not all PDF viewers support all modes.  Any that are not supported
 are replaced by the &#8220;R&#8221; mode, which simply replaces one
 slide with the next unless the PDF viewer has a different default
 transition mode.
-</span>
 </p>
 </div>
 
@@ -2291,7 +2289,7 @@ are (mostly) ignored.  An important exception is
 point size of headers/footers should they become too crowded.  Most
 of mom&#8217;s inlines affecting the appearance of type are also
 ignored
-(<a href="inlines.html#inline-size-mom"><kbd><nobr>\*S[&lt;size&gt;]</nobr></kbd></a>
+(<a href="inlines.html#inline-size-mom"><kbd><span class="nobr">\*S[&lt;size&gt;]</span></kbd></a>
 is an exception; there may be a few others).
 </p>
 
@@ -2394,7 +2392,7 @@ for double-spaced, and 12-point for single-spaced.
 <p>
 In PRINTSTYLE <kbd>TYPEWRITE</kbd>, mom, by default, underlines
 anything that looks like italics.  This includes the
-<a href="typesetting.html#slant-inline"><kbd><nobr>\*[SLANT]</nobr></kbd></a>
+<a href="typesetting.html#slant-inline"><kbd><span class="nobr">\*[SLANT]</span></kbd></a>
 <a href="definitions.html#inlines">inline escape</a>
 for pseudo-italics.  (See
 <a href="goodies.html#underline">UNDERLINE</a>
@@ -2453,7 +2451,7 @@ particularly useful for reducing the point size of
 headers/footers should they become crowded (quite likely to
 happen if the title of your document is long and your
 <a href="#copystyle">COPYSTYLE</a>
-is <kbd>DRAFT</kbd).
+is <kbd>DRAFT</kbd>).
 </p>
 
 <p class="tip-bottom">
@@ -2889,7 +2887,7 @@ The macro
 <a href="color.html#color">COLOR</a>
 and the
 <a href="definitions.html#inlines">inline escape</a>,
-<a href="color.html#color-inline"><kbd><nobr>\*[&lt;colorname&gt;]</nobr></kbd></a>
+<a href="color.html#color-inline"><kbd><span class="nobr">\*[&lt;colorname&gt;]</span></kbd></a>
 can be used at any time during document processing for occasional
 colour effects.  However, consistent and reliable colourising of
 various document elements (the docheader, heads, linebreaks,
@@ -2914,7 +2912,7 @@ If you plan to have mom generate a
 <a href="docelement.html#toc">table of contents</a>,
 do not embed colour
 <a href="definitions.html#inlines">inline escapes</a>
-(<a href="color.html#color-inline"><kbd><nobr>\*[&lt;colourname&gt;]</nobr></kbd></a>)
+(<a href="color.html#color-inline"><kbd><span class="nobr">\*[&lt;colourname&gt;]</span></kbd></a>)
 in the
 <a href="definitions.html#stringargument">string arguments</a>
 given to any of the
@@ -4390,7 +4388,7 @@ text, not any macros following.
 <div class="box-tip">
 <p class="tip">
 <span class="note">Note:</span>
-<a href="inlines.html#b"><kbd><nobr>\*[B]</nobr></kbd></a>
+<a href="inlines.html#b"><kbd><span class="nobr">\*[B]</span></kbd></a>
 cannot be used as a replacement for <kbd>.EL</kbd> when terminating
 a document.
 </p>

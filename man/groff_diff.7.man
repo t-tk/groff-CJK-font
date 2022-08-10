@@ -1930,11 +1930,13 @@ A device's default stroke and fill colors are not necessarily the same.
 .
 .TP
 .BI .de1\~ xx\~yy
-Similar to
-.BR .de ,
-but compatibility mode is switched off during execution.
+Define a macro to be interpreted with compatibility mode disabled.
 .
-On entry, the current compatibility mode is saved and restored at exit.
+When
+.I xx
+is called,
+compatibility mode enablement status is saved;
+it is restored when the call completes.
 .
 .
 .TP
@@ -3588,7 +3590,8 @@ request similarly to that of a
 .B de
 request
 (albeit one not read in copy mode),
-but stores it under an internal name and deletes it when it exits.
+but stores it under an internal name and deletes it when the loop
+finishes.
 .
 The operation of a macro containing a
 .B while
@@ -3608,7 +3611,7 @@ lacked the
 .B while
 request\[em]is to instead write a recursive macro.
 .
-It will only be parsed once (unless you redefine it).
+It will be parsed only once (unless you redefine it).
 .
 To prevent infinite loops,
 the default number of available recursion levels is 1,000 or somewhat

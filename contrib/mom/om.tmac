@@ -20,7 +20,7 @@ for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-Version 2.5_a
+Version 2.5_b
 -------------
 Antoine de St-Exupéry asserted that elegance in engineering is
 achieved not when there is nothing left to add, but when there is
@@ -53,7 +53,7 @@ extensions, and float management).
 .if (\n[.x]\n[.y] < 118) \
 .   ab [mom]: You need GNU troff version 1.18 or higher to run this version of mom.
 \# Mom version
-.ds version 2.5_a
+.ds version 2.5_b
 .if dVERSION \{\
 .   ab [mom]: Version \*[version]
 .\}
@@ -467,7 +467,7 @@ end
 .    ie !\\n[#DOCS]=1 \
 .       if \\n[#B_MARGIN_SET]=1 .DO_B_MARGIN
 .    el \{\
-.       if \\n[#COLUMNS]=1 .nr #COL_NUM \\n[#NUM_COLS]
+.       if (\\n[#COLUMNS]=1):(\\n[#COLUMNS]=2) .nr #COL_NUM \\n[#NUM_COLS]
 .       if !\\n[#FN_DEPTH] \{\
 .          ch FN_OVERFLOW_TRAP
 .          nr #RESET_FN_OVERFLOW_TRAP 1
@@ -2677,7 +2677,7 @@ end
 .    \}
 .    if d$DC_ADJUST .ps \\*[$DC_ADJUST]p
 .    nr #DC_LINES +1
-.    if \\n[#DC_LINES]v>\\n[.t] \{\
+.    if (\\n[#DC_LINES]v-1v)>(\\n[.t]-1) \{\
 .       nr pgnum \\n%+\\n[#PAGE_NUM_ADJ] 1
 .       if \\n[#COLUMNS]=1 .ds col-num ", column \\n[#COL_NUM]
 .       tm1 \
@@ -10545,7 +10545,10 @@ Shimming must be disabled with NO_SHIM before using FLEX.
 .    \}
 .    nr @TOP 1
 .    ie \\n[#COLUMNS]=1 \{\
-.       ie (\\n[#COL_NUM]=\\n[#NUM_COLS]):(\\n[#NEWPAGE]=1) .DO_FOOTER
+.       ie (\\n[#COL_NUM]=\\n[#NUM_COLS]):(\\n[#NEWPAGE]=1) \{\
+.          rr #NEWPAGE
+.          DO_FOOTER
+.       \}
 .       el \{\
 .          ie (\\n[#ENDNOTES]=1):(\\n[#BIBLIOGRAPHY]=1) \{\
 .             if \\n[#ENDNOTES] .sp |\\n[ec]u-\\n[#EN_LEAD]u
@@ -11825,7 +11828,12 @@ Shimming must be disabled with NO_SHIM before using FLEX.
 \#
 .MAC LINEBREAK END
 .    if r #Q_AT_TOP .rr #Q_AT_TOP
-.    ie  '\\*[$LINEBREAK_CHAR]'' .sp 2
+.    if \\n[@TOP] .RESTORE_SPACE
+.    ie '\\*[$LINEBREAK_CHAR]'' \{\
+.       br
+.       nop \&
+.       sp
+.    \}
 .    el \{\
 .       ie \\n[#END_QUOTE] .
 .       el .sp
@@ -17129,6 +17137,8 @@ E\\R'#CAP_HEIGHT \\n[.cht]'
 .    MISC
 .    rr #COVER_TITLE
 .    rr #DOC_COVER_TITLE
+.    rr #FROM_COVERTITLE
+.    rr #FROM_DOC_COVERTITLE
 .    rr #MISC
 .    rr #COVER_MISC
 .    rr #DOC_COVER_MISC
@@ -17352,6 +17362,7 @@ E\\R'#CAP_HEIGHT \\n[.cht]'
 .          nr #RESTORE_PN_V_POS \\n[#PAGE_NUM_V_POS]
 .          PAGINATION OFF
 .       \}
+.       if \\n[#COLUMNS]=1 .nr #COLUMNS +1
 .       NEWPAGE \" Break to blank page
 .       nop \&
 .       br
@@ -17366,7 +17377,8 @@ E\\R'#CAP_HEIGHT \\n[.cht]'
 .       \}
 .       if !'\\$1'DIVIDER' .if \\n[#HEADERS_WERE_ON] .HEADERS
 .    \}
-.    NEWPAGE
+.    if \\n[#COLUMNS]=2 .nr #COLUMNS -1
+.    NEWPAGE \" Break to text page
 .    ie '\\$1'DIVIDER' \{\
 .       if \\n[#BLANKPAGE_AFTER_DEFER] .bp
 .       if \\n[#FOOTERS_WERE_ON] .FOOTERS
@@ -17388,8 +17400,11 @@ E\\R'#CAP_HEIGHT \\n[.cht]'
 .       \}
 .       if '\\$1'NULL' \{\
 .          if \\n[#FOOTERS_WERE_ON] .FOOTERS
+.          if \\n[#RESTORE_PN_V_POS]=2 \
+.             nr #PAGE_NUM_V_POS \\n[#RESTORE_PN_V_POS]
 .          if \\n[#PAGE_NUM_V_POS]=2 \
 .             if \\n[#PAGINATE_WAS_ON] .PAGINATE
+.          nr #PAGE_NUM_ADJ -\\n[#HOW_MANY]
 .       \}
 .    \}
 .    if \\n[#PAGINATE]=1 \
@@ -17403,6 +17418,7 @@ E\\R'#CAP_HEIGHT \\n[.cht]'
 .    rr #HEADERS_WERE_ON
 .    rr #FOOTERS_WERE_ON
 .    rr #PAGINATE_WAS_ON
+.    rr #RESTORE_PN_V_POS
 .END
 \#
 \# FLOATS
@@ -20586,6 +20602,11 @@ E\\R'#CAP_HEIGHT \\n[.cht]'
 .END
 \#
 .MAC TE END
+.    if !r TW \{\
+.       tm1 "[mom]: '\\n[.F]' contains tbl(1) data but '-t' flag is missing from
+.       tm1 "        the command line.
+.       ab Aborting.
+.    \}
 .    ev tbl*end \" Needed because of .ad changes
 .    evc \\*[ev-current] 
 .    nh
