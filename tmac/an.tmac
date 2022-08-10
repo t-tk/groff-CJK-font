@@ -271,18 +271,21 @@
 .  ds an-title "\\$1\"
 .  if \\n[CT] .stringup an-title
 .  ds an-section "\\$2\"
-.  ie (\\n[.$] > 4)    .ds an-extra3 "\\$5\"
-.  el \{ .ie '\\$2'1'  .ds an-extra3 \\*[an*section1]\"
-.  el \{ .ie '\\$2'2'  .ds an-extra3 \\*[an*section2]\"
-.  el \{ .ie '\\$2'3'  .ds an-extra3 \\*[an*section3]\"
-.  el \{ .ie '\\$2'4'  .ds an-extra3 \\*[an*section4]\"
-.  el \{ .ie '\\$2'5'  .ds an-extra3 \\*[an*section5]\"
-.  el \{ .ie '\\$2'6'  .ds an-extra3 \\*[an*section6]\"
-.  el \{ .ie '\\$2'7'  .ds an-extra3 \\*[an*section7]\"
-.  el \{ .ie '\\$2'8'  .ds an-extra3 \\*[an*section8]\"
-.  el \{ .ie '\\$2'9'  .ds an-extra3 \\*[an*section9]\"
-.  el                  .ds an-extra3 \" empty
-.  \}\}\}\}\}\}\}\}\}
+.  ie (\\n[.$] > 4) .ds an-extra3 "\\$5\"
+.  el \{\
+.    \" Simulate switch/case in roff.
+.          ie '\\$2'1' .ds an-extra3 \\*[an*section1]\"
+.    el \{.ie '\\$2'2' .ds an-extra3 \\*[an*section2]\"
+.    el \{.ie '\\$2'3' .ds an-extra3 \\*[an*section3]\"
+.    el \{.ie '\\$2'4' .ds an-extra3 \\*[an*section4]\"
+.    el \{.ie '\\$2'5' .ds an-extra3 \\*[an*section5]\"
+.    el \{.ie '\\$2'6' .ds an-extra3 \\*[an*section6]\"
+.    el \{.ie '\\$2'7' .ds an-extra3 \\*[an*section7]\"
+.    el \{.ie '\\$2'8' .ds an-extra3 \\*[an*section8]\"
+.    el \{.ie '\\$2'9' .ds an-extra3 \\*[an*section9]\"
+.    el                .ds an-extra3 \" empty
+.    \}\}\}\}\}\}\}\}
+.  \}
 .
 .  ds an-extra1 "\\$3\"
 .  ie (\\n[.$] > 3)    .ds an-extra2 "\\$4\"
@@ -303,7 +306,7 @@
 .    rm an-msg
 .  \}
 .
-.  if '\\*[an-extra3]'' \{\
+.  if '\\$5\\*[an-extra3]'' \{\
 .    ds an-msg .\\$0 missing fifth argument and second argument '\\$2'\"
 .    as an-msg " not a recognized manual section; specify volume title\"
 .    an-style-warn \\*[an-msg]
@@ -1049,7 +1052,6 @@ contains unsupported escape sequence
 .  \" If continuous rendering, tell tbl not to use keeps.
 .  ie \\n[cR] .nr 3usekeeps 0
 .  el         .nr 3usekeeps 1
-.  sp \\n[PD]u
 .  if \\n[an-is-output-html] \{\
 .    nr an-TS-ll \\n[.l]
 .    ll 1000n

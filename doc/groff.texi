@@ -468,7 +468,7 @@ developing GNU and promoting software freedom.''
 @title groff
 @subtitle The GNU implementation of @code{troff}
 @subtitle Edition 1.23.0
-@subtitle June 2022
+@subtitle August 2022
 @author Trent@tie{}A.@: Fisher
 @author Werner Lemberg
 @author G.@tie{}Branden Robinson
@@ -2431,14 +2431,14 @@ documentation.
 The @file{ms} (``manuscript'') package is suitable for the preparation
 of letters, memoranda, reports, and books.  These @code{groff}
 macros feature cover page and table of contents generation,
-automatically numbered headings, several different paragraph styles, a
-variety of text styling options, footnotes, and multi-column page
-layouts.  @file{ms} supports the @command{tbl}, @command{eqn},
-@command{pic}, and @command{refer} preprocessors for inclusion of
-tables, mathematical equations, diagrams, and standardized bibliographic
-citations.  This implementation is mostly compatible with the documented
-interface and behavior of AT&T Unix Version@tie{}7 @file{ms}.  Several
-extensions from 4.2BSD (Berkeley)
+automatically numbered headings, several paragraph styles, a variety of
+text styling options, footnotes, and multi-column page layouts.
+@file{ms} supports the @command{tbl}, @command{eqn}, @command{pic}, and
+@command{refer} preprocessors for inclusion of tables, mathematical
+equations, diagrams, and standardized bibliographic citations.  This
+implementation is mostly compatible with the documented interface and
+behavior of AT&T Unix Version@tie{}7 @file{ms}.  Several extensions from
+4.2BSD (Berkeley)
 @c Few changes were made in 4.3, Tahoe, Reno, or 4.4.
 and Tenth Edition Research Unix have been recreated.
 
@@ -2496,7 +2496,8 @@ Format the document with the @command{groff} command.  @command{nroff}
 can be useful for previewing.
 
 @CartoucheExample
-$ vi radical.ms
+$ editor radical.ms
+$ nroff -ww -z -ms radical.ms # check for errors
 $ nroff -ms radical.ms | less -R
 $ groff -T ps -ms radical.ms > radical.ps
 $ see radical.ps
@@ -2623,7 +2624,7 @@ implementations are specific to @acronym{AT&T} or Berkeley, and are not
 supported by @code{groff} @file{ms}.
 
 @item Format and layout
-By setting registers and strings, you can change your document's
+By setting registers and strings, you can configure your document's
 typeface, margins, spacing, headers and footers, and footnote
 arrangment.  @xref{ms Document Control Settings}.
 
@@ -3284,7 +3285,7 @@ amount stored in the @code{PI} register on every line @emph{except} the
 first (also known as a hanging indent).  This is a Berkeley extension.
 @endDefmac
 
-The following example illustrates several different paragraphing macros.
+The following example illustrates the use of paragraphing macros.
 
 @CartoucheExample
 .NH 2
@@ -3327,9 +3328,8 @@ software.
 Use headings to create a sequential or hierarchical structure for your
 document.  The @file{ms} macros print headings in @strong{bold} using
 the same font family and, by default, type size as the body text.
-Headings are available with and without automatic numbering.  Text lines
-immediately after heading macro calls are treated as part of the
-heading, rendered on the same output line in the same style.
+Headings are available with and without automatic numbering.  Text on
+input lines following the macro call becomes the heading's title.
 
 @DefmacList {NH, [@Var{depth}], ms}
 @DefmacListEnd {NH, @t{S} @Var{heading-depth-index} @dots{}, ms}
@@ -3831,7 +3831,7 @@ One application of @code{ne} is to reserve space on the page for a
 figure or illustration to be included later.
 
 @cindex boxes [@file{ms}]
-A keep have a frame drawn around it; this is called a @dfn{boxed keep}.
+A @dfn{boxed keep} has a frame drawn around it.
 
 @DefmacList {B1, , ms}
 @DefmacListEndx {B2, , ms}
@@ -3940,7 +3940,7 @@ preprocessors match these tokens only at the start of an input line.
 @DefmacList {TS, [@code{H}], ms}
 @DefmacListEndx {TE, , ms}
 Demarcate a table to be processed by the @code{tbl} preprocessor.  The
-optional argument@tie{}@code{H} to @code{TS} instructs @code{groff} to
+optional argument@tie{}@code{H} to @code{TS} instructs @file{ms} to
 repeat table rows (often column headings) at the top of each new page
 the table spans, if applicable; calling the @code{TH} macro marks the
 end of such rows.  The GNU @cite{tbl@r{(1)}} man page provides a
@@ -4401,8 +4401,8 @@ great deal of time in the long run if you use @file{ms} regularly.
 You can customize the style of the leader that bridges each table of
 contents entry with its page number; define the @code{TC-LEADER} special
 character by using the @code{char} request.  A typical leader combines
-the dot glyph @samp{.} with a horizontal space escape sequence to spread
-the dots.  The width of the page number field is stored in the
+the dot glyph @samp{.} with a horizontal motion escape sequence to
+spread the dots.  The width of the page number field is stored in the
 @code{TC-MARGIN} register.
 
 @c ---------------------------------------------------------------------
@@ -4463,12 +4463,12 @@ request, but the @file{ms} @code{RS} and @code{RE} macros.
 @item
 @cindex fractional type sizes in @file{ms} macros
 @cindex @file{ms} macros, fractional type sizes in
-@acronym{AT&T} @file{ms} supported only integer values for the type size
-and vertical spacing.  To overcome this restriction, for the registers
-@code{PS}, @code{VS}, @code{FPS}, and @code{FVS}, @code{groff} @file{ms}
-interprets values equal to or larger than 1000 as decimal fractions
-multiplied by 1000.  See the @code{PS} register in @ref{ms Document
-Control Settings}.
+@acronym{AT&T} @file{ms} supported only integral values for the type
+size and vertical spacing.  To overcome this restriction, for the
+registers @code{PS}, @code{VS}, @code{FPS}, and @code{FVS}, @code{groff}
+@file{ms} interprets values equal to or larger than 1000 as decimal
+fractions multiplied by 1000.  See the @code{PS} register in @ref{ms
+Document Control Settings}.
 
 @item
 @acronym{AT&T} @file{ms}'s @code{AU} macro supported arguments used with
@@ -8089,12 +8089,13 @@ sensible places without hyphens.
 @cindex disabling hyphenation (@code{\%})
 @cindex hyphenation, disabling (@code{\%})
 To tell GNU @code{troff} how to hyphenate words as they occur in input,
-use the @code{\%} escape, also known as the @dfn{hyphenation character}.
-Each instance within a word indicates to GNU @code{troff} that the
-word may be hyphenated at that point, while prefixing a word with this
-escape prevents it from being otherwise hyphenated.  This mechanism
-affects only that occurrence of the word; to change the hyphenation of a
-word for the remainder of input processing, use the @code{hw} request.
+use the @code{\%} escape sequence; it is the default @dfn{hyphenation
+character}.  Each instance within a word indicates to GNU @code{troff}
+that the word may be hyphenated at that point, while prefixing a word
+with this escape prevents it from being otherwise hyphenated.  This
+mechanism affects only that occurrence of the word; to change the
+hyphenation of a word for the remainder of input processing, use the
+@code{hw} request.
 
 @cindex @code{\X}, followed by @code{\%}
 @cindex @code{\Y}, followed by @code{\%}
@@ -8962,17 +8963,20 @@ is recognized; any excess is ignored.
 
 @cindex table of contents
 @cindex contents, table of
-For a table of contents, to name an example, tab stops may be defined so
-that the section number is one tab stop, the title is the second with
-the remaining space being filled with a line of dots, and then the page
-number slightly separated from the dots.
+A table of contents, for example, may define tab stops after a section
+number, a title, and a gap to be filled with leader dots.  The page
+number follows the leader, after a right-aligned final tab stop wide
+enough to house the largest page number occurring in the document.
 
 @Example
-.ds entry 1.1\tBackground\a\t12
-.lc .
-.ta 1i 5i +.25i
-\*[entry]
-    @result{} 1.1  Foo..........................................  12
+.ds entry1 19.\tThe Prophet\a\t98
+.ds entry2 20.\tAll Astir\a\t101
+.ta .5i 4.5i +.5iR
+.nf
+\*[entry1]
+\*[entry2]
+    @result{} 19.  The Prophet.............................   98
+    @result{} 20.  All Astir...............................  101
 @endExample
 
 @c ---------------------------------------------------------------------
@@ -12376,8 +12380,8 @@ sequences used to obtain them.  In the previous example, @samp{|} and
 same positions, so the comparands are equal.  If @samp{.ft@tie{}I} had
 been added before the @samp{.ie}, they would differ: the first @samp{|}
 would produce an italic @samp{|}, not a roman one.  Motions must match
-in orientation and magnitude to within the applicable horizontal or
-vertical motion quantum of the device, after rounding.  @samp{.if
+in orientation and magnitude to within the applicable horizontal and
+vertical motion quanta of the device, after rounding.  @samp{.if
 "\u\d"\v'0'"} is false even though both comparands result in zero net
 motion, because motions are not interpreted or optimized but sent as-is
 to the output.@footnote{Because formatting of the comparands takes place
@@ -12579,7 +12583,7 @@ produce no output.
 subsequent to the request's conditional expression.  @code{\@}} should
 appear on a line with other occurrences of itself as necessary to match
 @code{\@{} sequences.  It can be preceded by a control character,
-spaces, and tabs.  Input after any quantity of @code{\@}} sequence on
+spaces, and tabs.  Input after any quantity of @code{\@}} sequences on
 the same line is processed only if all of the preceding conditions to
 which they correspond are true.  Furthermore, a @code{\@}} closing the
 body of a @code{while} request (discussed below) must be the last such
@@ -12638,6 +12642,26 @@ condition was false) the remainder of the input line is interpreted
 @emph{as if it were on an input line by itself}.
 @endDefesc
 
+We can use @code{ie}, @code{el}, and conditional blocks to simulate the
+multi-way ``switch'' or ``case'' control structures of other languages.
+The following example is adapted from the @code{groff} @file{man}
+package.  Indentation is used to clarify the logic.
+
+@Example
+.\" Simulate switch/case in roff.
+.      ie '\\$2'1' .ds title General Commands\"
+.el \@{.ie '\\$2'2' .ds title System Calls\"
+.el \@{.ie '\\$2'3' .ds title Library Functions\"
+.el \@{.ie '\\$2'4' .ds title Kernel Interfaces\"
+.el \@{.ie '\\$2'5' .ds title File Formats\"
+.el \@{.ie '\\$2'6' .ds title Games\"
+.el \@{.ie '\\$2'7' .ds title Miscellaneous Information\"
+.el \@{.ie '\\$2'8' .ds title System Management\"
+.el \@{.ie '\\$2'9' .ds title Kernel Development\"
+.el                .ds title \" empty
+.\@}\@}\@}\@}\@}\@}\@}\@}
+@endExample
+
 @c ---------------------------------------------------------------------
 
 @node while,  , if-else, Conditionals and Loops
@@ -12667,10 +12691,10 @@ the @code{while} request's @dfn{body}.
 GNU @code{troff} treats the body of a @code{while} request similarly to
 that of a @code{de} request (albeit one not read in copy
 mode@footnote{@xref{Copy Mode}.}), but stores it under an internal name
-and deletes it when it exits.  The operation of a macro containing a
-@code{while} request can slow significantly if the @code{while} body is
-large.  Each time the macro is executed, the @code{while} body is parsed
-and stored again.
+and deletes it when the loop finishes.  The operation of a macro
+containing a @code{while} request can slow significantly if the
+@code{while} body is large.  Each time the macro is executed, the
+@code{while} body is parsed and stored again.
 
 @Example
 .de xxx
@@ -12687,7 +12711,7 @@ and stored again.
 @noindent
 An often better solution---and one that is more portable, since
 @acronym{AT&T} @code{troff} lacked the @code{while} request---is to
-instead write a recursive macro.  It will only be parsed
+instead write a recursive macro.  It will be parsed only
 once.@footnote{unless you redefine it}
 
 @Example
@@ -12851,9 +12875,9 @@ interpreted---without disturbing that state when it is finished.
 @Defreq {de1, name [@Var{end}]}
 The @code{de1} request defines a macro to be interpreted with
 compatibility mode disabled.  When @var{name} is called, compatibility
-mode enablement status is saved, and when @var{name} finishes, it is
-restored.  Observe the extra backlash before the interpolation of
-register @samp{xxx}; we'll explore this subject in @ref{Copy Mode}.
+mode enablement status is saved; it is restored when the call completes.
+Observe the extra backlash before the interpolation of register
+@samp{xxx}; we'll explore this subject in @ref{Copy Mode}.
 
 @Example
 .nr xxx 12345
@@ -18118,7 +18142,7 @@ The form of the @var{metrics} field is as follows.
 There must not be any spaces, tabs, or newlines between these
 @dfn{subfields} (which have been split here into two lines only for
 better legibility).  The subfields are in basic units expressed as
-decimal integers.  Unspecified subfields default to be@tie{}@code{0}.
+decimal integers.  Unspecified subfields default to@tie{}@code{0}.
 Since there is no associated binary format, these values are not
 required to fit into the C language data type @samp{char} as they are in
 @acronym{AT&T} device-independent @code{troff}.

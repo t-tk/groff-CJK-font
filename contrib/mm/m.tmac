@@ -178,10 +178,16 @@ Index		array!index
 .	el .ds @sdf_font R
 .\}
 .\"
-.\"	Current pointsize and vertical space, always in points.
+.\"	Set the type size and vertical spacing.  If given on the command
+.\"	line, these have already been converted to basic units.
 .if !r S .nr S 10
-.ps \n[S]
-.vs \n[S]+2
+.ie (\n[S] >= 1000) .ps \n[S]z/1000u
+.el                 .ps \n[S]
+.nr *vs-default \n[.ps]*120/100
+.if !r V .nr V \n[*vs-default]
+.ie (\n[V] >= 1000) .vs \n[V]p/1000u
+.el                 .vs \n[V]
+.rm *vs-default
 .\"
 .nr @ps \n[.ps]
 .nr @vs \n[.v]
@@ -190,15 +196,13 @@ Index		array!index
 .\"
 .\"	Page length
 .if r L \{\
-.	ie n .pl \n[L]u
-.	el .pl \n[L]u
+.	pl \n[L]u
 .\}
 .nr @pl \n[.p]
 .\"
 .\"	page width
 .ie r W \{\
-.	ie n .ll \n[W]u
-.	el .ll \n[W]u
+.	ll \n[W]u
 .\}
 .el .ll 6i
 .nr @ll \n[.l]
@@ -1658,6 +1662,7 @@ in=\\n[.i] fi=\\n[.u] .d=\\n[.d] nl=\\n[nl] pg=\\n[%]
 .nr ft*note-size 0
 .nr ft*busy 0
 .nr ft*nr 0 1
+.aln :p ft*nr
 .nr ft*wide 0
 .nr ft*hyphen 0\"	hyphenation value
 .nr ft*adjust 1\"	>0 if adjust true
@@ -1666,7 +1671,8 @@ in=\\n[.i] fi=\\n[.u] .d=\\n[.d] nl=\\n[nl] pg=\\n[%]
 .nr ft*exist 0\"	not zero if there are any footnotes to be printed
 .nr ft*clear-at-header 0\" >0 if footnotes should be reset at first level head.
 .\"
-.ds F \v'-.4m'\s-3\\n+[ft*nr]\s0\v'.4m'
+.ie t .ds F \v'-.4m'\s-3\\n+[ft*nr]\s0\v'.4m'
+.el   .ds F [\\n+[ft*nr]]
 .\"
 .\"-----------------
 .\" init footnote environment

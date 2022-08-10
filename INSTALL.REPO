@@ -6,11 +6,11 @@
 
 This information supplements the generic installation instructions in
 the file 'INSTALL'.  It is meant for people building from the
-development repository or a snapshot archive produced from it, rather
-than a distribution archive.  Distribution archives include a
-'configure' script, among other files; snapshot archives do not.  If you
-want to start building the 'groff' system using an existing 'configure'
-script, you don't need the information in this file.
+development repository, rather than a distribution archive.
+Distribution archives include a 'configure' script, among other files;
+the repository does not.  If you want to start building the 'groff'
+system using an existing 'configure' script, you don't need the
+information in this file.
 
 Dependencies
 ------------
@@ -51,45 +51,6 @@ Bootstrapping from a Git checkout
 Invoke the bootstrap script.
 
     $ ./bootstrap
-
-
-Bootstrapping from a snapshot archive
--------------------------------------
-
-Obtain groff's supported revision of gnulib and instruct the bootstrap
-script where to find it.
-
-Here is the output of "git submodule" for this groff release.
-
- c8b8f3bbcde37a53cd226f4c9cebd0dde6aca37f gnulib (v0.1-5208-gc8b8f3bbcd)
-
-We therefore do the following.
-
-  $ hash=c8b8f3bbcde37a53cd226f4c9cebd0dde6aca37f
-  $ wget -O gnulib.tar.gz https://git.savannah.gnu.org/cgit/gnulib.git/\
-snapshot/gnulib-$hash.tar.gz
-  $ tar xf gnulib.tar.gz
-
-Before we can proceed, we need to patch a bug in gnulib's
-"git-version-gen" script.
-
---- build-aux/git-version-gen~  2022-06-03 18:34:08.175890973 +0000
-+++ build-aux/git-version-gen   2022-06-03 17:51:02.221945195 +0000
-@@ -189,7 +189,7 @@
-     # Remove the "g" to save a byte.
-     v=`echo "$v" | sed 's/-\([^-]*\)-g\([^-]*\)$/.\1-\2/'`;
-     v_from_git=1
--elif test "x$fallback" = x || git --version >/dev/null 2>&1; then
-+elif test "x$fallback" = x && ! git --version >/dev/null 2>&1; then
-     v=UNKNOWN
- else
-     v=$fallback
-
-Place the foregoing in a file called "../git-version-gen.patch", apply
-it, then run the bootstrap script.
-
-  $ patch -d gnulib-$hash -p0 < ../git-version-gen.patch
-  $ ./bootstrap --gnulib-srcdir=gnulib-$hash
 
 
 What bootstrapping does

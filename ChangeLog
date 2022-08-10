@@ -1,11 +1,130 @@
+2022-08-04  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* NEWS: Add item for new groff mm `V` register support.
+
+2022-08-04  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/preproc/eqn/lex.cpp (do_delim): Recognize "delim on" even
+	in compatibility mode, enabling tbl to toggle eqn delimiter
+	recognition when it is run in compatibility mode as well.
+	* src/preproc/eqn/eqn.1.man (Controlling delimiteres): Update.
+	* NEWS: Add item.
+
+	Fixes <https://savannah.gnu.org/bugs/?62852>.  Thanks to Bjarni
+	Ingi Gislason for the report.
+
+2022-08-03  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/an.tmac (TH): Fix spurious complaint from `CHECKSTYLE`
+	feature when a custom manual section title is declared for a
+	standard section number.  Thanks to Quentin Monnet for the
+	report.
+
+2022-07-31  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/pdfpic.tmac: Finish incomplete string renames.  Continues
+	0fd6ab6b4c, 21 January.
+		pdfpic*file-name -> pdfpic*file-name-base
+		pspic-args -> pdfpic*pspic-args
+
+2022-07-30  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/an.tmac (TS): Stop inserting space before tables.  Unlike
+	ms(7), man(7) has no concept of "displays" and thus none of
+	"display distance".  It is up to the page author to use
+	paragraphing macros around tables if vertical space is desired.
+	And not up to us to impose it.
+
+	Fixes <https://savannah.gnu.org/bugs/?62841>.
+
+2022-07-30  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[man]: Regression-test Savannah #62841.
+
+	* tmac/tests/an_TS-adds-no-vertical-space.sh: Do it.
+	* tmac/tmac.am (tmac_TESTS): Run test.
+
+2022-07-30  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/preproc/tbl/table.cpp (table::do_bottom): Avoid
+	overprinting a double-boxed table's bottom border on nroff
+	devices.
+
+2022-07-30  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[tbl]: Expand regression test for Savannah #49490.  Check for
+	overlap of double box borders, too.
+
+	* src/preproc/tbl/tests/\
+	do-not-overlap-bottom-border-in-nroff.sh: Do it.
+
+2022-07-30  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[tbl]: Fix Savannah #49390.
+
+	* src/preproc/tbl/table.cpp (table::do_bottom): Avoid
+	overprinting a boxed table's bottom border on nroff devices.
+
+	Fixes <https://savannah.gnu.org/bugs/?49390>.  Thanks to Osamu
+	Sayama for the report.
+
+2022-07-30  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[tbl]: Regression-test Savannah #49390.
+
+	* src/preproc/tbl/tests/\
+	do-not-overlap-bottom-border-in-nroff.sh: Do it.
+	* src/preproc/tbl/tbl.am (tbl_TESTS): Run test.
+
+2022-07-28  Deri James  <deri@chuzzlewit.myzen.co.uk>
+
+	[gropdf]: Improve slant application to lowercase Greek letters.
+	<https://lists.gnu.org/archive/html/groff/2022-07/msg00210.html>
+
+	* tmac/pdf.tmac: Slant only if the glyph is sourced from a
+	special font, not a regular (text) font containing Greek glyphs.
+
+2022-07-26  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/s.tmac: Add italic correction support to `I` and `BI`
+	macros.  Call `par*define-font-macro` with newly recognized
+	third argument indicating that italic corrections should be
+	applied.
+	(par*define-font-macro): Apply the corrections if directed.
+
+2022-07-25  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/roff/troff/input.cpp (input_char_description): Clear
+	static buffer on every entry to the function so that calling it
+	twice in succession where the second call populates the buffer
+	with less data than the first doesn't leave garbage characters
+	in a diagnostic message.  Problem appears to date back to 1991
+	or earlier.
+
+	Fixes <https://savannah.gnu.org/bugs/?62813>.
+
+2022-07-25  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/roff/troff/input.cpp (token::usable_as_delimiter):
+	(do_non_interpreted, interpolate_arg): Recast diagnostic
+	messages for clarity.
+
+2022-07-25  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/e.tmac: Initialize section number registers. Fixes
+	warnings when starting section numbering at a depth greater than
+	1.
+
+	Fixes <https://savannah.gnu.org/bugs/?62812>.
+
 2022-07-23  G. Branden Robinson <g.branden.robinson@gmail.com>
 
 	* m4/groff.m4 (GROFF_PAGE): Use 'grep -q' instead of redirecting
 	standard output to null device.  The '-q' option was
-	standardized in POSIX Issue 5 (1997).  Also drop the redirection
-	of the standard error stream; we have already checked the file
-	named in "$descfile" for existence and readability.  grep should
-	not emit diagnostic messages.
+	standardized in POSIX Issue 5 (1997) or earlier.  Also drop the
+	redirection of the standard error stream; we have already
+	checked the file named in "$descfile" for existence and
+	readability.  grep should not emit diagnostic messages.
 
 2022-07-22  G. Branden Robinson <g.branden.robinson@gmail.com>
 
@@ -1047,11 +1166,6 @@
 
 2022-05-31  G. Branden Robinson <g.branden.robinson@gmail.com>
 
-	* configure.ac (AC_INIT): Add `--fallback` argument to
-	`git-version-gen` to facilitate snapshot builds.
-
-2022-05-31  G. Branden Robinson <g.branden.robinson@gmail.com>
-
 	* configure.ac: Report use of "g" prefix for commands and macro
 	package compatibility wrappers.
 	* m4/groff.m4 (GROFF_G): Fix code style nits.  Update
@@ -1452,7 +1566,7 @@
 2022-05-20  G. Branden Robinson <g.branden.robinson@gmail.com>
 
 	* Makefile.am (EXTRA_DIST): Ship "ChangeLog.122" in distribution
-	archive.  Overlooked in commit c11995df16, 19 Feburary 2021.
+	archive.  Overlooked in commit c11995df16, 19 February 2021.
 
 2022-05-20  G. Branden Robinson <g.branden.robinson@gmail.com>
 
@@ -14127,6 +14241,8 @@
 	with five bytes of input using transparent line indicator.
 
 	* src/roff/groff/groff.am: Add test.
+
+	Fixes <https://savannah.gnu.org/bugs/?55278>.
 
 2019-01-12  Ingo Schwarze  <schwarze@openbsd.org>
 

@@ -91,9 +91,6 @@ The current version is 1.23.0 (Autumn 2020).
 To view the git repository in your browser, use
 .URL "http://\:git.savannah.gnu.org/\:cgit/\:groff.git" \
      "Savannah's cgit interface" .
-.
-There you can also download snapshots;
-simply click on a commit entry line to get the URL.
 
 Additional contributions can be found
 .URL "http://\:groff.ffii.org/\:groff/\:contrib/" here .
@@ -146,7 +143,7 @@ a release.
 You require a C++ compiler.
 
 The file `INSTALL.REPO' contains supplementary instructions for building
-directly from a clone of the repository or a snapshot tarball.
+directly from a clone of the repository.
 
 The file `NEWS' describes recent user-visible changes to `groff'.
 
@@ -171,8 +168,6 @@ The current development version of `groff' is available from a
 
 To view the git repository in your browser, go to its
 .URL http://\:git.savannah.gnu.org/\:cgit/\:groff.git "browser interface" .
-There you can also download snapshots; simply click on a commit entry
-line to get the URL.
 .
 .
 .SH
@@ -193,8 +188,7 @@ bison \[>=] 1.875b or byacc
 .in
 
 Note that `texinfo' and `bison' or `byacc' are required only for building
-from repository sources (either a checked out working copy, or a commit
-snapshot).
+from repository sources (a checked-out working copy).
 They are not required for building from a stable release tarball.
 Also note that the version numbers stated are the minimum supported.
 No version of `texinfo' < 5.0 works, and the original release of `bison'

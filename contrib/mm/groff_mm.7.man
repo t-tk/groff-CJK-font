@@ -8,7 +8,7 @@ groff_mm \- memorandum macros for GNU roff
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 1989-2021 Free Software Foundation, Inc.
+.\" Copyright (C) 1989-2022 Free Software Foundation, Inc.
 .\"
 .\" Permission is granted to make and distribute verbatim copies of this
 .\" manual provided the copyright notice and this permission notice are
@@ -72,20 +72,89 @@ implementation found in the AT&T Documenter's Workbench (DWB),
 with the following limitations.
 .
 .
-.IP \[bu]
+.IP \[bu] 2n
 No Bell Labs localisms are implemented.
 .
-.
-.IP \[bu]
-The macros
+This includes the logo and company name strings,
+.B }Z
+and
+.BR ]S ,
+respectively;
+the encoded company site location addresses recognized as the third
+argument to the
+.B AU
+macro;
+the
+.B Pv
+(\[lq]private\[rq] heading)
+register;
+and the
+.B CS
+(cover sheet),
 .B OK
+(other keywords),
 and
 .B PM
-are not implemented.
+(proprietary markings)
+macros.
+.
+.
+.IP \[bu]
+The
+.I grap
+preprocessor is not explicitly supported;
+no
+.B G1
+and
+.B G2
+macros
+are defined.
+.
+.
+.IP \[bu]
+The service mark string
+.B Sm
+is not implemented.
+.
+.
+.IP \[bu]
+The registers
+.BR A ,
+.BR C ,
+.BR E ,
+.BR T ,
+and
+.BR U ,
+typically set from the
+.I troff \" generic
+or
+.I nroff \" generic
+command lines with DWB
+.IR mm ,
+are not recognized.
 .
 .
 .IP \[bu]
 Cut marks are not supported.
+.
+.
+.P
+DWB
+.I mm
+supported only seven levels of heading.
+.
+As a compatible extension,
+.I groff mm
+supports fourteen,
+introducing new registers
+.B H8
+through
+.BR H14 ,
+and affecting the interpretation of the
+.B HF
+and
+.B HP
+strings.
 .
 .
 .\" ====================================================================
@@ -359,6 +428,28 @@ for instance with
 .SH Macros
 .\" ====================================================================
 .
+An explicitly empty argument may be specified with a pair of double
+quotes;
+to call a macro
+.B XX
+with an empty second argument but non-empty first and third ones,
+you could input the following.
+.
+.RS
+.EX
+\&.XX foo \[dq]\[dq] baz
+.EE
+.RE
+.
+.
+.P
+Macro names longer than two characters are GNU extensions;
+some shorter names were not part of DWB
+.IR mm 's
+published interface but are documented aspects of
+.I groff mm.
+.
+.
 .TP
 .BI )E\  "level text"
 Add heading text
@@ -370,7 +461,12 @@ which is either\~0 or in the range 1 to\~7.
 See also
 .BR .H .
 .
-This macro is used for customized tables of contents.
+This undocumented DWB
+.I mm
+macro is exposed by
+.I groff mm
+to enable customized tables of contents.
+.
 .
 .TP
 .BR 1C\  [ 1 ]
@@ -405,36 +501,43 @@ Author's firm, should be called before
 see also
 .BR COVER .
 .
+.
 .TP
-.BI AL\  \fR[\fPtype\ \fR[\fPtext-indent\  \fR[\fP1\fR]]]\fP
-Start auto-increment list.
+.BI AL\~ \fR[\fPtype\~\fR[\fPtext-indent\~ \fR[\fP1\fR]]]\fP
+Start an auto-incrementing list.
 .
 Items are numbered beginning with one.
 .
 The
 .I type
-argument controls the format of numbers.
+argument assigns the register format
+(see above)
+of the list item enumerators.
 .
-.RS
-.IP
-.TS
-tab(@);
-lb lb
-l l.
-Arg@Description
-1@Arabic (the default)
-A@Upper-case letters (A\(enZ)
-a@Lower-case letters (a\(enz)
-I@Upper-case roman
-i@Lower-case roman
-.TE
-.RE
+The default
+.RB is\~ 1 .
 .
-.IP
+An explicitly empty
+.I type
+also indicates the default.
+.
 .I text-indent
-sets the indentation and overrides
+sets the indentation and overrides the register
 .BR Li .
-A third argument prohibits printing of a blank line before each item.
+.
+If a third argument,
+conventionally
+.BR 1 ,
+is given,
+the blank line that normally precedes each list item is suppressed.
+.
+Use
+.B LI
+to declare list items,
+and
+.B LE
+to end the list.
+.
 .
 .TP
 .BI APP\  "name text"
@@ -642,11 +745,15 @@ kept display.
 The text is indented one character,
 and the right margin is one character shorter.
 .
+This is a GNU extension.
+.
 .
 .TP
 .B B2
 End boxed,
 kept display.
+.
+This is a GNU extension.
 .
 .
 .TP
@@ -1265,9 +1372,13 @@ The default for
 .I mm
 is 10.
 .
+.
 .TP
 .B FE
-Footnote end.
+Footnote end;
+see macro
+.BR FS .
+.
 .
 .TP
 .BI FG\  "\fR[\fPtitle \fR[\fPoverride \fR[\fPflag \fR[\fPrefname\fR]]]]\fP"
@@ -1310,31 +1421,48 @@ is used inside
 it is not affected by the format of
 .BR DS .
 .
+.
 .TP
-.BI FS\  \fR[\fPlabel\fR]\fP
+.BR FS \~[\c
+.IR label ]
 Footnote start.
 .
-The footnote is ended by
-.BR FE .
+Text until
+.B FE
+is called is collected into a footnote.
 .
-By default, footnotes are automatically numbered;
-the number is available in string\~\c
-.BR F .
+By default,
+footnotes are automatically numbered starting at 1;
+the number is available in register
+.B :p
+and,
+with a trailing period,
+in
+.RB string\~ F .
 .
-Just add
-.B \[rs]*F
-in the text.
+This string precedes the footnote text at the bottom of the column or
+page.
 .
-By adding
-.IR label ,
-it is possible to have other number or names on the footnotes.
+Vertical space in the amount of
+.RB register\~ Fs
+separates footnotes;
+the default amount is 1v.
 .
-Footnotes in displays are now possible.
+In
+.IR "groff ms" ,
+footnotes may be used in displays.
 .
-An empty line separates footnotes;
-the height of the line is controlled by register
-.BR Fs ,
-default value is\~1.
+.
+.IP
+A
+.I label
+argument replaces the contents of the string
+.BR F ;
+it need not be numeric.
+.
+In this event,
+the footnote marker in the body text must be explicitly written.
+.
 .
 .TP
 .BI GETHN\  "refname \fR[\fPvarname\fR]\fP"
@@ -1772,28 +1900,21 @@ Hyphenation can be turned off by setting register
 .B Hy
 to\~0 at the beginning of the file.
 .
+.
 .TP
 .BI HM\  "\fR[\fParg1 \fR[\fParg2 \fR[.\|.\|.\& [\fParg14\fR]]]]\fP"
-Heading mark style.
+Set the heading mark style.
 .
-Controls the type of marking for printing of the heading counters.
+Each argument assigns the specified register format
+(see above)
+to the corresponding heading level.
 .
-Default is\~1 for all levels.
+The default
+.RB is\~ 1
+for all levels.
 .
-.IP
-.B Argument
+An explicitly empty argument also indicates the default.
 .
-.TS
-tab(@);
-l l.
-1@Arabic numerals.
-0001@Arabic numerals with leading zeroes, one or more.
-A@upper-case alphabetic
-a@lower-case alphabetic
-I@upper-case roman numerals
-i@lower-case roman numerals
-\[dq]\[dq]@Arabic numerals.
-.TE
 .
 .TP
 .BI HU\  heading-text
@@ -2205,10 +2326,11 @@ Default value is 99.
 .
 There is no nesting limit.
 .
+.
 .IP
 The indentation can be changed through register
 .BR Li .
-Default is\~6.
+.
 .
 .IP
 All lists begin with a list initialization macro,
@@ -2236,52 +2358,6 @@ l l.
 .TE
 .RE
 .
-.IP
-These lists are described at other places in this manual.
-.
-See also
-.BR LB .
-.
-.TP
-.BI LT\  \fR[\fIarg\/\fR]\fI
-Format a letter in one of four different styles depending
-on the argument.
-.
-Also see section \[lq]Internals\[rq] below.
-.
-.RS
-.IP
-.TS
-tab(@);
-lb lb
-l lx.
-Arg@Style
-BL@T{
-Blocked.
-Date line, return address, writer's address and closing
-begins at the center of the line.
-.
-All other lines begin at the left margin.
-T}
-SB@T{
-Semi-blocked.
-Same as blocked,
-except that the first line in every paragraph is indented five spaces.
-T}
-FB@T{
-Full-blocked.
-All lines begin at the left margin.
-T}
-SP@T{
-Simplified.
-As full-blocked,
-but the salutation is replaced by a fully-capitalized subject,
-any formal closing is omitted,
-and the author's signature is presented on a single line in full
-capitals.
-T}
-.TE
-.RE
 .
 .TP
 .BI LO\  "type \fR[\fParg\fR]\fP"
@@ -2339,6 +2415,49 @@ T}
 .TE
 .RE
 .
+.
+.TP
+.BI LT\  \fR[\fIarg\/\fR]\fI
+Format a letter in one of four different styles depending
+on the argument.
+.
+Also see section \[lq]Internals\[rq] below.
+.
+.RS
+.IP
+.TS
+tab(@);
+lb lb
+l lx.
+Arg@Style
+BL@T{
+Blocked.
+Date line, return address, writer's address and closing
+begins at the center of the line.
+.
+All other lines begin at the left margin.
+T}
+SB@T{
+Semi-blocked.
+Same as blocked,
+except that the first line in every paragraph is indented five spaces.
+T}
+FB@T{
+Full-blocked.
+All lines begin at the left margin.
+T}
+SP@T{
+Simplified.
+As full-blocked,
+but the salutation is replaced by a fully-capitalized subject,
+any formal closing is omitted,
+and the author's signature is presented on a single line in full
+capitals.
+T}
+.TE
+.RE
+.
+.
 .TP
 .BI MC\  "column-size \fR[\fPcolumn-separation\fR]\fP"
 Begin multiple columns.
@@ -2358,22 +2477,34 @@ is the space between two columns.
 Default separation is
 .IR column-size /15.
 .
-See also
+.
+This is a GNU extension;
+see also
 .BR 1C .
 .
-.TP
-.BI ML\  "mark \fR[\fPtext-indent\ " \fR[\fP1\fR]]\fP
-Marked list start.
 .
-The
+.TP
+.BI ML\~ "mark \fR[\fPtext-indent\~" \fR[\fP1\fR]]\fP
+Start a list with the
 .I mark
-argument is printed before each list item.
+argument preceding each list item.
 .
 .I text-indent
-sets the indent and overrides
+sets the indentation and overrides the register
 .BR Li .
 .
-A third argument prohibits printing of a blank line before each item.
+If a third argument,
+conventionally
+.BR 1 ,
+is given,
+the blank line that normally precedes each list item is suppressed.
+.
+Use
+.B LI
+to declare list items,
+and
+.B LE
+to end the list.
 .
 .
 .TP
@@ -2466,13 +2597,6 @@ End alternative multi-column mode and emit the columns.
 .
 .
 .TP
-.BI nP\  \fR[\fPtype\fR]\fP
-Print numbered paragraph with header level two.
-.
-See
-.BR .P .
-.
-.TP
 .B NCOL
 Force printing to the next column.
 .
@@ -2481,24 +2605,66 @@ Don't use this together with the
 macros, see
 .BR 2C .
 .
+.
+.TP
+.BI ND\  new-date
+New date.
+.
+Overrides the current date.
+.
+Date is not printed if
+.I new-date
+is an empty string.
+.
+.
+.TP
+.B NE
+End notation begun with
+.BR NS ;
+filling is enabled.
+.
+.
+.TP
+.BI nP\  \fR[\fPtype\fR]\fP
+Print numbered paragraph with header level two.
+.
+See
+.BR .P .
+.
+.
 .TP
 .BI NS\  \fR[\fParg\  \fR[\fP1\fR]]\fP
-Print different types of notations.
+Collect notations of the type specified by
+.I arg
+until
+.B NE
+is called;
+filling is disabled.
 .
-The argument selects between the predefined type of notations.
+If a second argument,
+conventionally
+.BR 1 ,
+is given,
+then the argument becomes the entire notation and
+.B NE
+is not necessary.
 .
-If the second argument is available,
-then the argument becomes the entire notation.
-.
-If the argument doesn't select a predefined type,
-it is printed as
+If
+.I arg
+does not match one of the predefined types listed below,
+the notations are prefixed with
 .RI "\[lq]Copy (" arg ") to\[rq]."
 .
-It is possible to add more standard notations;
+In
+.IR "groff mm" ,
+you can set up further notations to be recognized by
+.BR NS ;
 see the strings
 .B Letns
 and
-.BR Letnsdef .
+.B Letnsdef
+below.
+.
 .
 .RS
 .IP
@@ -2525,15 +2691,6 @@ l l.
 .TE
 .RE
 .
-.TP
-.BI ND\  new-date
-New date.
-.
-Overrides the current date.
-.
-Date is not printed if
-.I new-date
-is an empty string.
 .
 .TP
 .BI OF\  \fR[\fParg\fR]\fP
@@ -3367,6 +3524,13 @@ are defined if using
 .B \-T
 and setting top and/or bottom margin to less than the default.
 .
+This undocumented DWB
+.I mm
+macro is exposed by
+.I groff mm
+to increase user control of page layout.
+.
+.
 .TP
 .BI WA\  "\fR[\fPwriter-name \fR[\fPtitle\fR]]\fP"
 Begin specification of the writer and writer's address.
@@ -3375,10 +3539,6 @@ Several names can be specified with empty
 .BR WA / WE
 pairs, but only one address.
 .
-.TP
-.B WE
-End the address specification after
-.BR .WA .
 .
 .TP
 .BI WC\  "\fR[\fPformat1\fR] [\fPformat2\fR] [.\|.\|.]\fP"
@@ -3423,6 +3583,12 @@ T}
 .RE
 .
 .
+.TP
+.B WE
+End the address specification after
+.BR WA .
+.
+.
 .\" ====================================================================
 .SH Strings
 .\" ====================================================================
@@ -3434,6 +3600,20 @@ A string containing the word \[lq]APPENDIX\[rq].
 .TP
 .B Apptxt
 The current appendix text.
+.
+.
+.TP
+.B BU
+bullet
+(see
+.B BL
+macro)
+.
+.
+.TP
+.B Ci
+list of indentation amounts to use for table of contents heading levels,
+overriding automatic computation
 .
 .
 .TP
@@ -3457,6 +3637,24 @@ register.
 .TP
 .B EM
 Em dash string
+.
+.
+.TP
+.B F
+interpolates an automatically numbered footnote marker;
+the number is used by the next
+.B FS
+call without an argument.
+.
+In
+.I troff
+mode,
+the marker is superscripted;
+in
+.I nroff
+mode,
+it is surrounded by square brackets.
+.
 .
 .TP
 .B H1txt
@@ -3494,41 +3692,11 @@ Contains the index command.
 Default value is
 .RB \[lq] sort\~\-t\[rs]t \[rq].
 .
-.TP
-.B Lifg
-String containing \[lq]Figure\[rq].
-.
-.TP
-.B Litb
-String containing \[lq]TABLE\[rq].
-.
-.TP
-.B Liex
-String containing \[lq]Exhibit\[rq].
-.
-.TP
-.B Liec
-String containing \[lq]Equation\[rq].
-.
-.TP
-.B Licon
-String containing \[lq]CONTENTS\[rq].
-.
-.TP
-.B Lf
-Contains the string \[lq]LIST OF FIGURES\[rq].
-.
-.TP
-.B Lt
-Contains the string \[lq]LIST OF TABLES\[rq].
-.
-.TP
-.B Lx
-Contains the string \[lq]LIST OF EXHIBITS\[rq].
 .
 .TP
 .B Le
 Contains the string \[lq]LIST OF EQUATIONS\[rq].
+.
 .
 .TP
 .B Letfc
@@ -3536,29 +3704,13 @@ Contains the string \[lq]Yours very truly,\[rq],
 used in
 .BR .FC .
 .
+.
 .TP
 .B Letapp
 Contains the string \[lq]APPROVED:\[rq],
 used in
 .BR .AV .
 .
-.TP
-.B Letdate
-Contains the string \[lq]Date\[rq],
-used in
-.BR .AV .
-.
-.TP
-.B LetCN
-Contains the string \[lq]CONFIDENTIAL\[rq],
-used in
-.BR ".LO CN" .
-.
-.TP
-.B LetSA
-Contains the string \[lq]To Whom It May Concern:\[rq],
-used in
-.BR ".LO SA" .
 .
 .TP
 .B LetAT
@@ -3566,17 +3718,20 @@ Contains the string \[lq]ATTENTION:\[rq],
 used in
 .BR ".LO AT" .
 .
-.TP
-.B LetSJ
-Contains the string \[lq]SUBJECT:\[rq],
-used in
-.BR ".LO SJ" .
 .
 .TP
-.B LetRN
-Contains the string \[lq]In reference to:\[rq],
+.B LetCN
+Contains the string \[lq]CONFIDENTIAL\[rq],
 used in
-.BR ".LO RN" .
+.BR ".LO CN" .
+.
+.
+.TP
+.B Letdate
+Contains the string \[lq]Date\[rq],
+used in
+.BR .AV .
+.
 .
 .TP
 .B Letns
@@ -3598,6 +3753,7 @@ as a prefix and
 as a suffix.
 .
 Observe the space after \[lq]Copy\[rq] and before \[lq]to\[rq].
+.
 .
 .RS
 .IP
@@ -3626,12 +3782,75 @@ Letns!to@ to \fI(note leading space)\fP
 .TE
 .RE
 .
+.
 .TP
 .B Letnsdef
 Define the standard notation used when no argument is given to
 .BR .NS .
 .
 Default is\~0.
+.
+.
+.TP
+.B LetRN
+Contains the string \[lq]In reference to:\[rq],
+used in
+.BR ".LO RN" .
+.
+.
+.TP
+.B LetSA
+Contains the string \[lq]To Whom It May Concern:\[rq],
+used in
+.BR ".LO SA" .
+.
+.
+.TP
+.B LetSJ
+Contains the string \[lq]SUBJECT:\[rq],
+used in
+.BR ".LO SJ" .
+.
+.
+.TP
+.B Lf
+Contains the string \[lq]LIST OF FIGURES\[rq].
+.
+.
+.TP
+.B Licon
+String containing \[lq]CONTENTS\[rq].
+.
+.
+.TP
+.B Liec
+String containing \[lq]Equation\[rq].
+.
+.
+.TP
+.B Liex
+String containing \[lq]Exhibit\[rq].
+.
+.
+.TP
+.B Lifg
+String containing \[lq]Figure\[rq].
+.
+.
+.TP
+.B Litb
+String containing \[lq]TABLE\[rq].
+.
+.
+.TP
+.B Lt
+Contains the string \[lq]LIST OF TABLES\[rq].
+.
+.
+.TP
+.B Lx
+Contains the string \[lq]LIST OF EXHIBITS\[rq].
+.
 .
 .TP
 .B "MO1 \(en MO12"
@@ -3674,10 +3893,13 @@ ap@Appendix
 .TE
 .RE
 .
+.
 .TP
 .B Tm
-Contains the string \[lq]\[rs](tm\[rq],
-the trade mark symbol.
+contains the special character
+.BR \[rs](tm ,
+the trade mark sign.
+.
 .
 .TP
 .B Verbnm
@@ -3695,6 +3917,25 @@ Default is\~1.
 .\" ====================================================================
 .
 .TP
+.B .mgm
+Always\~1.
+.
+.
+.TP
+.B :p
+auto-incrementing footnote counter;
+see macro
+.B FS
+.
+.
+.TP
+.B :R
+auto-incrementing reference counter;
+see macro
+.B RS
+.
+.
+.TP
 .B Aph
 Print an appendix page for every new appendix if this register
 is non-zero.
@@ -3703,6 +3944,20 @@ No output occurs if
 .B Aph
 is zero,
 but there is always an appendix entry in the \[lq]List of contents\[rq].
+.
+.
+.TP
+.B Au
+includes supplemental author information
+(the third and subsequent arguments to
+.B AU )
+in memorandum \[lq]from\[rq] information.
+.
+It defaults
+.RB to\~ 1 ;
+.BR 0 \~excludes
+the information.
+.
 .
 .TP
 .B Cl
@@ -3739,14 +3994,6 @@ If set to\~1, eject after floating display is output.
 .
 Default is\~0.
 .
-.TP
-.B Dsp
-If defined, it controls the space output before and after static
-displays.
-.
-Otherwise the value of
-.B Lsp
-is used.
 .
 .TP
 .B Df
@@ -3765,6 +4012,17 @@ before and after display.
 .
 Default is\~1.
 .
+.
+.TP
+.B Dsp
+If defined, it controls the space output before and after static
+displays.
+.
+Otherwise the value of
+.B Lsp
+is used.
+.
+.
 .TP
 .B Ej
 If set to\~1, eject page before each first-level heading.
@@ -3778,15 +4036,34 @@ set to\~1.
 .
 Default is\~0.
 .
+.
+.TP
+.B Ex
+auto-incrementing exhibit counter;
+see macro
+.B EX
+.
+.
+.TP
+.B Fg
+auto-incrementing figure counter;
+see macro
+.B FG
+.
+.
 .TP
 .B Fs
 Footnote spacing.
 .
 Default is\~1.
 .
+.
 .TP
-.B "H1 \(en H7"
-Heading counters
+.BR H1 \|.\|.\|.\| H14
+auto-incrementing heading counters;
+see macro
+.B H
+.
 .
 .TP
 .B H1dot
@@ -3951,6 +4228,29 @@ above.
 .B L
 Page length, only for command-line settings.
 .
+.
+.TP
+.B Le
+.TQ
+.B Lf
+.TQ
+.B Lt
+.TQ
+.B Lx
+enable (1) or disable (0) the inclusion of lists of equations.
+figures,
+tables,
+and exhibits,
+respectively.
+.
+All default
+.RB to\~ 1
+except
+.BR Le ,
+which defaults
+.RB to\~ 0 .
+.
+.
 .TP
 .B Letwam
 Maximum lines in return-address, used in
@@ -3958,20 +4258,16 @@ Maximum lines in return-address, used in
 .
 Default is\~14.
 .
-.TP
-.BR Lf ,\  Lt ,\  Lx ,\  Le
-Enable (1) or disable (0) the printing of List of figures,
-.
-List of tables, List of exhibits and List of equations, respectively.
-.
-Default values are Lf=1, Lt=1, Lx=1, and Le=0.
 .
 .TP
 .B Li
-List indentation, used by
-.BR .AL .
+is the list item indentation amount used by lists
+.RB ( LB
+and the macros that call it).
 .
-Default is\~6.
+The default
+.BR is\~ 6 .
+.
 .
 .TP
 .B Limsp
@@ -4056,6 +4352,17 @@ Default is\~0.
 .TP
 .B O
 Page offset, only for command-line settings.
+.
+.
+.TP
+.B Oc
+controls the presence of page numbers in the table of contents.
+.
+The default
+.RB is\~ 0 ,
+which numbers the pages with Arabic numerals;
+any positive value suppresses them.
+.
 .
 .TP
 .B Of
@@ -4152,6 +4459,16 @@ Set default value for second argument of
 .
 Default is\~0.
 .
+.
+.TP
+.B S
+defines the type size for the document,
+and must be set from the command line.
+.
+A scaling unit may be appended;
+scaled points are assumed.
+.
+.
 .TP
 .B Sectf
 A flag controlling \[lq]section-figures\[rq] numbering style.
@@ -4176,6 +4493,18 @@ Display indentation.
 .
 Default is\~5.
 .
+.
+.TP
+.B V
+defines the vertical spacing for the document,
+and must be set from the command line.
+.
+A scaling unit may be appended;
+points are assumed.
+.
+The default vertical spacing is 120% of the type size.
+.
+.
 .TP
 .B Verbin
 Indentation for
@@ -4187,9 +4516,6 @@ Default is 5n.
 .B W
 Line length, only for command-line settings.
 .
-.TP
-.B .mgm
-Always\~1.
 .
 .
 .\" ====================================================================
