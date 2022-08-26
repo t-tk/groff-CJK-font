@@ -390,15 +390,14 @@ Index		array!index
 .vs \\n[@vs]u
 ..
 .de @warning
-'tm \\*[@mm]:\\n[.F]:\\n[.c]: warning: \\$*
+.tm \\*[@mm]:\\n[.F]:\\n[.c]: warning: \\$*
 .if \\n[D] .backtrace
 ..
+.\" All errors are fatal.
 .de @error
-'tm ******************
-'tm \\*[@mm]:\\n[.F]:\\n[.c]: error: \\$*
+.tm \\*[@mm]:\\n[.F]:\\n[.c]: error: \\$*
 .if \\n[D] .backtrace
-'tm ******************
-.ab \\*[@mm]: syntax error; aborting
+.ab
 ..
 .de misc@toupper
 .tr aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ
@@ -2395,23 +2394,22 @@ in=\\n[.i] fi=\\n[.u] .d=\\n[.d] nl=\\n[nl] pg=\\n[%]
 ..
 .\" ####### module pic #######################################
 .de PS
-.nr pic*in 0
 .br
 .SP .5
-.ie \\n[.$]<2 .@error "PS: bad arguments. Probably not processed with pic."
+.ie !\\n[.$]=2 \{\
+.	ds pic*msg PS: expected 2 arguments, got \\n[.$]\"
+.	as pic*msg ; not preprocessed with pic?\"
+.	@error \\*[pic*msg]
+.\}
 .el \{\
-.	if !\\n[ds*lvl] .ne (u;\\$1)+1v
-.\" should be contained between .DS/.DE
-.if r ds*format \{\
-.		if \\n[ds*lvl]&((\\n[ds*format]=2):(\\n[ds*format]=3)) \{\
-.			nr pic*in \\n[.i]
-.\" .		in +(u;\\n[.l]-\\n[.i]-\\$2/2)
-.		\}
-.	\}
+.	if r ds*format .if !\\n[ds*lvl] .ne (u;\\$1)+1v
 .\}
 ..
-.de PE
+.de PY
 .init@reset
+..
+.de PE
+.PY
 .SP .5
 ..
 .\" ####### module eq #######################################

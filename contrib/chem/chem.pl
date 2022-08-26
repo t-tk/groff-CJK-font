@@ -2,7 +2,8 @@
 
 # chem - a groff preprocessor for producing chemical structure diagrams
 
-my $Copyright = 'Copyright (C) 2006-2014 Free Software Foundation, Inc.';
+my $copyright = 'Copyright (C) 2006-2014, 2022'
+                . ' Free Software Foundation, Inc.';
 # Written by Bernd Warken <groff-bernd.warken-72@web.de>.
 
 # This file is part of 'chem', which is part of 'groff'.
@@ -23,13 +24,9 @@ my $Copyright = 'Copyright (C) 2006-2014 Free Software Foundation, Inc.';
 # settings
 ########################################################################
 
-my $Program_Version = '1.0.5';
+my $chem_version = '1.0.6';
+my $groff_version = 'DEVELOPMENT';
 
-# this setting of the groff version is only used before make is run,
-# otherwise @VERSION@ will set it.
-my $Groff_Version_Preset='1.20preset';
-
-# test on Perl version
 require v5.6;
 
 
@@ -47,41 +44,27 @@ use File::Spec;
 # $Bin is the directory where this script is located
 use FindBin;
 
-my $Chem_Name;
-my $Groff_Version;
+my $chem;
 my $File_chem_pic;
-my $File_pic_tmac;
 
-BEGIN {
-  {
-    my $before_make;		# script before run of 'make'
-    {
-      my $at = '@';
-      $before_make = 1 if '@VERSION@' eq "${at}VERSION${at}";
-    }
+my $is_in_source_tree;
+{
+  $is_in_source_tree = 1 if '@VERSION@' eq '@' . 'VERSION' . '@';
+}
 
-    my %at_at;
+my %makevar;
 
-    if ($before_make) {
-      my $chem_dir = $FindBin::Bin;
-      $at_at{'BINDIR'} = $chem_dir;
-      $at_at{'G'} = '';
-      $File_chem_pic = File::Spec->catfile($chem_dir, 'chem.pic');
-      $File_pic_tmac = File::Spec->catfile($chem_dir, '..', 'pic.tmac');
-      $Groff_Version = '';
-      $Chem_Name = 'chem';
-    } else {
-      $Groff_Version = '@VERSION@';
-      $at_at{'BINDIR'} = '@BINDIR@';
-      $at_at{'G'} = '@g@';
-      $at_at{'PICDIR'} = '@PICDIR@';
-      $at_at{'TMACDIR'} = '@MACRODIR@';
-      $File_chem_pic =
-	File::Spec->catfile($at_at{'PICDIR'}, 'chem.pic');
-      $File_pic_tmac = File::Spec->catfile($at_at{'TMACDIR'}, 'pic.tmac');
-      $Chem_Name = $at_at{'G'} . 'chem';
-    }
-  }
+if ($is_in_source_tree) {
+  my $chem_dir = $FindBin::Bin;
+  $makevar{'G'} = '';
+  $File_chem_pic = File::Spec->catfile($chem_dir, 'chem.pic');
+  $chem = 'chem';
+} else {
+  $groff_version = '@VERSION@';
+  $makevar{'G'} = '@g@';
+  $makevar{'PICDIR'} = '@PICDIR@';
+  $File_chem_pic = File::Spec->catfile($makevar{'PICDIR'}, 'chem.pic');
+  $chem = $makevar{'G'} . 'chem';
 }
 
 
@@ -208,10 +191,6 @@ my $Line = '';
     my $count_minus = 0;
     my @stdin = ();
     my $stdin = 0;
-
-    # for centralizing the pic code
-    open TMAC, "<$File_pic_tmac" and print <TMAC>;
-    close TMAC;
 
     foreach (@ARGV) {
       $count_minus++ if /^-$/;
@@ -1215,54 +1194,38 @@ sub setparams {
 } # setparams()
 
 
-##########
-# usage()
-#
-# Print usage information for --help.
-#
 sub usage {
-  print "\n";
-  &version();
   print <<EOF;
+usage: $chem [file] ...
+usage: $chem { -h | --help | -v | --version }
 
-Usage: $Chem_Name [option]... [filespec]...
+$chem is a groff preprocessor for producing chemical structure
+diagrams.  It produces input for the $makevar{'G'}pic preprocessor.  If
+no file operands are given, or if file is "-", the standard input stream
+is read.
 
-$Chem_Name is a groff preprocessor for producing chemical structure
-diagrams.  The output suits to the pic preprocessor.
-
-"filespec" is one of
-  "filename"       name of a readable file
-  "-"              for standard input
-
-All available options are
-
--h --help         print this usage message.
--v --version      print version information.
-
+Options:
+ -h, --help     Display this message and exit.
+ -v, --version  Display version information and exit.
 EOF
-} # usage()
+}
 
 
-##########
-# version()
-#
-# Get version information from version.sh and print a text with this.
-#
 sub version {
-  $Groff_Version = $Groff_Version_Preset unless $Groff_Version;
   print <<EOF;
-$Chem_Name $Program_Version (Perl version)
-is part of groff version $Groff_Version.
-$Copyright
-GNU groff and chem come with ABSOLUTELY NO WARRANTY.
-You may redistribute copies of groff and its subprograms
-under the terms of the GNU General Public License.
+$chem (groff $groff_version) $chem_version
+$copyright
+License GPLv2: GNU GPL version 2
+<https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
 EOF
-} # version()
+}
 
 1;
+
 # Local Variables:
 # fill-column: 72
 # mode: CPerl
 # End:
-# vim: set autoindent textwidth=72:
+# vim: set cindent noexpandtab shiftwidth=2 softtabstop=2 textwidth=72:

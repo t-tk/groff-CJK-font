@@ -846,6 +846,9 @@ contributed much of the material on the @file{ms} macro package.
 @c =====================================================================
 @c =====================================================================
 
+@codequotebacktick on
+@codequoteundirected on
+
 @node Invoking groff, Tutorial for Macro Users, Introduction, Top
 @chapter Invoking @code{groff}
 @cindex invoking @code{groff}
@@ -1307,9 +1310,6 @@ Do not postprocess the output of @code{gtroff}.  Normally @code{groff}
 automatically runs the appropriate postprocessor.
 @end table
 
-@codequotebacktick off
-@codequoteundirected off
-
 
 @c =====================================================================
 
@@ -1581,57 +1581,73 @@ groff -Tps -dpaper=a4l -P-pa4 -P-l -ms foo.ms > foo.ps
 
 @c =====================================================================
 
+@c BEGIN Keep parallel with groff(1), section "Examples".
 @node Invocation Examples,  , Paper Size, Invoking groff
 @section Invocation Examples
 @cindex invocation examples
 @cindex examples of invocation
 
-This section lists several common uses of @code{groff} and the
-corresponding command lines.
+@code{roff} systems are best known for formatting man pages.  Once a
+@command{man} librarian program has located a man page, it may execute
+a @code{groff} command much like the following.
 
 @Example
-groff file
+groff -t -man -Tutf8 /usr/share/man/man1/groff.1
+@endExample
+
+The librarian will also pipe the output through a pager, which might not
+interpret the SGR terminal escape sequences @command{groff} emits for
+boldface, underlining, or italics; see the @cite{grotty@r{(1)}} man page
+for a discussion.
+
+To process a @code{roff} input file using the preprocessors
+@command{gtbl} and @command{gpic} and the @file{me} macro package in the
+way to which AT&T @code{troff} users were accustomed, one would type (or
+script) a pipeline.
+
+@Example
+gpic foo.me | gtbl | gtroff -me -Tutf8 | grotty
+@endExample
+
+Using @command{groff}, this pipe can be shortened to an equivalent
+command.
+
+@Example
+groff -p -t -me -T utf8 foo.me
+@endExample
+
+An even easier way to do this is to use @command{grog} to guess the
+preprocessor and macro options and execute the result by using the
+command substitution feature of the shell.
+
+@Example
+$(grog -Tutf8 foo.me)
+@endExample
+
+Each command-line option to a postprocessor must be specified with any
+required leading dashes @samp{-}
+@c No GNU roff postprocessor uses long options for anything except
+@c --help or --version.
+@c or @samp{--}
+because @command{groff} passes the arguments as-is to the postprocessor;
+this permits arbitrary arguments to be transmitted.  For example, to
+pass a title to the @command{gxditview} postprocessor,
+the shell commands
+
+@Example
+groff -X -P -title -P 'trial run' mydoc.t
 @endExample
 
 @noindent
-This command processes @file{file} without a macro package or a
-preprocessor.  The output device is the default, @samp{ps}, and the
-output is sent to @code{stdout}.
+and
 
 @Example
-groff -t -mandoc -Tascii file | less
+groff -X -Z mydoc.t | gxditview -title 'trial run' -
 @endExample
 
 @noindent
-This is basically what a call to the @code{man} program does.  GNU
-@code{troff} processes the man page @file{file} with the @file{mandoc}
-macro file (which in turn loads either the @file{man} or the @file{mdoc}
-macro package), using the @command{tbl} preprocessor and the
-@code{ascii} output device.  Finally, the @command{less} pager displays
-the result.
-
-@Example
-groff -X -m me file
-@endExample
-
-@noindent
-Preview @file{file} with @code{gxditview}, using the @file{me} macro
-package.  Since no @option{-T} option is specified, use the default
-device (@samp{ps}).  You can say either @w{@samp{-m me}} or
-@w{@samp{-me}}; the latter is an anachronism from the early days of
-Unix.@footnote{The same is true for the other major macro packages that
-come with @code{groff}: @file{man}, @file{mdoc}, @file{ms}, @file{mm},
-and @file{mandoc}.  This won't work in general; for example, to load
-@file{trace.tmac}, either @samp{-mtrace} or @w{@samp{-m trace}} must be
-used.}
-
-@Example
-groff -man -rD1 -z file
-@endExample
-
-@noindent
-Check @file{file} with the @file{man} macro package, forcing
-double-sided printing---don't produce any output.
+are equivalent.
+@c END Keep parallel with groff(1), section "Examples".
 
 @menu
 * grog::
@@ -1679,6 +1695,9 @@ Unix shell prompt:
 As this example shows, it is still necessary to redirect the output to
 something meaningful (i.e., either a file or a pager program like
 @code{less}).
+
+@codequotebacktick off
+@codequoteundirected off
 
 
 
@@ -3949,13 +3968,15 @@ use.
 @endDefmac
 
 @DefmacList {PS, , ms}
-@DefmacListEndx {PE, , ms}
-Demarcate a diagram to be processed by the @code{pic} preprocessor.  You
-can create @code{pic} input manually or by using a program such as
-@code{xfig}.
+@DefmacItemx {PE, , ms}
+@DefmacListEndx {PF, , ms}
+@code{PS} begins a picture to be processed by the @command{gpic}
+preprocessor; either of @code{PE} or @code{PF} ends it, the latter with
+``flyback'' to the vertical position at its top.  You can create
+@code{pic} input manually or with a program such as @code{xfig}.
 @endDefmac
 
-@DefmacList {EQ, [@Var{align} [@Var{label}], ms}
+@DefmacList {EQ, [@Var{align} [@Var{label}]], ms}
 @DefmacListEndx {EN, , ms}
 Demarcate an equation to be processed by the @code{eqn} preprocessor.
 The equation is centered by default; @var{align} can be @samp{C},
@@ -6559,12 +6580,7 @@ solution, using escaped spaces, can be found in documents prepared for
 @acronym{AT&T} @code{troff}.  Nevertheless, it is not optimal in most
 situations, since @w{@samp{\ }} inserts a fixed-width, non-breaking
 space.  GNU @code{troff} provides the @code{\~} escape sequence to
-insert an adjustable, non-breaking space.@footnote{@code{\~} is also
-supported by Heirloom Doctools @code{troff} 050915 (September 2005),
-@code{neatroff} (since commit 1c6ab0f6e, 2016-09-13), and @code{mandoc}
-1.14.5 (March 2019) but not by Plan@tie{}9 @code{troff}, Solaris
-@code{troff}, or DWB @code{troff} or @code{onroff}.}
-@c as of this writing, 2022-03-21
+insert an adjustable, non-breaking space.
 
 @cindex @code{"}, in a macro argument
 @cindex double quote, in a macro argument
@@ -16648,6 +16664,21 @@ referred to it as a ``living fossil''.} should be migrated to another
 @node Other Differences, , Compatibility Mode, Implementation Differences
 @subsection Other Differences
 
+@code{groff} request names unrecognized by other @code{troff}
+implementations will likely be ignored; escape sequences that are
+@code{groff} extensions are liable to be formatted literally.
+@cindex @code{\~}, incompatibilities with @acronym{AT&T} @code{troff}
+For example, the adjustable, non-breaking escape sequence @code{\~}
+@c BEGIN Keep in sync with groff_diff(7) and groff_man_style(7).
+is also supported by Heirloom Doctools @code{troff} 050915 (September
+2005), @code{mandoc} 1.9.5 (2009-09-21), @code{neatroff} (commit
+1c6ab0f6e, 2016-09-13), and Plan@tie{}9 from User Space @code{troff}
+(commit 93f8143600, 2022-08-12), but not by Solaris or Documenter's
+Workbench @code{troff}s.
+@c as of this writing, 2022-08-13
+@c END Keep in sync with groff_diff(7) and groff_man_style(7).
+@xref{Manipulating Filling and Adjustment}.
+
 @cindex @code{\A}, incompatibilities with @acronym{AT&T} @code{troff}
 @cindex @code{\|}, incompatibilities with @acronym{AT&T} @code{troff}
 @cindex @code{\^}, incompatibilities with @acronym{AT&T} @code{troff}
@@ -18168,8 +18199,8 @@ featural description of the glyph: it is a bit mask recording whether
 the glyph is an ascender, descender, both, or neither.  When a @code{\w}
 escape sequence is interpolated, these values are bitwise or-ed
 together for each glyph and stored in the @code{nr} register.  In font
-descriptions for @code{nroff}-mode output devices (terminals), all
-glyphs might have a type of zero.
+descriptions for terminal devices, all glyphs might have a type of zero,
+regardless of their appearance.
 
 @table @code
 @item 0
@@ -18205,20 +18236,20 @@ For efficiency, these data are now compiled directly into
 arrays for PostScript fonts containing more than 256 glyphs.  Anything
 on the line after the @var{entity-name} field or @samp{--} is ignored.
 
-A line in the @code{charset} section can also have the following format.
+A line in the @code{charset} section can also have the form
 
 @Example
 @var{name} "
 @endExample
 
 @noindent
-This notation indicates that @var{name} is another name for the glyph
-named on the preceding line.  Such aliases can be chained.
+identifying @var{name} as another name for the glyph mentioned in the
+preceding line.  Such aliases can be chained.
 
 @kindex kernpairs
-The word @code{kernpairs} starts a list of kerning adjustments to be
-made to adjacent glyph pairs from this font.  It contains a sequence of
-lines formatted as follows.
+The directive @code{kernpairs} starts a list of kerning adjustments to
+be made to adjacent glyph pairs from this font.  It contains a sequence
+of lines formatted as follows.
 
 @Example
 @var{g1} @var{g2} @var{n}

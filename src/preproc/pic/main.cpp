@@ -24,7 +24,9 @@ extern "C" const char *Version_string;
 output *out;
 char *graphname;		// the picture box name in TeX mode
 
-int flyback_flag;
+bool want_flyback = false;
+// groff pic supports '.PY' to work around mm package stepping on 'PF'.
+bool want_alternate_flyback = false;
 int zero_length_line_flag = 0;
 // Non-zero means we're using a groff driver.
 int driver_extension_flag = 1;
@@ -88,13 +90,14 @@ int top_input::get()
     c = getc(fp);
     if (c == 'P') {
       c = getc(fp);
-      if (c == 'F' || c == 'E') {
+      if (c == 'E' || c == 'F' || c == 'Y') {
 	int d = getc(fp);
 	if (d != EOF)
 	  ungetc(d, fp);
 	if (d == EOF || d == ' ' || d == '\n' || compatible_flag) {
 	  eof = 1;
-	  flyback_flag = c == 'F';
+	  want_flyback = (c == 'F');
+	  want_alternate_flyback = (c == 'Y');
 	  return EOF;
 	}
 	push_back[0] = c;
@@ -133,7 +136,7 @@ int top_input::get()
   bol = 0;
   if (c == EOF) {
     eof = 1;
-    error("end of file before .PE or .PF");
+    error("end of file before .PE, .PF, or .PY");
     error_with_file_and_line(current_filename, start_lineno - 1,
 			     ".PS was here");
   }
@@ -160,13 +163,14 @@ int top_input::peek()
     c = getc(fp);
     if (c == 'P') {
       c = getc(fp);
-      if (c == 'F' || c == 'E') {
+      if (c == 'E' || c == 'F' || c == 'Y') {
 	int d = getc(fp);
 	if (d != EOF)
 	  ungetc(d, fp);
 	if (d == EOF || d == ' ' || d == '\n' || compatible_flag) {
 	  eof = 1;
-	  flyback_flag = c == 'F';
+	  want_flyback = (c == 'F');
+	  want_alternate_flyback = (c == 'Y');
 	  return EOF;
 	}
 	push_back[0] = c;
@@ -217,7 +221,7 @@ int top_input::get_location(const char **filenamep, int *linenop)
 
 void do_picture(FILE *fp)
 {
-  flyback_flag = 0;
+  want_flyback = false;
   int c;
   if (!graphname)
     free(graphname);
@@ -287,7 +291,7 @@ void do_picture(FILE *fp)
     parse_cleanup();
     lex_cleanup();
 
-    // skip the rest of the .PF/.PE line
+    // skip the rest of the .PE/.PF/.PY line
     while ((c = getc(fp)) != EOF && c != '\n')
       ;
     if (c == '\n')
@@ -622,7 +626,8 @@ int main(int argc, char **argv)
     out = make_troff_output();
     printf(".do if !dPS .ds PS\n"
 	   ".do if !dPE .ds PE\n"
-	   ".do if !dPF .ds PF\n");
+	   ".do if !dPF .ds PF\n"
+	   ".do if !dPY .ds PY\n");
   }
 #ifdef FIG_SUPPORT
   if (whole_file_flag) {

@@ -112,13 +112,13 @@ my $w_flg=0;
 my $nomove=0;
 my $pendmv=0;
 my $gotT=0;
-my $suppress=0;	# Suppress processing?
-my %incfil;	# Included Files
-my @outlev=([0,undef,0,0]);	# Structure pdfmark /OUT entries
+my $suppress=0; # Suppress processing?
+my %incfil;     # Included Files
+my @outlev=([0,undef,0,0]);     # Structure pdfmark /OUT entries
 my $curoutlev=\@outlev;
-my $curoutlevno=0;	# Growth point for @curoutlev
+my $curoutlevno=0;      # Growth point for @curoutlev
 my $Foundry='';
-my $xrev=0;	# Reverse x direction of font
+my $xrev=0;     # Reverse x direction of font
 my $matrixchg=0;
 my $wt=-1;
 my $thislev=1;
@@ -478,13 +478,13 @@ sub MakeMatrix
 	    $slant*=$env{FontHT}/$cftsz if $env{FontHT} != 0;
 	    my $ang=rad($slant);
 
-	    $mat[2]=sprintf('%.3f',sin($ang)/cos($ang));
-	}
+            $mat[2]=sprintf('%.3f',sin($ang)/cos($ang));
+        }
 
-	if ($fontxrev)
-	{
-	    $mat[0]=-$mat[0];
-	}
+        if ($fontxrev)
+        {
+            $mat[0]=-$mat[0];
+        }
     }
 
     $matrix=join(' ',@mat);
@@ -922,7 +922,7 @@ sub do_x
 		    }
 		}
 		elsif ($pdfmark=~m/(.+) \/DEST\s*$/)
-                {
+		{
                     my @xwds=split(' ',"<< $1 >>");
                     my $dest=ParsePDFValue(\@xwds);
                     $dest->{View}->[1]=GraphY($dest->{View}->[1]*-1);
@@ -1142,12 +1142,12 @@ sub do_x
 		}
 	    }
 	    elsif (lc($xprm[1]) eq 'xrev')
-	    {
-		$xrev=!$xrev;
-	    }
-	    elsif (lc($xprm[1]) eq 'markstart')
-	    {
-		$mark={'rst' => ($xprm[2]+$xprm[4])/$unitwidth, 'rsb' => ($xprm[3]-$xprm[4])/$unitwidth, 'xpos' => $xpos-($xprm[4]/$unitwidth),
+            {
+                $xrev=!$xrev;
+            }
+            elsif (lc($xprm[1]) eq 'markstart')
+            {
+                $mark={'rst' => ($xprm[2]+$xprm[4])/$unitwidth, 'rsb' => ($xprm[3]-$xprm[4])/$unitwidth, 'xpos' => $xpos-($xprm[4]/$unitwidth),
 			    'ypos' => $ypos, 'lead' => $xprm[4]/$unitwidth, 'pdfmark' => join(' ',@xprm[5..$#xprm])};
 	    }
 	    elsif (lc($xprm[1]) eq 'markend')
@@ -2413,17 +2413,19 @@ sub LoadFont
 
 	    if ($r[1] eq '"')
 	    {
-		$fnt{NAM}->{$r[0]}=$fnt{NAM}->{$lastnm};
+		$fnt{NAM}->{$r[0]}=[@{$fnt{NAM}->{$lastnm}}];
 		next;
 	    }
 
+	    $r[3]=oct($r[3]) if substr($r[3],0,1) eq '0';
 	    $r[0]='u0020' if $r[3] == 32;
-	    $r[0]="u00".hex($r[3]) if $r[0] eq '---';
-#	    next if $r[3] >255;
-	    $fnt{NAM}->{$r[0]}=[$p[0],$r[3],'/'.$r[4],$r[3],0];
-	    $fnt{NO}->[$r[3]]=[$r[0],$r[0]];
-	    $lastnm=$r[0];
-	    $lastchr=$r[3] if $r[3] > $lastchr;
+            $r[0]="u00".hex($r[3]) if $r[0] eq '---';
+#           next if $r[3] >255;
+            $r[4]=$r[0] if !defined($r[4]);
+            $fnt{NAM}->{$r[0]}=[$p[0],$r[3],'/'.$r[4],$r[3],0];
+            $fnt{NO}->[$r[3]]=[$r[0],$r[0]];
+            $lastnm=$r[0];
+            $lastchr=$r[3] if $r[3] > $lastchr;
 	    $fixwid=$p[0] if $fixwid == -1;
 	    $fixwid=-2 if $fixwid > 0 and $p[0] != $fixwid;
 
@@ -2506,12 +2508,12 @@ sub LoadFont
     }
     else
     {
-	Warn("unable to embed font file for '$fnt{internalname}'"
-	    . " ($ofontnm) (missing entry in 'download' file?)")
-	    if $embedall;
-	$fno=++$objct;
-	$fontlst{$fontno}->{OBJ}=BuildObj($objct,
-			{'Type' => '/Font',
+        Warn("unable to embed font file for '$fnt{internalname}'"
+            . " ($ofontnm) (missing entry in 'download' file?)")
+            if $embedall;
+        $fno=++$objct;
+        $fontlst{$fontno}->{OBJ}=BuildObj($objct,
+                        {'Type' => '/Font',
 			'Subtype' => '/Type1',
 			'BaseFont' => '/'.$fnt{internalname},
 			'Widths' => $fnt{WIDTH},
@@ -3646,15 +3648,15 @@ sub do_t
     {
 	PutLine(0) if $#lin > -1;
 	MakeMatrix(1);
-	$stream.="$matrix ".PutXY($xpos,$ypos)." Tm\n", $poschg=0;
-	$stream.="$curkern Tc\n";
-	$stream.="0 Tw ";
-	$stream.="($par) Tj\n";
-	MakeMatrix();
-	$stream.="$matrix ".PutXY($xpos,$ypos)." Tm\n", $poschg=0;
-	$matrixchg=0;
-	$stream.="$curkern Tc\n";
-	return;
+        $stream.="$matrix ".PutXY($xpos,$ypos)." Tm\n", $poschg=0;
+        $stream.="$curkern Tc\n";
+        $stream.="0 Tw ";
+        $stream.="($par) Tj\n";
+        MakeMatrix();
+        $stream.="$matrix ".PutXY($xpos,$ypos)." Tm\n", $poschg=0;
+        $matrixchg=0;
+        $stream.="$curkern Tc\n";
+        return;
     }
 
     if ($pendmv)
@@ -3774,11 +3776,12 @@ sub RemapChr
 
     if ($unused && $unused <= 255)
     {
-	my $glyph=$fnt->{NO}->[$unused]->[1];
-	delete($fontlst{$cft}->{CACHE}->{$cftsz});
-	$fnt->{NAM}->{$chnm}->[ASSIGNED]=$unused;
-	$fnt->{NO}->[$unused]->[1]=$chnm;
-	$widtbl=CacheWid($cft);
+        my $glyph=$fnt->{NO}->[$unused]->[1];
+        delete($fontlst{$cft}->{CACHE}->{$cftsz});
+        $fnt->{NAM}->{$chnm}->[ASSIGNED]=$unused;
+        $fnt->{NAM}->{$chnm}->[USED]=1;
+        $fnt->{NO}->[$unused]->[1]=$chnm;
+        $widtbl=CacheWid($cft);
 
 	$stream.="% AAA Assign $chnm ($ch) to $unused\n" if $debug;
 

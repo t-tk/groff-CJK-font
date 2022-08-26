@@ -1,3 +1,35 @@
+2022-08-18  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* chem.pl: Refactor.
+	  - Rename scalars.
+	    Copyright -> copyright
+	    Program_Version -> chem_version
+	    Groff_Version -> groff_version
+	    Chem_Name -> chem
+	    before_make -> is_in_source_tree
+	  - Rename hash.
+	    at_at -> makevar
+	  - Drop unused hash member `$makevar{'BINDIR'}`.
+	  - Drop scalar `Groff_Version_Preset`, which apparently hadn't
+	    been updated since groff 1.20.  Instead, follow grog(1) and
+	    set the `groff_version` scalar to "DEVELOPMENT" if this is
+	    the version from the groff source tree.  Overwrite its value
+	    with that determined by make(1) if available.
+	  - Tighten usage and version messages; make the latter more
+	    conformant with the format recommended in the GNU Coding
+	    Standards.  Explicitly identify license as GNU GPLv2.
+	  (usage): Refer to "pic" with its command prefix if it is known
+	  to have one.  (If running "unbuilt", we have no way to know.)
+
+2022-08-18  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* chem.pl: Stop copying "pic.tmac" (fallback troff macro
+	definitions) into the output.  It might not be necessary and it
+	is inappropriate to do so if a macro package offers its own
+	definitions or the user has made other arrangements on the
+	command line.  (The same thing can be achieved with the "-mpic"
+	argument to the formatter or a front end.)  Bump version number.
+
 2022-06-15  G. Branden Robinson <g.branden.robinson@gmail.com>
 
 	* chem.1.man: Fix markup nits.  Use idiomatic input style,

@@ -1,3 +1,205 @@
+2022-08-23  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/roff/troff/env.cpp (environment::set_family): Throw error
+	if user requests a font family that (when combined with the
+	current style) can't be resolved to a real font name.  Fixes a
+	regression introduced by me in commit d8cb8cf9d8, 2021-09-15,
+	arising from a revision of font selection logic in node.cpp to
+	enable a bunch of _other_ font error diagnostics.
+
+	Fixes <https://savannah.gnu.org/bugs/?62941>.  Thanks to Dave
+	Kemper for the report and two useful end points for a bisection.
+
+2022-08-23  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/roff/troff/env.cpp (environment::set_family): Add some
+	paranoia.  Add `assert()`s on the previous font mounting
+	position still being valid and the font family dictionary lookup
+	not returning a null pointer.  Add an early return for the
+	latter case (which should be impossible).
+
+2022-08-23  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/roff/troff/node.cpp (font_family::make_definite):
+	Refactor.  Rename parameter from inscrutable `i` to
+	`mounting_position`.  Add `assert()` to enforce invariant: we're
+	passed a mounting position that is nonnegative.  Use `pos` as
+	short alias of parameter once we're into the function body.
+	Relocate conditional branches to front-load early returns as
+	well as those requiring little code to handle.  This reduces the
+	average indentation level of the function, a readability win.
+
+2022-08-23  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[man]: Restore robustness to `EE` misuse.
+
+	* tmac/an.tmac: Add `an*is-in-example` register to keep track
+	state of within-exampleness.  Not doing so can cause a spurious
+	use of `EE` to wrongly set the inter-paragraph distance to zero.
+	(TH): Initialize register.
+	(EX): Test register; if set, ignore macro call and, if
+	`CHECKSTYLE` warnings are on, throw diagnostic.  Set register.
+	(EE): Test register; if clear, ignore macro call and, if
+	`CHECKSTYLE` warnings are on, throw diagnostic.  Clear register.
+
+	* tmac/an-ext.tmac (EX, EE): Similar, using `mX` register.
+	Because AT&T troff had no `return` request, invert the sense of
+	the tests and put the entire macro bodies inside conditionals.
+
+	This regressed post-1.22.4.  Thanks to Ingo Schwarze for the
+	report and a proposed patch.
+
+2022-08-23  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/an-ext.tmac: Refactor.  Rename `mX` to `mZ` so we can use
+	`mX` for an "in-example" state register in a future commit.
+	Rename `mE` to `mF` to store the current font's mounting
+	position.  Bizarrely, `mF` was not already used for this
+	purpose.
+
+2022-08-22  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/libs/libgroff/error.cpp (do_error_with_file_and_line):
+	Trivially refactor.  Use separate string constant for invariant
+	material.  (This will make it easier to, for example, store the
+	diagnostic level strings in an array that can be indexed by
+	their corresponding `enum` type.)
+
+2022-08-22  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/roff/troff/input.cpp (fatal_with_file_and_line)
+	(error_with_file_and_line, debug_with_file_and_line): Align more
+	closely with GNU Coding Standards regarding diagnostics: don't
+	suffix the colon after the program name with a space when
+	location information follows.
+
+2022-08-22  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/devices/grohtml/grohtml.1.man: Fix erroneous claim.
+	Images are not generated when "baseline rules" or "box rules"
+	are encountered in the input.  These are troff special
+	characters; the former is converted to an underscore and the
+	latter to U+2502, "box drawings light vertical".  This remains
+	true even if a series of them is drawn with the `\l` escape
+	sequence.  (I also checked vertical line drawing with `\L`.
+	grohtml's handling of that provoked a rather wet eructation from
+	my lower esophageal sphincter--the output is assuredly not
+	correct.  But it's still not an image.)
+
+2022-08-22  Deri James  <deri@chuzzlewit.myzen.co.uk>
+
+	Bug #62934 - after glyph remapped mark it as used
+
+	When many glyphs are remapped from code points above 255
+	such as writing documents in cyrillic with the U-TR fonts,
+	gropdf starts reusing code points in the range 128-255.
+	If subsequently one of those code points is actually required,
+	such as \(em (code 138), and it has been replaced by a
+	cyrillic, then it needs to be mapped to another free code.
+
+	To determine if a particular code point is free each glyph
+	has a USED flag. The bug was caused because after remapping
+	\(em to the next free glyph the USED flag was not set. So the
+	next new cyrillic character to be entered was given the same
+	code point as had been allocated to \(em.
+
+	* src/devices/gropdf/gropdf.pl: Set the USED flag on remapped
+	glyphs.
+
+	Fixes <https://savannah.gnu.org/bugs/?62934>.
+
+	Thanks to Nikita Ivanov for spotting the problem and testing
+	the fix.
+
+2022-08-20  Deri James  <deri@chuzzlewit.myzen.co.uk>
+
+	Bug #62923 - problem using aliased glyphs
+
+	With a large font if 2 characters above the 255 code
+	point limit are aliased, the aliased glyph has incorrect meta
+	data.
+
+	* src/devices/gropdf/gropdf.pl: Instead of duplicating a pointer
+	to the font metadata, duplicate the data itself. Then, if the
+	glyph is remapped to a code point under 256, the metadata is
+	preserved.
+
+	Fixes <https://savannah.gnu.org/bugs/?62923>.  Thanks to Nikita
+	Ivanov for the report.
+
+2022-08-18  Deri James  <deri@chuzzlewit.myzen.co.uk>
+
+	[gropdf]: Improve parsing of troff font files.
+
+	* src/devices/gropdf/gropdf.pl: Allow the glyph code number
+	to be octal or hex as well as a decimal number. If entity_name
+	is missing use name instead.
+
+2022-08-15  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[ms]: Support pic(1) "flyback" feature.
+
+	* tmac/s.tmac (PF): Add macro; it does what `PE` formerly did,
+	minus vertical spacing.
+	(PE): Call `PF` and vertically space as before.
+
+	* doc/groff.texi (ms Insertions):
+	* doc/ms.ms (Tables, figures, equations, and references):
+	* tmac/groff_ms.7.man (Tables, figures, equations, and
+	references): Document it.
+
+	* NEWS: Add item.
+
+	Fixes <https://savannah.gnu.org/bugs/?60558>.
+
+2022-08-15  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/s.tmac (@PS): Validate better; check for 2 arguments
+	exactly.
+
+2022-08-14  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[pic]: Recognize `.PY` as synonym of `.PF`.
+
+	* src/preproc/pic/main.cpp:
+	* src/preproc/pic/pic.h: Add new Boolean variable,
+	`want_alternate_flyback` to record `.PY` usage.
+
+	* src/preproc/pic/main.cpp (top_input::get, top_input::peek):
+	Recognize it.  Update diagnostic messages to mention it.
+	(main): Define `PY` troff macro as empty if not defined.
+
+	* src/preproc/pic/troff.cpp (troff_output::finish_picture):
+	Don't advance the vertical position if `want_alternate_flyback`.
+	Write out the `PY` macro call if it was on the input.
+
+	* src/preproc/pic/pic.1.man: Document it.
+
+	* tmac/pic.tmac (PY): Define the same as `PF`.
+
+	* NEWS: Add item.
+
+	Fixes <https://savannah.gnu.org/bugs/?62901>.
+
+2022-08-14  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[pic]: Refactor `flyback_flag`.
+
+	* src/preproc/pic/main.cpp:
+	* src/preproc/pic/pic.h:
+	* src/preproc/pic/troff.cpp: Rename to `want_flyback`.
+
+	* src/preproc/pic/main.cpp:
+	* src/preproc/pic/pic.h: Demote type from `int` to `bool`.
+
+	* src/preproc/pic/main.cpp (top_input::get, top_input::peek):
+	Use parentheses to clarify operation precedence.
+
+2022-08-14  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/preproc/eqn/eqn.1.man: Expand to include lists of
+	recognized primitives and predefined macros.
+
 2022-08-04  G. Branden Robinson <g.branden.robinson@gmail.com>
 
 	* NEWS: Add item for new groff mm `V` register support.
@@ -7,7 +209,7 @@
 	* src/preproc/eqn/lex.cpp (do_delim): Recognize "delim on" even
 	in compatibility mode, enabling tbl to toggle eqn delimiter
 	recognition when it is run in compatibility mode as well.
-	* src/preproc/eqn/eqn.1.man (Controlling delimiteres): Update.
+	* src/preproc/eqn/eqn.1.man (Controlling delimiters): Update.
 	* NEWS: Add item.
 
 	Fixes <https://savannah.gnu.org/bugs/?62852>.  Thanks to Bjarni

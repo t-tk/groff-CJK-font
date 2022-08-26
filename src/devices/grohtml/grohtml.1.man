@@ -1,13 +1,15 @@
 .TH grohtml @MAN1EXT@ "@MDATE@" "groff @VERSION@"
 .SH Name
-grohtml, post\-grohtml, pre\-grohtml \- groff output driver for HTML
+grohtml, post\-grohtml, pre\-grohtml \-
+.I groff
+output driver for HTML
 .
 .
 .\" ====================================================================
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 1999-2021 Free Software Foundation, Inc.
+.\" Copyright (C) 1999-2022 Free Software Foundation, Inc.
 .\"
 .\" Permission is granted to make and distribute verbatim copies of this
 .\" manual provided the copyright notice and this permission notice are
@@ -107,16 +109,17 @@ grohtml, post\-grohtml, pre\-grohtml \- groff output driver for HTML
 The GNU
 .I roff
 system's HTML support consists of a preprocessor,
-.IR pre\-grohtml ,
+.IR \%pre\-grohtml ,
 and an output driver,
-.IR post\-grohtml ;
+.IR \%post\-grohtml ;
 together,
 they translate
 .MR roff @MAN7EXT@
 documents to HTML.
 .
-Users should always invoke
-.I grohtml
+Because a preprocessor is (uniquely) required for this output driver,
+users should invoke
+.I \%grohtml
 via the
 .MR groff @MAN1EXT@
 command with the
@@ -125,56 +128,55 @@ or
 .B \-Txhtml
 options.
 .
+(In this installation,
+.B @DEVICE@
+is the default output device.)
+.
+Use
+.IR groff 's
+.B \-P
+option to pass any options shown above to
+.IR \%grohtml .
+.
 If no operands are given,
 or if
 .I file
 is
 .RB \[lq] \- \[rq],
-.I grohtml
+.I \%grohtml
 reads the standard input stream.
 .
 Output is written to the standard output stream.
 .
-When
-.I grohtml
-is run by
-.IR groff ,
-options can be passed to
-.I grohtml
-using
-.IR groff 's
-.B \-P
-option.
 .
-.
-.PP
-.I grohtml
+.P
+.I \%grohtml
 invokes
 .I groff
 twice.
 .
 In the first pass,
 the preprocessor
-.I pre\-grohtml
+.I \%pre\-grohtml
 renders
 pictures,
 equations,
 and tables as images in PostScript format using the
 .B ps
-output driver.
+output device.
 .
 In the second pass,
 the output driver
-.I post\-grohtml
+.I \%post\-grohtml
 translates the output of
 .MR @g@troff @MAN1EXT@
 to HTML.
 .
 .
-.PP
-.I grohtml
-always writes output encoded in \%UTF-8 and has built-in entities for
-all non-composite Unicode characters.
+.P
+.I \%grohtml
+writes output encoded in \%UTF-8 and has built-in HTML entities for all
+non-composite Unicode characters.
 .
 In spite of this,
 .I groff
@@ -183,6 +185,114 @@ found during the first pass.
 .
 Such warnings can be safely ignored unless the special characters
 appear inside a table or equation.
+.
+.
+.\" ====================================================================
+.SS Typefaces
+.\" ====================================================================
+.
+.I \%grohtml
+supports the standard four styles:
+.B R
+(roman),
+.B I
+.RI ( italic ),
+.B B
+.RB ( bold ),
+and
+.B BI
+(\f[BI]bold-italic\f[]).
+.
+Fonts are grouped into families
+.B T
+and
+.B C
+having members in each style.
+.
+.
+.RS
+.TP
+.B TR
+Times roman
+.
+.TQ
+.B TI
+Times italic
+.
+.TQ
+.B TB
+Times bold
+.
+.TQ
+.B TBI
+Times bold-italic
+.
+.TQ
+.B CR
+Courier roman
+.
+.TQ
+.B CI
+Courier italic
+.
+.TQ
+.B CB
+Courier bold
+.
+.TQ
+.B CBI
+Courier bold-italic
+.RE
+.
+.
+.P
+A special font,
+.BR S ,
+is also provided to accommodate
+.I roff
+documents that expect it to always be available.
+.
+.
+.\" ====================================================================
+.SS "Font description files"
+.\" ====================================================================
+.
+The font description files used with
+.I \%grohtml
+expose the same glyph repertoire in their
+.B charset
+sections.
+.
+See
+.MR groff_font @MAN5EXT@ .
+.
+.
+.\" ====================================================================
+.SS Dependencies
+.\" ====================================================================
+.
+.I \%pre\-grohtml
+generates an image whenever an
+.I @g@eqn
+equation,
+.I @g@tbl
+table,
+or
+.I @g@pic
+picture is encountered in the input.
+.
+.I \%grohtml
+therefore may run several commands as part of its operation.
+.
+These include the \%Netpbm tools
+.IR \%pnmcrop ,
+.IR \%pnmcut ,
+and
+.IR \%pnmtopng ;
+\%Ghostscript
+.RI ( gs );
+and the \%PSUtils tool
+.IR \%psselect .
 .
 .
 .\" ====================================================================
@@ -201,25 +311,29 @@ all exit afterward.
 .
 .TP
 .BI \-a \~anti-aliasing-text-bits
-Number of bits of antialiasing information to be used by
-.I text
-when generating PNG images.
+Number of bits of antialiasing information to be used by text when
+generating PNG images.
 .
-The default is\~4 but valid values are 0,
-1,
-2,
-and\~4.
-.
-Note that your version of
-.I gs
-needs to support the
-.B \%\-dTextAlphaBits
+The default
+.RB is\~ 4
+but
+.BR 0 ,
+.BR 1 ,
 and
-.B \%\-dGraphicAlphaBits
-options in order to exploit antialiasing.
+.B 2
+are also valid.
 .
-A value of\~0 stops
-.I grohtml
+Your system's version of
+.I gs
+must support the
+.B \%\-dTextAlphaBits
+option in order to exploit antialiasing.
+.\" XXX: How antiquated are the ones that don't?  Get rid of this?
+.
+A value
+.RB of\~ 0
+stops
+.I \%grohtml
 from issuing antialiasing commands to
 .IR gs .
 .
@@ -237,29 +351,27 @@ Suppress output of \[lq]CreationDate:\[rq] HTML comment.
 .TP
 .BI \-D \~image-directory
 Instruct
-.I grohtml
+.I \%grohtml
 to place all image files into directory
 .IR image-directory .
 .
 .
 .TP
 .B \-e
-This option should not be directly specified;
-it is an internal option used by
+Direct
+.I @g@eqn
+to produce MathML.
+.
+.
+.IP
+This option should not be manually specified;
+it is synthesized by
 .I groff
-when
+depending on whether it was given the
 .B \-Thtml
 or
 .B \-Txhtml
-is specified.
-.
-.IR grohtml 's
-preprocessor uses it to determine whether
-.I eqn
-should be directed to produce MathML
-(if
-.B \-Txhtml
-is specified).
+option.
 .
 .
 .TP
@@ -280,50 +392,48 @@ Suppress output of \[lq]Creator:\[rq] HTML comment.
 .
 .TP
 .BI \-g \~anti-aliasing-graphic-bits
-Number of bits of antialiasing information to be used by
-.I graphics
-when generating PNG images.
+Number of bits of antialiasing information to be used by graphics when
+generating PNG images.
 .
-The default is\~4 but valid values are 0,
-1,
-2,
-and\~4.
-.
-Note your version of
-.I gs
-needs to support the
-.B \%\-dTextAlphaBits
+The default
+.RB is\~ 4
+but
+.BR 0 ,
+.BR 1 ,
 and
-.B \%\-dGraphicAlphaBits
-options in order to exploit antialiasing.
+.B 2
+are also valid.
 .
-A value of\~0 stops
-.I grohtml
+Your system's version of
+.I gs
+must support the
+.B \%\-dGraphicAlphaBits
+option in order to exploit antialiasing.
+.\" XXX: How antiquated are the ones that don't?  Get rid of this?
+.
+A value
+.RB of\~ 0
+stops
+.I \%grohtml
 from issuing antialiasing commands to
 .IR gs .
 .
 .
 .TP
 .B \-h
-Generate section and number headings by using
-.BR <B> .\|.\|. </B>
-and increasing the font size,
-rather than using the
-.BI <H n >\c
-\&.\|.\|.\c
-.BI </H n >
-tags.
+Generate section headings by using HTML
+.B B
+elements and increasing the font size,
+rather than HTML
+.B H
+elements.
 .
 .
 .TP
 .BI \-i \~resolution
-Select the resolution for all images.
-.
-By default this is 100 pixels per inch.
-.
-Example:
-.B \-i200
-indicates 200 pixels per inch.
+Set the image resolution in pixels per inch;
+the default
+.RB is\~ 100 .
 .
 .
 .TP
@@ -331,7 +441,7 @@ indicates 200 pixels per inch.
 Determine the image file name stem.
 .
 If omitted,
-.I grohtml
+.I \%grohtml
 uses
 .IR \%grohtml\- XXXXX
 (where
@@ -345,7 +455,7 @@ number.
 .TP
 .BI \-j \~output-stem
 Instruct
-.I grohtml
+.I \%grohtml
 to split the HTML output into multiple files.
 .
 Output is written to a new file at each section heading
@@ -372,7 +482,7 @@ Without the option the anchor value is the textual heading.
 This can cause problems when a heading contains a \[lq]?\[rq] on older
 versions of some browsers.
 .
-This flag is automatically turned on if a heading contains an image.
+This feature is automatically enabled if a heading contains an image.
 .
 .
 .TP
@@ -384,8 +494,8 @@ Specify the vertical offset of images in points.
 .B \-p
 Display page rendering progress to the standard error stream.
 .
-.I grohtml
-only displays a page number when an image is required.
+.I \%grohtml
+displays a page number only when an image is required.
 .
 .
 .TP
@@ -395,17 +505,19 @@ Turn off the automatic header and footer line
 .
 .
 .TP
-.BI \-s \~base-point-size
-Set the base point size of the source file.
+.BI \-s \~base-type-size
+Set the document's base type size in points.
 .
-Thereafter when this point size is used in the source it will correspond
-to the HTML base size.
+When this size is used in the source,
+it corresponds to the HTML base type size.
 .
-Every increase of two points in the source will yield a
-.B <big>
-tag, and conversely when a decrease of two points is seen a
-.B <small>
-tag is emitted.
+Every increase of two points in the source will produce a
+.RB \[lq] big \[rq]
+element,
+and conversely when a decrease of two points is seen,
+a
+.RB \[lq] small \[rq]
+element is emitted.
 .
 .
 .TP
@@ -439,84 +551,30 @@ should be either the
 or the
 .RB letter\~ x ,
 which indicates whether
-.I grohtml
+.I \%grohtml
 should generate HTML\~4 or XHTML,
 respectively.
 .
-This option should not be directly invoked by the user as it is
-an internal option utilized by
+.
+.IP
+This option should not be manually specified;
+it is synthesized by
 .I groff
-when
+depending on whether it was given the
 .B \-Thtml
 or
 .B \-Txhtml
-is specified.
+option.
 .
 .
 .TP
 .B \-y
-Produce a right-justified
+Produce a right-aligned
 .I groff
-signature at the end of the document.
-.
-This is only generated if the
+signature at the end of the document
+(only if
 .B \-V
-flag is also specified.
-.
-.
-.\" ====================================================================
-.SH Usage
-.\" ====================================================================
-.
-Font styles called
-.BR R ,
-.BR I ,
-.BR B ,
-and
-.B BI
-are mounted at font positions\~1 to\~4,
-respectively.
-.
-.
-.\" ====================================================================
-.SH Dependencies
-.\" ====================================================================
-.
-.I grohtml
-is dependent upon the PNG utilities
-.RI ( \%pnmcut ,
-.IR \%pnmcrop ,
-.IR \%pnmtopng )
-and Ghostscript
-.RI ( gs ).
-.
-.I \%pnmtopng
-(version 2.37.6 or greater)
-and
-.I \%pnmcut
-from the netpbm package (version 9.16 or greater) will work also.
-.
-It is also dependent upon
-.I \%psselect
-from the PSUtils package.
-.
-Images are generated whenever a table,
-picture,
-equation or line
-(such as a baseline rule or box rule)
-is encountered.
-.
-.
-.\" ====================================================================
-.SH Files
-.\" ====================================================================
-.
-.I grohtml
-uses temporary files.
-.
-See
-.MR groff @MAN1EXT@
-for details about where such files are created.
+is also specified).
 .
 .
 .\" ====================================================================
@@ -525,7 +583,9 @@ for details about where such files are created.
 .
 .TP
 .I GROFF_FONT_PATH
-A list of directories in which to seek the selected output device's
+lists directories in which to search for
+.IR devhtml ,
+.IR grohtml 's
 directory of device and font description files.
 .
 See
@@ -556,15 +616,75 @@ see
 .
 .
 .\" ====================================================================
+.SH Files
+.\" ====================================================================
+.
+.TP
+.I @FONTDIR@/\:\%devhtml/\:DESC
+describes the
+.B html
+output device.
+.
+.
+.TP
+.IR @FONTDIR@/\:\%devhtml/ F
+describes the font known
+.RI as\~ F
+on device
+.BR html .
+.
+.
+.TP
+.I @MACRODIR@/\:html\:.tmac
+defines font mappings,
+special characters,
+and colors for use with the
+.B html
+output device.
+.
+It is automatically loaded by
+.I \%troffrc
+when either of the
+.B html
+or
+.B xhtml
+output devices is selected.
+.
+.
+.TP
+.I @MACRODIR@/\:html\-end\:.tmac
+finalizes setup of the
+.B html
+output device.
+.
+It is automatically loaded by
+.I \%troffrc\-end
+when either of the
+.B html
+or
+.B xhtml
+output devices is selected.
+.
+.
+.P
+.I \%grohtml
+uses temporary files.
+.
+See
+.MR groff @MAN1EXT@
+for details about where such files are created.
+.
+.
+.\" ====================================================================
 .SH Bugs
 .\" ====================================================================
 .
-.I grohtml
+.I \%grohtml
 is still beta code.
 .
 .
 .PP
-.I grohtml
+.I \%grohtml
 does not truly support hyphenation,
 but you can fool it into hyphenating long input lines,
 which can appear in HTML output with a hyphenated word followed by a

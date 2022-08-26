@@ -115,6 +115,16 @@ o The GNU extension
   to use 'o' and 'n' as left and right delimiters, respectively.  If
   yours does, consider swapping them, or select others.
 
+pic
+---
+
+o The token `.PY` is now recognized as a synonym of `.PF` to work around
+  a name space collision with the m (mm) macro package, which uses the
+  same name for a page footer management macro.  (This problem dates
+  back at least to Unix System V Release 2, 1983.)  You should continue
+  to use `.PF` to end pictures with flyback unless a similar problem
+  faces your document.
+
 Macro packages
 --------------
 
@@ -202,19 +212,19 @@ o The an (man) macro package supports a new macro, `MR`, intended for
   users.
 
   Inclusion of the `MR` macro was prompted by its introduction to
-  plan9port's troff in August 2020.  Its purpose is to ameliorate
-  several long-standing problems with man page cross references: (1) the
-  package's lack of inherent hyperlink support for them; (2)
-  false-positive identification of strings resembling man page cross
-  references (as can happen with "exit(1)", "while(1)", "sleep(5)",
-  "time(0)" and others) by terminal emulators and other programs; (3)
-  the unwanted intrusion of hyphens into man page titles, which
-  frustrates copy-and-paste operations (this problem has always been
-  avoidable through use of the \% escape sequence, but cross references
-  are frequent in man pages and some page authors are inexpert *roff
-  users); and (4) deep divisions in man page maintenance communities
-  over which typeface should be used to set the man page title (italics,
-  roman, or bold).
+  Plan 9 from User Space's troff in August 2020.  Its purpose is to
+  ameliorate several long-standing problems with man page cross
+  references: (1) the package's lack of inherent hyperlink support for
+  them; (2) false-positive identification of strings resembling man page
+  cross references (as can happen with "exit(1)", "while(1)",
+  "sleep(5)", "time(0)" and others) by terminal emulators and other
+  programs; (3) the unwanted intrusion of hyphens into man page titles,
+  which frustrates copy-and-paste operations (this problem has always
+  been avoidable through use of the \% escape sequence, but cross
+  references are frequent in man pages and some page authors are
+  inexpert *roff users); and (4) deep divisions in man page maintenance
+  communities over which typeface should be used to set the man page
+  title (italics, roman, or bold).
 
 o Part of the an (man) macro package has been renamed from `an-old.tmac`
   to `an.tmac`, replacing a file that sourced the `andoc.tmac` wrapper.
@@ -306,6 +316,10 @@ o The e (me) macro package's `$v` and `$V` registers have been renamed
   are expected to set them if desired, unlike other registers and
   strings beginning with "$".
 
+o The e (me) and s (ms) macro packages now offer a `PF` macro,
+  supporting the pic(1) preprocessor's "flyback" feature.  Thanks to
+  Dave Kemper.
+
 o The m (mm) macro package now recognizes a `V` register to set the
   vertical spacing for the document.  Like the existing `S`, it must be
   set from the command line.  Further, both registers are interpreted
@@ -323,6 +337,9 @@ o The m (mm) and s (ms) macro packages no longer manipulate the set of
 
 o The m (mm) and s (ms) macro packages' `R` macros now work analogously
   to their `B` and `I` macros instead of ignoring their arguments.
+
+o The m (mm) package now offers a `PY` macro, which serves the function
+  of `PF` (end pic(1) picture with flyback) from other macro packages.
 
 o The "ptx.tmac" macro file, a counterpart to the GNU coreutils ptx(1)
   command for generating permuted indexes, is now installed.  It has
@@ -468,8 +485,8 @@ Miscellaneous
 
 o Because all generated forms of groff's Texinfo manual are now included
   in the distribution archive, building from that archive no longer
-  depends on GNU Texinfo or a TeX installation (the latter was only
-  required for the "doc" target, which had to be explicitly named).
+  depends on GNU Texinfo or a TeX installation (the latter was required
+  only for the "doc" target, which had to be explicitly named).
 
 o Building groff from its distribution archive no longer requires byacc
   (or GNU Bison) to be installed.

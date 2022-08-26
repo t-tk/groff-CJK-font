@@ -65,18 +65,19 @@ static void do_error_with_file_and_line(const char *filename,
     fputc(' ', stderr);
   switch (type) {
   case FATAL:
-    fputs("fatal error: ", stderr);
+    fputs("fatal error", stderr);
     break;
   case ERROR:
-    fputs("error: ", stderr);
+    fputs("error", stderr);
     break;
   case WARNING:
-    fputs("warning: ", stderr);
+    fputs("warning", stderr);
     break;
   case DEBUG:
-    fputs("debug: ", stderr);
+    fputs("debug", stderr);
     break;
   }
+  fputs(": ", stderr);
   errprint(format, arg1, arg2, arg3);
   fputc('\n', stderr);
   fflush(stderr);
