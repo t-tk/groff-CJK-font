@@ -613,18 +613,14 @@ and
 and sentence endings are still detected and additional inter-sentence
 space applied.
 .
-If a user
-(or one of
-.IR groff 's
-localization support macro files)
-has changed the additional inter-sentence space amount,
-the latter process can change the rendering of,
+If the amount of additional inter-sentence is altered,
+the rendering of,
 for instance,
 regular expressions using
 .B .\&
 or
 .B ?\&
-followed by multiple spaces.
+followed by multiple spaces can change.
 .
 Use the non-printing input break escape sequence
 .B \(rs&
@@ -741,6 +737,8 @@ again excepted);
 see subsection \(lqFont style macros\(rq below.
 .
 .
+.br
+.ne 4v
 .TP
 .B .P
 .TQ
@@ -1189,12 +1187,9 @@ Email addresses are bracketed with
 and other forms of hyperlink with
 .BR .UR / .UE .
 .
-Hyperlinked text is supported on the
-.BR html ,
-.BR tty ,
-and
-.B xhtml
-output devices;
+Hyperlinked text is supported on HTML
+.\", PDF,
+and terminal output devices;
 terminals and pager programs must support ECMA-48 OSC\~8 escape
 sequences
 (see
@@ -1226,7 +1221,7 @@ see
 .I \%an\-ext.tmac
 in section \(lqFiles\(rq below.
 .
-The plan9port project's
+Plan\~9 from User Space's
 .I troff \" plan9port
 implements
 .BR .MR .
@@ -1689,36 +1684,28 @@ escape sequences in subsection \(lqPortability\(rq below.
 _endif()dnl
 .P
 Unlike the above font style macros,
-the font style alternation macros below accept only arguments on the
-same line as the macro call.
+the font style alternation macros below set no input traps;
+they must be given arguments to have effect.
 .
 Italic corrections are applied as appropriate.
 .
-If space is required within one of the arguments,
+_ifstyle()dnl
+If a space is required within an argument,
 first consider whether the same result could be achieved with as much
-clarity by using the single-style macros on separate input lines.
+clarity by using single-style macros on separate input lines.
 .
 When it cannot,
 double-quote an argument containing embedded space characters.
 .
 Setting all three different styles within a word
 presents challenges;
-_ifstyle()dnl
 it is possible with the
 .B \ec
 and/or
 .B \ef
 escape sequences,
-but
-_endif()dnl
-see subsection \(lqPortability\(rq
-_ifnotstyle()dnl
-in
-.MR groff_man_style @MAN7EXT@
-for approaches.
-_endif()dnl
-_ifstyle()dnl
-below for caveats.
+but see subsection \(lqPortability\(rq
+below for approaches.
 _endif()dnl
 .
 .
@@ -2331,6 +2318,8 @@ grave accent,
 tilde).
 .
 .
+.br
+.ne 2v
 .TP
 .B \e\(dq
 Comment.
@@ -2352,7 +2341,7 @@ a series of lines ending in backslash-newline appears to
 .I groff
 as a single input line.
 .
-Use this escape sequence to break excessively long input lines for
+Use this escape sequence to split excessively long input lines for
 document maintenance.
 .
 .
@@ -2375,10 +2364,6 @@ are still honored.
 .
 .TP
 .B \e:
-.\" Heirloom Doctools troff since release 050915 (2005-09-15)
-.\" mandoc since 2018-12-15 (released in 1.14.5, 2019-03-10)
-.\" neatroff since 399a4936, 2014-02-17
-.\" Plan 9 troff does not appear to support it.
 Insert a non-printing break point.
 .
 A word can break at such a point,
@@ -2395,6 +2380,25 @@ in combination to control breaking of a file name or URI or to permit
 hyphenation only after certain explicit hyphens within a word.
 .
 See subsection \[lq]Hyperlink macros\[rq] above for an example.
+.
+.
+.IP
+This escape sequence is a
+.I groff
+extension also supported by Heirloom Doctools
+.I troff \" Heirloom
+050915 (September 2005),
+.I mandoc
+1.14.5 (2019-03-10),
+and
+.I neatroff
+(commit 399a4936,
+2014-02-17),
+but not by Plan\~9,
+Solaris,
+or Documenter's Workbench
+.IR troff s. \" Plan 9, Solaris, DWB
+.\" as of this writing, 2022-08-13
 .
 .
 .TP
@@ -2414,6 +2418,32 @@ There are 1,024\e\(tibytes in 1\e\(tiKiB.
 CSTR\e\(ti#8 documents the B\e\(tilanguage.
 .EE
 .RE
+.
+.
+.\" BEGIN Keep in sync with groff.texi node "Other Differences" and
+.\" groff_diff(7).
+.IP
+This escape sequence is a
+.I groff
+extension also supported by Heirloom Doctools
+.I troff \" Heirloom
+050915 (September 2005),
+.I mandoc
+1.9.5 (2009-09-21),
+and
+.I neatroff
+(commit 1c6ab0f6e,
+2016-09-13),
+Plan\~9 from User Space
+.I troff \" Plan 9
+(commit 93f8143600,
+2022-08-12),
+but not by Solaris
+or Documenter's Workbench
+.IR troff s. \" Solaris, DWB
+.\" as of this writing, 2022-08-13
+.\" END Keep in sync with groff.texi node "Other Differences" and
+.\" groff_diff(7).
 .
 .
 .TP
@@ -2443,140 +2473,6 @@ and PDF.
 .
 .
 .TP
-.B \e\-
-Minus sign or basic Latin hyphen-minus.
-.
-This escape sequence produces the Unix command-line option dash in the
-output.
-.
-.RB \(lq \- \(rq
-is a hyphen in the
-.I roff
-language;
-some output devices replace it with U+2010
-(hyphen)
-or similar.
-.
-.
-.TP
-.B \e(aq
-Basic Latin neutral apostrophe.
-.
-Some
-output devices replace
-.RB \(lq \(aq \(rq
-with a right single quotation mark.
-.
-.
-.TP
-.B \e(oq
-.TQ
-.B \e(cq
-Opening (left) and closing (right) single quotation marks.
-.
-Use these for paired directional single quotes,
-\(oqlike this\(cq.
-.
-.
-.TP
-.B \e(dq
-Basic Latin quotation mark
-(double quote).
-.
-Use in macro calls to prevent
-.\" This page prefers double quotes, but not here because they are more
-.\" confusing to the eye when another double quote is what is quoted!
-.RB \(oq \(dq \(rq
-.\" AT&T: .RB ` """'
-from being interpreted as beginning a quoted argument,
-or simply for readability.
-.
-.
-.RS
-.IP
-.\" from src/preproc/eqn/eqn.1.man
-.EX
-\&.TP
-\&.BI \(dqsplit \e(dq\(dq text \e(dq
-.EE
-.RE
-.
-.
-.TP
-.B \e(lq
-.TQ
-.B \e(rq
-Left and right double quotation marks.
-.
-Use these for paired directional double quotes,
-\(lqlike this\(rq.
-.
-.
-.TP
-.B \e(em
-Em-dash.
-.
-Use for an interruption\(emsuch as this one\(emin a sentence.
-.
-.
-.TP
-.B \e(en
-En-dash.
-.
-Use to separate the ends of a range,
-particularly between numbers;
-for example,
-\(lqthe digits 1\(en9\(rq.
-.
-.
-.TP
-.B \e(ga
-Basic Latin grave accent.
-.
-Some output devices replace
-.RB \(lq \(ga \(rq
-with a left single quotation mark.
-.
-.
-.TP
-.B \e(ha
-Basic Latin circumflex accent
-(\(lqhat\(rq).
-.
-Some output devices replace
-.RB \(lq \(ha \(rq
-with U+02C6
-(modifier letter circumflex accent)
-or similar.
-.
-.
-.TP
-.B \e(rs
-Reverse solidus
-(backslash).
-.
-The backslash is the default escape character in the
-.I roff
-language,
-so it does not represent itself in output.
-.
-Also see
-.B \ee
-below.
-.
-.
-.TP
-.B \e(ti
-Basic Latin tilde.
-.
-Some output devices replace
-.RB \(lq \(ti \(rq
-with U+02DC
-(small tilde)
-or similar.
-.
-.
-.TP
 .B \ec
 End a text line without inserting space or attempting a break.
 .
@@ -2598,10 +2494,6 @@ be broken there,
 as in
 .BR .EX / .EE
 examples.
-.
-Nothing after
-.B \ec
-on the input line is formatted.
 .
 The next line is interpreted as usual and can `include' a macro call
 (contrast with
@@ -2745,6 +2637,161 @@ usually result in more readable
 source than
 .B \ef
 escape sequences do.
+.
+.
+.P
+Several special characters are also widely portable.
+.
+AT&T
+.I troff
+did not `define' the reverse solidus or quotation characters listed
+below,
+but any of its descendants,
+like Plan\~9 or Solaris
+.IR troff , \" Plan 9, Solaris
+can support them by defining their glyphs in font description files;
+see
+.MR groff_font @MAN5EXT@ .
+.
+.
+.TP
+.B \e\-
+Minus sign or basic Latin hyphen-minus.
+.
+This escape sequence produces the Unix command-line option dash in the
+output.
+.
+.RB \(lq \- \(rq
+is a hyphen in the
+.I roff
+language;
+some output devices replace it with U+2010
+(hyphen)
+or similar.
+.
+.
+.TP
+.B \e(aq
+Basic Latin neutral apostrophe.
+.
+Some
+output devices replace
+.RB \(lq\| \(aq \|\(rq
+with a right single quotation mark.
+.
+.
+.br
+.ne 3v
+.TP
+.B \e(oq
+.TQ
+.B \e(cq
+Opening (left) and closing (right) single quotation marks.
+.
+Use these for paired directional single quotes,
+\(oqlike this\(cq.
+.
+.
+.TP
+.B \e(dq
+Basic Latin quotation mark
+(double quote).
+.
+Use in macro calls to prevent
+.\" This page prefers double quotes, but not here because they are more
+.\" confusing to the eye when another double quote is what is quoted!
+.RB \(oq\| \(dq \|\(rq
+.\" AT&T: .RB ` """'
+from being interpreted as beginning a quoted argument,
+or simply for readability.
+.
+.
+.RS
+.IP
+.\" from src/preproc/eqn/eqn.1.man
+.EX
+\&.TP
+\&.BI \(dqsplit \e(dq\(dq text \e(dq
+.EE
+.RE
+.
+.
+.br
+.\" XXX: We need only 2v, but 2v more are necessary due to bad
+.\" interaction with TP's own use of the ne request.
+.ne 4v
+.TP
+.B \e(lq
+.TQ
+.B \e(rq
+Left and right double quotation marks.
+.
+Use these for paired directional double quotes,
+\(lqlike this\(rq.
+.
+.
+.TP
+.B \e(em
+Em-dash.
+.
+Use for an interruption\(emsuch as this one\(emin a sentence.
+.
+.
+.TP
+.B \e(en
+En-dash.
+.
+Use to separate the ends of a range,
+particularly between numbers;
+for example,
+\(lqthe digits 1\(en9\(rq.
+.
+.
+.TP
+.B \e(ga
+Basic Latin grave accent.
+.
+Some output devices replace
+.RB \(lq\| \(ga \|\(rq
+with a left single quotation mark.
+.
+.
+.TP
+.B \e(ha
+Basic Latin circumflex accent
+(\(lqhat\(rq).
+.
+Some output devices replace
+.RB \(lq \(ha \(rq
+with U+02C6
+(modifier letter circumflex accent)
+or similar.
+.
+.
+.TP
+.B \e(rs
+Reverse solidus
+(backslash).
+.
+The backslash is the default escape character in the
+.I roff
+language,
+so it does not represent itself in output.
+.
+Also see
+.B \ee
+below.
+.
+.
+.TP
+.B \e(ti
+Basic Latin tilde.
+.
+Some output devices replace
+.RB \(lq \(ti \(rq
+with U+02DC
+(small tilde)
+or similar.
 .
 .
 .P
@@ -3116,7 +3163,7 @@ and
 .BR .UR / .UE .
 .\" ...along with implementations of OP, EX, and EE.
 .
-The plan9port project's
+Plan\~9 from User Space's
 .I troff \" plan9port
 introduced
 .B .MR

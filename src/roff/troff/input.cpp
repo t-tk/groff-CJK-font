@@ -8876,7 +8876,7 @@ void fatal_with_file_and_line(const char *filename, int lineno,
 			      const errarg &arg3)
 {
   if (program_name)
-    fprintf(stderr, "%s: ", program_name);
+    fprintf(stderr, "%s:", program_name);
   fprintf(stderr, "%s:", filename);
   if (lineno > 0)
     fprintf(stderr, "%d:", lineno);
@@ -8894,7 +8894,7 @@ void error_with_file_and_line(const char *filename, int lineno,
 			      const errarg &arg3)
 {
   if (program_name)
-    fprintf(stderr, "%s: ", program_name);
+    fprintf(stderr, "%s:", program_name);
   fprintf(stderr, "%s:", filename);
   if (lineno > 0)
     fprintf(stderr, "%d:", lineno);
@@ -8912,7 +8912,7 @@ void debug_with_file_and_line(const char *filename,
 			      const errarg &arg3)
 {
   if (program_name)
-    fprintf(stderr, "%s: ", program_name);
+    fprintf(stderr, "%s:", program_name);
   fprintf(stderr, "%s:", filename);
   if (lineno > 0)
     fprintf(stderr, "%d:", lineno);

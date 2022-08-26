@@ -1191,10 +1191,14 @@ See
 This macro defines string
 .BR TPeh .
 .
+.
 .TP
 .B EN
-Equation end, see
+End equation input preprocessed by
+.MR @g@eqn @MAN1EXT@ ;
+see
 .BR EQ .
+.
 .
 .TP
 .B EOP
@@ -1243,42 +1247,40 @@ the default is to center.
 See
 .BR PIC .
 .
-.TP
-.BI EQ\  \fR[\fPlabel\fR]\fP
-Equation start.
 .
-.BR EQ / EN
-are the delimiters for equations written for
+.TP
+.BR EQ \~[\c
+.IR label ]
+Start equation input preprocessed by
 .MR @g@eqn @MAN1EXT@ .
 .
-.BR EQ / EN
-must be inside of a
-.BR DS / DE
-pair, except if
 .B EQ
-is used to set options for
+and
+.B EN
+macro calls bracket an equation region.
+.
+Such regions must be contained in displays
+.RB ( DS / DE ),
+except when the region is used only to configure
 .I @g@eqn
-only.
+and not to produce output.
 .
-The
+If present,
 .I label
-argument appears at the right margin of the equation,
-centered vertically within the
-.BR DS / DE
-block,
-unless register
-.B Eq
-is\~1.
+appears at the aligned to the right and
+centered vertically within the display;
+see register
+.BR Eq .
 .
-Then the label appears at the left margin.
 .
-.IP
-If there are multiple
-.BR EQ / EN
-blocks within a single
-.BR DS / DE
-pair,
-only the last equation label (if any) is printed.
+If multiple
+.I eqn \" generic
+regions occur within a display,
+only the last
+.I label
+(if any)
+is used.
+.
 .
 .TP
 .BI EX\  "\fR[\fPtitle \fR[\fPoverride \fR[\fPflag \fR[\fPrefname\fR]]]]\fP"
@@ -2903,6 +2905,18 @@ mode.
 .
 .
 .TP
+.B PY
+Picture end with flyback.
+.
+Ends a
+.MR @g@pic @MAN1EXT@
+picture,
+returning the vertical position to where it was prior to the picture.
+.
+This is a GNU extension.
+.
+.
+.TP
 .BR R \~\c \" space in roman because we must use 2-font macro with \c
 .RI [ roman-text\~\c
 .RI [ previous-font-text ]]\~.\|.\|.
@@ -4029,12 +4043,11 @@ If set to\~1, eject page before each first-level heading.
 .
 Default is\~0.
 .
+.
 .TP
 .B Eq
-Equation labels are left-aligned if set to\~0 and right-aligned if
-set to\~1.
-.
-Default is\~0.
+aligns equation labels to the left of a display if 1,
+and to the right if 0 (default).
 .
 .
 .TP

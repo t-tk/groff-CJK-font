@@ -2058,16 +2058,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .de @PS
 .br
 .sp \\n[DD]u
-.ie \\n[.$]<2 .@error bad arguments to .PS (not preprocessed with pic?)
+.ie !\\n[.$]=2 \{\
+.	ds pic*msg .PS: expected 2 arguments, got \\n[.$]\"
+.	as pic*msg ; not preprocessed with pic?\"
+.	@error \\*[pic*msg]
+.	rm pic*msg
+.\}
 .el \{\
 .	ds@need (u;\\$1)+1v
 .	in +(u;\\n[.l]-\\n[.i]-\\$2/2>?0)
 .\}
 .HTML-IMAGE
 ..
-.de PE
+.de PF
 .HTML-IMAGE-END
 .par@reset
+..
+.de PE
+.PF
 .sp \\n[DD]u+.5m
 ..
 .\" ****************************

@@ -22,8 +22,8 @@
 .nr TC-MARGIN \w'00' \" expect 2-digit page numbers at most
 .ie t .nr PI 3.5n
 .el   .nr PI 4n
-.ND July 2022
-.EH '%''July 2022'
+.ND August 2022
+.EH '%''August 2022'
 .EF ''''
 .OH 'Using \f[I]groff\f[] with the \f[I]ms\f[] macros''%'
 .OF ''''
@@ -2396,14 +2396,23 @@ T{
 \&.PS
 .br
 \&.PE
+.br
+\&.PF
 T}	T{
-Demarcate a diagram to be processed by the
+.CW .PS
+begins a picture to be processed by the
 .I pic
-preprocessor.
+preprocessor;
+either of
+.CW .PE
+or
+.CW .PF
+ends it,
+the latter with \[lq]flyback\[rq] to the vertical position at its top.
 .
 You can create
 .I pic
-input manually or by using a program such as
+input manually or with a program such as
 .I xfig (1).
 T}
 _

@@ -6081,52 +6081,50 @@ font_family::~font_family()
   delete[] map;
 }
 
-int font_family::make_definite(int i)
+// Resolve a requested font mounting position to a mounting position
+// usable by the output driver.  (Positions 1 through 4 are typically
+// allocated to styles, and are not usable thus.)  A return value of
+// `-1` indicates failure.
+int font_family::make_definite(int mounting_position)
 {
-  if (i >= 0) {
-    if (i < map_size && map[i] >= 0)
-      return map[i];
-    else {
-      if (i < font_table_size && font_table[i] != 0) {
-	if (i >= map_size) {
-	  int old_map_size = map_size;
-	  int *old_map = map;
-	  map_size *= 3;
-	  map_size /= 2;
-	  if (i >= map_size)
-	    map_size = i + 10;
-	  map = new int[map_size];
-	  memcpy(map, old_map, old_map_size*sizeof(int));
-	  delete[] old_map;
-	  for (int j = old_map_size; j < map_size; j++)
-	    map[j] = -1;
-	}
-	if (font_table[i]->is_style()) {
-	  symbol sty = font_table[i]->get_name();
-	  symbol f = concat(nm, sty);
-	  int n;
-	  // don't use symbol_fontno, because that might return a style
-	  // and because we don't want to translate the name
-	  for (n = 0; n < font_table_size; n++)
-	    if (font_table[n] != 0 && font_table[n]->is_named(f)
-		&& !font_table[n]->is_style())
-	      break;
-	  if (n >= font_table_size) {
-	    n = next_available_font_position();
-	    if (!mount_font_no_translate(n, f, f))
-	      return -1;
-	  }
-	  return map[i] = n;
-	}
-	else
-	  return map[i] = i;
-      }
-      else
-	return -1;
-    }
-  }
-  else
+  assert(mounting_position >= 0);
+  int pos = mounting_position;
+  if (pos < 0)
     return -1;
+  if (pos < map_size && map[pos] >= 0)
+    return map[pos];
+  if (!(pos < font_table_size && font_table[pos] != 0))
+    return -1;
+  if (pos >= map_size) {
+    int old_map_size = map_size;
+    int *old_map = map;
+    map_size *= 3;
+    map_size /= 2;
+    if (pos >= map_size)
+      map_size = pos + 10;
+    map = new int[map_size];
+    memcpy(map, old_map, old_map_size * sizeof (int));
+    delete[] old_map;
+    for (int j = old_map_size; j < map_size; j++)
+      map[j] = -1;
+  }
+  if (!(font_table[pos]->is_style()))
+    return map[pos] = pos;
+  symbol sty = font_table[pos]->get_name();
+  symbol f = concat(nm, sty);
+  int n;
+  // Don't use symbol_fontno, because that might return a style and
+  // because we don't want to translate the name.
+  for (n = 0; n < font_table_size; n++)
+    if (font_table[n] != 0 && font_table[n]->is_named(f)
+	&& !font_table[n]->is_style())
+      break;
+  if (n >= font_table_size) {
+    n = next_available_font_position();
+    if (!mount_font_no_translate(n, f, f))
+      return -1;
+  }
+  return map[pos] = n;
 }
 
 dictionary family_dictionary(5);

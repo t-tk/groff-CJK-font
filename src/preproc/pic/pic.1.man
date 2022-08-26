@@ -101,10 +101,11 @@ It copies the contents of each
 to the standard output stream,
 except that lines between
 .B .PS
-and either
-.B .PE
+and any of
+.BR .PE ,
+.BR .PF ,
 or
-.B .PF
+.B .PY
 are interpreted as picture descriptions.
 .
 Ending a
@@ -114,6 +115,8 @@ picture with
 leaves the page position at the bottom of the picture;
 ending it with
 .B .PF
+or
+.B .PY
 leaves the position at the top.
 .
 Normally,
@@ -134,22 +137,38 @@ is
 the standard input stream is read.
 .
 .
-.LP
+.P
 It is the user's responsibility to provide appropriate definitions
 of the
 .BR PS ,
 .BR PE ,
-and
+and one or both of the
 .B PF
+and
+.B PY
 macros.
 .
-When the macro package being used does not supply such definitions
-(for example,
-old versions of \-ms),
-appropriate definitions can be
-obtained with
+When a macro package does not supply these,
+appropriate definitions can be obtained with
 .BR \-mpic ;
 these will center each picture.
+.
+.
+.P
+GNU
+.I pic \" GNU
+supports
+.B PY
+as a synonym of
+.B PF
+to work around a name space collision with the
+.I mm
+macro package,
+which uses the same name for a page footer management macro.
+.
+Use
+.B PF
+preferentially unless a similar problem faces your document.
 .
 .
 .\" ====================================================================
@@ -179,9 +198,9 @@ Lines beginning with
 are not passed through transparently.
 .
 Lines beginning with
-.B .
+.B .\&
 are passed through with the initial
-.B .
+.B .\&
 changed to
 .BR \[rs] .
 .
@@ -207,8 +226,9 @@ variable.
 Recognize
 .BR .PS ,
 .BR .PE ,
+.BR .PF ,
 and
-.B .PF
+.B .PY
 even when followed by a character other than space or newline.
 .
 .
@@ -1443,11 +1463,12 @@ package.
 .
 .TP
 .I @MACRODIR@/pic.tmac
-Example definitions of the
+offers simple definitions of the
 .BR PS ,
 .BR PE ,
+.BR PF ,
 and
-.B PF
+.B PY
 macros.
 .
 .

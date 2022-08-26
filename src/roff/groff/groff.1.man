@@ -1794,25 +1794,30 @@ Once a
 librarian program has located a man page,
 it may execute a
 .I groff
-command much like the following,
-constructing a pipeline to page the output.
-.
+command much like the following.
 .
 .RS
-.P
 .EX
-groff \-t \-man -Tutf8 /usr/share/man/man1/groff.1.man | less \-R
+groff \-t \-man \-Tutf8 /usr/share/man/man1/groff.1
 .EE
 .RE
+.
+The librarian will also pipe the output through a pager,
+which might not interpret the SGR terminal escape sequences
+.I groff
+emits for boldface,
+underlining,
+or italics;
+see section \[lq]Limitations\[rq] below.
 .
 .
 .P
 To process a
 .I roff
 input file using the preprocessors
-.I tbl \" AT&T
+.I @g@tbl
 and
-.I pic \" AT&T
+.I @g@pic
 and the
 .I me
 macro package in the way to which AT&T
@@ -1825,14 +1830,14 @@ a pipeline.
 .
 .IP
 .EX
-pic foo.me | tbl | troff \-me \-Tutf8 | grotty
+@g@pic foo.me | @g@tbl | @g@troff \-me \-Tutf8 | grotty
 .EE
 .
 .
 .P
 Using
 .IR groff ,
-this pipe can be shortened to the equivalent command
+this pipe can be shortened to an equivalent command.
 .
 .IP
 .EX

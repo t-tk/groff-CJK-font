@@ -267,6 +267,7 @@
 .  nr an-need-no-space-mode 0
 .  nr an-need-break 0
 .  nr an-is-in-diversion 0
+.  nr an*is-in-example 0
 .
 .  ds an-title "\\$1\"
 .  if \\n[CT] .stringup an-title
@@ -986,6 +987,10 @@ contains unsupported escape sequence
 .
 .\" Begin an example (typically of source code or shell input).
 .de1 EX
+.  if \\n[an*is-in-example] \{\
+.    an-style-warn ignoring .\\$0 while already in example
+.    return
+.  \}
 .  ds an*saved-family \\n[.fam]
 .  nr an*saved-font \\n[.f]
 .  nr an*saved-paragraph-distance \\n[PD]
@@ -1002,10 +1007,15 @@ contains unsupported escape sequence
 .  \}
 .  el .fam \\*[an*example-family]
 .  ft R
+.  nr an*is-in-example 1
 ..
 .
 .\" End example.
 .de EE
+.  if !\\n[an*is-in-example] \{\
+.    an-style-warn ignoring .\\$0 while not in example
+.    return
+.  \}
 .  \" Undo the remappings from `EX`.
 .  ie '\*[.T]'dvi' \{\
 .    ftr R
@@ -1020,6 +1030,7 @@ contains unsupported escape sequence
 .  rr an*saved-paragraph-distance
 .  rr an*saved-font
 .  rm an*saved-family
+.  nr an*is-in-example 0
 ..
 .
 .\" Set a man page cross reference.

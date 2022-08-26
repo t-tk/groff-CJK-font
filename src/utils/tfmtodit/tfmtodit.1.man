@@ -1,6 +1,9 @@
 .TH tfmtodit @MAN1EXT@ "@MDATE@" "groff @VERSION@"
 .SH Name
-tfmtodit \- adapt TeX Font Metrics files for groff \-Tdvi
+tfmtodit \- adapt TeX Font Metrics files for use with
+.I groff
+and
+.I grodvi
 .
 .
 .\" ====================================================================
@@ -72,19 +75,19 @@ tfmtodit \- adapt TeX Font Metrics files for groff \-Tdvi
 .\" ====================================================================
 .
 .I tfmtodit
-creates a font description file for use with the
+creates a font description file for use with
+.MR groff @MAN1EXT@ 's
 .B dvi
-output driver of
-.MR groff @MAN1EXT@ .
+output device.
 .
 .I tfm-file
 is the name of the \*(tx font metric file for the font.
 .
 .I map-file
-is a file giving the
+assigns
 .I groff
-special character identifiers for glyphs in the font;
-this file should consist of a sequence of lines of the form
+ordinary or special character identifiers to glyph indices in the font;
+it should consist of a sequence of lines of the form
 .
 .RS
 .IR "i c1" \~\&.\|.\|.\&\~ cn
@@ -92,14 +95,14 @@ this file should consist of a sequence of lines of the form
 .
 where
 .I i
-is a decimal integer giving the position of the glyph in the font,
+is a position of the glyph in the font in decimal,
 and
 .I c1
 through
 .I cn
-are
+are glyph identifiers in the form used by
 .I groff
-special character identifiers for the glyph.
+font descriptions.
 .
 If a glyph has no
 .I groff
@@ -107,7 +110,7 @@ names but exists in
 .I tfm-file,
 it is put in the
 .I groff
-font description file as an unnamed character.
+font description file as an unnamed glyph.
 .
 Output is written in
 .MR groff_font @MAN5EXT@
@@ -119,28 +122,22 @@ font name.
 .
 .
 .P
-The
-.B \-s
-option should be given if the font is \[lq]special\[rq],
+If the font is \[lq]special\[rq],
 meaning that
 .I groff
-should search it whenever a glyph is not found in the current font.
-.
-In that case,
+should search it whenever a glyph is not found in the current font,
+use the
+.B \-s
+option and name
 .I font-description
-should be listed as an argument to the
+in the
 .B fonts
 directive in the output device's
 .I DESC
-file;
-if it is not special,
-there is no need to do so,
-since
-.MR @g@troff @MAN1EXT@
-will automatically mount it when it is first used.
+file.
 .
 .
-.LP
+.P
 To do a good job of math typesetting,
 .I groff
 requires font metric information not present in
@@ -179,12 +176,10 @@ def ignore_math_fit(expr left_adjustment,right_adjustment) =
 .EE
 .RE
 .
-.
-.LP
 For the EC font family,
 load the following definition after
-.BR exbase \[em]it
-is probably easiest to patch
+.BR exbase ;
+consider patching
 .I exbase.mf
 locally.
 .
@@ -201,8 +196,6 @@ def ignore_math_fit(expr left_adjustment,right_adjustment) =
 The only difference from the previous example is the \[lq]ori_\[rq]
 prefix to \[lq]special\[rq] and \[lq]numspecial\[rq].
 .
-.
-.LP
 The GF file created using this modified
 .I cm.base
 or
@@ -282,6 +275,105 @@ describes the font known
 .RI as\~ F
 on device
 .BR dvi .
+.
+.
+.TP
+.I @FONTDIR@/\:\%devdvi/\:\%generate/\:\%ec.map
+.TQ
+.I @FONTDIR@/\:\%devdvi/\:\%generate/\:\%msam.map
+.TQ
+.I @FONTDIR@/\:\%devdvi/\:\%generate/\:\%msbm.map
+.TQ
+.I @FONTDIR@/\:\%devdvi/\:\%generate/\:\%tc.map
+.TQ
+.I @FONTDIR@/\:\%devdvi/\:\%generate/\:\%texb.map
+.TQ
+.I @FONTDIR@/\:\%devdvi/\:\%generate/\:\%texex.map
+.TQ
+.I @FONTDIR@/\:\%devdvi/\:\%generate/\:\%texi.map
+.TQ
+.I @FONTDIR@/\:\%devdvi/\:\%generate/\:\%texitt.map
+.TQ
+.I @FONTDIR@/\:\%devdvi/\:\%generate/\:\%texmi.map
+.TQ
+.I @FONTDIR@/\:\%devdvi/\:\%generate/\:\%texr.map
+.TQ
+.I @FONTDIR@/\:\%devdvi/\:\%generate/\:\%texsy.map
+.TQ
+.I @FONTDIR@/\:\%devdvi/\:\%generate/\:\%textex.map
+.TQ
+.I @FONTDIR@/\:\%devdvi/\:\%generate/\:\%textt.map
+map glyph indices in \*[tx] fonts to
+.I groff
+ordinary and special character identifiers.
+.
+.I \%ec.map
+is used for
+.BR TREC ,
+.BR TIEC ,
+.BR TBEC ,
+.BR TBIEC ,
+.BR HREC ,
+.BR HIEC ,
+.BR HBEC ,
+.BR HBIEC ,
+.BR CWEC ,
+and
+.BR CWIEC ;
+.I \%msam.map
+for
+.BR SA ;
+.I \%msbm.map
+for
+.BR SB ;
+.I \%tc.map
+for
+.BR TRTC ,
+.BR TITC ,
+.BR TBTC ,
+.BR TBITC ,
+.BR HRTC ,
+.BR HITC ,
+.BR HBTC ,
+.BR HBITC ,
+.BR CWTC ,
+and
+.BR CWITC ;
+.I \%texb.map
+for
+.BR TB ,
+.BR HR ,
+.BR HI ,
+.BR HB ,
+and
+.BR HBI ;
+.I \%texex.map
+for
+.BR EX ;
+.I \%texi.map
+for
+.B TI
+and
+.BR TBI ;
+.I \%texitt.map
+for
+.BR CWI ;
+.I \%texmi.map
+for
+.BR MI ;
+.I \%texr.map
+for
+.BR TR ;
+.I \%texsy.map
+for
+.BR S ;
+.I \%textex.map
+for
+.BR SC ;
+and
+.I \%textt.map
+for
+.BR CW .
 .
 .
 .\" ====================================================================

@@ -550,7 +550,9 @@ void environment::set_family(symbol fam)
   if (interrupted)
     return;
   if (fam.is_null() || fam.is_empty()) {
-    if (prev_family->make_definite(fontno) < 0)
+    int previous_mounting_position = prev_family->make_definite(fontno);
+    assert(previous_mounting_position >= 0);
+    if (previous_mounting_position < 0)
       return;
     font_family *tem = family;
     family = prev_family;
@@ -558,8 +560,17 @@ void environment::set_family(symbol fam)
   }
   else {
     font_family *f = lookup_family(fam);
-    if (f->make_definite(fontno) < 0)
+    // If the family isn't already in the dictionary, looking it up will
+    // create an entry for it.  That doesn't mean that it will be
+    // resolvable to a real font when combined with a style name.
+    assert((f != 0 /* nullptr */) &&
+	   (0 != "font family dictionary lookup"));
+    if (0 /* nullptr */ == f)
       return;
+    if (f->make_definite(fontno) < 0) {
+      error("no font family named '%1' exists", fam.contents());
+      return;
+    }
     prev_family = family;
     family = f;
   }

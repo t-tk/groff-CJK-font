@@ -1754,7 +1754,7 @@ which is covered in the section
 </div>
 
 <div class="box-macro-args">
-Macro: <b>SPACE</b> <kbd class="macro-args">&lt;space to add between lines&gt;</kbd>
+Macro: <b>SPACE</b> <kbd class="macro-args">[&lt;space to add between lines&gt;]</kbd>
 </div>
 <p class="alias">
 <i>Alias:</i> <b>SP</b>
@@ -1764,9 +1764,7 @@ Macro: <b>SPACE</b> <kbd class="macro-args">&lt;space to add between lines&gt;</
 SPACE breaks a line, just like
 <a href="#br">BR</a>,
 then adds space after the line.  With no argument, it adds an extra
-line space of a value equal to the current
-<a href="definitions.html#leading">leading</a>.
-If you pass it a numeric argument without supplying a
+line space.  If you pass it a numeric argument without supplying a
 <a href="definitions.html#unitofmeasure">unit of measure</a>,
 it advances that number of extra line spaces.  For example:
 <br/>
@@ -1782,16 +1780,13 @@ breaks the line and adds two extra linespaces.
 </p>
 
 <p>
-If you supply a unit of measure, SPACE breaks the line then advances
-one linespace (at the current
-<a href="definitions.html#leading">leading</a>)
-<i>plus</i> the specified amount of extra space given to SPACE, as in
+If you supply a unit of measure, SPACE breaks the line and advances
+the specified vertical distance, as in
 <br/>
 <span class="pre-in-pp">
   .SPACE 6p
 </span>
-which breaks the line and advances one full linespace plus six
-points.
+which breaks the line and advances six points further.
 </p>
 
 <div class="box-tip">
@@ -3141,12 +3136,30 @@ relative to the current vertical position.
 </p>
 
 <p>
-Used by itself, or preceded by
-<a href="#br">BR</a>,
-ALD will advance by one line space plus the distance you specify.
-Preceded by
-<a href="#el">EL</a>,
-it will advance by exactly the distance you specify.
+ALD causes a line break, which means the argument is added to the
+current
+<a href="definitions.html#leading">leading</a>.
+For example, if your current leading is 12 points, a line of type
+after <kbd>.ALD 6p</kbd> will be 18 points distant from the previous
+line.
+</p>
+
+<p>
+If you wish to advance the argument's distance <i>from the
+current baseline,</i> it should be preceded by
+<a href="#el">EL</a>.
+For example,
+<br/>
+<span class="pre-in-pp">
+  .LEFT
+  .LS 12
+  First line.
+  Second line.\c
+  .EL
+  .ALD 15p
+  Third line.
+</span>
+would place the third line exactly 15 points beneath the second.
 </p>
 
 <p>
@@ -3204,12 +3217,33 @@ relative to the current vertical position.
 </p>
 
 <p>
-Used by itself, or preceded by
-<a href="#br">BR</a>,
-RLD will advance by one line space, then reverse by the distance you
-specify.  Preceded by
-<a href="#el">EL</a>,
-it will reverse by exactly the distance you specify.
+RLD causes a line break, which means the argument is subtracted from
+the current
+<a href="definitions.html#leading">leading</a>.
+For example, if your current leading is 12 points, a line of type
+after <kbd>.RLD 6p</kbd> will be 6 points distant from the previous
+line.
+</p>
+
+<p>
+If you wish to move upward <i>from the current baseline</i> by the
+argument's distance, RLD should be preceded by
+<a href="#el">EL</a>.
+For example,
+<br/>
+<span class="pre-in-pp">
+  .LEFT
+  .LS 18
+  First line.
+  Second line.\c
+  .EL
+  .RLD 3p
+  Third line.
+</span>
+would raise the third line by 3 points relative to the baseline of
+the second line.  Put another way, if the <kbd>.RLD</kbd> in the
+example were 18p, the third line would fall on the same baseline as
+the second.
 </p>
 
 <p>

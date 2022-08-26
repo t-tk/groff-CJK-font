@@ -8,7 +8,7 @@
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 1989-2020 Free Software Foundation, Inc.
+.\" Copyright (C) 1989-2022 Free Software Foundation, Inc.
 .\"
 .\" Permission is granted to make and distribute verbatim copies of this
 .\" manual provided the copyright notice and this permission notice are
@@ -213,21 +213,6 @@ or
 .
 .
 .\" ====================================================================
-.SS "Controlling delimiters"
-.\" ====================================================================
-.
-.I eqn
-recognizes
-.RB \[lq] "delim on" \[rq]
-as a command to restore the delimiters which have been previously
-disabled with a call to
-.RB \[lq] "delim off" \[rq].
-.
-If delimiters haven't been specified,
-these commands have no effect.
-.
-.
-.\" ====================================================================
 .SS "Automatic spacing"
 .\" ====================================================================
 .
@@ -328,6 +313,46 @@ assigns the
 .RB \[lq] punctuation \[rq]
 type to each of the characters in \[lq].,;:\[rq] wherever they
 subsequently appear in an equation.
+.
+.
+.\" ====================================================================
+.SS Primitives
+.\" ====================================================================
+.
+.I @g@eqn
+supports without alteration the AT&T
+.I eqn \" AT&T
+primitives
+.BR above ,
+.BR back ,
+.BR bar ,
+.BR bold ,
+.BR define ,
+.BR down ,
+.BR fat ,
+.BR font ,
+.BR from ,
+.BR fwd ,
+.BR gfont ,
+.BR gsize ,
+.BR italic ,
+.BR left ,
+.BR lineup ,
+.BR mark ,
+.BR matrix ,
+.BR ndefine ,
+.BR over ,
+.BR right ,
+.BR roman ,
+.BR size ,
+.BR sqrt ,
+.BR sub ,
+.BR sup ,
+.BR tdefine ,
+.BR to ,
+.BR under ,
+and
+.BR up .
 .
 .
 .\" ====================================================================
@@ -684,6 +709,19 @@ picture.
 .\" ====================================================================
 .SS "Extended primitives"
 .\" ====================================================================
+.
+.I @g@eqn
+recognizes an
+.RB \[lq] on \[rq]
+argument to the
+.B delim
+primitive specially;
+restoring any delimiters that have been previously disabled with
+.RB \[lq] "delim off" \[rq].
+.
+If delimiters haven't been specified,
+neither of these commands have effect.
+.
 .
 .TP
 .BI col\~ n\~\c
@@ -1204,22 +1242,110 @@ Remove definition of
 making it undefined.
 .
 .
-.LP
-Besides the macros mentioned above,
-the following definitions are available:
-.BR Alpha ,
-.BR Beta ,
-\&.\|.\|.,
-.B Omega
-(this is the same as
-.BR ALPHA ,
-.BR BETA ,
-\&.\|.\|.,
-.BR OMEGA ),
-.B ldots
-(three dots on the baseline),
+.\" ====================================================================
+.SS "Predefined macros"
+.\" ====================================================================
+.
+.I @g@eqn
+supports the predefined macros offered by AT&T
+.I eqn:
+.BR and ,
+.BR approx ,
+.BR arc ,
+.BR cos ,
+.BR cosh ,
+.BR del ,
+.BR det ,
+.BR dot ,
+.BR dotdot ,
+.BR dyad ,
+.BR exp ,
+.BR for ,
+.BR grad ,
+.BR half ,
+.BR hat ,
+.BR if ,
+.BR inter ,
+.BR Im ,
+.BR inf ,
+.BR int ,
+.BR lim ,
+.BR ln ,
+.BR log ,
+.BR max ,
+.BR min ,
+.BR nothing ,
+.BR partial ,
+.BR prime ,
+.BR prod ,
+.BR Re ,
+.BR sin ,
+.BR sinh ,
+.BR sum ,
+.BR tan ,
+.BR tanh ,
+.BR tilde ,
+.BR times ,
+.BR union ,
+.BR vec ,
+.BR == ,
+.BR != ,
+.BR += ,
+.BR \-> ,
+.BR <\- ,
+.BR << ,
+.BR >> ,
 and
-.BR dollar .
+.RB \[lq] .\|.\|. \[rq].
+.
+The lowercase classical Greek letters are available as
+.BR alpha ,
+.BR beta ,
+.BR chi ,
+.BR delta ,
+.BR epsilon ,
+.BR eta ,
+.BR gamma ,
+.BR iota ,
+.BR kappa ,
+.BR lambda ,
+.BR mu ,
+.BR nu ,
+.BR omega ,
+.BR omicron ,
+.BR phi ,
+.BR pi ,
+.BR psi ,
+.BR rho ,
+.BR sigma ,
+.BR tau ,
+.BR theta ,
+.BR upsilon ,
+.BR xi ,
+and
+.BR zeta .
+.
+Obtain their uppercase forms by spelling these names with an initial
+capital letter or in full capitals,
+as in
+.B Alpha
+or
+.BR ALPHA .
+.
+.
+.P
+GNU
+.I eqn \" GNU
+further defines the macros
+.BR cdot ,
+.B cdots
+(see above),
+.BR dollar ,
+which sets a dollar sign,
+.BR ldots ,
+which sets three dots on the baseline,
+and
+.BR utilde .
 .
 .
 .\" ====================================================================
@@ -1520,6 +1646,46 @@ See section \[lq]Bugs\[rq] below for translation limits specific to
 .SH Bugs
 .\" ====================================================================
 .
+Names of macros and primitives must be quoted anywhere they occur in
+.I eqn \" generic
+input if they are to be interpreted by
+.IR troff . \" generic
+.
+These names,
+particularly short ones like
+.RB \[lq] pi \[rq]
+and
+.RB \[lq] PI \[rq],
+can collide with
+.I troff \" generic
+identifiers.
+.
+For instance,
+the
+.I eqn \" generic
+command
+.
+.RS
+.EX
+gfont PI
+.EE
+.RE
+.
+does not select
+.IR groff 's
+Palatino italic font for the \[lq]global\[rq] equation face;
+you must use
+.
+.RS
+.EX
+gfont "PI"
+.EE
+.RE
+.
+instead.
+.
+.
+.P
 Inline equations are set at the point size that is current at the
 beginning of the input line.
 .
