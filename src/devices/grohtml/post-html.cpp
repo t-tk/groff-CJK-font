@@ -94,6 +94,7 @@ static int valid_flag = FALSE;              /* has user requested a valid flag a
                                             /* end of each page?                        */
 static int groff_sig = FALSE;               /* "This document was produced using"       */
 html_dialect dialect = html4;               /* which html dialect should grohtml output */
+static int charset_utf8 = FALSE;            /* charset in UTF-8, default isUS-ASCII     */
 
 
 /*
@@ -1396,6 +1397,36 @@ void page::add_line (style *s,
 	       min(y_1, y_2), min(x_1, x_2),
 	       max(y_1, y_2), max(x_1, x_2));
   }
+}
+
+/*
+ *  to_utf8_string - returns a utf string of int, ch.
+ */
+
+static char *to_utf8_string (unsigned int ch)
+{
+  static char buf[30];
+
+  if      (ch<0x80  )
+    sprintf(buf, "%c", ch & 0xff);
+  else if (ch<0x800 )
+    sprintf(buf, "%c%c",
+      0xc0 + (((ch) >>  6) & 0x1f),
+      0x80 + (((ch)      ) & 0x3f) );
+  else if (ch<0xD800 || (ch>0xDFFF && ch<0x10000))
+    sprintf(buf, "%c%c%c",
+      0xe0 + (((ch) >> 12) & 0x0f),
+      0x80 + (((ch) >>  6) & 0x3f),
+      0x80 + (((ch)      ) & 0x3f) );
+  else if (ch<0x120000)
+    sprintf(buf, "%c%c%c%c",
+      0xf0 + (((ch) >> 18) & 0x07),
+      0x80 + (((ch) >> 12) & 0x3f),
+      0x80 + (((ch) >>  6) & 0x3f),
+      0x80 + (((ch)      ) & 0x3f) );
+  else
+    sprintf(buf, "&#%u;", ch);
+  return buf;
 }
 
 /*
@@ -3998,6 +4029,11 @@ void html_printer::end_font (const char *fontname)
     current_paragraph->done_bold();
     current_paragraph->done_italic();
     current_paragraph->done_tt();
+  } else if (strcmp(fontname, "CSH") == 0 ||
+             strcmp(fontname, "CTH") == 0 ||
+             strcmp(fontname, "JPG") == 0 ||
+             strcmp(fontname, "KOG") == 0) {
+    current_paragraph->done_bold();
   }
 }
 
@@ -4046,6 +4082,18 @@ void html_printer::start_font (const char *fontname)
     current_paragraph->do_tt();
     current_paragraph->do_italic();
     current_paragraph->do_bold();
+  } else if (strcmp(fontname, "CSS") == 0 ||
+             strcmp(fontname, "CTS") == 0 ||
+             strcmp(fontname, "JPM") == 0 ||
+             strcmp(fontname, "KOM") == 0) {
+    current_paragraph->done_bold();
+    current_paragraph->done_italic();
+  } else if (strcmp(fontname, "CSH") == 0 ||
+             strcmp(fontname, "CTH") == 0 ||
+             strcmp(fontname, "JPG") == 0 ||
+             strcmp(fontname, "KOG") == 0) {
+    current_paragraph->do_bold();
+    current_paragraph->done_italic();
   }
 }
 
@@ -4416,7 +4464,7 @@ void html_printer::add_to_sbuf (glyph *g, const string &s)
       html_glyph = 0;
 
     if ((0 /* nullptr */ == html_glyph) && (code >= UNICODE_DESC_START))
-      html_glyph = to_unicode(code);
+      html_glyph = charset_utf8 ? to_utf8_string(code) : to_unicode(code);
   } else
     html_glyph = get_html_translation(sbuf_style.f, s);
 
@@ -4497,6 +4545,8 @@ static const char *get_html_entity (unsigned int code)
       case 0x003E: return "&gt;";
       default: return 0;
     }
+  } else if (charset_utf8) {
+      return to_utf8_string(code);
   } else {
     switch (code) {
       case 0x00A0: return "&nbsp;";
@@ -5176,13 +5226,17 @@ void html_printer::writeHeadMetaStyle (void)
     fputs("<meta name=\"generator\" "
 	  "content=\"groff -Thtml, see www.gnu.org\">\n", stdout);
     fputs("<meta http-equiv=\"Content-Type\" "
-	  "content=\"text/html; charset=US-ASCII\">\n", stdout);
+	  "content=\"text/html; charset=", stdout);
+    fputs(charset_utf8 ? "UTF-8" : "US-ASCII", stdout);
+    fputs("\">\n", stdout);
     fputs("<meta name=\"Content-Style\" content=\"text/css\">\n",
 	  stdout);
     fputs("<style type=\"text/css\">\n", stdout);
   }
   else {
-    fputs("<?xml version=\"1.0\" encoding=\"us-ascii\"?>\n", stdout);
+    fputs("<?xml version=\"1.0\" encoding=\"", stdout);
+    fputs(charset_utf8 ? "UTF-8" : "us-ascii", stdout);
+    fputs("\"?>\n", stdout);
     fputs("<!DOCTYPE html PUBLIC \"-//W3C//"
 	  "DTD XHTML 1.1 plus MathML 2.0//EN\"\n", stdout);
     fputs(" \"http://www.w3.org/TR/MathML2/dtd/xhtml-math11-f.dtd\"\n",
@@ -5196,7 +5250,9 @@ void html_printer::writeHeadMetaStyle (void)
     fputs("<meta name=\"generator\" "
 	  "content=\"groff -Txhtml, see www.gnu.org\"/>\n", stdout);
     fputs("<meta http-equiv=\"Content-Type\" "
-	  "content=\"text/html; charset=US-ASCII\"/>\n", stdout);
+	  "content=\"text/html; charset=", stdout);
+    fputs(charset_utf8 ? "UTF-8" : "US-ASCII", stdout);
+    fputs("\"/>\n", stdout);
     fputs("<meta name=\"Content-Style\" content=\"text/css\"/>\n",
 	  stdout);
     fputs("<style type=\"text/css\">\n", stdout);
@@ -5559,7 +5615,7 @@ int main(int argc, char **argv)
     { NULL, 0, 0, 0 }
   };
   while ((c = getopt_long(argc, argv,
-	  "a:bCdD:eF:g:Ghi:I:j:lno:prs:S:vVx:y", long_options, NULL))
+	  "a:bCdD:eF:g:Ghi:I:j:lno:prs:S:UvVx:y", long_options, NULL))
 	 != EOF)
     switch(c) {
     case 'a':
@@ -5628,6 +5684,9 @@ int main(int argc, char **argv)
     case 'S':
       split_level = atoi(optarg) + 1;
       break;
+    case 'U':
+      charset_utf8 = TRUE;
+      break;
     case 'v':
       printf("GNU post-grohtml (groff) version %s\n", Version_string);
       exit(0);
@@ -5669,7 +5728,7 @@ int main(int argc, char **argv)
 
 static void usage(FILE *stream)
 {
-  fprintf(stream, "usage: %s [-bCGhlnrVy] [-F font-directory]"
+  fprintf(stream, "usage: %s [-bCGhlnrUVy] [-F font-directory]"
 	  " [-j output-stem] [-s base-point-size] [-S heading-level]"
 	  " [-x html-dialect] [file ...]\n",
 	  program_name);

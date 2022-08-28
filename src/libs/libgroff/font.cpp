@@ -453,7 +453,7 @@ int font::get_width(glyph *g, int point_size)
     // Unicode font
     int width = 24; // XXX: Add a request to override this.
     int w = wcwidth(get_code(g));
-    if (w > 1)
+    if (w > 1 && !font::use_unscaled_charwidths)
       width *= w;
     if (real_size == unitwidth || font::use_unscaled_charwidths)
       return width;
@@ -1190,11 +1190,6 @@ bool font::load(bool load_header_only)
 	  if (metric.code == 0 && ptr == p) {
 	    t.error("invalid code '%1' for character '%2'", p, nm);
 	    return false;
-	  }
-	  if (is_unicode) {
-	    int w = wcwidth(metric.code);
-	    if (w > 1)
-	      metric.width *= w;
 	  }
 	  p = strtok(0, WS);
 	  if ((0 == p) || (strcmp(p, "--") == 0)) {

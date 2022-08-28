@@ -37,3 +37,11 @@ printf '\303\241' | "$groff" -k -Thtml | grep -qx '<p>&aacute;</p>'
 # preconv only emits groffish \[uXXXX] escapes for non-ASCII codepoints.
 echo "testing -C -k -Thtml" >&2
 printf "\('a" | "$groff" -C -k -Thtml | grep -qx '<p>&aacute;</p>'
+
+# test for Japanese, preprocessor
+echo "testing -Kutf8 -Thtml -Z" >&2
+printf ".ft JPM\nさざ波" | "$groff" -Kutf8 -Thtml -Z | tr '\n' ';' | grep -q 'Cu3055;H48;Cu3055_3099;h48;Cu6CE2;h48;'
+
+# test for Japanese
+echo "testing -Kutf8 -Thtml -P-U" >&2
+printf ".ft JPM\nさざ波" | "$groff" -Kutf8 -Thtml -P-U | grep -qx '<p>さざ波</p>'
