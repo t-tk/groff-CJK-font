@@ -33,6 +33,14 @@ It supports UTF16 encoding.
 We not need to patch for grodvi to support CJK.
 It outputs in upTeX dvi format.
 
+#### patch for post-grohtml (backend for HTML format)
+- src/preproc/html/pre-html.cpp
+- src/devices/grohtml/post-html.cpp
+- src/libs/libgroff/font.cpp
+
+It supports UTF8 encoding and CJK fonts.
+
+
 ### font definition
 
 #### CJK font definition for grops
@@ -55,11 +63,23 @@ It outputs in upTeX dvi format.
 - font/devdvi/KOM
 - font/devdvi/KOG
 
+#### CJK font definition for grohtml
+- font/devhtml/CSS
+- font/devhtml/CSH
+- font/devhtml/CTS
+- font/devhtml/CTH
+- font/devhtml/JPM
+- font/devhtml/JPG
+- font/devhtml/KOM
+- font/devhtml/KOG
+
 ### test samples
 - src/roff/groff/tests/smoke-test_ps_device.sh
 - src/roff/groff/tests/smoke-test_dvi_device.sh
+- src/roff/groff/tests/smoke-test_html_device.sh
 - tests/*
 - tests/grodvi/*
+- tests/grohtml/*
 
 
 ## License
@@ -71,4 +91,5 @@ GNU GPL Version 3.
 
 1. [GNU troff (groff) — a GNU project](https://www.gnu.org/software/groff/)
 2. [groff 1.18.1 with MULTILINGUAL support](https://answers.launchpad.net/ubuntu/+source/groff/1.18.1.1-12)
+3. [bug #62830: [grops] support CJK fonts encoded in UTF16](http://savannah.gnu.org/bugs/?62830)
 
