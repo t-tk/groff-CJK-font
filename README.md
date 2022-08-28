@@ -39,6 +39,7 @@ It outputs in upTeX dvi format.
 - src/libs/libgroff/font.cpp
 
 It supports UTF8 encoding and CJK fonts.
+Command line option `-U` is added to pre-grohtml and post-grohtml.
 
 
 ### font definition
