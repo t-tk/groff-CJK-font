@@ -24,10 +24,10 @@ set -e
 
 # test for upTeX dvi with Japanese, preprocessor
 echo "testing -Kutf8 -Tdvi -Z" >&2
-printf ".ft JPM\nあ安" | "$groff" -Kutf8 -Tdvi -Z | tr '\n' ';' | grep -q 'Cu3042;h8000;Cu5B89;h8000;'
+printf ".ft JPM\nさざ波" | "$groff" -Kutf8 -Tdvi -Z | tr '\n' ';' | grep -q 'Cu3055;h8000;Cu3055_3099;h8000;Cu6CE2;h8000;'
 
 
 # test for upTeX dvi with Japanese
 echo "testing -Kutf8 -Tdvi" >&2
-#printf ".ft JPM\nあ安" | "$groff" -Kutf8 -Tdvi > grodvi.dvi && updvitype grodvi.dvi | grep -q '[あ安]'
-printf ".ft JPM\nあ安" | "$groff" -Kutf8 -Tdvi | od -tx1 | grep -q "81 30 42 81 5b 89"
+#printf ".ft JPM\nさざ波" | "$groff" -Kutf8 -Tdvi > grodvi.dvi && updvitype grodvi.dvi | grep -q '[さざ波]'
+printf ".ft JPM\nさざ波" | "$groff" -Kutf8 -Tdvi | od -tx1 | grep -q "81 30 55 81 30 56 81 6c e2"

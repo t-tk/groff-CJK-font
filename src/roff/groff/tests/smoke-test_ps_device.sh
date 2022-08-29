@@ -24,9 +24,9 @@ set -e
 
 # test for PostScript with Japanese, preprocessor
 echo "testing -Kutf8 -Tps -Z" >&2
-printf ".ft JPM\nあ安" | "$groff" -Kutf8 -Tps -Z | tr '\n' ';' | grep -q 'Cu3042;h10000;Cu5B89;h10000;'
+printf ".ft JPM\nさざ波" | "$groff" -Kutf8 -Tps -Z | tr '\n' ';' | grep -q 'Cu3055;h10000;Cu3055_3099;h10000;Cu6CE2;h10000;'
 
 
 # test for PostScript with Japanese, UTF16 encoding
 echo "testing -Kutf8 -Tps" >&2
-printf ".ft JPM\nあ安" | "$groff" -Kutf8 -Tps | grep -q '/Ryumin-Light-UniJIS-UTF16-H SF<30425B89>'
+printf ".ft JPM\nさざ波" | "$groff" -Kutf8 -Tps | grep -q '/Ryumin-Light-UniJIS-UTF16-H SF<305530566CE2>'
