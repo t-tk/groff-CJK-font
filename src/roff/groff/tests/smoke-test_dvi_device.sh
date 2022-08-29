@@ -29,5 +29,5 @@ printf ".ft JPM\nさざ波" | "$groff" -Kutf8 -Tdvi -Z | tr '\n' ';' | grep -q '
 
 # test for upTeX dvi with Japanese
 echo "testing -Kutf8 -Tdvi" >&2
-#printf ".ft JPM\nさざ波" | "$groff" -Kutf8 -Tdvi > grodvi.dvi && updvitype grodvi.dvi | grep -q '[さざ波]'
+#printf ".ft JPM\nさざ波" | "$groff" -Kutf8 -Tdvi > grodvi.dvi && updvitype grodvi.dvi | grep -qx '\[さざ波\]'
 printf ".ft JPM\nさざ波" | "$groff" -Kutf8 -Tdvi | od -tx1 | grep -q "81 30 55 81 30 56 81 6c e2"
