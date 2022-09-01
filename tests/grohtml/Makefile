@@ -3,10 +3,10 @@ GROFF_BIN_PATH := ../..
 GROFF_FONT_PATH := ../../font
 GROFF_TMAC_PATH := ../../tmac
 
-SRCS  = dankeCJK.1 dankeCJK1.1 dankeJK0.1 dankeJK1.1 humanCJK0.1 humanCJK2.1
+SRCS  = dankeCJK.1 dankeCJK1.1 dankeCJK2.1 dankeJK0.1 dankeJK1.1 humanCJK0.1
 SRCS += ningen0.1 ningen1.1 ningen2.1 ningen3.1 ningen4.1
 SRCS += vita0.1 vita1.1 vita2.1 vita3.1 ame.1
-SRCS += kingdom0.1 leftKO.1 lucky.1 width1.1
+SRCS += kingdom0.1 leftKO.1 lucky.1
 HTML  = $(SRCS:.1=.html)
 
 .SUFFIXES: .html
@@ -29,6 +29,9 @@ dankeCJK1.html: ../dankeCJK1.1
 
 dankeCJK1_ascii.html: ../dankeCJK1.1
 	groff -K utf8 -T html ../dankeCJK1.1 > ./dankeCJK1_ascii.html
+
+dankeCJK2.html: ../dankeCJK2.1
+	groff -K utf8 -T html -P-U ../dankeCJK2.1 > ./dankeCJK2.html
 
 dankeJK0.html: ../dankeJK0.1
 	groff -K utf8 -T html -P-U ../dankeJK0.1 > ./dankeJK0.html
