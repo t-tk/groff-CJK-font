@@ -29,10 +29,6 @@ It supports font definition by a range of unicode code points.
 
 It supports UTF16 encoding.
 
-#### grodvi (backend for dvi format)
-We not need to patch for grodvi to support CJK.
-It outputs in upTeX dvi format.
-
 #### patch for post-grohtml (backend for HTML format)
 - src/preproc/html/pre-html.cpp
 - src/devices/grohtml/post-html.cpp
@@ -40,6 +36,13 @@ It outputs in upTeX dvi format.
 
 It supports UTF8 encoding and CJK fonts.
 Command line option `-U` is added to pre-grohtml and post-grohtml.
+
+#### grodvi (backend for dvi format)
+We not need to patch for grodvi to support CJK.
+It outputs in upTeX dvi format.
+
+#### grotty UTF8 outputs
+We not need to patch for grotty to support CJK.
 
 
 ### font definition
@@ -54,16 +57,6 @@ Command line option `-U` is added to pre-grohtml and post-grohtml.
 - font/devps/KOM
 - font/devps/KOG
 
-#### CJK font definition for grodvi
-- font/devdvi/CSS
-- font/devdvi/CSH
-- font/devdvi/CTS
-- font/devdvi/CTH
-- font/devdvi/JPM
-- font/devdvi/JPG
-- font/devdvi/KOM
-- font/devdvi/KOG
-
 #### CJK font definition for grohtml
 - font/devhtml/CSS
 - font/devhtml/CSH
@@ -74,6 +67,26 @@ Command line option `-U` is added to pre-grohtml and post-grohtml.
 - font/devhtml/KOM
 - font/devhtml/KOG
 
+#### CJK font definition for grodvi
+- font/devdvi/CSS
+- font/devdvi/CSH
+- font/devdvi/CTS
+- font/devdvi/CTH
+- font/devdvi/JPM
+- font/devdvi/JPG
+- font/devdvi/KOM
+- font/devdvi/KOG
+
+#### CJK font definition for grotty UTF-8 outputs
+- font/devutf8/CSS
+- font/devutf8/CSH
+- font/devutf8/CTS
+- font/devutf8/CTH
+- font/devutf8/JPM
+- font/devutf8/JPG
+- font/devutf8/KOM
+- font/devutf8/KOG
+
 ### test samples
 - src/roff/groff/tests/smoke-test_ps_device.sh
 - src/roff/groff/tests/smoke-test_dvi_device.sh
@@ -81,6 +94,7 @@ Command line option `-U` is added to pre-grohtml and post-grohtml.
 - tests/*
 - tests/grodvi/*
 - tests/grohtml/*
+- tests/grotty/*
 
 
 ## License
