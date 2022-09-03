@@ -969,9 +969,9 @@ Excess entries in a row of table data
 not even an implicit one arising from rectangularization of the table)
 are discarded with a diagnostic message.
 .
-Do not use a
 .I roff
-comment escape sequence in a table entry.
+control lines are accepted between rows of table data and within text
+blocks.
 .
 If you wish to visibly mark an empty table entry in the document source,
 populate it with the
@@ -1251,7 +1251,7 @@ respectively.
 .
 .
 .\" ====================================================================
-.SS Miscellaneous
+.SS \f[I]roff\f[] interface
 .\" ====================================================================
 .
 The register
@@ -1292,37 +1292,6 @@ tables by calling it from a page footer macro that is itself called by
 a trap planted near the bottom of the page.
 .
 See section \[lq]Limitations\[rq] below for more on multi-page tables.
-.
-.
-.\" XXX: The following is a general caveat about preprocessors; move it.
-.P
-Using
-.I @g@tbl
-macros within conditional input
-(that is,
-contingent upon an
-.BR if ,
-.BR ie ,
-.BR el ,
-or
-.B while
-request)
-can result in misleading line numbers in subsequent diagnostics.
-.
-.I @g@tbl
-unconditionally injects its output into the source document,
-but the conditional branch containing it may not be taken,
-and if it is not,
-the
-.B lf
-requests that
-.I @g@tbl
-injects to restore the source line number cannot take effect.
-.
-Consider copying the input line counter register
-.B c.\&
-and restoring its value at a convenient location after applicable
-arithmetic.
 .
 .
 .\" ====================================================================
@@ -1452,6 +1421,37 @@ and therefore can't recognize a decimal separator that only appears
 later when
 .I @g@troff
 interpolates a macro or string definition.
+.
+.
+.\" XXX: The following is a general caveat about preprocessors; move it.
+.P
+Using
+.I @g@tbl
+macros within conditional input
+(that is,
+contingent upon an
+.BR if ,
+.BR ie ,
+.BR el ,
+or
+.B while
+request)
+can result in misleading line numbers in subsequent diagnostics.
+.
+.I @g@tbl
+unconditionally injects its output into the source document,
+but the conditional branch containing it may not be taken,
+and if it is not,
+the
+.B lf
+requests that
+.I @g@tbl
+injects to restore the source line number cannot take effect.
+.
+Consider copying the input line counter register
+.B c.\&
+and restoring its value at a convenient location after applicable
+arithmetic.
 .
 .
 .\" ====================================================================
@@ -1727,6 +1727,7 @@ center tab(;);
 CbS,LN,AN.
 Daily energy intake (in MJ)
 Macronutrients
+\&.\[rs]" assume 3 significant figures of precision
 Carbohydrates;4.5
 Fats;2.25
 Protein;3
@@ -1749,6 +1750,7 @@ Total;\[rs][ti]24.4
 center tab(;);
 CbS,LN,AN.
 Daily energy intake (in MJ)
+.\" assume 3 significant figures of precision
 Macronutrients
 Carbohydrates;4.5
 Fats;2.25

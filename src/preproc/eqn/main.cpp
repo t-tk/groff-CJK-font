@@ -282,7 +282,7 @@ int main(int argc, char **argv)
     { "version", no_argument, 0, 'v' },
     { NULL, 0, 0, 0 }
   };
-  while ((opt = getopt_long(argc, argv, "DCRvd:f:p:s:m:T:M:rN", long_options,
+  while ((opt = getopt_long(argc, argv, "CRvd:f:p:s:m:T:M:rN", long_options,
 			    NULL))
 	 != EOF)
     switch (opt) {
@@ -301,11 +301,13 @@ int main(int argc, char **argv)
       break;
     case 'd':
       if (optarg[0] == '\0' || optarg[1] == '\0')
-	error("-d requires two character argument");
+	error("'-d' option requires a two-character argument");
       else if (invalid_input_char(optarg[0]))
-	error("bad delimiter '%1'", optarg[0]);
+	error("invalid delimiter '%1' in '-d' option argument",
+	      optarg[0]);
       else if (invalid_input_char(optarg[1]))
-	error("bad delimiter '%1'", optarg[1]);
+	error("invalid delimiter '%1' in '-d' option argument",
+	      optarg[1]);
       else {
 	start_delim = optarg[0];
 	end_delim = optarg[1];
@@ -332,16 +334,20 @@ int main(int argc, char **argv)
       }
       break;
     case 's':
-      if (!set_gsize(optarg))
-	error("invalid size '%1'", optarg);
+      if (set_gsize(optarg))
+	warning("option '-s' is deprecated; see eqn(1) man page");
+      else
+	error("invalid size '%1' in '-s' option argument ", optarg);
       break;
     case 'p':
       {
 	int n;
-	if (sscanf(optarg, "%d", &n) == 1)
+	if (sscanf(optarg, "%d", &n) == 1) {
+	  warning("option '-p' is deprecated; see eqn(1) man page");
 	  set_script_reduction(n);
+	}
 	else
-	  error("bad size '%1'", optarg);
+	  error("invalid size '%1' in '-p' option argument ", optarg);
       }
       break;
     case 'm':
@@ -350,15 +356,11 @@ int main(int argc, char **argv)
 	if (sscanf(optarg, "%d", &n) == 1)
 	  set_minimum_size(n);
 	else
-	  error("bad size '%1'", optarg);
+	  error("invalid size '%1' in '-n' option argument ", optarg);
       }
       break;
     case 'r':
       one_size_reduction_flag = 1;
-      break;
-    case 'D':
-      warning("-D option is obsolete: use 'set draw_lines 1' instead");
-      draw_flag = 1;
       break;
     case 'N':
       no_newline_in_delim_flag = 1;

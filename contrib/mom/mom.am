@@ -21,11 +21,13 @@
 mom_srcdir = $(top_srcdir)/contrib/mom
 
 # pdfmom command used to generate .pdf
+#
+# Use '-K utf8', not '-k', in case 'configure' didn't find uchardet.
 MOMPDFMOM = \
   GROFF_COMMAND_PREFIX= \
   GROFF_BIN_PATH="$(GROFF_BIN_PATH)" \
   PDFMOM_BIN_PATH="$(top_builddir)" \
-  $(PDFMOMBIN) $(FFLAG) $(MFLAG) -M$(mom_srcdir) -k -p -e -t
+  $(PDFMOMBIN) $(FFLAG) $(MFLAG) -M$(mom_srcdir) -K utf8 -p -e -t
 
 man7_MANS += contrib/mom/groff_mom.7
 

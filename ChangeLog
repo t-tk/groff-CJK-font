@@ -1,3 +1,89 @@
+2022-09-02  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	Drop groff_filenames(5) document.  It says nothing accurate that
+	is not covered elsewhere.
+
+	* contrib/groff_filenames: Delete.
+	* doc/doc.am (GROFF_MAN_PAGES): Drop.
+	* src/roff/groff/groff.1.man: Drop cross reference to it.
+	* NEWS: Add item.
+
+	Fixes <https://savannah.gnu.org/bugs/index.php?61818>.
+
+2022-09-01  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/preproc/tbl/tbl.1.man (Table data): Generalize discussion
+	of roff control line use in tables.
+	(Examples): Illustrate how to embed a comment in a table.
+
+2022-08-31  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* NEWS: man(7)'s `TS` no longer adds vertical space.  See commit
+	7ec36dc9b9, 30 July.
+
+2022-08-28  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/preproc/eqn/main.cpp (main): Issue deprecation warning
+	upon use of '-p' or '-s' options.  The eqn(1) man page has
+	documented these as deprecated since at least groff 1.02 (June
+	1991).  Don't count on them sticking around another 30 years.
+
+2022-08-28  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/preproc/eqn/main.cpp (main): Clarify error diagnostics
+	regarding invalid option arguments.  Identify the option being
+	handled at the time and characterize the argument as "invalid",
+	not "bad".
+
+2022-08-28  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[eqn]: Drop support for undocumented '-D' option.  It has been
+	undocumented, and issued a warning of its obsolescence upon use,
+	for 30 years, since groff 1.06 (September 1992).  That's plenty
+	long enough for a deprecation cycle.
+
+	* src/preproc/eqn/main.cpp (main): Do it.
+	* NEWS: Add item.
+
+2022-08-27  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[man]: (EX, EE): Always break line, even if call invalid.
+
+	* tmac/an.tmac (EX, EE):
+	* tmac/an-ext.tmac (EX, EE): Do it.  Ingo Schwarze pointed out
+	that page authors will expect breaking semantics from these
+	macros even if using them in an ill-formed way.  In a
+	well-formed document, the breaks are redundant but harmless (the
+	later `nf` and `fi` requests, respectively, also cause breaks).
+
+2022-08-27  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[mdoc]: Trivially refactor.
+
+	* tmac/doc.tmac:
+	* tmac/mdoc/doc-common: Rename string `doc-command-name` to
+	`doc-topic-name`; the former is misleading for man pages not in
+	sections 1, 6, or 8.
+
+2022-08-25  Bjarni Ingi Gislason <bjarniig@vortex.is>
+
+	* man/groff_char.7.man: Fix bad example syntax.
+
+	Fixes <https://savannah.gnu.org/bugs/?62959>.
+
+2022-08-25  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[mdoc]: Trivially refactor.
+
+	* tmac/mdoc/doc-common:
+	* tmac/mdoc/doc-ditroff:
+	* tmac/mdoc/doc-nroff: Stop using "Null" as an empty string
+	indicator when comparing a string interpolation to an empty
+	parameter will serve just as well; it is also more idiomatic.
+	The string in question, `doc-section`, is never formatted if it
+	is empty anyway; the very tests at issue, which populate
+	`doc-header-string`, ensure this.
+
 2022-08-23  G. Branden Robinson <g.branden.robinson@gmail.com>
 
 	* src/roff/troff/env.cpp (environment::set_family): Throw error
@@ -33,9 +119,9 @@
 
 	[man]: Restore robustness to `EE` misuse.
 
-	* tmac/an.tmac: Add `an*is-in-example` register to keep track
-	state of within-exampleness.  Not doing so can cause a spurious
-	use of `EE` to wrongly set the inter-paragraph distance to zero.
+	* tmac/an.tmac: Add `an*is-in-example` register to track state
+	of within-exampleness.  Not doing so can cause a spurious use of
+	`EE` to wrongly set the inter-paragraph distance to zero.
 	(TH): Initialize register.
 	(EX): Test register; if set, ignore macro call and, if
 	`CHECKSTYLE` warnings are on, throw diagnostic.  Set register.

@@ -1,6 +1,7 @@
 .TH groff_mom @MAN7EXT@ "@MDATE@" "groff @VERSION@"
 .SH Name
-groff_mom \- modern macros for document composition with GNU roff
+groff_mom \- modern macros for document composition with GNU
+.I roff
 .
 .
 .\" ====================================================================
@@ -80,75 +81,66 @@ groff_mom \- modern macros for document composition with GNU roff
 .
 .
 .\" ====================================================================
-.SH "Calling \f[I]mom\f[]"
+.SH Description
 .\" ====================================================================
 .
-.B mom
+.I mom
 is a macro set for
-.BR groff ,
-designed primarily to format documents for
-.I PDF
-and
-.I PostScript
-output.
+.IR groff ,
+designed primarily to prepare documents for PDF and PostScript output.
 .
 .
-.P
-.B mom
-provides two categories of macros: macros for typesetting, and
-macros for document processing.
+.I mom
+provides macros in two categories: typesetting
+and document processing.
 .
-The typesetting macros provide access to groff's typesetting
-capabilities in ways that are simpler to master than groff's
-primitives.
+The former provide access to
+.IR groff 's
+typesetting capabilities in ways that are simpler to master than
+.IR groff 's
+requests and escape sequences.
 .
-The document processing macros provide highly customizable markup
-tags that allow the user to design and output professional-looking
-documents with a minimum of typesetting intervention.
+The latter provide highly customizable markup tags that allow the user
+to design and output professional-looking documents with a minimum of
+typesetting intervention.
 .
 .
 .P
 Files processed with
 .MR pdfmom @MAN1EXT@
-with or without the
-.RI \-T ps
-option, produce
-.I PDF
-documents.
+produce PDF documents.
 .
-The documents include a
-.I PDF
-outline that appears in the \[oq]Contents\[cq] panel of document
-viewers, and may contain clickable internal and external links.
-.
+The documents include a PDF outline that appears in the navigation pane
+panel of document viewers,
+and may contain clickable internal and external links.
 .
 .P
-When
-.RI \-T ps
-is absent,
-.B groff's
-native
-.I PDF
-driver,
-.BR gropdf ,
+Normally.
+.IR groff 's
+native PDF driver,
+.MR gropdf @MAN1EXT@ ,
 is used to generate the output.
 .
-When given, the output is still
-.IR PDF ,
-but processing is passed over to
-.BR pdfroff ,
+When
+.I pdfmom
+is given the
+.RB \[lq] "\-T ps" \[rq]
+option,
+it still produces PDF,
+but processing is delegated to
+.IR pdfroff ,
 which uses
-.B groff's
+.IR groff 's
 PostScript driver,
-.BR grops .
-Not all
-.I PDF
-features are available when
-.RI \-T ps
-is given; its primary use is to allow processing of files with
-embedded
-.I PostScript
+.MR grops @MAN1EXT@ .
+.
+Not all PDF features are available when
+.B \-T ps
+is given;
+its primary use is to allow processing of files with embedded PostScript
 images.
+.\" XXX: but we have PDFPIC now...so -Tps is necessary only for people
+.\" who want to avoid use of unsafe mode?
 .
 .
 .P
@@ -156,25 +148,27 @@ Files processed with
 .B groff \-mom
 (or
 .BR "\-m mom" )
-produce PostScript output by default.
+format for the device specified with the
+.B \-T
+option.
+.
+(In this installation,
+.B @DEVICE@
+is the default output device.)
 .
 .
 .P
-.B mom
-comes with her own very complete documentation in
-.I HTML
-format.
+.I mom
+comes with her own comprehensive documentation in HTML.
 .
-A separate
-.IR "PDF manual" ,
-.I Producing PDFs
-with groff and
-.BR mom ,
-covers full
-.B mom
-or
-.I PDF
-usage.
+A PDF manual,
+\[lq]Producing PDFs with
+.I groff
+and
+.IR mom \[rq],
+discusses preparation of PDF documents with
+.I mom
+in detail.
 .
 .
 .\" ====================================================================
@@ -182,74 +176,43 @@ usage.
 .\" ====================================================================
 .
 .TP
-.I @MACRODIR@/\:om.tmac
-\[en] the main macro file
-.TQ
 .I @MACRODIR@/\:mom.tmac
-\[en] a wrapper file that calls om.tmac directly.
+is a wrapper enabling the package to be loaded with
+.RB \[lq] "groff \-m mom" \[rq].
+.
+.
+.TP
+.I @MACRODIR@/\:om.tmac
+implements the package.
+.
 .
 .TP
 .I @HTMLDOCDIR@/\:mom/\:toc.html
-\[en] entry point to the HTML documentation
+is the entry point to the HTML documentation.
+.
 .
 .TP
 .I @PDFDOCDIR@/\:mom\-pdf.pdf
-\[en] the PDF manual,
-.I Producing PDFs with groff and mom
+is \[lq]Producing PDFs with
+.I groff
+and
+.IR mom \[rq],
+by Deri James and Peter Schaffter.
+.
 .
 .TP
 .IR @EXAMPLEDIR@/\:mom/\: * .mom
-\[en] example files using mom
+are examples of
+.I mom
+usage.
 .
 .
 .\" ====================================================================
-.SH "Documentation in alphabetical order"
-.\" ====================================================================
-.
-.
-This part of the man page contains information just as in groff(7),
-.I mom macros
-and
-.I mom escape sequences
-in alphabetical order.
-.
-.
-.P
-The logical order of
-.I mom macros
-and
-.I mom escape sequences
-is very well documented in
-.
-.TP
-.I @HTMLDOCDIR@/\:mom/\:toc.html
-\[en] entry point to the HTML documentation
-.
-.
-.P
-That document is quite good for beginners, but other users should be
-happy to have some documentation in reference style.
-.
-.
-.P
-So we restrict this part to the alphabetical order of macros and
-escape sequences.
-.
-But, so far, we took all documentation details from the
-.I toc.html
-file, just in a more useful alphabetical order.
-.
-.
-So this part of the man page is nothing new, but only a logical
-arrangement.
-.
-.
-.\" ====================================================================
-.SH "Quick reference"
+.SH Reference
 .\" ====================================================================
 .
 .\" ====================================================================
-.SS "Quick reference of inline escape sequences in alphabetical order"
+.SS "Escape sequences"
 .\" ====================================================================
 .
 .TP
@@ -259,7 +222,7 @@ begin using an initialized colour inline
 .
 .TP
 .FONT B \[rs]*[BCK I " n" B ]
-move backwards in a line
+move backward in a line
 .
 .
 .TP
@@ -299,7 +262,7 @@ pseudo-condensed superscript
 .
 .TP
 .FONT B \[rs]*[DOWN I " n" B ]
-temporarily move downwards in a line
+temporarily move downward in a line
 .
 .
 .TP
@@ -388,11 +351,11 @@ invoke underlining inline (fixed width fonts only)
 .
 .TP
 .FONT B \[rs]*[UP I " n" B ]
-temporarily move upwards in a line
+temporarily move upward in a line
 .
 .
 .\" ====================================================================
-.SS "Quick reference of macros in alphabetical order"
+.SS Macros
 .\" ====================================================================
 .
 .TP
@@ -622,7 +585,7 @@ begin using an initialized colour inline
 .
 .TP
 .FONT B \[rs]*[BCK I " n" B ]
-move wards in a line
+move backward in a line
 .
 .
 .\" ====================================================================
@@ -670,7 +633,7 @@ is invoked, it remains in effect until turned off.
 .P
 Note: If you're using the document processing macros with
 .BR "\%.PRINTSTYLE \%TYPEWRITE" ,
-.B mom
+.I mom
 ignores
 .B \[rs]*[BOLDER]
 requests.
@@ -730,7 +693,7 @@ inline escape sequence.
 .
 If you wish the new point size to be pseudo-condensed, simply reinvoke
 .B \%\[rs]*[COND]
-afterwards.
+afterward.
 .
 Equally,
 .B \%\[rs]*[COND]
@@ -740,7 +703,7 @@ must be turned off before changing the condense percentage with
 .P
 Note: If you're using the document processing macros with
 .BR "\%.PRINTSTYLE \%TYPEWRITE" ,
-.B mom
+.I mom
 ignores
 .B \%\[rs]*[COND]
 requests.
@@ -761,7 +724,7 @@ pseudo-condensed superscript
 .\" ====================================================================
 .TP
 .FONT B \[rs]*[DOWN I " n" B ]
-temporarily move downwards in a line
+temporarily move downward in a line
 .
 .
 .\" ====================================================================
@@ -818,7 +781,7 @@ If you wish the new point size to be
 .IR \%pseudo-extended ,
 simply reinvoke
 .B \%\[rs]*[EXT]
-afterwards.
+afterward.
 .
 Equally,
 .B \%\[rs]*[EXT]
@@ -828,7 +791,7 @@ must be turned off before changing the extend percentage with
 .P
 Note: If you are using the document processing macros with
 .BR "\%.PRINTSTYLE \%TYPEWRITE" ,
-.B mom
+.I mom
 ignores
 .B \%\[rs]*[EXT]
 requests.
@@ -936,7 +899,7 @@ is invoked, it remains in effect until turned off.
 .P
 Note: If you're using the document processing macros with
 .BR "\%.PRINTSTYLE \%TYPEWRITE" ,
-.B mom
+.I mom
 underlines pseudo-italics by default.
 .
 To change this behaviour, use the special macro
@@ -1015,7 +978,7 @@ or
 .IR changes ,
 or horizontal movements, including padding) are taken into account
 when
-.B mom
+.I mom
 determines the
 .I position
 and
@@ -1047,10 +1010,10 @@ macro.
 .P
 .I IMPORTANT:
 Owing to the way
-.B groff
+.I groff
 processes input lines and turns them into output lines, it is not
 possible for
-.B mom
+.I mom
 to
 .I guess
 the correct starting position of string tabs marked off in lines that
@@ -1153,7 +1116,7 @@ invoke underlining inline (fixed width fonts only)
 .\" ====================================================================
 .TP
 .FONT B \[rs]*[UP I " n" B ]
-temporarily move upwards in a line
+temporarily move upward in a line
 .
 .
 .\" ====================================================================
@@ -1186,7 +1149,7 @@ sets a nominal position at the bottom of the page beyond which you
 don't want your type to go.
 .
 When the bottom margin is reached,
-.B mom
+.I mom
 starts a new page.
 .
 .B .B_MARGIN requires a unit of measure.
@@ -1240,7 +1203,7 @@ In the event that you pass an invalid argument to
 .B \%.FAMILY
 (i.e.\& a non-existent
 .IR family ),
-.BR mom ,
+.IR mom ,
 by default, uses the
 .IR "fallback font" ,
 .B Courier Medium Roman
@@ -1307,7 +1270,7 @@ Some examples of invoking
 .
 .TP
 .B .FALLBACK_FONT WARN
-.B mom
+.I mom
 will issue a warning whenever you try to access a non-existent
 .I font
 but will continue processing your file with the default
@@ -1349,7 +1312,7 @@ If, for some reason, you want to revert to
 just enter
 .B \%".FALLBACK_FONT ABORT"
 and
-.B mom
+.I mom
 will once again abort on
 .IR "font errors" .
 .
@@ -1361,7 +1324,9 @@ will once again abort on
 .\" ====================================================================
 .TP
 .BI .FAM " <family>"
-Type Family, alias of \fB.FAMILY\fR
+Type Family,
+alias of
+.B .FAMILY
 .
 .
 .\" ====================================================================
@@ -1369,7 +1334,9 @@ Type Family, alias of \fB.FAMILY\fR
 .\" ====================================================================
 .TP
 .BI .FAMILY " <family>"
-Type Family, alias \fB.FAM\fR
+Type Family,
+alias of
+.B .FAM
 .
 .RS
 .
@@ -1450,23 +1417,29 @@ to
 .IR I .
 .
 .P
-Additional note: If you are running a version of groff lower than
-1.19.2, you must follow all
+Additional note: If you are running a
+.I groff
+version prior to
+1.19.2,
+you must follow all
 .B .FAMILY
 requests with a
 .B .FT
-request, otherwise
-.B mom
+request,
+otherwise
+.I mom
 will set all type up to the next
 .B .FT
 request in the fallback font.
 .
 .P
-If you are running a version of groff greater than or equal to 1.19.2,
+If you are running
+.I groff
+1.19.2 or later,
 when you invoke the
 .B .FAMILY
 macro,
-.B mom
+.I mom
 .I remembers
 the font style
 .BR ( Roman ,
@@ -1487,7 +1460,7 @@ For example:
 .
 .P
 However, if the font style does not exist in the new family,
-.B mom
+.I mom
 will set all subsequent type in the fallback font (by default,
 .B Courier Medium
 .BR Roman )
@@ -1499,7 +1472,7 @@ request that's valid for the
 .P
 For example, assuming you don't have the font
 .B Medium Condensed Roman
-.RB  ( mom
+.RI ( mom
 extension
 .IR CD )
 in the
@@ -1527,9 +1500,10 @@ request that's valid for
 Please see the Appendices,
 .I Adding fonts to
 .IR groff ,
-for information on adding fonts and families to groff, as well as to
+for information on adding fonts and families to
+.IR groff , as well as to
 see a list of the extensions
-.B mom
+.I mom
 provides to
 .IR groff 's
 basic
@@ -1652,7 +1626,7 @@ and shapes within the same family.
 .
 .P
 Have a look here for a list of the weight/style arguments
-.B mom
+.I mom
 allows.
 .
 Be aware, though, that you must have the fonts, correctly installed
@@ -1668,29 +1642,34 @@ found in the description of the
 .B \%.FAMILY
 macro.
 .
+.
 .P
 How
-.B mom
+.I mom
 reacts to an invalid argument to
 .B .FT
-depends on which version of groff you're using.
+depends on which version of
+.I groff
+you're using.
 .
 If your
-.I groff version
-is greater than or equal to 1.19.2,
-.B mom
-will issue a warning and, depending on how you've set up the fallback
-font, either continue processing using the fallback font, or abort
+.I groff
+version is 1.19.2 or later,
+.I mom
+will issue a warning and,
+depending on how you've set up the fallback font,
+either continue processing using the fallback font,
+or abort
 (allowing you to correct the problem).
 .
-If your
-.I groff version
-is less than 1.19.2,
-.B mom
-will silently continue processing, using either the fallback font or
-the font that was in effect prior to the invalid
+In earlier versions,
+.I mom
+will silently continue processing,
+using either the fallback font or the font that was in effect prior to
+the invalid
 .B .FT
 call.
+.
 .
 .P
 .B .FT
@@ -1797,7 +1776,7 @@ Subsequent invocations of
 .B \%.HI
 do not require you to supply a
 .IR measure ;
-.B mom
+.I mom
 keeps track of the last measure you gave it.
 .
 .P
@@ -1832,7 +1811,7 @@ A numbered list using
 .
 .P
 .I Note:
-.B mom
+.I mom
 has macros for setting lists.
 .
 This recipe exists to demonstrate the use of
@@ -1871,7 +1850,7 @@ on its exclusionary implications?
 First, we invoke a left indent with a measure equal to the width of 2
 figures spaces plus a period (using the \[rs]w inline escape).
 .
-At this point, the left indent is active; text afterwards would
+At this point, the left indent is active; text afterward would
 normally be indented.
 .
 However, we invoke a hanging indent of exactly the same width, which
@@ -2046,7 +2025,7 @@ With no argument,
 indents by its last active value.
 .
 See the brief explanation of how
-.B mom
+.I mom
 handles indents for more details.
 .
 .P
@@ -2086,7 +2065,7 @@ This usage has been deprecated in favour of
 .
 .B .IX
 will continue to behave as before, but
-.B mom
+.I mom
 will issue a warning to
 .I stderr
 indicating that you should update your documents.
@@ -2180,7 +2159,7 @@ With no argument,
 indents by its last active value.
 .
 See the brief explanation of how
-.B mom
+.I mom
 handles indents for more details.
 .
 .P
@@ -2250,8 +2229,8 @@ or
 .B .PAPER
 without invoking
 .B .L_MARGIN
-(either before or afterwards),
-.B mom
+(either before or afterward),
+.I mom
 automatically sets
 .B .L_MARGIN
 to
@@ -2495,10 +2474,10 @@ macro would look like this:
 .RS
 .EX
 .tr -\-
-\f[CB].PAGE 11i 17i 1i 1i 1.5i
+\&.PAGE 11i 17i 1i 1i 1.5i
                  |   |
 required right---+   +---top margin
-        margin\f[R]
+        margin
 .tr --
 .EE
 .RE
@@ -2507,7 +2486,7 @@ required right---+   +---top margin
 Clearly,
 .B .PAGE
 is best used when you want a convenient way to tell
-.B mom
+.I mom
 just the dimensions of your printer sheet (width and length), or when
 you want to tell her everything about the page (dimensions and all the
 margins), for example
@@ -2541,7 +2520,8 @@ the last macro you invoke prior to entering text.
 .P
 Please read the
 .I Important note
-on page dimensions and papersize for information on ensuring groff
+on page dimensions and papersize for information on ensuring
+.I groff
 respects your
 .B .PAGE
 dimensions and margins.
@@ -2555,7 +2535,7 @@ dimensions and margins.
 .TP
 .BI .PAGELENGTH " <length of printer sheet>"
 tells
-.B mom
+.I mom
 how long your printer sheet is.
 .
 It works just like
@@ -2565,7 +2545,7 @@ It works just like
 .
 .P
 Therefore, to tell
-.B mom
+.I mom
 your printer sheet is 11 inches long, you enter
 .RS
 .EX
@@ -2574,7 +2554,9 @@ your printer sheet is 11 inches long, you enter
 .RE
 .
 Please read the important note on page dimensions and papersize for
-information on ensuring groff respects your
+information on ensuring
+.I groff
+respects your
 .IR PAGELENGTH .
 .
 .RE
@@ -2600,7 +2582,7 @@ requires a unit of measure.
 Decimal fractions are allowed.
 .
 Hence, to tell
-.B mom
+.I mom
 that the width of your printer sheet is 8\(12 inches, you enter
 .RS
 .EX
@@ -2610,7 +2592,9 @@ that the width of your printer sheet is 8\(12 inches, you enter
 .
 .P
 Please read the Important note on page dimensions and papersize for
-information on ensuring groff respects your
+information on ensuring
+.I groff
+respects your
 .IR PAGEWIDTH .
 .
 .RE
@@ -2858,8 +2842,8 @@ or
 .B PAPER
 without invoking
 .B .R_MARGIN
-afterwards,
-.B mom
+afterward,
+.I mom
 automatically sets
 .B .R_MARGIN
 to
@@ -2992,14 +2976,19 @@ produces, on output
 .EE
 .RE
 .
+.
 .P
-If you want the tabs to line up, use
+If you want the tabs to line up,
+use
 .B .TN
-.RI ( "Tab Next" )
-or, more conveniently, the inline escape \[rs]*[TB+]:
+(\[lq]Tab Next\[rq])
+or,
+more conveniently,
+the inline escape sequence
+.BR \[rs]*[TB+] :
 .RS
 .EX
-\fB.TAB 1
+.BR .TAB \~1
 A line of text in tab 1.\[rs]*[TB+]
 A line of text in tab 2.
 .EE
@@ -3010,6 +2999,7 @@ which produces
 .B "A line of text in tab 1.\&   A line of text in tab 2."
 .EE
 .RE
+.
 .
 .P
 If the text in your tabs runs to several lines, and you want the first
@@ -3047,7 +3037,7 @@ does not automatically move to the baseline of the first line in the
 To demonstrate:
 .RS
 .EX
-\f[B]TAB 1
+TAB 1
 Carrots
 Potatoes
 Broccoli
@@ -3060,7 +3050,7 @@ $0.99/bunch
 produces, on output
 .RS
 .EX
-\fBCarrots
+Carrots
 Potatoes
 Broccoli
             $1.99/5 lbs
@@ -3118,7 +3108,7 @@ the first line of a paragraph by, say, 2 ems, do
 Subsequent invocations of
 .B .TI
 do not require you to supply a measure;
-.B mom
+.I mom
 keeps track of the last measure you gave it.
 .
 .P
@@ -3227,13 +3217,13 @@ is not allowed.
 In other words, you cannot do
 .RS
 .EX
-\fB.TAB 1
+\&.TAB 1
 Some text\[rs]c
 \&.TN
 Some more text\[rs]c
 \&.TN
 \&.TN
-Yet more text\fR
+Yet more text
 .EE
 .RE
 .
@@ -3246,7 +3236,7 @@ to
 should be entered
 .RS
 .EX
-\fB.TAB 1
+\&.TAB 1
 Some text\[rs]c
 \&.TN
 Some more text\[rs]c
@@ -3368,10 +3358,7 @@ PDF support was provided by
 Deri James
 .ME .
 .
-The alphabetical documentation of macros and escape sequences in this
-man page were written by the
-.I mom
-team.
+This manual page was written by Bernd Warken.
 .
 .
 .\" ====================================================================

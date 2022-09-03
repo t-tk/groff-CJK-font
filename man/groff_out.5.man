@@ -1,7 +1,8 @@
-'\" e
 .TH groff_out @MAN5EXT@ "@MDATE@" "groff @VERSION@"
 .SH Name
-groff_out \- GNU roff intermediate output format
+groff_out \- GNU
+.I roff
+intermediate output format
 .
 .
 .\" XXX: This page needs review and editing.
@@ -104,20 +105,17 @@ The fundamental operation of the
 .MR @g@troff @MAN1EXT@
 formatter is the translation of the
 .MR groff @MAN7EXT@
-input language into a device-independent form,
-described here,
-primarily concerned with what has to be written or drawn at specific
-positions on the output device.
-.
-This language is simple and imperative.
+input language into a series of instructions concerned primarily with
+placing glyphs or geometric objects at specific positions on a
+rectangular page.
 .
 In the following discussion,
 the term
 .I command
-always refers to this intermediate output language,
-and never to the
+refers to this intermediate output language,
+never to the
 .MR groff @MAN7EXT@
-language intended for direct use by document authors.
+language intended for use by document authors.
 .
 Intermediate output commands comprise several categories:
 glyph output;
@@ -128,92 +126,52 @@ motion of the printing position;
 page advancement;
 drawing of geometric primitives;
 and device control commands,
-a catch-all for operations not easily classified as any of the
-foregoing,
-such as directives to start and stop output,
+a catch-all for other operations.
+.
+The last includes directives to start and stop output,
 identify the intended output device,
-or place URL hyperlinks in supported output formats.
+and embed URL hyperlinks in supported output formats.
 .
 .
 .P
-As the GNU
-.I roff
-processor
+Because the front-end command
 .MR groff @MAN1EXT@
-is a wrapper program around
+is a wrapper that normally runs the
 .I @g@troff
-that automatically calls a
-postprocessor, this output does not show up normally.
-.
-This is why it is called
-.I intermediate
-within the
-.I groff
-.IR system .
+formatter to generate intermediate output
+and an output driver (\[lq]postprocessor\[rq]) to consume it,
+users normally do not encounter this language.
 .
 The
 .I groff
-program provides the option
+program's
 .B \-Z
-to inhibit postprocessing, such that the produced
-.I intermediate output
-is sent to standard output just like calling
+option inhibits postprocessing such that this intermediate output is
+sent to the standard output stream as when
 .I @g@troff
-manually.
+is run manually.
 .
 .
 .P
-In this document, the term
-.I @g@troff output
-describes what is output by the GNU
-.I @g@troff
-program, while
-.I intermediate output
-refers to the language that is accepted by the parser that prepares
-this output for the postprocessors.
+.IR groff 's
+intermediate output facilitates the development of output drivers and
+other postprocessors by offering a common programming interface.
 .
-This parser is smarter on whitespace and implements obsolete elements
-for compatibility, otherwise both formats are the same.
+It is an extension of the page description language developed by Brian
+Kernighan for AT&T device-independent
+.I troff \" AT&T
+circa 1980.
 .
-Both formats can be viewed directly with
-.MR gxditview @MAN1EXT@ .
-.
-.
-.P
-The main purpose of the
-.I intermediate output
-concept is to facilitate the development of postprocessors by
-providing a common programming interface for all devices.
-.
-It has a language of its own that is completely different from the
-.MR groff @MAN7EXT@
-language.
-.
-While the
-.I groff
-language is a high-level programming language for text processing, the
-.I intermediate output
-language is a kind of low-level assembler language by specifying all
-positions on the page for writing and drawing.
-.
-.
-.P
-The
-.RI pre- groff
-.I roff
-versions are denoted as
-.I classical
-.IR troff .
-The
-.I intermediate output
-produced by
-.I groff
-is fairly readable, while
-.I classical troff
-output was hard to understand because of strange habits that are
-still supported, but not used any longer by
-.I GNU
-.IR @g@troff .
+Where a distinction is necessary,
+we will say
+.RI \[lq] @g@troff
+output\[rq] to describe the output of GNU
+.IR troff , \" GNU
+and \[lq]intermediate output\[rq] to denote the language accepted by
+the parser implemented in
+.IR groff 's
+internal C++ library used by most of its output drivers.
+.\" XXX GBR leaves off here.
 .
 .
 .\" ====================================================================
