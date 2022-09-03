@@ -1,7 +1,9 @@
 '\" p
 .TH @g@soelim @MAN1EXT@ "@MDATE@" "groff @VERSION@"
 .SH Name
-@g@soelim \- recursively interpolate source requests in roff files
+@g@soelim \- recursively interpolate source requests in
+.I roff
+or other text files
 .
 .
 .\" ====================================================================
@@ -92,7 +94,7 @@ recursively.
 .
 By default,
 it writes
-.B .lf
+.B lf
 requests as well to record the name and line number of each
 .I input-file
 and
@@ -115,14 +117,14 @@ Output is written to the standard output stream.
 .
 .
 .PP
-To embed a backslash
-.RB \[lq] \[rs] \[rq]
-in the name of a
-.IR macro-file ,
-write
-.RB \[lq] \[rs]\[rs] \[rq]
+If the name of a
+.I macro-file
+contains a backslash,
+use
+.B \[rs]\[rs]
 or
-.RB \[lq] \[rs]e \[rq].
+.B \[rs]e
+to embed it.
 .
 To embed a space,
 write
@@ -149,7 +151,7 @@ This convention allows source requests to be \[lq]protected\[rq] from
 processing by
 .IR @g@soelim ,
 for instance as part of macro definitions or
-.B .if
+.RB \[lq] if \[rq]
 requests.
 .
 .
@@ -168,9 +170,9 @@ option overrides this requirement.
 .PP
 The foregoing is the limit of
 .IR @g@soelim 's
-understanding of
+understanding of the
 .I roff
-languages;
+language;
 it does not,
 for example,
 replace the input line
@@ -214,7 +216,7 @@ is as follows.
 .\"
 .\" This is done so that the box sizes (in the pic(1) diagram) and arrow
 .\" alignments (in the text alternative) can remain fixed.
-.if !'@g@'' \{\
+.if !'@g@'\%' \{\
 In the diagrams below,
 the traditional names for
 .I soelim
@@ -276,12 +278,11 @@ box invisible width 0.5 height 0.4 "output" "file"
 .PP
 That is,
 files sourced with
-.B .so
+.RB \[lq] so \[rq]
 are normally read
 .I only
-by
-.I @g@troff
-(the actual formatter).
+by the formatter,
+.IR @g@troff .
 .
 .I @g@soelim
 is
@@ -365,9 +366,9 @@ all exit afterward.
 .
 .TP
 .B \-C
-Recognize
+Recognize an input line starting with
 .B .so
-even when followed by a character other than space or newline.
+even if a character other than a space or newline follows.
 .
 .TP
 .BI \-I\~ dir
@@ -395,7 +396,7 @@ it is otherwise searched last.
 .B \-r
 Write files \[lq]raw\[rq];
 do not add
-.B .lf
+.B lf
 requests.
 .
 .
@@ -405,7 +406,7 @@ Emit \*[tx] comment lines starting with
 .RB \[lq] % \[rq]
 indicating the current file and line number,
 rather than
-.B .lf
+.B lf
 requests for the same purpose.
 .
 .

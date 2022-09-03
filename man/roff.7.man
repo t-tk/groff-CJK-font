@@ -1532,8 +1532,8 @@ only programmers of macro packages need a substantial command of it.
 .
 A
 .I roff
-preprocessor is any program that generates output that syntactically
-obeys the rules of the
+preprocessor is any program generating output that syntactically obeys
+the rules of the
 .I roff
 formatting language.
 .
@@ -1542,58 +1542,60 @@ into
 .I roff
 code when run through the preprocessor program.
 .
-Parts written in these languages may be included within a
+Portions of the document written in these languages are bracketed by
+tokens that look like
 .I roff
-document; they are identified by special
+macro calls.
+.
 .I roff
-requests or macros.
+preprocessor programs transform only the regions of the document
+inteded for them.
 .
-Each document that is enhanced by preprocessor code must be run
-through all corresponding preprocessors before it is fed into the
-actual
-.I roff
-formatter program, for the formatter just ignores all alien code.
+Each document thus enhanced by preprocessor code must be run through the
+corresponding preprocessors before the formatter processes it.
 .
-The preprocessor programs extract and transform only the document
-parts that are determined for them.
+Some preprocessors produce input intended for interpretation by another
+preprocessor;
+for example,
+.I chem \" generic
+produces
+.I pic \" generic
+input.
 .
-.
-.P
-There are a lot of free and commercial
-.I roff
-preprocessors.
-.
-Some of them aren't available on each system, but there is a small
-set of preprocessors that are considered as an integral part of each
+Preprocessors must consequently be run in an appropriate order;
+.MR groff @MAN1EXT@
+handles this automatically for all preprocessors supplied by the GNU
 .I roff
 system.
 .
-The classical preprocessors are
 .
-.RS
-.TS
-tab (@);
-lb l.
-tbl@for tables.
-eqn@for mathematical formulae.
-pic@for drawing diagrams.
-refer@for bibliographic references.
-soelim@for including macro files from standard locations.
-chem@for drawing chemical formul\[ae].
-.TE
-.RE
+.P
+GNU
+.I roff
+provides several preprocessors,
+including
+.IR @g@eqn ,
+.IR @g@grn ,
+.IR @g@pic ,
+.IR @g@tbl ,
+.IR @g@refer ,
+and
+.IR @g@soelim .
 .
 .
 .P
-Other known preprocessors that are not available on all systems
-include
+Other preprocessors for
+.I roff
+systems are known.
+.
 .
 .RS
 .TS
 tab (@);
-lb l.
-grap@for constructing graphical elements.
-grn@for including \fBgremlin\fR(1) pictures.
+Li L.
+dformat@depicts data structures;
+grap@constructs statistical charts; and
+ideal@draws diagrams using a constraint-based language
 .TE
 .RE
 .
@@ -1698,19 +1700,23 @@ CSTR\~#54 was first written in the 1970s.
 Such hardware is no longer used in production environments,
 and device capabilities
 (including resolution,
-color drawing,
+support for multiple colors,
 and font repertoire)
 have tended to increase.
 .
-The PostScript output driver
-.MR dpost 1
-from an AT&T
-.I troff
-of 1980s vintage had a resolution of 720 units per inch,
-whereas
+Further,
+to reduce file size and processing time,
+AT&T
+.IR troff 's
+device-independent output format placed low limits on the magnitudes of
+quantities it could represent in some cases.
+.
+Its PostScript output driver,
+.MR dpost 1 ,
+had a resolution of 720 units per inch;
 .IR groff 's
 .MR grops @MAN1EXT@
-uses 72 000.
+uses 72,000.
 .
 .
 .\".P
@@ -1854,9 +1860,8 @@ and escape sequences
 .IR "ad libitum" .
 .
 .
-A document writer will not
-(usually)
-note any difference in usage for requests or macros;
+A document writer will not (usually) note any difference in usage for
+requests or macros;
 both are written on a line on their own starting with a dot.
 .
 However,
@@ -1929,7 +1934,7 @@ escape sequence.
 .
 .P
 .I Registers
-store numbers and sizes.
+store numbers and measurements.
 .
 A register can be set with the request
 .B .nr
@@ -1938,78 +1943,45 @@ and its value can be retrieved by the escape sequence
 .
 .
 .\" ====================================================================
-.SH "File name extensions"
+.SH "File naming conventions"
 .\" ====================================================================
 .
-Manual pages
-(man\~pages)
-take the section number as a file name extension,
-e.g.,
-the file name for this document is
-.IR roff.7 ,
-i.e., it is kept in section\~7
-of the man pages.
-.
-.
-.P
-The classical macro packages take the package name as an extension,
-e.g.,
-.RI file .me
-for a document using the
-.I me
-macro package,
-.RI file .mm
-for
-.IR mm ,
-.RI file .ms
-for
-.IR ms ,
-.RI file .pic
-for
-.I pic
-files,
-and so on.
-.
-.
-.P
-There is no general naming scheme for
+The structure or content of a file name,
+beyond its location in the file system,
+is not significant to
 .I roff
-documents,
-though
-.RI file .t
-for \[lq]troff file\[rq] is seen now and then.
+tools.
 .
+.I roff
+documents employing \[lq]full-service\[rq] macro packages
+(see
+.MR groff_tmac @MAN5EXT@ )
+tend to be named with a suffix identifying the package;
+we thus see file names ending in
+.IR .man ,
+.IR .ms ,
+.IR .me ,
+.IR .mm ,
+and
+.IR .mom ,
+for instance.
 .
-.P
-File name extensions can be handy in conjunction with the
-.MR less 1
-pager.
+When installed,
+man pages tend to be named with the manual's section number as the
+suffix.
 .
-It provides the possibility to feed all input into a command-line pipe
-that is specified in the shell environment variable
-.IR LESSOPEN .
+For example,
+the file name for this document is
+.IR roff.7 .
 .
-This process is not well documented,
-so here is an example.
-.
-.RS
-.P
-.EX
-LESSOPEN=\[aq]|lesspipe %s\[aq]
-.EE
-.RE
-.
-.
-.P
-where
-.I lesspipe
-is either a system-supplied command or a shell script of your own.
-.
-.
-.P
-See
-.MR groff_filenames @MAN5EXT@
-for more on file name extensions.
+Practice for
+\[lq]raw\[rq]
+.I roff
+documents is less consistent;
+they
+are sometimes seen with a
+.I .t
+suffix.
 .
 .
 .\" BEGIN Keep parallel with groff.texi node "Input Conventions".
@@ -2104,6 +2076,7 @@ so that reflowing the input doesn't turn them into control lines.
 .
 .IP \[bu]
 Do not use spaces to perform indentation or align columns of a table.
+Leading spaces are reliable when text is not being filled.
 .
 .
 .IP \[bu]
@@ -2363,7 +2336,9 @@ Bernd Warken
 .ME ,
 with the sections \[lq]Concepts\[rq],
 \[lq]History\[rq],
-and \[lq]Input Conventions\[rq]
+\[lq]File name conventions\[rq],
+and
+\[lq]Input conventions\[rq]
 mostly written by
 .MT g.branden\:.robinson@\:gmail\:.com
 G.\& Branden Robinson

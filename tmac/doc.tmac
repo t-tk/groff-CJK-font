@@ -939,10 +939,10 @@
 .als doc-Ms-font doc-Sy-font
 .
 .
-.\" NS doc-command-name global string
+.\" NS doc-topic-name global string
 .\" NS   save first invocation of .Nm
 .
-.ds doc-command-name
+.ds doc-topic-name \" empty
 .
 .
 .\" NS Nm user macro
@@ -950,7 +950,7 @@
 .\" NS
 .\" NS modifies:
 .\" NS   doc-arg-ptr
-.\" NS   doc-command-name
+.\" NS   doc-topic-name
 .\" NS   doc-curr-font
 .\" NS   doc-indent-synopsis
 .\" NS   doc-indent-synopsis-active
@@ -965,10 +965,10 @@
 .    ie \n[.$] \
 .      doc-parse-args \$@
 .    el \{\
-.      ie "\*[doc-command-name]"" \
+.      ie "\*[doc-topic-name]"" \
 .        tm Usage: .Nm name ... (#\n[.c])
 .      el \
-.        doc-parse-args \*[doc-command-name]
+.        doc-parse-args \*[doc-topic-name]
 .  \}\}
 .
 .  if !\n[doc-arg-limit] \
@@ -978,24 +978,24 @@
 .  doc-print-prefixes
 .  ie (\n[doc-arg-limit] < \n[doc-arg-ptr]) \{\
 .    \" last argument
-.    ie "\*[doc-command-name]"" \{\
+.    ie "\*[doc-topic-name]"" \{\
 .      tm Usage: .Nm name ... (#\n[.c])
 .      doc-reset-args
 .    \}
 .    el \{\
-.      nop \*[doc-Nm-font]\*[doc-command-name]\f[]\s[0]\c
+.      nop \*[doc-Nm-font]\*[doc-topic-name]\f[]\s[0]\c
 .      doc-print-and-reset
 .  \}\}
 .  el \{\
 .    nr doc-curr-font \n[.f]
 .
 .    ie !(\n[doc-type\n[doc-arg-ptr]] == 2) \{\
-.      ie "\*[doc-command-name]"" \
+.      ie "\*[doc-topic-name]"" \
 .        tm Usage: .Nm name ... (#\n[.c])
 .      el \{\
 .        \" replace previous argument (Nm) with default value
 .        nr doc-arg-ptr -1
-.        ds doc-arg\n[doc-arg-ptr] "\*[doc-Nm-font]\*[doc-command-name]\f[]\s[0]
+.        ds doc-arg\n[doc-arg-ptr] "\*[doc-Nm-font]\*[doc-topic-name]\f[]\s[0]
 .        nr doc-type\n[doc-arg-ptr] 2
 .        ds doc-space\n[doc-arg-ptr] "\*[doc-space]
 .
@@ -1019,8 +1019,8 @@
 .          \}
 .          ti -\n[doc-indent-synopsis]u
 .      \}\}
-.      if "\*[doc-command-name]"" \
-.        ds doc-command-name "\*[doc-arg\n[doc-arg-ptr]]
+.      if "\*[doc-topic-name]"" \
+.        ds doc-topic-name "\*[doc-arg\n[doc-arg-ptr]]
 .
 .      nop \*[doc-Nm-font]\c
 .    \}
@@ -3468,7 +3468,7 @@
 .  nr doc-indent-synopsis-active-saved \n[doc-indent-synopsis-active]
 .  nr doc-have-decl-saved \n[doc-have-decl]
 .  nr doc-have-var-saved \n[doc-have-var]
-.  ds doc-command-name-saved "\*[doc-command-name]
+.  ds doc-topic-name-saved "\*[doc-topic-name]
 .  ds doc-quote-left-saved "\*[doc-quote-left]
 .  ds doc-quote-right-saved "\*[doc-quote-right]
 .  nr doc-nesting-level-saved \n[doc-nesting-level]
@@ -3612,7 +3612,7 @@
 .  nr doc-indent-synopsis-active \n[doc-indent-synopsis-active-saved]
 .  nr doc-have-decl \n[doc-have-decl-saved]
 .  nr doc-have-var \n[doc-have-var-saved]
-.  ds doc-command-name "\*[doc-command-name-saved]
+.  ds doc-topic-name "\*[doc-topic-name-saved]
 .  ds doc-quote-left "\*[doc-quote-left-saved]
 .  ds doc-quote-right "\*[doc-quote-right-saved]
 .  nr doc-nesting-level \n[doc-nesting-level-saved]

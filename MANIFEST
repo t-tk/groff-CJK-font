@@ -1,178 +1,185 @@
-    Copyright 2001-2020 Free Software Foundation, Inc.
+    Copyright 2001-2022 Free Software Foundation, Inc.
 
     Copying and distribution of this file, with or without modification,
     are permitted in any medium without royalty provided the copyright
     notice and this notice are preserved.
 
-This file gives an overview of the directories and the main files of
-the groff source distribution.
+This file summarizes the structure of the groff source distribution.
 
 
-1) The top directory.
+1) Top-level directory contents
 
+  ANNOUNCE      Release announcement template.
   BUG-REPORT    A template for bug-reports.
   ChangeLog     Log of the changes in the different groff versions.
   COPYING       The GNU General Public License (GPL).
-  FDL           The Free Documentation License (FDL).
-  INSTALL       Information on compiling and installing groff.
-  INSTALL.gen   Generic information on configuration and compiling.
+  FDL           The GNU Free Documentation License (FDL).
+  FOR-RELEASE   Release procedures for groff maintainer(s) to follow.
+  HACKING       Advice for contributors to groff.
+  INSTALL       Generic information on configuration and compiling.
+  INSTALL.extra How to install groff from a distribution archive.
+  INSTALL.REPO  How to install groff from a Git repository checkout.
   LICENSES      Licensing information.
   MANIFEST      The file you are reading.
   MORE.STUFF    Useful stuff in other packages.
   NEWS          Recent user-visible changes in groff.
-  PROBLEMS      Tips to handle known critical situations.
+  PROBLEMS      Tips to handle known situations of concern.
   PROJECTS      Long-term additions to groff.
-  README        Availability and contact information for groff.
+  README        Introduction to and contact information for groff.
   README.MinGW  Build information for MinGW.
   TODO          Things planned for future groff versions.
 
-  All other files in the top directory are related to the configuration,
-  compilation, and install processes.
+  All other files in the top-level directory are related to
+  configuration, compilation, and installation procedures.
 
 
-2) The directory structure
+2) Directory structure
 
 ./arch          Data that is special for different architectures.
-  djgpp         Data special for the 32-bit DOS compiler djgpp.
-  misc          Data needed for various platforms.
+  djgpp         Data specialized for the 32-bit DOS compiler djgpp.
+  mingw         Data specialized for the MinGW environment.
+  misc          Data needed for various other platforms.
 
-./contrib       Part of groff, but maintained by other people.
-  chem          A preprocessor (for pic) to produce chemical structure
-                diagrams.
-  eqn2graph     Convert equations created with EQN into different
-                graphical formats.
+./contrib       Resources provided with groff, but maintained by others.
+  chem          Embed chemical structure diagrams in groff documents.
+  eqn2graph     Convert eqn(1) equations into graphical images.
   gdiffmk       An improved implementation of the diffmk command to mark
                 differences between groff/nroff/troff files.
-  glilypond     A preprocessor that handles `lilypond' parts in a `roff'
-                file.
-  gperl         A preprocessor that handles `perl' parts in a `roff'
-                file.
-  gpinyin       A preprocessor providing simpler Pinyin input.
-  grap2graph    Convert grap diagraps into different graphical formats.
+  glilypond     Embed LilyPond sheet music in groff documents.
+  gperl         Populate groff registers and strings using perl(1).
+  gpinyin       Use Hanyu Pinyin input to compose groff documents.
+  grap2graph    Convert grap(1) diagrams into graphical images.
   hdtbl         A sophisticated table macro package.
-  mm            The groff mm macro package.
-  mom           The groff mom macro package.
-  pdfmark       A package to add PDF marks to groff documents, together
-                with a shell script (pdfroff) for easy creation of PDF
-                documents.
-  pic2graph     Convert PIC diagrams into different graphical formats.
+  mm            The groff memorandum macro package.
+  mom           Peter Schaffter's "mom", a friendly groff macro package.
+  pdfmark       Add PDF marks to groff documents; includes "pdfroff",
+                which eases creation of PDF documents.
+  pic2graph     Convert pic(1) diagrams into graphical images.
+  rfc1345       Use RFC 1345 mnemonics as groff special characters.
+  sboxes        Use bordered, shaded background boxes with ms and PDF.
 
-./doc           Manuals and tutorials to groff aspects.
+./doc           Manuals for various components of groff.
 
-./font          Device information and fonts.
-  devX100       100dpi device for X Window System.
-  devX100-12    100dpi device with narrower font (for 12pt base font).
-  devX75        75dpi device for X Window System.
-  devX75-12     75dpi device with narrower font (for 12pt base font).
-  devascii      Text device for ASCII output.
-  devcp1047     EBCDIC device.
+./font          Device and font description files.
+  devX100       100dpi X11 device (10 point base type size).
+  devX100-12    100dpi X11 device (12 point base type size).
+  devX75        75dpi X11 device (10 point base type size).
+  devX75-12     75dpi X11 device (12 point base type size).
+  devascii      Terminal device with ASCII (ISO 646) encoding.
+  devcp1047     Terminal device with EBCDIC (code page 1047) encoding.
   devdvi        TeX DVI device.
   devhtml       HTML device.
-  devlatin1     Text device for latin-1 (ISO 8859-1) output.
-  devlbp        Device for Canon CaPSL laser printers.
-  devlj4        Device for HP LaserJet 4/PCL 5 and compatible printers.
+  devlatin1     Terminal device with ISO Latin-1 (8859-1) encoding.
+  devlbp        Canon CaPSL laser printers.
+  devlj4        HP LaserJet 4/PCL 5 and compatible printers.
   devps         PostScript device.
   devpdf        PDF device.
-  devutf8       Text device for Unicode output.
-  util          Utility programs.
+  devutf8       Terminal device with UTF-8 encoding.
+  scripts       Scripts used in generation of device/font descriptions.
+  util          Tools to aid groff developes with new device support.
 
-./m4            M4 macro files used creating the configure script.
+./m4            M4 macro files used to create the "configure" script.
 
-./man           Some groff manual pages of more general character.
+./man           groff manual pages of general applicability.
 
-./src           Everything written in programming languages.
+./src           groff programs and libraries.
 
-./src/devices   The postprocessors.
-  grodvi        TeX DVI output.
-  grohtml       HTML output.
-  grolbp        Canon printers.
-  grolj4        HP Laserjet 4, PCL 5, and compatible printers.
-  grops         PostScript output.
-  gropdf        PDF output.
-  grotty        Text output.
-  xditview      A groff (pre)viewer for the X Window system.
+./src/devices   Output drivers for devices and file formats.
+  grodvi        TeX DVI.
+  grohtml       HTML.
+  grolbp        Canon CaPSL laser printers.
+  grolj4        HP Laserjet 4/PCL 5 and compatible printers.
+  grops         PostScript.
+  gropdf        PDF.
+  grotty        Terminal output.
+  xditview      A troff output (pre)viewer for the X Window System.
 
-./src/include   The *.h C/C++ include files.
+./src/include   C/C++ header files.
 
-./src/libs      C++ code common to several parts of the groff sources.
-  gnulib        Auxiliary functions copied from the `gnulib' repository.
-  libbib        Library of bibliographic functions.
-  libdriver     Parser for intermediate output and postprocessor code.
-  libgroff      Library for general support functions used everywhere.
+./src/libs      C++ code shared among several groff components.
+  libbib        Manage bibliographic database.
+  libdriver     Parse troff output; also output utility functions.
+  libgroff      General support functions used everywhere.
   libxutil      Utility functions for xditview and xtotroff.
 
 ./src/preproc   Preprocessors.
-  eqn           Mathematical formulae.
-  grn           Gremlin pictures.
-  html          The preprocessor part of grohtml.
-  pic           Diagram drawer.
-  preconv       Input encoding conversion.
-  refer         Bibliographic references.
-  soelim        File inclusion using tmac path.
-  tbl           Tables.
+  eqn           Typeset mathematical formulae.
+  grn           Draw Gremlin pictures.
+  html          Prepare tbl and eqn input for grohtml.
+  pic           Draw diagrams.
+  preconv       Convert document input encoding for input to troff.
+  refer         Generate bibliographic references.
+  soelim        Expose 'so' (sourced) documents to preprocessing.
+  tbl           Lay out tables.
 
-./src/roff      Front-end programs.
-  groff         Wrapper around troff.  This is the main user program.
-  nroff         Emulate classical nroff text formatter.
-  troff         Main roff formatter program.
+./src/roff      Programs that run the formatter.
+  groff         troff wrapper.  This is the main user program.
+  nroff         groff wrapper convenient for terminal users.
+  troff         Formatter.
 
 ./src/utils     Utility programs around groff.
-  addftinfo     Add font metrics to troff fonts for use with groff.
+  addftinfo     Supplement AT&T troff font descriptions with metrics
+                groff requires.
   afmtodit      Create font description files for the PostScript device.
   grog          Guess groff command-line options required by a document.
   hpftodit      Create font description files for the LJ4 device.
   indxbib       Make inverted index for bibliographic databases.
   lkbib         Search bibliographic databases.
   lookbib       Interactively search bibliographic databases.
-  pfbtops       Translate a PostScript font in PFB format to PFA.
+  pfbtops       Translate a PostScript Type 1 font in PFB format to PFA.
   tfmtodit      Create font description files for TeX DVI device.
   xtotroff      Create font description files for xditview.
 
 ./tmac          Macro files.
+  mdoc          Modules for the mdoc package.
 
+Various directories contain a "tests" subdirectory.  These are automated
+tests performed when groff's Makefile is run with the "check" target.
 
 3) Documentation
 
-The groff documentation is scattered upon several places.
+groff documentation is spread throughout the tree; where possible, it is
+close to the source code it describes.
 
-- The main directory contains documents related to the groff source.
-  The README file contains the information needed to get the groff
-  package, report bugs, and contact the developers.
+- The top-level directory contains text files presenting groff as a
+  software project, with its focus on organization of the code,
+  development procedures, and project administration.
 
-- The man-page of each program (section 1) is kept in the source
-  directory of the program.
+  If you don't know where to begin, start with "README"; it contains the
+  information you will require to obtain the groff distribution archive,
+  report bugs, and contact the developers.
 
-- The man-pages for the other sections are found in `src/man'.
+- A man page for each program (for section 1 of the manual) is
+  maintained in the source directory of the program itself.
 
-- Documentation in other formats are located in the `doc' directory,
-  including the groff info file, tutorials, and manuals.
+- Extensive man pages documenting GNU roff's input language, special
+  character repertoire, differences from AT&T troff, device and font
+  description file formats, macro files, and historical and conceptual
+  background are maintained in the "man" directory.
 
-Man-pages have source files ending in `.man'.  Running `make' processes
-the files and uses `.n' as the new file extension.  In both cases it is
-difficult to quickly decide into which section the man-page shall go.
-Here is a shell command (to be called from the top directory of the
-groff source tree) that finds all man-pages and writes the section
-number after each file name:
+- Documentation in other formats is located in the "doc" directory,
+  including groff's Texinfo manual, and tutorial and/or reference
+  manuals written using groff macro packages.
 
-  find -type f \
-  | grep '[.]man$' \
-  | sort \
-  | xargs grep -e '^[.]TH ' \
-  | sed -e 's/^\(.\+\): *\.TH.*@MAN\(.*\)EXT@.*$/\1 \2/'
-
-
-4) The roff parser
-
-The parsing of the roff language is done by troff.  The input is
-converted to tokens in `src/roff/troff/input.cpp' and transformed into
-`nodes' by `src/roff/troff/env.cpp' and `src/roff/troff/node.cpp'.  From
-these, the intermediate output is generated (also in `node.cpp').
+- Documentation for contributed components is kept in the relevant
+  subdirectory of "contrib".
 
 
-5) Postprocessing
+4) groff language parser
 
-The parser for the intermediate output and the postprocessing is in
-`src/libs/libdriver/input.cpp'.  This is used by all postprocessors.
+The "troff" program in "src/roff/troff" parses the groff input language.
+There, "input.cpp" implements the main loop and tokenizes input.  Input
+tokens are transformed into nodes (a GNU troff internal data structure)
+by "env.cpp" and "node.cpp".  Routines in the latter file generate the
+intermediate output language from lists of nodes.
+
+
+5) Intermediate output language parser
+
+The parser for intermediate output and implemented in
+"src/libs/libdriver/input.cpp".  This is used by all groff output
+drivers written in C++.  ("gropdf", written in Perl, performs its own
+parsing.)
 
 
 ##### Editor settings
@@ -180,4 +187,4 @@ Local Variables:
 fill-column: 72
 mode: text
 End:
-vim: set textwidth=72:
+vim: set expandtab textwidth=72:

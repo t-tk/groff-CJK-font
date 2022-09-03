@@ -1,7 +1,9 @@
 '\" t
 .TH groff @MAN7EXT@ "@MDATE@" "groff @VERSION@"
 .SH Name
-groff \- GNU roff language reference
+groff \- GNU
+.I roff
+language reference
 .
 .
 .\" ====================================================================
@@ -486,6 +488,13 @@ It ends the argument (list).
 .
 .
 .P
+Additionally,
+the Control+A character (U+0001) in text is interpreted as a
+.I leader
+(see below).
+.
+.
+.P
 Horizontal white space characters are significant to
 .I groff,
 but trailing spaces on text lines are ignored.
@@ -547,6 +556,39 @@ See section \[lq]Line continuation\[rq] below.
 .I tab
 A tab character in text causes the drawing position to advance to the
 next defined tab stop.
+.
+.
+.\" ====================================================================
+.SH "Tabs and leaders"
+.\" ====================================================================
+.
+.\" BEGIN Keep (roughly) parallel with groff.texi node "Tabs and
+.\" Leaders".
+The formatter interprets input horizontal tab characters
+(\[lq]tabs\[rq]) and Control+A characters (\[lq]leaders\[rq]) into
+movements to the next tab stop.
+.
+Tabs simply move to the next tab stop;
+leaders place enough periods to fill the space.
+.
+Tab stops are by default located every half inch measured from the
+drawing position corresponding to the beginning of the input line;
+see section \[lq]Page geometry\[rq] of
+.MR roff 7 .
+.
+Tabs and leaders do not cause breaks and therefore do not interrupt
+filling.
+.
+Tab stops can be configured with the
+.B ta
+request,
+and tab and leader glyphs with the
+.B tc
+and
+.B lc
+requests,
+respectively.
+.\" END Keep (roughly) parallel with groff.texi node "Tabs and Leaders".
 .
 .
 .\" ====================================================================
@@ -688,26 +730,19 @@ recognize the eight standard ISO\~6429/ECMA-48 color names
 .\" END Keep (roughly) parallel with groff.texi node "Colors".
 .
 .
+.br
+.ne 3v
 .\" ====================================================================
 .SH Measurements
 .\" ====================================================================
 .
-A
-.I numerical value
-is an integer or decimal fraction with an optional scaling unit
-appended.
+Numeric values are expressed as integers or decimal fractions optionally
+followed by a
+.I scaling unit,
+a letter abbreviating a unit of measurement.
 .
-They are used to express measurements or dimensionless quantities.
-.
-A
-.I scaling unit
-is a one-letter abbreviation for a unit of measurement.
-.
-.
-.P
-The
-.I groff
-language defines the following scaling units.
+They are stored as integers in device-specific
+.I basic units.
 .
 .
 .P
@@ -724,44 +759,56 @@ inch
 .
 .TPx
 .B P
-pica\ \[eq]\ 1/6\ inch
+pica
+(1/6 inch)
 .
 .TPx
 .B p
-point\ \[eq]\ 1/72\ inch
+point
+(1/72 inch)
 .
 .TPx
 .B m
-em\ \[eq]\ \f[R]the font size in points (approx.\& width of letter
-\[oq]\f[CR]m\f[R]\[cq])
+em
+(size of current font in points;
+approximate width of \[lq]M\[rq] glyph)
 .
 .TPx
 .B M
-100\^th \f[R]of an \f[CR]em
+1/100 em
 .
 .TPx
 .B n
-en\ \[eq]\ em/2
+en
+(1/2 em)
 .
 .TPx
 .B u
-Basic unit for output device
+basic unit;
+device-specific
 .
 .TPx
 .B v
-vee (vertical line space)
+vee
+(distance between adjacent text baselines)
 .
 .TPx
 .B s
-scaled point\ \[eq]\ 1/\f[CI]sizescale\f[R] of a point (defined in
-font \f[I]DESC\f[] file)
+scaled point;
+device-specific
 .
 .TPx
 .B f
-multiply by 65,536
-(used with color components)
+multiply by 65,536;
+used to scale color channel values
 .RE
 .LE
+.
+.
+.P
+See
+.MR groff_font @MAN5EXT@
+for information on device-specific measurements.
 .
 .
 .\" ====================================================================
@@ -772,13 +819,11 @@ multiply by 65,536
 .\" expressions".
 A
 .I numeric expression
-is a syntactic structure,
-recognized only in specific contexts,
-that evaluates to an integer:
+evaluates to an integer:
 it can be as simple as a literal
 .RB \[lq] 0 \[rq]
 or it can be a complex sequence of register and string interpolations
-interleaved with operators.
+interleaved with measurements operators.
 .
 .
 .P
@@ -793,7 +838,7 @@ _
 \f[R]unary\f[] +	assertion, motion, incrementation
 \f[R]unary\f[] \-	negation, motion, decrementation
 _
-(\f[CI]c\f[];\f[CI]e\f[])	scaling
+;	scaling
 >?	maximum
 <?	minimum
 _
@@ -900,8 +945,10 @@ then
 .P
 GNU
 .IR troff 's \" GNU
-scaling operator
-.BI ( c ; e )
+scaling operator,
+used with parentheses as
+.BI ( c ; e )\c
+,
 evaluates a numeric
 .RI expression\~ e
 .RI using\~ c

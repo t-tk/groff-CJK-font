@@ -272,30 +272,6 @@
 # grap2graph.am
 #
 
-# Automake rules for 'groff_filenames'
-
-# Copyright (C) 2013-2020 Free Software Foundation, Inc.
-
-# Written by Bernd Warken <groff-bernd.warken-72@web.de>.
-# Automake migration by Bertrand Garrigues
-
-# This file is part of 'groff'.
-
-# 'groff' is free software; you can redistribute it and/or modify it
-# under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 2 of the License, or
-# (at your option) any later version.
-
-# 'groff' is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-# General Public License for more details.
-
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-########################################################################
-
 # Copyright (C) 2006-2020 Free Software Foundation, Inc.
 #      Written by Werner Lemberg <wl@gnu.org>
 #      Automake migration by Bertrand Garrigues
@@ -2369,7 +2345,6 @@ am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/test-groff.in \
 	$(top_srcdir)/contrib/gperl/gperl.am \
 	$(top_srcdir)/contrib/gpinyin/gpinyin.am \
 	$(top_srcdir)/contrib/grap2graph/grap2graph.am \
-	$(top_srcdir)/contrib/groff_filenames/groff_filenames.am \
 	$(top_srcdir)/contrib/hdtbl/hdtbl.am \
 	$(top_srcdir)/contrib/mm/mm.am \
 	$(top_srcdir)/contrib/mom/mom.am \
@@ -3875,8 +3850,6 @@ EXTRA_DIST = gnulib_m4/gnulib-cache.m4 lib/alloca.in.h lib/errno.in.h \
 	contrib/gpinyin/gpinyin.1.man contrib/gpinyin/gpinyin.pl \
 	$(grap2graph_srcdir)/grap2graph.sh \
 	$(grap2graph_srcdir)/grap2graph.1.man \
-	contrib/groff_filenames/ChangeLog \
-	contrib/groff_filenames/groff_filenames.5.man \
 	contrib/hdtbl/examples/fonts_n.in \
 	contrib/hdtbl/examples/fonts_x.in $(hdtbl_test_template) \
 	contrib/hdtbl/ChangeLog contrib/hdtbl/TODO \
@@ -4012,8 +3985,8 @@ man1_MANS = contrib/chem/chem.1 contrib/eqn2graph/eqn2graph.1 \
 	src/utils/hpftodit/hpftodit.1 src/utils/lkbib/lkbib.1 \
 	src/utils/pfbtops/pfbtops.1 src/utils/tfmtodit/tfmtodit.1 \
 	$(am__append_17) $(am__append_18)
-man5_MANS = contrib/groff_filenames/groff_filenames.5 man/groff_font.5 \
-	man/groff_out.5 man/groff_tmac.5 src/devices/grolj4/lj4_font.5
+man5_MANS = man/groff_font.5 man/groff_out.5 man/groff_tmac.5 \
+	src/devices/grolj4/lj4_font.5
 man7_MANS = contrib/hdtbl/groff_hdtbl.7 contrib/mm/groff_mm.7 \
 	contrib/mm/groff_mmse.7 contrib/mom/groff_mom.7 \
 	contrib/rfc1345/groff_rfc1345.7 man/groff_char.7 \
@@ -4310,11 +4283,13 @@ mm_TESTS = \
 mom_srcdir = $(top_srcdir)/contrib/mom
 
 # pdfmom command used to generate .pdf
+#
+# Use '-K utf8', not '-k', in case 'configure' didn't find uchardet.
 MOMPDFMOM = \
   GROFF_COMMAND_PREFIX= \
   GROFF_BIN_PATH="$(GROFF_BIN_PATH)" \
   PDFMOM_BIN_PATH="$(top_builddir)" \
-  $(PDFMOMBIN) $(FFLAG) $(MFLAG) -M$(mom_srcdir) -k -p -e -t
+  $(PDFMOMBIN) $(FFLAG) $(MFLAG) -M$(mom_srcdir) -K utf8 -p -e -t
 
 
 # Files installed in $(tmacdir).
@@ -4613,7 +4588,6 @@ GROFF_MAN_PAGES1 = \
   src/utils/tfmtodit/tfmtodit.1 \
   src/roff/troff/troff.1 \
   $(XTOTROFF_MAN1) \
-  contrib/groff_filenames/groff_filenames.5 \
   man/groff_font.5 \
   man/groff_out.5 \
   man/groff_tmac.5 \
@@ -5679,7 +5653,7 @@ all: $(BUILT_SOURCES)
 .SUFFIXES: .roff .in .ps .mom .pdf .me.in .me .man .c .cpp .dvi .html .log .o .obj .test .test$(EXEEXT) .texi .trs .txt .ypp
 am--refresh: Makefile
 	@:
-$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am $(top_srcdir)/lib/gnulib.mk $(top_srcdir)/arch/mingw/mingw.am $(top_srcdir)/arch/misc/misc.am $(top_srcdir)/contrib/chem/chem.am $(top_srcdir)/contrib/eqn2graph/eqn2graph.am $(top_srcdir)/contrib/gdiffmk/gdiffmk.am $(top_srcdir)/contrib/glilypond/glilypond.am $(top_srcdir)/contrib/gperl/gperl.am $(top_srcdir)/contrib/gpinyin/gpinyin.am $(top_srcdir)/contrib/grap2graph/grap2graph.am $(top_srcdir)/contrib/groff_filenames/groff_filenames.am $(top_srcdir)/contrib/hdtbl/hdtbl.am $(top_srcdir)/contrib/mm/mm.am $(top_srcdir)/contrib/mom/mom.am $(top_srcdir)/contrib/pdfmark/pdfmark.am $(top_srcdir)/contrib/pic2graph/pic2graph.am $(top_srcdir)/contrib/rfc1345/rfc1345.am $(top_srcdir)/contrib/sboxes/sboxes.am $(top_srcdir)/doc/doc.am $(top_srcdir)/font/devX100/devX100.am $(top_srcdir)/font/devX100-12/devX100-12.am $(top_srcdir)/font/devX75/devX75.am $(top_srcdir)/font/devX75-12/devX75-12.am $(top_srcdir)/font/devascii/devascii.am $(top_srcdir)/font/devcp1047/devcp1047.am $(top_srcdir)/font/devdvi/devdvi.am $(top_srcdir)/font/devhtml/devhtml.am $(top_srcdir)/font/devlatin1/devlatin1.am $(top_srcdir)/font/devlbp/devlbp.am $(top_srcdir)/font/devlj4/devlj4.am $(top_srcdir)/font/devpdf/devpdf.am $(top_srcdir)/font/devps/devps.am $(top_srcdir)/font/devutf8/devutf8.am $(top_srcdir)/font/scripts/scripts.am $(top_srcdir)/man/man.am $(top_srcdir)/src/include/include.am $(top_srcdir)/src/libs/libbib/libbib.am $(top_srcdir)/src/libs/libdriver/libdriver.am $(top_srcdir)/src/libs/libgroff/libgroff.am $(top_srcdir)/src/libs/libxutil/libxutil.am $(top_srcdir)/src/devices/grodvi/grodvi.am $(top_srcdir)/src/devices/grohtml/grohtml.am $(top_srcdir)/src/devices/grolbp/grolbp.am $(top_srcdir)/src/devices/grolj4/grolj4.am $(top_srcdir)/src/devices/gropdf/gropdf.am $(top_srcdir)/src/devices/grops/grops.am $(top_srcdir)/src/devices/grotty/grotty.am $(top_srcdir)/src/devices/xditview/xditview.am $(top_srcdir)/src/preproc/eqn/eqn.am $(top_srcdir)/src/preproc/grn/grn.am $(top_srcdir)/src/preproc/html/html.am $(top_srcdir)/src/preproc/pic/pic.am $(top_srcdir)/src/preproc/preconv/preconv.am $(top_srcdir)/src/preproc/refer/refer.am $(top_srcdir)/src/preproc/soelim/soelim.am $(top_srcdir)/src/preproc/tbl/tbl.am $(top_srcdir)/src/roff/groff/groff.am $(top_srcdir)/src/roff/nroff/nroff.am $(top_srcdir)/src/roff/troff/troff.am $(top_srcdir)/src/utils/addftinfo/addftinfo.am $(top_srcdir)/src/utils/afmtodit/afmtodit.am $(top_srcdir)/src/utils/grog/grog.am $(top_srcdir)/src/utils/hpftodit/hpftodit.am $(top_srcdir)/src/utils/indxbib/indxbib.am $(top_srcdir)/src/utils/lkbib/lkbib.am $(top_srcdir)/src/utils/lookbib/lookbib.am $(top_srcdir)/src/utils/pfbtops/pfbtops.am $(top_srcdir)/src/utils/tfmtodit/tfmtodit.am $(top_srcdir)/src/utils/xtotroff/xtotroff.am $(top_srcdir)/tmac/tmac.am $(am__configure_deps)
+$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am $(top_srcdir)/lib/gnulib.mk $(top_srcdir)/arch/mingw/mingw.am $(top_srcdir)/arch/misc/misc.am $(top_srcdir)/contrib/chem/chem.am $(top_srcdir)/contrib/eqn2graph/eqn2graph.am $(top_srcdir)/contrib/gdiffmk/gdiffmk.am $(top_srcdir)/contrib/glilypond/glilypond.am $(top_srcdir)/contrib/gperl/gperl.am $(top_srcdir)/contrib/gpinyin/gpinyin.am $(top_srcdir)/contrib/grap2graph/grap2graph.am $(top_srcdir)/contrib/hdtbl/hdtbl.am $(top_srcdir)/contrib/mm/mm.am $(top_srcdir)/contrib/mom/mom.am $(top_srcdir)/contrib/pdfmark/pdfmark.am $(top_srcdir)/contrib/pic2graph/pic2graph.am $(top_srcdir)/contrib/rfc1345/rfc1345.am $(top_srcdir)/contrib/sboxes/sboxes.am $(top_srcdir)/doc/doc.am $(top_srcdir)/font/devX100/devX100.am $(top_srcdir)/font/devX100-12/devX100-12.am $(top_srcdir)/font/devX75/devX75.am $(top_srcdir)/font/devX75-12/devX75-12.am $(top_srcdir)/font/devascii/devascii.am $(top_srcdir)/font/devcp1047/devcp1047.am $(top_srcdir)/font/devdvi/devdvi.am $(top_srcdir)/font/devhtml/devhtml.am $(top_srcdir)/font/devlatin1/devlatin1.am $(top_srcdir)/font/devlbp/devlbp.am $(top_srcdir)/font/devlj4/devlj4.am $(top_srcdir)/font/devpdf/devpdf.am $(top_srcdir)/font/devps/devps.am $(top_srcdir)/font/devutf8/devutf8.am $(top_srcdir)/font/scripts/scripts.am $(top_srcdir)/man/man.am $(top_srcdir)/src/include/include.am $(top_srcdir)/src/libs/libbib/libbib.am $(top_srcdir)/src/libs/libdriver/libdriver.am $(top_srcdir)/src/libs/libgroff/libgroff.am $(top_srcdir)/src/libs/libxutil/libxutil.am $(top_srcdir)/src/devices/grodvi/grodvi.am $(top_srcdir)/src/devices/grohtml/grohtml.am $(top_srcdir)/src/devices/grolbp/grolbp.am $(top_srcdir)/src/devices/grolj4/grolj4.am $(top_srcdir)/src/devices/gropdf/gropdf.am $(top_srcdir)/src/devices/grops/grops.am $(top_srcdir)/src/devices/grotty/grotty.am $(top_srcdir)/src/devices/xditview/xditview.am $(top_srcdir)/src/preproc/eqn/eqn.am $(top_srcdir)/src/preproc/grn/grn.am $(top_srcdir)/src/preproc/html/html.am $(top_srcdir)/src/preproc/pic/pic.am $(top_srcdir)/src/preproc/preconv/preconv.am $(top_srcdir)/src/preproc/refer/refer.am $(top_srcdir)/src/preproc/soelim/soelim.am $(top_srcdir)/src/preproc/tbl/tbl.am $(top_srcdir)/src/roff/groff/groff.am $(top_srcdir)/src/roff/nroff/nroff.am $(top_srcdir)/src/roff/troff/troff.am $(top_srcdir)/src/utils/addftinfo/addftinfo.am $(top_srcdir)/src/utils/afmtodit/afmtodit.am $(top_srcdir)/src/utils/grog/grog.am $(top_srcdir)/src/utils/hpftodit/hpftodit.am $(top_srcdir)/src/utils/indxbib/indxbib.am $(top_srcdir)/src/utils/lkbib/lkbib.am $(top_srcdir)/src/utils/lookbib/lookbib.am $(top_srcdir)/src/utils/pfbtops/pfbtops.am $(top_srcdir)/src/utils/tfmtodit/tfmtodit.am $(top_srcdir)/src/utils/xtotroff/xtotroff.am $(top_srcdir)/tmac/tmac.am $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -5701,7 +5675,7 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__maybe_remake_depfiles)'; \
 	    cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__maybe_remake_depfiles);; \
 	esac;
-$(top_srcdir)/lib/gnulib.mk $(top_srcdir)/arch/mingw/mingw.am $(top_srcdir)/arch/misc/misc.am $(top_srcdir)/contrib/chem/chem.am $(top_srcdir)/contrib/eqn2graph/eqn2graph.am $(top_srcdir)/contrib/gdiffmk/gdiffmk.am $(top_srcdir)/contrib/glilypond/glilypond.am $(top_srcdir)/contrib/gperl/gperl.am $(top_srcdir)/contrib/gpinyin/gpinyin.am $(top_srcdir)/contrib/grap2graph/grap2graph.am $(top_srcdir)/contrib/groff_filenames/groff_filenames.am $(top_srcdir)/contrib/hdtbl/hdtbl.am $(top_srcdir)/contrib/mm/mm.am $(top_srcdir)/contrib/mom/mom.am $(top_srcdir)/contrib/pdfmark/pdfmark.am $(top_srcdir)/contrib/pic2graph/pic2graph.am $(top_srcdir)/contrib/rfc1345/rfc1345.am $(top_srcdir)/contrib/sboxes/sboxes.am $(top_srcdir)/doc/doc.am $(top_srcdir)/font/devX100/devX100.am $(top_srcdir)/font/devX100-12/devX100-12.am $(top_srcdir)/font/devX75/devX75.am $(top_srcdir)/font/devX75-12/devX75-12.am $(top_srcdir)/font/devascii/devascii.am $(top_srcdir)/font/devcp1047/devcp1047.am $(top_srcdir)/font/devdvi/devdvi.am $(top_srcdir)/font/devhtml/devhtml.am $(top_srcdir)/font/devlatin1/devlatin1.am $(top_srcdir)/font/devlbp/devlbp.am $(top_srcdir)/font/devlj4/devlj4.am $(top_srcdir)/font/devpdf/devpdf.am $(top_srcdir)/font/devps/devps.am $(top_srcdir)/font/devutf8/devutf8.am $(top_srcdir)/font/scripts/scripts.am $(top_srcdir)/man/man.am $(top_srcdir)/src/include/include.am $(top_srcdir)/src/libs/libbib/libbib.am $(top_srcdir)/src/libs/libdriver/libdriver.am $(top_srcdir)/src/libs/libgroff/libgroff.am $(top_srcdir)/src/libs/libxutil/libxutil.am $(top_srcdir)/src/devices/grodvi/grodvi.am $(top_srcdir)/src/devices/grohtml/grohtml.am $(top_srcdir)/src/devices/grolbp/grolbp.am $(top_srcdir)/src/devices/grolj4/grolj4.am $(top_srcdir)/src/devices/gropdf/gropdf.am $(top_srcdir)/src/devices/grops/grops.am $(top_srcdir)/src/devices/grotty/grotty.am $(top_srcdir)/src/devices/xditview/xditview.am $(top_srcdir)/src/preproc/eqn/eqn.am $(top_srcdir)/src/preproc/grn/grn.am $(top_srcdir)/src/preproc/html/html.am $(top_srcdir)/src/preproc/pic/pic.am $(top_srcdir)/src/preproc/preconv/preconv.am $(top_srcdir)/src/preproc/refer/refer.am $(top_srcdir)/src/preproc/soelim/soelim.am $(top_srcdir)/src/preproc/tbl/tbl.am $(top_srcdir)/src/roff/groff/groff.am $(top_srcdir)/src/roff/nroff/nroff.am $(top_srcdir)/src/roff/troff/troff.am $(top_srcdir)/src/utils/addftinfo/addftinfo.am $(top_srcdir)/src/utils/afmtodit/afmtodit.am $(top_srcdir)/src/utils/grog/grog.am $(top_srcdir)/src/utils/hpftodit/hpftodit.am $(top_srcdir)/src/utils/indxbib/indxbib.am $(top_srcdir)/src/utils/lkbib/lkbib.am $(top_srcdir)/src/utils/lookbib/lookbib.am $(top_srcdir)/src/utils/pfbtops/pfbtops.am $(top_srcdir)/src/utils/tfmtodit/tfmtodit.am $(top_srcdir)/src/utils/xtotroff/xtotroff.am $(top_srcdir)/tmac/tmac.am $(am__empty):
+$(top_srcdir)/lib/gnulib.mk $(top_srcdir)/arch/mingw/mingw.am $(top_srcdir)/arch/misc/misc.am $(top_srcdir)/contrib/chem/chem.am $(top_srcdir)/contrib/eqn2graph/eqn2graph.am $(top_srcdir)/contrib/gdiffmk/gdiffmk.am $(top_srcdir)/contrib/glilypond/glilypond.am $(top_srcdir)/contrib/gperl/gperl.am $(top_srcdir)/contrib/gpinyin/gpinyin.am $(top_srcdir)/contrib/grap2graph/grap2graph.am $(top_srcdir)/contrib/hdtbl/hdtbl.am $(top_srcdir)/contrib/mm/mm.am $(top_srcdir)/contrib/mom/mom.am $(top_srcdir)/contrib/pdfmark/pdfmark.am $(top_srcdir)/contrib/pic2graph/pic2graph.am $(top_srcdir)/contrib/rfc1345/rfc1345.am $(top_srcdir)/contrib/sboxes/sboxes.am $(top_srcdir)/doc/doc.am $(top_srcdir)/font/devX100/devX100.am $(top_srcdir)/font/devX100-12/devX100-12.am $(top_srcdir)/font/devX75/devX75.am $(top_srcdir)/font/devX75-12/devX75-12.am $(top_srcdir)/font/devascii/devascii.am $(top_srcdir)/font/devcp1047/devcp1047.am $(top_srcdir)/font/devdvi/devdvi.am $(top_srcdir)/font/devhtml/devhtml.am $(top_srcdir)/font/devlatin1/devlatin1.am $(top_srcdir)/font/devlbp/devlbp.am $(top_srcdir)/font/devlj4/devlj4.am $(top_srcdir)/font/devpdf/devpdf.am $(top_srcdir)/font/devps/devps.am $(top_srcdir)/font/devutf8/devutf8.am $(top_srcdir)/font/scripts/scripts.am $(top_srcdir)/man/man.am $(top_srcdir)/src/include/include.am $(top_srcdir)/src/libs/libbib/libbib.am $(top_srcdir)/src/libs/libdriver/libdriver.am $(top_srcdir)/src/libs/libgroff/libgroff.am $(top_srcdir)/src/libs/libxutil/libxutil.am $(top_srcdir)/src/devices/grodvi/grodvi.am $(top_srcdir)/src/devices/grohtml/grohtml.am $(top_srcdir)/src/devices/grolbp/grolbp.am $(top_srcdir)/src/devices/grolj4/grolj4.am $(top_srcdir)/src/devices/gropdf/gropdf.am $(top_srcdir)/src/devices/grops/grops.am $(top_srcdir)/src/devices/grotty/grotty.am $(top_srcdir)/src/devices/xditview/xditview.am $(top_srcdir)/src/preproc/eqn/eqn.am $(top_srcdir)/src/preproc/grn/grn.am $(top_srcdir)/src/preproc/html/html.am $(top_srcdir)/src/preproc/pic/pic.am $(top_srcdir)/src/preproc/preconv/preconv.am $(top_srcdir)/src/preproc/refer/refer.am $(top_srcdir)/src/preproc/soelim/soelim.am $(top_srcdir)/src/preproc/tbl/tbl.am $(top_srcdir)/src/roff/groff/groff.am $(top_srcdir)/src/roff/nroff/nroff.am $(top_srcdir)/src/roff/troff/troff.am $(top_srcdir)/src/utils/addftinfo/addftinfo.am $(top_srcdir)/src/utils/afmtodit/afmtodit.am $(top_srcdir)/src/utils/grog/grog.am $(top_srcdir)/src/utils/hpftodit/hpftodit.am $(top_srcdir)/src/utils/indxbib/indxbib.am $(top_srcdir)/src/utils/lkbib/lkbib.am $(top_srcdir)/src/utils/lookbib/lookbib.am $(top_srcdir)/src/utils/pfbtops/pfbtops.am $(top_srcdir)/src/utils/tfmtodit/tfmtodit.am $(top_srcdir)/src/utils/xtotroff/xtotroff.am $(top_srcdir)/tmac/tmac.am $(am__empty):
 
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
@@ -12413,12 +12387,6 @@ grap2graph: $(grap2graph_srcdir)/grap2graph.sh
 # Local Variables:
 # fill-column: 72
 # mode: makefile-automake
-# End:
-# vim: set autoindent filetype=automake textwidth=72:
-
-# Local Variables:
-# mode: makefile-automake
-# fill-column: 72
 # End:
 # vim: set autoindent filetype=automake textwidth=72:
 

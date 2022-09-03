@@ -949,7 +949,8 @@ standard input.  Whitespace is permitted between an option and its
 argument.
 
 The @code{grog} command can be used to guess the correct @code{groff}
-command to format a file.
+command to format a file.  See its man page @cite{grog@r{(1)}}; type
+@samp{man grog} at the command line to view it.
 
 Here's the description of the command-line options:
 
@@ -1648,53 +1649,6 @@ groff -X -Z mydoc.t | gxditview -title 'trial run' -
 @noindent
 are equivalent.
 @c END Keep parallel with groff(1), section "Examples".
-
-@menu
-* grog::
-@end menu
-
-@c ---------------------------------------------------------------------
-
-@node grog,  , Invocation Examples, Invocation Examples
-@subsection @code{grog}
-
-@pindex grog
-@code{grog} reads files, guesses which of the @code{groff} preprocessors
-and/or macro packages are required for formatting them, and prints the
-@code{groff} command including those options on the standard output.  It
-generates one or more of the options @option{-e}, @option{-man},
-@option{-me}, @option{-mm}, @option{-mom}, @option{-ms}, @option{-mdoc},
-@option{-mdoc-old}, @option{-p}, @option{-R}, @option{-g}, @option{-G},
-@option{-s}, and @option{-t}.
-
-A special file name@tie{}@file{-} refers to the standard input.
-Specifying no files also means to read the standard input.  Any
-specified options are included in the printed command.  No space is
-allowed between options and their arguments.  The only options
-recognized are @option{-C} (which is also passed on) to enable
-compatibility mode, and @option{-v} to print the version number and
-exit.
-
-For example,
-
-@Example
-grog -Tdvi paper.ms
-@endExample
-
-@noindent
-guesses the appropriate command to print @file{paper.ms} and then prints
-it to the command line after adding the @option{-Tdvi} option.  For
-direct execution, enclose the call to @code{grog} in backquotes at the
-Unix shell prompt:
-
-@Example
-`grog -Tdvi paper.ms` > paper.dvi
-@endExample
-
-@noindent
-As this example shows, it is still necessary to redirect the output to
-something meaningful (i.e., either a file or a pager program like
-@code{less}).
 
 @codequotebacktick off
 @codequoteundirected off
@@ -4880,7 +4834,7 @@ inter-sentence space.
 * Sentences::
 * Breaking::
 * Adjustment::
-* Tab Stops::
+* Tabs and Leaders::
 * Requests and Macros::
 * Macro Packages::
 * Input Encodings::
@@ -5139,7 +5093,7 @@ This is discussed in @ref{Manipulating Filling and Adjustment}.
 
 @c ---------------------------------------------------------------------
 
-@node Adjustment, Tab Stops, Breaking, Text
+@node Adjustment, Tabs and Leaders, Breaking, Text
 @subsection Adjustment
 
 @cindex extra spaces between words
@@ -5153,43 +5107,44 @@ Filling and Adjustment}.
 
 @c ---------------------------------------------------------------------
 
-@node Tab Stops, Input Conventions, Adjustment, Text
-@subsection Tab Stops
+@node Tabs and Leaders, Input Conventions, Adjustment, Text
+@subsection Tabs and Leaders
 
 @cindex horizontal tab character
-@cindex tab stops
-@cindex stops, tab
 @cindex tab character
 @cindex character, horizontal tab
-GNU @code{troff} translates horizontal tab characters, also called
-simply ``tabs'', in the input into movements to the next tab stop.
-These tab stops are by default located every half inch measured from the
-current position on the input line.  With them, simple tables can be
-made.@footnote{``Tab'' is short for ``tabulation'', revealing the term's
-origin as a spacing mechanism for table arrangement.}  However, this
-method can be deceptive, as the appearance (and width) of the text in an
-editor and the results from GNU @code{troff} can vary greatly,
-particularly when proportional typefaces are used.
-
-A tab character does not cause a break and therefore does not interrupt
-filling.  We use an arrow @arrow{} below to indicate an input tab
-character.
+@cindex leader character
+@cindex character, leader
+@cindex tab stops
+@cindex stops, tab
+GNU @code{troff} translates input horizontal tab characters (``tabs'')
+and @key{Control+A} characters (``leaders'') into movements to the next
+tab stop.  Tabs simply move to the next tab stop; leaders place enough
+periods to fill the space.  Tab stops are by default located every half
+inch measured from the drawing position corresponding to the beginning
+of the input line; see @ref{Page Geometry}.   Tabs and leaders do not
+cause breaks and therefore do not interrupt filling.  Below, we use
+arrows @arrow{} and bullets @bullet{} to indicate input tabs and
+leaders, respectively.
 
 @Example
 1
-@arrow{} 2 @arrow{} 3 @arrow{} 4
-@arrow{} @arrow{} 5
-@result{} 1         2       3       4                 5
+@arrow{} 2 @arrow{} 3 @bullet{} 4
+@arrow{} @bullet{} 5
+@result{} 1         2       3.......4         ........5
 @endExample
 
-GNU @code{troff} provides sufficient facilities for sophisticated table
-composition; see @ref{Tabs and Fields}.  There are many details to track
-when using such low-level features, so most users turn to the
+Tabs and leaders lend themselves to table construction.@footnote{``Tab''
+is short for ``tabulation'', revealing the term's origin as a spacing
+mechanism for table arrangement.} The tab and leader glyphs can be
+configured, and further facilities for sophisticated table composition
+are available; see @ref{Tabs and Fields}.  There are many details to
+track when using such low-level features, so most users turn to the
 @cite{tbl@r{(1)}} preprocessor for table construction.
 
 @c ---------------------------------------------------------------------
 
-@node Requests and Macros, Macro Packages, Tab Stops, Text
+@node Requests and Macros, Macro Packages, Tabs and Leaders, Text
 @subsection Requests and Macros
 
 We have now encountered almost all of the syntax there is in the
@@ -5529,6 +5484,7 @@ into control lines.
 
 @item
 Do not use spaces to perform indentation or align columns of a table.
+Leading spaces are reliable when text is not being filled.
 
 @item
 Comment your document.  It is never too soon to apply comments to
@@ -5875,10 +5831,9 @@ scaling unit.  To multiply or divide by a dimensionless value, use
 @cindex numeric expressions
 @cindex expressions, numeric
 
-A @dfn{numeric expression} is a syntactic structure, recognized only in
-specific contexts, that evaluates to an integer:@: it can be as simple
-as a literal @samp{0} or it can be a complex sequence of register and
-string interpolations interleaved with operators.
+A @dfn{numeric expression} evaluates to an integer:@: it can be as
+simple as a literal @samp{0} or it can be a complex sequence of register
+and string interpolations interleaved with measurements and operators.
 
 GNU @code{troff} provides a set of mathematical and logical operators
 familiar to programmers---as well as some unusual ones---but supports
@@ -5949,13 +5904,13 @@ remainder@tie{}@var{r} by @samp{(a % b)}, then @math{qb + r = a}.
 @cindex scaling operator
 @cindex operator, scaling
 @opindex ;
-GNU @code{troff}'s scaling operator @code{(@var{c};@var{e})}, evaluates
-a numeric expression@tie{}@var{e} using@tie{}@var{c} as the default
-scaling unit.  If @var{c} is omitted, scaling units are ignored in the
-evaluation of@tie{}@var{e}.  This operator can save typing by avoiding
-the attachment of scaling units to every operand out of caution.  Your
-macros can select a sensible default unit in case the user neglects to
-supply one.
+GNU @code{troff}'s scaling operator, used with parentheses as
+@code{(@var{c};@var{e})}, evaluates a numeric expression@tie{}@var{e}
+using@tie{}@var{c} as the default scaling unit.  If @var{c} is omitted,
+scaling units are ignored in the evaluation of@tie{}@var{e}.  This
+operator can save typing by avoiding the attachment of scaling units to
+every operand out of caution.  Your macros can select a sensible default
+unit in case the user neglects to supply one.
 
 @Example
 .\" Indent by amount given in first argument; assume ens.
