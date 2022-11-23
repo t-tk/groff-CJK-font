@@ -25,8 +25,7 @@ set -e
 #
 # Ensure .Mt renders correctly.
 
-DOCUMENT=\
-'.Dd 2021-02-10
+input='.Dd 2021-02-10
 .Dt mandoc 1
 .Os groff test suite
 .Sh Authors
@@ -38,10 +37,12 @@ utility was written by
 and is maintained by
 .An Ingo Schwarze Aq Mt schwarze@openbsd.org .'
 
-echo "$DOCUMENT" | "$groff" -Tascii -P-cbou -mdoc \
-    | grep -Fq 'written by Kristaps Dzonsons <kristaps@bsd.lv> and'
+output=$(echo "$input" | "$groff" -Tascii -P-cbou -mdoc)
 
-echo "$DOCUMENT" | "$groff" -Tascii -P-cbou -mdoc \
+echo "$output" \
+    | grep -Fq 'written by Kristaps Dzonsons <kristaps@bsd.lv>'
+
+echo "$output" \
     | grep -Fq 'is maintained by Ingo Schwarze <schwarze@openbsd.org>.'
 
 # vim:set ai et sw=4 ts=4 tw=72:

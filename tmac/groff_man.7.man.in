@@ -47,10 +47,13 @@ _ifstyle()dnl
 _endif()dnl
 .SH Name
 _ifnotstyle()dnl
-groff_man \- compose manual pages with GNU roff
+groff_man \- compose manual pages with GNU
+.I roff
 _endif()dnl
 _ifstyle()dnl
-groff_man_style \- GNU roff man page tutorial and style guide
+groff_man_style \- GNU
+.I roff
+man page tutorial and style guide
 _endif()dnl
 .
 .
@@ -186,6 +189,14 @@ Macros whose use we discourage
 and
 .BR .UC )
 are described in subsection \(lqDeprecated features\(rq below.
+.
+.
+.P
+Throughout Unix documentation,
+a manual entry is referred simply to as a \(lqman page\(rq,
+regardless of its length,
+without gendered implication,
+and irrespective of the macro package selected for its composition.
 _ifstyle()dnl
 .
 .
@@ -361,13 +372,20 @@ macros.
 .
 .
 .TP
-.BI .TH " title section"\c
+.BI .TH " topic section"\c
 .RI " [" footer-middle ]\c
 .RI " [" footer-inside ]\c
 .RI " [" header-middle ]
-Define the title of the man page as
-.I title
-and the volume of the manual to which it belongs as
+Determine the contents of the page header and footer.
+_ifstyle()dnl
+.
+.I roff
+systems refer to these collectively as \(lqtitles\(rq.
+_endif()dnl
+.
+The subject of the man page is
+.I topic
+and the section of the manual to which it belongs is
 .I section.
 _ifstyle()dnl
 .
@@ -382,17 +400,17 @@ See
 for details on the section numbers and suffixes applicable to your
 system.
 .
-.I title
+.I topic
 and
 .I section
-are positioned together at the left and right in the header line
+are positioned together at the left and right in the header
 (with
 .I section
 in parentheses immediately appended to
-.IR title ).
+.IR topic ).
 .
 .I footer-middle
-is centered in the footer line.
+is centered in the footer.
 .
 The arrangement of the rest of the footer depends on whether
 double-sided layout is enabled with the option
@@ -411,13 +429,13 @@ The outside footer is the page number,
 except in the continuous-rendering mode enabled by the option
 .BR \-rcR=1 ,
 in which case it is the
-.I title
+.I topic
 and
 .I section,
 as in the header.
 .
 .I header-middle
-is centered in the header line.
+is centered in the header.
 .
 If
 .I section
@@ -428,7 +446,7 @@ there is no need to specify
 will supply text for it.
 .
 The macro package may also abbreviate
-.I title
+.I topic
 and
 .I footer-inside
 with ellipses
@@ -613,7 +631,7 @@ and
 and sentence endings are still detected and additional inter-sentence
 space applied.
 .
-If the amount of additional inter-sentence is altered,
+If the amount of additional inter-sentence spacing is altered,
 the rendering of,
 for instance,
 regular expressions using
@@ -775,8 +793,6 @@ if specified,
 and by a default amount otherwise;
 see subsection \(lqHorizontal and vertical spacing\(rq below.
 .
-.
-.IP
 If the tag is not as wide as the indentation,
 the paragraph starts on the same line as the tag,
 at the applicable indentation,
@@ -1285,11 +1301,12 @@ for hyperlink-aware output drivers.
 .
 .
 .TP
-.BI .MR "\~page-title manual-section"\c
+.BI .MR "\~topic manual-section"\c
 .RI \~[ trailing-text ]
+.IR (since\~ groff \~1.23) \" TODO: remove note once novelty dies down
 Set a man page cross reference as
 \[lq]\c
-.IB page-title ( manual-section )\c
+.IB topic ( manual-section )\c
 \[rq].
 .
 If
@@ -1300,14 +1317,14 @@ it follows the closing parenthesis without intervening space.
 .
 Hyphenation is disabled while the cross reference is set.
 .
-.I page-title
+.I topic
 is set in the font specified by the
 .B MF
 string.
 .
 The cross reference hyperlinks to a URI of the form
 .RB \[lq] man:\c
-.IR page-title ( manual-section )\[rq].
+.IR topic ( manual-section )\[rq].
 _ifstyle()dnl
 .
 .
@@ -1920,7 +1937,7 @@ indented from it by 3n
 .B \-rSN
 option).
 .
-The HTML output device ignores indentation.
+HTML output devices ignore indentation.
 _ifstyle()dnl
 .
 .
@@ -2214,7 +2231,7 @@ the above strings should be avoided.
 .SS Portability
 .\" ====================================================================
 .
-It is wise to quote multi-word section and subsection titles;
+It is wise to quote multi-word section and subsection headings;
 the
 .B .SH
 and
@@ -2430,10 +2447,10 @@ extension also supported by Heirloom Doctools
 050915 (September 2005),
 .I mandoc
 1.9.5 (2009-09-21),
-and
 .I neatroff
 (commit 1c6ab0f6e,
 2016-09-13),
+and
 Plan\~9 from User Space
 .I troff \" Plan 9
 (commit 93f8143600,
@@ -2918,7 +2935,7 @@ _ifstyle()dnl
 _endif()dnl
 .
 .IP
-Use of this presentation-level macro is deprecated.
+Use of this presentation-oriented macro is deprecated.
 .
 It translates poorly to HTML,
 under which exact space control and tabulation are not readily
@@ -2949,7 +2966,7 @@ is handled as with
 .
 .
 .IP
-Use of this presentation-level macro is deprecated.
+Use of this presentation-oriented macro is deprecated.
 .
 A hanging indentation cannot be expressed naturally under HTML,
 and HTML-based man page processors may interpret it as starting an
@@ -3014,7 +3031,7 @@ see subsection \(lqHorizontal and vertical spacing\(rq above.
 .
 .
 .IP
-Use of this presentation-level macro is deprecated.
+Use of this presentation-oriented macro is deprecated.
 .
 It translates poorly to HTML,
 under which exact control of inter-paragraph spacing is not readily
@@ -3236,17 +3253,16 @@ to disable it.
 .
 .TP
 .B \-rC1
-Number output pages continuously,
+Number output pages consecutively,
 in strictly increasing sequence,
-rather than resetting the page number to\~1 at each new
+rather than resetting the page number to\~1 with each new
 .I man
 document.
 .
 .
 .TP
 .B \-rCS=1
-Capitalize section headings,
-setting section headings
+Set section headings
 (the argument(s) to
 .BR .SH )
 in full capitals.
@@ -3257,8 +3273,7 @@ distinction information.
 .
 .TP
 .B \-rCT=1
-Capitalize titles,
-setting the man page title
+Set the man page topic
 (the first argument to
 .BR .TH )
 in full capitals in headers and footers.
@@ -3365,8 +3380,8 @@ above).
 .
 .
 .TP
-.BI \-dMF= man-page-title-font
-Set the font used for man page titles named in
+.BI \-dMF= man-page-topic-font
+Set the font used for man page topics named in
 .B .TH
 and
 .B .MR
@@ -3385,7 +3400,7 @@ If the
 .B MF
 string ends in \[lq]I\[rq],
 it is assumed to be an oblique typeface,
-and italic corrections are applied before and after man page titles.
+and italic corrections are applied before and after man page topics.
 .
 .
 .TP
@@ -3500,7 +3515,7 @@ taking advantage of the fact that pages using them must call
 or
 .BR .Dd ,
 respectively,
-as their first macro.
+before any other macros.
 .
 A
 .I man

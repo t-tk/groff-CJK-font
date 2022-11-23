@@ -24,8 +24,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
 #define __GETOPT_PREFIX groff_
 
+#include <errno.h> // errno
 #include <stdio.h>
-#include <stdlib.h>
+#include <stdlib.h> // exit(), EXIT_FAILURE, EXIT_SUCCESS
+#include <string.h> // strerror()
 #include <limits.h>
 
 #include <getopt.h>
@@ -43,13 +45,16 @@ static char *program_name;
 
 static void error(const char *s)
 {
-  fprintf(stderr, "%s: %s\n", program_name, s);
-  exit(2);
+  fprintf(stderr, "%s: error: %s\n", program_name, s);
+  exit(EXIT_FAILURE);
 }
 
 static void usage(FILE *stream)
 {
-  fprintf(stream, "usage: %s [-v] [pfb_file]\n", program_name);
+  fprintf(stream, "usage: %s [pfb-file]\n"
+	  "usage: %s {-v | --version}\n"
+	  "usage: %s --help\n",
+	  program_name, program_name, program_name);
 }
 
 static void get_text(int n)
@@ -178,26 +183,28 @@ int main(int argc, char **argv)
     switch (opt) {
     case 'v':
       printf("GNU pfbtops (groff) version %s\n", Version_string);
-      exit(0);
+      exit(EXIT_SUCCESS);
       break;
     case CHAR_MAX + 1: /* --help */
       usage(stdout);
-      exit(0);
+      exit(EXIT_SUCCESS);
       break;
     case '?':
       usage(stderr);
-      exit(1);
+      exit(2);
       break;
     }
   }
 
   if (argc - optind > 1) {
     usage(stderr);
-    exit(1);
+    exit(2);
   }
-  if (argc > optind && !freopen(argv[optind], "r", stdin)) {
-    perror(argv[optind]);
-    exit(1);
+  const char *file = argv[optind];
+  if (argc > optind && !freopen(file, "r", stdin)) {
+    fprintf(stderr, "%s: error: unable to open file '%s': %s\n",
+	    program_name, file, strerror(errno));
+    exit(EXIT_FAILURE);
   }
   SET_BINARY(fileno(stdin));
   for (;;) {
@@ -226,5 +233,11 @@ int main(int argc, char **argv)
     else
       get_binary(n);
   }
-  exit(0);
+  exit(EXIT_SUCCESS);
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

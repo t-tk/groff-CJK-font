@@ -1,4 +1,4 @@
-#!@PERL@ -w
+#!@PERL@
 #
 #       gropdf          : PDF post processor for groff
 #
@@ -21,6 +21,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 use strict;
+use warnings;
 use Getopt::Long qw(:config bundling);
 
 use constant
@@ -32,7 +33,7 @@ use constant
     USED                => 4,
 };
 
-(my $progname=$0) =~s @.*/@@;
+my $prog=$0;
 
 my $gotzlib=0;
 
@@ -125,6 +126,7 @@ my $thislev=1;
 my $mark=undef;
 my $suspendmark=undef;
 my $boxmax=0;
+my %missing;    # fonts in download files which are not found/readable
 
 
 
@@ -141,7 +143,7 @@ my $transition={PAGE => {Type => '/Trans', S => '', D => 1, Dm => '/H', M => '/I
 		BLOCK => {Type => '/Trans', S => '', D => 1, Dm => '/H', M => '/I', Di => 0, SS => 1.0, B => 0}};
 my $firstpause=0;
 my $present=0;
-my @bgstack; 		# Stack of background boxes
+my @bgstack;		# Stack of background boxes
 my $bgbox='';		# Draw commands for boxes on this page
 
 $noslide=1 if exists($ENV{GROPDF_NOSLIDE}) and $ENV{GROPDF_NOSLIDE};
@@ -202,19 +204,48 @@ end
 end
 EOF
 
+sub usage
+{
+    my $stream = *STDOUT;
+    my $had_error = shift;
+    $stream = *STDERR if $had_error;
+    print $stream
+"usage: $prog [-dels] [-F font-directory] [-I inclusion-directory]" .
+" [-p paper-format] [-u [cmap-file]] [-y foundry] [file ...]\n" .
+"usage: $prog {-v | --version}\n" .
+"usage: $prog --help\n";
+    if (!$had_error)
+    {
+	print $stream "\n" .
+"Translate the output of troff(1) into Portable Document Format.\n" .
+"See the gropdf(1) manual page.\n";
+    }
+    exit($had_error);
+}
+
 my $fd;
 my $frot;
 my $fpsz;
 my $embedall=0;
 my $debug=0;
+my $want_help=0;
 my $version=0;
 my $stats=0;
 my $unicodemap;
 my @idirs;
 
-GetOptions("F=s" => \$fd, 'I=s' => \@idirs, 'l' => \$frot, 'p=s' => \$fpsz, 'd!' => \$debug, 'v' => \$version, 'version' => \$version, 'e' => \$embedall, 'y=s' => \$Foundry, 's' => \$stats, 'u:s' => \$unicodemap);
+if (!GetOptions('F=s' => \$fd, 'I=s' => \@idirs, 'l' => \$frot,
+		'p=s' => \$fpsz, 'd!' => \$debug, 'help' => \$want_help,
+		'v' => \$version, 'version' => \$version,
+		'e' => \$embedall, 'y=s' => \$Foundry, 's' => \$stats,
+		'u:s' => \$unicodemap))
+{
+    &usage(1);
+}
 
 unshift(@idirs,'.');
+
+&usage(0) if ($want_help);
 
 if ($version)
 {
@@ -287,6 +318,15 @@ elsif (exists($ppsz{$papersz}))
 {
     @defaultmb=@mediabox=(0,0,$ppsz{$papersz}->[0],$ppsz{$papersz}->[1]);
 }
+elsif (substr($papersz,-1) eq 'l' and exists($ppsz{substr($papersz,0,-1)}))
+{
+    # Note 'legal' ends in 'l' but will be caught above
+    @defaultmb=@mediabox=(0,0,$ppsz{substr($papersz,0,-1)}->[1],$ppsz{substr($papersz,0,-1)}->[0]);
+}
+else
+{
+    Warn("ignoring unrecognized paper format '$papersz'");
+}
 
 my (@dt)=localtime($ENV{SOURCE_DATE_EPOCH} || time);
 my $dt=PDFDate(\@dt);
@@ -303,7 +343,7 @@ while (<>)
     s/\r$//;
     $lct++;
 
-    do 	# The ahead buffer behaves like 'ungetc'
+    do	# The ahead buffer behaves like 'ungetc'
     {{
 	if (scalar(@ahead))
 	{
@@ -637,7 +677,16 @@ sub LoadDownload
 		$file=substr($file,1);
 	    }
 
-	    $download{"$foundry $name"}=$file;
+            my $pth=$file;
+            $pth=$dir."/$devnm/$file" if substr($file,0,1) ne '/';
+
+            if (!-r $pth)
+            {
+                $missing{"$foundry $name"}="$dir/$devnm";
+                next;
+            }
+
+            $download{"$foundry $name"}=$file if !exists($download{"$foundry $name"});
 	}
 
         close($f);
@@ -821,12 +870,12 @@ sub do_x
 		IsGraphic();
 		my ($curangle,$hyp)=RtoP($xpos,GraphY($ypos));
 		my ($x,$y)=PtoR($theta+$curangle,$hyp);
- 		my ($tx, $ty) = ($xpos - $x, GraphY($ypos) - $y);
- 		if ($frot) {
- 		  ($tx, $ty) = ($tx *  sin($theta) + $ty * -cos($theta),
- 				$tx * -cos($theta) + $ty * -sin($theta));
- 		}
- 		$stream.="q\n".sprintf("%.3f %.3f %.3f %.3f %.3f %.3f cm",cos($theta),sin($theta),-sin($theta),cos($theta),$tx,$ty)."\n";
+		my ($tx, $ty) = ($xpos - $x, GraphY($ypos) - $y);
+		if ($frot) {
+		  ($tx, $ty) = ($tx *  sin($theta) + $ty * -cos($theta),
+				$tx * -cos($theta) + $ty * -sin($theta));
+		}
+		$stream.="q\n".sprintf("%.3f %.3f %.3f %.3f %.3f %.3f cm",cos($theta),sin($theta),-sin($theta),cos($theta),$tx,$ty)."\n";
 		$InPicRotate=1;
 	    }
 	    elsif ($par=~m/exec grestore/ and $InPicRotate)
@@ -993,10 +1042,10 @@ sub do_x
 				$thislev--;
 			    }
 
-    			    $curoutlevno=$#{$curoutlev};
+			    $curoutlevno=$#{$curoutlev};
 			}
 
-# 			push(@{$curoutlev},$this);
+#			push(@{$curoutlev},$this);
 			splice(@{$curoutlev},++$curoutlevno,0,$this);
 			$curoutlev->[0]->[2]++;
 		    }
@@ -1291,7 +1340,7 @@ sub do_x
 	    {
 		splice(@xprm,0,2);
 		my $type=shift(@xprm);
-# 		print STDERR "ypos=$ypos\n";
+#		print STDERR "ypos=$ypos\n";
 
 		if (lc($type) eq 'off')
 		{
@@ -1444,6 +1493,22 @@ sub FixRect
     return if !defined($rect);
     $rect->[1]=GraphY($rect->[1]);
     $rect->[3]=GraphY($rect->[3]);
+
+    if ($rot)
+    {
+	($rect->[0],$rect->[1])=Rotate($rect->[0],$rect->[1]);
+	($rect->[2],$rect->[3])=Rotate($rect->[2],$rect->[3]);
+    }
+}
+
+sub Rotate
+{
+    my ($tx,$ty)=(@_);
+    my $theta=rad($rot);
+
+    ($tx,$ty)=(d3($tx * cos(-$theta) - $ty * sin(-$theta)),
+	       d3($tx * sin( $theta) + $ty * cos( $theta)));
+    return($tx,$ty);
 }
 
 sub GetPoints
@@ -1464,11 +1529,11 @@ sub GetPoints
 
 # sub BuildRef
 # {
-# 	my $fil=shift;
-# 	my $bbox=shift;
-# 	my $mat=shift;
-# 	my $wid=($bbox->[2]-$bbox->[0])*$mat->[0];
-# 	my $hgt=($bbox->[3]-$bbox->[1])*$mat->[3];
+#	my $fil=shift;
+#	my $bbox=shift;
+#	my $mat=shift;
+#	my $wid=($bbox->[2]-$bbox->[0])*$mat->[0];
+#	my $hgt=($bbox->[3]-$bbox->[1])*$mat->[3];
 #
 #       if (!open(PDF,"<$fil"))
 #       {
@@ -1476,27 +1541,27 @@ sub GetPoints
 #               return(undef);
 #       }
 #
-# 	my (@f)=(<PDF>);
+#	my (@f)=(<PDF>);
 #
-# 	close(PDF);
+#	close(PDF);
 #
-# 	$objct++;
-# 	my $xonm="XO$objct";
+#	$objct++;
+#	my $xonm="XO$objct";
 #
-# 	$pages->{'Resources'}->{'XObject'}->{$xonm}=BuildObj($objct,{'Type' => '/XObject',
-# 								    'Subtype' => '/Form',
-# 								    'BBox' => $bbox,
-# 								    'Matrix' => $mat,
-# 								    'Resources' => $pages->{'Resources'},
-# 								    'Ref' => {'Page' => '1',
-# 										'F' => BuildObj($objct+1,{'Type' => '/Filespec',
-# 													  'F' => "($fil)",
-# 													  'EF' => {'F' => BuildObj($objct+2,{'Type' => '/EmbeddedFile'})}
-# 										})
-# 								    }
-# 								});
+#	$pages->{'Resources'}->{'XObject'}->{$xonm}=BuildObj($objct,{'Type' => '/XObject',
+#								    'Subtype' => '/Form',
+#								    'BBox' => $bbox,
+#								    'Matrix' => $mat,
+#								    'Resources' => $pages->{'Resources'},
+#								    'Ref' => {'Page' => '1',
+#										'F' => BuildObj($objct+1,{'Type' => '/Filespec',
+#													  'F' => "($fil)",
+#													  'EF' => {'F' => BuildObj($objct+2,{'Type' => '/EmbeddedFile'})}
+#										})
+#								    }
+#								});
 #
-# 	$obj[$objct]->{STREAM}="q 1 0 0 1 0 0 cm
+#	$obj[$objct]->{STREAM}="q 1 0 0 1 0 0 cm
 # q BT
 # 1 0 0 1 0 0 Tm
 # .5 g .5 G
@@ -1507,12 +1572,12 @@ sub GetPoints
 # Q\n";
 #
 # #	$obj[$objct]->{STREAM}=PutXY($xpos,$ypos)." m ".PutXY($xpos+$wid,$ypos)." l ".PutXY($xpos+$wid,$ypos+$hgt)." l ".PutXY($xpos,$ypos+$hgt)." l f\n";
-# 	$obj[$objct+2]->{STREAM}=join('',@f);
-# 	PutObj($objct);
-# 	PutObj($objct+1);
-# 	PutObj($objct+2);
-# 	$objct+=2;
-# 	return($xonm);
+#	$obj[$objct+2]->{STREAM}=join('',@f);
+#	PutObj($objct);
+#	PutObj($objct+1);
+#	PutObj($objct+2);
+#	$objct+=2;
+#	return($xonm);
 # }
 
 sub LoadSWF
@@ -1566,7 +1631,7 @@ sub LoadSWF
 			'P' => "$cpageno 0 R",
 			'RichMediaSettings' => { 'Deactivation' => { 'Condition' => '/PI',
 						'Type' => '/RichMediaDeactivation'},
-				    'Activation' => { 	'Condition' => '/PV',
+				    'Activation' => {	'Condition' => '/PV',
 						'Type' => '/RichMediaActivation'}},
 			'F' => 68,
 			'Subtype' => '/RichMedia',
@@ -2220,8 +2285,9 @@ sub Msg
 {
     my ($fatal,$msg)=@_;
 
-    print STDERR "$progname:";
-    print STDERR "$env{SourceFile}: " if exists($env{SourceFile});
+    print STDERR "$prog:";
+    print STDERR "$env{SourceFile}:" if exists($env{SourceFile});
+    print STDERR " ";
 
     if ($fatal)
     {
@@ -2366,7 +2432,7 @@ sub LoadFont
         OpenFile(\$f,$fontdir,$fontnm);
     }
 
-    Die("failed to open font '$ofontnm'") if !defined($f);
+    Die("unable to open font '$ofontnm' for mounting") if !defined($f);
 
     my $foundry='';
     $foundry=$1 if $fontnm=~m/^(.*?)-/;
@@ -2404,7 +2470,7 @@ sub LoadFont
 	    $stg=3,next if lc($_) eq 'charset';
 
 	    my ($ch1,$ch2,$k)=split;
-# 	    $fnt{KERN}->{$ch1}->{$ch2}=$k;
+#	    $fnt{KERN}->{$ch1}->{$ch2}=$k;
 	}
 	else
 	{
@@ -2508,9 +2574,17 @@ sub LoadFont
     }
     else
     {
-        Warn("unable to embed font file for '$fnt{internalname}'"
+        if (exists($missing{$fontkey}))
+        {
+            Warn("The download file in '$missing{$fontkey}' "
+            . " has erroneous entry for '$fnt{internalname} ($ofontnm)'");
+        }
+        else
+        {
+            Warn("unable to embed font file for '$fnt{internalname}'"
             . " ($ofontnm) (missing entry in 'download' file?)")
             if $embedall;
+        }
         $fno=++$objct;
         $fontlst{$fontno}->{OBJ}=BuildObj($objct,
                         {'Type' => '/Font',
@@ -2571,7 +2645,7 @@ sub GetType1
     my $f;
 
     OpenFile(\$f,$fontdir,"$file");
-    Die("failed to open '$file'") if !defined($f);
+    Die("unable to open font '$file' for embedding") if !defined($f);
 
     $head=GetChunk($f,1,"currentfile eexec");
     $body=GetChunk($f,2,"00000000") if !eof($f);
@@ -3412,22 +3486,22 @@ sub PutLine
 	    }
 	    else
 	    {
-    # 			$stream.="\%dg  0 Tw [";
+    #			$stream.="\%dg  0 Tw [";
     #
-    # 			foreach my $wd (@lin)
-    # 			{
-    #  				$stream.="($wd->[0]) " if defined($wd->[0]);
-    # 				$stream.="$wd->[1] " if defined($wd->[1]) and $wd->[1] != 0;
-    # 			}
+    #			foreach my $wd (@lin)
+    #			{
+    #				$stream.="($wd->[0]) " if defined($wd->[0]);
+    #				$stream.="$wd->[1] " if defined($wd->[1]) and $wd->[1] != 0;
+    #			}
     #
-    # 			$stream.="] TJ\n";
+    #			$stream.="] TJ\n";
     #
     #				my $wt=$lin[0]->[1]||0;
 
-    # 			while ($wt < -$whtsz/$cftsz)
-    # 			{
-    # 				$wt+=$whtsz/$cftsz;
-    # 			}
+    #			while ($wt < -$whtsz/$cftsz)
+    #			{
+    #				$wt+=$whtsz/$cftsz;
+    #			}
 
 		$stream.=sprintf( "%.3f Tw ",-($whtsz+$wt*$cftsz)/$unitwidth-$curkern );
 		if (!defined($lin[0]->[0]) and defined($lin[0]->[1]))
@@ -3632,12 +3706,12 @@ sub do_t
 
     $stream.="% --- wht=$whtsz, pend=$pendmv, nomv=$nomove\n" if $debug;
 
-# 	if ($w_flg && $#lin > -1)
-# 	{
-# 		$lin[$#lin]->[0].=' ';
-# 		$pendmv-=$whtsz;
-# 		$dontglue=1 if $pendmv==0;
-# 	}
+#	if ($w_flg && $#lin > -1)
+#	{
+#		$lin[$#lin]->[0].=' ';
+#		$pendmv-=$whtsz;
+#		$dontglue=1 if $pendmv==0;
+#	}
 
     $wt=-$pendmv/$cftsz if $w_flg and $wt==-1;
     $pendmv-=$nomove;

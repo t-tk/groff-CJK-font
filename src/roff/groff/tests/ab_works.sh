@@ -22,7 +22,7 @@ groff="${abs_top_builddir:-.}/test-groff"
 
 # Verify exit status and regression-test Savannah #60782.
 #
-# We don't test the the X11 devices because groff launches an X client,
+# We don't test the X11 devices because groff launches an X client,
 # which has to be killed.  Using "-z" to avoid this masks the bug.
 
 for d in ascii cp1047 dvi html latin1 lbp lj4 pdf ps utf8

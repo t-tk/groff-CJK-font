@@ -32,23 +32,7 @@
 .\"     @(#)doc-ditroff	8.1 (Berkeley) 06/08/93
 .
 .
-.\" Use -rCS=1 to force capitalization of section headings.
-.if !r CS .nr CS 0
-.
-.\" Use -rCT=1 to force capitalization of page titles in headers.
-.if !r CT .nr CT 0
-.
-.\" use -rD=1 for double-sided printing
-.if !r D .nr D 0
-.
-.\" use -rcR=1 to force the creation of a single, very long page
-.if !r cR .nr cR 0
-.
-.\" \n[HY] is recognized for groff_man(7) compatibility, particuarly via
-.\" andoc.tmac and man(1); see \n[doc-hyphen-flags] in doc-common.
-.if !r HY .nr HY 1
-.
-.\" use -rS={11,12} to change the font size from 10pt to 11pt or 12pt.
+.\" Use -rS={11,12} to change the font size from 10pt to 11pt or 12pt.
 .if !r S .nr S 10
 .
 .ie        (\n[S] == 11) \{\
@@ -67,59 +51,46 @@
 .
 .\" the 'doc-xx-font' strings must not be empty!
 .
-.ds doc-caption-font \f[R]\s[\n[.ps]u]
-.ds doc-caption-font2 \f[R]\s[\n[.ps]u]
-.ds doc-Ad-font \f[I]\s[\n[.ps]u]
-.ds doc-Ar-font \f[CO]\s[\n[.ps]u]
-.ds doc-Cm-font \f[CB]\s[\n[.ps]u]
-.ds doc-Em-font \f[I]\s[\n[.ps]u]
-.ds doc-Er-font \f[C]\s[\n[.ps]u]
-.ds doc-Ev-font \f[C]\s[\n[.ps]u]
-.ds doc-Fa-font \f[CO]\s[\n[.ps]u]
-.ds doc-Fd-font \f[CB]\s[\n[.ps]u]
-.ds doc-Fl-font \f[CB]\s[\n[.ps]u]
-.ds doc-Fn-font \f[CB]\s[\n[.ps]u]
-.ds doc-Ft-font \f[CO]\s[\n[.ps]u]
-.ds doc-Ic-font \f[CB]\s[\n[.ps]u]
-.ds doc-Li-font \f[C]
-.ds doc-Me-font \f[B]\s[\n[.ps]u]
-.ds doc-Nm-font \f[CB]\s[\n[.ps]u]
-.ds doc-No-font \f[R]\s[\n[.ps]u]
-.ds doc-Pa-font \f[C]\s[\n[.ps]u]
-.ds doc-Sh-font \f[B]\s[\n[.ps]u]
-.ds doc-Sy-font \f[B]\s[\n[.ps]u]
-.ds doc-Sx-font \f[B]\s[\n[.ps]u]
-.ds doc-Tn-font-shape \f[R]
-.ds doc-Va-font \f[I]\s[\n[.ps]u]
-.ds doc-Xr-font \f[C]\s[\n[.ps]u]
+.ds doc-page-topic-font \f[I]
+.ds doc-page-section-font \f[R]
+.ds doc-Ad-font \f[I]
+.ds doc-Ar-font \f[CI]
+.ds doc-Cm-font \f[CR]
+.ds doc-Em-font \f[I]
+.ds doc-Er-font \f[CR]
+.ds doc-Ev-font \f[CR]
+.ds doc-Fa-font \f[CI]
+.ds doc-Fd-font \f[CB]
+.ds doc-Fl-font \f[CR]
+.ds doc-Fn-font \f[CB]
+.ds doc-Ft-font \f[CI]
+.ds doc-Ic-font \f[CB]
+.ds doc-Li-font \f[CR]
+.ds doc-Lk-font \f[R]\"
+.ds doc-Me-font \f[B]
+.ds doc-Nm-font \f[CB]
+.ds doc-No-font \f[R]
+.ds doc-Pa-font \f[I]
+.ds doc-Sh-font \f[B]
+.ds doc-Sy-font \f[B]
+.ds doc-Tn-font \f[R]
+.ds doc-Va-font \f[I]
+.ds doc-Xr-font \f[I]
 .
-.ds doc-left-parenthesis \f[R]\|(\|\f[]\s[\n[.ps]u]
-.ds doc-right-parenthesis \f[R]\|)\|\f[]\s[\n[.ps]u]
-.ds lp \f[R](\f[]\s[\n[.ps]u]
-.ds rp \f[R])\f[]\s[\n[.ps]u]
-.ds doc-left-bracket \f[R]\^[\^\f[]\s[\n[.ps]u]
-.ds doc-right-bracket \f[R]\^]\f[]\s[\n[.ps]u]
+.ds doc-left-parenthesis \f[R](\f[]
+.ds doc-right-parenthesis \f[R])\f[]
+.ds lp \f[R](\f[]
+.ds rp \f[R])\f[]
+.ds doc-left-bracket \f[R][\f[]
+.ds doc-right-bracket \f[R]]\f[]
 .
 .tr *\[**]
 .
 .\" miscellaneous
-.nr doc-subheader-indent (\w\f[C],u * 5u)
-.nr doc-paragraph-space .5v
+.nr doc-paragraph-space .4v
 .
 .nr doc-digit-width \w'\0'u
-.nr doc-fixed-width \w\f[C]0
-.
-.
-.\" NS doc-header-space global register
-.\" NS   the space between header and body
-.
-.nr doc-header-space .5i
-.
-.
-.\" NS doc-footer-space global register
-.\" NS   the space between body and footer
-.
-.nr doc-footer-space .5i
+.nr doc-fixed-width \w'\f[CR]0'
 .
 .
 .\" NS doc-display-vertical global register
@@ -133,18 +104,19 @@
 .\" NS
 .\" NS modifies:
 .\" NS   doc-display-vertical
+.\" NS   doc-line-length
 .
 .eo
 .de doc-setup-page-layout
 .  ie r LL \
 .    ll \n[LL]u
 .  el \
-.    ll 6.5i
+.    ll \n[.l]u
 .
 .  ie r LT \
 .    lt \n[LT]u
 .  el \
-.    lt 6.5i
+.    lt \n[.l]u
 .
 .  po 1i
 .
@@ -179,36 +151,6 @@
 .ds Am &
 .
 .
-.\" NS doc-header-string global string
-.\" NS   the final string used for the manual page header
-.
-.ds doc-header-string
-.
-.
-.\" NS doc-setup-header macro
-.\" NS   install and initialize header and footer support
-.\" NS
-.\" NS modifies:
-.\" NS   doc-header-string
-.
-.eo
-.de doc-setup-header
-.  ds doc-header-string "\*[doc-document-title]
-.  if !"\*[doc-section]"" \
-.    as doc-header-string \|(\*[doc-section])
-.
-.  br
-.
-.  if !\n[cR] \{\
-.    wh 0 doc-header
-.    wh -1.25i doc-footer
-.  \}
-.
-.  e@ doc-end-macro
-..
-.ec
-.
-.
 .\" NS doc-get-width macro
 .\" NS   computes the width of a string as a multiple of
 .\" NS   'doc-fixed-width': '.doc-get-width string'
@@ -218,7 +160,7 @@
 .
 .eo
 .de doc-get-width
-.  nr doc-width \w\f[C]\$1
+.  nr doc-width \w'\f[CR]\$1'
 .  ie (\n[doc-width] >= \n[doc-fixed-width]) \{\
 .    ie (\n[doc-width] % \n[doc-fixed-width]) \
 .      nr doc-width ((\n[doc-width] / \n[doc-fixed-width]) + 1)
@@ -244,7 +186,7 @@
 .
 .eo
 .de doc-get-arg-width
-.  nr doc-width \w\f[C]\*[doc-arg\$1]
+.  nr doc-width \w'\f[CR]\*[doc-arg\$1]'
 .  ie (\n[doc-width] >= \n[doc-fixed-width]) \{\
 .    ie (\n[doc-width] % \n[doc-fixed-width]) \
 .      nr doc-width ((\n[doc-width] / \n[doc-fixed-width]) + 1)
@@ -266,7 +208,7 @@
 .\" NS
 .\" NS modifies:
 .\" NS   doc-argXXX
-.\" NS   doc-arg-limit
+.\" NS   doc-arg-count
 .\" NS   doc-arg-ptr
 .\" NS   doc-macro-name
 .\" NS   doc-spaceXXX
@@ -283,7 +225,7 @@
 .
 .eo
 .de Ql
-.  if !\n[doc-arg-limit] \{\
+.  if !\n[doc-arg-count] \{\
 .    ie \n[.$] \{\
 .      ds doc-macro-name Ql
 .      doc-parse-args \$@
@@ -298,7 +240,7 @@
 .  \" don't use quotes if we have more than two succeeding string
 .  \" arguments
 .  nr doc-reg-Ql +1
-.  if (\n[doc-arg-limit] >= \n[doc-reg-Ql]) \
+.  if (\n[doc-arg-count] >= \n[doc-reg-Ql]) \
 .    if (\n[doc-type\n[doc-reg-Ql]] == 2) \
 .      nr doc-width 3
 .
@@ -315,8 +257,8 @@
 .    el \{\
 .      \" if .Ql has been called directly, we must shift all elements in
 .      \" the argument vector to the right so that we can insert 'Li'
-.      nr doc-reg-Ql \n[doc-arg-limit]
-.      nr doc-reg-Ql1 (\n[doc-arg-limit] + 1)
+.      nr doc-reg-Ql \n[doc-arg-count]
+.      nr doc-reg-Ql1 (\n[doc-arg-count] + 1)
 .      while \n[doc-reg-Ql] \{\
 .        rn doc-arg\n[doc-reg-Ql] doc-arg\n[doc-reg-Ql1]
 .        rnn doc-type\n[doc-reg-Ql] doc-type\n[doc-reg-Ql1]
@@ -327,7 +269,7 @@
 .      ds doc-arg1 Li
 .      nr doc-type1 1
 .      ds doc-space1
-.      nr doc-arg-limit +1
+.      nr doc-arg-count +1
 .    \}
 .
 .    ds doc-quote-left "\*[doc-left-singlequote]

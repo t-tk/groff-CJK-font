@@ -217,7 +217,7 @@ do
 			shift
 		;;
 	--version)
-		echo "GNU ${CMD} (groff) version @VERSION@"
+		echo "${CMD} (groff) version @VERSION@"
 		exit 0
 		;;
 	--help)

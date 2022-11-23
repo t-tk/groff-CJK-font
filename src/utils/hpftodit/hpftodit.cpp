@@ -384,9 +384,11 @@ static void
 usage(FILE *stream)
 {
   fprintf(stream,
-	  "usage: %s [-s] [-a] [-q] [-i n] tfm_file map_file output_font\n"
-	  "       %s -d tfm_file [map_file]\n",
-	  program_name, program_name);
+"usage: %s [-aqs] [-i n] tfm-file map-file output-font\n"
+"usage: %s -d tfm-file [map-file]\n"
+"usage: %s {-v | --version}\n"
+"usage: %s --help\n",
+	  program_name, program_name, program_name, program_name);
 }
 
 static void

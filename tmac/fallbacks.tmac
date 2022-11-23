@@ -1,8 +1,9 @@
-.\" -*- nroff -*-
+.\" Define device-independent fallbacks for unavailable glyphs.
 .\"
-.\" fallbacks.tmac
-.\"
-.\" This file contains generic fallback characters.
+.\" These are designed such that "troffrc" loads them early, after
+.\" composite glyph setup but before any device-specific fallbacks.
+.\" Macro files specific to an output device can therefore override the
+.\" definitions below as necessary.
 .
 .do nr *groff_fallbacks_tmac_C \n[.cp]
 .cp 0
@@ -65,6 +66,124 @@
 .fchar \[u217d] c
 .fchar \[u217e] d
 .fchar \[u217f] m
+.
+.\" Fonts often lack precomposed glyphs for accented Latin letters that
+.\" were not defined in ISO 8859-1 (Latin-1).
+.\"
+.\" Some of these can be ugly; on typesetter devices, much depends on
+.\" the design of the fonts used.
+.\"
+.\" groff defines no dot-above accent so we cannot construct some
+.\" composite glyphs in this way.  Turkish is an especial challenge
+.\" because dotting an I (or not) results in a different base glyph.
+.\" In any case, dotless 'i' base glyphs are rare in old fonts.
+.\"
+.\" Latin-2 fallbacks
+.fchar \[A ab] \z\[ab]A
+.fchar \[A ho] \z\[ho]A
+.fchar \[C aa] \z\[aa]C
+.fchar \[C ah] \z\[ah]C
+.fchar \[D ah] \z\[ah]D
+.fchar \[u110] \z-D\" capital letter d with stroke
+.fchar \[E ah] \z\[ah]E
+.fchar \[E ho] \z\[ho]E
+.fchar \[/L]   \z/L
+.fchar \[L aa] \z\[aa]L
+.fchar \[L ho] \z\[ho]L
+.fchar \[N aa] \z\[aa]N
+.fchar \[N ah] \z\[ah]N
+.fchar \[O a"] \z\[a"]O
+.fchar \[R aa] \z\[aa]R
+.fchar \[R ah] \z\[ah]R
+.fchar \[S aa] \z\[aa]S
+.fchar \[S ac] \z\[ac]S
+.fchar \[vS]   \z\[ah]S
+.fchar \[T ac] \z\[ac]T
+.fchar \[T ah] \z\[ah]T
+.fchar \[U ao] \z\[ao]U
+.fchar \[U a"] \z\[a"]U
+.fchar \[Z aa] \z\[aa]Z
+.fchar \[Z a.] \z\[a.]Z
+.fchar \[vZ]   \z\[ah]Z
+.
+.fchar \[a ab] \z\[ab]a
+.fchar \[a ho] \z\[ho]a
+.fchar \[c aa] \z\[aa]c
+.fchar \[c ah] \z\[ah]c
+.fchar \[d ah] \z\[ah]d
+.fchar \[u110] \z-d\" small letter d with stroke
+.fchar \[e ah] \z\[ah]e
+.fchar \[e ho] \z\[ho]e
+.fchar \[/l]   \z/l
+.fchar \[l aa] \z\[aa]l
+.fchar \[l ho] \z\[ho]l
+.fchar \[n aa] \z\[aa]n
+.fchar \[n ah] \z\[ah]n
+.fchar \[o a"] \z\[a"]o
+.fchar \[r aa] \z\[aa]r
+.fchar \[r ah] \z\[ah]r
+.fchar \[s aa] \z\[aa]s
+.fchar \[s ac] \z\[ac]s
+.fchar \[vs]   \z\[ah]s
+.fchar \[t ac] \z\[ac]t
+.fchar \[t ah] \z\[ah]t
+.fchar \[u ao] \z\[ao]u
+.fchar \[u a"] \z\[a"]u
+.fchar \[z aa] \z\[aa]z
+.fchar \[z a.] \z\[a.]z
+.fchar \[vz]   \z\[ah]z
+.
+.\" Latin-5 fallbacks
+.fchar \[G ab] \z\[ab]G
+.fchar \[g ab] \z\[ab]g
+.
+.\" Latin-9 fallbacks
+.fchar \[OE] OE
+.fchar \[oe] oe
+.fchar \[:Y] \z\[ad]Y
+.
+.fchar \[u2000] \[u2002]\" en quad
+.fchar \[u2001] \[u2003]\" em quad
+.fchar \[u2002] \h'1/2u'\" en space
+.fchar \[u2003] \h'1'\" em space
+.fchar \[u2004] \h'1/3u'\" three-per-em space
+.fchar \[u2005] \h'1/4u'\" four-per-em space
+.fchar \[u2006] \h'1/6u'\" six-per-em space
+.fchar \[u2007] \0\" figure space
+.fchar \[u2008] \^\" puncutation space
+.fchar \[u2009] \|\" thin space
+.fchar \[u200A] \^\" hair space
+.fchar \[u200B] \h'0'\" zero-width space
+.fchar \[u2010] -\:\" hyphen
+.fchar \[u2011] -\" non-breaking hyphen (won't break w/o .hcode or \:)
+.ie t .fchar \[u2012] \v'-.3m'\l'\w"\0"u\[ru]'\v'+.3m'\" figure dash
+.el   .fchar \[u2012] \-
+.fchar \[u2013] \[en]\" en dash
+.fchar \[u2014] \[em]\" em dash
+.fchar \[u2015] \[em]\" horizontal bar (quotation dash)
+.fchar \[u2016] ||\" double vertical line (matrix norm)
+.if t .fchar \[u2017] \Z'\[ul]'\v'+.1m'\[ul]\v'-.1m'\" double low line
+.fchar \[u2018] \[oq]\" left single quotation mark
+.fchar \[u2019] \[cq]\" right single quotation mark
+.fchar \[u201C] \[lq]\" left double quotation mark
+.fchar \[u201D] \[rq]\" right double quotation mark
+.fchar \[u2020] \[dg]\" dagger
+.fchar \[u2021] \[dd]\" double dagger
+.fchar \[u2022] \[bu]\" bullet
+.fchar \[u2024] .\" one dot leader
+.fchar \[u2025] .\|.\" two dot leader
+.fchar \[u2026] .\|.\|.\" horizontal ellipsis
+.fchar \[u2027] \[pc]\" hyphenation point
+.fchar \[u2030] \[%0]\" per mille sign
+.fchar \[u2032] \[fm]\" prime
+.fchar \[u2033] \[sd]\" double prime
+.fchar \[u2039] \[fo]\" left single chevron
+.fchar \[u203A] \[fc]\" right single chevron
+.if t .fchar \[u203D] \o'?!'\" interrobang
+.fchar \[u203E] \[rn]\" overline
+.fchar \[u2044] \[f/]\" fraction slash
+.fchar \[u2052] %\" commercial minus sign
+.fchar \[u2053] \[ti]\" swung dash
 .
 .cp \n[*groff_fallbacks_tmac_C]
 .do rr *groff_fallbacks_tmac_C

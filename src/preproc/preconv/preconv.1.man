@@ -1,6 +1,7 @@
 .TH preconv @MAN1EXT@ "@MDATE@" "groff @VERSION@"
 .SH Name
-preconv \- prepare files for typesetting with groff
+preconv \- prepare files for typesetting with
+.I groff
 .
 .
 .\" ====================================================================
@@ -37,7 +38,7 @@ preconv \- prepare files for typesetting with groff
 .SY preconv
 .RB [ \-dr ]
 .RB [ \-D\~\c
-.IR default-encoding ]
+.IR fallback-encoding ]
 .RB [ \-e\~\c
 .IR encoding ]
 .RI [ file\~ .\|.\|.]
@@ -136,9 +137,7 @@ use it.
 .
 .
 .IP 2.
-Check whether the input starts with a Unicode Byte Order Mark.
-.
-If so,
+If the input starts with a Unicode Byte Order Mark,
 determine the encoding as UTF-8,
 UTF-16,
 or UTF-32 accordingly.
@@ -470,6 +469,14 @@ through its
 command-line option.
 .
 .
+.P
+.I preconv
+assumes that its input uses the default escape character,
+a backslash
+.BR \[rs] ,
+and writes special character escape sequences accordingly.
+.
+.
 .\" ====================================================================
 .SH Options
 .\" ====================================================================
@@ -492,9 +499,9 @@ Emit debugging messages to the standard error stream.
 .
 .
 .TP
-.BI \-D\~ default-encoding
+.BI \-D\~ fallback-encoding
 Report
-.I default-encoding
+.I fallback-encoding
 if all detection methods fail.
 .
 .

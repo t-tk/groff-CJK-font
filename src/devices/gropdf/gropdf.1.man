@@ -1,6 +1,8 @@
 .TH gropdf @MAN1EXT@ "@MDATE@" "groff @VERSION@"
 .SH Name
-gropdf \- groff output driver for Portable Document Format
+gropdf \-
+.I groff
+output driver for Portable Document Format
 .
 .
 .\" ====================================================================
@@ -46,15 +48,15 @@ gropdf \- groff output driver for Portable Document Format
 .SY gropdf
 .RB [ \-dels ]
 .RB [ \-F\~\c
-.IR dir ]
+.IR font-directory ]
 .RB [ \-I\~\c
-.IR dir ]
+.IR inclusion-directory ]
 .RB [ \-p\~\c
-.IR paper-size ]
+.IR paper-format ]
 \#.RB [ \-w\~\c
 \#.IR n ]
 .RB [ \-u
-.RI [ cmapfile ]]
+.RI [ cmap-file ]]
 .RB [ \-y\~\c
 .IR foundry ]
 .RI [ file\~ .\|.\|.]
@@ -177,19 +179,20 @@ it is otherwise searched last.
 Orient the document in landscape format.
 .
 .TP
-.BI \-p " paper-size"
-Set physical dimension of output medium.
+.BI \-p " paper-format"
+Set the physical dimensions of the output medium.
 .
 This overrides the
 .BR papersize ,
 .BR paperlength ,
 and
 .B paperwidth
-commands in the
+directives in the
 .I DESC
-file; it accepts the same arguments as the
+file;
+it accepts the same arguments as the
 .B papersize
-command.
+directive.
 .
 See
 .MR groff_font @MAN5EXT@
@@ -208,15 +211,15 @@ complains about this line if it is included, but works anyway.
 .
 .TP
 .BR \-u \~[\c
-.IR cmapfile ]
-.B Gropdf
+.IR cmap-file ]
+.B gropdf
 normally includes a ToUnicode CMap with any font created using
 .I text.enc
 as the encoding file,
 this makes it easier to search for words which contain ligatures.
 .
 You can include your own CMap by specifying a
-.I cmapfile
+.I cmap-file
 or have no CMap at all by omitting the argument.
 .
 .
@@ -261,9 +264,9 @@ device uses a resolution of 72000 and a sizescale of 1000.
 .
 .
 .LP
-The device description file must contain a valid paper size; see
-.MR groff_font @MAN5EXT@
-for more information.
+The device description file must contain a valid paper format;
+see
+.MR groff_font @MAN5EXT@ .
 .
 .I gropdf
 uses the same Type\~1 Adobe PostScript fonts as the
@@ -797,23 +800,23 @@ One
 special used by the DVI driver is also recognised:
 .
 .TP
-.BI \[rs]X\[aq]papersize= paper-size \[aq]
+.BI \[rs]X\[aq]papersize= paper-format \[aq]
 where the
-.I paper-size
-parameter is the same as the
+.I paper-format
+parameter is the same as that to the
 .B papersize
-command.
+directive.
 .
 See
-.MR groff_font @MAN5EXT@
-for details.
+.MR groff_font @MAN5EXT@ .
 .
 This means that you can alter the page size at will within the PDF file
 being created by
 .IR gropdf .
 .
-If you do want to change the paper size,
+If you do want to change the paper format,
 it must be done before you start creating the page.
+.
 .
 .LP
 In addition,
@@ -1713,6 +1716,9 @@ by Deri James.
 .\" .BR \%pfbtops (@MAN1EXT@),
 .\" .BR \%groff_tmac (@MAN5EXT@),
 .
+.
+.\" Clean up.
+.rm FT
 .
 .\" Restore compatibility mode (for, e.g., Solaris 10/11).
 .cp \n[*groff_gropdf_1_man_C]

@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 #
 # BuildFoundries: Given a Foundry file, generate groff font description
 # files and a "download" file so gropdf can embed fonts in PDF output.
@@ -23,6 +23,7 @@
 
 use strict;
 use Getopt::Long;
+use warnings;
 
 my $pathsep='@PATH_SEPARATOR@';
 
@@ -140,7 +141,7 @@ sub LoadFoundry
 			    unlink $gfont;
 			}
 		    }
-		    Notice("Copied grops font $gfont...") if $gotf;
+		    Notice("copied grops font $gfont") if $gotf;
 
 		}
 		else
@@ -168,7 +169,7 @@ sub LoadFoundry
 		    }
 		    else
 		    {
-			Notice("Generated $gfont...");
+			Notice("generated $gfont");
 		    }
 		}
 		else
@@ -265,6 +266,7 @@ sub LocateFile
         next if !defined($p) or $p eq ';' or $p eq ':';
         $p=~s/^\s+//;
         $p=~s/\s+$//;
+        $p=~s@/+$@@;
 
         next if $p=~m/^\%rom\%/;	# exclude %rom% paths (from (gs))
 

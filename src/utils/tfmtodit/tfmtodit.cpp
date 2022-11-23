@@ -876,7 +876,9 @@ static void usage(FILE *stream)
 {
   fprintf(stream,
 "usage: %s [-s] [-g gf-file] [-k skew-char] tfm-file map-file font\n"
-"usage: %s { -v | --version }\n", program_name, program_name);
+"usage: %s {-v | --version}\n"
+"usage: %s --help\n",
+	  program_name, program_name, program_name);
 }
 
 // Local Variables:

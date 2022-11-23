@@ -17,83 +17,51 @@ Generic Problems
 
 
 
-* Displaying a man page on a terminal with/without my favourite pager
-  only gives garbage.
+* Displaying a man page on a terminal with/without my favorite pager
+  shows garbage.
 
-groff by default now uses SGR escape sequences (`ANSI color') to
-control the display attributes (bold, underlined, colour) on TTYs.
-Some terminals (e.g. `kterm') don't understand SGR, and some pagers
-(e.g. older versions of `less' or `less' without the -R option) don't
-understand SGR either.  There are three solutions to fix this, in
-order of preference; please read the grotty man page for more details.
+groff's terminal output driver, grotty, by default uses ISO 6429/ECMA-48
+escape sequences understood by video terminals and their emulators,
+rather than the overstriking sequences implemented for typewriter-like
+terminals used in the 1960s and 1970s.  These escape sequences control
+display attributes like bold and italic or oblique typefaces,
+underlining, foreground and background color selection, and hyperlink
+marking.  Terminal emulators that claim compatibility with the DEC
+VT100, Linux console driver, or xterm should ignore well-formed escape
+sequences that they are not able to support, but some implementations
+are buggy.
 
-The fourth and probably best option is to update your terminal program
-and pager to versions which can handle SGR.
+Furthermore, the popular "less" pager by default assumes that its input
+will use overstriking sequences.  (This is a surprising choice, as users
+of paper terminals had no need for pager programs; to "scroll back", the
+operator would simply physically pull up the spool of ejected paper to
+read it.)  less(1) must instead be given the '-R' option to interpret
+escape sequences used by video terminals.  Be aware that the
+overstriking convention is inescapably ambiguous in some output
+sequences.  See the grotty(1) man page.
 
-  1. Set the GROFF_NO_SGR environment variable.
+Hyperlink support in terminal emulators is a relatively new initiative
+(as of 2022) employing a sequence known as "OSC 8".
+  https://gist.github.com/egmontkob/eb114294efbcd5adb1944c9f3cb5feda
 
-  2. Pass option `-c' to grotty (this is, add `-P-c' to groff's
-     command line options).
+Due to the feature's young age, the man and mdoc macro packages have a
+configuration switch for hyperlink support, and it may be disabled in
+your site's man.local and mdoc.local files.  Use a command like
+  printf '\033]8;;man:grotty(1)\033\\grotty(1)\033]8;;\033\\\n' | more
+to check your terminal and pager for OSC 8 support.  If you see
+"grotty(1)" and no additional garbage characters, then you may wish to
+edit those site files to remove any lines that disable this feature.
 
-  3. Append the following fragment to the `troffrc' file:
+There are a couple of workarounds if you prefer or require overstriking
+sequences rather than ISO 6429/ECMA-48 escape sequences.
 
+  1. Set the GROFF_NO_SGR environment variable to any value.
 
---- start ---
-.if n \{\
-.  nr _C \n(.C
-.  cp 0
-.
-.  \" The following code sets a top-of-page trap to disable grotty's TTY
-.  \" mode.  Since neither \X nor .output can be used before the first
-.  \" page has started, we must use a trap.  To make it work with
-.  \" troff's -o option, we wait until the first printed page.
-.
-.  de sgr@dummy
-.  .
-.
-.  rn wh wh@old
-.
-.  \" The stand-alone version.  If no other trap is set, we can safely
-.  \" insert the truncated vertical space caused by the trap (if any).
-.  \" Otherwise we assume that the document's main macro package takes
-.  \" care of that.  The trap is removed once it has been executed.
-.  de1 no@sgr
-.    if \\n[.P] \{\
-.      if (\\n[.t] == \\n[.p]) \{\
-.        rn wh@old wh
-.        rm no@sgr
-.        wh 0
-.        sp \\n[.trunc]
-.        nop \X'tty: sgr 0'
-.        sp -1
-.    \}\}
-.  .
-.
-.  wh@old 0 no@sgr
-.
-.  \" The piggyback version to be appended to macros planted with the
-.  \" modified `wh' request.
-.  de1 no@sgr1
-.    if \\n[.P] \{\
-.      rn wh@old wh
-.      ds no@sgr1
-.      nop \X'tty: sgr 0'
-.      sp -1
-.    \}
-.  .
-.
-.  \" We redefine the `wh' request so that `no@sgr1' is appended to
-.  \" the trap macro.
-.  de1 wh
-.    am1 \\$2 sgr@dummy
-.      no@sgr1
-.    sgr@dummy
-.    wh@old \\$1 \\$2
-.  .
-.
-.  cp \n[_C]
-.\}
---- end ---
+  2. Pass option '-c' to grotty (that is, add '-P-c' to groff's
+     command-line options).
+
+The third and probably best option is to use terminal and pager programs
+that handle standardized video terminal escape sequences well.
 
 ----------------------------------------------------------------------
 
@@ -137,10 +105,10 @@ character escape sequences '\(mi' or '\[mi]'.
 * My document says that the current year is 19100, not 2000.
 
 In groff, as in traditional troff, the yr number register yields the
-year minus 1900.  Unfortunately, there is a longstanding bug in the
-Troff User's Manual <http://cm.bell-labs.com/cm/cs/cstr/54.ps.gz>,
-which incorrectly claims that yr is the last two digits of the year.
-This claim was never true of either Unix troff or of groff.
+year minus 1900.  Unfortunately, the Bell Labs document "Troff User's
+Manual" (Computing Science Technical Report #54) incorrectly claims that
+yr is the last two digits of the year.  This claim has never been true
+AT&T troff nor of groff.
 
 If your text looks like this:
 
@@ -261,33 +229,49 @@ You need version 1.42 or newer.
   them to the height and depth of its argument, but the registers
   always seem to be 0.
 
-\n(st and \n(sb aren't supposed to give the height and depth of the
-string rather they give the minimum and maximum vertical displacement
-of the baseline.  For example for \v'2u'\v'-3u', \n(st is 1 and \n(sb
-is -2.  The height and depth of the string is available in the \n[rst]
-and \n[rsb] registers: these are groff extensions.
+\n(st and \n(sb don't give the height and depth of the argument to \w,
+but the maximum vertical displacements of the text baseline above
+(\n(st) and below (\n(sb) its original position.  Consider an example
+where no text is formatted, but small vertical motions are used.
+
+  \w"\v'-1u'\v'3u'"
+  .tm st=\n(st, sb=\n(sb
+    st=1, sb=-2
+
+Observe that the sign convention of these registers is opposite that of
+relative vertical motion.  (This is how Documenter's Workbench troff
+and Heirloom Doctools troff work as well.)
+
+The height and depth of formatted text in the \w argument are available
+in the \n[rst] and \n[rsb] registers; these are groff extensions.
 
 ----------------------------------------------------------------------
 
 * While formatting a manual page, groff complains about not being able
-  to break lines.  The problem seems to be caused by a line like:
-  .TP \w'label'+2
+  to break lines.  A line like the following seems to cause this.
+    .TP \w'label'+2
 
-The -man documentation says that the default scaling indicator for TP
-macro is `n'.  The groff -man macros implement this correctly, so that
-the argument is evaluated as if it were
+The groff_man(7) man page says that the default scaling unit for the
+`TP` macro is 'n' (ens), and that is how the groff man macros are
+implemented.  Consequently, the macro argument above is evaluated
+equivalently to this expression.
 
   \w'label'n+2n
 
-The Unix -man macros don't implement this correctly (probably because
-it's hard to do in Unix troff); they just append `n' to the entire
-argument, so that it is evaluated as if it were
+AT&T troff's man macros don't implement this correctly (probably because
+it's hard to do in that troff); instead, they append 'n' to the entire
+argument, so that it is evaluated as if it were written as follows.
 
   \w'label'u+2n
 
-The solution is to fix the manual page:
+The solution is to fix the manual page.
 
   .TP \w'label'u+2
+
+It might be better still to avoid such computations in macro arguments,
+however; programs that are not *roff formatters that attempt to
+interpret man pages can lack the ability to interpret numeric
+expressions.  See section "Portability" of groff_man_style(7).
 
 ----------------------------------------------------------------------
 
@@ -469,7 +453,7 @@ See groff(1) and groff_tmac(5) for more information.
 * When I print the output of groff -Tps, the output is always shifted
   up by about 0.7 inches; I'm using 8.5x11 inch paper.
 
-Make sure that the paper size is `letter'.  See groff_tmac(5).
+Make sure that the paper format is "letter".  See groff_tmac(5).
 
 ----------------------------------------------------------------------
 
@@ -518,7 +502,8 @@ This is a defect in pageview.  Change the `broken' parameter in
 * With groff -TX75, -TX100 or -X, I can only view the first page.
 
 The left mouse button brings up a menu that allows you to view other
-pages.
+pages.  You can also press <space> and <backspace> to advance and
+retreat the current page view, respectively.
 
 ----------------------------------------------------------------------
 
@@ -538,7 +523,7 @@ You have at least 3 options:
 
 - use groff -Tps with GNU Ghostscript;
 
-- use groff -Tdvi with a TeX .dvi to Laserjet driver;
+- use groff -Tdvi with a TeX .dvi to LaserJet driver;
 
 - use groff with the LaserJet driver in Chris Lewis' psroff package
   (available for ftp from:

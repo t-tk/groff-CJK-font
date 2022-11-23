@@ -2263,7 +2263,7 @@ node *environment::make_tag(const char *nm, int i)
     macro m;
     m.append_str("devtag:");
     for (const char *p = nm; *p; p++)
-      if (!invalid_input_char((unsigned char)*p))
+      if (!is_invalid_input_char((unsigned char)*p))
 	m.append(*p);
     m.append(' ');
     m.append_int(i);
@@ -3911,7 +3911,7 @@ void hyphen_trie::read_patterns_file(const char *name, int append,
 	  c = hpf_getc(fp);
 	if (c == '{') {
 	  if (have_patterns || have_hyphenation)
-	    error("\\patterns not allowed inside of %1 group",
+	    error("\\patterns is not allowed inside of %1 group",
 		  have_patterns ? "\\patterns" : "\\hyphenation");
 	  else {
 	    have_patterns = 1;
@@ -3926,7 +3926,7 @@ void hyphen_trie::read_patterns_file(const char *name, int append,
 	  c = hpf_getc(fp);
 	if (c == '{') {
 	  if (have_patterns || have_hyphenation)
-	    error("\\hyphenation not allowed inside of %1 group",
+	    error("\\hyphenation is not allowed inside of %1 group",
 		  have_patterns ? "\\patterns" : "\\hyphenation");
 	  else {
 	    have_hyphenation = 1;
@@ -3957,7 +3957,7 @@ void hyphen_trie::read_patterns_file(const char *name, int append,
       }
       else if (c == '{') {
 	if (have_patterns || have_hyphenation)
-	  error("'{' not allowed within %1 group",
+	  error("'{' is not allowed within %1 group",
 		have_patterns ? "\\patterns" : "\\hyphenation");
 	c = hpf_getc(fp);		// skipped if not starting \patterns
 					// or \hyphenation

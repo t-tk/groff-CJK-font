@@ -192,34 +192,136 @@
 .nr doc-punct! 3
 .
 .
+.\" Define alternate requests to handle continuous rendering.
+.\"
+.\" This .ne replacement avoids page breaks; instead, the page length is
+.\" increased to the necessary amount (this is needed for tables).
+.
+.eo
+.de doc-ne
+.  ie \n[.$] .nr doc-amount (v;\$*)
+.  el        .nr doc-amount 1v
+.  if (\n[doc-amount] >= \n[.t]) \
+.    pl +(\n[doc-amount]u - \n[.t]u + 1v)
+.  rr doc-amount
+..
+.ec
+.
+.\" This .bp replacement for continuous rendering mode adjusts the page
+.\" length to the current position so that no empty lines are inserted.
+.
+.eo
+.de doc-bp
+.  pl \n[nl]u
+..
+.ec
+.
+.
+.\" NS doc-set-up-continuous-rendering
+.\"   Move macros into place for continuous rendering.  An end-of-input
+.\"   macro is set up by doc-set-up-titles.
+.de doc-set-up-continuous-rendering
+.  rn ne doc-real-ne
+.  rn bp doc-real-bp
+.  rn doc-ne ne
+.  rn doc-bp bp
+..
+.
+.if \n[cR] \
+.  doc-set-up-continuous-rendering
+.
+.
 .\" header assembly macros
 .
-.\" NS doc-document-title global string
+.\" NS doc-page-topic global string
 .\" NS   the title of the manual page
 .
-.ds doc-document-title UNTITLED
+.ds doc-page-topic UNTITLED\"
 .
 .
 .\" NS doc-volume global string
-.\" NS   the volume where the manual page belongs to
+.\" NS   the volume to which the manual page belongs
 .
-.ds doc-volume LOCAL
+.ds doc-volume LOCAL\"
 .
 .
 .\" NS doc-section global string
-.\" NS   the manual section
+.\" NS   the manual section (1, 2, 3, ..., 3perl, 9)
 .
 .ds doc-section \" empty
+.
+.
+.\" NS doc-set-up-titles macro
+.\" NS   install and initialize header and footer support
+.\"
+.\" TODO: Support man(7)'s `FT` register.
+.
+.eo
+.de doc-set-up-titles
+.  br
+.
+.  if !\n[cR] \{\
+.    wh 0 doc-header
+.    wh -1.0i doc-break-body-text
+.    wh -.5i doc-footer
+.  \}
+.
+.  e@ doc-end-macro
+..
+.ec
+.
+.
+.\" NS doc-date-string global string
+.\" NS   the manual page date as set by 'Dd'
+.
+.ds doc-date-string UNDATED\"
+.
+.
+.\" NS Dd user macro (not parsed, not callable)
+.\" NS   set document date
+.\" NS
+.\" NS modifies:
+.\" NS   doc-date-string
+.\" NS
+.\" NS width register 'Dd' set above
+.
+.eo
+.de Dd
+.  \" If batch processing (rendering multiple) man page documents, we
+.  \" must handle the end of a previous document.
+.  \"
+.  \" If also continuously rendering, cause a page transition to a new
+.  \" mdoc(7) document.  Clear the page header trap first so it is not
+.  \" sprung with stale information.  Update the page number depending
+.  \" on the C (consecutive numbering) register.
+.  if !\n[doc-is-first-page-of-document] \{\
+.    ie \n[cR] .doc-end-macro
+.    el \{\
+.      ch doc-header
+.
+.      ie \n[C] .bp (\n[%] + 1) \" argument NOT redundant before page 1
+.      el       .bp 1
+.    \}
+.    nr doc-is-first-page-of-document 1
+.  \}
+.
+.  if !\n[.$] \
+.    tm mdoc warning: .Dd directive expects an argument (#\n[.c])
+.  if \n[.$] \{\
+.    ie "\$1"$Mdocdate:" .ds doc-date-string \$2\~\$3, \$4\"
+.    el                  .ds doc-date-string \$*\"
+.  \}
+..
+.ec
 .
 .
 .\" NS Dt user macro (not parsed, not callable)
 .\" NS   document title
 .\" NS
 .\" NS modifies:
-.\" NS   doc-document-title
+.\" NS   doc-page-topic
 .\" NS   doc-section
 .\" NS   doc-volume
-.\" NS   doc-topic-name
 .\" NS
 .\" NS local variables:
 .\" NS   doc-volume-as-XXX
@@ -229,8 +331,6 @@
 .
 .\" an alternative, more detailed scheme for naming the manual sections
 .\"
-.ds doc-volume-operating-system BSD
-.nr doc-volume-operating-system-ateol 0
 .ds doc-volume-ds-1 General Commands Manual
 .ds doc-volume-ds-2 System Calls Manual
 .ds doc-volume-ds-3 Library Functions Manual
@@ -341,36 +441,27 @@
 .
 .eo
 .de Dt
-.  \" reset default arguments
-.  ds doc-topic-name \" empty
-.  ds doc-volume LOCAL
-.  ds doc-section \" empty
-.  ds doc-command-name
-.
+.  if !\n[.$] \
+.    tm mdoc warning: .Dt directive expects one or more arguments \
+(#\n[.c])
 .  if !"\$1"" \
-.    ds doc-document-title "\$1
+.    ds doc-page-topic "\$1
 .
 .  if \n[CT] \
-.    stringup doc-document-title
+.    stringup doc-page-topic
 .
 .  if !"\$2"" \{\
 .    ds doc-section \$2
-.    ie \B\$2 \{\
+.    ie \B'\$2' \{\
 .      if ((\$2 >= 1) & (\$2 <= 9)) \{\
-.        ie \n[doc-volume-operating-system-ateol] \{\
-.          ds doc-volume "\*[doc-volume-ds-\$2] \*[doc-volume-operating-system]
-.          if \A\$3 \{\
-.            if d doc-volume-as-\$3 \
-.              as doc-volume "/\*[doc-volume-as-\$3]
-.        \}\}
-.        el \{\
-.          ds doc-volume "\*[doc-volume-operating-system]
-.          if \A\$3 \{\
-.            if d doc-volume-as-\$3 \
-.              as doc-volume "/\*[doc-volume-as-\$3]
+.        ds doc-volume \" empty (not "LOCAL")
+.        if \A'\$3' \{\
+.          if d doc-volume-as-\$3 \
+.            as doc-volume "\*[doc-volume-as-\$3]
 .          \}
-.          as doc-volume " \*[doc-volume-ds-\$2]
-.    \}\}\}
+.        as doc-volume " \*[doc-volume-ds-\$2]
+.      \}
+.    \}
 .    el \{\
 .      ie "\$2"unass" \
 .        ds doc-volume DRAFT
@@ -378,39 +469,33 @@
 .        ds doc-volume DRAFT
 .      el .if "\$2"paper" \
 .        ds doc-volume UNTITLED
-.      \}\}
-.      if \A\$3 \{\
-.        if d doc-volume-ds-\$3 \
-.          ds doc-volume "\*[doc-volume-ds-\$3]
-.  \}\}\}
+.      \}
+.   \}
+.   if \A'\$3' \{\
+.     if d doc-volume-ds-\$3 \
+.       ds doc-volume "\*[doc-volume-ds-\$3]
+.   \}
+. \}
 .
 .  if !"\$3"" \
 .    if "\*[doc-volume]"LOCAL" \
 .      ds doc-volume \$3
-.
-.  doc-setup-header
-.
-.  if \n[nl] \
-.    bp
-.
-.  if '\*[.T]'pdf' \
-.    pdfbookmark 1 "\*[doc-document-title](\*[doc-section])"
 ..
 .ec
 .
 .
 .\" NS doc-default-operating-system global string
-.\" NS   the exact (default) version of the operating system
+.\" NS   the default OS to associate with man pages
 .\" NS
 .\" NS override this in 'mdoc.local', if necessary
 .
-.ds doc-default-operating-system BSD
+.ds doc-default-operating-system GNU\"
 .
 .
 .\" NS doc-operating-system global string
-.\" NS   the exact version of the operating system
+.\" NS   the OS or software project associated with the man page
 .
-.ds doc-operating-system
+.ds doc-operating-system \" empty
 .
 .
 .\" NS Os user macro (not parsed, not callable)
@@ -418,7 +503,6 @@
 .\" NS
 .\" NS modifies:
 .\" NS   doc-operating-system
-.\" NS   doc-topic-name
 .\" NS
 .\" NS local variables:
 .\" NS   doc-operating-system-XXX-XXX
@@ -823,20 +907,18 @@
 .
 .eo
 .de Os
-.  ds doc-topic-name \" empty
-.
 .  ie "\$1"" \
 .    ds doc-operating-system "\*[doc-default-operating-system]
 .  el \{ .ie "\$1"ATT" \{\
 .    ds doc-operating-system AT&T
-.    if \A\$2 \{\
+.    if \A'\$2' \{\
 .      ie d doc-operating-system-ATT-\$2 \
 .        as doc-operating-system " \*[doc-operating-system-ATT-\$2]
 .      el \
 .        as doc-operating-system " UNIX
 .  \}\}
 .  el \{ .ie "\$1"BSD" \{\
-.    if \A\$2 \{\
+.    if \A'\$2' \{\
 .      ie d doc-operating-system-BSD-\$2 \
 .        ds doc-operating-system "\*[doc-operating-system-BSD-\$2]
 .      el \
@@ -844,7 +926,7 @@
 .  \}\}
 .  el \{ .ie "\$1"FreeBSD" \{\
 .    ds doc-operating-system FreeBSD
-.    if \A\$2 \{\
+.    if \A'\$2' \{\
 .      ie d doc-operating-system-FreeBSD-\$2 \
 .        as doc-operating-system \~\*[doc-operating-system-FreeBSD-\$2]
 .      el \
@@ -852,7 +934,7 @@
 .  \}\}
 .  el \{ .ie "\$1"DragonFly" \{\
 .    ds doc-operating-system DragonFly
-.    if \A\$2 \{\
+.    if \A'\$2' \{\
 .      ie d doc-operating-system-DragonFly-\$2 \
 .        as doc-operating-system \~\*[doc-operating-system-DragonFly-\$2]
 .      el \
@@ -860,7 +942,7 @@
 .  \}\}
 .  el \{ .ie "\$1"NetBSD" \{\
 .    ds doc-operating-system NetBSD
-.    if \A\$2 \{\
+.    if \A'\$2' \{\
 .      ie d doc-operating-system-NetBSD-\$2 \
 .        as doc-operating-system \~\*[doc-operating-system-NetBSD-\$2]
 .      el \
@@ -868,7 +950,7 @@
 .  \}\}
 .  el \{ .ie "\$1"OpenBSD" \{\
 .    ds doc-operating-system OpenBSD
-.    if \A\$2 \{\
+.    if \A'\$2' \{\
 .      ie d doc-operating-system-OpenBSD-\$2 \
 .        as doc-operating-system \~\*[doc-operating-system-OpenBSD-\$2]
 .      el \
@@ -876,7 +958,7 @@
 .  \}\}
 .  el \{ .ie "\$1"Darwin" \{\
 .    ds doc-operating-system Darwin
-.    if \A\$2 \{\
+.    if \A'\$2' \{\
 .      ie d doc-operating-system-Darwin-\$2 \
 .        as doc-operating-system \~\*[doc-operating-system-Darwin-\$2]
 .      el \
@@ -888,34 +970,13 @@
 .      as doc-operating-system " \$2
 .  \}\}\}\}\}\}\}\}
 .
-.  if \n[doc-is-first-page-of-document] \{\
-.    doc-header
-.    nr doc-is-first-page-of-document 0
-.  \}
-..
-.ec
+.  doc-set-up-titles
 .
+.  if '\*[.T]'pdf' \
+.    pdfbookmark 1 "\*[doc-page-topic](\*[doc-section])"
 .
-.\" NS doc-date-string global string
-.\" NS   the manual page date as set by 'Dd'
-.
-.ds doc-date-string \" empty
-.
-.
-.\" NS Dd user macro (not parsed, not callable)
-.\" NS   set document date
-.\" NS
-.\" NS modifies:
-.\" NS   doc-date-string
-.\" NS   doc-topic-name
-.\" NS
-.\" NS width register 'Dd' set above
-.
-.eo
-.de Dd
-.  ds doc-topic-name \" empty
-.  ie "\$1"$Mdocdate:"  .ds doc-date-string \$2\~\$3, \$4
-.  el                   .ds doc-date-string \$*
+.  doc-header
+.  nr doc-is-first-page-of-document 0
 ..
 .ec
 .
@@ -933,6 +994,8 @@
 .\" NS   print page header
 .\" NS
 .\" NS local variables:
+.\" NS   doc-xref
+.\" NS   doc-abbv
 .\" NS   doc-reg-dh
 .\" NS   doc-reg-dh1
 .\" NS   doc-hs-len
@@ -940,63 +1003,82 @@
 .
 .eo
 .de doc-header
+.  ds doc-xref \*[doc-page-topic-font]\*[doc-page-topic]\f[]\"
+.  as doc-xref \*[doc-page-section-font](\*[doc-section])\f[]\"
+.  ds doc-abbv \*[doc-page-topic]\"
 .  ev doc-env-dh
 .  doc-setup-page-layout
-.  if !\n[cR] \{\
-.    \" Re-use doc-header-space between page top and header.
-.    sp \n[doc-header-space]u
-.  \}
-.  nr doc-reg-dh \w'\*[doc-caption-font]\*[doc-header-string]\f[]'
-.  nr doc-reg-dh1 \w'\*[doc-caption-font2]\*[doc-volume]\f[]'
+.  ie \n[cR] .pl +1v
+.  el        .sp .5i
+.  nr doc-reg-dh \w'\*[doc-page-topic-font]\*[doc-xref]\f[]'
+.  nr doc-reg-dh1 \w'\*[doc-volume]'
 .  if (\n[doc-reg-dh] + \n[doc-reg-dh1] + \n[doc-reg-dh] >= \n[.lt]) \{\
 .    while (\n[doc-reg-dh] + \n[doc-reg-dh1] + \n[doc-reg-dh] >= \n[.lt]) \{\
-.      length doc-hs-len-prev \*[doc-header-string]
-.      substring doc-header-string 0 -2
-.      length doc-hs-len \*[doc-header-string]
-.      nr doc-reg-dh \w'\*[doc-caption-font]\*[doc-header-string]\|.\|.\|.\f[]'
+.      ds doc-xref \*[doc-page-topic-font]\*[doc-abbv]\f[]\"
+.      as doc-xref \*[doc-page-section-font](\*[doc-section])\f[]\"
+.      length doc-abbv-len-prev \*[doc-abbv]
+.      substring doc-abbv 0 -2
+.      length doc-abbv-len \*[doc-abbv]
+.      nr doc-reg-dh \w'\*[doc-page-topic-font]\*[doc-abbv]\|.\|.\|.\f[]'
 .      \" If header string didn't actually get shorter, stop trying.
-.      if (\n[doc-hs-len-prev] <= \n[doc-hs-len]) \
+.      if (\n[doc-abbv-len-prev] <= \n[doc-abbv-len]) \
 .        break
 .    \}
-.    rr doc-hs-len
-.    rr doc-hs-len-prev
-.    as doc-header-string "\|.\|.\|.
+.    rr doc-abbv-len
+.    rr doc-abbv-len-prev
+.    as doc-abbv \|.\|.\|.
 .  \}
-.  tl \*[doc-caption-font]\*[doc-header-string]\f[]\*[doc-caption-font2]\*[doc-volume]\f[]\*[doc-caption-font]\*[doc-header-string]\f[]
-.  ie !\n[cR] \
-.    sp \n[doc-header-space]u
-.  el \{\
+.  tl '\*[doc-xref]'\*[doc-volume]\f[]'\*[doc-xref]'
+.  ie \n[cR] \{\
 .    pl +1v
 .    sp 1v
 .  \}
+.  el .sp |1i
 .  ev
 .  ns
+.  rm doc-xref
+.  rm doc-abbv
 ..
 .ec
 .
 .
+.\" NS doc-break-body-text
+.\" NS   Schedule a page break when the next output line is written (not
+.\" NS   called if continuously rendering).
+.de doc-break-body-text
+'  bp
+..
+.
+.
 .\" NS doc-footer macro
 .\" NS   print page footer
+.\"
+.\" NS local variables:
+.\" NS   doc-xref
+.\"
+.\" TODO: Support man(7)'s `X` register.
 .
 .eo
 .de doc-footer
-.  ie \n[cR] \
-.    br
-.  el \{\
-.    ev doc-caption-enviroment
-.    doc-setup-page-layout
-.    sp \n[doc-footer-space]u
-.    ie \n[D] \{\
-.      ie e \
-.        tl %\*[doc-caption-font2]\*[doc-date-string]\f[]\*[doc-caption-font]\*[doc-operating-system]\f[]
-.      el \
-.        tl \*[doc-caption-font]\*[doc-operating-system]\f[]\*[doc-caption-font2]\*[doc-date-string]\f[]%
-.    \}
+.  ds doc-xref \*[doc-page-topic-font]\*[doc-page-topic]\f[]\"
+.  as doc-xref \*[doc-page-section-font](\*[doc-section])\f[]\"
+.  ev doc-caption-enviroment
+.  doc-setup-page-layout
+.  ie \n[D] \{\
+.    ie e \
+.      tl '%'\*[doc-date-string]'\*[doc-operating-system]'
 .    el \
-.      tl \*[doc-caption-font]\*[doc-operating-system]\f[]\*[doc-caption-font2]\*[doc-date-string]\f[]%
-.    bp
-.    ev
+.      tl '\*[doc-operating-system]'\*[doc-date-string]'%'
 .  \}
+.  el \{\
+.    ie \n[cR] \
+.      tl '\*[doc-operating-system]'\*[doc-date-string]'\*[doc-xref]'
+.    el \
+.      tl '\*[doc-operating-system]'\*[doc-date-string]'%'
+.  \}
+.  if !\n[cR] .bp
+.  ev
+.  rm doc-xref
 ..
 .ec
 .
@@ -1030,21 +1112,20 @@
 .
 .eo
 .de doc-end-macro
-.  \" We may still have a partial line in the environment.  If this is
-.  \" the case, and we happen to be on the last line of the page, the
-.  \" '.fl' request will cause the page to be ejected and troff will
-.  \" immediately exit.  If we are in nroff mode, this would be
-.  \" unfortunate, since we would never get a chance to output the
-.  \" footer.  So we fudge the page length to make sure that the last
-.  \" page is never ejected until we want it to be.
-.
-.  fl
 .  doc-check-depth
 .
 .  if \n[cR] \{\
+.    \" We might have a pending output line that is not yet broken, and
+.    \" also be 1v from the bottom of the page.  If we break (or flush)
+.    \" the output line now, the page will get ejected afterward and
+.    \" troff will exit because we're in an end-of-input macro--our
+.    \" footer will never be output.  So, if that is the case, further
+.    \" extend the page length by 1v.
+.    if ((\n[.p] - \n[nl]) <= \n[.V]) .pl +1v
+.    br
 .    pl +1v
 .    sp 1v
-.    tl \*[doc-caption-font]\*[doc-operating-system]\f[]\*[doc-caption-font2]\*[doc-date-string]\f[]\*[doc-caption-font]\*[doc-operating-system]\f[]
+.    doc-footer
 .    \" If we're processing multiple documents and have started a new
 .    \" one, draw a line between this footer and the next header.
 .    if !'\n[.F]'' \{\
@@ -1060,6 +1141,14 @@
 .  ch doc-header
 .  bp
 .  nr doc-is-first-page-of-document 1
+.
+.  \" Reset strings to reduce info leaks from one man page to the next.
+.  ds doc-date-string UNDATED\"
+.  ds doc-page-topic UNTITLED\"
+.  ds doc-volume LOCAL\"
+.  ds doc-section \" empty
+.  ds doc-operating-system \" empty
+.  ds doc-topic-name \" empty
 ..
 .ec
 .
@@ -1131,6 +1220,12 @@
 .  nop \[em] \$*
 ..
 .ec
+.
+.
+.\" NS doc-in-name-section global register (bool)
+.\" NS   whether we are in the 'name' section
+.
+.nr doc-in-name-section 0
 .
 .
 .\" NS doc-in-synopsis-section global register (bool)
@@ -1224,6 +1319,7 @@
 .\" NS   doc-in-authors-section
 .\" NS   doc-in-files-section
 .\" NS   doc-in-library-section
+.\" NS   doc-in-name-section
 .\" NS   doc-in-see-also-section
 .\" NS   doc-in-synopsis-section
 .\" NS   doc-indent-synopsis
@@ -1251,12 +1347,20 @@
 .  \" Tell doc-print-recursive whether to force capitalization.
 .  nr doc-do-capitalize \n[CS]
 .
-.  ie \n[doc-arg-limit] \{\
+.  \" Normalize capitalization of section heading.
+.  doc-prepare-section-heading \$*
+.
+.  ie "\*[doc-sec-head]"\*[doc-section-name]" \
+.    nr doc-in-name-section 1
+.  el \
+.    nr doc-in-name-section 0
+.
+.  ie \n[doc-arg-count] \{\
 .    \" we only allow 'Sh' within 'Sh'; it will change the font back to
 .    \" 'doc-Sh-font'
 .    ie "\*[doc-macro-name]"Sh" \{\
 .      nr doc-arg-ptr +1
-.      ie (\n[doc-arg-limit] >= \n[doc-arg-ptr]) \{\
+.      ie (\n[doc-arg-count] >= \n[doc-arg-ptr]) \{\
 .        nr doc-curr-font \n[.f]
 .        nop \*[doc-Sh-font]\c
 .        doc-print-recursive
@@ -1278,17 +1382,14 @@
 .    ds doc-macro-name Sh
 .    doc-parse-args \$@
 .
-.    if t \
-.      ad
-.
-.    \" this resolves, e.g., '.Sh "SEE ALSO"'
-.    doc-prepare-section-heading \$*
+.    ad \*[AD]
 .
 .    ie "\*[doc-sec-head]"\*[doc-section-name]" \{\
-.      doc-setup-header
+.      doc-set-up-titles
 .      in 0
 .    \}
 .    el \{\
+.      nr doc-in-name-section 0
 .      nr doc-in-synopsis-section 0
 .      nr doc-in-library-section 0
 .      nr doc-in-see-also-section 0
@@ -1327,7 +1428,7 @@
 .    \}
 .
 .    doc-setup-page-layout
-.    sp
+.    sp \n[doc-paragraph-space]u
 .    ns
 .    ta T .5i
 .    if !\n[cR] \
@@ -1351,7 +1452,7 @@
 .    if t \
 .      ss \n[doc-reg-Sh] \n[doc-reg-Sh1]
 .
-.    in +\n[doc-subheader-indent]u
+.    in \n[IN]u
 .    ns
 .
 .    doc-check-depth
@@ -1377,12 +1478,12 @@
 .
 .eo
 .de Ss
-.  ie \n[doc-arg-limit] \{\
+.  ie \n[doc-arg-count] \{\
 .    \" we only allow 'Ss' within 'Ss'; it will change the font back to
 .    \" 'doc-Sh-font'
 .    ie "\*[doc-macro-name]"Ss" \{\
 .      nr doc-arg-ptr +1
-.      ie (\n[doc-arg-limit] >= \n[doc-arg-ptr]) \{\
+.      ie (\n[doc-arg-count] >= \n[doc-arg-ptr]) \{\
 .        nr doc-curr-font \n[.f]
 .        nop \*[doc-Sh-font]\c
 .        doc-print-recursive
@@ -1406,10 +1507,10 @@
 .
 .    ds doc-subsection-heading \$*
 .
-.    sp
+.    sp \n[doc-paragraph-space]u
 .    if !\n[cR] \
 .      ne 3
-.    ti -.25i
+.    in \n[SN]u
 .
 .    if '\*[.T]'pdf' \
 .      pdfbookmark 3 "\*[doc-subsection-heading]"
@@ -1426,6 +1527,7 @@
 .    ss \n[doc-reg-Ss] \n[doc-reg-Ss1]
 .
 .    ta T .5i
+.    in
 .    if !\n[cR] \
 .      ne 2
 .    br
@@ -1447,12 +1549,12 @@
 .de Rd
 .  tm MDOC GLOBAL REGISTER DUMP
 .  tm doc-macro-name == '\*[doc-macro-name]'
-.  tm doc-arg-limit == \n[doc-arg-limit]
+.  tm doc-arg-count == \n[doc-arg-count]
 .  tm doc-num-args == \n[doc-num-args]
 .  tm doc-arg-ptr == \n[doc-arg-ptr]
 .
 .  nr doc-reg-Rd 1
-.  while (\n[doc-reg-Rd] <= \n[doc-arg-limit]) \{\
+.  while (\n[doc-reg-Rd] <= \n[doc-arg-count]) \{\
 .    tm doc-arg\n[doc-reg-Rd] == '\*[doc-arg\n[doc-reg-Rd]]'
 .    tm doc-type\n[doc-reg-Rd] == \n[doc-type\n[doc-reg-Rd]]
 .    tm doc-space\n[doc-reg-Rd] == '\*[doc-space\n[doc-reg-Rd]]'
@@ -1563,15 +1665,13 @@
 .  tm doc-volume-name == '\*[doc-volume-name]'
 .  tm doc-have-author == \n[doc-have-author]
 .
-.  tm doc-document-title == '\*[doc-document-title]'
+.  tm doc-page-topic == '\*[doc-page-topic]'
 .  tm doc-volume == '\*[doc-volume]'
 .  tm doc-section == '\*[doc-section]'
 .  tm doc-operating-system == '\*[doc-operating-system]'
 .  tm doc-date-string == '\*[doc-date-string]'
-.  tm doc-header-space == \n[doc-header-space]
-.  tm doc-footer-space == \n[doc-footer-space]
 .  tm doc-display-vertical == \n[doc-display-vertical]
-.  tm doc-header-string == '\*[doc-header-string]'
+.  tm doc-in-name-section == \n[doc-in-name-section]
 .  tm doc-in-synopsis-section == \n[doc-in-synopsis-section]
 .  tm doc-in-library-section == \n[doc-in-library-section]
 .  tm doc-in-see-also-section == \n[doc-in-see-also-section]

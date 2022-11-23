@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 1994-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
@@ -31,6 +30,7 @@ X command to specify inline escape sequence (how to specify unprintable chars?)
 X command to include bitmap graphics
 */
 
+#include "assert.h"
 #include "driver.h"
 #include "nonposix.h"
 
@@ -58,7 +58,7 @@ static int user_paper_size = -1;
 static int landscape_flag = 0;
 static int duplex_flag = 0;
 
-// An upper limit on the paper size in centipoints,
+// An upper limit on the paper dimensions in centipoints,
 // used for setting HPGL picture frame.
 #define MAX_PAPER_WIDTH (12*720)
 #define MAX_PAPER_HEIGHT (17*720)
@@ -230,13 +230,13 @@ lj4_printer::lj4_printer(int ps)
   if (font::papersize) {
     int n = lookup_paper_size(font::papersize);
     if (n < 0)
-      error("unknown paper size '%1'", font::papersize);
+      error("ignoring invalid paper format '%1'", font::papersize);
     else
       paper_size = n;
   }
   if (ps >= 0)
     paper_size = ps;
-  printf("\033&l%dA"		// paper size
+  printf("\033&l%dA"		// paper format
 	 "\033&l%dO"		// orientation
 	 "\033&l0E",		// no top margin
 	 paper_table[paper_size].code,
@@ -640,7 +640,7 @@ int main(int argc, char **argv)
       {
 	int n = lookup_paper_size(optarg);
 	if (n < 0)
-	  error("unknown paper size '%1'", optarg);
+	  error("ignoring invalid paper format '%1'", font::papersize);
 	else
 	  user_paper_size = n;
 	break;
@@ -700,7 +700,15 @@ int main(int argc, char **argv)
 static void usage(FILE *stream)
 {
   fprintf(stream,
-	  "usage: %s [-lv] [-d [n]] [-c n] [-p paper_size]\n"
-	  "       [-w n] [-F dir] [files ...]\n",
-	  program_name);
+	  "usage: %s [-l] [-c n] [-d [n]] [-F dir] [-p paper-format]"
+	  " [-w n] [file ...]\n"
+	  "usage: %s {-v | --version}\n"
+	  "usage: %s --help\n",
+	  program_name, program_name, program_name);
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

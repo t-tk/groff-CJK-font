@@ -46,20 +46,49 @@ int html = 0;
 int xhtml = 0;
 eqnmode_t output_format;
 
-int read_line(FILE *fp, string *p)
+static const char *input_char_description(int c)
+{
+  switch (c) {
+  case '\001':
+    return "a leader character";
+  case '\n':
+    return "a newline character";
+  case '\b':
+    return "a backspace character";
+  case '\t':
+    return "a tab character";
+  case ' ':
+    return "a space character";
+  case '\177':
+    return "a delete character";
+  }
+  size_t bufsz = sizeof "character code " + INT_DIGITS + 1;
+  // repeat expression; no VLAs in ISO C++
+  static char buf[sizeof "character code " + INT_DIGITS + 1];
+  (void) memset(buf, 0, bufsz);
+  if (csprint(c)) {
+    buf[0] = '\'';
+    buf[1] = c;
+    buf[2] = '\'';
+    return buf;
+  }
+  (void) sprintf(buf, "character code %d", c);
+  return buf;
+}
+
+static bool read_line(FILE *fp, string *p)
 {
   p->clear();
   int c = -1;
   while ((c = getc(fp)) != EOF) {
-    if (!invalid_input_char(c))
+    if (!is_invalid_input_char(c))
       *p += char(c);
     else
-      error("invalid input character code '%1'", c);
+      error("invalid input (%1)", input_char_description(c));
     if (c == '\n')
       break;
   }
-  current_lineno++;
-  return p->length() > 0;
+  return (p->length() > 0);
 }
 
 void do_file(FILE *fp, const char *filename)
@@ -72,13 +101,15 @@ void do_file(FILE *fp, const char *filename)
   current_filename = fn.contents();
   if (output_format == troff)
     printf(".lf 1 %s\n", current_filename);
-  current_lineno = 0;
+  current_lineno = 1;
   while (read_line(fp, &linebuf)) {
     if (linebuf.length() >= 4
 	&& linebuf[0] == '.' && linebuf[1] == 'l' && linebuf[2] == 'f'
-	&& (linebuf[3] == ' ' || linebuf[3] == '\n' || compatible_flag)) {
+	&& (linebuf[3] == ' ' || linebuf[3] == '\n' || compatible_flag))
+    {
       put_string(linebuf, stdout);
       linebuf += '\0';
+      // In GNU roff, `lf` assigns the number of the _next_ line.
       if (interpret_lf_args(linebuf.contents() + 3))
 	current_lineno--;
     }
@@ -92,17 +123,23 @@ void do_file(FILE *fp, const char *filename)
       int start_lineno = current_lineno + 1;
       str.clear();
       for (;;) {
-	if (!read_line(fp, &linebuf))
+	if (!read_line(fp, &linebuf)) {
+	  current_lineno = 0; // suppress report of line number
 	  fatal("end of file before .EN");
-	if (linebuf.length() >= 3 && linebuf[0] == '.' && linebuf[1] == 'E') {
+	}
+	if (linebuf.length() >= 3
+	    && linebuf[0] == '.'
+	    && linebuf[1] == 'E') {
 	  if (linebuf[2] == 'N'
 	      && (linebuf.length() == 3 || linebuf[3] == ' '
 		  || linebuf[3] == '\n' || compatible_flag))
 	    break;
 	  else if (linebuf[2] == 'Q' && linebuf.length() > 3
 		   && (linebuf[3] == ' ' || linebuf[3] == '\n'
-		       || compatible_flag))
-	    fatal("nested .EQ");
+		       || compatible_flag)) {
+	    current_lineno++; // We just read another line.
+	    fatal("equations cannot be nested (.EQ within .EQ)");
+	  }
 	}
 	str += linebuf;
       }
@@ -117,12 +154,15 @@ void do_file(FILE *fp, const char *filename)
 	if (output_format == mathml)
 	  putchar('\n');
         else {
-	  printf(".lf %d\n", current_lineno - 1);
+	  current_lineno++;
+	  printf(".lf %d\n", current_lineno);
 	  output_string();
 	}
       }
-      if (output_format == troff)
+      if (output_format == troff) {
+	current_lineno++;
 	printf(".lf %d\n", current_lineno);
+      }
       put_string(linebuf, stdout);
     }
     else if (start_delim != '\0' && linebuf.search(start_delim) >= 0
@@ -130,6 +170,7 @@ void do_file(FILE *fp, const char *filename)
       ;
     else
       put_string(linebuf, stdout);
+    current_lineno++;
   }
   current_filename = 0;
   current_lineno = 0;
@@ -151,7 +192,9 @@ static int inline_equation(FILE *fp, string &linebuf, string &str)
   inline_flag = 1;
   for (;;) {
     if (no_newline_in_delim_flag && strchr(start + 1, end_delim) == 0) {
-      error("missing '%1'", end_delim);
+      error("unterminated inline equation; started with %1,"
+	    " expecting %2", input_char_description(start_delim),
+	    input_char_description(end_delim));
       char *nl = strchr(start + 1, '\n');
       if (nl != 0)
 	*nl = '\0';
@@ -173,8 +216,9 @@ static int inline_equation(FILE *fp, string &linebuf, string &str)
       }
       str += ptr;
       if (!read_line(fp, &linebuf))
-	fatal("unterminated '%1' at line %2, looking for '%3'",
-	      start_delim, start_lineno, end_delim);
+	fatal("unterminated inline equation; started with %1,"
+	      " expecting %2", input_char_description(start_delim),
+	      input_char_description(end_delim));
       linebuf += '\0';
       ptr = &linebuf[0];
     }
@@ -266,8 +310,11 @@ static char *delim_search(char *ptr, int delim)
 void usage(FILE *stream)
 {
   fprintf(stream,
-    "usage: %s [ -rvDCNR ] -dxx -fn -sn -pn -mn -Mdir -Ts [ files ... ]\n",
-    program_name);
+    "usage: %s [-CNrR] [-d xy] [-f font] [-m n] [-M dir] [-p n] [-s n]"
+    " [-T name] [file ...]\n"
+    "usage: %s {-v | --version}\n"
+    "usage: %s --help\n",
+    program_name, program_name, program_name);
 }
 
 int main(int argc, char **argv)
@@ -282,8 +329,8 @@ int main(int argc, char **argv)
     { "version", no_argument, 0, 'v' },
     { NULL, 0, 0, 0 }
   };
-  while ((opt = getopt_long(argc, argv, "CRvd:f:p:s:m:T:M:rN", long_options,
-			    NULL))
+  while ((opt = getopt_long(argc, argv, "CNrRd:f:m:M:p:s:T:v",
+			    long_options, NULL))
 	 != EOF)
     switch (opt) {
     case 'C':
@@ -297,17 +344,17 @@ int main(int argc, char **argv)
       break;
     case 'v':
       printf("GNU eqn (groff) version %s\n", Version_string);
-      exit(0);
+      exit(EXIT_SUCCESS);
       break;
     case 'd':
       if (optarg[0] == '\0' || optarg[1] == '\0')
 	error("'-d' option requires a two-character argument");
-      else if (invalid_input_char(optarg[0]))
-	error("invalid delimiter '%1' in '-d' option argument",
-	      optarg[0]);
-      else if (invalid_input_char(optarg[1]))
-	error("invalid delimiter '%1' in '-d' option argument",
-	      optarg[1]);
+      else if (is_invalid_input_char(optarg[0]))
+	error("invalid delimiter (%1) in '-d' option argument",
+	      input_char_description(optarg[0]));
+      else if (is_invalid_input_char(optarg[1]))
+	error("invalid delimiter (%1) in '-d' option argument",
+	      input_char_description(optarg[1]));
       else {
 	start_delim = optarg[0];
 	end_delim = optarg[1];
@@ -335,7 +382,7 @@ int main(int argc, char **argv)
       break;
     case 's':
       if (set_gsize(optarg))
-	warning("option '-s' is deprecated; see eqn(1) man page");
+	warning("option '-s' is deprecated");
       else
 	error("invalid size '%1' in '-s' option argument ", optarg);
       break;
@@ -343,7 +390,7 @@ int main(int argc, char **argv)
       {
 	int n;
 	if (sscanf(optarg, "%d", &n) == 1) {
-	  warning("option '-p' is deprecated; see eqn(1) man page");
+	  warning("option '-p' is deprecated");
 	  set_script_reduction(n);
 	}
 	else
@@ -356,7 +403,7 @@ int main(int argc, char **argv)
 	if (sscanf(optarg, "%d", &n) == 1)
 	  set_minimum_size(n);
 	else
-	  error("invalid size '%1' in '-n' option argument ", optarg);
+	  error("invalid size '%1' in '-n' option argument", optarg);
       }
       break;
     case 'r':
@@ -367,14 +414,14 @@ int main(int argc, char **argv)
       break;
     case CHAR_MAX + 1: // --help
       usage(stdout);
-      exit(0);
+      exit(EXIT_SUCCESS);
       break;
     case '?':
       usage(stderr);
-      exit(1);
+      exit(EXIT_FAILURE);
       break;
     default:
-      assert(0);
+      assert(0 == "unhandled getopt_long return value");
     }
   init_table(device);
   init_char_table();
@@ -400,7 +447,9 @@ int main(int argc, char **argv)
     FILE *fp = config_macro_path.open_file(STARTUP_FILE, &path);
     if (fp) {
       do_file(fp, path);
-      fclose(fp);
+      if (fclose(fp) < 0)
+	fatal("unable to close '%1': %2", STARTUP_FILE,
+	      strerror(errno));
       free(path);
     }
   }
@@ -414,15 +463,19 @@ int main(int argc, char **argv)
 	errno = 0;
 	FILE *fp = fopen(argv[i], "r");
 	if (!fp)
-	  fatal("can't open '%1': %2", argv[i], strerror(errno));
+	  fatal("unable to open '%1': %2", argv[i], strerror(errno));
 	else {
 	  do_file(fp, argv[i]);
-	  fclose(fp);
+	  if (fclose(fp) < 0)
+	    fatal("unable to close '%1': %2", argv[i], strerror(errno));
 	}
       }
-  if (ferror(stdout) || fflush(stdout) < 0)
-    fatal("output error");
-  return 0;
+  if (ferror(stdout))
+    fatal("standard output stream is in an error state");
+  if (fflush(stdout) < 0)
+    fatal("unable to flush standard output stream: %1",
+	  strerror(errno));
+  exit(EXIT_SUCCESS);
 }
 
 // Local Variables:

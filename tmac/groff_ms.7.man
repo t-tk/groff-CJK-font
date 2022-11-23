@@ -1,7 +1,9 @@
 '\" t
 .TH groff_ms @MAN7EXT@ "@MDATE@" "groff @VERSION@"
 .SH Name
-groff_ms \- GNU roff manuscript macro package for formatting documents
+groff_ms \- GNU
+.I roff
+manuscript macro package for formatting documents
 .
 .
 .\" ====================================================================
@@ -92,7 +94,7 @@ This implementation is mostly compatible with the documented interface
 and behavior of AT&T Unix Version\~7
 .IR ms .
 .
-Several extensions from 4.2BSD (Berkeley)
+Many extensions from 4.2BSD (Berkeley)
 .\" Few changes were made in 4.3, Reno, Tahoe, or 4.4.
 and Tenth Edition Research Unix have been recreated.
 .
@@ -459,7 +461,7 @@ but not the date)
 at the top of the first page.
 .
 If the optional
-.B no\-repeat\-info
+.B no\-\:\%repeat\-\:\%info
 argument is given,
 .I ms
 produces a cover page but does not repeat any of its information on
@@ -473,16 +475,15 @@ Normally,
 sets the page number following the cover page to\~1.
 .
 Specifying the optional
-.B no\-renumber
+.B no\-\:\%renumber
 argument suppresses this alteration.
 .
 Optional arguments can occur in any order.
-.\" Including the next sentence harms U.S. letter pagination... :-/
-.\"
-.\".RB \[lq] no \[rq]
-.\"is recognized as a synonym of
-.\".B no\-repeat\-info
-.\"for AT&T compatibility.
+.
+.RB \[lq] no \[rq]
+is recognized as a synonym of
+.B no\-\:\%repeat\-\:\%info
+for AT&T compatibility.
 .
 .
 .TP
@@ -490,11 +491,11 @@ Optional arguments can occur in any order.
 Specify the document title.
 .
 .I ms
-collects text on input lines following a call to this macro into the
-title until reaching an
+collects text on input lines following this call into the title until
+reaching
 .BR .AU ,
 .BR .AB ,
-or heading or paragraphing macro call.
+or a heading or paragraphing macro call.
 .
 .
 .TP
@@ -502,13 +503,13 @@ or heading or paragraphing macro call.
 Specify an author's name.
 .
 .I ms
-collects text on input lines following a call to this macro into the
-author's name until reaching an
+collects text on input lines following this call into the author's name
+until reaching
 .BR .AI ,
 .BR .AB ,
 another
 .BR .AU ,
-or heading or paragraphing macro call.
+or a heading or paragraphing macro call.
 .
 Call it repeatedly to specify multiple authors.
 .
@@ -528,11 +529,11 @@ the last
 call controls.
 .
 .I ms
-collects text on input lines following a call to this macro into the
-author's institution until reaching an
+collects text on input lines following this call into the author's
+institution until reaching
 .BR .AU ,
 .BR .AB ,
-or heading or paragraphing macro call.
+or a heading or paragraphing macro call.
 .
 .
 .TP
@@ -546,8 +547,7 @@ and,
 if
 .B .RP
 is also called,
-left-aligned after other document description information on the cover
-page.
+left-aligned at the end of the document description on the cover page.
 .
 .
 .TP
@@ -559,11 +559,10 @@ or any
 if
 .B .RP
 is also called,
-left-aligned after other document description information on the cover
-page.
+left-aligned at the end of the document description on the cover page.
 .
-This is the
-.I groff ms
+This is
+.IR "groff ms" 's
 default.
 .
 .
@@ -572,8 +571,8 @@ default.
 Begin the abstract.
 .
 .I ms
-collects text on input lines following a call to this macro into the
-abstract until reaching an
+collects text on input lines following this call into the abstract until
+reaching an
 .B .AE
 call.
 .
@@ -598,7 +597,9 @@ End the abstract.
 .
 The
 .B FAM
-string sets the font family for body text;
+string,
+a GNU extension,
+sets the font family for body text;
 the default is
 .RB \[lq] T \[rq].
 .
@@ -646,10 +647,11 @@ This is a Tenth Edition Research Unix extension.
 .\" ====================================================================
 .
 .I ms
-provides a handful of strings to obtain typographical symbols not easily
+provides a few strings to obtain typographical symbols not easily
 entered with the keyboard.
 .
-Many others are available as special character escape sequences\[em]see
+These and many others are available as special character escape
+sequences\[em]see
 .MR groff_char @MAN7EXT@ .
 .
 .
@@ -675,6 +677,11 @@ the right.
 .SS Paragraphs
 .\" ====================================================================
 .
+Paragraphing macros
+.IR break ,
+or terminate,
+any pending output line so that a new paragraph can begin.
+.
 Several paragraph types are available,
 differing in how indentation
 applies to them:
@@ -689,7 +696,8 @@ All paragraphing macro calls cause the insertion of vertical space in
 the amount stored in the
 .B PD
 register,
-except at page or column breaks.
+except at page or column breaks,
+or adjacent to displays.
 .
 .
 .PP
@@ -1857,7 +1865,7 @@ macros define footers for them.
 By default,
 .I ms
 places no header on any page numbered \[lq]1\[rq]
-(regardless of its assigned format).
+(regardless of its number format).
 .
 .
 .TP
@@ -2128,163 +2136,93 @@ if present).
 .
 .
 .P
-When creating a table of contents,
-incorporating content derived from headings specified by
-.B .NH
-and
-.B .SH ,
-traditional
-.I ms
-implementations provide no convenient mechanism
-for duplication of the heading text into the table of contents;
+The remaining features in this subsection are GNU extensions.
+.
 .I groff ms
-mitigates this limitation,
-by providing the following pair of macros,
-(for use after
-.B .NH
-and
-.B .SH
-respectively):
+obviates the need to repeat heading text after
+.B .XS
+calls.
 .
-.TP
-.BI .XN\~ text\ ...
-.TQ
-.BI .XH\~ outline\-level\ text\ ...
-Duplicate
-.I text\~...
-added to the body ot the document,
-to create a table of contents entry,
-(which may be indented in accordance with
-.IR outline\-level ).
-.
-.P
-Either,
-or both of
-.B XN
-and
-.B XH
-may be redefined by the user,
-(preferably by definition of the replacement hook macros,
-.BR \%XN\-REPLACEMENT ,
-and
-.B \%XH\-REPLACEMENT
-respectively);
-in their default implementations,
-both emit their
-.I text
-arguments into the body of the document,
-as heading text;
-they also pass this same text to the callback macro:
-.
-.TP
-.BI \%.XH\-UPDATE\-TOC\~ \%outline\-level\ text\ ...
-Encapsulate
-.I text
-within
-.BR \%.XS ... XE ,
-to create a table of contents entry.
-This macro is called by both
+Call
 .B .XN
 and
 .B .XH
-(no complementary
-.B \%XN\-UPDATE\-TOC
-macro is required),
-and may be redefined by the user;
-in its default implementation,
-its
-.I \%outline\-level
-argument,
-(which is inferred from the last\[hy]specified
+after
 .B .NH
-heading level,
-when called by
-.BR .XN ),
-is simply ignored,
-but may be used by any user\[hy]defined replacement,
-for example,
-to control indentation of the table of contents.
-.
-.IP
-When called by
-.BR .XN ,
-in addition to the inference of the
-.I \%outline\-level
-argument,
-the
-.I text
-arguments are augmented,
-by prefixing the current heading number,
-(which is also deduced from the last preceding use of
-.BR .NH ).
-.
-.P
-In addition to
-.BR \%XH\-UPDATE\-TOC ,
-the default
-.B XN
 and
-.B XH
-implementations support the following pair of callback macros:
-.
-.
-.br
-.ne 4v
-.TP
-.B \%.XN\-INIT
-.TQ
-.B \%.XH\-INIT
-Called by
-.BR .XN ,
-and by
-.B .XH
-respectively,
-.I before
-.B \%.XH\-UPDATE\-TOC
-is called;
-in their default implementations,
-neither does anything,
-but either,
-or both,
-may be redefined by the user.
-.
-.P
-If the user has chosen to redefine
-.BR \%XH\-UPDATE\-TOC ,
-in some fashion which requires descrimination
-between the cases of having been called by
-.BR .XN ,
-or by
-.BR .XH ,
-then it may also be appropriate to redefine
-.BR \%XN\-INIT ,
-or
-.BR \%XH\-INIT ,
-or both,
-to handle the required discriminatory effect.
-.
-.P
-It should be noted that,
-whereas
-.I groff ms
-will emit an error diagnostic,
-and will
-.I not
-create any table of contents entry,
-if
-.B .XN
-is used before the first use of
-.BR .NH ,
-no such restriction is imposed on the use of
-.BR .XH .
-Thus,
-while it is nominally intended for use after
 .BR .SH ,
-.B .XH
-may be used in any context,
-in which use of
-.BR \%.XS ... XE
-is permitted.
+respectively.
+.
+Text to be appended to the formatted section heading,
+but not to appear in the table of contents entry,
+can follow these calls.
+.
+.
+.TP
+.BI .XN\~ heading-text
+Format
+.I heading-text
+and create a corresponding table of contents entry;
+the indentation is computed from the
+.I depth
+argument of the preceding
+.B NH
+call.
+.
+.
+.TP
+.BI .XH\~ "depth heading-text"
+As
+.BR .XN ,
+but use
+.I depth
+to determine the indentation.
+.
+.
+.P
+.I groff ms
+encourages customization of table of contents entry production.
+.
+(Re-)define any of the following macros as desired.
+.
+.
+.TP
+.BI \%.XN\-REPLACEMENT\~ heading-text
+.TQ
+.BI \%.XH\-REPLACEMENT\~ "depth heading-text"
+These hook macros implement
+.B .XN
+and
+.BR .XH ,
+and call
+.B \%XN\-INIT
+and
+.BR \%XH\-INIT ,
+respectively,
+then call
+.B \%XH\-UPDATE\-TOC
+with the arguments given them.
+.
+.
+.TP
+.B \%.XH\-INIT
+.TQ
+.B \%.XN\-INIT
+These hook macros do nothing by default.
+.
+.
+.TP
+.BI \%.XH\-UPDATE\-TOC\~ "depth heading-text"
+Bracket
+.I heading-text
+with
+.B XS
+and
+.B XE
+calls,
+indenting it by 2 ens per level of
+.I depth
+beyond the first.
 .
 .
 .P
@@ -2434,26 +2372,42 @@ and
 .IP \[bu]
 AT&T
 .I ms
-supported only integral values for the type size and vertical spacing.
+interpreted the values of the registers
+.B PS
+and
+.B VS
+in points,
+and did not support the use of scaling units with them.
 .
-To overcome this restriction,
-for the registers
+.I groff ms
+interprets values of the registers
 .BR PS ,
 .BR VS ,
 .BR FPS ,
 and
 .BR FVS ,
-.I groff ms
-interprets values equal to or larger than\~1000 as decimal fractions
-multiplied by\~1000.
+equal to or larger than\~1,000
+(one thousand)
+as decimal fractions multiplied by\~1,000.
 .
-In
-.I ms
-documents that don't need to be portable to other implementations,
-use of a scaling unit,
-as in
-.RB \[lq] ".nr PS 10.5p" \[rq],
-is preferable.
+(Register values are converted to and stored as basic
+units.
+.
+See \[lq]Measurements\[rq] in the
+.I groff
+Texinfo manual or the
+.MR groff @MAN7EXT@
+man page.)
+.
+This threshold makes use of a scaling unit with these parameters
+practical for high-resolution devices while preserving backward
+compatibility.
+.
+For example,
+.RB \[lq] "groff \-rPS=10.5p" \[rq]
+at the shell prompt is equivalent to placing
+.RB \[lq] ".nr PS 10.5p" \[rq]
+at the beginning of the document.
 .
 .
 .IP \[bu]
@@ -2829,6 +2783,8 @@ Larry Kollar
 .ME .
 .
 .
+.br
+.ne 8v
 .\" ====================================================================
 .SH "See also"
 .\" ====================================================================
@@ -2848,7 +2804,7 @@ it may be compressed and/or available in additional formats.
 with the
 .I ms
 Macro Package\[rq];
-Larry Kollar and G.\~Branden Robinson.
+Larry Kollar and \%G.\~Branden Robinson.
 .
 .
 .br
@@ -2864,9 +2820,9 @@ and the
 macros\[rq];
 Deri James.
 .
-.B BOXSTART
+.B \%BOXSTART
 and
-.B BOXSTOP
+.B \%BOXSTOP
 macros are available via the
 .I sboxes
 extension package,

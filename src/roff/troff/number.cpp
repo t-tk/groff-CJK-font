@@ -33,16 +33,17 @@ int vresolution = 1;
 int units_per_inch;
 int sizescale;
 
-static int parse_expr(units *v, int scaling_indicator,
-		      int parenthesised, int rigid = 0);
-static int start_number();
+static bool is_valid_expression(units *v, int scaling_unit,
+				bool is_parenthesized,
+				bool is_mandatory = false);
+static bool is_valid_expression_start();
 
 int get_vunits(vunits *res, unsigned char si)
 {
-  if (!start_number())
+  if (!is_valid_expression_start())
     return 0;
   units x;
-  if (parse_expr(&x, si, 0)) {
+  if (is_valid_expression(&x, si, false /* is_parenthesized */)) {
     *res = vunits(x);
     return 1;
   }
@@ -52,10 +53,10 @@ int get_vunits(vunits *res, unsigned char si)
 
 int get_hunits(hunits *res, unsigned char si)
 {
-  if (!start_number())
+  if (!is_valid_expression_start())
     return 0;
   units x;
-  if (parse_expr(&x, si, 0)) {
+  if (is_valid_expression(&x, si, false /* is_parenthesized */)) {
     *res = hunits(x);
     return 1;
   }
@@ -67,10 +68,11 @@ int get_hunits(hunits *res, unsigned char si)
 
 int get_number_rigidly(units *res, unsigned char si)
 {
-  if (!start_number())
+  if (!is_valid_expression_start())
     return 0;
   units x;
-  if (parse_expr(&x, si, 0, 1)) {
+  if (is_valid_expression(&x, si, false /* is_parenthesized */,
+			  true /* is_mandatory */)) {
     *res = x;
     return 1;
   }
@@ -80,10 +82,10 @@ int get_number_rigidly(units *res, unsigned char si)
 
 int get_number(units *res, unsigned char si)
 {
-  if (!start_number())
+  if (!is_valid_expression_start())
     return 0;
   units x;
-  if (parse_expr(&x, si, 0)) {
+  if (is_valid_expression(&x, si, false /* is_parenthesized */)) {
     *res = x;
     return 1;
   }
@@ -93,10 +95,10 @@ int get_number(units *res, unsigned char si)
 
 int get_integer(int *res)
 {
-  if (!start_number())
+  if (!is_valid_expression_start())
     return 0;
   units x;
-  if (parse_expr(&x, 0, 0)) {
+  if (is_valid_expression(&x, 0, false /* is_parenthesized */)) {
     *res = x;
     return 1;
   }
@@ -124,7 +126,7 @@ int get_vunits(vunits *res, unsigned char si, vunits prev_value)
     *res = prev_value - v;
     break;
   default:
-    assert(0);
+    assert(0 == "unhandled switch case returned by get_incr_number()");
   }
   return 1;
 }
@@ -145,7 +147,7 @@ int get_hunits(hunits *res, unsigned char si, hunits prev_value)
     *res = prev_value - v;
     break;
   default:
-    assert(0);
+    assert(0 == "unhandled switch case returned by get_incr_number()");
   }
   return 1;
 }
@@ -166,7 +168,7 @@ int get_number(units *res, unsigned char si, units prev_value)
     *res = prev_value - v;
     break;
   default:
-    assert(0);
+    assert(0 == "unhandled switch case returned by get_incr_number()");
   }
   return 1;
 }
@@ -187,7 +189,7 @@ int get_integer(int *res, int prev_value)
     *res = prev_value - int(v);
     break;
   default:
-    assert(0);
+    assert(0 == "unhandled switch case returned by get_incr_number()");
   }
   return 1;
 }
@@ -195,7 +197,7 @@ int get_integer(int *res, int prev_value)
 
 static incr_number_result get_incr_number(units *res, unsigned char si)
 {
-  if (!start_number())
+  if (!is_valid_expression_start())
     return BAD;
   incr_number_result result = ABSOLUTE;
   if (tok.ch() == '+') {
@@ -206,46 +208,48 @@ static incr_number_result get_incr_number(units *res, unsigned char si)
     tok.next();
     result = DECREMENT;
   }
-  if (parse_expr(res, si, 0))
+  if (is_valid_expression(res, si, false /* is_parenthesized */))
     return result;
   else
     return BAD;
 }
 
-static int start_number()
+static bool is_valid_expression_start()
 {
   while (tok.is_space())
     tok.next();
   if (tok.is_newline()) {
     warning(WARN_MISSING, "numeric expression missing");
-    return 0;
+    return false;
   }
   if (tok.is_tab()) {
     warning(WARN_TAB, "expected numeric expression, got %1",
 	    tok.description());
-    return 0;
+    return false;
   }
   if (tok.is_right_brace()) {
     warning(WARN_RIGHT_BRACE, "expected numeric expression, got right"
 	    "brace escape sequence");
-    return 0;
+    return false;
   }
-  return 1;
+  return true;
 }
 
 enum { OP_LEQ = 'L', OP_GEQ = 'G', OP_MAX = 'X', OP_MIN = 'N' };
 
-#define SCALE_INDICATOR_CHARS "icfPmnpuvMsz"
+#define SCALING_UNITS "icfPmnpuvMsz"
 
-static int parse_term(units *v, int scaling_indicator,
-		      int parenthesised, int rigid);
+static bool is_valid_term(units *v, int scaling_unit,
+			  bool is_parenthesized, bool is_mandatory);
 
-static int parse_expr(units *v, int scaling_indicator,
-		      int parenthesised, int rigid)
+static bool is_valid_expression(units *v, int scaling_unit,
+				bool is_parenthesized,
+				bool is_mandatory)
 {
-  int result = parse_term(v, scaling_indicator, parenthesised, rigid);
+  int result = is_valid_term(v, scaling_unit, is_parenthesized,
+			     is_mandatory);
   while (result) {
-    if (parenthesised)
+    if (is_parenthesized)
       tok.skip();
     int op = tok.ch();
     switch (op) {
@@ -289,8 +293,9 @@ static int parse_expr(units *v, int scaling_indicator,
       return result;
     }
     units v2;
-    if (!parse_term(&v2, scaling_indicator, parenthesised, rigid))
-      return 0;
+    if (!is_valid_term(&v2, scaling_unit, is_parenthesized,
+		       is_mandatory))
+      return false;
     int overflow = 0;
     switch (op) {
     case '<':
@@ -333,7 +338,7 @@ static int parse_expr(units *v, int scaling_indicator,
       }
       if (overflow) {
 	error("addition overflow");
-	return 0;
+	return false;
       }
       *v += v2;
       break;
@@ -348,7 +353,7 @@ static int parse_expr(units *v, int scaling_indicator,
       }
       if (overflow) {
 	error("subtraction overflow");
-	return 0;
+	return false;
       }
       *v -= v2;
       break;
@@ -371,37 +376,37 @@ static int parse_expr(units *v, int scaling_indicator,
       }
       if (overflow) {
 	error("multiplication overflow");
-	return 0;
+	return false;
       }
       *v *= v2;
       break;
     case '/':
       if (v2 == 0) {
 	error("division by zero");
-	return 0;
+	return false;
       }
       *v /= v2;
       break;
     case '%':
       if (v2 == 0) {
 	error("modulus by zero");
-	return 0;
+	return false;
       }
       *v %= v2;
       break;
     default:
-      assert(0);
+      assert(0 == "unhandled switch case while processing operator");
     }
   }
   return result;
 }
 
-static int parse_term(units *v, int scaling_indicator,
-		      int parenthesised, int rigid)
+static bool is_valid_term(units *v, int scaling_unit,
+			  bool is_parenthesized, bool is_mandatory)
 {
   int negative = 0;
   for (;;)
-    if (parenthesised && tok.is_space())
+    if (is_parenthesized && tok.is_space())
       tok.next();
     else if (tok.ch() == '+')
       tok.next();
@@ -417,66 +422,67 @@ static int parse_term(units *v, int scaling_indicator,
     // | is not restricted to the outermost level
     // tbl uses this
     tok.next();
-    if (!parse_term(v, scaling_indicator, parenthesised, rigid))
-      return 0;
+    if (!is_valid_term(v, scaling_unit, is_parenthesized, is_mandatory))
+      return false;
     int tem;
-    tem = (scaling_indicator == 'v'
+    tem = (scaling_unit == 'v'
 	   ? curdiv->get_vertical_position().to_units()
 	   : curenv->get_input_line_position().to_units());
     if (tem >= 0) {
       if (*v < INT_MIN + tem) {
 	error("numeric overflow");
-	return 0;
+	return false;
       }
     }
     else {
       if (*v > INT_MAX + tem) {
 	error("numeric overflow");
-	return 0;
+	return false;
       }
     }
     *v -= tem;
     if (negative) {
       if (*v == INT_MIN) {
 	error("numeric overflow");
-	return 0;
+	return false;
       }
       *v = -*v;
     }
-    return 1;
+    return true;
   case '(':
     tok.next();
     c = tok.ch();
     if (c == ')') {
-      if (rigid)
-	return 0;
+      if (is_mandatory)
+	return false;
       warning(WARN_SYNTAX, "empty parentheses");
       tok.next();
       *v = 0;
-      return 1;
+      return true;
     }
-    else if (c != 0 && strchr(SCALE_INDICATOR_CHARS, c) != 0) {
+    else if (c != 0 && strchr(SCALING_UNITS, c) != 0) {
       tok.next();
       if (tok.ch() == ';') {
 	tok.next();
-	scaling_indicator = c;
+	scaling_unit = c;
       }
       else {
 	error("expected ';' after scaling unit, got %1",
 	      tok.description());
-	return 0;
+	return false;
       }
     }
     else if (c == ';') {
-      scaling_indicator = 0;
+      scaling_unit = 0;
       tok.next();
     }
-    if (!parse_expr(v, scaling_indicator, 1, rigid))
-      return 0;
+    if (!is_valid_expression(v, scaling_unit,
+			     true /* is_parenthesized */, is_mandatory))
+      return false;
     tok.skip();
     if (tok.ch() != ')') {
-      if (rigid)
-	return 0;
+      if (is_mandatory)
+	return false;
       warning(WARN_SYNTAX, "expected ')', got %1", tok.description());
     }
     else
@@ -484,11 +490,11 @@ static int parse_term(units *v, int scaling_indicator,
     if (negative) {
       if (*v == INT_MIN) {
 	error("numeric overflow");
-	return 0;
+	return false;
       }
       *v = -*v;
     }
-    return 1;
+    return true;
   case '.':
     *v = 0;
     break;
@@ -506,12 +512,12 @@ static int parse_term(units *v, int scaling_indicator,
     do {
       if (*v > INT_MAX/10) {
 	error("numeric overflow");
-	return 0;
+	return false;
       }
       *v *= 10;
       if (*v > INT_MAX - (int(c) - '0')) {
 	error("numeric overflow");
-	return 0;
+	return false;
       }
       *v += c - '0';
       tok.next();
@@ -528,11 +534,11 @@ static int parse_term(units *v, int scaling_indicator,
   case '=':
     warning(WARN_SYNTAX, "empty left operand to '%1' operator", c);
     *v = 0;
-    return rigid ? 0 : 1;
+    return is_mandatory ? false : true;
   default:
     warning(WARN_NUMBER, "expected numeric expression, got %1",
 	    tok.description());
-    return 0;
+    return false;
   }
   int divisor = 1;
   if (tok.ch() == '.') {
@@ -550,10 +556,10 @@ static int parse_term(units *v, int scaling_indicator,
       tok.next();
     }
   }
-  int si = scaling_indicator;
+  int si = scaling_unit;
   int do_next = 0;
-  if ((c = tok.ch()) != 0 && strchr(SCALE_INDICATOR_CHARS, c) != 0) {
-    switch (scaling_indicator) {
+  if ((c = tok.ch()) != 0 && strchr(SCALING_UNITS, c) != 0) {
+    switch (scaling_unit) {
     case 0:
       warning(WARN_SCALE, "scaling unit invalid in context");
       break;
@@ -605,20 +611,23 @@ static int parse_term(units *v, int scaling_indicator,
     {
       // Convert to hunits so that with -Tascii 'm' behaves as in nroff.
       hunits em = curenv->get_size();
-      *v = scale(*v, em.is_zero() ? hresolution : em.to_units(), divisor);
+      *v = scale(*v, em.is_zero() ? hresolution : em.to_units(),
+		 divisor);
     }
     break;
   case 'M':
     {
       hunits em = curenv->get_size();
-      *v = scale(*v, em.is_zero() ? hresolution : em.to_units(), divisor*100);
+      *v = scale(*v, em.is_zero() ? hresolution : em.to_units(),
+		 (divisor * 100));
     }
     break;
   case 'n':
     {
       // Convert to hunits so that with -Tascii 'n' behaves as in nroff.
-      hunits en = curenv->get_size()/2;
-      *v = scale(*v, en.is_zero() ? hresolution : en.to_units(), divisor);
+      hunits en = curenv->get_size() / 2;
+      *v = scale(*v, en.is_zero() ? hresolution : en.to_units(),
+		 divisor);
     }
     break;
   case 'v':
@@ -635,18 +644,18 @@ static int parse_term(units *v, int scaling_indicator,
     *v = scale(*v, sizescale, divisor);
     break;
   default:
-    assert(0);
+    assert(0 == "unhandled switch case when processing scaling unit");
   }
   if (do_next)
     tok.next();
   if (negative) {
     if (*v == INT_MIN) {
       error("numeric overflow");
-      return 0;
+      return false;
     }
     *v = -*v;
   }
-  return 1;
+  return true;
 }
 
 units scale(units n, units x, units y)
@@ -676,24 +685,24 @@ units scale(units n, units x, units y)
 
 vunits::vunits(units x)
 {
-  // don't depend on the rounding direction for division of negative integers
+  // Don't depend on rounding direction when dividing negative integers.
   if (vresolution == 1)
     n = x;
   else
     n = (x < 0
-	 ? -((-x + vresolution/2 - 1)/vresolution)
-	 : (x + vresolution/2 - 1)/vresolution);
+	 ? -((-x + (vresolution / 2) - 1) / vresolution)
+	 : (x + (vresolution / 2) - 1) / vresolution);
 }
 
 hunits::hunits(units x)
 {
-  // don't depend on the rounding direction for division of negative integers
+  // Don't depend on rounding direction when dividing negative integers.
   if (hresolution == 1)
     n = x;
   else
     n = (x < 0
-	 ? -((-x + hresolution/2 - 1)/hresolution)
-	 : (x + hresolution/2 - 1)/hresolution);
+	 ? -((-x + (hresolution / 2) - 1) / hresolution)
+	 : (x + (hresolution / 2) - 1) / hresolution);
 }
 
 // Local Variables:

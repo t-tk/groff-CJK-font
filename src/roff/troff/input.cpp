@@ -137,7 +137,7 @@ static symbol read_escape_parameter(read_mode = NO_ARGS);
 static symbol read_long_escape_parameters(read_mode = NO_ARGS);
 static void interpolate_string(symbol);
 static void interpolate_string_with_args(symbol);
-static void interpolate_macro(symbol, int = 0);
+static void interpolate_macro(symbol, bool = false);
 static void interpolate_number_format(symbol);
 static void interpolate_environment_variable(symbol);
 
@@ -165,7 +165,7 @@ void set_escape_char()
 {
   if (has_arg()) {
     if (tok.ch() == 0) {
-      error("invalid escape character");
+      error("cannot select invalid escape character; using '\\'");
       escape_char = '\\';
     }
     else
@@ -349,7 +349,7 @@ int file_iterator::fill(node **)
     int c = getc(fp);
     if (c == EOF)
       break;
-    if (invalid_input_char(c))
+    if (is_invalid_input_char(c))
       warning(WARN_INPUT, "invalid input character code %1", int(c));
     else {
       *p++ = c;
@@ -374,7 +374,7 @@ int file_iterator::fill(node **)
 int file_iterator::peek()
 {
   int c = getc(fp);
-  while (invalid_input_char(c)) {
+  while (is_invalid_input_char(c)) {
     warning(WARN_INPUT, "invalid input character code %1", int(c));
     c = getc(fp);
   }
@@ -823,7 +823,7 @@ static char get_char_for_escape_parameter(bool allow_space = false)
     copy_mode_error("end of input in escape sequence");
     return '\0';
   default:
-    if (!invalid_input_char(c))
+    if (!is_invalid_input_char(c))
       break;
     // fall through
   case '\n':
@@ -837,7 +837,7 @@ static char get_char_for_escape_parameter(bool allow_space = false)
   case '\t':
   case '\001':
   case '\b':
-    copy_mode_error("%1 not allowed in escape sequence parameter",
+    copy_mode_error("%1 is not allowed in an escape sequence parameter",
 		    input_char_description(c));
     return '\0';
   }
@@ -1433,15 +1433,20 @@ static void define_color()
 
 node *do_overstrike()
 {
-  token start;
   overstrike_node *on = new overstrike_node;
   int start_level = input_stack::get_level();
+  token start;
   start.next();
   for (;;) {
     tok.next();
-    if (tok.is_newline() || tok.is_eof()) {
+    if (tok.is_newline()) {
+      input_stack::push(make_temp_iterator("\n"));
+      break;
+    }
+    if (tok.is_eof()) {
       warning(WARN_DELIM, "missing closing delimiter in overstrike"
 	     " escape sequence (got %1)", tok.description());
+      // Synthesize an input line ending.
       input_stack::push(make_temp_iterator("\n"));
       break;
     }
@@ -1470,21 +1475,22 @@ node *do_overstrike()
 
 static node *do_bracket()
 {
-  token start;
   bracket_node *bn = new bracket_node;
-  start.next();
   int start_level = input_stack::get_level();
+  token start;
+  start.next();
   for (;;) {
     tok.next();
-    if (tok.is_eof() || tok.is_newline()) {
+    if (tok.is_newline()) {
+      input_stack::push(make_temp_iterator("\n"));
+      break;
+    }
+    if (tok.is_eof()) {
       warning(WARN_DELIM, "missing closing delimiter in"
 	      " bracket-building escape sequence (got %1)",
 	      tok.description());
-      // XXX: Most other places we miss a closing delimiter, we push a
-      // temp iterator for the EOF case too.  What's special about \b?
-      // Exceptions: \w, \X are like this too.
-      if (tok.is_newline())
-	input_stack::push(make_temp_iterator("\n"));
+      // Synthesize an input line ending.
+      input_stack::push(make_temp_iterator("\n"));
       break;
     }
     if (tok == start
@@ -1502,17 +1508,19 @@ static node *do_bracket()
 
 static int do_name_test()
 {
+  int start_level = input_stack::get_level();
   token start;
   start.next();
-  int start_level = input_stack::get_level();
-  int bad_char = 0;
-  int some_char = 0;
+  bool got_bad_char = false;
+  bool got_some_char = false;
   for (;;) {
     tok.next();
     if (tok.is_newline() || tok.is_eof()) {
-      warning(WARN_DELIM, "missing closing delimiter in identifier"
-	      " validation escape sequence (got %1)",
-	      tok.description());
+      if (tok != start)
+	warning(WARN_DELIM, "missing closing delimiter in identifier"
+		" validation escape sequence (got %1)",
+		tok.description());
+      // Synthesize an input line ending.
       input_stack::push(make_temp_iterator("\n"));
       break;
     }
@@ -1520,10 +1528,10 @@ static int do_name_test()
 	&& (compatible_flag || input_stack::get_level() == start_level))
       break;
     if (!tok.ch())
-      bad_char = 1;
-    some_char = 1;
+      got_bad_char = true;
+    got_some_char = true;
   }
-  return some_char && !bad_char;
+  return (got_some_char && !got_bad_char);
 }
 
 static int do_expr_test()
@@ -1550,7 +1558,8 @@ static int do_expr_test()
     tok.next();
     if (tok.is_newline() || tok.is_eof()) {
       warning(WARN_DELIM, "missing closing delimiter in"
-	      " expression test escape (got %1)", tok.description());
+	      " expression test escape sequence (got %1)",
+	      tok.description());
       input_stack::push(make_temp_iterator("\n"));
       break;
     }
@@ -1600,14 +1609,17 @@ static node *do_zero_width()
 static node *do_zero_width()
 {
   node *rev = new dummy_node;
+  int start_level = input_stack::get_level();
   token start;
   start.next();
-  int start_level = input_stack::get_level();
   for (;;) {
     tok.next();
     if (tok.is_newline() || tok.is_eof()) {
-      warning(WARN_DELIM, "missing closing delimiter in"
-	      " zero-width escape (got %1)", tok.description());
+      if (tok != start)
+	warning(WARN_DELIM, "missing closing delimiter in"
+		" zero-width escape sequence (got %1)",
+		tok.description());
+      // Synthesize an input line ending.
       input_stack::push(make_temp_iterator("\n"));
       break;
     }
@@ -1615,7 +1627,7 @@ static node *do_zero_width()
 	&& (compatible_flag || input_stack::get_level() == start_level))
       break;
     if (!tok.add_to_zero_width_node_list(&rev))
-      error("invalid token in argument to \\Z");
+      error("invalid token in argument to escaped 'Z'");
   }
   node *n = 0;
   while (rev) {
@@ -2363,7 +2375,7 @@ bool token::usable_as_delimiter(bool report_error)
     case ')':
     case '.':
       if (report_error)
-        error("character '%1' not allowed as starting delimiter",
+        error("character '%1' is not allowed as a starting delimiter",
 	      char(c));
       return false;
     default:
@@ -2381,7 +2393,7 @@ bool token::usable_as_delimiter(bool report_error)
   case TOKEN_TAB:
   case TOKEN_NEWLINE:
     if (report_error)
-      error("%1 not allowed as starting delimiter", description());
+      error("%1 is not allowed as a starting delimiter", description());
     return false;
   default:
     return true;
@@ -2395,55 +2407,59 @@ const char *token::description()
   case TOKEN_BACKSPACE:
     return "a backspace character";
   case TOKEN_CHAR:
-    buf[0] = '\'';
-    buf[1] = c;
-    buf[2] = '\'';
-    buf[3] = '\0';
-    return buf;
+    if (c == INPUT_DELETE)
+      return "a delete character";
+    else {
+      buf[0] = '\'';
+      buf[1] = c;
+      buf[2] = '\'';
+      buf[3] = '\0';
+      return buf;
+    }
   case TOKEN_DUMMY:
-    return "'\\&'";
+    return "an escaped '&'";
   case TOKEN_ESCAPE:
-    return "'\\e'";
+    return "an escaped 'e'";
   case TOKEN_HYPHEN_INDICATOR:
-    return "'\\%'";
+    return "an escaped '%'";
   case TOKEN_INTERRUPT:
-    return "'\\c'";
+    return "an escaped 'c'";
   case TOKEN_ITALIC_CORRECTION:
-    return "'\\/'";
+    return "an escaped '/'";
   case TOKEN_LEADER:
     return "a leader character";
   case TOKEN_LEFT_BRACE:
-    return "'\\{'";
+    return "an escaped '{'";
   case TOKEN_MARK_INPUT:
-    return "'\\k'";
+    return "an escaped 'k'";
   case TOKEN_NEWLINE:
-    return "newline";
+    return "a newline";
   case TOKEN_NODE:
     return "a node";
   case TOKEN_NUMBERED_CHAR:
-    return "'\\N'";
+    return "an escaped 'N'";
   case TOKEN_RIGHT_BRACE:
-    return "'\\}'";
+    return "an escaped '}'";
   case TOKEN_SPACE:
     return "a space";
   case TOKEN_SPECIAL:
     return "a special character";
   case TOKEN_SPREAD:
-    return "'\\p'";
+    return "an escaped 'p'";
   case TOKEN_STRETCHABLE_SPACE:
-    return "'\\~'";
+    return "an escaped '~'";
   case TOKEN_UNSTRETCHABLE_SPACE:
-    return "'\\ '";
+    return "an escaped ' '";
   case TOKEN_HORIZONTAL_SPACE:
-    return "a horizontal space";
+    return "a horizontal motion";
   case TOKEN_TAB:
     return "a tab character";
   case TOKEN_TRANSPARENT:
-    return "'\\!'";
+    return "an escaped '!'";
   case TOKEN_TRANSPARENT_DUMMY:
-    return "'\\)'";
+    return "an escaped ')'";
   case TOKEN_ZERO_WIDTH_BREAK:
-    return "'\\:'";
+    return "an escaped ':'";
   case TOKEN_EOF:
     return "end of input";
   default:
@@ -2472,11 +2488,11 @@ void compatible()
   skip_line();
 }
 
-static void empty_name_warning(bool required)
+static void diagnose_missing_identifier(bool required)
 {
   if (tok.is_newline() || tok.is_eof()) {
     if (required)
-      warning(WARN_MISSING, "missing name");
+      warning(WARN_MISSING, "missing identifier");
   }
   else if (tok.is_right_brace() || tok.is_tab()) {
     const char *start = tok.description();
@@ -2486,22 +2502,22 @@ static void empty_name_warning(bool required)
     if (!tok.is_newline() && !tok.is_eof())
       error("%1 is not allowed before an argument", start);
     else if (required)
-      warning(WARN_MISSING, "missing name");
+      warning(WARN_MISSING, "missing identifier");
   }
   else if (required)
-    error("expected name, got %1", tok.description());
+    error("expected identifier, got %1", tok.description());
   else
-    error("expected name, got %1; treated as missing",
+    error("expected identifier, got %1; treated as missing",
 	  tok.description());
 }
 
-static void non_empty_name_warning()
+static void diagnose_invalid_identifier()
 {
   if (!tok.is_newline() && !tok.is_eof() && !tok.is_space()
       && !tok.is_tab() && !tok.is_right_brace()
       // We don't want to give a warning for .el\{
       && !tok.is_left_brace())
-    error("%1 not allowed in a name", tok.description());
+    error("%1 is not allowed in an identifier", tok.description());
 }
 
 symbol get_name(bool required)
@@ -2516,11 +2532,11 @@ symbol get_name(bool required)
 	tok.make_space();
       }
       else
-	non_empty_name_warning();
+	diagnose_invalid_identifier();
       return symbol(buf);
     }
     else {
-      empty_name_warning(required);
+      diagnose_missing_identifier(required);
       return NULL_SYMBOL;
     }
   }
@@ -2563,13 +2579,13 @@ static symbol do_get_long_name(bool required, char end)
     tok.next();
   }
   if (i == 0) {
-    empty_name_warning(required);
+    diagnose_missing_identifier(required);
     return NULL_SYMBOL;
   }
   if (end && buf[i] == end)
     buf[i+1] = '\0';
   else
-    non_empty_name_warning();
+    diagnose_invalid_identifier();
   if (buf == abuf)
     return symbol(buf);
   else {
@@ -2665,7 +2681,7 @@ void do_request()
   if (nm.is_null())
     skip_line();
   else
-    interpolate_macro(nm, 1);
+    interpolate_macro(nm, true /* don't want next token */);
   compatible_flag = do_old_compatible_flag;
   do_old_compatible_flag = -1;
   request_or_macro *p = lookup_request(nm);
@@ -2686,7 +2702,7 @@ inline int possibly_handle_first_page_transition()
 
 static int transparent_translate(int cc)
 {
-  if (!invalid_input_char(cc)) {
+  if (!is_invalid_input_char(cc)) {
     charinfo *ci = charset_table[cc];
     switch (ci->get_special_translation(1)) {
     case charinfo::TRANSLATE_SPACE:
@@ -3088,7 +3104,7 @@ request::request(REQUEST_FUNCP pp) : p(pp)
 {
 }
 
-void request::invoke(symbol, int)
+void request::invoke(symbol, bool)
 {
   (*p)();
 }
@@ -3787,7 +3803,7 @@ int operator==(const macro &m1, const macro &m2)
   return 1;
 }
 
-static void interpolate_macro(symbol nm, int no_next)
+static void interpolate_macro(symbol nm, bool do_not_want_next_token)
 {
   request_or_macro *p = (request_or_macro *)request_dictionary.lookup(nm);
   if (p == 0) {
@@ -3816,7 +3832,7 @@ static void interpolate_macro(symbol nm, int no_next)
     }
   }
   if (p)
-    p->invoke(nm, no_next);
+    p->invoke(nm, do_not_want_next_token);
   else {
     skip_line();
     return;
@@ -3925,14 +3941,14 @@ static void decode_string_args(macro_iterator *mi)
   }
 }
 
-void macro::invoke(symbol nm, int no_next)
+void macro::invoke(symbol nm, bool do_not_want_next_token)
 {
   macro_iterator *mi = new macro_iterator(nm, *this);
   decode_args(mi);
   input_stack::push(mi);
   // we must delay tok.next() in case the function has been called by
   // do_request to assure proper handling of compatible_flag
-  if (!no_next)
+  if (!do_not_want_next_token)
     tok.next();
 }
 
@@ -4084,11 +4100,14 @@ void spring_trap(symbol nm)
   static char buf2[2] = { END_TRAP, '\0' };
   input_stack::push(make_temp_iterator(buf2));
   request_or_macro *p = lookup_request(nm);
+  // We don't perform this validation at the time the trap is planted
+  // because a request name might be replaced by a macro by the time the
+  // trap springs.
   macro *m = p->to_macro();
   if (m)
     input_stack::push(new macro_iterator(nm, *m, "trap-called macro"));
   else
-    error("you can't invoke a request with a trap");
+    error("trap failed to spring: '%1' is a request", nm.contents());
   input_stack::push(make_temp_iterator(buf));
 }
 
@@ -4119,7 +4138,7 @@ void read_request()
     while (c == ' ')
       c = get_copy(0);
     while (c != EOF && c != '\n' && c != ' ') {
-      if (!invalid_input_char(c)) {
+      if (!is_invalid_input_char(c)) {
 	if (reading_from_terminal)
 	  fputc(c, stderr);
 	had_prompt = 1;
@@ -4140,7 +4159,7 @@ void read_request()
   int nl = 0;
   int c;
   while ((c = getchar()) != EOF) {
-    if (invalid_input_char(c))
+    if (is_invalid_input_char(c))
       warning(WARN_INPUT, "invalid input character code %1", int(c));
     else {
       if (c == '\n') {
@@ -4321,7 +4340,7 @@ static void interpolate_string(symbol nm)
   request_or_macro *p = lookup_request(nm);
   macro *m = p->to_macro();
   if (!m)
-    error("you can only invoke a string or macro using \\*");
+    error("cannot interpolate request '%1'", nm.contents());
   else {
     if (m->is_string()) {
       string_iterator *si = new string_iterator(*m, "string", nm);
@@ -4336,14 +4355,14 @@ static void interpolate_string(symbol nm)
   }
 }
 
-static void interpolate_string_with_args(symbol s)
+static void interpolate_string_with_args(symbol nm)
 {
-  request_or_macro *p = lookup_request(s);
+  request_or_macro *p = lookup_request(nm);
   macro *m = p->to_macro();
   if (!m)
-    error("you can only invoke a string or macro using \\*");
+    error("cannot interpolate request '%1'", nm.contents());
   else {
-    macro_iterator *mi = new macro_iterator(s, *m);
+    macro_iterator *mi = new macro_iterator(nm, *m);
     decode_string_args(mi);
     input_stack::push(mi);
   }
@@ -5100,7 +5119,8 @@ static bool read_size(int *x)
       else {
 	val = val*10 + (c - '0');
 	error("ambiguous type size in escape sequence; rewrite to use"
-	      " '\\s(%1' or similar", val);
+	      " '%1s(%2' or similar", static_cast<char>(escape_char),
+	      val);
       }
     }
     val *= sizescale;
@@ -5255,22 +5275,21 @@ static void do_register()
 
 static void do_width()
 {
+  int start_level = input_stack::get_level();
   token start;
   start.next();
-  int start_level = input_stack::get_level();
   environment env(curenv);
   environment *oldenv = curenv;
   curenv = &env;
   for (;;) {
     tok.next();
-    if (tok.is_eof() || tok.is_newline()) {
-      warning(WARN_DELIM, "missing closing delimiter in"
-	      " width computation escape sequence (got %1)", tok.description());
-      // XXX: Most other places we miss a closing delimiter, we push a
-      // temp iterator for the EOF case too.  What's special about \w?
-      // Exception: \b, \X are like this too.
-      if (tok.is_newline())
-	input_stack::push(make_temp_iterator("\n"));
+    if (tok.is_newline() || tok.is_eof()) {
+      if (tok != start)
+	warning(WARN_DELIM, "missing closing delimiter in"
+		" width computation escape sequence (got %1)",
+		tok.description());
+      // Synthesize an input line ending.
+      input_stack::push(make_temp_iterator("\n"));
       break;
     }
     if (tok == start
@@ -5469,25 +5488,28 @@ static void encode_char(macro *mac, char c)
   }
 }
 
-node *do_special()
+static node *do_special()
 {
+  int start_level = input_stack::get_level();
   token start;
   start.next();
-  int start_level = input_stack::get_level();
   macro mac;
-  for (tok.next();
-       tok != start || input_stack::get_level() != start_level;
-       tok.next()) {
-    if (tok.is_eof() || tok.is_newline()) {
-      warning(WARN_DELIM, "missing closing delimiter in device control"
-	      " escape sequence (got %1)", tok.description());
-      // XXX: Most other places we miss a closing delimiter, we push a
-      // temp iterator for the EOF case too.  What's special about \X?
-      // Exceptions: \b, \w are like this too.
-      if (tok.is_newline())
-	input_stack::push(make_temp_iterator("\n"));
+  for (;;) {
+    tok.next();
+    if (tok.is_newline()) {
+      input_stack::push(make_temp_iterator("\n"));
       break;
     }
+    if (tok.is_eof()) {
+      warning(WARN_DELIM, "missing closing delimiter in device control"
+	      " escape sequence (got %1)", tok.description());
+      // Synthesize an input line ending.
+      input_stack::push(make_temp_iterator("\n"));
+      break;
+    }
+    if (tok == start
+	&& (compatible_flag || input_stack::get_level() == start_level))
+      break;
     unsigned char c;
     if (tok.is_space())
       c = ' ';
@@ -6037,7 +6059,7 @@ void source_quietly()
 void pipe_source()
 {
   if (!unsafe_flag) {
-    error("'pso' request not allowed in safer mode");
+    error("'pso' request is not allowed in safer mode");
     skip_line();
   }
   else {
@@ -6219,7 +6241,8 @@ filename(fname), llx(0), lly(0), urx(0), ury(0), lastc(EOF)
 		  // ...we must ensure it is not a further attempt to defer
 		  // assignment to a trailer, (which we are already parsing).
 		  //
-		  error("'(atend)' not allowed in trailer of '%1'", filename);
+		  error("'(atend)' is not allowed in trailer of '%1'",
+			filename);
 	      }
 	    }
 	    else
@@ -6626,7 +6649,7 @@ const char *asciify(int c)
     buf[0] = '\0';
     break;
   default:
-    if (invalid_input_char(c))
+    if (is_invalid_input_char(c))
       buf[0] = '\0';
     else
       buf[0] = c;
@@ -6639,23 +6662,23 @@ const char *input_char_description(int c)
 {
   switch (c) {
   case '\n':
-    return "newline character";
+    return "a newline character";
   case '\b':
-    return "backspace character";
+    return "a backspace character";
   case '\001':
-    return "leader character";
+    return "a leader character";
   case '\t':
-    return "tab character";
+    return "a tab character";
   case ' ':
-    return "space character";
+    return "a space character";
   case '\0':
-    return "node";
+    return "a node";
   }
-  size_t bufsz = sizeof "magic character code "  + INT_DIGITS + 1;
+  size_t bufsz = sizeof "magic character code " + INT_DIGITS + 1;
   // repeat expression; no VLAs in ISO C++
-  static char buf[sizeof "magic character code "  + INT_DIGITS + 1];
+  static char buf[sizeof "magic character code " + INT_DIGITS + 1];
   (void) memset(buf, 0, bufsz);
-  if (invalid_input_char(c)) {
+  if (is_invalid_input_char(c)) {
     const char *s = asciify(c);
     if (*s) {
       buf[0] = '\'';
@@ -6790,7 +6813,7 @@ void do_open(int append)
 void open_request()
 {
   if (!unsafe_flag) {
-    error("'open' request not allowed in safer mode");
+    error("'open' request is not allowed in safer mode");
     skip_line();
   }
   else
@@ -6800,7 +6823,7 @@ void open_request()
 void opena_request()
 {
   if (!unsafe_flag) {
-    error("'opena' request not allowed in safer mode");
+    error("'opena' request is not allowed in safer mode");
     skip_line();
   }
   else
@@ -7137,7 +7160,8 @@ void define_class()
       }
       if (child1->is_class() || child2->is_class()) {
 	warning(WARN_SYNTAX,
-		"nested character class is not allowed in range definition");
+		"a nested character class is not allowed in a range"
+		" definition");
 	skip_line();
 	return;
       }
@@ -7237,7 +7261,7 @@ charinfo *token::get_char(bool required)
       // and token::process() don't add this token type if the escape
       // character is null.  If not, this should be an assert().  Also
       // see escape_off().
-      error("'\\e' used while escape sequences disabled");
+      error("escaped 'e' used while escape sequences disabled");
       return 0;
     }
   }
@@ -7573,7 +7597,7 @@ char *read_string()
     ;
   int i = 0;
   while (c != '\n' && c != EOF) {
-    if (!invalid_input_char(c)) {
+    if (!is_invalid_input_char(c)) {
       if (i + 2 > len) {
 	char *tem = s;
 	s = new char[len*2];
@@ -7597,7 +7621,7 @@ char *read_string()
 void pipe_output()
 {
   if (!unsafe_flag) {
-    error("'pi' request not allowed in safer mode");
+    error("'pi' request is not allowed in safer mode");
     skip_line();
   }
   else {
@@ -7634,7 +7658,7 @@ static int system_status;
 void system_request()
 {
   if (!unsafe_flag) {
-    error("'sy' request not allowed in safer mode");
+    error("'sy' request is not allowed in safer mode");
     skip_line();
   }
   else {
@@ -7702,7 +7726,7 @@ void transparent_file()
 	int c = getc(fp);
 	if (c == EOF)
 	  break;
-	if (invalid_input_char(c))
+	if (is_invalid_input_char(c))
 	  warning(WARN_INPUT, "invalid input character code %1", int(c));
 	else {
 	  curdiv->transparent_output(c);
@@ -7959,7 +7983,7 @@ static void set_string(const char *name, const char *value)
 {
   macro *m = new macro;
   for (const char *p = value; *p; p++)
-    if (!invalid_input_char((unsigned char)*p))
+    if (!is_invalid_input_char((unsigned char)*p))
       m->append(*p);
   request_dictionary.define(name, m);
 }
@@ -8007,11 +8031,15 @@ static void add_string(const char *s, string_list **p)
 void usage(FILE *stream, const char *prog)
 {
   fprintf(stream,
-"usage: %s [-abcCEiRUz] [-dCS] [-dNAME=STRING] [-fFAM] [-Fdir]"
-" [-Idir] [-mNAME] [-Mdir] [-nNUM] [-oLIST] [-rCN] [-rREG=EXPR]"
-" [-Tdev] [-wNAME] [-Wname] [file ...]\n"
-"usage: %s {-h | --help | -v | --version}\n",
-	  prog, prog);
+"usage: %s [-abcCEiRUz] [-d ct] [-d string=text] [-f font-family]"
+" [-F font-directory] [-I inclusion-directory] [-m macro-package]"
+" [-M macro-directory] [-n page-number] [-o page-list]"
+" [-r cnumeric-expression] [-r register=numeric-expression]"
+" [-T output-device] [-w warning-category] [-W warning-category]"
+" [file ...]\n"
+"usage: %s {-v | --version}\n"
+"usage: %s {-h | --help}\n",
+	  prog, prog, prog);
 }
 
 int main(int argc, char **argv)
@@ -8568,6 +8596,12 @@ static node *read_draw_node()
 	  maxpoints *= 2;
 	  delete[] oldpoint;
 	}
+	if (tok.is_newline() || tok.is_eof()) {
+	  warning(WARN_DELIM, "missing closing delimiter in drawing"
+		  " escape sequence (got %1)", tok.description());
+	  err = true;
+	  break;
+	}
 	if (!get_hunits(&point[i].h,
 			type == 'f' || type == 't' ? 'u' : 'm')) {
 	  err = true;
@@ -8676,8 +8710,8 @@ static void read_color_draw_node(token &start)
     curenv->set_fill_color(col);
   while (tok != start) {
     if (tok.is_newline() || tok.is_eof()) {
-      warning(WARN_DELIM, "missing closing delimiter in color drawing"
-	      " command (got %1)", tok.description());
+      warning(WARN_DELIM, "missing closing delimiter in color space"
+	      " drawing escape sequence (got %1)", tok.description());
       input_stack::push(make_temp_iterator("\n"));
       break;
     }
@@ -8732,7 +8766,7 @@ static void enable_warning(const char *name)
   if (mask)
     warning_mask |= mask;
   else
-    error("unknown warning '%1'", name);
+    error("unrecognized warning category '%1'", name);
 }
 
 static void disable_warning(const char *name)
@@ -8741,7 +8775,7 @@ static void disable_warning(const char *name)
   if (mask)
     warning_mask &= ~mask;
   else
-    error("unknown warning '%1'", name);
+    error("unrecognized warning category '%1'", name);
 }
 
 static void copy_mode_error(const char *format,

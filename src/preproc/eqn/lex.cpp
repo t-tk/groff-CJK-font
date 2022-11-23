@@ -401,8 +401,9 @@ file_input::file_input(FILE *f, const char *fn, input *p)
 
 file_input::~file_input()
 {
+  if (fclose(fp) < 0)
+    fatal("unable to close '%1': %2", filename, strerror(errno));
   delete[] filename;
-  fclose(fp);
 }
 
 int file_input::read_line()
@@ -419,7 +420,7 @@ int file_input::read_line()
       }
       if (c == EOF)
 	break;
-      else if (invalid_input_char(c))
+      else if (is_invalid_input_char(c))
 	lex_error("invalid input character code %1", c);
       else {
 	line += char(c);
@@ -689,7 +690,7 @@ void add_quoted_context(const string &s)
 
 void init_lex(const char *str, const char *filename, int lineno)
 {
- while (current_input != 0) {
+  while (current_input != 0) {
     input *tem = current_input;
     current_input = current_input->next;
     delete tem;
@@ -709,6 +710,7 @@ void get_delimited_text()
     start = get_char();
   token_buffer.clear();
   if (start == EOF) {
+    current_lineno = 0;
     if (got_location)
       error_with_file_and_line(filename, lineno,
 			       "end of input while defining macro");
@@ -719,6 +721,7 @@ void get_delimited_text()
   for (;;) {
     int c = get_char();
     if (c == EOF) {
+      current_lineno = 0;
       if (got_location)
 	error_with_file_and_line(filename, lineno,
 				 "end of input while defining macro");

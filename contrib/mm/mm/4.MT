@@ -17,7 +17,7 @@ for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-Please submit bug reports with examples at
+Please submit bug reports using groff's 'BUG-REPORT' file to
 http://savannah.gnu.org/bugs/?group=groff.
 ..
 .

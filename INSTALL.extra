@@ -51,8 +51,8 @@ should be constructed.
 
 As an example, we will imagine that groff's source code is in
 '/usr/local/src/groff' and that the build should happen within the
-directory '/home/my/groff-build'.  You can choose your own name for the
-build directory.
+directory '/home/my/groff-build'.  These directory names can be anything
+valid on the operating system.
 
   0. Create '/home/my/groff-build' and 'cd' to that directory.
 
@@ -88,9 +88,9 @@ with options like '--prefix' that select an alternative directory that
 is writable by the user conducting the build.  Type './configure --help'
 from the groff source tree for documentation of relevant options.
 Running groff commands from such a directory may require you to set the
-'GROFF_FONT_PATH' and 'GROFF_TMAC_PATH' environment variables.  See the
-groff(1) man page.  See "Evaluation" below for instructions on viewing
-this man page without having groff installed.
+'GROFF_BIN_PATH', 'GROFF_FONT_PATH', and 'GROFF_TMAC_PATH' environment
+variables.  See the groff(1) man page.  See "Evaluation" below for
+instructions on viewing this man page without having groff installed.
 
 
 Non-POSIX Platforms
@@ -111,7 +111,7 @@ capable of handling this standardized version of the language.  The C++
 source files use a suffix of '.cpp'; your C++ compiler must be able to
 handle this.  A C/C++ preprocessor that conforms to ISO C90 is also
 required.  If you don't already have a C++ compiler, we suggest GCC 9.4
-or later.  To override the configure script's choice of C++ compiler,
+or later.  To override the 'configure' script's choice of C++ compiler,
 you can set the CXX environment variable to the name of its executable.
 
 A few components of groff are written in ISO C99.  Features later made
@@ -128,11 +128,35 @@ requires the 'pkg-config' program to be installed on your system, as
 well as the library's C header files--on a package-based host system,
 this can mean installing uchardet's '-dev' or '-devel' package.
 
+URW fonts
+---------
+
+The 'configure' script searches for PostScript Type 1 fonts originating
+with the URW foundry; these are metrically compatible replacements for
+the Adobe PostScript Level 2 base 35 fonts required by that standard.
+These URW fonts are packaged with Ghostscript and in various derivative
+versions.  The Adobe fonts are not free software, but the replacements,
+often named "Nimbus Roman", "Nimbus Sans", and "Nimbus Mono", and so
+forth, are.  The PostScript and early PDF standards assumed that these
+base fonts would be supplied by the rendering device (a printer or PDF
+viewer).  Nowadays the PDF standard expects all fonts to be embedded in
+the document; if groff's gropdf(1) output driver knows where to find
+these fonts, you can use its "-e" option for this purpose.
+
+The build process populates "Foundry" and "download" files that tell
+gropdf where to find their groff font descriptions and the font files
+themselves, respectively.  If you have multiple versions of the URW
+fonts available on your system, or the 'configure' script cannot locate
+them on its own, use its "--with-urw-fonts-dir" option to tell the
+script where to find them.  If you never use groff to generate
+PostScript or PDF documents, you can ignore any output from the
+'configure' script about URW fonts.
+
 
 Miscellaneous
 =============
 
-If you want A4 or U.S. letter paper format and the configure script
+If you want A4 or U.S. letter paper format and the 'configure' script
 produces an incorrect guess, say
 
   PAGE=xxx ./configure
@@ -154,7 +178,7 @@ to run it.
 You can also try it out from the directory you used to build it.  A
 script called 'test-groff' is supplied for this purpose.  It sets up
 environment variables to allow groff to run without being installed.
-For example, the command
+For example, from the directory where you built groff, the command
 
   ./test-groff -man -Tascii src/roff/groff/groff.1 | less -R
 
@@ -210,7 +234,7 @@ I can view the test log as follows.
 
   cat build/tmac/tests/localization-works.sh.log
 
-Many known issues are documented in the PROBLEMS file; some apply to
+Many known issues are documented in the 'PROBLEMS' file; some apply to
 historical systems.  You can also browse groff bug reports via the GNU
 Savannah issue tracker to see if your issue has already been reported.
 
@@ -218,7 +242,7 @@ Savannah issue tracker to see if your issue has already been reported.
 
 If that doesn't help and you need support, please contact the groff
 mailing list at groff@gnu.org.  If you think that you have found a bug,
-please submit a ticket.
+please submit a ticket using the 'BUG-REPORT' file as a template.
 
   https://savannah.gnu.org/bugs/?group=groff&func=additem
 
@@ -228,15 +252,16 @@ Uninstalling
 
 If you are dissatisfied with groff, or to prepare for a new installation
 from source, you can uninstall it to ensure that no stale files persist
-on the system.  Run the command 'make uninstall'.  (If you used 'sudo
-make install', run 'sudo make uninstall'.)  At a minimum, some
-directories not particular to groff, like 'bin' and (depending on
-configuration) an X11 'app-defaults' directory will remain, as will one
-plain file called 'dir', created by GNU Texinfo's 'install-info'
-command.  (As of this writing, 'install-info' offers no provision for
-removing an effectively empty 'dir' file, and groff does not attempt to
-parse this file to determine whether it can be safely removed.)  All
-other groff artifacts will be deleted from the installation hierarchy.
+on the system.  Run the command 'sudo make uninstall'.  (If you
+successfully used 'make install', simply run 'make uninstall'.)  At a
+minimum, some directories not particular to groff, like 'bin' and
+(depending on configuration) an X11 'app-defaults' directory will
+remain, as will one plain file called 'dir', created by GNU Texinfo's
+'install-info' command.  (As of this writing, 'install-info' offers no
+provision for removing an effectively empty 'dir' file, and groff does
+not attempt to parse this file to determine whether it can be safely
+removed.)  All other groff artifacts will be deleted from the
+installation hierarchy.
 
 
 ##### Editor settings

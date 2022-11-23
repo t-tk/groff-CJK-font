@@ -411,7 +411,12 @@
 .wh -\\n(_Bu @r
 .if \\n(?n \
 .	nm \\n(ln
+.if \\n(_f \
+.	if !\\n(_f=\\n($m \
+.		do @err writing \\n($m-column footnote in \
+\\n(_f-column layout
 .|f
+.nr _f 0
 .if \\n(?n \
 .	nm
 .fi
@@ -637,7 +642,7 @@
 .		rr |l
 .\}
 .	el \
-.		@err invalid numeric argument to 'n2': '\\$1'
+.		do @err invalid numeric argument to 'n2': '\\$1'
 .\}
 .el \
 \{\
@@ -691,7 +696,7 @@
 .
 .de sk			\" *** leave a blank page (next page)
 .if \\n(.$>0 \
-.	@err ignoring argument(s) to 'sk'
+.	do @err ignoring argument(s) to 'sk'
 .nr ?s 1
 ..
 .
@@ -964,6 +969,7 @@
 .
 .
 .de 2c			\" *** double columned output
+.do if d |f .do @err changing columnation with footnote pending
 .br
 .if \\n($m>1 \
 .	1c\"				\" revert to 1c if already 2c
@@ -981,6 +987,7 @@
 ..
 .
 .de 1c			\" *** single columned output
+.do if d |f .do @err changing columnation with footnote pending
 .br
 .nr $c 1
 .nr $m 1
@@ -1600,6 +1607,11 @@
 .
 .de (f			\" *** begin footnote
 .if "\\n(.z"|f" .do @err footnotes cannot be nested
+.if \\n(_f \
+.	if !\\n(_f=\\n($m \
+.		do @err queueing \\n($m-column footnote after \
+\\n(_f-column footnote
+.nr _f \\n($m
 .ie "\\n(.z"" \
 \{\
 .	nr _D \\n(dn
@@ -1910,7 +1922,7 @@
 .if "\\$1"AB" \
 .	nr _0 5			\" abstract
 .if \\n(_0=0 \
-.	@err invalid segment type to '++': '\\$1'
+.	do @err invalid segment type to '++': '\\$1'
 .nr ?R 0
 .if \\n(_0>10 \
 \{\
@@ -2148,6 +2160,8 @@
 .@R ?b\"		\" pending floating keep at page bottom?
 .@R ?C\"		\" at chapter header?
 .@R ?e\"		\" in equation?
+.@R ?f\"		\" inside footnote?
+.@R _f\"		\" column count of previous footnote
 .@R ?H\"		\" suppress headers and footers next page?
 .@R ?I\"		\" has the header trap been sprung?
 .@R ?N\"		\" numbering with shorter line length?
@@ -2173,7 +2187,7 @@
 .nr es 0.5v			\" equation pre/postspacing
 .if \n(es<\n(.V .nr es \n(.V
 .wh 0 @h			\" set header
-.nr $l \n(.lu			\" line length
+.nr $l \n(.lu			\" line length (of column)
 .nr _L \n(.lu			\" line length of page
 .nr $c 1			\" current column number
 .nr $f 1			\" footnote number
@@ -2185,6 +2199,9 @@
 .ds rq \(rq\"			\" right quote
 .em @z
 .
+.\" Set line length and get .lt side effect.
+.if t .ll \n(_Lu
+.if n .ll 6.0i
 .
 .\"		*** FOREIGN LETTERS AND SPECIAL CHARACTERS ***
 .
@@ -2214,8 +2231,6 @@
 .ds qe \s-2\v'0.45m'\z\(em\v'-0.625m'\z\(em\v'-0.625m'\(em\v'0.8m'\s0\h'-0.1m'\v'-0.05m'\(br\v'0.05m'\h'0.1m'
 .ds qa \z\e\h'0.35m'\z\(sl\h'-0.33m'\v'-0.3m'\s-4\(em\s0\v'0.3m'\h'0.15m'
 .rm #h #v
-.ll 6.0i
-.lt 6.0i
 .
 .de @U
 .do @err the '\\$1' macro is not supported by this version of 'me'

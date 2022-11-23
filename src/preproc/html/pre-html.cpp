@@ -25,9 +25,11 @@
 
 #include <signal.h>
 #include <ctype.h>
-#include <assert.h>
 #include <stdlib.h>
 #include <errno.h>
+
+#include "assert.h"
+
 #include "errarg.h"
 #include "error.h"
 #include "stringclass.h"
@@ -1521,23 +1523,29 @@ static char_buffer inputFile;
 
 static void usage(FILE *stream)
 {
-  fprintf(stream, "usage: %s [-epV] [-a ANTI-ALIASING-TEXT-BITS]"
-	  " [-D IMAGE-DIRECTORY] [-F FONT-DIRECTORY]"
-	  " [-g ANTI-ALIASING-GRAPHICS-BITS] [-i RESOLUTION]"
-	  " [-I IMAGE-STEM] [-o IMAGE-VERTICAL-OFFSET]"
-	  " [-x HTML-DIALECT] [TROFF-COMMAND] [TROFF-ARGUMENT] ...\n"
-	  "usage: %s -v\n", program_name, program_name);
-  fputs(
+  fprintf(stream,
+"usage: %s [-epV] [-a anti-aliasing-text-bits] [-D image-directory]"
+" [-F font-directory] [-g anti-aliasing-graphics-bits] [-i resolution]"
+" [-I image-stem] [-o image-vertical-offset] [-x html-dialect]"
+" troff-command troff-argument ...\n"
+"usage: %s {-v | --version}\n"
+"usage: %s --help\n",
+	 program_name, program_name, program_name);
+  if (stdout == stream) {
+    fputs(
+"\n"
+"Prepare a troff(1) document for HTML formatting.\n"
 "\n"
 "This program is not intended to be executed standalone; it is\n"
-"normally part of a groff pipeline for producing HTML output.\n"
-"\n"
-"If your need to call it manually (e.g., for debugging purposes),\n"
-"give the 'groff' program the command-line option '-V' to inspect\n",
-	stream);
-  fprintf(stream, "the arguments with which '%s' is called.\n",
-      program_name);
-  fputs("\nSee grohtml(1).\n", stream);
+"normally part of a groff pipeline.  If your need to run it manually\n"
+"(e.g., for debugging purposes), give the 'groff' program the\n"
+"command-line option '-V' to inspect the arguments with which\n",
+	  stream);
+    fprintf(stream,
+"'%s' is called.  See the grohtml(1) manual page.\n",
+	  program_name);
+    exit(EXIT_SUCCESS);
+  }
 }
 
 /*
@@ -1658,7 +1666,6 @@ static int scanArguments(int argc, char **argv)
       break;
     case CHAR_MAX + 1: // --help
       usage(stdout);
-      exit(EXIT_SUCCESS);
       break;
     case '?':
       usage(stderr);

@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 2000-2020 Free Software Foundation, Inc.
      Written by Gaius Mulley (gaius@glam.ac.uk).
 
@@ -21,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
 #include <signal.h>
 #include <ctype.h>
-#include <assert.h>
 #include <stdlib.h>
 #include <errno.h>
 #include "errarg.h"
@@ -330,3 +328,9 @@ char *pushBackBuffer::readString (void)
   }
   return( str );
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

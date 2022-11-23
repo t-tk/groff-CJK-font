@@ -1,6 +1,8 @@
 .TH @g@pic @MAN1EXT@ "@MDATE@" "groff @VERSION@"
 .SH Name
-@g@pic \- compile pictures for troff or TeX
+@g@pic \- compile pictures for
+.I troff
+or TeX
 .
 .
 .\" ====================================================================
@@ -106,18 +108,20 @@ and any of
 .BR .PF ,
 or
 .B .PY
-are interpreted as picture descriptions.
+are interpreted as picture descriptions in the
+.I pic
+language.
 .
-Ending a
+End a
 .I @g@pic
 picture with
 .B .PE
-leaves the page position at the bottom of the picture;
-ending it with
+to leave the drawing position at the bottom of the picture,
+and with
 .B .PF
 or
 .B .PY
-leaves the position at the top.
+to leave it at the top.
 .
 Normally,
 .I @g@pic
@@ -149,7 +153,9 @@ and
 macros.
 .
 When a macro package does not supply these,
-appropriate definitions can be obtained with
+obtain simple definitions with the
+.I groff
+option
 .BR \-mpic ;
 these will center each picture.
 .
@@ -188,9 +194,8 @@ all exit afterward.
 .TP
 .B \-c
 Be more compatible with
-.IR tpic .
-.
-Implies
+.IR tpic ;
+implies
 .BR \-t .
 .
 Lines beginning with
@@ -211,7 +216,7 @@ it takes an optional integer argument specifying the line thickness
 (pen size)
 in milliinches;
 a missing argument restores the previous line thickness;
-the default line thickness is 8 milliinches.
+the default line thickness is 8\~milliinches.
 .
 The line thickness thus specified takes effect only when a
 non-negative line thickness has not been specified by use of the
@@ -240,15 +245,12 @@ extensions to the
 .I troff \" generic
 drawing commands.
 .
-You should use this if you are using a postprocessor that doesn't
-support these extensions.
-.
-The extensions are described in
+Specify this option if a postprocessor you're using doesn't support
+these extensions,
+described in
 .MR groff_out @MAN5EXT@ .
 .
-The
-.B \-n
-option also causes
+This option also causes
 .I @g@pic
 not to use zero-length lines to draw dots in
 .I troff \" generic
@@ -262,14 +264,14 @@ Operate in
 .B sh
 commands are ignored.
 .
-This option,
+This mode,
 enabled by default,
 can be useful when operating on untrustworthy input.
 .
 .
 .TP
 .B \-t
-\*[tx] mode.
+Produce \*[tx] output.
 .
 .
 .TP
@@ -318,95 +320,24 @@ is device-independent.
 .SH Usage
 .\" ====================================================================
 .
-This section describes only the differences between GNU
+This section primarily discusses the differences between GNU
 .I pic \" GNU
-and the original version of
-.IR pic . \" AT&T
+and the Eighth Edition Research Unix version of AT&T
+.I pic \" AT&T
+(1985).
 .
-Many of these differences also apply to newer versions of Unix
-.BR pic .
-.
-A complete documentation is available in the file
-.
-.
-.LP
-.RS
-.I @DOCDIR@/\:pic.ms
-.RE
+Many of these differences also apply to later versions of AT&T
+.IR pic .
 .
 .
 .\" ====================================================================
 .SS "\*[tx] mode"
 .\" ====================================================================
 .
-\*[tx] mode is enabled by the
+\*[tx]-compatible output is produced when the
 .B \-t
-option.
+option is specified.
 .
-In \*[tx] mode,
-.I @g@pic
-will define a vbox called
-.B \[rs]graph
-for each picture.
-.
-Use the
-.B figname
-command to change the name of the vbox.
-.
-You must yourself print that vbox using,
-for example,
-the command
-.
-.
-.RS
-.LP
-.EX
-\[rs]centerline{\[rs]box\[rs]graph}
-.EE
-.RE
-.
-.
-.LP
-Actually,
-since the vbox has a height of zero
-(it is defined with \[rs]vtop)
-this will produce slightly more vertical space above the picture than
-below it;
-.
-.
-.RS
-.LP
-.B
-\[rs]centerline{\[rs]raise 1em\[rs]box\[rs]graph}
-.RE
-.
-.
-.LP
-would avoid this.
-.
-.
-.LP
-To make the vbox having a positive height and a depth of zero
-(as used e.g., by \*[lx]'s
-.BR \%graphics.sty ),
-define the following macro in your document:
-.
-.
-.RS
-.LP
-.B \[rs]def\[rs]gpicbox#1{%
-.br
-.B "   \[rs]vbox{\[rs]unvbox\[rs]csname #1\[rs]endcsname\[rs]kern 0pt}}
-.RE
-.
-.
-.LP
-Now you can simply say
-.B \[rs]gpicbox{graph}
-instead of \[rs]box\[rs]graph.
-.
-.
-.LP
 You must use a \*[tx] driver that supports
 .I tpic
 version 2 specials.
@@ -423,7 +354,7 @@ commands it produced for \*[tx].)
 .\" http://ftp.cs.stanford.edu/tex/texhax/texhax90.019
 .
 .
-.LP
+.P
 Lines beginning with
 .B \[rs]
 are passed through transparently;
@@ -431,19 +362,96 @@ a
 .B %
 is added to the end of the line to avoid unwanted spaces.
 .
-You can safely use this feature to change fonts or to
-change the value of
+You can safely use this feature to change fonts or the value of
 .BR \[rs]baselineskip .
 .
 Anything else may well produce undesirable results;
 use at your own risk.
 .
-Lines beginning with a period are not given any special treatment.
+By default,
+lines beginning with a dot are not treated specially\[em]but see the
+.B \-c
+option.
+.
+.
+.P
+In \*[tx] mode,
+.I @g@pic
+will define a vbox called
+.B \[rs]graph
+for each picture.
+.
+Use GNU
+.IR pic 's \" GNU
+.B figname
+command to change the name of the vbox.
+.
+You must print that vbox yourself using the command
+.
+.RS
+.EX
+\[rs]centerline{\[rs]box\[rs]graph}
+.EE
+.RE
+.
+for instance.
+.
+Since the vbox has a height of zero
+(it is defined with
+.BR \[rs]vtop )
+this will produce slightly more vertical space above the picture than
+below it;
+.
+.RS
+.EX
+\[rs]centerline{\[rs]raise 1em\[rs]box\[rs]graph}
+.EE
+.RE
+.
+would avoid this.
+.
+To give the vbox a positive height and a depth of zero
+(as used by \*[lx]'s
+.IR \%graphics.sty ,
+for example)
+define the following macro in your document.
+.
+.RS
+.EX
+\[rs]def\[rs]gpicbox#1{%
+  \[rs]vbox{\[rs]unvbox\[rs]csname #1\[rs]endcsname\[rs]kern 0pt}}
+.EE
+.RE
+.
+You can then simply say
+.B \[rs]gpicbox{graph}
+instead of
+.BR \[rs]box\[rs]graph .
 .
 .
 .\" ====================================================================
 .SS Commands
 .\" ====================================================================
+.
+Several commands new to GNU
+.I pic \" GNU
+accept delimiters,
+shown in their synopses as braces
+.BR "{ }" .
+.
+Nesting of braces is supported.
+.
+Any other characters
+(except a space,
+tab,
+or newline)
+.\" XXX even crazy control characters, ugh--src/preproc/pic/lex.cpp:1266
+may be used as alternative delimiters,
+in which case any given pair must be identical.
+.
+Strings are recognized within delimiters of either kind;
+they may contain the delimiter character or unbalanced braces.
+.
 .
 .TP
 \fBfor\fR \fIvariable\fR \fB=\fR \fIexpr1\fR \fBto\fR \fIexpr2\fR \
@@ -530,6 +538,8 @@ This is useful for debugging.
 .
 .TP
 \fBcommand\fR \fIarg\fR\|.\|.\|.
+.\" Move right margin to indentation since we must indent more later.
+.RS
 Concatenate the arguments
 and pass them through as a line to
 .I troff
@@ -545,13 +555,13 @@ This has a similar effect to a line beginning with
 .B .\&
 or
 .BR \[rs] ,
-but allows the values of variables to be passed through.
+but allows the values of
+.I pic
+variables to be passed to the formatter.
 .
 For example,
 .
-.
 .RS
-.IP
 .EX
 \&.PS
 x = 14
@@ -561,16 +571,13 @@ command ".ds string x is " x "."
 .EE
 .RE
 .
-.
-.IP
-prints
-.
+produces
 .
 .RS
-.IP
 .EX
 x is 14.
 .EE
+.RE
 .RE
 .
 .
@@ -608,6 +615,8 @@ at this point in the file.
 .RB [ until\~ \[dq]\c
 .IB word \[dq]\c
 ]
+.\" Move right margin to indentation since we must indent more later.
+.RS
 This construct does
 .I body
 once for each line of
@@ -643,9 +652,7 @@ can be any character not occurring in
 .
 For example,
 .
-.
-.RS
-.IP
+.RS \" now move further
 .EX
 \&.PS
 copy thru % circle at ($1,$2) % until "END"
@@ -658,13 +665,9 @@ box
 .EE
 .RE
 .
-.
-.IP
-is equivalent to
-.
+and
 .
 .RS
-.IP
 .EX
 \&.PS
 circle at (1,2)
@@ -675,12 +678,18 @@ box
 .EE
 .RE
 .
+are equivalent.
 .
-.IP
-The commands to be performed for each line can also be taken
-from a macro defined earlier by giving the name of the macro
-as the argument to
+The commands to be performed for each line can also be taken from a
+macro defined earlier by giving the name of the macro as the argument to
 .BR thru .
+.
+The argument after
+.B thru
+is looked up as a macro name first;
+if not defined,
+its first character is interpreted as a delimiter.
+.RE
 .
 .
 .LP
@@ -775,31 +784,6 @@ prints
 .B 5 3
 .EE
 .RE
-.
-.
-.LP
-Arguments of the form
-.IP
-.I X anything X
-.LP
-are also allowed to be of the form
-.IP
-.BI {\  anything\  }
-.
-.
-.LP
-In this case
-.I anything
-can contain balanced occurrences of
-.B {
-and
-.BR } .
-Strings may contain
-.I X
-or imbalanced occurrences of
-.B {
-and
-.BR } .
 .
 .
 .\" ====================================================================
@@ -1072,14 +1056,14 @@ which should be a string as described in
 .MR printf 3
 appropriate for the number of arguments supplied.
 .
-Only the flags
+Only the modifiers
 .RB \[lq] # \[rq],
 .RB \[lq] \- \[rq],
 .RB \[lq] + \[rq],
-and \[lq]\~\[rq] [sp]ace),
+and \[lq]\~\[rq] [space]),
 a minimum field width,
 an optional precision,
-and the conversion specifications
+and the conversion specifiers
 .BR %e ,
 .BR %E ,
 .BR %f ,
@@ -1435,7 +1419,9 @@ papersize to
 .IR groff .
 .
 .
-.LP
+.br
+.ne 3v
+.P
 As the Encapsulated PostScript File Format
 .B EPS
 is getting more and more important,
@@ -1517,15 +1503,16 @@ is part of the
 distribution.
 .
 .
-.LP
+.P
 \[lq]PIC\[em]A Graphics Language for Typesetting: User Manual\[rq],
 by Brian W.\& Kernighan,
-1991,
+1984
+(revised 1991),
 AT&T Bell Laboratories Computing Science Technical Report No.\& 116
 .
 .
-.LP
-.B ps2eps
+.P
+.I ps2eps
 is available from CTAN mirrors, e.g.,
 .UR ftp://\:ftp\:.dante\:.de/\:tex\-archive/\:support/\:ps2eps/
 .UE
@@ -1559,6 +1546,7 @@ W.\& Richard Stevens,
 .\" Clean up.
 .rm tx
 .rm lx
+.rm ic
 .
 .\" Restore compatibility mode (for, e.g., Solaris 10/11).
 .cp \n[*groff_pic_1_man_C]

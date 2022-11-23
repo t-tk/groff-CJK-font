@@ -41,6 +41,8 @@ const int ESCAPE_e = 035;
 const int ESCAPE_PERCENT = 036;
 const int ESCAPE_SPACE = 037;
 
+const int INPUT_DELETE = 0177;
+
 const int TITLE_REQUEST = 0200;
 const int COPY_FILE_REQUEST = 0201;
 const int TRANSPARENT_FILE_REQUEST = 0202;
@@ -62,6 +64,8 @@ const int INPUT_NO_BREAK_SPACE = 0240;
 const int INPUT_SOFT_HYPHEN= 0255;
 
 #else /* IS_EBCDIC_HOST */
+
+const int INPUT_DELETE = 007;
 
 const int ESCAPE_QUESTION = 010;
 const int BEGIN_TRAP = 011;

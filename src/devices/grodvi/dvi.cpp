@@ -16,6 +16,7 @@ for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
+#include "assert.h"
 #include "driver.h"
 #include "nonposix.h"
 #include "paper.h"
@@ -934,7 +935,7 @@ int main(int argc, char **argv)
     case 'p':
       if (!font::scan_papersize(optarg, 0,
 				&user_paper_length, &user_paper_width))
-	error("invalid custom paper size '%1' ignored", optarg);
+	error("ignoring invalid paper format '%1'", optarg);
       break;
     case 'v':
       {
@@ -974,7 +975,9 @@ static void usage(FILE *stream)
 {
   fprintf(stream,
 "usage: %s [-dl] [-F dir] [-p paper-format] [-w n] [file ...]\n"
-"usage: %s {-v | --version}\n", program_name, program_name);
+"usage: %s {-v | --version}\n"
+"usage: %s --help\n",
+          program_name, program_name, program_name);
 }
 
 // Local Variables:

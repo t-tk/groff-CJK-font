@@ -96,7 +96,7 @@ foreach (@ARGV) {
       q(parts in 'roff' files.);
     exit;
   } elsif ( /^(-v|--v|--ve|--ver|--vers|--versi|--versio|--version)$/ ) {
-    print q('gperl' version ) . $version;
+    print "gperl (groff @VERSION@) version $version";
     exit;
   }
 }

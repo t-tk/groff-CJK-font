@@ -106,9 +106,9 @@ int mksdir(char *tmpl);
 
   extern char invalid_char_table[];
 
-  inline int invalid_input_char(int c)
+  inline bool is_invalid_input_char(int c)
   {
-    return c >= 0 && invalid_char_table[c];
+    return (c >= 0 && invalid_char_table[c]);
   }
 
 #ifdef HAVE_STRCASECMP

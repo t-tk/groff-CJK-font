@@ -5728,12 +5728,12 @@ int main(int argc, char **argv)
 
 static void usage(FILE *stream)
 {
-  fprintf(stream, "usage: %s [-bCGhlnrUVy] [-F font-directory]"
-	  " [-j output-stem] [-s base-point-size] [-S heading-level]"
-	  " [-x html-dialect] [file ...]\n",
-	  program_name);
-  fprintf(stream, "usage: %s {--help | -v | --version}\n",
-	  program_name);
+  fprintf(stream,
+"usage: %s [-bCGhlnrUVy] [-F font-directory] [-j output-stem]"
+" [-s base-type-size] [-S heading-level] [-x html-dialect] [file ...]\n"
+"usage: %s {-v | --version}\n"
+"usage: %s --help\n",
+	  program_name, program_name, program_name);
 }
 
 // Local Variables:

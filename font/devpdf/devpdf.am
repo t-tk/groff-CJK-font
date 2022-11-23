@@ -64,6 +64,7 @@ $(devpdffontmapdata):
 	  $(top_srcdir)/font/devps/generate/`basename $@` \
 	  $(top_builddir)/font/devpdf/map
 
+MOSTLYCLEANFILES += font/devpdf/util/BuildFoundries
 font/devpdf/util/BuildFoundries: \
   $(devpdf_srcdir)/util/BuildFoundries.pl $(SH_DEPS_SED_SCRIPT) afmtodit
 	$(AM_V_GEN)$(MKDIR_P) $(top_builddir)/font/devpdf/util \
@@ -85,6 +86,7 @@ font/devpdf/util/BuildFoundries: \
 	   fi \
 	&& chmod +x $(top_builddir)/font/devpdf/util/BuildFoundries
 
+MOSTLYCLEANFILES += font/devpdf/DESC
 font/devpdf/DESC: $(devpdf_srcdir)/DESC.in
 	$(AM_V_GEN)$(MKDIR_P) $(top_builddir)/font/devpdf \
 	&& cat $(devpdf_srcdir)/DESC.in \
@@ -106,15 +108,21 @@ else
 	  $(devpdf_srcdir)/Foundry.in >$@
 endif
 
+# This is kind of a cheat, but works because BuildFoundries produces so
+# many artifacts.
+$(DEFAULT_BASE35_FONTS) $(URW_BASE35_FONTS): font/devpdf/download
+
+MOSTLYCLEANFILES += font/devpdf/download
 font/devpdf/download: $(devpdffontmapdata) font/devpdf/DESC \
   font/devpdf/Foundry font/devpdf/enc/text.enc \
   font/devpdf/util/BuildFoundries
 	$(AM_V_GEN)$(MKDIR_P) $(top_builddir)/font/devpdf \
-	&& echo "# foundry	ps-name	psfile" >$@.tmp \
+	&& echo "# foundry	ps-font-name	ps-font-file" >$@.tmp \
+	&& echo "# A blank foundry is the default." >>$@.tmp \
 	&& PATH="$(abs_top_builddir)$(GROFF_PATH_SEPARATOR)$(abs_top_builddir)/build-aux$(GROFF_PATH_SEPARATOR)$(PATH)" \
 	     $(abs_top_builddir)/font/devpdf/util/BuildFoundries \
 	       --strict $(abs_top_builddir)/font/devpdf \
-	       '$(abs_top_srcdir)/font/devps : $(abs_top_builddir)/font/devps' \
+	       '$(abs_top_srcdir)/font/devps:$(abs_top_builddir)/font/devps' \
 	       >>$@.tmp \
 	&& mv $@.tmp $@
 

@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
@@ -19,6 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
 #ifndef ASSERT_H
 #define ASSERT_H
+
+// C99 requires that the diagnostic emitted by assert() contain the
+// failing expression and name of the function in scope.  Define our own
+// macro to ensure this even in ISO C90 systems that don't.
 
 void assertion_failed(int, const char *, const char *, const char *);
 

@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
@@ -23,7 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 #include <stdlib.h>
 #include <stddef.h>
 #include <errno.h>
-#include <assert.h>
 #include <math.h>
 #include "errarg.h"
 #include "error.h"
@@ -32,3 +30,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 #include "geometry.h"
 
 void do_file(const char *);
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

@@ -284,54 +284,65 @@ AC_DEFUN([GROFF_URW_FONTS_PATH], [
     [AS_HELP_STRING([--with-urw-fonts-dir=DIR],
       [search for URW PostScript Type 1 fonts in DIR])],
     [urwfontsdir="$withval"])
-  AC_SUBST(urwfontsdir)])
 ])
 
-# Check availability of URW fonts in the search path given by 'gs -h'
-# supplemented with the paths where font/devpdf/Foundry.in expects them,
-# or in the custom directory passed to 'configure'.
+# Check for availability of URW fonts in the directory specified by the
+# user (see GROFF_URW_FONTS_PATH above); alternatively, use the search
+# path given by 'gs -h' (if possible) supplemented with the paths where
+# font/devpdf/Foundry.in expects them.
 
 AC_DEFUN([GROFF_URW_FONTS_CHECK], [
+  AC_REQUIRE([GROFF_URW_FONTS_PATH])
   AC_REQUIRE([GROFF_AWK_PATH])
   AC_REQUIRE([GROFF_GHOSTSCRIPT_PATH])
   groff_have_urw_fonts=no
+  AC_MSG_CHECKING([for URW fonts in Type 1/PFB format])
+  _list_paths=
+
   if test "$AWK" != missing && test "$GHOSTSCRIPT" != missing
   then
-    AC_MSG_CHECKING([for URW fonts in Type 1/PFB format])
     _list_paths=`$GHOSTSCRIPT -h | $AWK 'BEGIN { found = 0 } /Search path:/ { found = 1 } /^[ ]*\// { print $'0' }'| tr : ' '`
-    _list_paths="$_list_paths \
-      /usr/share/fonts/type1/gsfonts/ \
-      /usr/share/fonts/default/Type1/ \
-      /usr/share/fonts/default/Type1/adobestd35/ \
-      /usr/share/fonts/type1/urw-base35/ \
-      /opt/local/share/fonts/urw-fonts/ \
-      /usr/local/share/fonts/ghostscript/"
-    if test -n "$urwfontsdir"
-    then
-      _list_paths="$ _list_paths $urwfontsdir"
-    fi
-    for k in $_list_paths
-    do
-      for _font_file in \
-        URWGothic-Book.t1 \
-        URWGothic-Book.pfb \
-        URWGothicL-Book.pfb \
-        a010013l.pfb
-      do
-        if test -f $k/$_font_file
-        then
-          AC_MSG_RESULT([found in $k])
-          groff_have_urw_fonts=yes
-          break 2
-        fi
-      done
-    done
-    if test $groff_have_urw_fonts = no
-    then
-      AC_MSG_RESULT([none found])
-    fi
   fi
+
+  _list_paths="$_list_paths \
+    /usr/share/fonts/type1/gsfonts/ \
+    /usr/share/fonts/default/Type1/ \
+    /usr/share/fonts/default/Type1/adobestd35/ \
+    /usr/share/fonts/type1/urw-base35/ \
+    /opt/local/share/fonts/urw-fonts/ \
+    /usr/local/share/fonts/ghostscript/"
+
+  if test -n "$urwfontsdir"
+  then
+    _list_paths="$urwfontsdir"
+  fi
+
+  for k in $_list_paths
+  do
+    for _font_file in \
+      URWGothic-Book.t1 \
+      URWGothic-Book.pfb \
+      URWGothicL-Book.pfb \
+      a010013l.pfb
+    do
+      if test -f $k/$_font_file
+      then
+        AC_MSG_RESULT([found in $k])
+        groff_have_urw_fonts=yes
+        urwfontsdir=$k
+        break 2
+      fi
+    done
+  done
+
+  if test $groff_have_urw_fonts = no
+  then
+    AC_MSG_RESULT([none found])
+    urwfontsdir=
+  fi
+
   AC_SUBST([groff_have_urw_fonts])
+  AC_SUBST(urwfontsdir)
 ])
 
 AC_DEFUN([GROFF_URW_FONTS_NOTICE], [
@@ -858,7 +869,7 @@ AC_DEFUN([GROFF_BROKEN_SPOOLER_FLAGS],
 
 
 AC_DEFUN([GROFF_PAGE], [
-  AC_MSG_CHECKING([default paper size])
+  AC_MSG_CHECKING([default paper format])
   groff_prefix=$prefix
   test "$prefix" = NONE && groff_prefix=$ac_default_prefix
   if test -z "$PAGE" && test -r /etc/papersize
@@ -1769,8 +1780,8 @@ AC_DEFUN([GROFF_POPPLER], [
   AC_CHECK_PROG([PDFFONTS], [pdffonts], [found], [missing])
   AC_CHECK_PROG([PDFIMAGES], [pdfimages], [found], [missing])
   if test "$PDFINFO" = found \
-    -a "$PDFFONTS" = found \
-    -a "$PDFIMAGES" = found
+    && test "$PDFFONTS" = found \
+    && test "$PDFIMAGES" = found
   then
     groff_have_pdftools=yes
   fi

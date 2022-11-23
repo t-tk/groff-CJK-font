@@ -403,7 +403,10 @@ void alter_format()
   else if (tok.is_newline() || tok.is_eof())
     warning(WARN_MISSING, "missing register format");
   else
-    error("bad register format (got %1)", tok.description());
+    if (!cscntrl(c))
+      error("invalid register format '%1'", c);
+    else
+      error("invalid register format (got %1)", tok.description());
   skip_line();
 }
 

@@ -59,6 +59,8 @@ wail () {
 echo '*** basic output (line number field prepended)' >&2
 output=$(echo "$input" | "$groff" -Tascii -P-cbou -me)
 
+echo "$output"
+
 # We expect the foregoing to produce a me(7) diagnostic complaining of a
 # negative page offset but we're not testing for that.
 
@@ -86,6 +88,8 @@ echo "$output" | grep -q '^     The.*boxing$' || wail # 5 spaces
 
 echo '*** roff(1)-compatible output (shorter line length)' >&2
 output=$(echo "$input" | "$groff" -dCC -Tascii -P-cbou -me)
+
+echo "$output"
 
 echo 'checking for 0 page offset and 5n paragraph indentation (1)' >&2
 echo "$output" | grep -q '^     Feck.*vex' || wail # 5 spaces

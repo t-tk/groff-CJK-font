@@ -295,7 +295,7 @@ end
 .    br
 .    nr #PAGE_WIDTH \\$1
 .    if !r#L_MARGIN .L_MARGIN \\n[.o]
-.    if !r#R_MARGIN .R_MARGIN 1i
+.    R_MARGIN 1i
 .    if '\\*[.T]'pdf' \X'papersize=\\n[#PAGE_WIDTH]z,\\n[#PAGE_LENGTH]z'\c
 .END
 \#
@@ -4166,6 +4166,7 @@ y\R'#DESCENDER \\n[.cdp]'
 \#   LANDSCAPE may be given after papersize arg.
 \#
 .MAC PAPER END
+.    vs 0
 .    ds $PAPER \\$1
 .    if '\\*[$PAPER]'LETTER' \{\
 .       PAGEWIDTH  8.5i
@@ -4230,7 +4231,9 @@ y\R'#DESCENDER \\n[.cdp]'
 .       as $PAPER " LANDSCAPE\"
 .    \}
 .    if !r#L_MARGIN .L_MARGIN \\n[.o]
-.    if !r#R_MARGIN .R_MARGIN 1i
+.    if !r#R_MARGIN .R_MARGIN \\n[#PAGE_WIDTH]u-\\n[#L_MARGIN]u-1i
+.    if '\\*[.T]'pdf' .br
+.    vs
 .END
 \#
 \# ====================================================================
@@ -8725,7 +8728,7 @@ Shimming must be disabled with NO_SHIM before using FLEX.
 .       nr #DOC_COVER_BLANKPAGE 1
 .       nr #COVER_BLANKPAGE 1
 .    \}
-.    el \{
+.    el \{\
 .       rr #FORCE_RECTO
 .       rr #DOC_COVER_BLANKPAGE
 .       rr #COVER_BLANKPAGE
@@ -22284,10 +22287,8 @@ does not fit on page \\n[pgnum]\\*[col-num].
 \# up to +8.  User's sentence spacing is reset in FOOTNOTES and ENDNOTES.
 \#
 .de ref*build
-.if \\n[#PRINT_STYLE]=2 \{\
-.   ds $RESTORE_SS_VAR \\*[$SS_VAR]
-.   SS +8
-.\}
+.if \\n[#PRINT_STYLE]=2 \
+.   if (\\n[#FN_REF]+\\n[#EN_REF])>0 .SS +8
 .rm ref*string
 .while \\n[.$] \{\
 .   if d [\\$1 \{\

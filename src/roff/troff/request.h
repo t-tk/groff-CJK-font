@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
@@ -24,14 +23,14 @@ class macro;
 class request_or_macro : public object {
 public:
   request_or_macro();
-  virtual void invoke(symbol, int) = 0;
+  virtual void invoke(symbol, bool) = 0;
   virtual macro *to_macro();
 };
 
 class request : public request_or_macro {
   REQUEST_FUNCP p;
 public:
-  void invoke(symbol, int);
+  void invoke(symbol, bool);
   request(REQUEST_FUNCP);
 };
 
@@ -64,7 +63,7 @@ public:
   void set(unsigned char, int);
   unsigned char get(int);
   int length();
-  void invoke(symbol, int);
+  void invoke(symbol, bool);
   macro *to_macro();
   void print_size();
   int empty();
@@ -90,3 +89,9 @@ class charinfo;
 class environment;
 
 node *charinfo_to_node_list(charinfo *, const environment *);
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

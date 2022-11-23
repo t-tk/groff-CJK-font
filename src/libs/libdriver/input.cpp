@@ -1,7 +1,3 @@
-// -*- C++ -*-
-
-// <groff_src_dir>/src/libs/libdriver/input.cpp
-
 /* Copyright (C) 1989-2020 Free Software Foundation, Inc.
 
    Written by James Clark (jjc@jclark.com)
@@ -1735,9 +1731,13 @@ do_file(const char *filename)
 	break;
       }
     case 'h':			// h: relative horizontal move
+      if (npages <= 0)
+	fatal_command(command);
       current_env->hpos += (EnvInt) get_integer_arg();
       break;
     case 'H':			// H: absolute horizontal positioning
+      if (npages <= 0)
+	fatal_command(command);
       current_env->hpos = (EnvInt) get_integer_arg();
       break;
     case 'm':			// m: glyph color
@@ -1801,9 +1801,13 @@ do_file(const char *filename)
 	break;
       }
     case 'v':			// v: relative vertical move
+      if (npages <= 0)
+	fatal_command(command);
       current_env->vpos += (EnvInt) get_integer_arg();
       break;
     case 'V':			// V: absolute vertical positioning
+      if (npages <= 0)
+	fatal_command(command);
       current_env->vpos = (EnvInt) get_integer_arg();
       break;
     case 'w':			// w: inform about paddable space
@@ -1829,3 +1833,9 @@ do_file(const char *filename)
     warning("no final 'x stop' command");
   delete_current_env();
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:
