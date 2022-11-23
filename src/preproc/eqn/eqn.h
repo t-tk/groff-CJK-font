@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
@@ -19,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
 #include "lib.h"
 
-#include <assert.h>
 #include <stdlib.h>
 #include <errno.h>
 #include "cset.h"
@@ -51,3 +49,9 @@ void init_table(const char *device);
 
 // prefix for all registers, strings, macros
 #define PREFIX "0"
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

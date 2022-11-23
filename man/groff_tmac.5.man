@@ -1,6 +1,8 @@
 .TH groff_tmac @MAN5EXT@ "@MDATE@" "groff @VERSION@"
 .SH Name
-groff_tmac \- macro files in the GNU roff typesetting system
+groff_tmac \- macro files in the GNU
+.I roff
+typesetting system
 .
 .
 .\" ====================================================================
@@ -417,48 +419,42 @@ Chinese.
 .I latin5
 .TQ
 .I latin9
-Various input encodings supported directly by groff.
+are various ISO\~8859 input encodings supported by
+.IR groff .
 .
-Normally, this macro is loaded at the very beginning of a document or
-specified as the first macro argument on the command line.
-.
+On systems using ISO character encodings,
 .I groff
-loads latin1 by default at startup.
+loads
+.I latin1.tmac
+automatically at startup.
 .
-These macro packages don't work on EBCDIC hosts.
+A document that uses Latin-2,
+Latin-5,
+or Latin-9
+can specify one of these alternative encodings.
 .
 .
 .TP
 .I cp1047
-Encoding support for EBCDIC.
+provides support for EBCDIC-based systems.
 .
-On those platforms it is loaded automatically at startup.
-.
-Due to different character ranges used in
+On those platforms,
 .I groff
-it doesn't work on architectures which are based on ASCII.
+loads
+.I cp1047.tmac
+automatically at startup.
 .
 .
 .P
-Some input encoding characters may not be available for a particular
-output device.
-.
-For example, saying
-.
-.P
-.EX
-groff \-Tlatin1 \-mlatin9 ...
-.EE
-.
-.P
-fails if you use the Euro character in the input.
-.
-Usually, this limitation is present only for drivers which have a
-limited set of output glyphs
-.RB ( ascii ,
-.BR latin1 );
-for other drivers it is usually sufficient to install proper
-fonts which contain the necessary glyphs.
+Because different input character codes constitute valid GNU
+.I troff \" GNU
+input on ISO and EBCDIC systems,
+the
+.I latin
+macro files cannot be used on EBCDIC systems,
+and
+.I cp1047
+cannot be used on ISO systems.
 .
 .
 .\" ====================================================================
@@ -480,7 +476,7 @@ documents.
 .\"   europs
 .\"   psatk
 .\"   psfig
-.TP 9n \" 'papersize'
+.TP
 .I 62bit
 provides macros for addition,
 multiplication,
@@ -513,33 +509,35 @@ See
 .
 .TP
 .I papersize
-enables the paper size to be set on the command line by giving a
-.BI "\-d \%paper=" size
+enables the paper format to be set on the command line by giving a
+.RB \[lq] \-d
+.BI \%paper= format\c
+\[rq]
 option to
 .IR @g@troff .
 .
 Possible values for
-.I size
+.I format
 are the ISO and DIN formats
-\[lq]A0\[en]A6\[rq],
-\[lq]B0\[en]B6\[rq],
-\[lq]C0\[en]C6\[rq],
+.RB \[lq] A0 \[en] A6 \[rq],
+.RB \[lq] B0 \[en] B6 \[rq],
+.RB \[lq] C0 \[en] C6 \[rq],
 and
-\[lq]D0\[en]D6\[rq];
+.RB \[lq] D0 \[en] D6 \[rq];
 .\" XXX: src/libs/libgroff/paper.cpp also supports [ABCD]7.
 the U.S.\& formats
-\[lq]letter\[rq],
-\[lq]legal\[rq],
-\[lq]tabloid\[rq],
-\[lq]ledger\[rq],
-\[lq]statement\[rq],
+.RB \%\[lq] letter \[rq],
+.RB \%\[lq] legal \[rq],
+.RB \%\[lq] tabloid \[rq],
+.RB \%\[lq] ledger \[rq],
+.RB \%\[lq] statement \[rq],
 and
-\[lq]executive\[rq];
+.RB \%\[lq] executive \[rq];
 and the envelope formats
-\[lq]com10\[rq],
-\[lq]monarch\[rq],
+.RB \%\[lq] com10 \[rq],
+.RB \%\[lq] monarch \[rq],
 and
-\[lq]DL\[rq].
+.RB \%\[lq] DL \[rq].
 .
 All formats,
 even those for envelopes,
@@ -548,6 +546,26 @@ the length measurement is vertical.
 .
 Appending \[lq]l\[rq] (ell) to any of these denotes landscape
 orientation instead.
+.
+This macro file assumes one-inch horizontal margins,
+and sets registers recognized by the
+.I groff
+.IR man ,
+.IR mdoc ,
+.IR mm ,
+.IR mom ,
+and
+.I ms
+packages to configure them accordingly.
+.
+If you want different margins,
+you will need to use those packages' facilities,
+or
+.I @g@troff
+.B ll
+and/or
+.B po
+requests to adjust them.
 .
 An output device typically requires command-line options
 .B \-p
@@ -558,13 +576,14 @@ respectively,
 defined in its
 .I DESC
 file;
-see subsection \[lq]Paper sizes\[rq]
+see subsection \[lq]Paper format\[rq]
 of
 .MR groff @MAN1EXT@ .
 .
 This macro file is normally loaded at startup by the
 .I troffrc
-file.
+file when formatting for a typesetting device
+(but not a terminal).
 .
 .
 .TP

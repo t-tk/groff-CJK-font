@@ -1,11 +1,13 @@
 '\" t
 .TH grolbp @MAN1EXT@ "@MDATE@" "groff @VERSION@"
 .SH Name
-grolbp \- groff output driver for Canon CaPSL printers
+grolbp \-
+.I groff
+output driver for Canon CaPSL printers
 .
 .
-.\" Modified by Francisco Andrés Verdú <pandres@dragonet.es> for the
-.\" grolbp program.
+.\" Modified from grolj4 man page by Francisco Andrés Verdú
+.\" <pandres@dragonet.es> for the grolbp program.
 .
 .
 .\" ====================================================================
@@ -48,7 +50,7 @@ grolbp \- groff output driver for Canon CaPSL printers
 .RB [ \-o\~\c
 .IR orientation ]
 .RB [ \-p\~\c
-.IR paper-size ]
+.IR paper-format ]
 .RB [ \-w\~\c
 .IR width ]
 .RI [ file\~ .\|.\|.]
@@ -65,7 +67,7 @@ grolbp \- groff output driver for Canon CaPSL printers
 ] [\c
 .BI \-\-orientation= orientation\c
 ] [\c
-.BI \-\-papersize= paper-size\c
+.BI \-\-papersize= paper-format\c
 ]
 .RI [ file\~ .\|.\|.]
 .YS
@@ -91,9 +93,9 @@ grolbp \- groff output driver for Canon CaPSL printers
 .SH Description
 .\" ====================================================================
 .
-The GNU
+This GNU
 .I roff
-LBP output driver translates the output of
+output driver translates the output of
 .MR @g@troff @MAN1EXT@
 into a CaPSL and VDM format suitable for Canon LBP-4 and LBP-8 printers.
 .
@@ -127,97 +129,8 @@ reads the standard input stream.
 Output is written to the standard output stream.
 .
 .
-.P
-For compatibility with
-.MR grolj4 @MAN1EXT@ ,
-an additional drawing command is available.
-.
-.
-.TP
-.BI \[rs]D\[aq]R\~ "dh dv" \[aq]
-Draw a rule
-(i.e., a solid black rectangle),
-with one corner at the current position,
-and the diagonally opposite corner at the current
-position
-.RI +( dh , dv ).
-.
-.
 .\" ====================================================================
-.SH Options
-.\" ====================================================================
-.
-.B \-h
-and
-.B \-\-help
-display a usage message,
-while
-.B \-v
-and
-.B \-\-version
-show version information;
-all exit afterward.
-.
-.
-.TP
-.BI \-c " num-copies"
-.TQ
-.BI \-\-copies= num-copies
-Print
-.I num-copies
-copies of each page.
-.
-.
-.TP
-.BI \-F " font-directory"
-.TQ
-.BI \-\-fontdir= font-directory
-Prepend directory
-.RI font-directory /dev name
-to the search path for font and device description files;
-.I name
-is the name of the device, usually
-.BR lbp .
-.
-.
-.TP
-.B \-l
-.TQ
-.B \-\-landscape
-Print the document with a landscape orientation.
-.
-.
-.TP
-.BI \-o " orientation"
-.TQ
-.BI \-\-orientation= orientation
-Print the document with
-.I orientation
-orientation, which must be \(oqportrait\(cq or \(oqlandscape\(cq.
-.
-.
-.TP
-.BI \-p " paper-size"
-.TQ
-.BI \-\-papersize= paper-size
-Set the paper size to
-.IR paper-size ,
-which must be a valid paper size description as indicated in section
-\[lq]Paper Sizes\[rq], below.
-.
-.
-.TP
-.BI \-w " width"
-.TQ
-.BI \-\-linewidth= width
-Set the default line thickness to
-.I width
-thousandths of an em;
-the default is 0.04\~em.
-.
-.
-.\" ====================================================================
-.SH Typefaces
+.SS Typefaces
 .\" ====================================================================
 .
 The driver supports the Dutch,
@@ -258,108 +171,59 @@ Elite | ER | EB | EI |
 .
 .
 .\" ====================================================================
-.SH "Paper sizes"
+.SS "Paper format, orientation, and device description file"
 .\" ====================================================================
 .
-The paper size can be set in the
-.I DESC
-file or with command-line options to
-.I grolbp.
-If the paper size is specified both ways,
-the command-line options take
-precedence over the contents of the
-.I DESC
-file
-(this applies to the page orientation too).
-.
-.MR groff_font @MAN5EXT@
-describes how to set the paper dimensions in the
-.I DESC
-file.
-.
-To set the paper size on the command line,
-add
-.RS
-.EX
-.BI \-p\~ paper-size
-.EE
-.RE
-or
-.RS
-.EX
-.BI \-\-papersize= paper-size
-.EE
-.RE
-to the other
 .I grolbp
-options,
-where
-.I paper-size
-is in the same format as in the
-.I DESC
-file.
+supports paper formats
+.RB \[lq] A4 \[rq],
+.RB \[lq] letter \[rq],
+.RB \[lq] legal \[rq],
+and
+.RB \[lq] executive \[rq].
 .
-If no paper size is specified in the
-.I DESC
-file or on the command line,
-a default size of A4 is used.
+These are matched case-insensitively.
+.
+The
+.BR \-p ,
+.B \-\-papersize
+option overrides any setting in the device description file
+.IR DESC .
+.
+If neither specifies a paper format,
+A4 is assumed.
 .
 .
-.\" ====================================================================
-.SH "Page orientation"
-.\" ====================================================================
-.
-As with the page size,
-the orientation of the page
-.RB ( portrait
-or
-.BR landscape )
-can be set in the
-.I DESC
-file or with command-line options.
-.
-These keywords are case insensitive.
-.
-To set the orientation in the
+.P
+In its
 .I DESC
 file,
-insert a line
-.RS
-.EX
-orientation portrait
-.EE
-.RE
+.I grolbp
+(case-insensitively) recognizes an
+.B orientation
+directive accepting one mandatory argument,
+.B portrait
 or
-.RS
-.EX
-orientation landscape
-.EE
-.RE
-as desired.
+.BR landscape .
 .
-The first valid orientation command in the
-.I DESC
-file is used.
+The first valid orientation directive encountered controls.
+.\" XXX: This is inconsistent with other description file processing.
 .
-.
-To set the page orientation with command-line options you can use the
-.B \-o
-or
+The
+.BR \-l ,
+.BR \-o ,
+and
 .B \-\-orientation
-options with the same parameters
-.RB ( portrait
-or
-.BR landscape )
-as in the
-.I DESC
-file,
-or the
-.B \-l
-option to select landscape orientation.
+command-line options
+override any setting in
+.IR DESC .
+.
+If none of the foregoing specify the orientation,
+portrait is assumed.
 .
 .
 .\" ====================================================================
-.SH "Font description files"
+.SS "Font description files"
 .\" ====================================================================
 .
 In addition to the font description file directives documented in
@@ -407,7 +271,7 @@ can be one of the letters
 .BR I ,
 or
 .BR B ,
-.\" XXX: what about "BI"?
+.\" The bold-italic style apparently was not supported for bitmap fonts.
 indicating the roman,
 italic,
 and bold styles,
@@ -442,7 +306,7 @@ listing A\[rq].
 For instance,
 to select the \[lq]Swiss\[rq] font in bold-italic style,
 which appears in the font listing
-as \[lq]Swiss\-BoldOblique\[rq],
+as \%\[lq]Swiss\-BoldOblique\[rq],
 .RS
 .EX
 lbpname Swiss\-BoldOblique
@@ -459,12 +323,109 @@ device.
 .
 .
 .\" ====================================================================
+.SS "Drawing commands"
+.\" ====================================================================
+.
+For compatibility with
+.MR grolj4 @MAN1EXT@ ,
+an additional drawing command is available.
+.
+.
+.TP
+.BI \[rs]D\[aq]R\~ "dh dv" \[aq]
+Draw a rule
+(solid black rectangle)
+with one corner at the drawing position,
+and the diagonally opposite corner at the drawing position
+.RI +( dh , dv ).
+.\" XXX , at which the drawing position will be afterward. ?
+.
+.
+.\" ====================================================================
+.SH Options
+.\" ====================================================================
+.
+.B \-h
+and
+.B \-\-help
+display a usage message,
+while
+.B \-v
+and
+.B \-\-version
+show version information;
+all exit afterward.
+.
+.
+.TP
+.BI \-c " num-copies"
+.TQ
+.BI \-\-copies= num-copies
+Produce
+.I num-copies
+copies of each page.
+.
+.
+.TP
+.BI \-F " font-directory"
+.TQ
+.BI \-\-fontdir= font-directory
+Prepend directory
+.RI font-directory /dev name
+to the search path for font and device description files;
+.I name
+is the name of the device,
+usually
+.BR lbp .
+.
+.
+.TP
+.B \-l
+.TQ
+.B \-\-landscape
+Format the document in landscape orientation.
+.
+.
+.TP
+.BI \-o " orientation"
+.TQ
+.BI \-\-orientation= orientation
+Format the document in the given
+.IR orientation ,
+which must be
+.RB \%\[lq] portrait \[rq]
+or
+.RB \%\[lq] landscape \[rq].
+.
+.
+.TP
+.BI \-p " paper-format"
+.TQ
+.BI \-\-papersize= paper-format
+Set the paper format to
+.IR paper-format ,
+which must be a valid paper format as described above.
+.
+.
+.TP
+.BI \-w " width"
+.TQ
+.BI \-\-linewidth= width
+Set the default line thickness to
+.I width
+thousandths of an em;
+the default is
+.B 40
+(0.04\~em).
+.
+.
+.\" ====================================================================
 .SH Environment
 .\" ====================================================================
 .
 .TP
 .I GROFF_FONT_PATH
-A list of directories in which to seek the selected output device's
+lists directories in which to seek the selected output device's
 directory of device and font description files.
 .
 See

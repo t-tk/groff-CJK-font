@@ -16,10 +16,10 @@ for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-Please submit bug reports with examples at
+Please submit bug reports using groff's 'BUG-REPORT' file to
 http://savannah.gnu.org/bugs/?group=groff.
 
-Naming convention stolen from mgs.
+Naming convention adapted from groff ms.
 Local names	module*name
 Extern names	module@name
 Env.var		environ:name
@@ -194,13 +194,13 @@ Index		array!index
 .if \n[D]>1 .tm @ps=\n[@ps], @vs=\n[@vs]
 .if \n[D]>3 .tm INIT: l:\n[.l] p:\n[.p] o:\n[.o]
 .\"
-.\"	Page length
+.\"	page length
 .if r L \{\
 .	pl \n[L]u
 .\}
 .nr @pl \n[.p]
 .\"
-.\"	page width
+.\"	line length
 .ie r W \{\
 .	ll \n[W]u
 .\}
@@ -513,9 +513,11 @@ in=\\n[.i] fi=\\n[.u] .d=\\n[.d] nl=\\n[nl] pg=\\n[%]
 .\" switch environment, keep all important settings.
 .de misc@ev-keep
 .nr misc*ll \\n[.l]
+.ds misc*fam \\n[.fam]
 .ev \\$1
 .ll \\n[misc*ll]u
 .lt \\n[misc*ll]u
+.fam \\*[misc*fam]
 ..
 .\"-------------
 .\" .misc@push stackname value
@@ -1251,6 +1253,13 @@ in=\\n[.i] fi=\\n[.u] .d=\\n[.d] nl=\\n[nl] pg=\\n[%]
 .\" Disable in HTML mode
 .if !'\*[.T]'html' \{\
 .if \\n[D]>1 .tm Page# \\n[%] (\\n[.F]:\\n[c.])
+.	if (u;(\\n[pg*header-size] + \\n[pg*extra-header-size] \
+       + \\n[pg*footer-size] + \\n[pg*extra-footer-size] \
+       + \\n[.V]) >= \\n[.p]) \{\
+.		pl \\n[nl]u
+.		@error insufficient page length; aborting\"
+.	\}
+.\}
 .\" check if Hy has been changed
 .ie \\n[Hy] 'hy 14
 .el 'nh

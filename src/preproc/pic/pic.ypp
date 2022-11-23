@@ -55,8 +55,8 @@ object_list olist;
 
 const char *ordinal_postfix(int n);
 const char *object_type_name(object_type type);
-char *format_number(const char *form, double n);
-char *do_sprintf(const char *form, const double *v, int nv);
+char *format_number(const char *fmt, double n);
+char *do_sprintf(const char *fmt, const double *v, int nv);
 
 %}
 
@@ -359,7 +359,8 @@ placeless_element:
 		{
 		  delim_flag = 0;
 		  if (safer_flag)
-		    lex_error("unsafe to run command '%1'", $3);
+		    lex_error("unsafe to run command '%1'; ignoring",
+			      $3);
 		  else {
 		    int retval = system($3);
 		    if (retval < 0)
@@ -685,6 +686,8 @@ object_spec:
 		}
 	| PLOT expr
 		{
+		  lex_warning("'plot' is deprecated; use 'sprintf'"
+			      " instead");
 		  $$ = new object_spec(TEXT_OBJECT);
 		  $$->text = new text_item(format_number(0, $2), 0, -1);
 		}
@@ -1647,7 +1650,12 @@ expr_not_lower_than:
 	| INT '(' any_expr ')'
 		{ $$ = $3 < 0 ? -floor(-$3) : floor($3); }
 	| RAND '(' any_expr ')'
-		{ $$ = 1.0 + floor(((rand()&0x7fff)/double(0x7fff))*$3); }
+		{
+		  lex_error("use of 'rand' with an argument is"
+			    " deprecated; shift and scale 'rand()' with"
+			    " arithmetic instead");
+		  $$ = 1.0 + floor(((rand()&0x7fff)/double(0x7fff))*$3);
+		}
 	| RAND '(' ')'
 		{
 		  /* return a random number in the range [0,1) */
@@ -1885,41 +1893,44 @@ const char *object_type_name(object_type type)
 
 static char sprintf_buf[1024];
 
-char *format_number(const char *form, double n)
+char *format_number(const char *fmt, double n)
 {
-  if (form == 0)
-    form = "%g";
-  return do_sprintf(form, &n, 1);
+  if (0 /* nullptr */ == fmt)
+    fmt = "%g";
+  return do_sprintf(fmt, &n, 1);
 }
 
-char *do_sprintf(const char *form, const double *v, int nv)
+char *do_sprintf(const char *fmt, const double *v, int nv)
 {
+  // Define valid conversion specifiers and modifiers.
+  static const char spcs[] = "eEfgG%";
+  static const char mods[] = "#-+ 0123456789.";
   string result;
   int i = 0;
   string one_format;
-  while (*form) {
-    if (*form == '%') {
-      one_format += *form++;
-      for (; *form != '\0' && strchr("#-+ 0123456789.", *form) != 0; form++)
-	one_format += *form;
-      if (*form == '\0' || strchr("eEfgG%", *form) == 0) {
-	lex_error("bad sprintf format");
+  while (*fmt) {
+    if ('%' == *fmt) {
+      one_format += *fmt++;
+      for (; *fmt != '\0' && strchr(mods, *fmt) != 0; fmt++)
+	one_format += *fmt;
+      if ('\0' == *fmt || strchr(spcs, *fmt) == 0) {
+	lex_error("invalid sprintf conversion specifier '%1'", *fmt);
 	result += one_format;
-	result += form;
+	result += fmt;
 	break;
       }
-      if (*form == '%') {
-	form++;
+      if ('%' == *fmt) {
+	fmt++;
 	snprintf(sprintf_buf, sizeof(sprintf_buf), "%%");
       }
       else {
 	if (i >= nv) {
-	  lex_error("too few arguments to snprintf");
+	  lex_error("too few arguments to sprintf");
 	  result += one_format;
-	  result += form;
+	  result += fmt;
 	  break;
 	}
-	one_format += *form++;
+	one_format += *fmt++;
 	one_format += '\0';
 // We validated the format string above.  Most conversion specifiers are
 // rejected, including `n`.
@@ -1933,7 +1944,7 @@ char *do_sprintf(const char *form, const double *v, int nv)
       result += sprintf_buf;
     }
     else
-      result += *form++;
+      result += *fmt++;
   }
   result += '\0';
   return strsave(result.contents());

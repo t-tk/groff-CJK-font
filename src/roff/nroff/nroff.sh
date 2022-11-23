@@ -28,10 +28,14 @@ opts=
 dry_run=
 is_option_argument_pending=
 
-usage="usage: $prog [-bcCEhikpRStUVz] [-dCS] [-dNAME=STRING] [-Karg]\
- [-mNAME] [-Mdir] [-nNUM] [-oLIST] [-Parg] [-rCN] [-rREG=EXPR] [-Tdev]\
- [-wNAME] [-Wname] [file ...]
-usage: $prog {--help | -v | --version}"
+usage="usage: $prog [-bcCEhikpRStUVz] [-d ctext] [-d string=text] \
+[-K fallback-encoding] [-m macro-package] [-M macro-directory] \
+[-n page-number] [-o page-list] [-P postprocessor-argument] \
+[-r cnumeric-expression] [-r register=numeric-expression] \
+[-T output-device] [-w warning-category] [-W warning-category] \
+[file ...]
+usage: $prog {-v | --version}
+usage: $prog --help"
 
 for arg
 do

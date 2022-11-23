@@ -1,13 +1,15 @@
 .TH groff @MAN1EXT@ "@MDATE@" "groff @VERSION@"
 .SH Name
-groff \- front end to the GNU roff document formatting system
+groff \- front end to the GNU
+.I roff
+document formatting system
 .
 .
 .\" ====================================================================
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 1989-2021 Free Software Foundation, Inc.
+.\" Copyright (C) 1989-2022 Free Software Foundation, Inc.
 .\"
 .\" This file is part of groff, the GNU roff type-setting system.
 .\"
@@ -36,43 +38,43 @@ groff \- front end to the GNU roff document formatting system
 .SY groff
 .RB [ \-abcCeEgGijklNpRsStUVXzZ ]
 .RB [ \-d\~\c
-.IR cs ]
+.IR ctext ]
 .RB [ \-d\~\c
-.IB name =\c
-.IR string ]
+.IB string =\c
+.IR text ]
 .RB [ \-D\~\c
-.IR enc ]
+.IR fallback-encoding ]
 .RB [ \-f\~\c
-.IR fam ]
+.IR font-family ]
 .RB [ \-F\~\c
-.IR dir ]
+.IR font-directory ]
 .RB [ \-I\~\c
-.IR dir ]
+.IR inclusion-directory ]
 .RB [ \-K\~\c
-.IR enc ]
+.IR input-encoding ]
 .RB [ \-L\~\c
-.IR arg ]
+.IR spooler-argument ]
 .RB [ \-m\~\c
-.IR name ]
+.IR macro-package ]
 .RB [ \-M\~\c
-.IR dir ]
+.IR macro-directory ]
 .RB [ \-n\~\c
-.IR num ]
+.IR page-number ]
 .RB [ \-o\~\c
-.IR list ]
+.IR page-list ]
 .RB [ \-P\~\c
-.IR arg ]
+.IR postprocessor-argument ]
 .RB [ \-r\~\c
-.IR cn ]
+.IR cnumeric-expression ]
 .RB [ \-r\~\c
-.IB reg =\c
-.IR expr ]
+.IB register =\c
+.IR numeric-expression ]
 .RB [ \-T\~\c
-.IR dev ]
+.IR output-device ]
 .RB [ \-w\~\c
-.IR name ]
+.IR warning-category ]
 .RB [ \-W\~\c
-.IR name ]
+.IR warning-category ]
 .RI [ file\~ .\|.\|.]
 .YS
 .
@@ -106,13 +108,43 @@ is the primary front end to the GNU
 .I roff
 document formatting system.
 .
+.\" BEGIN Keep parallel with groff.texi node "What Is groff?".
+.\" This language is slightly expanded from that in the "ANNOUNCE" file
+.\" and on the groff home page.
 GNU
 .I roff
-transforms text input files into typeset output in a variety of formats,
-such as PDF and HTML.
+is a typesetting system that reads plain text input files that include
+formatting commands to produce output in PostScript,
+PDF,
+HTML,
+DVI,
+or other formats,
+or for display to a terminal.
 .
-It is also used to format man pages for viewing on terminals.
+Formatting commands can be low-level typesetting primitives,
+macros from a supplied package,
+or user-defined macros.
 .
+All three approaches can be combined.
+.
+.
+.P
+A reimplementation and extension of the typesetter from AT&T Unix,
+.I groff
+is present on most POSIX systems owing to its long association with Unix
+manuals
+(including man pages).
+.
+It and its predecessor are notable for their production of several
+best-selling software engineering texts.
+.
+.I groff
+is capable of producing typographically sophisticated documents while
+consuming minimal system resources.
+.\" END Keep parallel with groff.texi node "What Is groff?".
+.
+.
+.P
 The
 .I groff
 command orchestrates the execution of preprocessors,
@@ -167,7 +199,7 @@ or are interpreted differently by
 .
 .TP
 .BI \-D\~ enc
-Set default input encoding used by
+Set fallback input encoding used by
 .MR preconv @MAN1EXT@
 to
 .IR enc ;
@@ -236,7 +268,7 @@ Run
 .MR preconv @MAN1EXT@
 preprocessor.
 .
-Refer to its manual page for its behavior if neither of
+Refer to its man page for its behavior if neither of
 .IR groff 's
 .B \-K
 or
@@ -289,7 +321,7 @@ to the print spooler program.
 If multiple
 .IR arg s
 are required,
-each should be passed with a separate
+pass each with a separate
 .B \-L
 option.
 .
@@ -314,7 +346,7 @@ and
 .
 .TP
 .B \-N
-Prohibit newlines within
+Prohibit newlines between
 .I eqn \" language
 delimiters:
 pass
@@ -339,7 +371,7 @@ to the postprocessor.
 If multiple
 .IR arg s
 are required,
-each should be passed with a separate
+pass each with a separate
 .B \-P
 option.
 .
@@ -413,9 +445,6 @@ option to
 and
 .IR @g@troff .
 .
-See
-.BR \-S .
-.
 .
 .TP
 .B \-v
@@ -449,6 +478,15 @@ Use
 .MR gxditview @MAN1EXT@
 instead of the usual postprocessor to (pre)view a document on an X11
 display.
+.
+Combining this option with
+.B \-Tps
+uses the font metrics of the PostScript device,
+whereas the
+.B \-TX75
+and
+.B \-TX100
+options use the metrics of X11 fonts.
 .
 .
 .TP
@@ -565,9 +603,9 @@ Output only pages in
 .
 .
 .TP
-.BI \-r\~ cn
+.BI \-r\~ cnumeric-expression
 .TQ
-.BI \-r\~ reg = expr
+.BI \-r\~ register = numeric-expression
 Define register.
 .
 .
@@ -751,7 +789,7 @@ It is even.
 .
 .
 .\" ====================================================================
-.SS "Paper size"
+.SS "Paper format"
 .\" ====================================================================
 .
 In GNU
@@ -1645,6 +1683,8 @@ would be installed as
 Besides
 .IR troff , \" GNU
 the prefix applies to
+the formatter
+.IR nroff ; \" GNU
 the preprocessors
 .IR eqn , \" generic
 .IR grn , \" generic
@@ -2026,11 +2066,13 @@ see
 PDF documentation directory.
 .
 .
+.if !'@COMPATIBILITY_WRAPPERS@'no' \{\
 .TP
 .I @SYSTEMMACRODIR@
 System macro package
 .RI ( tmac
 file) directory.
+.\}
 .
 .
 .\" ====================================================================
@@ -2166,7 +2208,7 @@ manual.
 You can browse it interactively with \[lq]info groff\[rq].
 .
 .
-.\" groff ships 60 man pages generated from 59 source files.  The
+.\" groff ships 59 man pages generated from 58 source files.  The
 .\" numbered comments refer to their sorting order in the source tree,
 .\" so that it is easier to tell that we've enumerated all of them.
 .TP
@@ -2257,7 +2299,6 @@ Postprocessors for output devices:
 .MR grohtml @MAN1EXT@ , \" #25
 .MR grolbp @MAN1EXT@ , \" #26
 .MR grolj4 @MAN1EXT@ , \" #27
-.MR lj4_font @MAN5EXT@ , \" #28
 .MR gropdf @MAN1EXT@ , \" #29
 .MR grops @MAN1EXT@ , \" #31
 .MR grotty @MAN1EXT@ \" #32

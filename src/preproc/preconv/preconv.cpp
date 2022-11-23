@@ -18,13 +18,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
 #include "lib.h"
 
-#include <assert.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <sys/stat.h>
 #ifdef HAVE_UCHARDET
 #include <uchardet/uchardet.h>
 #endif
+
+#include "assert.h"
+
 #include "errarg.h"
 #include "error.h"
 #include "localcharset.h"
@@ -47,7 +49,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
 extern "C" const char *Version_string;
 
-char default_encoding[MAX_VAR_LEN];
+char fallback_encoding[MAX_VAR_LEN];
 char user_encoding[MAX_VAR_LEN];
 char encoding_string[MAX_VAR_LEN];
 bool is_debugging = false;
@@ -1145,7 +1147,7 @@ do_file(const char *filename)
       if (!file_encoding) {
         if (is_debugging)
           fprintf(stderr, "  could not detect encoding with uchardet\n");
-        file_encoding = default_encoding;
+        file_encoding = fallback_encoding;
       }
       else
         must_free_encoding = 1;
@@ -1202,17 +1204,22 @@ do_file(const char *filename)
 void
 usage(FILE *stream)
 {
-  fprintf(stream, "usage: %s [ option ] [ files ]\n"
-		  "\n"
-		  "-d           show debugging messages\n"
-		  "-D encoding  specify default encoding\n"
-		  "-e encoding  specify input encoding\n"
-		  "-h           print this message\n"
-		  "-r           don't add .lf requests\n"
-		  "-v           print version number\n"
-		  "\n"
-		  "The default encoding is '%s'.\n",
-		  program_name, default_encoding);
+  fprintf(stream,
+"usage: %s [-dr] [-D fallback-encoding] [-e encoding] [file ...]\n"
+"usage: %s {-v | --version}\n"
+"usage: %s {-h | --help}\n",
+	  program_name, program_name, program_name);
+  if (stdout == stream) {
+    fprintf(stream,
+"\n"
+"Read each file, convert its encoded characters to a form GNU"
+" troff(1)\n"
+"can interpret, and send the result to the standard output stream.\n"
+"The default fallback encoding is '%s'.  See the preconv(1) manual"
+" page.\n",
+	  fallback_encoding);
+    exit(EXIT_SUCCESS);
+  }
 }
 
 // ---------------------------------------------------------
@@ -1222,16 +1229,16 @@ int
 main(int argc, char **argv)
 {
   program_name = argv[0];
-  // Determine the default encoding.  This must be done before
-  // getopt() is called since the usage message shows the default
+  // Determine the fallback encoding.  This must be done before
+  // getopt() is called since the usage message shows the fallback
   // encoding.
   setlocale(LC_ALL, "");
   char *locale = getlocale(LC_CTYPE);
   if (!locale || !strcmp(locale, "C") || !strcmp(locale, "POSIX"))
-    strcpy(default_encoding, "latin1");
+    strcpy(fallback_encoding, "latin1");
   else {
-    strncpy(default_encoding, locale_charset(), MAX_VAR_LEN - 1);
-    default_encoding[MAX_VAR_LEN - 1] = 0;
+    strncpy(fallback_encoding, locale_charset(), MAX_VAR_LEN - 1);
+    fallback_encoding[MAX_VAR_LEN - 1] = 0;
   }
 
   program_name = argv[0];
@@ -1274,8 +1281,8 @@ main(int argc, char **argv)
       break;
     case 'D':
       if (optarg) {
-	strncpy(default_encoding, optarg, MAX_VAR_LEN - 1);
-	default_encoding[MAX_VAR_LEN - 1] = 0;
+	strncpy(fallback_encoding, optarg, MAX_VAR_LEN - 1);
+	fallback_encoding[MAX_VAR_LEN - 1] = 0;
       }
       break;
     case 'r':
@@ -1283,7 +1290,6 @@ main(int argc, char **argv)
       break;
     case 'h':
       usage(stdout);
-      exit(0);
       break;
     case '?':
       usage(stderr);
@@ -1294,7 +1300,7 @@ main(int argc, char **argv)
     }
   int nbad = 0;
   if (is_debugging)
-    fprintf(stderr, "default encoding: '%s'\n", default_encoding);
+    fprintf(stderr, "fallback encoding: '%s'\n", fallback_encoding);
   if (optind >= argc)
     nbad += !do_file("-");
   else

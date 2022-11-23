@@ -259,8 +259,10 @@ void
 usage(FILE *stream)
 {
   fprintf(stream,
-	  "usage: %s [-vCs] [-M dir] [-F dir] [-T dev] [file ...]\n",
-	  program_name);
+	  "usage: %s [-Cs] [-M dir] [-F dir] [-T dev] [file ...]\n"
+	  "usage: %s {-v | --version}\n"
+	  "usage: %s --help\n",
+	  program_name, program_name, program_name);
 }
 
 

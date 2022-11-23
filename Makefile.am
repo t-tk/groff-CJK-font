@@ -180,7 +180,7 @@ oldfontdir=$(datasubdir)/oldfont
 # `localfontdir' says where local fonts will be installed (as dev*/*).
 localfontdir=$(dataprogramdir)/site-font
 
-# `legacyfontdir' is for compatibility with non-GNU troff.
+# `legacyfontdir' is for compatibility with AT&T/DWB troff.
 legacyfontdir=/usr/lib/font
 
 # `fontpath' says where to look for dev*/*.
@@ -849,6 +849,10 @@ MOSTLYCLEANFILES += $(prefixexecbin_SCRIPTS) $(bin_SCRIPTS) \
 # * For this target, no assurances about the good behavior of unusual
 #   characters in Makefile variables in other aspects of the groff build
 #   are offered.
+#
+# COMPATIBILITY_WRAPPERS is intended only for use in conditional
+# expressions in man pages (to see if the legacy macro package wrappers
+# feature is enabled) and not for expansion as formatted text.
 makevarescape=$(top_srcdir)/makevarescape.sed
 
 SUFFIXES += .man
@@ -858,6 +862,7 @@ SUFFIXES += .man
 	 sed -e "s|[@]APPDEFDIR[@]|`echo $(appdefdir) | sed -f $(makevarescape)`|g" \
 	     -e "s|[@]BINDIR[@]|`echo $(bindir) | sed -f $(makevarescape)`|g" \
 	     -e "s|[@]COMMON_WORDS_FILE[@]|`echo $(common_words_file) | sed -f $(makevarescape)`|g" \
+	     -e "s|[@]COMPATIBILITY_WRAPPERS[@]|$(compatibility_wrappers)|g" \
 	     -e "s|[@]DATASUBDIR[@]|`echo $(datasubdir) | sed -f $(makevarescape)`|g" \
 	     -e "s|[@]DEFAULT_INDEX[@]|`echo $(indexdir)/$(indexname) | sed -f $(makevarescape)`|g" \
 	     -e "s|[@]DEFAULT_INDEX_NAME[@]|`echo $(indexname) | sed -f $(makevarescape)`|g" \

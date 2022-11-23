@@ -38,7 +38,7 @@ things are probably working.'
 OUTPUT=$(printf "%s\n" "$EXAMPLE" | "$groff" -Tascii -P-cbou -mdoc)
 FAIL=
 
-if ! echo "$OUTPUT" | grep -qE '^mdoc-test\(7\) +BSD Miscellaneous'
+if ! echo "$OUTPUT" | grep -qE '^mdoc-test\(7\) +Miscellaneous'
 then
     FAIL=yes
     echo "header check failed" >&2
@@ -62,7 +62,7 @@ then
     echo "paragraph body check failed" >&2
 fi
 
-if ! echo "$OUTPUT" | grep -qE '^BSD +August 25, 2020'
+if ! echo "$OUTPUT" | grep -qE '^GNU +August 25, 2020 +mdoc-test\(7\)'
 then
     FAIL=yes
     echo "footer check failed" >&2

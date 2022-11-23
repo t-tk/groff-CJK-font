@@ -74,6 +74,11 @@ o New requests `stringdown` and `stringup` are available.  These change
 o The `ab` request no longer writes "User Abort." to the standard error
   stream if given no arguments.
 
+o The `fp` request no longer accepts file or font names with slashes in
+  them as arguments.  All font description files are expected to be
+  accessible within the directory of the output device for which they
+  were prepared.
+
 nroff
 -----
 
@@ -175,7 +180,7 @@ o The pspic package now also has an error hook macro, which you can use
     ..
 
 o The new rfc1345 macro package, contributed by Dorai Sitaram, defines
-  special character glyph names implementing RFC 1345 mnemonics (plus
+  special character identifiers implementing RFC 1345 mnemonics (plus
   some additions from Vim, which itself uses RFC 1345 for its digraphs).
   It is documented in the groff_rfc1345(7) man page.
 
@@ -184,6 +189,23 @@ o The new sboxes macro package, contributed by Deri James, offers a
   ms documents can draw colored rectangles beneath any groff output.
   See "Using PDF boxes with groff and the ms macros", installed as
   `msboxes.ms` and `msboxes.pdf` for instructions and a demonstration.
+
+o The an (man) and doc (mdoc) macro packages no longer remap the -, ',
+  and ` input characters to Basic Latin code points on UTF-8 devices,
+  but treat them as groff normally does (and AT&T troff before it did)
+  for typesetting devices, where they become the hyphen, apostrophe or
+  right single quotation mark, and left single quotation mark,
+  respectively.  This change is expected to expose glyph usage errors in
+  man pages.  See the "PROBLEMS" file for a recipe that will conceal
+  these errors.  A better long-term approach is for man pages to adopt
+  correct input practices; the man pages groff_man_style(7),
+  groff_char(7), and man-pages(7) (subsection "Generating optimal
+  glyphs"; from the Linux man-pages project) contain such instructions.
+  Doing so also improves man page typography when formatting for PDF.
+
+  If you maintain a generator of man(7) or mdoc(7) documents (such as a
+  tool that converts other formats to them), and need assistance, please
+  contact the groff@gnu.org mailing list and describe your situation.
 
 o The an (man) macro package can now produce clickable hyperlinks within
   terminal emulators, using the OSC 8 support added to grotty(1) (see
@@ -211,7 +233,7 @@ o The an (man) macro package supports a new macro, `MR`, intended for
   optional).  Because the macro semantically identifies a man page, it
   can create a clickable hyperlink ("man:ls(1)" for the above example)
   on supporting devices.  Furthermore, a new string, `MF`, defines the
-  font to be used for setting man page titles (the first argument to
+  font to be used for setting the man page topic (the first argument to
   `MR` and `TH`), permitting configuration by distributions, sites, and
   users.
 
@@ -222,13 +244,13 @@ o The an (man) macro package supports a new macro, `MR`, intended for
   them; (2) false-positive identification of strings resembling man page
   cross references (as can happen with "exit(1)", "while(1)",
   "sleep(5)", "time(0)" and others) by terminal emulators and other
-  programs; (3) the unwanted intrusion of hyphens into man page titles,
+  programs; (3) the unwanted intrusion of hyphens into man page topics,
   which frustrates copy-and-paste operations (this problem has always
   been avoidable through use of the \% escape sequence, but cross
   references are frequent in man pages and some page authors are
   inexpert *roff users); and (4) deep divisions in man page maintenance
   communities over which typeface should be used to set the man page
-  title (italics, roman, or bold).
+  topic (italics, roman, or bold).
 
 o Part of the an (man) macro package has been renamed from `an-old.tmac`
   to `an.tmac`, replacing a file that sourced the `andoc.tmac` wrapper.
@@ -241,18 +263,18 @@ o Part of the an (man) macro package has been renamed from `an-old.tmac`
   this.  The man-db man(1) implementation has, since 2001, used
   "-mandoc" preferentially if available when man-db is configured.
 
-o The an (man) macro package supports a new `AD` string to put the
-  default adjustment mode under user control at rendering time.  The
-  default is "b" (adjust lines to both margins) as has been the Unix
-  man(7) default since 1979.
+o The an (man) and doc (mdoc) macro packages support a new `AD` string
+  to put the default adjustment mode under user control at rendering
+  time.  The default is "b" (adjust lines to both margins) as has been
+  the Unix man(7) default since 1979.
 
 o The an (man) and doc (mdoc) macro packages support new `CS` and `CT`
-  registers to control rendering of man page section headings and titles
+  registers to control rendering of man page section headings and topics
   (seen in the page header), respectively, in full capitals.  These
-  default off (with no visible effect on pages which already fully
+  default off (with no visible effect on pages that already fully
   capitalize such text in man page sources).  The rationale is to
   encourage man page authors to preserve case distinction information in
-  (or restore it to) their titles and section headings, while giving
+  (or restore it to) their topics and section headings, while giving
   users (including system administrators, distributors, integrators, and
   maintainers of man(1) implementations) a way to view the rendered page
   elements in full capitals if desired.
@@ -272,7 +294,7 @@ o The an (man) macro package now interprets the value of the `HY`
 
 o The an (man) macro package's `TS` macro no longer inserts vertical
   space.  It was not documented to do so, but had since groff 1.18 (July
-  2002).  The page author is free to use paragraphing macros around
+  2002).  Man page authors may freely use paragraphing macros around
   tables if vertical space is desired.
 
 o The groff_man(7) man page documenting the groff implementation of the
@@ -282,10 +304,19 @@ o The groff_man(7) man page documenting the groff implementation of the
   material supplemented with explanations, examples, and advice for the
   reader who is not an expert in *roff systems or in writing man pages.
 
-o The doc (mdoc) macro package now honors the HY register as the an
-  (man) package does.  It furthermore recognizes the `AD` string (see
-  above) for compatibility with an (man), but at present ignores its
-  value.
+o The doc (mdoc) macro package now honors the `C`, `HY`, `IN`, and `SN`
+  registers as the an (man) package does.
+
+o The doc (mdoc) macro package now renders man page (sub)section cross
+  references cited with the `Sx` macro by quoting them instead of
+  setting them in italics.
+
+o On typestting output devices, the e (me) macro package now derives the
+  line length from the device description, which can be overriden by the
+  "papersize.tmac" macro file (usually configured via the "-d paper"
+  groff command-line option).  The package thus adapts to landscape
+  orientation and paper formats other than U.S. letter.  It continues to
+  use a line length of 6 (notional) inches on terminals.
 
 o The e (me) macro package has changed its support for output line
   numbering with the `n1` and `n2` macros to resolve several bugs in the
@@ -328,6 +359,16 @@ o The e (me) macro package's `$v` and `$V` registers have been renamed
 o The e (me) and s (ms) macro packages now offer a `PF` macro,
   supporting the pic(1) preprocessor's "flyback" feature.  Thanks to
   Dave Kemper.
+
+o The m (mm) macro package now adapts to the paper format selected when
+  the macro file "papersize.tmac" is used (by specifying the groff "-d
+  paper" command-line option).  A consequence is that "groff -mm" and
+  "groff -d paper=letter -mm" are _not_ synonymous (when groff is
+  configured to use U.S. letter as the default paper format), because
+  groff mm(7) uses a page offset of 0.963 inches on typesetters for
+  compatibility with DWB mm.  If the `W` or `O` registers are also set
+  on the command line, the line length and page offset, respectively,
+  are not overridden.
 
 o The m (mm) macro package now recognizes a `V` register to set the
   vertical spacing for the document.  Like the existing `S`, it must be
@@ -400,13 +441,20 @@ o The s (ms) macro package's `RP` macro recognizes a new optional
   the latter will continue to be supported for backward compatibility.
   Optional arguments to `RP` can be given in any order.
 
+o The s (ms) macro package supports new macros `XN` and `XH` to ease the
+  input of numbered and unnumbered section headings, respectively.  They
+  internally call the `XS` and `XE` macros to produce table of contents
+  entries, and lay a foundation for inclusion of PDF bookmarks, all
+  without requiring retyping of the heading text as the package
+  previously encouraged.  Thanks to Keith Marshall.
+
 o The "a4.tmac" file has been dropped from the distribution.  Its
   successor, "papersize.tmac", has been present and documented for
-  nearly 20 years.  See subsection "Paper size" of groff(1).
+  nearly 20 years.  See subsection "Paper format" of groff(1).
 
 o The "safer.tmac" file has been dropped from the distribution.  It was
   present only to support man(1) programs that unconditionally passed
-  the formatter the "-msafer" option, and has contained only comments
+  the formatter the "-msafer" option, and had contained only comments
   for over 20 years.  If your man(1) program has this requirement, you
   can create an empty file of this name in groff's macro file search
   path (see troff(1)) or consider migrating to man-db man(1).
@@ -451,7 +499,8 @@ o The "utf8" output device now maps the input characters '^' (caret,
   long-term approach is for man pages to adopt correct input practices;
   the man pages groff_man_style(7), groff_char(7), and man-pages(7)
   (subsection "Generating optimal glyphs"; from the Linux man-pages
-  project) contain such instructions.
+  project) contain such instructions.  Doing so also improves man page
+  typography when formatting for PDF.
 
   If you maintain a generator of man(7) or mdoc(7) documents (such as a
   tool that converts other formats to them), and need assistance, please
@@ -477,12 +526,12 @@ o groff's Texinfo manual is included in the distribution archive in
   language (see, for instance, the section/node "Text").
 
 o A compilation of all of groff's man pages in PDF and UTF-8-encoded
-  plain text is produced by the build.  Many of the documents in this
-  380+-page document have been heavily revised or rewritten, including
-  tbl(1), groff(1), groff_font(5), groff(7), groff_char(7), and roff(7).
-  The PDF version uses pdfmark extensions to produce an internal
-  bookmark for every man page document, section heading, and subsection
-  heading.
+  text (with SGR escape sequences) is produced by the build.  Many of
+  the documents in this 380+-page document have been heavily revised or
+  rewritten, including tbl(1), groff(1), groff_font(5), groff(7),
+  groff_char(7), and roff(7).  The PDF version uses pdfmark extensions
+  to produce an internal bookmark for every man page document, section
+  heading, and subsection heading.
 
 o Larry Kollar's "Using groff with the ms Macro Package" has been
   resurrected after 20+ years, revised, and updated.
@@ -504,11 +553,11 @@ o m4 is now required to build.  Any m4 that implements the features
   documented in the Version 7 Unix m4(1) man page, and the `-D` option,
   should suffice.
 
-o New 'configure' options --{en,dis}able-groff-allocator control whether
-  groff uses its own malloc/free-wrapping allocator to implement all C++
-  new/delete operations.  groff has used this allocator for over 30
-  years; C++ implementations are more mature now.  The default is now to
-  rely on C++ language runtime support for new/delete.  When building
+o New 'configure' options '--{en,dis}able-groff-allocator' control
+  whether groff uses its own malloc/free-wrapping allocator to implement
+  all C++ new/delete operations.  groff has used this allocator for over
+  30 years; C++ implementations are more mature now.  The default is now
+  to rely on C++ language runtime support for new/delete.  When building
   groff, use
     configure --enable-groff-allocator
   to re-enable groff's traditional allocator.
@@ -541,7 +590,7 @@ o The semantics of the environment variable SOURCE_DATE_EPOCH (support
 o xtotroff now supports a "-d" option to specify the directory in which
   to generate font description files.
 
-o The 'configure' option --with-doc that was introduced in version
+o The 'configure' option '--with-doc' that was introduced in version
   1.22.3 has been deleted again.  Its basic idea was misguided because
   each of the documents is only available in a subset of the output
   formats, so in contrast to the documentation, the option not only
@@ -568,6 +617,23 @@ o The 'doc' Make target has been eliminated.  'all' (the default Make
   manual's sources are modified; the distribution archive now provides
   copies of the manual in Info, plain text, HTML, DVI, and PDF.
 
+o afmtodit no longer writes file names with directory information in
+  them to the "name" directives of the font descriptions it generates.
+  (The `fp` request no longer accepts such names; see "troff" above.)
+
+o afmtodit now exits with status 2 (not 1) upon usage errors.
+
+o afmtodit now recognizes a '-w' option to specify the generated font
+  description's "spacewidth" parameter (see groff_font(5)).  The
+  internal library "libgroff" now emits a diagnostic if a font
+  description file is missing such a directive.  Adding this option
+  enables a well-formed font description to be produced by the tool
+  (without requiring editing by hand).
+
+o pfbtops now exits with status 2 upon usage errors and the standard C
+  library's `EXIT_FAILURE` status (usually 1) on operational failures
+  instead of vice versa.
+
 o groffer has been deleted from the distribution.
 
 o grog no longer supports the "--warnings" option; the one diagnostic
@@ -579,6 +645,9 @@ o The ditroff(7) man page has been deleted.  The "History" section of
 o The groff_filenames(5) man page has been deleted.  It had inaccuracies
   and spurious content.  The "File name conventions" section of roff(7)
   covers the same subject.
+
+o The lj4_font(5) man page has been deleted.  Its content has moved into
+  the "Fonts" subsection of grolj4(1).
 
 
 VERSION 1.22.4

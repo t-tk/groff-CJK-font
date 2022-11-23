@@ -18,8 +18,9 @@ internet at <http://www.gnu.org/licenses/gpl-2.0.txt>. */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <assert.h>
 #include <math.h>
+
+#include "assert.h"
 
 bool is_prime(unsigned n)
 {

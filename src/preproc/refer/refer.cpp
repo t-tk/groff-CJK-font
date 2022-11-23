@@ -393,9 +393,11 @@ int main(int argc, char **argv)
 static void usage(FILE *stream)
 {
   fprintf(stream,
-"usage: %s [-benCPRS] [-aN] [-cXYZ] [-fN] [-iXYZ] [-kX] [-lM,N]"
+"usage: %s [-bCenPRS] [-aN] [-cXYZ] [-fN] [-iXYZ] [-kX] [-lM,N]"
 " [-p db-file] [-sXYZ] [-tN] [-Bl.m] [file ...]\n"
-"usage: %s { -v | --version }\n", program_name, program_name);
+"usage: %s {-v | --version}\n"
+"usage: %s --help\n",
+	  program_name, program_name, program_name);
 }
 
 static void possibly_load_default_database()
@@ -451,7 +453,7 @@ static void do_file(const char *filename)
 	  line += '\n';
 	break;
       }
-      if (invalid_input_char(c))
+      if (is_invalid_input_char(c))
 	error("invalid input character code %1", c);
       else {
 	line += c;
@@ -482,7 +484,7 @@ static void do_file(const char *filename)
 	  int d = getc(fp);
 	  if (d == ']') {
 	    while ((d = getc(fp)) != '\n' && d != EOF) {
-	      if (invalid_input_char(d))
+	      if (is_invalid_input_char(d))
 		error("invalid input character code %1", d);
 	      else
 		post += d;
@@ -492,7 +494,7 @@ static void do_file(const char *filename)
 	  if (d != EOF)
 	    ungetc(d, fp);
 	}
-	if (invalid_input_char(c))
+	if (is_invalid_input_char(c))
 	  error("invalid input character code %1", c);
 	else
 	  str += c;
@@ -589,7 +591,7 @@ static void do_file(const char *filename)
 				   "missing '.R2' line");
 	  break;
 	}
-	if (invalid_input_char(c))
+	if (is_invalid_input_char(c))
 	  error_with_file_and_line(current_filename, start_lineno,
 				   "invalid input character code %1",
 				   c);
@@ -1138,7 +1140,7 @@ void do_bib(const char *filename)
     int c = getc(fp);
     if (EOF == c)
       break;
-    if (invalid_input_char(c)) {
+    if (is_invalid_input_char(c)) {
       error("invalid input character code %1", c);
       continue;
     }

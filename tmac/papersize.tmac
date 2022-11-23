@@ -1,6 +1,4 @@
-.\" papersize.tmac
-.\"
-.\" Set up groff for various paper sizes.
+.\" Set up GNU troff for various paper sizes.
 .\"
 .\" Usage:
 .\"
@@ -141,11 +139,22 @@
 .  el \
 .    nr paper-w 1
 .
-.  ie \n[paper-w] \
-.    tm papersize.tmac: warning: unrecognized paper size '\*[paper-arg]'
-.  el \
+.  ie \n[paper-w] \{\
+.    tmc papersize.tmac: warning: ignoring unrecognized paper format
+.    tm1 " '\*[paper-arg]'
+.  \}
+.  el \{\
 .    if !r LL \
 .      nr LL \n[.l]u  \" for ms, mdoc, man
+.    if !r #R_MARGIN \
+.      nr R_MARGIN 1i \" for mom
+.    \" for mm
+.    if !r W \{\
+.      nr W \n[.l]u
+.      if !r O \
+.        nr O 1i
+.    \}
+.  \}
 .\}
 .
 .cp \n[*groff_papersize_tmac_C]

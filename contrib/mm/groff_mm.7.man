@@ -1,7 +1,8 @@
 '\" t
 .TH groff_mm @MAN7EXT@ "@MDATE@" "groff @VERSION@"
 .SH Name
-groff_mm \- memorandum macros for GNU roff
+groff_mm \- memorandum macros for GNU
+.I roff
 .
 .
 .\" ====================================================================
@@ -132,6 +133,15 @@ or
 command lines with DWB
 .IR mm ,
 are not recognized.
+.
+.
+.IP \[bu]
+When setting the registers
+.B L
+or
+.B W
+from the command line,
+use an explicit scaling unit to avoid surprises.
 .
 .
 .IP \[bu]
@@ -906,86 +916,30 @@ Ends a block of text or display that begins with
 or
 .BR DF .
 .
+.
 .TP
-.BI DF\  "\fR[\fPformat \fR[\fPfill \fR[\fPrindent\fR]]]\fP"
-Begin floating display (no nesting allowed).
+.BR DF\~ [\c
+.IR format \~[ fill \~[ rindent ]]]
+Begin floating display.
 .
 A floating display is saved in a queue and is printed in the order
 entered.
 .
-.IR Format ,
-.IR fill ,
+The arguments
+.I format,
+.I fill,
 and
 .I rindent
-are the same as in
+are handled as in
 .BR DS .
 .
-Floating displays are controlled by the registers
+Floating displays cannot be nested.
+.
+Floating display output is controlled by the registers
 .B De
 and
 .BR Df .
 .
-.IP
-.B De register
-.
-.RS
-.IP
-.TS
-tab(@);
-l lx.
-0@T{
-Nothing special, this is the default.
-T}
-1@T{
-A page eject occurs after each printed display,
-giving only one display per page and no text following it.
-T}
-.TE
-.RE
-.
-.IP
-.B Df register
-.
-.RS
-.IP
-.TS
-tab(@);
-l lx.
-0@T{
-Displays are printed at the end of each section
-(when section-page numbering is active)
-or at the end of the document.
-T}
-1@T{
-A new display is printed on the current page if there is enough space,
-otherwise it is printed at the end of the document.
-T}
-2@T{
-One display is printed at the top of each page
-(or column,
-in multi-column mode).
-T}
-3@T{
-Print one display if there is enough space for it,
-otherwise it is printed at the top of the next page or column.
-T}
-4@T{
-Print as many displays as possible in a new page or column.
-.
-A page break occurs between each display if
-.B De
-is not zero.
-T}
-5@T{
-Fill the current page with displays and the rest beginning at a new page
-or column.
-.
-(This is the default.)
-.
-A page break occurs between each display if \fBDe\fP is not zero.
-T}
-.TE
-.RE
 .
 .TP
 .BI DL\  \fR[\fPtext-indent\  "\fR[\fP\fB1\fP \fR[\fP\fB1\fP\fR]]]\fP"
@@ -4002,21 +3956,63 @@ A value of\~1 gives information about the progress of formatting.
 .
 Default is\~0.
 .
+.
 .TP
 .B De
-If set to\~1, eject after floating display is output.
+If\~1,
+eject page after a floating display is output.
 .
-Default is\~0.
+The default is\~0.
 .
 .
 .TP
 .B Df
-Control floating keep output.
+Configure the output of the floating keep macro
+.BR DF .
 .
-This is a number in the range 0 to 5, with a default value of\~5.
+The valid range is 0 to 5;
+the default is\~5.
 .
-See
-.BR .DF .
+.
+.RS
+.IP
+.TS
+tab(@);
+L Lx.
+0@T{
+Output displays at the end of each section
+when section-page numbering is active,
+or at the end of the document otherwise.
+T}
+1@T{
+Output a display on the current page if there is enough space,
+otherwise at the end of the document.
+T}
+2@T{
+Output one display at the top of each page or column.
+T}
+3@T{
+Output a display on the current page if there is enough space,
+otherwise at the top of the next page or column.
+T}
+4@T{
+Output as many displays as possible in a new page or column.
+.
+A page break occurs between each display if
+.B De
+is not zero.
+T}
+5@T{
+Fill the current page with displays and the rest beginning at a new page
+or column.
+.
+A page break occurs between each display if
+.B De
+is not zero.
+T}
+.TE
+.RE
+.
 .
 .TP
 .B Ds
@@ -4239,7 +4235,14 @@ above.
 .
 .TP
 .B L
-Page length, only for command-line settings.
+defines the page length for the document,
+and must be set from the command line.
+.
+A scaling unit should be appended.
+.
+The default is that of the selected
+.I groff
+output device.
 .
 .
 .TP
@@ -4362,9 +4365,19 @@ l l.
 .IP
 Default is\~0.
 .
+.
 .TP
 .B O
-Page offset, only for command-line settings.
+defines the page offset of the document,
+and must be set from the command line.
+.
+A scaling unit should be appended.
+.
+The default
+.RB is\~ \&.75i
+on terminal devices and
+.B \&.963i
+on typesetters.
 .
 .
 .TP
@@ -4525,9 +4538,18 @@ Indentation for
 .
 Default is 5n.
 .
+.
 .TP
 .B W
-Line length, only for command-line settings.
+defines the \[lq]width\[rq]
+(line length)
+of the document,
+and must be set from the command line.
+.
+A scaling unit should be appended.
+.
+The default
+.RB is\~ 6i .
 .
 .
 .
@@ -4693,7 +4715,7 @@ of Lund, Sweden.
 .SH "See also"
 .\" ====================================================================
 .
-.UR https://tkurtbond\:.github\:.io/\:troff/\:mm-all\:.pdf
+.UR https://tkurtbond\:.github\:.io/\:troff/\:mm\-all\:.pdf
 .I MM \- A Macro Package for Generating Documents
 .UE ,
 the DWB\~3.3

@@ -217,7 +217,6 @@ GROFF_MAN_PAGES1 = \
   man/groff_font.5 \
   man/groff_out.5 \
   man/groff_tmac.5 \
-  src/devices/grolj4/lj4_font.5 \
   man/groff.7 \
   man/groff_char.7 \
   man/groff_diff.7 \
@@ -250,13 +249,20 @@ man-clean:
 	$(RM) $(GROFF_MAN_PAGES_ALL)
 
 # Many pages use tbl, a few use eqn, and soelim(1) uses pic.
-doc/groff-man-pages.pdf: $(GROFF_MAN_PAGES_ALL) eqn pic tbl
-	$(GROFF_V)$(DOC_GROFF) -pet -Tpdf -P-e -mandoc -rC1 \
-	  -rCHECKSTYLE=3 $(GROFF_MAN_PAGES1) \
+#
+# We embed the fonts (-P-e) to (1) honor the current PDF standard, (2)
+# ensure consistent rendering of the document, and (3) exercise this
+# feature of gropdf.
+doc/groff-man-pages.pdf: $(GROFF_MAN_PAGES_ALL) eqn pic tbl \
+  $(TMAC_PACKAGE_MAN) $(TMAC_PACKAGE_MDOC)
+	$(GROFF_V)$(DOC_GROFF) -pet -mandoc -rC1 -rCHECKSTYLE=3 \
+	  -Tpdf -P-e \
+	  $(GROFF_MAN_PAGES1) \
 	  $(tmac_srcdir)/sv.tmac $(GROFF_MAN_PAGES2) \
 	  $(tmac_srcdir)/en.tmac $(GROFF_MAN_PAGES3) > $@
 
-doc/groff-man-pages.utf8.txt: $(GROFF_MAN_PAGES_ALL) eqn pic tbl
+doc/groff-man-pages.utf8.txt: $(GROFF_MAN_PAGES_ALL) eqn pic tbl \
+  $(TMAC_PACKAGE_MAN) $(TMAC_PACKAGE_MDOC)
 	$(GROFF_V)$(DOC_GROFF) -pet -Tutf8 -mandoc \
 	  -rCHECKSTYLE=3 $(GROFF_MAN_PAGES1) \
 	  $(tmac_srcdir)/sv.tmac $(GROFF_MAN_PAGES2) \

@@ -1,4 +1,4 @@
-#! /usr/bin/env perl
+#!@PERL@
 # grog - guess options for groff command
 # Inspired by doctype script in Kernighan & Pike, Unix Programming
 # Environment, pp 306-8.
@@ -24,17 +24,10 @@
 # along with this program.  If not, see
 # <http://www.gnu.org/licenses/gpl-2.0.html>.
 
-require v5.6;
-
 use warnings;
 use strict;
 
 use File::Spec;
-
-# for running shell based programs within Perl; use `` instead of
-# use IPC::System::Simple qw(capture capturex run runx system systemx);
-
-$\ = "\n";
 
 my $groff_version = 'DEVELOPMENT';
 
@@ -86,14 +79,14 @@ my $have_any_valid_arguments = 0;
 
 sub fail {
   my $text = shift;
-  print STDERR "$program_name: error: $text";
+  print STDERR "$program_name: error: $text\n";
   $had_processing_problem = 1;
 }
 
 
 sub warn {
   my $text = shift;
-  print STDERR "$program_name: warning: $text";
+  print STDERR "$program_name: warning: $text\n";
 }
 
 
@@ -151,7 +144,7 @@ sub process_arguments {
 
     # Handle options that cause an early exit.
     &version() if ($arg eq '-v' || $arg eq '--version');
-    &help() if ($arg eq '-h' || $arg eq '--help');
+    &usage(0) if ($arg eq '-h' || $arg eq '--help');
 
     if ($arg =~ '^--.') {
       if ($arg =~ '^--(run|with-ligatures)$') {
@@ -159,6 +152,7 @@ sub process_arguments {
 	$pdf_with_ligatures = 1 if ($arg eq '--with-ligatures');
       } else {
         &fail("unrecognized grog option '$arg'; ignored");
+	&usage(1);
       }
       next;
     }
@@ -664,40 +658,35 @@ sub construct_command {
   #########
   # execute the 'groff' command here with option '--run'
   if ( $do_run ) { # with --run
-    print STDERR "@command";
+    print STDERR "@command\n";
     my $cmd = join ' ', @command;
     system($cmd);
   } else {
-    print "@command";
+    print "@command\n";
   }
 } # construct_command()
 
 
-sub help {
+sub usage {
+  my $stream = *STDOUT;
+  my $had_error = shift;
+  $stream = *STDERR if $had_error;
   my $grog = $program_name;
-  print <<EOF;
-usage: $grog [--ligatures] [--run] [GROFF-OPTION ...] [--] [FILE ...]
-       $grog { -h | --help | -v | --version }
-
-$grog reads each roff(7) input FILE and attempts to infer an appropriate
-groff(1) command to format it.  If FILE is missing or is "-", then $grog
-reads the standard input stream.  All arguments after a "--" argument
-are treated as FILEs.
-
-Options:
-  -h, --help      Display this uasge message and exit.
-  --ligatures     Include options '-P-y -PU' for gropdf(1) output driver,
-                    which produces ligatures.  Requires '-T pdf'.
-  --run           Report inferred command to the standard error stream
-                    and then execute it.
-  -v, --version   Display version information and exit.
-EOF
-  exit 0;
-} # help()
+  print $stream "usage: $grog [--ligatures] [--run]" .
+    " [groff-option ...] [--] [file ...]\n" .
+    "usage: $grog {-v | --version}\n" .
+    "usage: $grog {-h | --help}\n";
+  unless ($had_error) {
+    print $stream "\n" .
+"Read each roff(7) input FILE and attempt to infer an appropriate\n" .
+"groff(1) command to format it.  See the grog(1) manual page.\n";
+  }
+  exit $had_error;
+}
 
 
 sub version {
-  print "$program_name (groff) $groff_version";
+  print "GNU $program_name (groff) $groff_version\n";
   exit 0;
 } # version()
 

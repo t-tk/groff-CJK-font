@@ -19,10 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 #include "lib.h"
 
 #include <ctype.h>
-#include <assert.h>
 #include <math.h>
 #include <stdlib.h>
 #include <wchar.h>
+
+#include "assert.h"
+
 #include "errarg.h"
 #include "error.h"
 #include "cset.h"
@@ -111,7 +113,7 @@ bool text_file::next_line()
       int c = getc(fp);
       if (c == EOF)
 	break;
-      if (invalid_input_char(c))
+      if (is_invalid_input_char(c))
 	error("invalid input character code %1", int(c));
       else {
 	if (length + 1 >= linebufsize) {

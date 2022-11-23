@@ -1,4 +1,4 @@
-#!@PERL@ -w
+#!@PERL@
 #
 #	pdfmom		: Frontend to run groff -mom to produce PDFs
 #	Deri James	: Friday 16 Mar 2012
@@ -23,6 +23,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 use strict;
+use warnings;
 use File::Temp qw/tempfile/;
 my @cmd;
 my $dev='pdf';
@@ -72,7 +73,7 @@ while (my $c=shift)
 	$dev=$c;
 	next;
     }
-    elsif ($c eq '-v')
+    elsif ($c eq '-v' or $c eq '--version')
     {
 	print "GNU pdfmom (groff) version @VERSION@\n";
 	exit;
@@ -142,3 +143,8 @@ else
     exit 1;
 }
 
+# Local Variables:
+# fill-column: 72
+# mode: CPerl
+# End:
+# vim: set cindent noexpandtab shiftwidth=2 softtabstop=2 textwidth=72:

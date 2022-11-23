@@ -81,7 +81,7 @@ int top_input::get()
     return c;
   }
   int c = getc(fp);
-  while (invalid_input_char(c)) {
+  while (is_invalid_input_char(c)) {
     error("invalid input character code %1", int(c));
     c = getc(fp);
     bol = 0;
@@ -154,7 +154,7 @@ int top_input::peek()
   if (push_back[0] != EOF)
     return push_back[0];
   int c = getc(fp);
-  while (invalid_input_char(c)) {
+  while (is_invalid_input_char(c)) {
     error("invalid input character code %1", int(c));
     c = getc(fp);
     bol = 0;
@@ -322,7 +322,7 @@ void do_file(const char *filename)
   enum { START, MIDDLE, HAD_DOT, HAD_P, HAD_PS, HAD_l, HAD_lf } state = START;
   for (;;) {
     int c = getc(fp);
-    while (invalid_input_char(c)) {
+    while (is_invalid_input_char(c)) {
       error("invalid input character code %1", int(c));
       c = getc(fp);
     }
@@ -482,13 +482,15 @@ void do_whole_file(const char *filename)
 
 void usage(FILE *stream)
 {
-  fprintf(stream, "usage: %s [ -nvCSU ] [ filename ... ]\n", program_name);
+  fprintf(stream, "usage: %s [-CnSU] [file ...]\n", program_name);
 #ifdef TEX_SUPPORT
-  fprintf(stream, "       %s -t [ -cvzCSU ] [ filename ... ]\n", program_name);
+  fprintf(stream, "usage: %s -t [-cCSUz] [file ...]\n", program_name);
 #endif
 #ifdef FIG_SUPPORT
-  fprintf(stream, "       %s -f [ -v ] [ filename ]\n", program_name);
+  fprintf(stream, "usage: %s -f [-v] [file]\n", program_name);
 #endif
+  fprintf(stream, "usage: %s {-v | --version}\n", program_name);
+  fprintf(stream, "usage: %s --help\n", program_name);
 }
 
 #if defined(__MSDOS__) || defined(__EMX__)

@@ -97,7 +97,7 @@ int file_input::read_line()
       }
       if (c == EOF)
 	break;
-      else if (invalid_input_char(c))
+      else if (is_invalid_input_char(c))
 	lex_error("invalid input character code %1", c);
       else {
 	line += char(c);
@@ -1677,7 +1677,7 @@ simple_file_input::~simple_file_input()
 int simple_file_input::get()
 {
   int c = getc(fp);
-  while (invalid_input_char(c)) {
+  while (is_invalid_input_char(c)) {
     error("invalid input character code %1", c);
     c = getc(fp);
   }
@@ -1689,7 +1689,7 @@ int simple_file_input::get()
 int simple_file_input::peek()
 {
   int c = getc(fp);
-  while (invalid_input_char(c)) {
+  while (is_invalid_input_char(c)) {
     error("invalid input character code %1", c);
     c = getc(fp);
   }

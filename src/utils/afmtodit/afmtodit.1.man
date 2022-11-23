@@ -1,6 +1,8 @@
 .TH afmtodit @MAN1EXT@ "@MDATE@" "groff @VERSION@"
 .SH Name
-afmtodit \- adapt Adobe Font Metrics files for groff \-Tps and \-Tpdf
+afmtodit \- adapt Adobe Font Metrics files for
+.I groff
+PostScript and PDF output
 .
 .
 .\" ====================================================================
@@ -48,6 +50,8 @@ afmtodit \- adapt Adobe Font Metrics files for groff \-Tps and \-Tpdf
 .IR italic-correction-factor ]
 .RB [ \-o\~\c
 .IR output-file ]
+.RB [ \-w\~\c
+.IR space-width ]
 .I afm-file
 .I map-file
 .I font-description-file
@@ -56,6 +60,9 @@ afmtodit \- adapt Adobe Font Metrics files for groff \-Tps and \-Tpdf
 .
 .SY afmtodit
 .B \-v
+.
+.SY afmtodit
+.B \-\-version
 .YS
 .
 .
@@ -78,7 +85,7 @@ output devices of
 .I map-file
 associates a
 .I groff
-glyph name with a PostScript glyph name.
+ordinary or special character name with a PostScript glyph name.
 .
 Output is written in
 .MR groff_font @MAN5EXT@
@@ -98,26 +105,27 @@ should contain a sequence of lines of the form
 .
 .RS
 .EX
-.I ps-glyph groff-glyph
+.I ps-glyph groff-char
 .EE
 .RE
 .
 where
 .I ps-glyph
 is the PostScript glyph name and
-.I groff-glyph
-is the
+.I groff-char
+is a
 .I groff
-special character identifier for the glyph
-(as used in the
-.I groff
-font description file).
+ordinary
+(if of unit length)
+or special
+(if longer)
+character identifier.
 .
 The same
 .I ps-glyph
 can occur multiple times in the file;
 each
-.I groff-glyph
+.I groff-char
 must occur at most once.
 .
 Lines starting with \[lq]#\[rq] and blank lines are ignored.
@@ -131,9 +139,9 @@ subdirectory of the default font directory.
 .LP
 If a PostScript glyph is not mentioned in
 .IR map-file ,
-and a generic
+and a
 .I groff
-glyph name can't be deduced using the Adobe Glyph List
+character name can't be deduced using the Adobe Glyph List
 (AGL,
 built into
 .IR afmtodit ),
@@ -166,9 +174,11 @@ Refer to section \[lq]Using Symbols\[rq] in
 the
 .I groff
 Texinfo manual,
-which describes how
+or
+.MR groff_char @MAN7EXT@ ,
+which describe how
 .I groff
-glyph names are constructed.
+character identifiers are constructed.
 .
 .
 .LP
@@ -185,7 +195,7 @@ in the
 font description file.
 .
 Unencoded glyph indices don't have a specific order;
-it is best to access them with glyph names only.
+it is best to access them only via special character identifiers.
 .
 .
 .P
@@ -261,9 +271,17 @@ since
 will automatically mount it when it is first used.
 .
 .
+.br
+.ne 7v
 .\" ====================================================================
 .SH Options
 .\" ====================================================================
+.
+.B \-v
+and
+.B \-\-version
+show version information and exit afterward.
+.
 .
 .TP
 .BI \-a\~ slant
@@ -427,8 +445,10 @@ directive to the font description file.
 .
 .
 .TP
-.B \-v
-Write version information to the standard output stream and exit.
+.BI \-w\~ space-width
+Use
+.I space-width
+as the with of inter-word spaces.
 .
 .
 .TP
@@ -477,10 +497,10 @@ special character identifiers for Zapf Dingbats
 .RB ( ZD ),
 reversed Zapf Dingbats
 .RB ( ZDR ),
-symbol
-.RB ( S ),
 slanted symbol
 .RB ( SS ),
+symbol
+.RB ( S ),
 and text fonts,
 respectively.
 .

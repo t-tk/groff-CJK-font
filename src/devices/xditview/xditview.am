@@ -34,6 +34,13 @@ GXDITVIEWSOURCES = \
   src/devices/xditview/Menu.h \
   src/devices/xditview/Dvi.h
 
+GXDITVIEW_GROFF_VERSION_H=src/devices/xditview/groff_version.h
+
+$(GXDITVIEW_GROFF_VERSION_H): $(top_srcdir)/.version
+	$(AM_V_at)$(MKDIR_P) `dirname $@`
+	$(AM_V_GEN)printf \
+	  'const char *Version_string = "%s";\n' '@VERSION@' > $@
+
 if WITHOUT_X11
 GXDITVIEW_MAN1 =
 EXTRA_DIST += $(GXDITVIEWSOURCES)
@@ -45,7 +52,9 @@ gxditview_CPPFLAGS = $(AM_CPPFLAGS) $(X_CFLAGS) -Dlint \
   -I$(top_builddir)/src/devices/xditview
 gxditview_LDADD = $(X_LIBS) $(X_PRE_LIBS) -lXaw -lXmu -lXt -lX11 \
   $(X_EXTRA_LIBS) $(LIBM) libxutil.a lib/libgnu.a
-XDITVIEW_GENHDRS = src/devices/xditview/GXditview-ad.h
+XDITVIEW_GENHDRS = \
+ src/devices/xditview/GXditview-ad.h \
+ $(GXDITVIEW_GROFF_VERSION_H)
 gxditview_SOURCES = $(GXDITVIEWSOURCES)
 nodist_gxditview_SOURCES = $(XDITVIEW_GENHDRS)
 CLEANFILES += $(XDITVIEW_GENHDRS)

@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
@@ -20,8 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 #include "lib.h"
 
 #include <ctype.h>
-#include <assert.h>
 #include <stdlib.h>
+
+#include "assert.h"
+
 #include "errarg.h"
 #include "error.h"
 #include "font.h"
@@ -159,3 +160,9 @@ const char *glyph_to_name(glyph *g)
   charinfo *ci = (charinfo *)g; // Every glyph is actually a charinfo.
   return ci->name;
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

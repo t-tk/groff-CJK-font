@@ -192,7 +192,7 @@ void input_stack::push_file(const char *fn)
     }
     if (c == EOF)
       break;
-    if (invalid_input_char(c))
+    if (is_invalid_input_char(c))
       error_with_file_and_line(fn, lineno,
 			       "invalid input character code %1", c);
     else {

@@ -1,3 +1,69 @@
+2022-10-09  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[mm]: Add `--version` option support to mmroff.
+
+	* mm.am (mmroff): Replace `@VERSION@` token in script.
+	* mmroff.pl: Recognize `--version` option.
+	* mmroff.1.man (Synopsis, Options): Document.
+
+2022-10-09  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* mmroff.pl: Add proper diagnostic subroutine.  Add "progname"
+	scalar to store the name of the program.
+	(Die): New subroutine.
+	(print_index, top level): Call Die() when encountering
+	prohibitive problems instead of flinging a string into a void
+	context.
+
+2022-10-09  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* mmroff.pl: Enable Perl warnings.
+
+2022-10-09  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[mm]: Refactor generation of "mmroff" script.
+
+	* mmroff.pl: Replace absolute filespec with `@PERL@` replacement
+	token.  This is documentary; the filespec was getting replaced
+	anyway.
+	* mm.am (mmroff): Use more idiomatic token replacement strategy.
+	Also create target as a .tmp-suffixed file at first since it is
+	not initially executable, so that we don't race against anything
+	needing to run it in a parallelized build.  (This is a
+	hypothetical concern; at present, nothing runs mmroff during the
+	build.)
+
+2022-10-02  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* m.tmac (pg@header): Add page length sufficiency check.
+
+	Fixes <https://savannah.gnu.org/bugs/?24048>.  Thanks to Werner
+	Lemberg for the report.
+
+2022-10-02  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	Regression-test Savannah #24048.
+
+	* tests/short-pages-do-not-overflow-stack.sh: Test it.
+	* mm.am (mm_TESTS): Run test.
+
+2022-09-17  Nikita Ivanov <nikita.vyach.ivanov@gmail.com>
+
+	* mm/ms.cov (cov@print-title, cov@print-authors): Escape
+	newlines when beginning conditional blocks.
+
+	Fixes <https://savannah.gnu.org/bugs/?63075>.  [Problems
+	introduced by me in commits 59d1fd7a5e and 4fd984adc9, both
+	2021-07-17. --GBR]
+
+2022-09-16  Nikita Ivanov <nikita.vyach.ivanov@gmail.com>
+
+	* m.tmac (misc@ev-keep): Select configured default font family,
+	as with `.fam H` at the top of the document, for example, when
+	switching to new environment.
+
+	Fixes <https://savannah.gnu.org/bugs/?63067>.
+
 2022-08-14  G. Branden Robinson <g.branden.robinson@gmail.com>
 
 	* m.tmac (PY): Add new macro.

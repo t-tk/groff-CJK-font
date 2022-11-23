@@ -725,7 +725,7 @@ here to change mom&#8217;s document defaults (paper size, margins,
 family, point size, line space, rag, etc), or any of the document
 processing
 <a href="definitions.html#controlmacro">control macros</a>.
-This is the style-sheet section of a document, and
+This is the stylesheet section of a document, and
 must come after the
 <a href="#printstyle">PRINTSTYLE</a>
 directive.  Failure to observe this condition will result in
@@ -2624,19 +2624,19 @@ adjusted to fill pages fully to the bottom margin.
 <h3 id="index-style-before-start" class="macro-list">Type &amp; formatting parameters before START</h3>
 <ul class="macro-list">
   <li><a href="#type-before-start">Behaviour of the typesetting macros before START</a>
-  <ul class="sublist" style="line-height: 120%; margin-bottom: .25em;">
+  <ul class="sublist" style="font-size: 100%; line-height: 120%; margin-bottom: .25em;">
     <li><a href="#meanings">List of meanings</a></li>
     <li><a href="#lrc-note">Special note on LEFT, RIGHT and CENTER</a></li>
-    <li><a href="#include">Including (sourcing) style sheets and files</a></li>
     <li><a href="#color">Initializing colours</a></li>
   </ul></li>
+  <li><a href="#include">Including (sourcing) style sheets and files</a></li>
   <li><a href="#doc-lead-adjust">DOC_LEAD_ADJUST</a> &ndash; adjust linespacing to fill pages and align bottom margins</li>
   <li><a href="#docheader">DOCHEADER</a>
-  <ul class="sublist" style="line-height: 120%;">
+  <ul class="sublist" style="font-size: 100%; line-height: 120%;">
     <li><a href="#docheader-control">Docheader control</a></li>
   </ul></li>
   <li><a href="#columns">COLUMNS</a>
-  <ul class="sublist" style="line-height: 120%;">
+  <ul class="sublist" style="font-size: 100%; line-height: 120%;">
     <li><a href="#col-next">COL_NEXT</a></li>
     <li><a href="#col-break">COL_BREAK</a></li>
   </ul></li>
@@ -2789,7 +2789,7 @@ or <kbd>.CENTER</kbd> immediately after every invocation of the tag.
 <p>
 If you routinely make the same changes to mom&#8217;s defaults in
 order to create similar documents in a similar style&mdash;in other
-words, you need a template&mdash; you can create style-sheet files
+words, you need a template&mdash; you can create stylesheet files
 and include, or &#8220;source&#8221;, them into your mom documents
 with the macro <kbd>.INCLUDE</kbd>.  The right place for such style
 sheets is after
@@ -2835,7 +2835,7 @@ you&#8217;re working, you simply enter the filename after
 <kbd>.INCLUDE</kbd>.  If the file&#8217;s in another directory, you must
 provide a full path name to it.  For example, if you&#8217;re working in
 a directory called <kbd>/home/joe/stories</kbd> and your
-style-sheet is in <kbd>/home/joe/style-sheets</kbd>, the above
+stylesheet is in <kbd>/home/joe/stylesheets</kbd>, the above
 example would have to look like this:
 <br/>
 <span class="pre-in-pp">
@@ -2843,7 +2843,7 @@ example would have to look like this:
   .AUTHOR     "Joe Blow
   .PRINTSTYLE TYPESET
   \#
-  .INCLUDE    /home/joe/style-sheets/head-template
+  .INCLUDE    /home/joe/stylesheets/head-template
   \#
   .START
 </span>
@@ -2860,9 +2860,18 @@ well.
 
 <div class="box-tip">
 <p class="tip">
-<span class="experts">Experts:</span>
-INCLUDE is an alias for the groff request, <kbd>.so</kbd>.  Mix
-&#8217;n&#8217; match with impunity.
+<span class="note">Note:</span>
+INCLUDE is an alias for the groff request <kbd>.so</kbd>.  If the
+sourced file contains material that requires pre-processing (e.g.
+a table made with <b>tbl(1)</b> or non-English characters), use
+<kbd>.so</kbd> rather than INCLUDE and invoke pdfmom thus:
+<br/>
+<span class="pre-in-pp">
+  soelim file.mom | pdfmom [flags] &gt; file.pdf
+</span>
+<b>soelim</b> only looks for lines that begin with <kbd>.so</kbd>,
+which furthermore must not have any space between the period and
+the &#8220;s&#8221;.
 </p>
 </div>
 
@@ -2921,7 +2930,7 @@ nor in the string arguments given to
 <a href="docelement.html#heading">HEADING</a>.
 Use, rather, the
 <a href="definitions.html#controlmacro">control macros</a>
-mom provides to automatically colourize these elements.
+mom provides to automatically colourise these elements.
 </p>
 </div>
 

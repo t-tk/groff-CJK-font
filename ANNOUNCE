@@ -8,52 +8,88 @@ alpha FTP site.  You may download the distribution archive from there.
 What is groff?
 ==============
 
-Groff (GNU roff) is a typesetting system that reads plain text input
-files that include formatting commands to produce formatted output in
-PostScript, PDF, HTML, DVI formats or for display to the terminal.
-Formatting commands can be low-level typesetting primitives or macros
-from a supplied set.  Users may also write their own macros.  All three
-may be combined.
+groff (GNU roff) is a typesetting system that reads plain text input
+files that include formatting commands to produce output in PostScript,
+PDF, HTML, or DVI formats or for display to a terminal.  Formatting
+commands can be low-level typesetting primitives, macros from a
+supplied package, or user-defined macros.  All three approaches can be
+combined.
 
-Present on most Unix systems owing to its long association with Unix
-manuals (including man pages), and notable for its use in the production
-of several best-selling software engineering texts, groff is capable of
-producing typographically sophisticated documents while consuming
-minimal system resources.
+A reimplementation and extension of the typesetter from AT&T Unix, groff
+is present on most POSIX systems owing to its long association with Unix
+manuals (including man pages).  It and its predecessor are notable for
+their production of several best-selling software engineering texts.
+groff is capable of producing typographically sophisticated documents
+while consuming minimal system resources.
 
   https://www.gnu.org/software/groff/
 
 Changes
 =======
 
-groff 1.23.0.rc2 represents nearly 2 years of development since the
-previous release candidate, and nearly four since the last release.
+groff 1.23.0.rc2 represents two years of development since the previous
+release candidate, and nearly four since the last release.
 
 Headline features nominated by our development community include:
   * a new 'man' macro, "MR", for formatting man page cross references;
   * hyperlinked text in terminals via the ECMA-48 OSC 8 escape sequence;
-  * a new "rfc1345" macro package, contributed by Dorai Sitaram,
+  * a new 'rfc1345' macro package, contributed by Dorai Sitaram,
     enabling use of RFC 1345 mnemonics as groff special characters;
-  * a new "sboxes" macro package, contributed by Deri James, enabling
+  * a new 'sboxes' macro package, contributed by Deri James, enabling
     'ms' documents to place shaded and/or bordered rectangles underneath
     any groff page elements (PDF output only);
-  * version 2.5 of Peter Schaffter's "mom" macro package;
-  * the 'ms' package's new strings to assist subscripting; and
+  * 'mom' 2.5, a macro package contributed by Peter Schaffter;
+  * the 'ms' package's new strings to assist subscripting;
+  * Italian localization, including hyphenation patterns and macro
+    package string translations, thanks to Edmond Orignac; and
   * new hyphenation patterns for English.
 
 For more on these and other feature changes, see "News" below.
 
-Much attention has been given to fixing bugs and improving
-documentation.
+Much attention has been given to fixing bugs, improving diagnostic
+messages, and correcting and expanding documentation.  The previous
+release shipped with three automated unit tests; this one ships with
+over 130 unit and regression tests.
 
 As of this writing, per the GNU Savannah bug tracker, the groff project
-has resolved 351 problems as fixed for the 1.23.0 release.  Some of the
+has resolved 379 problems as fixed for the 1.23.0 release.  Some of the
 bugs we've corrected were over 30 years old.
+
+Classifying these issues by type and the component of the project to
+which they apply, we find the following.
+
+  Type                              Component
+  ----                              ---------
+  Build/installation           35   Core                           95
+  Crash/unresponsive           10   Driver: grohtml                 4
+  Documentation                95   Driver: gropdf                  7
+  Feature change               37   Driver: grops                   2
+  Incorrect behavior          115   Driver: grotty                  4
+  Lint                         12   Driver: others/general          4
+  Rendering/cosmetics          10   Font: devpdf                    1
+  Test                          4   Font: devps                     3
+  Warning/suspicious behavior  61   Font: others/general            4
+                                    General                        39
+                                    Macros: man                    32
+                                    Macros: mdoc                   10
+                                    Macros: me                     36
+                                    Macros: mm                     16
+                                    Macros: mom                     9
+                                    Macros: ms                     27
+                                    Macros: other/general          25
+                                    Preprocessor: eqn               3
+                                    Preprocessor: grn               3
+                                    Preprocessor: pic               5
+                                    Preprocessor: preconv           7
+                                    Preprocessor: refer             3
+                                    Preprocessor: tbl              15
+                                    Preprocessor: others/general    5
+                                    Utilities                      17
 
 Another way of capturing the amount of revision is as follows.
 
 $ git diff --stat 1.22.4 HEAD | tail -n 1
- 925 files changed, 110263 insertions(+), 64915 deletions(-)
+ 935 files changed, 117550 insertions(+), 69438 deletions(-)
 
 Obtaining groff
 ===============
@@ -92,5 +128,5 @@ form that most checksum tools default to.
 News
 ====
 
-[[ maintainer: insert "sed -n '/VERSION 1\.23/,/VERSION 1.22/p' NEWS"
-   and trim the ends a little ]]
+[[ maintainer: insert output of
+   "sed -n '/VERSION 1\.23/{:X;n;/VERSION 1\.22/q;p;bX}' NEWS" ]]

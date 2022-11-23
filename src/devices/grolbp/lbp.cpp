@@ -1,7 +1,6 @@
-// -*- C++ -*-
 /* Copyright (C) 1994-2020 Free Software Foundation, Inc.
-     Written by Francisco Andrés Verdú <pandres@dragonet.es> with many ideas
-     taken from the other groff drivers.
+     Written by Francisco Andrés Verdú <pandres@dragonet.es> with many
+     ideas taken from the other groff drivers.
 
 This file is part of groff.
 
@@ -24,6 +23,8 @@ TODO
  - Add X command to include bitmaps
 */
 
+#include "assert.h"
+
 #include "driver.h"
 #include "lbp.h"
 #include "charset.h"
@@ -33,11 +34,14 @@ TODO
 
 extern "C" const char *Version_string;
 
-static int user_papersize = -1;		// papersize
-static int orientation = -1;		// orientation
-static double user_paperlength = 0;	// Custom Paper size
+static int user_papersize = -1;
+static int orientation = -1;
+
+// custom paper format
+static double user_paperlength = 0;
 static double user_paperwidth = 0;
-static int ncopies = 1;			// Number of copies
+
+static int ncopies = 1;
 
 #define DEFAULT_LINEWIDTH_FACTOR 40	// 0.04em
 static int linewidth_factor = DEFAULT_LINEWIDTH_FACTOR;
@@ -83,8 +87,9 @@ private:
   unsigned short cur_symbol_set;
   int line_thickness;
   int req_linethickness; // requested line thickness
+  // custom paper format
   int papersize;
-  int paperlength;	// custom paper size
+  int paperlength;
   int paperwidth;
 };
 
@@ -154,10 +159,10 @@ lbp_printer::lbp_printer(int ps, double pw, double pl)
   lbpputs("\033c\033;\033[2&z\033[7 I\033[?32h\033[?33h\033[11h");
   wp54charset(); // Define the new symbol set
   lbpputs("\033[7 I\033[?32h\033[?33h\033[11h");
-  // Paper size handling
+  // Paper format handling
   if (orientation < 0)
     orientation = 0;	// Default orientation is portrait
-  papersize = 14;	// Default paper size is A4
+  papersize = 14;	// Default paper format is A4
   if (font::papersize) {
     papersize = set_papersize(font::papersize);
     paperlength = font::paperlength;
@@ -570,15 +575,15 @@ static struct {
 static int set_papersize(const char *paperformat)
 {
   unsigned int i;
-  // First test for a standard (i.e. supported directly by the printer)
-  // paper size
+  // First, test for a standard (i.e. supported directly by the printer)
+  // paper format.
   for (i = 0 ; i < sizeof(lbp_papersizes) / sizeof(lbp_papersizes[0]); i++)
   {
     if (strcasecmp(lbp_papersizes[i].name,paperformat) == 0)
       return lbp_papersizes[i].code;
   }
-  // Otherwise, we assume a custom paper size
-  return 82;
+  // Otherwise, we assume a custom paper format.
+  return 82; // XXX: magic number
 }
 
 static void handle_unknown_desc_command(const char *command, const char *arg,
@@ -621,18 +626,20 @@ static struct option long_options[] = {
 static void usage(FILE *stream)
 {
   fprintf(stream,
-	  "usage: %s [-lvh] [-c n] [-p paper_size] [-F dir] [-o or]\n"
-	  "       [-w width] [files ...]\n"
-	  "\n"
-	  "  -o --orientation=[portrait|landscape]\n"
-	  "  -v --version\n"
-	  "  -c --copies=numcopies\n"
-	  "  -l --landscape\n"
-	  "  -p --papersize=paper_size\n"
-	  "  -w --linewidth=width\n"
-	  "  -F --fontdir=dir\n"
-	  "  -h --help\n",
-	  program_name);
+"usage: %s [-l] [-c num-copies] [-F font-directory] [-o orientation]"
+" [-p paper-format] [-w width] [file ...]\n"
+"usage: %s {-v | --version}\n"
+"usage: %s {-h | --help}\n",
+	  program_name, program_name, program_name);
+  if (stdout == stream) {
+    fputs(
+"\n"
+"Translate the output of troff(1) into a CaPSL and VDM format suitable"
+"\n"
+"for Canon LBP-4 and LBP-8 printers.  See the grolbp(1) manual page.\n",
+	  stream);
+    exit(EXIT_SUCCESS);
+  }
 }
 
 int main(int argc, char **argv)
@@ -641,11 +648,11 @@ int main(int argc, char **argv)
     program_name = strsave(argv[0]);
   font::set_unknown_desc_command_handler(handle_unknown_desc_command);
   // command line parsing
-  int c = 0;
+  int c;
   int option_index = 0;
-  while (c >= 0) {
-    c = getopt_long (argc, argv, "c:F:hI:lo:p:vw:",
-		     long_options, &option_index);
+  while ((c = getopt_long(argc, argv, "c:F:hI:lo:p:vw:", long_options,
+			  &option_index))
+	 != EOF) {
     switch (c) {
     case 'F':
       font::command_line_font_dir(optarg);
@@ -658,7 +665,7 @@ int main(int argc, char **argv)
 	const char *s;
 	if (!font::scan_papersize(optarg, &s,
 				  &user_paperlength, &user_paperwidth))
-	  error("invalid paper size '%1' ignored", optarg);
+	  error("ignoring invalid paper format '%1'", optarg);
 	else
 	  user_papersize = set_papersize(s);
 	break;
@@ -668,7 +675,7 @@ int main(int argc, char **argv)
       break;
     case 'v':
       printf("GNU grolbp (groff) version %s\n", Version_string);
-      exit(0);
+      exit(EXIT_SUCCESS);
       break;
     case 'o':
       if (strcasecmp(optarg, "portrait") == 0)
@@ -706,12 +713,13 @@ int main(int argc, char **argv)
       }
     case 'h':
       usage(stdout);
-      exit(0);
       break;
     case '?':
       usage(stderr);
-      exit(1);
+      exit(EXIT_FAILURE);
       break;
+    default:
+      assert(0 == "unhandled getopt_long return value");
     }
   }
   if (optind >= argc)
@@ -722,3 +730,9 @@ int main(int argc, char **argv)
     lbpputs("\033c\033<");
   return 0;
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

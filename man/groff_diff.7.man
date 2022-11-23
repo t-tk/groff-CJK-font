@@ -1,7 +1,10 @@
 '\" e
 .TH groff_diff @MAN7EXT@ "@MDATE@" "groff @VERSION@"
 .SH Name
-groff_diff \- differences between GNU roff and AT&T troff
+groff_diff \- differences between GNU
+.I roff
+and AT&T
+.I troff
 .
 .
 .\" ====================================================================
@@ -77,8 +80,8 @@ features identifiers of arbitrary length,
 supports non-integral type sizes,
 adds new escape sequences and requests,
 provides new conditional expression operators,
-recognizes additional scaling units and numerical operators,
-and extends the function of some escape sequences and requests already
+recognizes additional scaling units and numeric operators,
+and extends the function of some escape sequences and requests
 present in
 .RI AT&T\~ troff .
 .
@@ -155,6 +158,27 @@ registers exercise color support.
 .SS "Fractional type sizes and new scaling units"
 .\" ====================================================================
 .
+.\" BEGIN Keep (roughly) parallel with groff.texi node "Using Fractional
+.\" Type Sizes".
+AT&T
+.I troff \" AT&T
+interpreted all type size measurements in points.
+.
+Combined with integer arithmetic,
+this design choice made it impossible to support,
+for instance,
+ten and a half-point type.
+.
+In GNU
+.IR troff , \" GNU
+an output device can select a scaling factor that subdivides a point
+into \[lq]scaled points\[rq].
+.
+A type size expressed in scaled points can thus represent a non-integral
+type size.
+.
+.
+.P
 A
 .I scaled point
 is equal to
@@ -162,34 +186,36 @@ is equal to
 points,
 where
 .I sizescale
-is a parameter specified in the device description file,
+is specified in the device description file,
 .IR DESC ,
 and defaults to\~1.
 .
-A new scaling
+(See
+.MR groff_font @MAN5EXT@ .)
+.
+The scaling
 .RB unit\~\[lq] z \[rq]
-has the effect of multiplying by
+has multiplies by
 .IR sizescale .
 .
-Requests and escape sequences in
-.I groff
-interpret arguments that represent a type size as being in units of
-scaled points;
+Requests and escape sequences in GNU
+.I troff \" GNU
+interpret arguments that represent a type size scaled points;
 that is,
-they evaluate such arguments using an implied default scaling unit
+they evaluate such arguments using a default scaling unit
 .RB of\~\[lq] z \[rq].
 .
 Arguments treated in this way comprise those to the escape sequences
-.B \eH
+.B \[rs]H
 and
-.BR \es ,
+.BR \[rs]s ,
 to the request
-.BR .ps ,
+.BR ps ,
 the third argument to the
-.B .cs
+.B cs
 request,
 and the second and fourth arguments to the
-.B .tkf
+.B tkf
 request.
 .
 .
@@ -198,17 +224,15 @@ For example,
 if
 .I sizescale
 is\~1000,
-then a scaled point is one one-thousandth of a point.
+then a scaled point is one thousandth of a point.
 .
 The request
-.RB \[lq] ".ps 10.25" \[rq]
+.RB \[lq] ".ps 10.5" \[rq]
 is synonymous with
-.RB \[lq] ".ps 10.25z" \[rq]
-and sets the type size to 10250\~scaled points,
-or 10.25\~points.
+.RB \[lq] ".ps 10.5z" \[rq]
+and sets the type size to 10,500\~scaled points,
+or 10.5\~points.
 .
-.
-.P
 Consequently,
 in
 .IR groff ,
@@ -216,7 +240,7 @@ the register
 .B \[rs]n[.s]
 can contain a non-integral type size.
 .
-The new register
+The register
 .B \[rs]n[.ps]
 returns the type size in scaled points.
 .
@@ -227,8 +251,8 @@ It makes no sense to use the
 unit in a numeric expression whose default scaling unit is neither
 .RB \[lq] u \[rq]
 .RB nor\~\[lq] z \[rq],
-so
-.I groff
+so GNU
+.I troff \" GNU
 disallows this.
 .
 Similarly,
@@ -237,8 +261,8 @@ it is nonsensical to use a scaling unit other
 .RB or\~\[lq] u \[rq]
 in a numeric expression whose default scaling unit
 .RB is\~\[lq] z \[rq],
-so
-.I groff
+so GNU
+.I troff
 disallows this as well.
 .
 .
@@ -247,7 +271,7 @@ Another new scaling unit,
 .RB \[lq] s \[rq],
 multiplies by the number of basic units in a scaled point.
 .
-For instance,
+Thus,
 .RB \[lq] \[rs]n[.ps]s \[rq]
 is equal to
 .RB \[lq] 1m \[rq]
@@ -258,6 +282,42 @@ Do not confuse the
 and
 .RB \[lq] z \[rq]
 scaling units.
+.
+.
+.P
+Output devices may be limited in the type sizes they can employ.
+.
+The
+.B .s
+and
+.B .ps
+registers represent the type size as selected by the output driver as it
+understands a device's capability.
+.
+The last
+.I requested
+type size is interpolated in scaled points by the read-only register
+.B .psr
+and in points as a decimal fraction by the read-only string-valued
+register
+.BR .sr .
+.
+Both are associated with the environment.
+.
+For example,
+if a type size of 10.95\~points is requested,
+and the nearest size permitted by a
+.B sizes
+request
+(or a
+.B sizescale
+directive in the device's
+.I DESC
+file)
+is 11\~points,
+the latter value is used by the output driver.
+.\" END Keep (roughly) parallel with groff.texi node "Using Fractional
+.\" Type Sizes".
 .
 .
 .P
@@ -318,7 +378,7 @@ ignore scaling units in the evaluation
 .
 .
 .\" ====================================================================
-.SS Conditional expressions
+.SS "Conditional expressions"
 .\" ====================================================================
 .
 More conditions can be tested with the
@@ -437,6 +497,7 @@ escape sequences
 .BR \[rs]f ,
 .BR \[rs]k ,
 .BR \[rs]n ,
+.BR \[rs]s ,
 .BR \[rs]$ ,
 and
 .BR \[rs]* ).
@@ -450,39 +511,33 @@ and then by symbol roughly in Unicode code point order.
 .
 .TP
 .BI \[rs]A\[aq] anything \[aq]
-This expands to
-.B 1
-or\~\c
-.BR 0 ,
-depending on whether
+Interpolate 1 if
 .I anything
-is or is not acceptable as the name of a string, macro, diversion,
-register, environment, font, or color.
+is a valid identifier,
+and\~0 otherwise.
 .
-It returns\~\c
-.B 0
-if
-.I anything
-is empty.
+Because invalid input characters are
+removed, invalid identifiers are empty or contain spaces,
+tabs,
+or newlines.
 .
-This is useful if you want to look up user input in some sort of
-associative table.
+You can employ
+.B \[rs]A
+to validate a macro argument before using it to construct another escape
+sequence or identifier.
 .
 .TP
 .BI \[rs]B\[aq] anything \[aq]
-This expands to
-.B 1
-or\~\c
-.BR 0 ,
-depending on whether
+Interpolate 1 if
 .I anything
-is or is not a valid numeric expression.
+is a valid numeric expression,
+and\~0 otherwise.
 .
-It returns\~\c
-.B 0
-if
-.I anything
-is empty.
+You might use
+.B \[rs]B
+along with the
+.RB \[lq] if \[rq]
+request to filter out invalid macro or string arguments.
 .
 .TP
 .BR \[rs]D\[aq] .\|.\|. \[aq]
@@ -845,7 +900,11 @@ and confuses drivers that do not know about this extension.
 .
 .TP
 .BI \[rs]Z\[aq] anything \[aq]
-Print anything and then restore the horizontal and vertical position;
+Save the drawing position,
+format
+.IR anything ,
+then restore it.
+.
 .I anything
 may not contain tabs or leaders.
 .
@@ -1223,7 +1282,7 @@ request but compatibility mode is switched off during execution.
 .
 .
 .TP
-.BI .as1\~ "name string"
+.BI .as1\~ "name contents"
 Similar to
 .BR .as ,
 but compatibility mode is switched off when the appended portion of the
@@ -1232,7 +1291,7 @@ string is later interpolated.
 To be more precise,
 a \[lq]compatibility save\[rq] token is inserted at the beginning of the
 appended string
-.IR string ,
+.IR contents ,
 and a \[lq]compatibility restore\[rq] token at the end.
 .
 As a consequence,
@@ -1506,7 +1565,7 @@ no characters have this property.
 .IP
 For example,
 if you need an automatic break point after
-the en-dash in numerical ranges like \[lq]3000\[en]5000\[rq],
+the en-dash in numeric ranges like \[lq]3000\[en]5000\[rq],
 insert
 .RS
 .RS
@@ -1581,11 +1640,11 @@ character on the right doesn't get examined.
 .
 .
 .TP
-.BI .char\~ "g string"
+.BI .char\~ "c contents"
 Define a new character or
-.RI glyph\~ g
+.RI glyph\~ c
 to be
-.IR string ,
+.IR contents ,
 which can be empty.
 .
 More precisely,
@@ -1595,16 +1654,16 @@ defines a
 object
 (or redefines an existing one)
 that is accessed with the
-.RI name\~ g
+.RI name\~ c
 on input,
 and produces
-.I string
+.I contents
 on output.
 .
 Every time
-.RI glyph\~ g
+.RI glyph\~ c
 needs to be printed,
-.I string
+.I contents
 is processed in a temporary environment and the result is wrapped up
 into a single object.
 .
@@ -1612,14 +1671,14 @@ Compatibility mode is turned off and the escape character is
 set
 .RB to\~ \[rs]
 while
-.I string
+.I contents
 is processed.
 .
 Any emboldening,
 constant spacing,
 or track kerning is applied to this object rather than to individual
 glyphs in
-.IR string .
+.IR contents .
 .
 .
 .IP
@@ -1639,7 +1698,7 @@ and
 .B \[rs]L
 escape sequences;
 and words
-.RI containing\~ g
+.RI containing\~ c
 can be hyphenated correctly,
 if the
 .B .hcode
@@ -1961,20 +2020,17 @@ is executed.
 .
 .
 .TP
-.BI .device\~ anything
+.BI .device\~ contents
 This request performs (almost) the same operation as the
 .B \[rs]X
 escape sequence.
 .
-.I anything
+.I contents
 is read in copy mode.
 .
-A
-.RB leading\~ \[dq]
-is stripped;
-this enables
-.I anything
-to contain leading spaces.
+An initial neutral double quote in
+.I contents
+is stripped off to allow embedding of leading spaces.
 .
 .
 .TP
@@ -2059,15 +2115,15 @@ as output.
 .
 .
 .TP
-.BI .ds1\~ "name string"
+.BI .ds1\~ "name contents"
 Similar to
 .BR .ds ,
 but compatibility mode is switched off when the string is later
 interpolated.
 .
 To be more precise,
-a \[lq]compatibility save\[rq] token is inserted at the beginning of the
-string,
+a \[lq]compatibility save\[rq] token is inserted at the beginning of
+.IR contents ,
 and a \[lq]compatibility restore\[rq] token at the end.
 .
 .
@@ -2160,11 +2216,11 @@ The current font family is associated with the environment.
 .
 .
 .TP
-.BI .fchar\~ c\~string
+.BI .fchar\~ c\~contents
 Define fallback character (or glyph)\~\c
 .I c
 to be
-.IR string .
+.IR contents .
 .
 The syntax of this request is the same as the
 .B char
@@ -2189,13 +2245,13 @@ restore the previous fill color.
 .
 .
 .TP
-.BI .fschar\~ f\~c\~string
+.BI .fschar\~ f\~c\~contents
 Define fallback character (or glyph)\~\c
 .I c
 for font\~\c
 .I f
 to be
-.IR string .
+.IR contents .
 .
 The syntax of this request is the same as the
 .B char
@@ -2882,18 +2938,18 @@ but if
 exists, append to it instead of truncating it.
 .
 .TP
-.BI .output\~ string
+.BI .output\~ contents
 Emit
-.I string
+.I contents
 directly to the intermediate output (subject to copy-mode
 interpretation);
 this is similar to
 .B \[rs]!\&
 used at the top level.
 .
-An initial double quote in
-.I string
-is stripped off to allow initial blanks.
+An initial neutral double quote in
+.I contents
+is stripped off to allow embedding of leading spaces.
 .
 .
 .TP
@@ -3048,11 +3104,11 @@ the request is ignored.
 .
 .
 .TP
-.BI .schar\~ c\~string
+.BI .schar\~ c\~contents
 Define global fallback character (or glyph)\~\c
 .I c
 to be
-.IR string .
+.IR contents .
 .
 The syntax of this request is the same as the
 .B char
@@ -3283,15 +3339,15 @@ file controls which font positions (if any) are initially associated
 with styles rather than fonts.
 .
 .TP
-.BI .substring\~ "str start\~"\c
+.BI .substring\~ "string start\~"\c
 .RI [ end ]
 Replace the string named
-.I str
+.I string
 with its substring bounded by the indices
 .I start
 and
 .IR end ,
-inclusive.
+inclusively.
 .
 The first character in the string has index\~0.
 .
@@ -3344,18 +3400,18 @@ and less than or equal to
 the increase in width is a linear function of the type size.
 .
 .TP
-.BI .tm1\~ string
+.BI .tm1\~ contents
 Similar to the
 .B tm
 request,
-.I string
-is read in copy mode and written on the standard error, but an initial
-double quote in
-.I string
-is stripped off to allow initial blanks.
+.I contents
+is read in copy mode and written on the standard error,
+but an initial neutral double quote in
+.I contents
+is stripped off to allow embedding of leading spaces.
 .
 .TP
-.BI .tmc\~ string
+.BI .tmc\~ contents
 Similar to
 .B tm1
 but without writing a final newline.
@@ -4185,20 +4241,36 @@ These four read/\:write registers are set by the
 request and contain the bounding box values (in PostScript units) of a
 given PostScript image.
 .
+.
 .P
 The following read/\:write registers are set by the
 .B \[rs]w
-escape sequence:
+escape sequence.
+.
 .
 .TP
 .B \[rs]n[rst]
 .TQ
 .B \[rs]n[rsb]
-Like the
-.B st
+Like
+.B \[rs]n[st]
 and
-.B sb
-registers, but take account of the heights and depths of glyphs.
+.BR \[rs]n[sb] ,
+but taking account of the heights and depths of glyphs.
+.
+In other words,
+these registers store the highest and lowest vertical positions attained
+by the argument formatted by the
+.B \[rs]w
+escape sequence,
+doing what AT&T
+.I troff \" AT&T
+documented
+.B \[rs]n[st]
+and
+.B \[rs]n[sb]
+as doing.
+.
 .
 .TP
 .B \[rs]n[ssc]

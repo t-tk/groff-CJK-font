@@ -968,7 +968,7 @@ void resource_manager::process_file(int rank, FILE *fp,
     int (resource_manager::*proc)(const char *, int, FILE *, FILE *);
   };
 
-  static comment_info comment_table[] = {
+  static const comment_info comment_table[] = {
     { "BeginResource:", &resource_manager::do_begin_resource },
     { "IncludeResource:", &resource_manager::do_include_resource },
     { "BeginDocument:", &resource_manager::do_begin_document },

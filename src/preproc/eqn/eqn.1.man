@@ -1,7 +1,9 @@
 '\" t
 .TH @g@eqn @MAN1EXT@ "@MDATE@" "groff @VERSION@"
 .SH Name
-@g@eqn \- format equations for groff or MathML
+@g@eqn \- format equations for
+.I groff
+or MathML
 .
 .
 .\" ====================================================================
@@ -146,7 +148,7 @@ in the directories given with the
 .B \-M
 option first,
 then in
-.IR @SYSTEMMACRODIR@ ,
+.if !'@COMPATIBILITY_WRAPPERS@'no' .IR @SYSTEMMACRODIR@ ,
 .IR @LOCALMACRODIR@ ,
 and finally in the standard macro directory
 .IR @MACRODIR@ .
@@ -156,12 +158,11 @@ If it exists,
 processes it before the other input files.
 .
 .
-.LP
-Only the differences between GNU
+.P
+This man page primarily discusses the differences between GNU
 .I eqn \" GNU
 and AT&T
-.I eqn \" AT&T
-are described in this document.
+.IR eqn .\" AT&T
 .
 Most of the new features of the GNU
 .I eqn \" GNU
@@ -217,10 +218,10 @@ or
 .\" ====================================================================
 .
 .I eqn
-gives each component of an equation a type,
-and adjusts the spacing between components using that type.
+imputes a type to each component of an equation,
+adjusting the spacing between them accordingly.
 .
-Possible types are described in the table below.
+Recognized types are as follows.
 .
 .
 .IP
@@ -235,6 +236,7 @@ a large operator such as
 .ds Su \[lq]\s+5\[*S]\s0\[rq]
 .if \n(.g .if !c\[*S] .ds Su the summation operator
 \*[Su]
+.rm Su
 T}
 binary	a binary operator such as \[lq]\[pl]\[rq]
 relation	a relation such as \[lq]=\[rq]
@@ -246,58 +248,61 @@ suppress	a type without automatic spacing adjustment
 .TE
 .
 .
-.LP
-Components of an equation get a type in one of two ways.
+.P
+Two primitives apply types to equation components.
+.
+Quote type names in
+.I eqn
+commands to prevent macro expansion from being attempted on their names.
 .
 .
 .TP
 .BI type\~ "t e"
-This yields an equation component that
-.RI contains\~ e
-but that has
-.RI type\~ t ,
-where
-.I t
-is one of the types mentioned above.
+Apply
+.RI type\~ t
+to
+.RI expression\~ e .
 .
 For example,
-.B times
-is defined as follows.
+.RB \[lq] times \[rq]
+is defined as if by the following.
 .
 .
 .RS
 .IP
 .EX
-type "binary" \[rs](mu
+define times \[aq] type "binary" \[rs](mu \[aq]
 .EE
 .RE
 .
 .
-.IP
-The type name doesn't have to be quoted,
-but doing so protects it from macro expansion.
-.
-.
+.br
+.ne 7v
 .TP
 .BI chartype\~ "t text"
 Each (unquoted) character
 .RI in\~ text
 is assigned
-.RI type\~ t .
+.RI type\~ t ,
+persistently.
 .
-The
-.RI type\~ t
-can also be
+If
+.I t
+is
 .RB \[lq] letter \[rq]
 or
-.RB \[lq] digit \[rq];
-in these cases
-.B chartype
-changes the font style of the characters.
+.RB \[lq] digit \[rq],
+.B \%chartype
+also assigns a typeface to each character in
+.IR text .
 .
 See subsection \[lq]Fonts\[rq] below.
 .
-For example,
+As an example,
+the default spacing for some punctuation characters is set up as if
+by the following
+.I eqn \" generic
+command.
 .
 .
 .RS
@@ -306,13 +311,6 @@ For example,
 chartype "punctuation" .,;:
 .EE
 .RE
-.
-.
-.IP
-assigns the
-.RB \[lq] punctuation \[rq]
-type to each of the characters in \[lq].,;:\[rq] wherever they
-subsequently appear in an equation.
 .
 .
 .\" ====================================================================
@@ -368,9 +366,9 @@ CSS \[lq]large\[rq].
 In
 .I @g@troff
 output,
-the point size is increased by\~5;
-in MathML output,
-the expression uses
+the type size is increased by\~5.
+.
+MathML output emits the following.
 .
 .
 .RS
@@ -574,17 +572,19 @@ that is not the first character on the input line is treated like
 .
 .TP
 .BI special\~ "text e"
-This constructs a new object
-.RI from\~ e
-using a
-.MR @g@troff @MAN1EXT@
-macro named
-.IR text .
+Construct an object by calling the
+.I troff \" generic
+macro
+.I text
+.RI on\~ e .
 .
-When the macro is called,
-the string
+The
+.I troff \" generic
+string
 .B 0s
-contains the output
+contains the
+.I eqn \" generic
+output
 .RI for\~ e ,
 and the registers
 .BR 0w ,
@@ -593,12 +593,13 @@ and the registers
 .BR 0skern ,
 and
 .B 0skew
-contain the width,
+the width,
 height,
 depth,
 subscript kern,
 and skew
-.RI of\~ e .
+.RI of\~ e ,
+respectively.
 .
 (The
 .I subscript kern
@@ -614,12 +615,11 @@ accent over it should be placed.)
 .
 The macro must modify
 .B 0s
-so that it outputs the desired result with its origin at the current
-point,
-and increase the current horizontal position by the width of the object.
-.
-The registers must also be modified so that they correspond to
-the result.
+so that it outputs the desired result,
+returns the drawing position to the text baseline at the beginning of
+.IR e ,
+and updates the foregoing registers to correspond to the new dimensions
+of the result.
 .
 .
 .IP
@@ -628,81 +628,102 @@ suppose you wanted a construct that \[lq]cancels\[rq] an expression by
 drawing a diagonal line through it.
 .
 .
+.br
+.ne 11v
 .RS
 .IP
-.if t .ne 10v+\n(.Vu
 .EX
-\&.EQ
-define cancel \[aq]special Ca\[aq]
-\&.EN
 \&.de Ca
-\&.\&  ds 0s \[rs]
+\&.  ds 0s \[rs]
 \[rs]Z\[aq]\[rs]\[rs]*(0s\[aq]\[rs]
 \[rs]v\[aq]\[rs]\[rs]n(0du\[aq]\[rs]
 \[rs]D\[aq]l \[rs]\[rs]n(0wu \-\[rs]\[rs]n(0hu-\[rs]\[rs]n(0du\[aq]\[rs]
 \[rs]v\[aq]\[rs]\[rs]n(0hu\[aq]
 \&..
+\&.EQ
+special Ca "x \[rs][mi] 3 \[rs][pl] x" \[ti] 3
+\&.EN
 .EE
 .RE
 .
 .
 .IP
-You could then cancel an
-.RI expression\~ e
-with
-.RB \[lq] "cancel {"
-.I e
-.BR } \[rq].
+We use the
+.B \[rs][mi]
+and
+.B \[rs][pl]
+special characters instead of + and \-
+because they are part of the argument to a
+.I @g@troff
+macro,
+so
+.I @g@eqn
+does not transform them to mathematical glyphs for us.
 .
-.
-.IP
 Here's a more complicated construct that draws a box around an
-expression.
+expression;
+the bottom of the box rests on the text baseline.
+.
+We define the
+.I eqn \" generic
+macro
+.B box
+to wrap the call of the
+.I @g@troff
+macro
+.BR Bx .
 .
 .
+.br
+.ne 17v
 .RS
 .IP
-.if t .ne 18v+\n(.Vu
 .EX
-\&.EQ
-define box \[aq]special Bx\[aq]
-\&.EN
 \&.de Bx
 \&.ds 0s \[rs]
-\[rs]Z\[aq]\[rs]h\[aq]1n\[aq]\[rs]\[rs]*(0s\[aq]\[rs]
-\[rs]Z\[aq]\[rs]
+\[rs]Z\[aq]\[rs]\[rs]h\[aq]1n\[aq]\[rs]\[rs]*[0s]\[aq]\[rs]
 \[rs]v\[aq]\[rs]\[rs]n(0du+1n\[aq]\[rs]
 \[rs]D\[aq]l \[rs]\[rs]n(0wu+2n 0\[aq]\[rs]
-\[rs]D\[aq]l 0 \-\[rs]\[rs]n(0hu\-\[rs]\[rs]n(0du-2n\[aq]\[rs]
+\[rs]D\[aq]l 0 \-\[rs]\[rs]n(0hu\-\[rs]\[rs]n(0du\-2n\[aq]\[rs]
 \[rs]D\[aq]l \-\[rs]\[rs]n(0wu\-2n 0\[aq]\[rs]
 \[rs]D\[aq]l 0 \[rs]\[rs]n(0hu+\[rs]\[rs]n(0du+2n\[aq]\[rs]
-\&\[aq]\[rs]
 \[rs]h\[aq]\[rs]\[rs]n(0wu+2n\[aq]
 \&.nr 0w +2n
 \&.nr 0d +1n
 \&.nr 0h +1n
 \&..
+\&.EQ
+define box \[aq] special Bx $1 \[aq]
+box(foo) \[ti] "bar"
+\&.EN
 .EE
 .RE
 .
 .
+.br
+.ne 5v
 .TP
 .BI space\~ n
-A positive value of the
-.RI integer\~ n
-(in hundredths of an em)
-sets the vertical spacing before the equation,
-a negative value sets the spacing after the equation,
-replacing the default values.
+Set extra vertical spacing around the equation,
+replacing the default values,
+where
+.IR n \~is
+an integer in hundredths of an em.
+.
+If positive,
+.IR n \~increases
+vertical spacing before the equation;
+if negative,
+it does so after the equation.
 .
 This primitive provides an interface to
 .IR groff 's
 .B \[rs]x
-escape
-(but with opposite sign).
+escape sequence,
+but with the opposite sign convention.
 .
-This keyword has no effect if the equation is part of a
-.I pic
+It has no effect if the equation is part of a
+.MR @g@pic @MAN1EXT@
 picture.
 .
 .
@@ -715,12 +736,12 @@ recognizes an
 .RB \[lq] on \[rq]
 argument to the
 .B delim
-primitive specially;
-restoring any delimiters that have been previously disabled with
+primitive specially,
+restoring any delimiters previously disabled with
 .RB \[lq] "delim off" \[rq].
 .
 If delimiters haven't been specified,
-neither of these commands have effect.
+neither command has effect.
 .
 .
 .TP
@@ -754,13 +775,15 @@ increases the vertical spacing between rows,
 using
 .IR groff 's
 .B \[rs]x
-escape
+escape sequence
 (the value has no effect in MathML mode).
 .
 Negative values are possible but have no effect.
 .
-If there is more than a single value given in a matrix,
-the biggest one is used.
+If more than one
+.I n
+occurs in a matrix,
+the largest is used.
 .
 .
 .\" ====================================================================
@@ -769,9 +792,9 @@ the biggest one is used.
 .
 When
 .I eqn
-is generating
+generates
 .I troff \" generic
-markup,
+input,
 the appearance of equations is controlled by a large number of
 parameters.
 .
@@ -781,7 +804,7 @@ rendering engine.
 .
 These parameters can be set using the
 .B set
-command.
+primitive.
 .
 .
 .TP
@@ -824,7 +847,7 @@ definitive.
 .TP
 .B minimum_size
 .I @g@eqn
-won't set anything at a smaller point size than this.
+won't set anything at a smaller type size than this.
 .
 The value is in points.
 .
@@ -955,28 +978,28 @@ escape sequence.
 .B num1
 The
 .B over
-command shifts up the numerator by at least this amount.
+primitive shifts up the numerator by at least this amount.
 .
 .
 .TP
 .B num2
 The
 .B smallover
-command shifts up the numerator by at least this amount.
+primitive shifts up the numerator by at least this amount.
 .
 .
 .TP
 .B denom1
 The
 .B over
-command shifts down the denominator by at least this amount.
+primitive shifts down the denominator by at least this amount.
 .
 .
 .TP
 .B denom2
 The
 .B smallover
-command shifts down the denominator by at least this amount.
+primitive shifts down the denominator by at least this amount.
 .
 .
 .TP
@@ -1150,10 +1173,11 @@ and
 output devices.
 .
 .
-.LP
-A more precise description of the role of many of these
-parameters can be found in Appendix\~H of
-.IR "The \*[tx]book" .
+.P
+Appendix\~H
+of
+.I "The \*[tx]book"
+discusses many of these parameters in greater detail.
 .RE
 .
 .
@@ -1161,7 +1185,9 @@ parameters can be found in Appendix\~H of
 .SS Macros
 .\" ====================================================================
 .
-Macros can take arguments.
+In GNU
+.IR eqn , \" GNU
+macros can take arguments.
 .
 In a macro body,
 .BI $ n
@@ -1178,36 +1204,36 @@ it is replaced by nothing.
 A word containing a left parenthesis where the part of the word before
 the left parenthesis has been defined using the
 .B define
-command is recognized as a macro call with arguments;
+primitive is recognized as a macro call with arguments;
 characters following the left parenthesis up to a matching right
 parenthesis are treated as comma-separated arguments.
 .
 Commas inside nested parentheses
 do not terminate an argument.
 .
+In the following synopses,
+.I X
+can be any character not appearing in the parameter thus bracketed.
+.
 .
 .TP
 .BI sdefine\~ "name X anything X"
 This is like the
 .B define
-command,
+primitive,
 but
 .I name
 is not recognized if called with arguments.
 .
 .
 .TP
-.BI "include \[dq]" file \[dq]
+.BI include\~ file
 .TQ
-.BI "copy \[dq]" file \[dq]
-Include the contents of
-.I file
-.RB ( include
-and
-.B copy
-are synonyms).
+.BI copy\~ file
+Interpolate the contents of
+.IR file .
 .
-Lines of
+Lines in
 .I file
 beginning with
 .B .EQ
@@ -1230,10 +1256,6 @@ process
 otherwise ignore
 .IR anything .
 .
-.I X
-can be any character not appearing in
-.IR anything .
-.
 .
 .TP
 .BI undef\~ name
@@ -1246,9 +1268,10 @@ making it undefined.
 .SS "Predefined macros"
 .\" ====================================================================
 .
-.I @g@eqn
+GNU
+.I eqn \" GNU
 supports the predefined macros offered by AT&T
-.I eqn:
+.IR eqn : \" AT&T
 .BR and ,
 .BR approx ,
 .BR arc ,
@@ -1299,11 +1322,11 @@ and
 .RB \[lq] .\|.\|. \[rq].
 .
 The lowercase classical Greek letters are available as
-.BR alpha ,
+.BR \%alpha ,
 .BR beta ,
 .BR chi ,
 .BR delta ,
-.BR epsilon ,
+.BR \%epsilon ,
 .BR eta ,
 .BR gamma ,
 .BR iota ,
@@ -1312,7 +1335,7 @@ The lowercase classical Greek letters are available as
 .BR mu ,
 .BR nu ,
 .BR omega ,
-.BR omicron ,
+.BR \%omicron ,
 .BR phi ,
 .BR pi ,
 .BR psi ,
@@ -1320,7 +1343,7 @@ The lowercase classical Greek letters are available as
 .BR sigma ,
 .BR tau ,
 .BR theta ,
-.BR upsilon ,
+.BR \%upsilon ,
 .BR xi ,
 and
 .BR zeta .
@@ -1328,9 +1351,9 @@ and
 Obtain their uppercase forms by spelling these names with an initial
 capital letter or in full capitals,
 as in
-.B Alpha
+.B \%Alpha
 or
-.BR ALPHA .
+.BR \%ALPHA .
 .
 .
 .P
@@ -1338,14 +1361,15 @@ GNU
 .I eqn \" GNU
 further defines the macros
 .BR cdot ,
-.B cdots
-(see above),
+.BR cdots ,
+and
+.B utilde
+(all discussed above),
 .BR dollar ,
 which sets a dollar sign,
-.BR ldots ,
-which sets three dots on the baseline,
 and
-.BR utilde .
+.BR ldots ,
+which sets three dots on the baseline.
 .
 .
 .\" ====================================================================
@@ -1358,9 +1382,9 @@ an italic font for letters,
 and a roman font for everything else.
 .
 The AT&T
-.I eqn
+.I eqn \" AT&T
 .B gfont
-command changes the font that is used as the italic font.
+primitive changes the font that is used as the italic font.
 .
 By default this
 .RB is\~ I .
@@ -1376,7 +1400,7 @@ Set the roman font
 .RI to\~ f .
 .
 .
-.LP
+.P
 The
 .B italic
 primitive uses the current italic font set by
@@ -1386,25 +1410,27 @@ the
 primitive uses the current roman font set by
 .BR grfont .
 .
-There is also a new
+GNU
+.I eqn \" GNU
+offers a
 .B gbfont
-command,
+primitive,
 which changes the font used by the
 .B bold
 primitive.
 .
-If you only use the
+If you use only the
 .BR roman ,
 .B italic
 and
 .B bold
-primitives to changes fonts within an equation,
-you can change all the fonts used by your equations just by using
+primitives to change fonts within an equation,
+then
 .BR gfont ,
 .B grfont
 and
 .B gbfont
-commands.
+suffice to configure all the typefaces used by your equations.
 .
 .
 .LP
@@ -1412,7 +1438,7 @@ You can control which characters are treated as letters
 (and therefore set in italics)
 by using the
 .B chartype
-command described above.
+primitive described above.
 .
 A type of
 .B letter
@@ -1602,7 +1628,7 @@ The
 and
 .B back
 operations cannot be implemented,
-and yield a MathML \[lq]<merror>\[rq] message instead.
+and yield a MathML \%\[lq]<merror>\[rq] message instead.
 .
 .IP \[bu]
 The
@@ -1637,18 +1663,14 @@ be recognized as strings that begin with \[lq]<math>\[rq] and end with
 \[lq]</math>\[rq] and do not cross line boundaries.
 .
 .
-.LP
-See section \[lq]Bugs\[rq] below for translation limits specific to
-.IR @g@eqn .
-.
-.
 .\" ====================================================================
 .SH Bugs
 .\" ====================================================================
 .
-Names of macros and primitives must be quoted anywhere they occur in
+Words must be quoted anywhere they occur in
 .I eqn \" generic
-input if they are to be interpreted by
+input if they are not to be recognized as names of macros or primitives,
+or if they are to be interpreted by
 .IR troff . \" generic
 .
 These names,
@@ -1686,7 +1708,7 @@ instead.
 .
 .
 .P
-Inline equations are set at the point size that is current at the
+Inline equations are set at the type size that is current at the
 beginning of the input line.
 .
 .

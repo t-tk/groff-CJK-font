@@ -1,4 +1,4 @@
-.\" an.tmac
+.\" groff implementation of man(7) package
 .\"
 .\" Copyright (C) 1989-2022 Free Software Foundation, Inc.
 .\"      Written by James Clark (jjc@jclark.com)
@@ -111,7 +111,14 @@
 .de1 an-end
 .  if !r an-TH-was-called .return
 .  if \\n[cR] \{\
-.    fl
+.    \" We might have a pending output line that is not yet broken, and
+.    \" also be 1v from the bottom of the page.  If we break (or flush)
+.    \" the output line now, the page will get ejected afterward and
+.    \" troff will exit because we're in an end-of-input macro--our
+.    \" footer will never be output.  So, if that is the case, further
+.    \" extend the page length by 1v.
+.    if ((\\n[.p] - \\n[nl]) <= \\n[.V]) .pl +1v
+.    br
 .    pl +1v
 .    sp 1v
 .    an-footer
@@ -171,10 +178,10 @@
 .
 .\" Cause a page transition to a new man(7) document.  Clear the page
 .\" header trap so it is not sprung with stale information.  Update the
-.\" page number depending on the C (continuous page numbering) register.
+.\" page number depending on the C (consecutive numbering) register.
 .de an-start-new-document
 .  ch an-header
-.  ie \\n[C] .bp (\\n[%] + 1)
+.  ie \\n[C] .bp (\\n[%] + 1) \" argument NOT redundant before page 1
 .  el        .bp 1
 ..
 .
@@ -197,7 +204,7 @@
 ..
 .
 .\" Begin man page.
-.\" .TH title section[ extra1[ extra2[ extra3]]]
+.\" .TH topic section[ extra1[ extra2[ extra3]]]
 .de1 TH
 .  if ((\\n[.$] < 2) : (\\n[.$] > 5)) \
 .    an-style-warn .\\$0 expects 2 to 5 arguments, got \\n[.$]
@@ -269,9 +276,9 @@
 .  nr an-is-in-diversion 0
 .  nr an*is-in-example 0
 .
-.  ds an-title "\\$1\"
-.  if \\n[CT] .stringup an-title
-.  ds an-section "\\$2\"
+.  ds an*topic "\\$1\"
+.  if \\n[CT] .stringup an*topic
+.  ds an*section "\\$2\"
 .  ie (\\n[.$] > 4) .ds an-extra3 "\\$5\"
 .  el \{\
 .    \" Simulate switch/case in roff.
@@ -309,7 +316,7 @@
 .
 .  if '\\$5\\*[an-extra3]'' \{\
 .    ds an-msg .\\$0 missing fifth argument and second argument '\\$2'\"
-.    as an-msg " not a recognized manual section; specify volume title\"
+.    as an-msg " not a recognized manual section; specify its title\"
 .    an-style-warn \\*[an-msg]
 .    rm an-msg
 .  \}
@@ -319,15 +326,15 @@
 .  ps \\n[PS]u
 .  vs \\n[VS]u
 .  lt \\n[LT]u
-.  an*abbreviate-page-title
+.  an*abbreviate-page-topic
 .  \" If AT or UC is called, we will need to abbreviate again.
 .  an*abbreviate-inner-footer
 .  ev
 .
-.  \" HTML gets the title without any abbreviation, since it's metadata.
+.  \" HTML gets the topic without any abbreviation, since it's metadata.
 .  if \\n[an-is-output-html] \{\
 .    DEVTAG-TL
-.    nop \\*[an-title]
+.    nop \\*[an*topic]
 .    DEVTAG-EO-TL
 .  \}
 .
@@ -429,53 +436,53 @@
 .    tl '\\*[an*ifoot]'\\*[an-extra1]'\\*[an*ofoot]'
 ..
 .
-.\" Abbreviate the page title if it's too long for the header.  Leaves
+.\" Abbreviate the page topic if it's too long for the header.  Leaves
 .\" string an-pageref defined for use in .PT and .an-footer.  Also
-.\" leaves an-title-abbv for possible use by .PT and .BT re-definers.
+.\" leaves an*topic-abbv for possible use by .PT and .BT re-definers.
 .\" Call this only from within the header/footer environment.
-.de an*abbreviate-page-title
-.  ds an-title-abbv \\*[an-title]\" might not get abbreviated at all
-.  ds an-title-string \\*[an-title]\"
+.de an*abbreviate-page-topic
+.  ds an*topic-abbv \\*[an*topic]\" might not get abbreviated at all
+.  ds an*topic-string \\*[an*topic]\"
 .  ds an-ellipsis \|.\|.\|.\|\"
 .  \" an*page-ref-string is left unmodified for internal use, such as
 .  \" PDF bookmarks.
-.  ds an*page-ref-string \\*[an-title](\\*[an-section])\"
-.  ds an-pageref \\*[an-title-abbv](\\*[an-section])\"
+.  ds an*page-ref-string \\*[an*topic](\\*[an*section])\"
+.  ds an-pageref \\*[an*topic-abbv](\\*[an*section])\"
 .  nr an-header-width \\w'\\*[an-pageref]\\*[an-extra3]\\*[an-pageref]'
 .  while (\\n[an-header-width] >= \\n[.lt]) \{\
-.    \" The page title is too long; trim some bits out of the middle.
-.    length an-title-length \\*[an-title-string]
+.    \" The page topic is too long; trim some bits out of the middle.
+.    length an*topic-length \\*[an*topic-string]
 .    \" roff division rounds integers toward zero.  Remove an additional
 .    \" character on each side of the midpoint to account for the
 .    \" ellipsis we add later.
-.    nr an-mark1 (\\n[an-title-length] / 2 - 2)
-.    nr an-mark2 (\\n[an-title-length] / 2 + 2)
-.    ds an-prefix \\*[an-title-string]\"
-.    ds an-suffix \\*[an-title-string]\"
+.    nr an-mark1 (\\n[an*topic-length] / 2 - 2)
+.    nr an-mark2 (\\n[an*topic-length] / 2 + 2)
+.    ds an-prefix \\*[an*topic-string]\"
+.    ds an-suffix \\*[an*topic-string]\"
 .    \" Use extremum operators to ensure that the first and last
-.    \" characters of the title remain intact (in cases of pathological
+.    \" characters of the topic remain intact (in cases of pathological
 .    \" shortening).
 .    substring an-prefix 0 (\\n[an-mark1] >? 1)
-.    substring an-suffix (\\n[an-mark2] <? \\n[an-title-length] - 1) -1
-.    ds an-title-string \\*[an-prefix]\\*[an-suffix]\"
-.    ds an-title-abbv \\*[an-prefix]\\*[an-ellipsis]\\*[an-suffix]\"
-.    \" Remeasure the formatted title; give up if we made no progress.
-.    length an-title-new-length \\*[an-title-string]
-.    ie (\\n[an-title-new-length] >= \\n[an-title-length]) \
+.    substring an-suffix (\\n[an-mark2] <? \\n[an*topic-length] - 1) -1
+.    ds an*topic-string \\*[an-prefix]\\*[an-suffix]\"
+.    ds an*topic-abbv \\*[an-prefix]\\*[an-ellipsis]\\*[an-suffix]\"
+.    \" Remeasure the formatted topic; give up if we made no progress.
+.    length an*topic-new-length \\*[an*topic-string]
+.    ie (\\n[an*topic-new-length] >= \\n[an*topic-length]) \
 .      break
-.    ds an-pageref \\*[an-title-abbv](\\*[an-section])\"
+.    ds an-pageref \\*[an*topic-abbv](\\*[an*section])\"
 .    nr an-header-width \
        \\w'\\*[an-pageref]\\*[an-extra3]\\*[an-pageref]'
 .  \}
-.  ds an-pageref \\*[an-lic]\f[\\*[MF]]\\*[an-title-abbv]\\*[an-ic]\
-\f[R](\\*[an-section])\"
-.  rr an-title-length-prev
+.  ds an-pageref \\*[an-lic]\f[\\*[MF]]\\*[an*topic-abbv]\\*[an-ic]\
+\f[R](\\*[an*section])\"
+.  rr an*topic-length-prev
 .  rr an-mark1
 .  rr an-mark2
 .  rm an-prefix
 .  rm an-suffix
-.  rm an-title-string
-.  rr an-title-length
+.  rm an*topic-string
+.  rr an*topic-length
 .  rr an-header-width
 .  rm an-ellipsis
 ..
@@ -1036,7 +1043,7 @@ contains unsupported escape sequence
 ..
 .
 .\" Set a man page cross reference.
-.\" .MR page-title page-section [trailing-text]
+.\" .MR page-topic page-section [trailing-text]
 .de1 MR
 .  if ((\\n[.$] < 2) : (\\n[.$] > 3)) \
 .    an-style-warn .\\$0 expects 2 or 3 arguments, got \\n[.$]
@@ -1081,7 +1088,7 @@ contains unsupported escape sequence
 .  HTML-IMAGE-END
 .  if \\n[an-is-output-html] .ll \\n[an-TS-ll]u
 .  if !r TW .if !\\n[an-was-tbl-failure-reported] \{\
-.    ds an-msg tbl preprocessor failed or was not run;\"
+.    ds an-msg tbl preprocessor failed, or it or soelim was not run;\"
 .    as an-msg " table(s) likely not rendered\"
 .    as an-msg " (TE macro called with TW register undefined)\"
 .    an-warn \\*[an-msg]
@@ -1187,22 +1194,18 @@ contains unsupported escape sequence
 .  el   .nr cR 0
 .\}
 .
-.\" continuous page numbering over multiple documents
+.\" consecutive page numbering across multiple documents
 .\"
 .\" We must use consecutive page numbers when using PostScript to
 .\" generate HTML images; we must not reset the page number at the
 .\" beginning of each document (the 'ps4html' register is automatically
 .\" added to the command line by the pre-HTML preprocessor).
-.\"
-.\" \n[C] may get set to 1 redundantly in the below; we could replace
-.\" that with a complex conditional, but it doesn't seem to be worth the
-.\" trouble given restrictions on use of '!', '&', and ':' operators.
 .ie !r C \
 .  nr C 0
 .el \
 .  if !\n[C] \
 .    if \n[an-is-output-html] \{\
-.       tm \*[an]: ignoring continuous page numbering in HTML output
+.       tm \*[an]: consecutive page numbering required for HTML output
 .       nr C 1
 .    \}
 .if \n[an-is-output-html] \
@@ -1218,7 +1221,7 @@ contains unsupported escape sequence
 .if !r CS \
 .  nr CS 0
 .
-.\" full capitalization of page title
+.\" full capitalization of page topic
 .if !r CT \
 .  nr CT 0
 .
@@ -1301,7 +1304,7 @@ contains unsupported escape sequence
 .  if \n[cR] \
 .    ds an-msg when continuously rendering
 .\}
-.if d an-msg \{
+.if d an-msg \{\
 .  tm \*[an]: ignoring starting page number \*[an-msg]
 .  rr P
 .  rm an-msg
@@ -1340,7 +1343,7 @@ contains unsupported escape sequence
 .  if \n[cR] \
 .    ds an-msg when continuously rendering
 .\}
-.if d an-msg \{
+.if d an-msg \{\
 .  tm \*[an]: ignoring page number suffix \*[an-msg]
 .  rr X
 .  rm an-msg
@@ -1359,7 +1362,7 @@ contains unsupported escape sequence
 .substring an-heading-style -1 -1
 .ds an-heading-family \" empty
 .length an-HF-length \*[HF]
-.if (\n[an-HF-length] > 1) \{
+.if (\n[an-HF-length] > 1) \{\
 .  as an-heading-family \*[HF]\"
 .  substring an-heading-family 0 -2
 .\}
@@ -1369,7 +1372,7 @@ contains unsupported escape sequence
 .rr an-HF-length
 .rm an-heading-style
 .
-.\" man page title font
+.\" man page topic font
 .if !d MF \
 .  ds MF I\"
 .
@@ -1377,13 +1380,13 @@ contains unsupported escape sequence
 .\" is an oblique style, append the corrections.
 .ds an-lic \" left italic correction
 .ds an-ic \" italic correction
-.ds an-page-title-style \*[MF]\"
-.substring an-page-title-style -1 -1
-.if '\*[an-page-title-style]'I' \{\
+.ds an*topic-style \*[MF]\"
+.substring an*topic-style -1 -1
+.if '\*[an*topic-style]'I' \{\
 .  as an-lic \,\"
 .  as an-ic \/\"
 .\}
-.rm an-page-title-style
+.rm an*topic-style
 .
 .if \n[cR] \
 .  an-set-up-continuous-rendering

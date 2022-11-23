@@ -1,7 +1,9 @@
 '\" t
 .TH roff @MAN7EXT@ "@MDATE@" "groff @VERSION@"
 .SH Name
-roff \- concepts and history of roff typesetting
+roff \- concepts and history of
+.I roff
+typesetting
 .
 .
 .\" TODO: Synchronize this material with introductory section(s) of our
@@ -71,22 +73,20 @@ implementation.
 .
 .
 .P
-This document
-presents typographical concepts that form the common background of all
+Below we present
+typographical concepts that form the background of all
 .I roff
 implementations,
-describes some of the development history of
+narrate the development history of some
 .I roff
 systems,
-offers details of the
-.I roff
-pipeline which are usually managed by front ends like
+detail the command pipeline managed by
 .MR groff @MAN1EXT@ ,
-surveys the formatting language,
-suggests some tips for editing
+survey the formatting language,
+suggest tips for editing
 .I roff
-input files,
-and recommends materials for further reading.
+input,
+and recommend further reading materials.
 .
 .
 .\" ====================================================================
@@ -315,16 +315,18 @@ The end of input causes a break.
 .
 .P
 After the formatter performs an automatic break,
-it then tries to
+it may then
 .I adjust
-the line:
-inter-word spaces are widened until the text reaches the right margin.
+the line,
+widening inter-word spaces until the text reaches the right margin.
 .
 Extra spaces between words are preserved.
 .
 Leading and trailing spaces are handled as noted above.
 .
-Text can be aligned to the left or right margins or centered using
+Text can be aligned to the left or right margin only,
+or centered,
+using
 .I requests.
 .
 .
@@ -360,6 +362,113 @@ so most users turn to the
 preprocessor for table construction.
 .\" END Keep roughly parallel with groff.texi nodes "Text" through "Tab
 .\" Stops".
+.
+.
+.\" ====================================================================
+.SS "Requests and macros"
+.\" ====================================================================
+.
+.\" BEGIN Keep roughly parallel with groff.texi node "Requests and
+.\" Macros".
+.\" We have now encountered almost all of the syntax there is in the
+.\" @code{roff} language, with an exception already noted in passing.
+A
+.I request
+is an instruction to the formatter that occurs after a
+.I control character,
+which is recognized at the beginning of an input line.
+.
+The regular control character is a dot
+.RB \[lq] .\& \[rq].
+.
+Its counterpart,
+the
+.I no-break control character,
+a neutral apostrophe
+.RB \[lq] \|\[aq]\| \[rq],
+suppresses the break
+.\" slack wording: that is
+implied by some requests.
+.
+These characters were chosen because it is uncommon for lines of text in
+natural languages to begin with them.
+.
+If you require a formatted period or apostrophe
+(closing single quotation mark)
+where
+.\" GNU @code{troff}
+the formatter is expecting a control character,
+prefix the dot or neutral apostrophe with the non-printing input break
+escape sequence,
+.RB \[lq] \[rs]& \[rq].
+.
+.
+.P
+An input line beginning with a control character is called a
+.I control line.
+.
+Every line of input that is not a control line is a
+.I text line.
+.
+.
+.P
+Requests often take
+.I arguments,
+words
+(separated from the request name and each other by spaces)
+that specify details of the action
+.\" GNU @code{troff}
+the formatter is expected to perform.
+.
+If a request is meaningless without arguments,
+it is typically ignored.
+.
+.\" TODO: roff(7): We haven't introduced escape sequences yet.
+.\" GNU @code{troff}'s requests and escape sequences comprise the
+.\" control language of the formatter.
+.
+Of key importance are the requests that define macros.
+.
+Macros are invoked like requests,
+enabling the request repertoire to be extended or overridden.
+.\" @footnote{Argument handling in macros is more flexible but also more
+.\" complex.  @xref{Calling Macros}.}
+.
+.
+.P
+A
+.I macro
+can be thought of as an abbreviation you can define for a
+collection of control and text lines.
+.
+When the macro is
+.I called
+by giving its name after a control character,
+it is replaced with what it stands for.
+.
+The process of textual replacement is known as
+.I interpolation.
+.\" @footnote{Some escape sequences undergo interpolation as well.}
+Interpolations are handled as soon as they are recognized,
+and once performed,
+a
+.I roff
+formatter scans the replacement for further requests,
+macro calls,
+and escape sequences.
+.
+.
+.P
+In
+.I roff
+systems,
+the
+.RB \[lq] de \[rq]
+request defines a macro.
+.\" @footnote{GNU @code{troff} offers additional ones.  @xref{Writing
+.\" Macros}.}
+.\" END Keep roughly parallel with groff.texi node "Requests and
+.\" Macros".
 .
 .
 .\" ====================================================================
@@ -403,8 +512,8 @@ A
 .I page
 is a two-dimensional structure upon which a
 .I roff
-system imposes a coordinate system with its upper left corner as the
-origin.
+system imposes a rectangular coordinate system with its upper left
+corner as the origin.
 .
 Coordinate values are in basic units and increase down and to the right.
 Useful ones are therefore always positive and within numeric ranges
@@ -517,55 +626,9 @@ or at least bear vertical margins larger than one vee.
 .
 .
 .\" ====================================================================
-.SS "Language elements"
+.SS "Other language elements"
 .\" ====================================================================
 .
-Lines of input to any
-.I roff
-formatter can be classified as one of two types:
-control lines and text lines.
-.
-.
-.P
-A
-.I control line
-starts with the
-.I control character,
-a dot
-.RB ( .\& )
-or the
-.I no-break control character,
-a neutral apostrophe
-.RB ( \[aq] ).
-.
-Either control character is followed by zero or more spaces or tabs
-and then an optional
-.I request,
-an instruction built in to the formatter.
-.
-Some requests take one or more
-.I arguments,
-which follow on the same line,
-separated from the request name and each other only by spaces.
-.
-.
-.P
-Any input line that is not a control line is a
-.I text line.
-.
-See section \[lq]Line continuation\[rq] in
-.MR groff @MAN7EXT@
-for an exception to this rule.
-.
-Text lines generally become formatted output.
-.
-To start a text line with the control or no-break control character,
-prefix the character with the
-.B \[rs]&
-escape sequence.
-.
-.
-.P
 .I Escape sequences
 start with the
 .I escape character,
@@ -581,28 +644,6 @@ With requests,
 the escape and control characters can be changed;
 further,
 escape sequence recognition can be turned off and back on.
-.
-.
-.P
-.I Macros
-permit the extension or replacement of the request repertoire.
-.
-Certain requests can be invoked to define a macro,
-a user-directed abbreviation for a collection of input lines.
-.
-Macros are called on control lines much as requests are invoked,
-albeit with occasional differences in argument handling.
-.
-When a macro is called,
-its definition
-(or \[lq]body\[rq])
-is
-.I interpolated,
-as if typed at its call site.
-.
-Its contents are then parsed for further request invocations,
-macro calls,
-and escape sequences.
 .
 .
 .P
@@ -690,29 +731,28 @@ and determine its type size and color.
 The formatting process turns input characters into output glyphs.
 .
 A few characters commonly seen on keyboards are treated
-specially by
+specially by the
 .I roff
-languages and may not look correct in output if used unthinkingly;
+language and may not look correct in output if used unthinkingly;
 they are
 the (double) quotation mark
-.RB ( \[dq] ),
+.RB ( \|\[dq]\| ),
 the neutral apostrophe
-.RB ( \[aq] ),
+.RB ( \|\[aq]\| ),
 the minus sign
 .RB ( \- ),
 the backslash
-.RB ( \[rs] ),
+.RB ( \|\[rs]\| ),
 the caret or circumflex accent
 .RB ( \[ha] ),
 the grave accent
-.RB ( \[ga] ),
+.RB ( \|\[ga]\| ),
 and the tilde
 .RB ( \[ti] ).
 .
-All are available via
+All of these and more can be produced with
 .I special character
-escape sequences,
-along with numerous other symbols;
+escape sequences;
 see
 .MR groff_char @MAN7EXT@ .
 .
@@ -795,8 +835,8 @@ Computer-driven document formatting dates back to the 1960s.
 .
 The
 .I roff
-system itself is intimately connected with the Unix operating system,
-but its roots go back to the earlier operating systems CTSS,
+system is intimately connected with Unix,
+but its origins lie with the earlier operating systems CTSS,
 GECOS,
 and Multics.
 .
@@ -809,11 +849,11 @@ and Multics.
 ancestor
 .I RUNOFF
 was written in the MAD language by Jerry Saltzer
-to prepare his Ph.D.\& thesis using the Compatible Time Sharing System
+to prepare his Ph.D.\& thesis on the Compatible Time Sharing System
 (CTSS),
 a project of the Massachusetts Institute of Technology (MIT).
 .
-The program is generally referred to in full capitals,
+This program is referred to in full capitals,
 both to distinguish it from its many descendants,
 and because bits were expensive in those days;
 five- and six-bit character encodings were still in widespread usage,
@@ -1171,8 +1211,8 @@ for Fifth Edition Unix,
 Ossanna combined and reimplemented the two
 .IR roff s
 in C,
-using preprocessor conditions of that language to generate both from a
-single source tree.
+using that language's preprocessor to generate both from a single source
+tree.
 .
 .
 .P
@@ -1296,11 +1336,11 @@ An output driver for PostScript,
 was swiftly developed.
 .
 However,
-due to AT&T software licensing practices,
+AT&T's software licensing practices kept
 Ossanna's
 .IR troff ,
-with its tight coupling to the capabilities of the C/A/T,
-remained in parallel distribution with device-independent
+with its tight coupling to the C/A/T's capabilities,
+in parallel distribution with device-independent
 .I troff
 throughout the 1980s.
 .
@@ -1370,36 +1410,41 @@ standard today.
 .
 .
 .\" ====================================================================
-.SS "Heirloom Doctools \f[I]troff\f[]"
+.SS "Other free \f[I]roff\f[]s"
 .\" ====================================================================
-.\" XXX GBR leaves off here.
 .
-An alternative is
-.UR https://\:github\:.com/\:n\-t\-roff/\:heirloom\-doctools
-.I Gunnar Ritter's Heirloom roff project
+In 2007, \" TODO: verify
+Caldera/SCO and Sun Microsystems,
+having acquired rights to AT&T Documenter's Workbench
+.I troff
+(a descendant of the Bell Labs code),
+released it under a free but GPL-incompatible license.
+.
+.UR https://\:github\:.com/\:n\-t\-roff/\:DWB3.3
+This implementation
 .UE
-project, started in 2005, which provides enhanced versions of the
-various roff tools found in the OpenSolaris and Plan\~9 operating
-systems, now available under free licenses.
-.
-You can get this package with the shell command:
-.RS
-.EX
-\[Do] git clone https://github.com/n\-t\-roff/heirloom\-doctools
-.EE
-.RE
+was made portable to modern POSIX systems,
+and adopted and enhanced first by Gunnar Ritter and then Carsten Kunze
+to produce
+.UR https://github.com/n-t-roff/heirloom-doctools
+Heirloom Doctools
+.I troff
+.UE .
 .
 .
 .P
-Moreover, one finds there the
-.UR https://\:github\:.com/\:n\-t\-roff/\:DWB3.3
-.I Original Documenter's Workbench Release 3.3
-.UE .
+In 2012, \" according to its Git history
+Ali Gholami Rudi began working on
+.UR https://\:github\:.com/\:aligrudi/\:neatroff
+.IR neatroff ,
+.UE
+a permissively licensed new implementation.
 .
 .
 .\" ====================================================================
 .SH "Using \f[I]roff\f[]"
 .\" ====================================================================
+.\" XXX GBR leaves off here.
 .
 Many people use
 .I roff
@@ -1532,31 +1577,19 @@ only programmers of macro packages need a substantial command of it.
 .
 A
 .I roff
-preprocessor is any program generating output that syntactically obeys
-the rules of the
+preprocessor is a program that,
+directly or ultimately,
+generates output in the
 .I roff
-formatting language.
+language.
 .
-Each preprocessor defines a language of its own that is translated
-into
+Typically, \" preconv is an exception.
+each preprocessor defines a language of its own that transforms its
+input into that for
 .I roff
-code when run through the preprocessor program.
+or another preprocessor.
 .
-Portions of the document written in these languages are bracketed by
-tokens that look like
-.I roff
-macro calls.
-.
-.I roff
-preprocessor programs transform only the regions of the document
-inteded for them.
-.
-Each document thus enhanced by preprocessor code must be run through the
-corresponding preprocessors before the formatter processes it.
-.
-Some preprocessors produce input intended for interpretation by another
-preprocessor;
-for example,
+As an example of the latter,
 .I chem \" generic
 produces
 .I pic \" generic
@@ -1567,6 +1600,24 @@ Preprocessors must consequently be run in an appropriate order;
 handles this automatically for all preprocessors supplied by the GNU
 .I roff
 system.
+.
+.
+.P
+Portions of the document written in preprocessor languages are usually
+.\" preconv is the exception again.
+bracketed by tokens that look like
+.I roff
+macro calls.
+.
+.I roff
+preprocessor programs transform only the regions of the document
+intended for them.
+.\" In preconv's case, that's the whole document.
+.
+When a preprocessor language is used by a document,
+its corresponding program must process it before the input is seen by
+the formatter,
+or incorrect rendering is almost guaranteed.
 .
 .
 .P
@@ -1582,12 +1633,13 @@ including
 and
 .IR @g@soelim .
 .
+See
+.MR groff @MAN1EXT@
+for a complete list.
 .
-.P
 Other preprocessors for
 .I roff
 systems are known.
-.
 .
 .RS
 .TS
@@ -1595,7 +1647,7 @@ tab (@);
 Li L.
 dformat@depicts data structures;
 grap@constructs statistical charts; and
-ideal@draws diagrams using a constraint-based language
+ideal@draws diagrams using a constraint-based language.
 .TE
 .RE
 .
@@ -1604,66 +1656,57 @@ ideal@draws diagrams using a constraint-based language
 .SS "Formatter programs"
 .\" ====================================================================
 .
-In the context of
+A
 .I roff
-systems,
-the formatter is the program that parses documents written in the
+formatter interprets input in the
 .I roff
-language.
+language and transforms it into
+.I intermediate output
+intended for processing by a selected device.
 .
-It generates intermediate output,
-which is intended to be fed into an output driver
-(also known as a device postprocessor),
-the identity of which must be known prior to processing.
-.
-The documents must already have been run through all necessary
-preprocessors to render correctly.
-.
-.
-.P
-The output produced by a
-.I roff
-formatter is represented in another language,
-termed the \[lq]intermediate output format\[rq].
-.
-As noted in section \[lq]History\[rq] above,
-this language was first specified in CSTR\~#97;
-GNU extensions to it are documented in
+Intermediate output uses its own language,
+described in
 .MR groff_out @MAN5EXT@ .
 .
-Intermediate output is in specialized in its parameters,
+Intermediate output is specialized in its parameters,
 but not its syntax,
-for the output driver used;
+for the selected device;
 the format is
 .RI device- independent ,
 but not
 .RI device- agnostic .
 .
+The parameters the formatter uses to arrange the document are stored in
+.I device
+and
+.IR "font description files" ;
+see
+.MR groff_font @MAN5EXT@ .
+.
 .
 .P
-The formatter is the heart of the
-.I roff
-system.
-.
-AT&T
-had two formatters:
+AT&T Unix
+had two formatters\[em]\c
 .I nroff
 for terminals,
 and
 .I troff
 for typesetters.
 .
-.
-.P
 Often,
 the name
 .I troff
-is used as a general term to refer to both formatters.
+is used loosely to refer to both.
 .
-When speaking that generally,
+When generalizing thus,
 .I groff
 documentation prefers the term
 .RI \[lq] roff \[rq].
+.
+In GNU
+.IR roff ,
+the formatter program is always
+.MR @g@troff @MAN1EXT@ .
 .
 .
 .\" ====================================================================
@@ -1679,15 +1722,15 @@ is a hardware interface like a printer,
 a text or graphical terminal,
 or a standardized file format that unrelated software can interpret.
 .
-.
-.P
-A
-.I roff
-output driver is a program that parses the device-independent
-intermediate output format of
-.I troff
+An
+.I output driver
+is a program that parses the output of
+.I troff \" generic
 and produces instructions specific to the device or file format it
 supports.
+.
+An output driver might support multiple devices,
+particularly if they are similar.
 .
 .
 .P
@@ -1709,7 +1752,7 @@ to reduce file size and processing time,
 AT&T
 .IR troff 's
 device-independent output format placed low limits on the magnitudes of
-quantities it could represent in some cases.
+some of the quantities it could represent.
 .
 Its PostScript output driver,
 .MR dpost 1 ,
@@ -1738,8 +1781,9 @@ are normal text files interleaved with
 .I roff
 formatting elements.
 .
+The
 .I roff
-languages are powerful enough to support arbitrary computation and
+language is powerful enough to support arbitrary computation and
 supply facilities that encourage their extension.
 .
 The primary such facility is macro definition;
@@ -1820,8 +1864,9 @@ language is Ossanna's \[lq]Troff User's Manual\[rq],
 CSTR\~#54,
 in its 1992 revision by Kernighan.
 .
+The
 .I roff
-languages provide requests,
+language provides requests,
 escape sequences,
 macro definition facilities,
 string variables,
@@ -1921,13 +1966,11 @@ and many others.
 .
 .P
 .I Strings
-are variables that can store a string.
+store text.
 .
-A string is stored by the
+They are populated with the
 .B .ds
-request.
-.
-The stored string can be retrieved later by the
+request and interpolated using the
 .B \[rs]*
 escape sequence.
 .
@@ -1992,9 +2035,9 @@ suffix.
 Since
 .I @g@troff
 fills text automatically,
-it is common practice in
+it is common practice in the
 .I roff
-languages to avoid visual composition of text in input files:
+language to avoid visual composition of text in input files:
 the esthetic appeal of the formatted output is what matters.
 .
 Therefore,
@@ -2238,6 +2281,8 @@ trigger the automatic activation of the
 mode.
 .
 .
+.br
+.ne 3v
 .IP \(bu
 Technically,
 having the sequence
@@ -2372,8 +2417,8 @@ by Dale Dougherty and Tim O'Reilly,
 1987,
 Hayden Books.
 .
-This well-regarded text from 1987 brings the reader from a state of no
-knowledge of Unix or text editing
+This well-regarded text brings the reader from a state of no knowledge
+of Unix or text editing
 (if necessary)
 to sophisticated computer-aided typesetting.
 .

@@ -1078,7 +1078,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .			\}
 .		\}
 .	\}
-.	ie \\n[ds*badarg] \{
+.	ie \\n[ds*badarg] \{\
 .		ds ds*msg unrecognized argument '\\$1' to .\\$0;\"
 .		as ds*msg " did you mean '.\\$0 I \\$1'?\"
 .		@error \\*[ds*msg]
@@ -1789,12 +1789,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .de XN-INIT
 ..
 .de XH-UPDATE-TOC
-.\" .XH-UPDATE-TOC <outline-level> [<section-number>] <text>
-.\" (<section-number> present only when called by XN)
+.\" .XH-UPDATE-TOC <outline-level> <text>
 .XS
 .in (\\$1u - 1u * 2n)
 .shift
-\&\\$*\" capture <section-number> (if present) and <text>
+\&\\$*
 .XE
 ..
 .\" Rudimentary integration hook, to be called (nominally)
@@ -1823,7 +1822,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .rm \\$0
 .de XN-REPLACEMENT
 .XN-INIT
-.XH-UPDATE-TOC \\n[nh*hl] \\*[SN] \\$@
+.XH-UPDATE-TOC \\n[nh*hl] \\$@
 \&\\$*
 ..
 .de toc*end-entry

@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
@@ -20,8 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 #include "lib.h"
 
 #include <stdlib.h>
-#include <assert.h>
 #include <errno.h>
+
+#include "assert.h"
 
 #include "posix.h"
 #include "errarg.h"
@@ -330,8 +330,10 @@ static void usage(FILE *stream)
 "usage: %s [-w] [-c common-words-file] [-d dir] [-f list-file]"
 " [-h min-hash-table-size] [-i excluded-fields]"
 " [-k max-keys-per-record] [-l min-key-length]"
-" [-n threshold] [-o file] [-t max-key-length] [file] ...\n"
-"usage: %s { -v | --version }\n", program_name, program_name);
+" [-n threshold] [-o file] [-t max-key-length] [file ...]\n"
+"usage: %s {-v | --version}\n"
+"usage: %s --help\n",
+	  program_name, program_name, program_name);
 }
 
 static void check_integer_arg(char opt, const char *arg, int min, int *res)
