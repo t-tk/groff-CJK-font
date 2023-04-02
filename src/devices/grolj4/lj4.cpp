@@ -30,7 +30,8 @@ X command to specify inline escape sequence (how to specify unprintable chars?)
 X command to include bitmap graphics
 */
 
-#include "assert.h"
+#include <assert.h>
+
 #include "driver.h"
 #include "nonposix.h"
 

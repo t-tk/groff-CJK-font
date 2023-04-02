@@ -1,5 +1,5 @@
 # Autoconf macros for groff.
-# Copyright (C) 1989-2022 Free Software Foundation, Inc.
+# Copyright (C) 1989-2023 Free Software Foundation, Inc.
 #
 # This file is part of groff.
 #
@@ -174,11 +174,15 @@ AC_DEFUN([GROFF_USE_TEX_CHECK], [
 # grohtml needs the following programs to produce images from tbl(1)
 # tables and eqn(1) equations.
 
+dnl Any macro that tests $make_htmldoc should AC_REQUIRE this.
+
 AC_DEFUN([GROFF_CHECK_GROHTML_PROGRAMS], [
-  make_htmldoc=no
   AC_REQUIRE([GROFF_GHOSTSCRIPT_PATH])
+
+  make_htmldoc=no
   missing=
   m4_foreach([groff_prog],
+dnl Keep this list of programs in sync with grohtml test scripts.
     [[pnmcrop], [pnmcut], [pnmtopng], [pnmtops], [psselect]], [
       AC_CHECK_PROG(groff_prog, groff_prog, [found], [missing])
       if test $[]groff_prog = missing
@@ -222,58 +226,113 @@ AC_DEFUN([GROFF_CHECK_GROHTML_PROGRAMS], [
   properly.  It will not be possible to prepare or install
   groff-generated documentation in HTML format.
 "
-
    fi
    AC_SUBST([make_htmldoc])
 ])
 
+
 AC_DEFUN([GROFF_GROHTML_PROGRAM_NOTICE], [
+  AC_REQUIRE([GROFF_CHECK_GROHTML_PROGRAMS])
+
   if test "$make_htmldoc" = no
   then
     AC_MSG_NOTICE([$grohtml_notice])
   fi
 ])
 
-# gropdf needs awk and Ghostscript to have produced its font description
-# files.
+dnl pdfroff uses awk, and we use it in GROFF_URW_FONTS_CHECK.
 
-AC_DEFUN([GROFF_CHECK_GROPDF_PROGRAMS], [
-  use_gropdf=no
+AC_DEFUN([GROFF_AWK_NOTICE], [
+  AC_REQUIRE([GROFF_AWK_PATH])
+
+  awk_names=awk
+  if test -n "$ALT_AWK_PROGS"
+  then
+    awk_names="$ALT_AWK_PROGS"
+  fi
+
+  if test "$AWK" = missing
+  then
+    AC_MSG_NOTICE([No awk program was found in \$PATH.
+
+  It was sought under the name(s) "$awk_names".
+    ])
+  fi
+])
+
+AC_DEFUN([GROFF_PDFROFF_DEPENDENCIES_CHECK], [
   AC_REQUIRE([GROFF_AWK_PATH])
   AC_REQUIRE([GROFF_GHOSTSCRIPT_PATH])
 
-  missing=
-  test "$AWK" = missing && missing="'awk'"
-  test "$GHOSTSCRIPT" = missing && missing="$missing 'gs'"
-  if test -z "$missing"
+  use_pdfroff=no
+  pdfroff_missing_deps=
+
+  test "$AWK" = missing && pdfroff_missing_deps="awk"
+
+  if test "$GHOSTSCRIPT" = missing
+  then
+    verb=is
+
+    if test -n "$pdfroff_missing_deps"
+    then
+      pdfroff_missing_deps="$pdfroff_missing_deps and "
+      verb=are
+    fi
+    pdfroff_missing_deps="${pdfroff_missing_deps}Ghostscript $verb"
+  fi
+
+  if test -z "$pdfroff_missing_deps"
+  then
+    use_pdfroff=yes
+  fi
+
+  AC_SUBST([use_pdfroff])
+])
+
+AC_DEFUN([GROFF_GROPDF_DEPENDENCIES_CHECK], [
+  AC_REQUIRE([GROFF_GHOSTSCRIPT_PATH])
+  AC_REQUIRE([GROFF_URW_FONTS_CHECK])
+
+  use_gropdf=no
+  gropdf_missing_deps=
+
+  if test "$GHOSTSCRIPT" != missing \
+    || test "$groff_have_urw_fonts" = yes
   then
     use_gropdf=yes
-  else
-    plural=`set $missing; test $[#] -eq 2 && echo s`
-    if test "$plural" = s
-    then
-      missing=`set $missing; echo "$[1] and $[2]"`
-      verb=were
-    else
-      missing=`echo $missing`
-      verb=was
-    fi
-
-  gropdf_notice="The program$plural $missing $verb not found in \
-\$PATH.
-
-  Consequently, groff's PDF output driver, 'gropdf', will not work
-  properly.  It will not be possible to prepare or install
-  groff-generated documentation in PDF.
-"
   fi
+
   AC_SUBST([use_gropdf])
 ])
 
+AC_DEFUN([GROFF_PDFROFF_PROGRAM_NOTICE], [
+  AC_REQUIRE([GROFF_PDFROFF_DEPENDENCIES_CHECK])
+
+  if test "$use_pdfroff" = no
+  then
+    AC_MSG_NOTICE(['pdfroff' will not be functional.
+
+  Because $pdfroff_missing_deps missing, 'pdfroff' will not operate
+  and the 'pdfmark.pdf' document will not be available.
+])
+  fi
+])
+
 AC_DEFUN([GROFF_GROPDF_PROGRAM_NOTICE], [
+  AC_REQUIRE([GROFF_GROPDF_DEPENDENCIES_CHECK])
+
   if test "$use_gropdf" = no
   then
-    AC_MSG_NOTICE([$gropdf_notice])
+    AC_MSG_NOTICE(['gropdf' will have reduced function.
+
+  Neither Ghostscript nor URW fonts are available; groff documentation
+  thus will not be available in PDF.
+
+  'gropdf' will be able to handle only documents using the standard PDF
+  base 14 fonts, plus the 'EURO' font groff supplies, and font embedding
+  with its '-e' option (accessed via the 'groff' command with the option
+  '-P -e') will not be possible.
+])
   fi
 ])
 
@@ -287,24 +346,21 @@ AC_DEFUN([GROFF_URW_FONTS_PATH], [
 ])
 
 # Check for availability of URW fonts in the directory specified by the
-# user (see GROFF_URW_FONTS_PATH above); alternatively, use the search
-# path given by 'gs -h' (if possible) supplemented with the paths where
-# font/devpdf/Foundry.in expects them.
+# user (see GROFF_URW_FONTS_PATH above).  We do NOT search the path of
+# directories built into Ghostscript because those fonts lack the
+# corresponding AFM files we need to generate groff font description
+# files; see afmtodit(1).  Ghostscript's own fonts are treated as the
+# "default foundry" and we already provide descriptions of them in
+# font/devpdf (along with groff's EURO font).
 
 AC_DEFUN([GROFF_URW_FONTS_CHECK], [
   AC_REQUIRE([GROFF_URW_FONTS_PATH])
-  AC_REQUIRE([GROFF_AWK_PATH])
   AC_REQUIRE([GROFF_GHOSTSCRIPT_PATH])
   groff_have_urw_fonts=no
   AC_MSG_CHECKING([for URW fonts in Type 1/PFB format])
-  _list_paths=
 
-  if test "$AWK" != missing && test "$GHOSTSCRIPT" != missing
-  then
-    _list_paths=`$GHOSTSCRIPT -h | $AWK 'BEGIN { found = 0 } /Search path:/ { found = 1 } /^[ ]*\// { print $'0' }'| tr : ' '`
-  fi
-
-  _list_paths="$_list_paths \
+dnl Keep this list in sync with font/devpdf/Foundry.in.
+  _list_paths="\
     /usr/share/fonts/type1/gsfonts/ \
     /usr/share/fonts/default/Type1/ \
     /usr/share/fonts/default/Type1/adobestd35/ \
@@ -317,9 +373,12 @@ AC_DEFUN([GROFF_URW_FONTS_CHECK], [
     _list_paths="$urwfontsdir"
   fi
 
+dnl Keep this list of font file names in sync with the corresponding
+dnl entry in font/devpdf/util/BuildFoundries.pl.
   for k in $_list_paths
   do
     for _font_file in \
+      URWGothic-Book \
       URWGothic-Book.t1 \
       URWGothic-Book.pfb \
       URWGothicL-Book.pfb \
@@ -346,16 +405,24 @@ AC_DEFUN([GROFF_URW_FONTS_CHECK], [
 ])
 
 AC_DEFUN([GROFF_URW_FONTS_NOTICE], [
-  if test "$GHOSTSCRIPT" != missing && test "$groff_have_urw_fonts" = no
+  if test "$groff_have_urw_fonts" = no
   then
+    gs_verbiage=
+    if test "$GHOSTSCRIPT" != missing
+    then
+      gs_verbiage=' as well as the search path shown by the
+  "'"$GHOSTSCRIPT"' -h" command (if available)'
+    fi
     AC_MSG_NOTICE([URW fonts in Type 1/PFB format were not found.
 
-  URW font generation for groff's 'gropdf' output driver will not work
-  properly.  You can obtain the URW base 35 fonts from their GitHub
-  project.
+  groff font description files for the URW fonts, used by the 'gropdf'
+  output driver, will not be available.  Use and embedding of fonts from
+  the 'U' foundry in PDF documents generated by groff will not be
+  possible.
 
-  As of this writing (2021-05-15), you can find them in the 'fonts'
-  directory of the following archives (choose one).
+  You can obtain the URW base 35 fonts from their GitHub project.  As of
+  this writing (2023-02-15), you can find them in the 'fonts' directory
+  of the following archives (choose one).
 
     https://github.com/ArtifexSoftware/urw-base35-fonts/archive/refs/
       tags/20200910.zip
@@ -366,26 +433,30 @@ AC_DEFUN([GROFF_URW_FONTS_NOTICE], [
 
     https://github.com/ArtifexSoftware/urw-base35-fonts/releases
 
-  By default, groff will look for these fonts in the search path shown
-  by the 'gs -h' command (if available) and in the two directories
-    /usr/share/fonts/type1/gsfonts/
-  and
-    /opt/local/share/fonts/urw-fonts/
-  (these locations are specified in font/devpdf/Foundry.in).  You will
-  need to re-run the 'configure' script after installing these fonts.
+  'gropdf' looks for these fonts in several directories specified in
+  font/devpdf/Foundry.in$gs_verbiage.
+
+  You will need to "make distclean" and re-run the 'configure' script
+  after installing the URW fonts.
 
   Alternatively, you can pass the option '--with-urw-fonts-dir=DIR'
   to 'configure' to look for them in the directory DIR you specify.
-  ])
+  If found, the 'U' foundry will be available via the '-y' option to
+  'gropdf' (accessed via the 'groff' command with the option '-P -y').
+    ])
   fi
 ])
 
 
 # Check whether the pnm tools accept the -quiet option.
 
+dnl Any macro that tests $pnmtools_quiet should AC_REQUIRE this.
+
 AC_DEFUN([GROFF_PNMTOOLS_CAN_BE_QUIET], [
-  pnmtools_quiet=
   AC_REQUIRE([GROFF_CHECK_GROHTML_PROGRAMS])
+
+  pnmtools_quiet=
+
   if test "$make_htmldoc" = yes
   then
     AC_MSG_CHECKING([whether PNM tools accept the '-quiet' option])
@@ -407,8 +478,9 @@ AC_DEFUN([GROFF_PNMTOOLS_CAN_BE_QUIET], [
 # doc/gnu.eps from repository builds.
 
 AC_DEFUN([GROFF_PNMTOPS_NOSETPAGE], [
-  pnmtops_nosetpage="pnmtops $pnmtools_quiet"
   AC_REQUIRE([GROFF_PNMTOOLS_CAN_BE_QUIET])
+
+  pnmtops_nosetpage="pnmtops $pnmtools_quiet"
   AC_MSG_CHECKING([whether pnmtops accepts the '-nosetpage' option])
   if echo P2 2 2 255 0 1 2 0 | pnmtops -nosetpage > /dev/null 2>&1
   then
@@ -423,6 +495,8 @@ AC_DEFUN([GROFF_PNMTOPS_NOSETPAGE], [
 
 # Check location of 'gs'; allow '--with-gs=PROG' option to override.
 
+dnl Any macro that tests $GHOSTSCRIPT should AC_REQUIRE this.
+
 AC_DEFUN([GROFF_GHOSTSCRIPT_PATH],
   [AC_REQUIRE([GROFF_GHOSTSCRIPT_PREFS])
    AC_ARG_WITH([gs],
@@ -430,7 +504,7 @@ AC_DEFUN([GROFF_GHOSTSCRIPT_PATH],
        [actual [/path/]name of ghostscript executable])],
      [GHOSTSCRIPT=$withval],
      [AC_CHECK_TOOLS(GHOSTSCRIPT, [$ALT_GHOSTSCRIPT_PROGS], [missing])])
-   test "$GHOSTSCRIPT" = "no" && GHOSTSCRIPT=missing])
+   test "$GHOSTSCRIPT" = no && GHOSTSCRIPT=missing])
 
 # Preferences for choice of 'gs' program...
 # (allow --with-alt-gs="LIST" to override).
@@ -443,12 +517,37 @@ AC_DEFUN([GROFF_GHOSTSCRIPT_PREFS],
     [ALT_GHOSTSCRIPT_PROGS="gs gswin32c gsos2"])
    AC_SUBST([ALT_GHOSTSCRIPT_PROGS])])
 
+AC_DEFUN([GROFF_GHOSTSCRIPT_AVAILABILITY_NOTICE], [
+  AC_REQUIRE([GROFF_GHOSTSCRIPT_PATH])
+
+  gs_names=gs
+  if test -n "$ALT_GHOSTSCRIPT_PROGS"
+  then
+    gs_names="$ALT_GHOSTSCRIPT_PROGS"
+  fi
+
+  if test "$GHOSTSCRIPT" = missing
+  then
+    AC_MSG_NOTICE([No Ghostscript program was found in \$PATH.
+
+  It was sought under the name(s) "$gs_names".
+
+  groff documentation will not be available in HTML.
+
+  'grohtml' will have reduced function, being unable to produce
+  documents using the 'tbl' preprocessor.
+    ])
+  fi
+])
+
 # Ghostscript version check.  Versions 9.00 <= x < 9.54 suffer from a
 # rendering glitch that affects the AT&T troff (and groff) special
 # character \(lh; see
 #   <https://bugs.ghostscript.com/show_bug.cgi?id=703187>.
 
 AC_DEFUN([GROFF_GHOSTSCRIPT_VERSION_CHECK], [
+  AC_REQUIRE([GROFF_GHOSTSCRIPT_PATH])
+
   if test "$GHOSTSCRIPT" != missing
   then
     AC_MSG_CHECKING([for gs version with good left sidebearing handling])
@@ -528,7 +627,7 @@ AC_DEFUN([GROFF_AWK_PATH],
        [actual [/path/]name of awk executable])],
      [AWK=$withval],
      [AC_CHECK_TOOLS(AWK, [$ALT_AWK_PROGS], [missing])])
-   test "$AWK" = "no" && AWK=missing])
+   test "$AWK" = no && AWK=missing])
 
 
 # Preferences for choice of 'awk' program; allow --with-alt-awk="LIST"
@@ -1683,6 +1782,11 @@ AC_DEFUN([GROFF_PROG_XPMTOPPM],
 
 AC_DEFUN([GROFF_MAKE_DEFINES_RM], [
   AC_MSG_CHECKING(whether make defines 'RM')
+  make=make
+  if test -n "$MAKE"
+  then
+    make=$MAKE
+  fi
   cat <<EOF > test_make_rm.mk
 all:
 	@if test -n "\$(RM)"; \
@@ -1692,7 +1796,7 @@ all:
 	   echo no; \
 	fi
 EOF
-  groff_make_defines_rm=`make -sf test_make_rm.mk`
+  groff_make_defines_rm=`"$make" -sf test_make_rm.mk`
   AC_MSG_RESULT([$groff_make_defines_rm])
   rm -f test_make_rm.mk
 ])
@@ -1772,20 +1876,6 @@ AC_DEFUN([GROFF_UCHARDET_NOTICE], [
   fi
 ])
 
-# Some automated tests use Poppler PDF tools for sanity checks.
-
-AC_DEFUN([GROFF_POPPLER], [
-  groff_have_pdftools=no
-  AC_CHECK_PROG([PDFINFO], [pdfinfo], [found], [missing])
-  AC_CHECK_PROG([PDFFONTS], [pdffonts], [found], [missing])
-  AC_CHECK_PROG([PDFIMAGES], [pdfimages], [found], [missing])
-  if test "$PDFINFO" = found \
-    && test "$PDFFONTS" = found \
-    && test "$PDFIMAGES" = found
-  then
-    groff_have_pdftools=yes
-  fi
-])
 
 AC_DEFUN([GROFF_USE_GROFF_ALLOCATOR], [
   AC_ARG_ENABLE([groff-allocator],

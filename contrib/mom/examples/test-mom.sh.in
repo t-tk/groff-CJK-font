@@ -38,6 +38,15 @@ if test "$have_urw_fonts" != "yes"; then
     exit 77
 fi
 
+for cmd in pdfinfo pdfimages
+do
+    if ! command -v $cmd >/dev/null
+    then
+        echo "cannot locate '$cmd' command; skipping" >&2
+        exit 77 # skip
+    fi
+done
+
 # $1: pdf file
 # $2: expected number of pages
 check_number_pages()

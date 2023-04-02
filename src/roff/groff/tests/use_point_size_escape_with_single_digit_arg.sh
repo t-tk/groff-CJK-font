@@ -31,14 +31,14 @@ set -e
 
 # Verify that the idiosyncratic behavior of \sN is supported in
 # compatibility mode...
-echo "testing \s36A in compatiblity mode (36-point 'A')" >&2
+echo "testing \s36A in compatibility mode (36-point 'A')" >&2
 echo "$DOC" | "$groff" -C -Z | grep -qx 's36000'
 
 # ...and not in regular mode.
-echo "testing \s36A in non-compatiblity mode (3-point '6A')" >&2
+echo "testing \s36A in non-compatibility mode (3-point '6A')" >&2
 echo "$DOC" | "$groff" -Z | grep -qx 's3000'
 
 # Check that we get a diagnostic when relying on the ambiguous form.
-echo "testing for diagnostic on \s36 in compatiblity mode" >&2
+echo "testing for diagnostic on \s36 in compatibility mode" >&2
 echo "$DOC" | "$groff" -C -Z 2>&1 >/dev/null \
     | grep -q 'ambiguous type size in escape sequence'

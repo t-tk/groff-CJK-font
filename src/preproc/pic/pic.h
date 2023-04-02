@@ -18,9 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
 #include "lib.h"
 
+#include <assert.h>
+#include <errno.h>
 #include <math.h>
 #include <stdlib.h>
-#include <errno.h>
 
 #ifdef NEED_DECLARATION_RAND
 #undef rand
@@ -46,7 +47,6 @@ extern "C" {
 }
 #endif
 
-#include "assert.h"
 #include "cset.h"
 #include "stringclass.h"
 #include "lf.h"

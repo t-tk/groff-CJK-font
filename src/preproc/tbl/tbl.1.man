@@ -10,7 +10,7 @@ documents
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 1989-2021 Free Software Foundation, Inc.
+.\" Copyright (C) 1989-2023 Free Software Foundation, Inc.
 .\"
 .\" Permission is granted to make and distribute verbatim copies of this
 .\" manual provided the copyright notice and this permission notice are
@@ -31,6 +31,21 @@ documents
 .\" Save and disable compatibility mode (for, e.g., Solaris 10/11).
 .do nr *groff_tbl_1_man_C \n[.cp]
 .cp 0
+.
+.\" Define fallback for groff 1.23's MR macro if the system lacks it.
+.nr do-fallback 0
+.if !\n(.f           .nr do-fallback 1 \" mandoc
+.if  \n(.g .if !d MR .nr do-fallback 1 \" older groff
+.if !\n(.g           .nr do-fallback 1 \" non-groff *roff
+.if \n[do-fallback]  \{\
+.  de MR
+.    ie \\n(.$=1 \
+.      I \%\\$1
+.    el \
+.      IR \%\\$1 (\\$2)\\$3
+.  .
+.\}
+.rr do-fallback
 .
 .
 .\" ====================================================================
@@ -129,10 +144,22 @@ and
 .B .TE
 (table end).
 .
-Within each such
-.I table region,
-another description can be preceded with an input line beginning with
+Each such
+.I table region
+encloses one or more table descriptions.
+.
+Within a table region,
+table descriptions beyond the first must each be preceded
+by an input line beginning with
 .BR .T& .
+.
+This mechanism does not start a new table region;
+all table descriptions are treated as part of their
+.BR .TS / .TE
+enclosure,
+even if they are boxed or have column headings that repeat on subsequent
+pages
+(see below).
 .
 .
 .P
@@ -295,8 +322,9 @@ is also recognized.
 .
 .TP
 .B expand
-Spread the table horizontally to fill the space between the current
-indentation and the current line length by increasing column separation.
+Spread the table horizontally to fill the available space
+(line length minus indentation)
+by increasing column separation.
 .
 Ordinarily,
 a table is made only as wide as necessary to accommodate the widths of
@@ -306,12 +334,13 @@ its entries and its column separations
 When
 .B expand
 applies to a table that exceeds the available horizontal space,
-column separation is reduced as far as necessary\[em]even to zero.
+column separation is reduced as far as necessary
+(even to zero).
 .
 .I @g@tbl
 produces
 .I groff
-input that issues a diagnostic if this occurs.
+input that issues a diagnostic if such compression occurs.
 .
 The column modifier
 .B x
@@ -335,13 +364,15 @@ This option is ignored on terminal devices.
 .
 .TP
 .B nokeep
-Don't use diversions to prevent page breaks.
+Don't use
+.I roff
+diversions to manage page breaks.
 .
 Normally,
 .I @g@tbl
-attempts to prevent undesirable breaks in tables by using diversions.
+employs them to avoid breaking a page within a table row.
 .
-This can sometimes interact badly with macro packages' own use of
+This usage can sometimes interact badly with macro packages' own use of
 diversions\[em]when footnotes,
 for example,
 are employed.
@@ -451,7 +482,7 @@ and perform other tasks described below.
 The format specification can occupy multiple input lines,
 but must conclude with a dot
 .RB \[lq] .\& \[rq]
-at the end of its final column descriptor.
+followed by a newline.
 .
 Each row definition is applied in turn to one row of the table.
 .
@@ -531,25 +562,29 @@ Left-align entry within the column.
 .
 .TP
 .BR N ,\~ n
-Numerically align entry in the column;
-that is,
-align columns of numbers vertically at the units place.
+Numerically align entry in the column.
+.
+.I @g@tbl
+aligns columns of numbers vertically at the units place.
 .
 If multiple decimal separators are adjacent to a digit,
-use the rightmost one for vertical alignment.
+it uses the rightmost one for vertical alignment.
 .
 If there is no decimal separator,
-use the rightmost digit for vertical alignment;
+the rightmost digit is used for vertical alignment;
 otherwise,
-center the entry within the column.
+.I @g@tbl
+centers the entry within the column.
 .
-The non-printing input token
+The
+.I roff
+dummy character
 .B \[rs]&
-in an entry treats the glyph preceding it
+in an entry marks the glyph preceding it
 (if any)
 as the units place;
 if multiple instances occur in the data,
-use the leftmost one for alignment.
+the leftmost is used for alignment.
 .
 .
 .IP
@@ -559,13 +594,14 @@ entries share a column with
 .B L
 or
 .BR R \~entries,
-center the widest
+.I @g@tbl
+centers the widest
 .BR N \~entry
 with respect to the widest
 .B L
 or
 .BR R \~entry,
-preserving the alignment of all
+preserving the alignment of
 .BR N \~entries
 with respect to each other.
 .
@@ -626,7 +662,7 @@ issues a diagnostic message.
 .
 .TP
 .B |
-Place a vertical rule on the corresponding row of the table
+Place a vertical rule (line) on the corresponding row of the table
 (if two of these are adjacent,
 a double vertical rule).
 .
@@ -636,7 +672,10 @@ entries correspond to it.
 A
 .B |
 to the left of the first column descriptor or to the right of the last
-one produces a line at the edge of the table.
+one produces a vertical rule at the edge of the table;
+these are redundant
+(and ignored)
+in boxed tables.
 .
 .
 .P
@@ -978,7 +1017,8 @@ blocks.
 If you wish to visibly mark an empty table entry in the document source,
 populate it with the
 .B \[rs]&
-non-printing input token.
+.I roff
+dummy character.
 .
 The table data are interrupted by a line consisting of the
 .B .T&
@@ -1096,7 +1136,9 @@ To use either
 or
 .B =
 literally and alone in an entry,
-prefix or suffix it with the token
+prefix or suffix it with the
+.I roff
+dummy character
 .BR \[rs]& .
 .
 To express
@@ -1132,7 +1174,9 @@ must be used
 the no-break control character is not recognized.
 .
 To start the first table entry in a row with a dot,
-precede it with the token
+precede it with the
+.I roff
+dummy character
 .BR \[rs]& .
 .
 .
@@ -1180,8 +1224,7 @@ Multiple text blocks can occur in a table row.
 .
 .
 .P
-Like other table entries,
-text blocks are formatted as was the text prior to the table,
+Text blocks are formatted as was the text prior to the table,
 modified by applicable column descriptors.
 .
 Specifically,
@@ -1199,7 +1242,7 @@ within its cell,
 but not its
 .I adjustment.
 .
-You can add
+Add
 .B na
 or
 .B ad
@@ -1208,7 +1251,7 @@ distinctly from other text in the document.
 .
 As with other table entries,
 when a text block ends,
-any alterations to its formatting are discarded.
+any alterations to formatting parameters are discarded.
 .
 They do not affect subsequent table entries,
 not even other text blocks.
@@ -1296,6 +1339,23 @@ a trap planted near the bottom of the page.
 See section \[lq]Limitations\[rq] below for more on multi-page tables.
 .
 .
+.P
+GNU
+.I tbl \" GNU
+.\" AT&T tbl used all kinds of registers; many began with "3".
+internally employs register,
+string,
+macro,
+and diversion names beginning with the
+.RB numeral\~ 3 .
+.
+A document to be preproccessed with GNU
+.I tbl \" GNU
+should not use any such identifiers.
+.\" XXX: Why are they not named starting with "gtbl*" or something?  GNU
+.\" tbl turns AT&T troff compatibility mode off anyway.
+.
+.
 .\" ====================================================================
 .SS "Interaction with \f[I]@g@eqn\f[]"
 .\" ====================================================================
@@ -1358,23 +1418,6 @@ Numeric and alphabetic entries may appear in the same column.
 .
 .IP \[bu]
 Numeric and alphabetic entries may span horizontally.
-.
-.
-.IP \[bu]
-GNU
-.I tbl \" GNU
-.\" AT&T tbl used all kinds of registers.
-internally employs register,
-string,
-macro,
-and diversion names beginning with the
-.RB digit\~ 3 .
-.
-A document to be preproccessed with GNU
-.I tbl \" GNU
-should not use any such identifiers.
-.\" XXX: Why are they not named starting with "gtbl*" or something?  GNU
-.\" tbl turns AT&T troff compatibility mode off anyway.
 .
 .
 .\" ====================================================================
@@ -1531,7 +1574,9 @@ or divert it in any other way.
 Further,
 the
 .B bp
-request cannot be used to force a page break in a multi-page table.
+request will not cause a page break in a
+.RB \[lq] "TS H" \[rq]
+table.
 .
 Define a macro to wrap
 .BR bp :
@@ -1547,7 +1592,7 @@ See section \[lq]Examples\[rq] below for a demonstration.
 .
 .
 .P
-Double horizontal rules are not currently supported by
+Double horizontal rules are not supported by
 .MR grotty @MAN1EXT@ ;
 single rules are used instead.
 .
@@ -1557,7 +1602,8 @@ so the
 .B u
 column modifier has no effect.
 .
-On terminal devices,
+On terminal devices
+.RI (\[lq] nroff\~ mode\[rq]),
 horizontal rules and box borders occupy a full vee of space;
 this amount is doubled for
 .B doublebox
@@ -1571,6 +1617,12 @@ mode:
 write
 .B ne
 requests accordingly.
+.
+Vertical rules between columns are drawn in the space between columns in
+.I nroff
+mode;
+using double vertical rules and/or reducing the column separation below
+the default can make them ugly or overstrike them with table data.
 .
 .
 .P

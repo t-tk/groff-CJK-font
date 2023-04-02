@@ -22,7 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 #include "request.h"
 #include "reg.h"
 
-object_dictionary number_reg_dictionary(101);
+object_dictionary register_dictionary(101);
 
 bool reg::get_value(units * /*d*/)
 {
@@ -305,7 +305,7 @@ void define_number_reg()
     skip_line();
     return;
   }
-  reg *r = (reg *)number_reg_dictionary.lookup(nm);
+  reg *r = (reg *)register_dictionary.lookup(nm);
   units v;
   units prev_value;
   if (!r || !r->get_value(&prev_value))
@@ -313,7 +313,7 @@ void define_number_reg()
   if (get_number(&v, 'u', prev_value)) {
     if (r == 0) {
       r = new number_reg;
-      number_reg_dictionary.define(nm, r);
+      register_dictionary.define(nm, r);
     }
     r->set_value(v);
     if (tok.is_space() && has_arg() && get_number(&v, 'u'))
@@ -333,10 +333,10 @@ void inline_define_reg()
   symbol nm = get_name(true /* required */);
   if (nm.is_null())
     return;
-  reg *r = (reg *)number_reg_dictionary.lookup(nm);
+  reg *r = (reg *)register_dictionary.lookup(nm);
   if (r == 0) {
     r = new number_reg;
-    number_reg_dictionary.define(nm, r);
+    register_dictionary.define(nm, r);
   }
   units v;
   units prev_value;
@@ -357,21 +357,21 @@ void inline_define_reg()
 
 void set_number_reg(symbol nm, units n)
 {
-  reg *r = (reg *)number_reg_dictionary.lookup(nm);
+  reg *r = (reg *)register_dictionary.lookup(nm);
   if (r == 0) {
     r = new number_reg;
-    number_reg_dictionary.define(nm, r);
+    register_dictionary.define(nm, r);
   }
   r->set_value(n);
 }
 
 reg *lookup_number_reg(symbol nm)
 {
-  reg *r = (reg *)number_reg_dictionary.lookup(nm);
+  reg *r = (reg *)register_dictionary.lookup(nm);
   if (r == 0) {
     warning(WARN_REG, "register '%1' not defined", nm.contents());
     r = new number_reg;
-    number_reg_dictionary.define(nm, r);
+    register_dictionary.define(nm, r);
   }
   return r;
 }
@@ -383,10 +383,10 @@ void alter_format()
     skip_line();
     return;
   }
-  reg *r = (reg *)number_reg_dictionary.lookup(nm);
+  reg *r = (reg *)register_dictionary.lookup(nm);
   if (r == 0) {
     r = new number_reg;
-    number_reg_dictionary.define(nm, r);
+    register_dictionary.define(nm, r);
   }
   tok.skip();
   char c = tok.ch();
@@ -416,7 +416,7 @@ void remove_reg()
     symbol s = get_name();
     if (s.is_null())
       break;
-    number_reg_dictionary.remove(s);
+    register_dictionary.remove(s);
   }
   skip_line();
 }
@@ -427,7 +427,7 @@ void alias_reg()
   if (!s1.is_null()) {
     symbol s2 = get_name(true /* required */);
     if (!s2.is_null()) {
-      if (!number_reg_dictionary.alias(s1, s2))
+      if (!register_dictionary.alias(s1, s2))
 	warning(WARN_REG, "register '%1' not defined", s2.contents());
     }
   }
@@ -440,14 +440,14 @@ void rename_reg()
   if (!s1.is_null()) {
     symbol s2 = get_name(true /* required */);
     if (!s2.is_null())
-      number_reg_dictionary.rename(s1, s2);
+      register_dictionary.rename(s1, s2);
   }
   skip_line();
 }
 
 void print_number_regs()
 {
-  object_dictionary_iterator iter(number_reg_dictionary);
+  object_dictionary_iterator iter(register_dictionary);
   reg *r;
   symbol s;
   while (iter.get(&s, (object **)&r)) {

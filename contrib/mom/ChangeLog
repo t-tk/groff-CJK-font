@@ -1,3 +1,23 @@
+2023-02-18  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* mom.am (uninstall_mom): Clean more fastidiously; try to remove
+	the configured `pdfdocdir` in the event it is empty, but do not
+	fail if it isn't.  (It can be a directory shared with other
+	groff components; we don't know in what order the uninstall
+	targets will serialize, but the last one run should succeed.)
+
+2023-02-02
+	* om.tmac (UNDERSCORE, UNDERSCORE2): Add PREFIX and SUFFIX
+	arguments so surrounding punctuation can be protected from
+	underscoring.
+
+2023-01-16
+	* om.tmac (PRINTSTYLE): Abort with message if nroff is called on
+	a document using PRINTSTYLE TYPESET.
+
+	Fixes <https://savannah.gnu.org/bugs/?63581>.  Thanks to Gene
+	for the report.
+
 2022-11-16
 
 	* om.tmac (PAPER): Adjust #R_MARGIN to work with papersize.tmac.
@@ -103,7 +123,7 @@
 
 	* templates added for setting up copyright pages
 
-	* updated mom.am to include the templates when buliding
+	* updated mom.am to include the templates when building
 		pdfs in mom/examples
 
 2018-11-24
@@ -308,7 +328,7 @@
 
 * Thu Sep 20 2012
 
-	o Simplify enviroment handling.
+	o Simplify environment handling.
 
 * Fri Aug 31 2012
 
@@ -326,7 +346,7 @@
 
 * Thu Sep 8 2011
 
-	o Added register #SUBHEAD, analagous to #HEAD, to fix excessive
+	o Added register #SUBHEAD, analogous to #HEAD, to fix excessive
 	spacing between SUBHEADs and SUBSUBHEADs.
 
 * Sun Feb 20 2011
@@ -1041,7 +1061,7 @@
 	footnotes, both "normal" footnotes and footnotes that occur inside
 	QUOTE, BLOCKQUOTE and EPIGRAPH.
 
-	o Addtion of font "styles" to om.tmac, plus changes to the FAMILY
+	o Addition of font "styles" to om.tmac, plus changes to the FAMILY
 	and FT macros to manage them.  New section in the doc appendices
 	on adding fonts and managing the new font styles.
 
@@ -1055,7 +1075,7 @@
 	used in justified text.
 
 	o NEWPAGE, which used to be an alias for .bp, has been moved into
-	its own macro, in order to make it more responsive to some unusal
+	its own macro, in order to make it more responsive to some unusual
 	situations.
 
 	o Some changes to elvis_syn.new, including that the file
@@ -1332,7 +1352,7 @@
 
 	o Changed .ne in .HEAD when PRINTSTYLE TYPESET from 5 to 4.  With
 	5, heads required at least 2 lines of text underneath or they'd be
-	defered to the next page, which created too much whitespace at the
+	deferred to the next page, which created too much whitespace at the
 	end of the page.  Heads will now be processed on the same page if
 	the head plus at least one line of text underneath fits.  I figure
 	it's easier for the user to break to a new page manually if this
@@ -1656,7 +1676,7 @@
 
 	o String tabs weren't working as advertised when set from within a
 	tab.  Fixed.  Two new registers added: #ST_OFFSET and #IN_TAB.
-	String tabs now behave poperly and intuitively when set within
+	String tabs now behave properly and intuitively when set within
 	tabs.
 
 	o Added a note to docs about surrounding \w'...' escape with

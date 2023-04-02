@@ -1,3 +1,37 @@
+2023-02-09  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	Revise test regime.  Reduce amount of indirection required to
+	run a test, and directly use the same script for standalone and
+	Automake-integrated testing.
+
+	* tests/gdiffmk_tests.sh: Delete.
+	* tests/runtests.sh: Revise to search for test artifact input
+	and output directories (source vs. build).  Drop argument
+	processing, converting two modes ("run" and "clean") into one
+	{run, with cleaning afterward}.  Also ensure we use the build
+	directory to construct "tmp_file.7".  Update authorship credit
+	so that Mike Bianchi isn't asked to support it.
+
+	* tests/baseline.7: Update expected test output.
+
+	* gdiffmk.am (TESTS): Run "runtests.sh" instead of
+	"gdiffmk_tests.sh".
+	(clean-local, clean_gdiffmk_check): Drop targets now that the
+	test script cleans up after itself.
+
+2023-02-06  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tests/runtests.sh: Refactor file handling.  Use narrower globs
+	to match the file names actually used; they are suffixed with a
+	dot and a number, not a number alone.  Honor $TMPDIR when
+	creating the even-more-temporary file.  Revise trap setup so
+	that the trap handler cannot be interrupted if it is already
+	running.  Call the handler, then commit suicide with SIGINT.
+	Use symbolic names for signals, not numbers.  Call new CleanUp
+	function before exiting normally.
+	(CleanUp): Pull temporary file clean-up logic into new function.
+	Also delete the even-more-temporary file used in test 1.
+
 2022-10-18  G. Branden Robinson <g.branden.robinson@gmail.com>
 
 	* gdiffmk.sh: Drop "GNU" from version information, since this

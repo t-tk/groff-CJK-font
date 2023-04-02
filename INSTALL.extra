@@ -28,8 +28,8 @@ A simple method of building and installing groff is as follows.
   3. Optionally, check the build for sound operation as described under
      "Evaluation" below.
 
-  4. Type 'sudo make install' to install groff's programs, data files,
-     and documentation.  'make install' is the only step for which you
+  4. Type 'sudo make install install-doc' to install groff's programs,
+     data files, and documentation.  This is the only step for which you
      need 'root' access; 'sudo' obtains this access.
 
   5. You can remove the groff executables and other generated files from
@@ -67,8 +67,8 @@ valid on the operating system.
   3. Optionally, check the build for sound operation as described under
      "Evaluation" below.
 
-  4. Type 'sudo make install' to install groff's programs, data files,
-     and documentation.  'make install' is the only step for which you
+  4. Type 'sudo make install install-doc' to install groff's programs,
+     data files, and documentation.  This is the only step for which you
      need 'root' access; 'sudo' obtains this access.
 
   5. You can remove the groff executables and other generated files from
@@ -165,7 +165,8 @@ where 'xxx' should be either 'A4' or 'letter'.  This affects only the
 media size used by some groff output drivers, like grops (which can
 still be overridden on the command line).  For compatibility with AT&T
 troff, GNU troff's default page length is always 11 inches.  The page
-length can be changed with the 'pl' request.
+length can be changed with the 'pl' request or with the "papersize"
+macro package; see section "Paper format" in groff(1).
 
 
 Evaluation
@@ -180,7 +181,7 @@ script called 'test-groff' is supplied for this purpose.  It sets up
 environment variables to allow groff to run without being installed.
 For example, from the directory where you built groff, the command
 
-  ./test-groff -man -Tascii src/roff/groff/groff.1 | less -R
+  ./test-groff -t -man -Tascii src/roff/groff/groff.1 | less -R
 
 displays the groff(1) man page with the 'less' pager.  (You might prefer
 either the '-Tlatin1' or '-Tutf8' option to '-Tascii' depending on the
@@ -225,10 +226,22 @@ directory) will have a log file called
 To re-run a test, change to the top of the build directory (if
 necessary) and run the test by name from the shell prompt.
 
+[Solaris 10 users _must_ run the test scripts by hand since the /bin/sh
+and utilities on that system are not conformant to the POSIX standard.]
+
 For example, to rerun the test mentioned above from a "build" directory
 I created as a subdirectory in the source tree, I would do this.
 
   (cd build && ../tmac/tests/localization-works.sh)
+
+[Solaris 10 users will need to put /usr/xpg4/bin or /usr/xpg6/bin in the
+$PATH and pass the test scripts as arguments to a POSIX-conforming
+shell.
+
+  (cd build && PATH=/usr/xpg4/bin:$PATH /usr/xpg4/bin/sh \
+   ../tmac/tests/localization-works.sh)
+
+You might wish to write a small shell script to facilitate the process.]
 
 I can view the test log as follows.
 

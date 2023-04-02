@@ -23,12 +23,11 @@
 
 #include "lib.h"
 
-#include <signal.h>
+#include <assert.h>
 #include <ctype.h>
-#include <stdlib.h>
 #include <errno.h>
-
-#include "assert.h"
+#include <signal.h>
+#include <stdlib.h>
 
 #include "errarg.h"
 #include "error.h"
@@ -1397,7 +1396,7 @@ int char_buffer::run_output_filter(int filter, int argc, char **argv)
     set_redirection(STDERR_FILENO, saved_stderr);
 
   // Now we redirect the standard output to the inlet end of the pipe,
-  // and push out the appropiately formatted data to the filter.
+  // and push out the appropriately formatted data to the filter.
 
   set_redirection(STDOUT_FILENO, pipedes[1]);
   emit_troff_output(DEVICE_FORMAT(filter));
@@ -1810,8 +1809,8 @@ int main(int argc, char **argv)
   else
     if (WEXITSTATUS(wstatus) != 0)
       // XXX: This is a crappy suggestion.  See Savannah #62673.
-      fatal("'%1' exited with status %2; re-run '%1' with a different"
-	    " output driver to see diagnostic messages", argv[0],
+      fatal("'%1' exited with status %2; re-run with a different output"
+	    " driver to see diagnostic messages", argv[0],
 	    WEXITSTATUS(wstatus));
   exit(EXIT_SUCCESS);
 }

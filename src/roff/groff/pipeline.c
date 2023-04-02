@@ -342,9 +342,9 @@ int run_pipeline(int ncommands, char ***commands, int no_pipe)
 
 #else  /* not _WIN32 */
 
-/* MSDOS doesn't have 'fork', so we need to simulate the pipe by running
-   the programs in sequence with standard streams redirected to and
-   from temporary files.
+/* MS-DOS doesn't have 'fork', so we need to simulate the pipe by
+   running the programs in sequence with standard streams redirected to
+   and from temporary files.
 */
 
 

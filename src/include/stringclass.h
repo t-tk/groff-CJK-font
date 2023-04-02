@@ -16,10 +16,9 @@ for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
+#include <assert.h>
 #include <string.h>
 #include <stdio.h>
-
-#include "assert.h"
 
 // Ensure that the first declaration of functions that are later
 // declared as inline declares them as inline.

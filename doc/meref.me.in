@@ -536,7 +536,7 @@ of depth
 .\" future non-introductory me(7) usage manual.
 They could be used
 to obtain section depth-dependent spacing.
-.sh 1 "Headers and Footers"
+.sh 1 "Headers, Footers, and Margins"
 .ds TP \(aq\,\fIL\/\fP\(aq\,\fIM\/\fP\(aq\,\fIR\/\fP\(aq
 .pp
 Headers and footers
@@ -596,6 +596,50 @@ and
 [6v]
 that from the bottom of the page
 to the (nominal) bottom of the text.
+.pp
+\*(ME uses \*T's environment 0 for body text,
+1 for keeps
+(see below),
+and 2 for headers and footers.
+The default line length is two inches less than the page width
+(e.g.,
+6.5i on U.S.\& letter paper).
+The default page offset
+(left margin)
+is determined by the output device;
+it is typically 1.0i on typesetting devices and 0 on terminals.
+.TL
+.b .xl
+.i \(+-n
+.DE
+Set line length to
+.i n
+[see above]
+only in the current environment.
+.TL
+.b .ll
+.i \(+-n
+.DE
+Set line length to
+to
+.i n
+[see above]
+in all environments used by \*(ME,\**
+.(f
+\**
+\*(ME uses only the three environments of AT&T \*T,
+but in GNU \*T,
+the user can create additional ones.
+.b .ll
+works like
+.b .xl
+for the latter.
+.)f
+and store it in
+.NR ($l .
+This macro should not be used
+after output has begun,
+and particularly not in multi-column layouts.
 .TL
 .b .he
 \*(TP
@@ -749,6 +793,9 @@ filling is enabled.
 .b .)l
 .DE
 End list.
+.\" dead-tree pagination
+.br
+.ne 4v
 .TL
 .b .(q
 .DE
@@ -1032,6 +1079,9 @@ using the current font and type size
 with display vertical spacing
 (\c
 .NR (dv ).
+.\" dead-tree pagination
+.br
+.ne 4v
 .sh 1 "Columnated Output"
 .TL
 .b .2c
@@ -1560,7 +1610,7 @@ a segment type of
 .b C
 is assumed.
 If a header is defined,
-the footer is replaced with it
+it replaces the footer
 on the first page
 of each chapter.
 If a title
@@ -1592,8 +1642,8 @@ if the segment type is
 .b A
 or
 .b RA.
-Increment \" ...except for abstract and bibliography segments
-and output the chapter number.
+The chapter number
+is incremented and output. \" except for abstract and bibliography segs
 If a chapter title
 .i T
 is present,
@@ -1691,42 +1741,6 @@ that hardly ever used.
 Must be followed by a
 .b .bp
 request or the end of input.
-.pp
-\*(ME uses \*T's environment 0 for body text,
-1 for keeps,
-and 2 for headers and footers.
-.TL
-.b .xl
-.i \(+-n
-.DE
-Set line length to
-.i n
-[6.0i]
-only in the current environment.
-.TL
-.b .ll
-.i \(+-n
-.DE
-Set line length to
-to
-.i n
-[6.0i]
-in all environments used by \*(ME,\**
-.(f
-\**
-\*(ME uses only the three environments of AT&T \*T,
-but in GNU \*T,
-the user can create additional ones.
-.b .ll
-works like
-.b .xl
-for the latter.
-.)f
-and store it in
-.NR ($l .
-This macro should not be used
-after output has begun,
-and particularly not in multi-column layouts.
 .\" dead-tree pagination
 .br
 .ne 6v
@@ -2196,7 +2210,7 @@ and a square \(sq labels \*G extensions.
 \&.$s	M\(dd	output footnote area separator
 \e%	F\(sc	control hyphenation
 \en%	R\(sc	current page number
-\e&	F\(sc	non-printing input break
+\e&	F\(sc	dummy character
 \e(\fI\,xx\fP	F\(sc	interpolate special character \fIxx\fP
 \&.(b	M	begin block
 \&.(c	M	begin centered block
@@ -2347,7 +2361,7 @@ and a square \(sq labels \*G extensions.
 \&.pl	M\(sc	set page length
 \&.pn	M\(sc	set next page number
 \&.po	M\(sc	set page offset
-\en(po	R	page offset
+\en(po	R	paragraph offset
 \&.pp	M	begin first-line indented paragraph
 \en(pp	R	paragraph type size in points
 \en(ps	R	paragraph prespace
@@ -2415,10 +2429,10 @@ and a square \(sq labels \*G extensions.
 .)l
 .if n .)c
 .ds $H \" empty
-.\" If we add material after this point, leave multi-column mode.  But
-.\" don't do so if there is no further content, because if one column is
-.\" already full, `1c` will produce an unnecessary empty page.
-.\"if t .1c
+.\" If we're laying out the final column, `1c` will produce an
+.\" unnecessary empty page.  If we're not, omitting `1c` will format a
+.\" column of headers with nothing underneath.
+.if \n($c<\n($m .1c
 .\" Local Variables:
 .\" mode: nroff
 .\" End:

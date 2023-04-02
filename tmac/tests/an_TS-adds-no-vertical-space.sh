@@ -33,8 +33,15 @@ bar
 
 # Bash strips out an empty line, but that's what we're looking for.
 output=$(printf "%s" "$input" | "$groff" -t -man -Tascii \
-    | sed -n '/Foo\./{n;s/^$/FAILURE/;tA;s/.*/SUCCESS/;:A;p}')
-
+    | sed -n \
+        -e '/Foo\./{n;s/^$/FAILURE/;tA;' \
+        -e 's/.*/SUCCESS/;:A;' \
+        -e 'p;}')
+    # Here's a tidier version accepted by GNU sed but rejected
+    # contemptuously by macOS sed.  (POSIX doesn't say you _have_ to
+    # accept semicolons after label ':' and branch 't' commands, so it
+    # doesn't.)
+    # sed -n '/Foo\./{n;s/^$/FAILURE/;tA;s/.*/SUCCESS/;:A;p}'
 test "$output" = SUCCESS
 
 # vim:set ai et sw=4 ts=4 tw=72:

@@ -76,7 +76,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .als OK @not-implemented \" "other keywords" for `TM` documents
 .als SG @not-implemented \" signatures for `TM` documents
 .als HO @not-implemented \" Holmdel
-.als IH @not-implemented \" Naperville
+.als IH @not-implemented \" Naperville (Indian Hill)
 .als MH @not-implemented \" Murray Hill
 .als PY @not-implemented \" Piscataway
 .als WH @not-implemented \" Whippany
@@ -1131,7 +1131,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .de par@load-init
 .\" PS and VS might have been set on the command line
 .if !rPS .nr PS 10
-.if !rLL .nr LL 6i
+.if !rLL .nr LL 6.5i
 .ll \\n[LL]u
 .\" don't set LT so that it can be defaulted from LL
 .ie rLT .lt \\n[LT]u
@@ -2004,8 +2004,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .	T#
 .	br
 .	di
-.	ie \\n[dn]+\\n[FM]+\\n[HM]+2v>=\\n[.p] \{\
-.		@error ridiculously long table header
+.	\" A table with repeating headings requires enough room for them
+.	\" and then at least one more vee for a row of data.
+.	ie \\n[dn]+1v>=(\\n[.p]-\\n[FM]-\\n[HM]) \{\
+.		ds tbl*err .TH repeating table heading(s) do not fit in
+.		as tbl*err " page area; formatting only once
+.		@error \\*[tbl*err]
+.		rm tbl*err
 .		ds@need \\n[dn]
 .		tbl*print-header
 .	\}
@@ -2026,7 +2031,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .ie '\\n(.z'tbl*header-div' .@error-recover .TS H but no .TH before .TE
 .el \{\
 .	nr tbl*have-header 0
-.       if !'\*(.T'html' .sp \\n[DD]u
+.	if !'\*(.T'html' \{\
+.		sp \\n[DD]u
+.		ns
+.	\}
 .\}
 .HTML-IMAGE-END
 .if '\*(.T'html' \

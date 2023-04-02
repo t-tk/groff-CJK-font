@@ -97,12 +97,12 @@ class table {
   string *minimum_width;
   int *column_separation;
   char *equal;
-  int left_separation;
-  int right_separation;
+  int left_separation; // from a vertical rule or box border, in ens
+  int right_separation; // from a vertical rule or box border, in ens
   int total_separation;
   int allocated_rows;
   void build_span_list();
-  void compute_expand_width();
+  void compute_overall_width();
   void do_hspan(int r, int c);
   void do_vspan(int r, int c);
   void allocate(int r);
@@ -132,15 +132,19 @@ class table {
 public:
   unsigned flags;
   enum {
-    CENTER       = 0x00000001,
-    EXPAND       = 0x00000002,
-    BOX          = 0x00000004,
-    ALLBOX       = 0x00000008,
-    DOUBLEBOX    = 0x00000010,
-    NOKEEP       = 0x00000020,
-    NOSPACES     = 0x00000040,
-    NOWARN       = 0x00000080,
-    EXPERIMENTAL = 0x80000000	// undocumented; use as a hook for experiments
+    CENTER        = 0x00000001,
+    EXPAND        = 0x00000002,
+    BOX           = 0x00000004,
+    ALLBOX        = 0x00000008,
+    DOUBLEBOX     = 0x00000010,
+    NOKEEP        = 0x00000020,
+    NOSPACES      = 0x00000040,
+    NOWARN        = 0x00000080,
+    // The next few properties help manage nroff mode output.
+    HAS_TOP_VLINE = 0x00000100,
+    HAS_TOP_HLINE = 0x00000200,
+    GAP_EXPAND    = 0x00000400,
+    EXPERIMENTAL  = 0x80000000 // undocumented
     };
   char *expand;
   table(int nc, unsigned flags, int linesize, char decimal_point_char);

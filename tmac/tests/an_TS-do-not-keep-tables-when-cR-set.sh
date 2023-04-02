@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (C) 2020 Free Software Foundation, Inc.
+# Copyright (C) 2020-2023 Free Software Foundation, Inc.
 #
 # This file is part of groff.
 #
@@ -42,7 +42,7 @@ is set.
 .
 .TS
 l.
-'$(seq 53)'
+'$(n=1; while [ $n -le 53 ]; do echo $n; n=$(( n + 1 )); done)'
 .TE'
 
 OUTPUT=$(printf "%s\n" "$EXAMPLE" | "$groff" -Tascii -P-cbou -t -man)

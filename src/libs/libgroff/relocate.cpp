@@ -18,10 +18,10 @@
 
 #include "lib.h"
 
+#include <assert.h>
 #include <errno.h>
 #include <stdlib.h>
 
-#include "assert.h"
 #include "defs.h"
 #include "posix.h"
 #include "nonposix.h"

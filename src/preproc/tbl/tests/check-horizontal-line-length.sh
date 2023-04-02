@@ -56,8 +56,8 @@ _
 
 echo "checking intersection of vertical and horizontal rules" >&2
 output=$(printf "%s" "$input" | "$groff" -Tascii -t)
-echo "$output" | sed -n '1p' | grep -Eqx '\+-{11}\+' || wail
-echo "$output" | sed -n '3p' | grep -Eqx '\+-{11}\+' || wail
+echo "$output" | sed -n '1p' | grep -Eqx '\+-{12}\+' || wail
+echo "$output" | sed -n '3p' | grep -Eqx '\+-{12}\+' || wail
 
 input='.ll 12n
 .TS
@@ -70,8 +70,8 @@ L.
 
 echo "checking width of boxed table" >&2
 output=$(printf "%s" "$input" | "$groff" -Tascii -t)
-echo "$output" | sed -n '1p' | grep -Eqx '\+-{11}\+' || wail
-echo "$output" | sed -n '3p' | grep -Eqx '\+-{11}\+' || wail
+echo "$output" | sed -n '1p' | grep -Eqx '\+-{12}\+' || wail
+echo "$output" | sed -n '3p' | grep -Eqx '\+-{12}\+' || wail
 
 test -z "$fail"
 

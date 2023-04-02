@@ -340,7 +340,7 @@ sub do_line {
     }
     # XXX: If the macro name shadows a standard macro name, maybe we
     # should delete the latter from our lists and hashes.  This might
-    # depend on whether the document is trying to remain compatibile
+    # depend on whether the document is trying to remain compatible
     # with an existing interface, or simply colliding with names they
     # don't care about (consider a raw roff document that defines 'PP').
     # --GBR
@@ -364,7 +364,7 @@ sub do_line {
   # macro package (tmac)
   ######################################################################
 
-  # man and ms share too many macro names for the following approch to
+  # man and ms share too many macro names for the following approach to
   # be fruitful for many documents; see &infer_man_or_ms_package.
   #
   # We can put one thumb on the scale, however.

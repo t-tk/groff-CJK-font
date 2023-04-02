@@ -5331,7 +5331,7 @@ html_printer::~html_printer()
 }
 
 /*
- *  get_str - returns a dupicate of string, s. The duplicate
+ *  get_str - returns a duplicate of string, s. The duplicate
  *            string is terminated at the next ',' or ']'.
  */
 

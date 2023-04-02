@@ -42,7 +42,7 @@ _
 
 echo "checking length of plain vertical rule" >&2
 output=$(printf "%s" "$input" | "$groff" -Tascii -t)
-echo "$output" | sed -n '2p' | grep -Fqx -- '|1234567890 |' || wail
+echo "$output" | sed -n '2p' | grep -Fqx -- '| 1234567890 |' || wail
 
 test -z "$fail"
 

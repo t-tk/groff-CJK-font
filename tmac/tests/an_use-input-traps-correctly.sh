@@ -80,7 +80,7 @@ input=".TH foo 1 2022-06-07 \"groff test suite\"
 .SM \\\\n[.s]\c
 \\n[.s]"
 
-output=$(printf "%s\n" "$input" | "$groff" -man -a 2>&1)
+output=$(printf "%s\n" "$input" | "$groff" -man -a -Tps 2>&1)
 
 echo "checking that SM macro uses correct input trap 'it'" >&2
 echo "$output" | grep -Fqx '910' || wail
@@ -91,7 +91,7 @@ input=".TH foo 1 2022-06-07 \"groff test suite\"
 .SB \\\\n[.fn]\\\\n[.s]\c
 \\n[.fn]\\n[.s]"
 
-output=$(printf "%s\n" "$input" | "$groff" -man -a 2>&1)
+output=$(printf "%s\n" "$input" | "$groff" -man -a -Tps 2>&1)
 
 echo "checking that SB macro uses correct input trap 'it'" >&2
 echo "$output" | grep -Fqx 'TB9TR10' || wail

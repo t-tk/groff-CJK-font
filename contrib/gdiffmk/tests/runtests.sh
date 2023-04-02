@@ -2,8 +2,9 @@
 #
 #	A very simple function test for gdiffmk.sh.
 #
-# Copyright (C) 2004-2020 Free Software Foundation, Inc.
-# Written by Mike Bianchi <MBianchi@Foveal.com <mailto:MBianchi@Foveal.com>>
+# Copyright (C) 2004-2020, 2023 Free Software Foundation, Inc.
+# Written by Mike Bianchi <MBianchi@Foveal.com>.
+# Subsequent modifications by G. Branden Robinson.
 
 # This file is part of the gdiffmk utility, which is part of groff.
 
@@ -21,34 +22,60 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # This file is part of GNU gdiffmk.
 
-# abs_top_srcdir and abs_top_builddir are set by AM_TESTS_ENVIRONMENT
-# (defined in Makefile.am) when running make check
+# abs_top_out_dir is set by AM_TESTS_ENVIRONMENT (defined in
+# Makefile.am) when running "make check".
 
-srcdir=${abs_top_srcdir}/contrib/gdiffmk/tests
+gdiffmk=${abs_top_out_dir:-.}/gdiffmk
 
-command=${abs_top_builddir}/gdiffmk
+# Locate directory containing our test artifacts.
+in_dir=
 
-#	Test the number of arguments and the first argument.
-case "$#-$1" in
-1-clean )
-	rm -fv result* tmp_file*
-	exit 0
-	;;
-1-run )
-	;;
-* )
-	echo >&2 "$0 [ clean | run ]
-Run a few simple tests on '${command}'."'
+for srcroot in . .. ../..
+do
+    # Look for a source file characteristic of the groff source tree.
+    if ! [ -f "$srcroot"/ChangeLog.115 ]
+    then
+        continue
+    fi
 
-clean	Remove the result? and tmp_file? files.
-run	Run the tests.
-'
-	exit 255
-	;;
-esac
+    d=$srcroot/contrib/gdiffmk/tests
+    if [ -d "$d" ]
+    then
+        in_dir=$d
+        break
+    fi
+done
+
+# If we can't find it, we can't test.
+if [ -z "$in_dir" ]
+then
+    echo "$0: cannot locate test artifact input directory" >&2
+    exit 77 # skip
+fi
+
+# Locate directory where we'll put the test output.
+out_dir=
+
+for buildroot in . .. ../..
+do
+    d=$buildroot/contrib/gdiffmk/tests
+    if [ -d "$d" ]
+    then
+        out_dir=$d
+        break
+    fi
+done
+
+# If we can't find it, we can't test.
+if [ -z "$out_dir" ]
+then
+    echo "$0: cannot locate test artifact output directory" >&2
+    exit 77 # skip
+fi
 
 exit_code=0	#  Success
 failure_count=0
+
 TestResult () {
 	if cmp -s $1 $2
 	then
@@ -63,92 +90,98 @@ TestResult () {
 	fi
 }
 
-tmpfile=/tmp/$$
-trap 'rm -f ${tmpfile}' 0 1 2 3 15
+CleanUp () {
+	rm -f ${out_dir}/result.* ${out_dir}/tmp_file.* ${tmpfile}
+}
+
+tmpfile=${TMPDIR:-/tmp}/$$
+trap 'trap "" HUP INT QUIT TERM; CleanUp; kill -s INT $$' \
+	HUP INT QUIT TERM
 
 #	Run tests.
 
 #	3 file arguments
-ResultFile=result.1
-${command}  ${srcdir}/file1  ${srcdir}/file2 ${ResultFile} 2>${tmpfile}
+ResultFile=${out_dir}/result.1
+${gdiffmk}  ${in_dir}/file1  ${in_dir}/file2 ${ResultFile} 2>${tmpfile}
 cat ${tmpfile} >>${ResultFile}
-TestResult ${srcdir}/baseline ${ResultFile}
-
+TestResult ${in_dir}/baseline ${ResultFile}
 
 #	OUTPUT to stdout by default
-ResultFile=result.2
-${command}  ${srcdir}/file1  ${srcdir}/file2  >${ResultFile} 2>&1
-TestResult ${srcdir}/baseline ${ResultFile}
-
+ResultFile=${out_dir}/result.2
+${gdiffmk}  ${in_dir}/file1  ${in_dir}/file2  >${ResultFile} 2>&1
+TestResult ${in_dir}/baseline ${ResultFile}
 
 #	OUTPUT to stdout via  -  argument
-ResultFile=result.3
-${command}  ${srcdir}/file1  ${srcdir}/file2 - >${ResultFile} 2>&1
-TestResult ${srcdir}/baseline ${ResultFile}
-
+ResultFile=${out_dir}/result.3
+${gdiffmk}  ${in_dir}/file1  ${in_dir}/file2 - >${ResultFile} 2>&1
+TestResult ${in_dir}/baseline ${ResultFile}
 
 #	FILE1 from standard input via  -  argument
-ResultFile=result.4
-${command}  - ${srcdir}/file2 <${srcdir}/file1  >${ResultFile} 2>&1
-TestResult ${srcdir}/baseline ${ResultFile}
+ResultFile=${out_dir}/result.4
+${gdiffmk}  - ${in_dir}/file2 <${in_dir}/file1  >${ResultFile} 2>&1
+TestResult ${in_dir}/baseline ${ResultFile}
 
 
 #	FILE2 from standard input via  -  argument
-ResultFile=result.5
-${command}  ${srcdir}/file1 - <${srcdir}/file2  >${ResultFile} 2>&1
-TestResult ${srcdir}/baseline ${ResultFile}
+ResultFile=${out_dir}/result.5
+${gdiffmk}  ${in_dir}/file1 - <${in_dir}/file2  >${ResultFile} 2>&1
+TestResult ${in_dir}/baseline ${ResultFile}
 
 
 #	Different values for addmark, changemark, deletemark
-ResultFile=result.6
-${command}  -aA -cC -dD  ${srcdir}/file1 ${srcdir}/file2  >${ResultFile} 2>&1
-TestResult ${srcdir}/baseline.6 ${ResultFile}
+ResultFile=${out_dir}/result.6
+${gdiffmk}  -aA -cC -dD  ${in_dir}/file1 ${in_dir}/file2  >${ResultFile} 2>&1
+TestResult ${in_dir}/baseline.6 ${ResultFile}
 
 
 #	Different values for addmark, changemark, deletemark
 #	Alternate format of -a -c and -d flag arguments
-ResultFile=result.6a
-${command}  -a A -c C -d D  ${srcdir}/file1 ${srcdir}/file2  >${ResultFile} 2>&1
-TestResult ${srcdir}/baseline.6a ${ResultFile}
+ResultFile=${out_dir}/result.6a
+${gdiffmk}  -a A -c C -d D  ${in_dir}/file1 ${in_dir}/file2  >${ResultFile} 2>&1
+TestResult ${in_dir}/baseline.6a ${ResultFile}
 
 
 #	Test for accidental file overwrite.
-ResultFile=result.7
-cp ${srcdir}/file2 tmp_file.7
-${command}  -aA -dD -cC  ${srcdir}/file1 tmp_file.7  tmp_file.7	\
+ResultFile=${out_dir}/result.7
+TempFile=${out_dir}/tmp_file.7
+cp ${in_dir}/file2 "$TempFile"
+${gdiffmk}  -aA -dD -cC  ${in_dir}/file1 "$TempFile"  "$TempFile" \
 							>${ResultFile} 2>&1
-TestResult ${srcdir}/baseline.7 ${ResultFile}
+TestResult ${in_dir}/baseline.7 ${ResultFile}
 
 
 #	Test -D option
-ResultFile=result.8
-${command}  -D  ${srcdir}/file1 ${srcdir}/file2 >${ResultFile} 2>&1
-TestResult ${srcdir}/baseline.8 ${ResultFile}
+ResultFile=${out_dir}/result.8
+${gdiffmk}  -D  ${in_dir}/file1 ${in_dir}/file2 >${ResultFile} 2>&1
+TestResult ${in_dir}/baseline.8 ${ResultFile}
 
 
 #	Test -D  and  -M  options
-ResultFile=result.9
-${command}  -D  -M '<<<<' '>>>>'				\
-			${srcdir}/file1 ${srcdir}/file2 >${ResultFile} 2>&1
-TestResult ${srcdir}/baseline.9 ${ResultFile}
+ResultFile=${out_dir}/result.9
+${gdiffmk}  -D  -M '<<<<' '>>>>'				\
+			${in_dir}/file1 ${in_dir}/file2 >${ResultFile} 2>&1
+TestResult ${in_dir}/baseline.9 ${ResultFile}
 
 
 #	Test -D  and  -M  options
 #	Alternate format of -M argument.
-ResultFile=result.9a
-${command}  -D  -M'<<<<' '>>>>'				\
-			${srcdir}/file1 ${srcdir}/file2 >${ResultFile} 2>&1
-TestResult ${srcdir}/baseline.9a ${ResultFile}
+ResultFile=${out_dir}/result.9a
+${gdiffmk}  -D  -M'<<<<' '>>>>'				\
+			${in_dir}/file1 ${in_dir}/file2 >${ResultFile} 2>&1
+TestResult ${in_dir}/baseline.9a ${ResultFile}
 
 
 #	Test -D  and  -B  options
-ResultFile=result.10
-${command}  -D  -B  ${srcdir}/file1 ${srcdir}/file2 >${ResultFile} 2>&1
-TestResult ${srcdir}/baseline.10 ${ResultFile}
+ResultFile=${out_dir}/result.10
+${gdiffmk}  -D  -B  ${in_dir}/file1 ${in_dir}/file2 >${ResultFile} 2>&1
+TestResult ${in_dir}/baseline.10 ${ResultFile}
 
 
 echo failure_count ${failure_count}
 
+# You can comment out the following line to examine failing cases.
+CleanUp
+
 exit ${exit_code}
 
-#	EOF
+# vim:set ai et sw=4 ts=4 tw=72:

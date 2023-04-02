@@ -188,7 +188,7 @@ enum E {
   OUTLINE, FILL, BOTH
 } polyfill;
 
-/* flag to controll filling of polygons */
+/* flag to control filling of polygons */
 
 double adj1 = 0.0;
 double adj2 = 0.0;

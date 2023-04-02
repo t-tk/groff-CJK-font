@@ -1,4 +1,4 @@
-    Copyright 2022 Free Software Foundation, Inc.
+    Copyright 2022-2023 Free Software Foundation, Inc.
 
     Copying and distribution of this file, with or without
     modification, are permitted in any medium without royalty provided
@@ -70,3 +70,92 @@ their impact.
     contrast, adding a command-line option to tbl, or changing the
     meaning of its "expand" region option such that it no longer
     horizontally compresses tables as well, _would_ be 'NEWS'-worthy.
+
+
+Writing Tests
+-------------
+
+Here are some portability notes on writing automated tests.
+
+* Write to the POSIX standard for the shell and utilities where
+  possible.  Issue 4 from 1994 is old enough that no contemporary system
+  has a good reason for not conforming.  A copy of the standard is
+  available at the Open Group's web site.
+    https://pubs.opengroup.org/onlinepubs/009656399/toc.pdf
+
+* The GNU coreutils "seq" command is handy but not standardized by
+  POSIX.  Replace it with a while loop.
+
+    seq 53
+    n=1; while [ $n -le 53 ]; do echo $n; n=$(( n + 1 )); done
+
+  "unset" is supported by POSIX-conformant shell; use it to remove
+  temporary shell variables after use.
+
+* The "od" command on macOS can put extra space characters (i.e., spaces
+  that don't correspond to the input) at the ends of lines when using
+  the "od -t c" format; GNU od does not.
+
+  So a regex like this that works with GNU od:
+    grep -Eqx '0000000 +A +\\b +B +\\b +C       D +\\n'
+  might need to be weakened to the following on macOS.
+    grep -Eqx '0000000 +A +\\b +B +\\b +C       D +\\n *'
+
+* The "od" command on macOS does not respect the environment variable
+  assignment "LC_ALL=C" when processing byte values 127<x<256 decimal
+  and using the "character" output format (option "-t c").  An
+  alternative output must be used, like bytewise octal (option "-t o1").
+  (macOS od may be non-conforming here, despite the claim of its man
+  page.  POSIX Issue 4 od's description says "The type specifier
+  character c specifies that bytes will be interpreted as characters
+  specified by the current setting of the LC_CTYPE locale category. ...
+  Other non-printable characters will be written as one three-digit
+  octal number for each byte in the character." (p. 538)  The language
+  in Issue 7 (2018) appears unchanged.
+    https://pubs.opengroup.org/onlinepubs/9699919799/utilities/od.html )
+
+* macOS sed requires semicolons after commands even if they are followed
+  immediately by a closing brace.
+
+  Rewrite
+    sed -n '/Foo\./{n;s/^$/FAILURE/;p}'
+  as follows.
+    sed -n '/Foo\./{n;s/^$/FAILURE/;p;}'
+
+  But see below regarding the opening braces.
+
+* POSIX doesn't say that sed has to accept semicolons as command
+  separators after label (':') and branch ('t') commands, or after brace
+  commands, so macOS sed doesn't.  GNU sed does.
+
+  So rewrite tidy, compact sed scripts like this:
+    sed -n '/Foo\./{n;s/^$/FAILURE/;tA;s/.*/SUCCESS/;:A;p}'
+  as this more cumbersome alternative.
+    sed -n \
+      -e '/Foo\./{n;s/^$/FAILURE/;tA;' \
+      -e 's/.*/SUCCESS/;:A;' \
+      -e 'p;}')
+
+  But see below regarding the opening braces.
+
+  Similarly, a brace sequence like that in this partial sed script:
+    /f1/p}}}}}}
+  must be rewritten as follows (or with '-e' expressions).
+    /f1/p;}
+    }
+    }
+    }
+    }
+    }
+
+* macOS and GNU sed don't require newlines (or '-e' expression endings)
+  after _opening_ braces, but Solaris 11 sed does.
+
+  So the sed script
+    /i/{N;/Table of Contents/{N;/Foo[. ][. ]*1/p;};}
+  must be rewritten as follows (or with '-e' expressions).
+    /i/{
+    N;/Table of Contents/{
+    N;/Foo[. ][. ]*1/p;
+    };
+    }

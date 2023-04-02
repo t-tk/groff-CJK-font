@@ -1,7 +1,9 @@
-[[ maintainer: send to info-gnu, platform-testers ]]
+[[ maintainer: Send to platform-testers for betas/RCs,
+               info-gnu for releases,
+               and CC groff and linux-man@vger.kernel.org for both. ]]
 
-groff 1.23 release candidate 2, 1.23.0.rc2, is now available from GNU's
-alpha FTP site.  You may download the distribution archive from there.
+groff 1.23 release candidate 4, 1.23.0.rc4, is now available from GNU's
+alpha site.  You may download the distribution archive from there.
 
   https://alpha.gnu.org/gnu/groff/
 
@@ -27,8 +29,20 @@ while consuming minimal system resources.
 Changes
 =======
 
-groff 1.23.0.rc2 represents two years of development since the previous
-release candidate, and nearly four since the last release.
+Release candidate 4 resolves portability problems on 64-bit AIX and
+64-bit MinGW, with FreeBSD/NetBSD/AIX make(1), and with the Sun C
+compiler; improves the fallback used in groff's man pages to keep them
+rendering on systems that don't implement the new `MR` man(7) macro;
+makes generation of the distribution archive less dependent on the build
+configuration; makes the automated tests more robust and revealing;
+improves configuration checking for URW font availability; and updates
+the documentation.
+
+Since groff 1.22.4 was released in December 2018, 26 people have made a
+total of over 4,500 commits.
+
+[[ maintainer: Insert output of
+   "git shortlog --summary 1.22.4..1.23.0.rc4" ]]
 
 Headline features nominated by our development community include:
   * a new 'man' macro, "MR", for formatting man page cross references;
@@ -49,10 +63,10 @@ For more on these and other feature changes, see "News" below.
 Much attention has been given to fixing bugs, improving diagnostic
 messages, and correcting and expanding documentation.  The previous
 release shipped with three automated unit tests; this one ships with
-over 130 unit and regression tests.
+over 160 unit and regression tests.
 
 As of this writing, per the GNU Savannah bug tracker, the groff project
-has resolved 379 problems as fixed for the 1.23.0 release.  Some of the
+has resolved 423 problems as fixed for the 1.23.0 release.  Some of the
 bugs we've corrected were over 30 years old.
 
 Classifying these issues by type and the component of the project to
@@ -60,36 +74,36 @@ which they apply, we find the following.
 
   Type                              Component
   ----                              ---------
-  Build/installation           35   Core                           95
-  Crash/unresponsive           10   Driver: grohtml                 4
-  Documentation                95   Driver: gropdf                  7
-  Feature change               37   Driver: grops                   2
-  Incorrect behavior          115   Driver: grotty                  4
-  Lint                         12   Driver: others/general          4
+  Build/installation           39   Core                           98
+  Crash/unresponsive           11   Driver: grohtml                 7
+  Documentation               103   Driver: gropdf                 10
+  Feature change               41   Driver: grops                   2
+  Incorrect behavior          131   Driver: grotty                  4
+  Lint                         15   Driver: others/general          7
   Rendering/cosmetics          10   Font: devpdf                    1
-  Test                          4   Font: devps                     3
-  Warning/suspicious behavior  61   Font: others/general            4
-                                    General                        39
-                                    Macros: man                    32
-                                    Macros: mdoc                   10
+  Test                          6   Font: devps                     3
+  Warning/suspicious behavior  67   Font: others/general            4
+                                    General                        49
+                                    Macros: man                    33
+                                    Macros: mdoc                   15
                                     Macros: me                     36
-                                    Macros: mm                     16
-                                    Macros: mom                     9
+                                    Macros: mm                     20
+                                    Macros: mom                    11
                                     Macros: ms                     27
-                                    Macros: other/general          25
-                                    Preprocessor: eqn               3
+                                    Macros: other/general          27
+                                    Preprocessor: eqn               5
                                     Preprocessor: grn               3
                                     Preprocessor: pic               5
                                     Preprocessor: preconv           7
                                     Preprocessor: refer             3
-                                    Preprocessor: tbl              15
+                                    Preprocessor: tbl              23
                                     Preprocessor: others/general    5
-                                    Utilities                      17
+                                    Utilities                      18
 
 Another way of capturing the amount of revision is as follows.
 
-$ git diff --stat 1.22.4 HEAD | tail -n 1
- 935 files changed, 117550 insertions(+), 69438 deletions(-)
+$ git diff --stat 1.22.4 1.23.0 | tail -n 1
+ [[ maintainer: insert output ]]
 
 Obtaining groff
 ===============
@@ -106,17 +120,19 @@ Use a mirror for higher download bandwidth.
 
 Here are the SHA-1 and SHA-256 checksums.
 
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  groff-1.23.0.rc2.tar.gz
-yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy  groff-1.23.0.rc2.tar.gz
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  groff-1.23.0.rc4.tar.gz
+yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy  groff-1.23.0.rc4.tar.gz
 
 The SHA-256 checksum is encoded in Base64 instead of the hexadecimal
-form that most checksum tools default to.
+form that most checksum tools default to.  The mechanism follows.
+
+sha256sum < groff-1.23.0.rc4.tar.gz | cut -f1 -d\  | xxd -r -p | base64
 
 [*] Use a .sig file to verify that the corresponding file (without the
     .sig suffix) is intact.  First, be sure to download both the .sig
     file and the corresponding archive.  Then, verify the archive.
 
-      gpg --verify groff-1.23.0.rc2.tar.gz
+      gpg --verify groff-1.23.0.rc4.tar.gz{.sig,}
 
     If that command fails because you don't have the required public
     key, you can import it.
@@ -125,8 +141,90 @@ form that most checksum tools default to.
 
     Re-run the 'gpg --verify' command subsequently.
 
+Caveats
+=======
+
+o A defect in GNU diffutils 3.9 (January 2023) causes gdiffmk to
+  malfunction and its automated test to fail.  See
+  <https://debbugs.gnu.org/db/61/61193.html>.
+
+o GNU tools, or otherwise POSIX-conforming ones, are generally required
+  to build on Solaris 10 or 11.  See the "PROBLEMS" file in the
+  distribution archive.
+
+o Solaris 10 has known problems with automated tests; see the "PROBLEMS"
+  file in the distribution archive.
+
+o There is a problem building on "newlib"-using systems when X11 support
+  is enabled; see the "PROBLEMS" file in the distribution archive.
+
+o The build is known to not work with the MSVC compiler.  There are no
+  plans to address this before C23 standardized attributes become
+  available.
+
 News
 ====
 
 [[ maintainer: insert output of
-   "sed -n '/VERSION 1\.23/{:X;n;/VERSION 1\.22/q;p;bX}' NEWS" ]]
+   "sed -n '/VERSION 1\.23/{n;:X;n;/VERSION 1\.22/q;p;bX}' NEWS" ]]
+
+Acknowledgements
+================
+
+We'd like to thank the following people for helping ensure the quality
+of this release.
+
+[[ maintainer: Collect "thanks to" credits from the ChangeLog file, for
+   instance with "grep -i -A1 thanks ChangeLog".  A manual merge of
+   similar from the contrib/ change log files may also be necessary. ]]
+
+"hackerb9"
+Alan D. Salewski
+Alex Colomar
+Alexander Kanavin
+Alexis
+Andreas Kusalananda Kähäri
+Axel Kielhorn
+Ben Wong
+Bertrand Garrigues
+Bjarni Ingi Gislason
+Blake McBride
+Brian Inglis
+Bruno Haible
+Colin Watson
+Dale Snell
+Dave Kemper
+Deri James
+Dorai Sitaram
+Doug McIlroy
+Florent Rougon
+Gene
+Hans Bezemer
+Ingo Schwarze
+Jeff Conrad
+Jeremy Puhlman
+John Gardner
+KUBO Koichi
+Keith Marshall
+Ken Mandelberg
+Nikita Ivanov
+Oliver Corff
+Olle Lögdahl
+Osamu Sayama
+Peter Schaffter
+Petru-Florin Mihancea
+Quentin Monnet
+Raf Czlonka
+Rafal Pietrak
+Ralph Corderoy
+Robert Bihlmeyer
+Robert Goulding
+Russ Allbery
+Sergei Trofimovich
+Steffen Nurpmeso
+T. Kurt Bond
+Tadziu Hoffman
+Thomas Dupond
+Werner Lemberg
+Wim Stockman
+наб

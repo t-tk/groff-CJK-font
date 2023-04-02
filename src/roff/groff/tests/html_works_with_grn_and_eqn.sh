@@ -20,6 +20,17 @@
 
 groff="${abs_top_builddir:-.}/test-groff"
 
+# Keep this list of programs in sync with GROFF_CHECK_GROHTML_PROGRAMS
+# in m4/groff.m4.
+for cmd in pnmcrop pnmcut pnmtopng pnmtops psselect
+do
+    if ! command -v $cmd >/dev/null
+    then
+        echo "cannot locate '$cmd' command; skipping test" >&2
+        exit 77 # skip
+    fi
+done
+
 # Commit c71b4ef4aa provoked an infinite loop in post-grohtml with these
 # preprocessors.
 

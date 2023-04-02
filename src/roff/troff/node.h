@@ -597,7 +597,7 @@ public:
 
 class charinfo;
 node *make_node(charinfo *, environment *);
-int character_exists(charinfo *, environment *);
+bool character_exists(charinfo *, environment *);
 
 int same_node_list(node *, node *);
 node *reverse_node_list(node *);

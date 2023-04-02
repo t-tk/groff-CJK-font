@@ -417,6 +417,11 @@ int environment::get_right_justify_lines()
   return right_justify_lines;
 }
 
+int environment::get_no_number_count()
+{
+  return no_number_count;
+}
+
 void environment::add_italic_correction()
 {
   if (current_tab) {
@@ -3402,16 +3407,16 @@ void print_env()
 }
 
 #define init_int_env_reg(name, func) \
-  number_reg_dictionary.define(name, new int_env_reg(&environment::func))
+  register_dictionary.define(name, new int_env_reg(&environment::func))
 
 #define init_vunits_env_reg(name, func) \
-  number_reg_dictionary.define(name, new vunits_env_reg(&environment::func))
+  register_dictionary.define(name, new vunits_env_reg(&environment::func))
 
 #define init_hunits_env_reg(name, func) \
-  number_reg_dictionary.define(name, new hunits_env_reg(&environment::func))
+  register_dictionary.define(name, new hunits_env_reg(&environment::func))
 
 #define init_string_env_reg(name, func) \
-  number_reg_dictionary.define(name, new string_env_reg(&environment::func))
+  register_dictionary.define(name, new string_env_reg(&environment::func))
 
 void init_env_requests()
 {
@@ -3493,6 +3498,7 @@ void init_env_requests()
   init_string_env_reg(".m", get_glyph_color_string);
   init_hunits_env_reg(".n", get_prev_text_length);
   init_int_env_reg(".nm", get_numbering_nodes);
+  init_int_env_reg(".nn", get_no_number_count);
   init_int_env_reg(".ps", get_point_size);
   init_int_env_reg(".psr", get_requested_point_size);
   init_vunits_env_reg(".pvs", get_post_vertical_spacing);
@@ -3508,15 +3514,15 @@ void init_env_requests()
   init_vunits_env_reg(".v", get_vertical_spacing);
   init_hunits_env_reg(".w", get_prev_char_width);
   init_int_env_reg(".zoom", get_zoom);
-  number_reg_dictionary.define("ct", new variable_reg(&ct_reg_contents));
-  number_reg_dictionary.define("hp", new horizontal_place_reg);
-  number_reg_dictionary.define("ln", new variable_reg(&next_line_number));
-  number_reg_dictionary.define("rsb", new variable_reg(&rsb_reg_contents));
-  number_reg_dictionary.define("rst", new variable_reg(&rst_reg_contents));
-  number_reg_dictionary.define("sb", new variable_reg(&sb_reg_contents));
-  number_reg_dictionary.define("skw", new variable_reg(&skw_reg_contents));
-  number_reg_dictionary.define("ssc", new variable_reg(&ssc_reg_contents));
-  number_reg_dictionary.define("st", new variable_reg(&st_reg_contents));
+  register_dictionary.define("ct", new variable_reg(&ct_reg_contents));
+  register_dictionary.define("hp", new horizontal_place_reg);
+  register_dictionary.define("ln", new variable_reg(&next_line_number));
+  register_dictionary.define("rsb", new variable_reg(&rsb_reg_contents));
+  register_dictionary.define("rst", new variable_reg(&rst_reg_contents));
+  register_dictionary.define("sb", new variable_reg(&sb_reg_contents));
+  register_dictionary.define("skw", new variable_reg(&skw_reg_contents));
+  register_dictionary.define("ssc", new variable_reg(&ssc_reg_contents));
+  register_dictionary.define("st", new variable_reg(&st_reg_contents));
 }
 
 // Hyphenation - TeX's hyphenation algorithm with a less fancy implementation.
@@ -4122,7 +4128,7 @@ void init_hyphen_requests()
   init_request("hla", set_hyphenation_language);
   init_request("hpf", hyphenation_patterns_file);
   init_request("hpfa", hyphenation_patterns_file_append);
-  number_reg_dictionary.define(".hla", new hyphenation_language_reg);
+  register_dictionary.define(".hla", new hyphenation_language_reg);
 }
 
 // Local Variables:

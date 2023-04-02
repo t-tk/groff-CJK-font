@@ -18,10 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
 #include "lib.h"
 
-#include <stdlib.h>
+#include <assert.h>
 #include <errno.h>
-
-#include "assert.h"
+#include <stdlib.h>
 
 #include "posix.h"
 #include "errarg.h"
@@ -295,7 +294,7 @@ int main(int argc, char **argv)
 #endif /* __EMX__ */
   if (rename(temp_index_file, index_file) < 0) {
 #ifdef __MSDOS__
-    // RENAME could fail on plain MSDOS filesystems because
+    // RENAME could fail on plain MS-DOS filesystems because
     // INDEX_FILE is an invalid filename, e.g. it has multiple dots.
     char *fname = p ? index_file + (p - base_name) : 0;
     char *dot = 0;

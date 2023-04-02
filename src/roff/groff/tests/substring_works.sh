@@ -37,7 +37,7 @@ groff="${abs_top_builddir:-.}/test-groff"
 .
 .\" .substring xx n1 [n2]
 .\"    Replace contents of string named xx with the substring bounded by
-.\"    zero-based indicies indices n1 and n2.  Negative indices count
+.\"    zero-based indices indices n1 and n2.  Negative indices count
 .\"    backwards from the end of the string.  If omitted, n2 is `-1`.
 .\"
 .\"    If n1 > n2, n1 and n2 are swapped.  If n1 equals or exceeds the

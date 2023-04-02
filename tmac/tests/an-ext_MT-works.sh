@@ -18,29 +18,37 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-# Ensure that groff's PDF device has the copies it needs of PostScript
-# device font descriptions.
-#
-# We need all of them except SS and ZDR.
-
-devps_fontsrcdir="${abs_top_srcdir:-..}"/font/devps
-devpdf_fontbuilddir="${abs_top_builddir:-.}"/font/devpdf
-
-psfonts=$(cd "$devps_fontsrcdir" && ls [A-Z]* \
-    | grep -Evx '(DESC\.in|SS|ZDR)')
+groff="${abs_top_builddir:-.}/test-groff"
 
 fail=
 
-for f in $psfonts
-do
-    printf "checking for font description %s...\n" "$f" >&2
-    if ! test -f "$devpdf_fontbuilddir"/"$f"
-    then
-        echo test -f "$devpdf_fontbuilddir"/"$f"
-        echo FAILED >&2
-        fail=yes
-    fi
-done
+wail() {
+    echo ...FAILED >&2
+    fail=yes
+}
+
+input='.TH foo 1 2022-11-22 "groff test suite"
+.SH Name
+foo \- frobnicate a bar
+.SH Description
+Mail
+.MT modok@\:example\:.com
+the boss
+.ME .
+.
+Complaints to
+.MT nobody@\:example\:.com
+.ME .'
+
+output=$(printf "%s\n" "$input" \
+    | "$groff" -rmG=0 -Tascii -P-cbou -man -rU0)
+echo "$output"
+
+echo "checking formatting of mail URI with link text" >&2
+echo "$output" | grep -Fq 'Mail the boss <modok@example.com>.' || wail
+
+echo "checking formatting of mail URI with no link text" >&2
+echo "$output" | grep -Fq 'Complaints to <nobody@example.com>.' || wail
 
 test -z "$fail"
 

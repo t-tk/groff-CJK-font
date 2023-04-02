@@ -47,6 +47,8 @@ abcdefghijklmnopqrstuvwxyz'
 
 OUTPUT=$(printf "%s\n" "$EXAMPLE" | "$groff" -Tascii -P-cbou -t -ms)
 
+echo "$OUTPUT"
+
 echo "testing whether hyphenation disabled in table text block" >&2
 ! echo "$OUTPUT" | grep '^foo' | grep -- '-$'
 

@@ -31,6 +31,21 @@ output driver for Portable Document Format
 .do nr *groff_gropdf_1_man_C \n[.cp]
 .cp 0
 .
+.\" Define fallback for groff 1.23's MR macro if the system lacks it.
+.nr do-fallback 0
+.if !\n(.f           .nr do-fallback 1 \" mandoc
+.if  \n(.g .if !d MR .nr do-fallback 1 \" older groff
+.if !\n(.g           .nr do-fallback 1 \" non-groff *roff
+.if \n[do-fallback]  \{\
+.  de MR
+.    ie \\n(.$=1 \
+.      I \%\\$1
+.    el \
+.      IR \%\\$1 (\\$2)\\$3
+.  .
+.\}
+.rr do-fallback
+.
 .
 .\" This macro definition is poor style from a portability standpoint,
 .\" but it's a good test and demonstration of the standard font
@@ -880,14 +895,6 @@ font.
 .
 To return to normal printing repeat the command again.
 .
-.TP
-.BI "\[rs]X'pdf: markstart " "/ANN definition" '
-The macros which support PDF Bookmarks use this call internally to
-start the definition of bookmark hotspot (user will have called
-\[oq].pdfhref\~L\[cq] with the text which will become the \[oq]hot
-spot\[cq] region).
-.
-Normally this is never used except from within the pdfmark macros.
 .
 .TP
 .BI "\[rs]X\[aq]pdf: markstart " "/ANN-definition" \[aq]
@@ -945,7 +952,7 @@ position within the document (see pagename command above).
 .I \[oq]when\[cq]
 can be either
 .RI \[oq] after "\[cq] or \[oq]" before \[cq].
-If it is ommitted it defaults to
+If it is omitted it defaults to
 .RI \[oq] before \[cq].
 .IP
 The convenience command for this is

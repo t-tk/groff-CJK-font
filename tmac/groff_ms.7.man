@@ -10,7 +10,7 @@ manuscript macro package for formatting documents
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 1989-2022 Free Software Foundation, Inc.
+.\" Copyright (C) 1989-2023 Free Software Foundation, Inc.
 .\"
 .\" Permission is granted to make and distribute verbatim copies of this
 .\" manual provided the copyright notice and this permission notice are
@@ -31,6 +31,21 @@ manuscript macro package for formatting documents
 .\" Save and disable compatibility mode (for, e.g., Solaris 10/11).
 .do nr *groff_groff_ms_7_man_C \n[.cp]
 .cp 0
+.
+.\" Define fallback for groff 1.23's MR macro if the system lacks it.
+.nr do-fallback 0
+.if !\n(.f           .nr do-fallback 1 \" mandoc
+.if  \n(.g .if !d MR .nr do-fallback 1 \" older groff
+.if !\n(.g           .nr do-fallback 1 \" non-groff *roff
+.if \n[do-fallback]  \{\
+.  de MR
+.    ie \\n(.$=1 \
+.      I \%\\$1
+.    el \
+.      IR \%\\$1 (\\$2)\\$3
+.  .
+.\}
+.rr do-fallback
 .
 .
 .\" ====================================================================
@@ -240,9 +255,9 @@ lf(CR) lx  l  lf(CR).
 Margin settings
 Parameter	Definition	Effective	Default
 _
-\[rs]n[PO]	Page offset (left margin)	next page	1i
-\[rs]n[LL]	Line length	next paragraph	6i
-\[rs]n[LT]	Title line length	next paragraph	6i
+\[rs]n[PO]	Page offset (left margin)	next page	1i (0)
+\[rs]n[LL]	Line length	next paragraph	6.5i (65n)
+\[rs]n[LT]	Title line length	next paragraph	6.5i (65n)
 \[rs]n[HM]	Top (header) margin	next page	1i
 \[rs]n[FM]	Bottom (footer) margin	next page	1i
 _
@@ -387,6 +402,18 @@ For entries marked
 .RI \[lq] special \[rq]
 in the \[lq]Effective\[rq] column,
 see the discussion in the applicable section below.
+.
+The
+.BR PO ,
+.BR LL ,
+and
+.B LT
+register defaults vary by output device and paper format;
+the values shown are for typesetters using U.S.\& letter paper,
+and then terminals.
+.
+See section \[lq]Paper format\[rq] of
+.MR groff @MAN1EXT@ .
 .
 The
 .B PD
@@ -1047,9 +1074,10 @@ similarly.
 Without arguments,
 .I ms
 styles subsequent text in bold
-until the next highlighting,
+until the next
 paragraphing,
-or heading macro call.
+heading,
+or no-argument typeface macro call.
 .
 .
 .TP
@@ -1125,10 +1153,9 @@ Typeset
 .I text
 with an underline.
 .
-Set
 .I post,
 if present,
-after
+is set after
 .I text
 with no intervening space.
 .
@@ -1137,8 +1164,8 @@ with no intervening space.
 .B .LG
 Set subsequent text in larger type
 (2\~points larger than the current size)
-until the next font size,
-highlighting,
+until the next
+type size,
 paragraphing,
 or heading macro call.
 .
@@ -1150,8 +1177,8 @@ needed.
 .B .SM
 Set subsequent text in smaller type
 (2\~points smaller than the current size)
-until the next type size,
-highlighting,
+until the next
+type size,
 paragraphing,
 or heading macro call.
 .
@@ -1208,6 +1235,8 @@ respectively.
 You may need to indent a region of text while otherwise formatting it
 normally.
 .
+Indented regions can be nested.
+.
 .
 .TP
 .B .RS
@@ -1219,7 +1248,7 @@ and displays are indented (further) by
 .
 .TP
 .B .RE
-End the most recent indented region.
+End the (next) most recent indented region.
 .
 .
 .\" ====================================================================
@@ -1814,9 +1843,9 @@ and
 .B RF
 to set the left,
 center,
-and right footers similarly.
+and right footers.
 .
-This approach works best for documents that do not distinguish odd- and
+This approach suffices for documents that do not distinguish odd- and
 even-numbered pages.
 .
 .
@@ -1943,17 +1972,16 @@ Redefine this macro to create a different set of default tab stops.
 .SS Margins
 .\" ====================================================================
 .
-Control margins using registers.
+Control margins using the registers summarized in the \[lq]Margins\[rq]
+portion of the table in section \[lq]Document control settings\[rq]
+above.
 .
-These are summarized in the \[lq]Margin settings\[rq] table in
-subsection \[lq]Document control settings\[rq] above.
-.
-There is no explicit right margin setting;
+There is no setting for the right margin;
 the combination of page offset
 .B \[rs]n[PO]
 and line length
 .B \[rs]n[LL]
-provides the information necessary to derive the right margin.
+determines it.
 .
 .
 .\" ====================================================================
@@ -2296,11 +2324,9 @@ rather than silently to ignore them.
 .
 .IP \[bu]
 Tenth Edition \" possibly 9th
-Research Unix supported a pair of
-.B P1
-and
-.B P2
-macros for setting code examples;
+Research Unix supported
+.BR P1 / P2
+macros to bracket code examples;
 .I groff ms
 does not.
 .
@@ -2359,14 +2385,13 @@ but by setting it absolutely.
 This can cause problems for documents that define additional macros of
 their own that try to manipulate indentation.
 .
-The solution is to use,
-not the
-.B in
-request,
-but
+Use
 .B .RS
 and
-.BR .RE .
+.B .RE
+instead of the
+.B in
+request.
 .
 .
 .IP \[bu]
@@ -2395,37 +2420,20 @@ units.
 .
 See \[lq]Measurements\[rq] in the
 .I groff
-Texinfo manual or the
-.MR groff @MAN7EXT@
-man page.)
+Texinfo manual or in
+.MR groff @MAN7EXT@ ).
 .
 This threshold makes use of a scaling unit with these parameters
 practical for high-resolution devices while preserving backward
 compatibility.
+.
+It also permits expression of non-integral type sizes.
 .
 For example,
 .RB \[lq] "groff \-rPS=10.5p" \[rq]
 at the shell prompt is equivalent to placing
 .RB \[lq] ".nr PS 10.5p" \[rq]
 at the beginning of the document.
-.
-.
-.IP \[bu]
-To make
-.I groff ms
-use the default page offset
-(which also specifies the left margin),
-the
-.B PO
-register must stay undefined until the first
-.I ms
-macro is called.
-.
-This implies that
-.B \[rs]n[PO]
-should not be used early in the document,
-unless it is changed also:
-accessing an undefined register automatically defines it.
 .
 .
 .IP \[bu]
@@ -2450,6 +2458,24 @@ but it doesn't work\[rq].
 In
 .IR "groff ms" ,
 it does.
+.
+.
+.IP \[bu]
+To make
+.I groff ms
+use the default page offset
+(which also specifies the left margin),
+the
+.B PO
+register must stay undefined until the first
+.I ms
+macro is called.
+.
+This implies that
+.B \[rs]n[PO]
+should not be used early in the document,
+unless it is changed also:
+accessing an undefined register automatically defines it.
 .
 .
 .IP \[bu]
@@ -2522,10 +2548,10 @@ The AT&T
 .I ms
 manual did not document the
 .B QI
-register,
-whereas Berkeley did;
+register;
+Berkeley and
 .I "groff ms"
-accordingly supports it.
+do.
 .
 .
 .IP \[bu]
@@ -2557,7 +2583,7 @@ some of which also require a glyph for the Bell System logo that
 .I groff
 does not support.
 .
-These include macros implementing several document type formats
+These macros implemented several document type formats
 (\c
 .BR EG , \" engineer's notes
 .BR IM , \" internal memorandum
@@ -2580,7 +2606,7 @@ stored the postal addresses of Bell Labs sites
 .BR MH , \" Murray Hill
 .BR PY , \" Piscataway
 .BR WH ), \" Whippany
-or lack a stable definition historically
+or lacked a stable definition over time
 (\c
 .BR UX ). \" Unix; on 1st use, add footnote identifying trademark owner
 .
@@ -2590,8 +2616,8 @@ or lack a stable definition historically
 .\" ====================================================================
 .
 .I "groff ms"
-retains support for some legacy features solely to support formatting of
-historical documents;
+retains some legacy features solely to support formatting of historical
+documents;
 contemporary ones should not use them because they can render poorly.
 .
 See
@@ -2777,9 +2803,13 @@ The GNU version of the
 .I ms
 macro package was written by James Clark and contributors.
 .
-This document was (re-)written by
+This document was written by Clark,
 .MT lkollar@\:despammed\:.com
 Larry Kollar
+.ME ,
+and
+.MT g.branden\:.robinson@\:gmail\:.com
+G.\& Branden Robinson
 .ME .
 .
 .

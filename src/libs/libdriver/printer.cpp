@@ -17,7 +17,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "assert.h"
+#include <assert.h>
+
 #include "driver.h"
 
 /* If we are sending output to an onscreen pager (as is the normal case

@@ -30,10 +30,10 @@ public:
   virtual void set_value(units);
 };
 
-class constant_int_reg : public reg {
+class readonly_register : public reg {
   int *p;
 public:
-  constant_int_reg(int *);
+  readonly_register(int *);
   const char *get_string();
 };
 
@@ -63,7 +63,7 @@ public:
   bool get_value(units *);
 };
 
-extern object_dictionary number_reg_dictionary;
+extern object_dictionary register_dictionary;
 extern void set_number_reg(symbol nm, units n);
 extern void check_output_limits(int x, int y);
 extern void reset_output_registers();

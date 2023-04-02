@@ -246,7 +246,7 @@ vunits macro_diversion::distance_to_next_trap()
   if (!diversion_trap.is_null() && diversion_trap_pos > vertical_position)
     return diversion_trap_pos - vertical_position;
   else
-    // Substract vresolution so that vunits::vunits does not overflow.
+    // Subtract vresolution so that vunits::vunits does not overflow.
     return vunits(INT_MAX - vresolution);
 }
 
@@ -814,7 +814,9 @@ void page_number()
 
   // the ps4html register is set if we are using -Tps
   // to generate images for html
-  reg *r = (reg *)number_reg_dictionary.lookup("ps4html");
+  // XXX: Yuck!  Get rid of this; macro packages already test the
+  // register before invoking .pn.
+  reg *r = (reg *)register_dictionary.lookup("ps4html");
   if (r == NULL)
     if (has_arg() && get_integer(&n, topdiv->get_page_number()))
       topdiv->set_next_page_number(n);
@@ -1180,27 +1182,27 @@ void init_div_requests()
   init_request("sv", save_vertical_space);
   init_request("vpt", vertical_position_traps);
   init_request("wh", when_request);
-  number_reg_dictionary.define(".a",
-		       new constant_int_reg(&last_post_line_extra_space));
-  number_reg_dictionary.define(".d", new vertical_position_reg);
-  number_reg_dictionary.define(".h", new high_water_mark_reg);
-  number_reg_dictionary.define(".ne",
+  register_dictionary.define(".a",
+		       new readonly_register(&last_post_line_extra_space));
+  register_dictionary.define(".d", new vertical_position_reg);
+  register_dictionary.define(".h", new high_water_mark_reg);
+  register_dictionary.define(".ne",
 			       new constant_vunits_reg(&needed_space));
-  number_reg_dictionary.define(".ns", new no_space_mode_reg);
-  number_reg_dictionary.define(".o", new page_offset_reg);
-  number_reg_dictionary.define(".p", new page_length_reg);
-  number_reg_dictionary.define(".pe", new page_ejecting_reg);
-  number_reg_dictionary.define(".pn", new next_page_number_reg);
-  number_reg_dictionary.define(".t", new distance_to_next_trap_reg);
-  number_reg_dictionary.define(".trunc",
+  register_dictionary.define(".ns", new no_space_mode_reg);
+  register_dictionary.define(".o", new page_offset_reg);
+  register_dictionary.define(".p", new page_length_reg);
+  register_dictionary.define(".pe", new page_ejecting_reg);
+  register_dictionary.define(".pn", new next_page_number_reg);
+  register_dictionary.define(".t", new distance_to_next_trap_reg);
+  register_dictionary.define(".trunc",
 			       new constant_vunits_reg(&truncated_space));
-  number_reg_dictionary.define(".vpt",
-		       new constant_int_reg(&vertical_position_traps_flag));
-  number_reg_dictionary.define(".z", new diversion_name_reg);
-  number_reg_dictionary.define("dl", new variable_reg(&dl_reg_contents));
-  number_reg_dictionary.define("dn", new variable_reg(&dn_reg_contents));
-  number_reg_dictionary.define("nl", new nl_reg);
-  number_reg_dictionary.define("%", new page_number_reg);
+  register_dictionary.define(".vpt",
+		       new readonly_register(&vertical_position_traps_flag));
+  register_dictionary.define(".z", new diversion_name_reg);
+  register_dictionary.define("dl", new variable_reg(&dl_reg_contents));
+  register_dictionary.define("dn", new variable_reg(&dn_reg_contents));
+  register_dictionary.define("nl", new nl_reg);
+  register_dictionary.define("%", new page_number_reg);
 }
 
 // Local Variables:

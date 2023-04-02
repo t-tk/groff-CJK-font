@@ -1,4 +1,4 @@
-    Copyright 1989-2020 Free Software Foundation, Inc.
+    Copyright 1989-2023 Free Software Foundation, Inc.
 
     Copying and distribution of this file, with or without modification,
     are permitted in any medium without royalty provided the copyright
@@ -10,9 +10,15 @@ other improvements to this file are welcome.
 
 ----------------------------------------------------------------------
 
+Problems are organized into categories underscored with equals signs.
+
+* General Problems
+* Printing and Display Problems
+* Platform-Dependent Macro Problems
+* Compilation Problems
 
 
-Generic Problems
+General Problems
 ================
 
 
@@ -99,6 +105,27 @@ glyph and there is no historically established *roff input character,
 ordinary or special, for obtaining it when a hyphen and minus sign are
 both separately available.  To obtain a true minus sign, use the special
 character escape sequences '\(mi' or '\[mi]'.
+
+----------------------------------------------------------------------
+
+* gdiffmk doesn't work / its automated test fails.
+
+A defect in GNU diffutils 3.9 (January 2023) causes gdiffmk to
+malfunction.  See <https://debbugs.gnu.org/db/61/61193.html>.
+
+----------------------------------------------------------------------
+
+* gdiffmk doesn't work on FreeBSD; I get errors from "expr".
+
+gdiffmk uses the expr(1) command to parse its arguments.  FreeBSD has
+extended the syntax of its expr command in a non-backward compatible way
+that it claims better conforms with POSIX's utility syntax guidelines
+with respect to option processing: however, POSIX mandates no options
+for expr.  Other implementations of expr do not support traditional
+Unix-style options ('-a', '-b', ...), and perhaps as a consequence do
+not follow FreeBSD's interpretation of the guidelines.  You way want to
+set $EXPR_COMPAT in your shell environment.  We hope to have a
+workaround for this behavior in a future release.
 
 ----------------------------------------------------------------------
 
@@ -739,7 +766,7 @@ is writing cannot map the groff special character '*D' to both 'Delta'
 and 'uni0394'.
 
 Which, if any, such warnings you see depends on the version of the URW
-fonts you are builing groff against.  See the '--with-urw-fonts-dir'
+fonts you are building groff against.  See the '--with-urw-fonts-dir'
 option to the "configure" script, and the afmtodit(1) and groff_char(7)
 man pages for more background.
 
@@ -772,6 +799,141 @@ The groff source tree includes gnulib, the GNU portability library
 <https://www.gnu.org/software/gnulib/>.  These warnings are about its
 source code and that project's responsibility to resolve.  We expect a
 future release of gnulib to do so.
+
+----------------------------------------------------------------------
+
+* I get a lot of warnings about "sprintf" on macOS.
+
+Apple has decided to treat the sprintf() standard C library function as
+deprecated even though the C standard itself has not.
+
+https://developer.apple.com/forums/thread/714675
+
+----------------------------------------------------------------------
+
+* I get a make(1) failure involving grep and the groff_man.7.man.in file
+  on Solaris 11.
+
+Solaris make(1) has a bug easily exhibited by the following Makefile.
+
+all:
+	! false
+
+Use GNU make instead; it may be available in /opt/csw/bin/gmake.
+
+----------------------------------------------------------------------
+
+* The "check-default-foundry" test fails when I run "make check".
+
+Your Ghostscript installation may have its fonts embedded in the
+executable; this can be discerned by searching for the pattern "%rom%"
+in its search path.
+
+  $ gs -h | grep '%rom%'
+
+The consequence is that gropdf(1) will be unable to embed fonts into PDF
+files it generates (apart from groff's "EURO" font) when the default
+foundry is used.  This is the same outcome as if Ghostscript were not
+installed at all.  If you install URW fonts (see "INSTALL.extra"), you
+will be able to embed them all by using the "U" foundry with gropdf to
+overcome this problem.
+
+----------------------------------------------------------------------
+
+* The "initialization_is_quiet" test fails on my GNU/Hurd or NetBSD box.
+
+This is a known problem.  We haven't tracked down the cause yet, but
+have improved the reporting of the test output in hopes that we can
+isolate it in a future release.
+
+----------------------------------------------------------------------
+
+* Tests fail when I run "make check" on Solaris 10 or 11.
+
+The test suite expects a POSIX-conforming shell and utilities.  Solaris
+10 does not offer these in the default $PATH.  We try to use features
+standardized no later than POSIX Issue 4 (1994).  Unfortunately even
+that is too recent for some implementations.  Solaris 11 has a (mostly)
+conforming shell.  It may help to ensure that "/usr/xpg6/bin" and
+"/usr/xpg4/bin" precede "/usr/bin" in the $PATH when building groff.
+
+For Solaris 10, it is necessary to modify the shell-based test scripts
+in place to use a conforming shell.  Here is an example.
+
+  $ gsed -i -e '1s@#!/bin/sh@#!/usr/xpg4/bin/sh@' \
+      `find . -name '*.sh' | grep /tests/`
+  $ PATH=/usr/xpg4/bin:$PATH gmake check
+
+Some test failures remain expected on Solaris 10.
+
+1.  FAIL: tmac/tests/pdfpic_does-not-choke-on-bad-pdfinfo-output.sh
+
+    /usr/bin/sed is non-conforming with the POSIX Issue 4 standard.
+
+    Install GNU sed in the $PATH and edit tmac/pdfpic.tmac and change
+    the "sed" on line 172 to "gsed".  Re-run "gmake check" as above.
+
+    The sed in /usr/xpg4/bin also works, but pdfpic.tmac uses groff's
+    `sy` request, which wraps the standard C library `system()`
+    function, which sanitizes $PATH to avoid privilege escalation, thus
+    making it likely that the non-conforming sed in /usr/bin will be
+    found first.
+
+2.  FAIL: contrib/hdtbl/examples/test-hdtbl.sh
+
+    /usr/bin/tr is non-conforming with the POSIX Issue 4 standard.  It
+    furthermore issues anonymous diagnostics, saying only "Bad string".
+
+    Install tr from GNU coreutils in the $PATH.  Edit line 57 of each of
+    contrib/hdtbl/examples/fonts_x.in and
+    contrib/hdtbl/examples/fonts_n.in.  Change "tr" to "gtr".  Re-run
+    "gmake check" as above.  (Some files will be rebuilt.)
+
+    The tr commands in /usr/xpg4/bin and /usr/xpg6/bin also work, but
+    the documents constructed from the above inputs use groff's `pso`
+    request, which wraps the standard C library `popen()` function,
+    which sanitizes $PATH to avoid privilege escalation, thus making it
+    likely that the non-conforming tr in /usr/bin will be found first.
+
+3.  FAIL: src/roff/groff/tests/initialization_is_quiet.sh
+    FAIL: src/roff/groff/tests/msoquiet_works.sh
+    FAIL: src/roff/groff/tests/soquiet_works.sh
+
+    (The first of these might be SKIPped instead.)
+
+    /usr/xpg4/bin/sh is non-conforming with the POSIX Issue 4 standard,
+    despite its name.  Its "unset" builtin is buggy.
+
+    These tests use the "unset" shell builtin command to prevent
+    environment variables from confounding test results.
+
+    POSIX says "[u]nsetting a variable ... that was not previously set
+    is not considered an error and will not cause the shell to abort."
+
+    Nevertheless this builtin returns an error exit status in this
+    circumstance.
+
+    $ /usr/xpg4/bin/sh -c 'unset _NON_EXISTENT_XYZ; echo $?'
+    1
+
+    You may disregard these failures, edit the test scripts to append
+    "|| true" to the "unset" commends, or change the scripts to use GNU
+    Bash or some other POSIX-conforming shell as illustrated above.
+
+----------------------------------------------------------------------
+
+* I get a build failure on Cygwin / a system using newlib and GCC 11.
+
+  "newlib" defines a function called "utoa" which conflicts with a
+  static (file scope-local) function in src/libs/libxutil/XFontName.c.
+
+  We expect to fix this in the near future; in the meantime, you can
+  patch the file to rename the function (and update its call sites) or,
+  if you don't require the "gxditview" output previewer or "xtotroff"
+  utility, you can build groff without X11 support.
+
+  $ make distclean
+  $ ./configure --without-x
 
 ----------------------------------------------------------------------
 

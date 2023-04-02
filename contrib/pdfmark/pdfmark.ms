@@ -519,7 +519,7 @@ any other explicit choice is unlikely to be compatible with
 .CW pdfmark ,
 and will have an unpredictable
 (possibly erroneous)
-effect on the ouput.
+effect on the output.
 If no
 .CW -T \^\c
 .CWI dev

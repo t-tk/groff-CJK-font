@@ -384,7 +384,7 @@ my $Line = '';
     }
 
     if ($Words[0] eq 'pic') {
-      # pic pass-thru
+      # pic pass-through
       return 1 if $#Words == 0;
       my $s = $line;
       $s =~ /^\s*pic\s*(.*)$/;
@@ -1196,7 +1196,7 @@ sub setparams {
 
 sub usage {
   print <<EOF;
-usage: $chem [file] ...
+usage: $chem [file ...]
 usage: $chem { -h | --help | -v | --version }
 
 $chem is a groff preprocessor for producing chemical structure

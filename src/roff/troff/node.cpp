@@ -4035,7 +4035,7 @@ int tag_node::ends_sentence()
 static int get_register(const char *p)
 {
   assert(p != 0 /* nullptr */);
-  reg *r = (reg *)number_reg_dictionary.lookup(p);
+  reg *r = (reg *)register_dictionary.lookup(p);
   assert(r != 0 /* nullptr */);
   units value;
   assert(r->get_value(&value));
@@ -4047,7 +4047,7 @@ static int get_register(const char *p)
 static const char *get_string(const char *p)
 {
   assert(p != 0 /* nullptr */);
-  reg *r = (reg *)number_reg_dictionary.lookup(p);
+  reg *r = (reg *)register_dictionary.lookup(p);
   assert(r != 0 /* nullptr */);
   return r->get_string();
 }
@@ -5026,21 +5026,21 @@ node *make_node(charinfo *ci, environment *env)
     return make_glyph_node(ci, env);
 }
 
-int character_exists(charinfo *ci, environment *env)
+bool character_exists(charinfo *ci, environment *env)
 {
   if (ci->get_special_translation() != charinfo::TRANSLATE_NONE)
-    return 1;
+    return true;
   charinfo *tem = ci->get_translation();
   if (tem)
     ci = tem;
   if (ci->get_macro())
-    return 1;
+    return true;
   node *nd = make_glyph_node(ci, env, false /* don't want warnings */);
   if (nd) {
     delete nd;
-    return 1;
+    return true;
   }
-  return 0;
+  return false;
 }
 
 node *node::add_char(charinfo *ci, environment *env,
@@ -6640,12 +6640,12 @@ void init_node_requests()
   init_request("sty", style);
   init_request("tkf", track_kern);
   init_request("uf", underline_font);
-  number_reg_dictionary.define(".fp", new next_available_font_position_reg);
-  number_reg_dictionary.define(".kern",
-			       new constant_int_reg(&global_kern_mode));
-  number_reg_dictionary.define(".lg",
-			       new constant_int_reg(&global_ligature_mode));
-  number_reg_dictionary.define(".P", new printing_reg);
+  register_dictionary.define(".fp", new next_available_font_position_reg);
+  register_dictionary.define(".kern",
+			       new readonly_register(&global_kern_mode));
+  register_dictionary.define(".lg",
+			       new readonly_register(&global_ligature_mode));
+  register_dictionary.define(".P", new printing_reg);
   soft_hyphen_char = get_charinfo(HYPHEN_SYMBOL);
 }
 

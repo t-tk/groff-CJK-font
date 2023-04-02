@@ -1,4 +1,3 @@
-.\" -*- nroff -*-
 .ig
 
 Copyright (C) 1991-2020 Free Software Foundation, Inc.
@@ -25,7 +24,7 @@ http://savannah.gnu.org/bugs/?group=groff.
 .\" Cover sheet. Memorandum type 4
 .\"------------
 .de cov@print-title
-.if !d cov*title .@error title (.TL) not defined!
+.if !d cov*title .@error title not defined; call TL and AU before MT
 .MOVE 2.8c
 .S +2
 .ad c
@@ -39,6 +38,8 @@ http://savannah.gnu.org/bugs/?group=groff.
 ..
 .\"------------
 .de cov@print-authors
+.\" The following diagnostic might be unreachable.
+.if !r cov*au .@error no authors defined; call AU before MT
 .SP 0.5
 .I
 .S +1
@@ -101,4 +102,9 @@ http://savannah.gnu.org/bugs/?group=groff.
 .cov@print-firm
 .cov@print-abstract
 ..
-
+.
+.\" Local Variables:
+.\" mode: nroff
+.\" fill-column: 72
+.\" End:
+.\" vim: set filetype=groff textwidth=72:

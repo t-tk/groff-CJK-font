@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (C) 2020 Free Software Foundation, Inc.
+# Copyright (C) 2022 Free Software Foundation, Inc.
 #
 # This file is part of groff.
 #
@@ -20,18 +20,35 @@
 
 groff="${abs_top_builddir:-.}/test-groff"
 
-EXAMPLE='.TH mt\-body 1 2020-08-15 "groff test suite"
-.SH Name
-mt\-body \- mailto: link text is subject to hyphenation
-.SH Description
-Do not try to
-.MT groff@gnu.org
-hyphenate the word
-pneumonoultramicroscopicsilicovolcanoconiosis
-without machine assistance
-.ME .'
+fail=
 
-printf "%s\n" "$EXAMPLE" | "$groff" -Tascii -P-cbou -man \
-    | grep -qE 'pn.*-'
+wail () {
+    echo "...FAILED" >&2
+    fail=YES
+}
+
+input='.Dd 2022-12-11
+.Dt foo 1
+.Os "groff test suite"
+.Sh Name
+.Nm foo
+.Nd frobnicate a bar
+.bp
+.Sh Description
+It took a while to get here.'
+
+output=$(printf "%s\n" "$input" | "$groff" -rcR=0 -rP13 -mdoc -Tascii \
+    -P-cbou)
+echo "$output"
+
+echo "checking first page footer" >&2
+echo "$output" | grep -En "^groff test suite +2022-12-11 +13$" \
+    | grep '^64:' || wail
+
+echo "checking second page footer" >&2
+echo "$output" | grep -En "^groff test suite +2022-12-11 +14$" \
+    | grep '^130:' || wail
+
+test -z "$fail"
 
 # vim:set ai et sw=4 ts=4 tw=72:

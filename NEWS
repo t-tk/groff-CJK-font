@@ -1,4 +1,4 @@
-    Copyright (C) 1992-2022 Free Software Foundation, Inc.
+    Copyright (C) 1992-2023 Free Software Foundation, Inc.
 
     Copying and distribution of this file, with or without modification,
     are permitted in any medium without royalty provided the copyright
@@ -22,12 +22,15 @@ o A new read-only register `.cp` is implemented.  Within a `do` request,
   groff_diff(7) or the groff Texinfo manual for rationale, use case, and
   example.
 
-o A new read-only register `.nm` is implemented.  It reports the
-  enablement status of output line numbering (caused by the `nm`
-  request) irrespective of the temporary suspension of numbering with
-  the `nn` request.  This register was introduced because there was no
-  way to introspect its state, tbl(1) needs to be able to do so, and the
-  writable line number register `ln` is not a reliable proxy for it.
+o New read-only registers `.nm` and `.nn` are implemented.  `.nm` is of
+  Boolean sense, reporting the enablement status of output line
+  numbering (caused by the `nm` request) irrespective of the temporary
+  suspension of numbering with the `nn` request.  `.nn` holds the count
+  of numbered output lines still to have that numbering suppressed.
+  These registers were introduced because there was no way for the
+  formatter (and thus a document) to introspect their state, tbl(1)
+  needs to be able to do so, and the writable line number register `ln`
+  is not a reliable proxy for this information.
 
 o Type size escape sequences of the form "\sNN", where NN is in the
   range 10-39, are now recognized only in compatibility mode ("groff
@@ -41,9 +44,10 @@ o Type size escape sequences of the form "\sNN", where NN is in the
 
   The form "\s(NN" is accepted for two-digit sizes in all known troffs.
   The form "\s[NNN]" accepts a numeric expression of variable length; it
-  has been supported by groff since version 1.02 (June 1991) at the
-  latest and is by current versions of Heirloom Doctools troff and
-  neatroff.  The form "\s'NNN'" is also widely supported.
+  has been supported by groff since version 1.01 (March 1991) or
+  earlier, by Heirloom Doctools troff since its 2005-08-16 release, and
+  by neatroff, but not by Plan 9 troff.  The form "\s'NNN'" is also
+  widely supported.
 
   Summary: in your documents, rewrite escape sequences beginning with
   "\s1", "\s2", or "\s3" in an unambiguous and portable form.  For
@@ -66,10 +70,10 @@ o New requests `soquiet` and `msoquiet` are available.  They operate as
 o New requests `stringdown` and `stringup` are available.  These change
   the string named in their argument by replacing each of its bytes with
   its lowercase or uppercase version (if any), respectively.  groff
-  special characters (see the groff_char(7) man page) can be used and
-  the output will often transform in the expected way due to the
-  regular naming convention of the special character escape sequences
-  for accented letters.
+  special characters (see the groff_char(7) man page) in the string will
+  often transform in the expected way due to the regular naming
+  convention for accented letters.  When they do not, use substrings
+  and/or catenation.
 
 o The `ab` request no longer writes "User Abort." to the standard error
   stream if given no arguments.
@@ -133,6 +137,15 @@ o The token `.PY` is now recognized as a synonym of `.PF` to work around
   back at least to Unix System V Release 2, 1983.)  You should continue
   to use `.PF` to end pictures with flyback unless a similar problem
   faces your document.
+
+tbl
+---
+
+o GNU tbl now suspends output line numbering while formatting tables,
+  saving and restoring its status before and after each table region,
+  including the count of lines for which numbering is suppressed.
+  Historical tbl implementations did not, with bizarre consequences when
+  text blocks were used in tables.
 
 Macro packages
 --------------
@@ -213,7 +226,7 @@ o The an (man) macro package can now produce clickable hyperlinks within
   since 2007, expose this feature.  At present the feature is disabled
   by default in `man.local` pending more widespread recognition of OSC 8
   sequences in pager programs.  The package now recognizes a `U`
-  register to configure hyperlink support for any output driver.
+  register to enable hyperlinks in any output driver supporting them.
 
   Use a command like
     printf '\033]8;;man:grotty(1)\033\\grotty(1)\033]8;;\033\\\n' | more
@@ -252,8 +265,8 @@ o The an (man) macro package supports a new macro, `MR`, intended for
   communities over which typeface should be used to set the man page
   topic (italics, roman, or bold).
 
-o Part of the an (man) macro package has been renamed from `an-old.tmac`
-  to `an.tmac`, replacing a file that sourced the `andoc.tmac` wrapper.
+o Part of the an (man) macro package has been renamed from "an-old.tmac"
+  to "an.tmac", replacing a file that sourced the "andoc.tmac" wrapper.
   This means that the "-man" argument to groff (or nroff, or troff) will
   no longer load the andoc wrapper, and not successfully format mdoc(7)
   man pages.  If you are not sure which macro package a given man page
@@ -297,6 +310,10 @@ o The an (man) macro package's `TS` macro no longer inserts vertical
   2002).  Man page authors may freely use paragraphing macros around
   tables if vertical space is desired.
 
+o The an (man) macro package no longer attempts to detect misuse of the
+  `R` string as a macro.  The `R` string itself is a legacy feature, not
+  required in modern man pages; see groff_man_style(7).
+
 o The groff_man(7) man page documenting the groff implementation of the
   an (man) macro package has been split into two pages.  The original
   page remains as a terser reference for experienced users.  A new page,
@@ -304,19 +321,19 @@ o The groff_man(7) man page documenting the groff implementation of the
   material supplemented with explanations, examples, and advice for the
   reader who is not an expert in *roff systems or in writing man pages.
 
-o The doc (mdoc) macro package now honors the `C`, `HY`, `IN`, and `SN`
-  registers as the an (man) package does.
+o The doc (mdoc) macro package now honors the `C`, `FT`, `HY`, `IN`,
+  `P`, `SN`, and `X` registers and `HF` string as the an (man) package
+  does.
 
 o The doc (mdoc) macro package now renders man page (sub)section cross
   references cited with the `Sx` macro by quoting them instead of
   setting them in italics.
 
-o On typestting output devices, the e (me) macro package now derives the
-  line length from the device description, which can be overriden by the
-  "papersize.tmac" macro file (usually configured via the "-d paper"
-  groff command-line option).  The package thus adapts to landscape
-  orientation and paper formats other than U.S. letter.  It continues to
-  use a line length of 6 (notional) inches on terminals.
+o The e (me) macro package has changed its default line length on
+  typesetting devices from 6i to the output device's default (for
+  example, 6.5i on the 'ps' and 'pdf' devices).  You can use
+  "papersize.tmac" to override this length, as in "groff -d paper=a4l",
+  without needing to alter the document.
 
 o The e (me) macro package has changed its support for output line
   numbering with the `n1` and `n2` macros to resolve several bugs in the
@@ -360,21 +377,30 @@ o The e (me) and s (ms) macro packages now offer a `PF` macro,
   supporting the pic(1) preprocessor's "flyback" feature.  Thanks to
   Dave Kemper.
 
+o The m (mm) and s (ms) macro packages no longer implement the `IX`
+  macro.  This undocumented 4.2BSD ms extension was similarly
+  undocumented by groff mm and ms.  No documents applying it are
+  attested.  groff mm documents its own indexing feature, `INITI`.  We
+  otherwise suggest makeindex(1), which supports troff and is available
+  with most TeX distributions, for your mm/ms document indexing needs.
+
 o The m (mm) macro package now adapts to the paper format selected when
   the macro file "papersize.tmac" is used (by specifying the groff "-d
   paper" command-line option).  A consequence is that "groff -mm" and
   "groff -d paper=letter -mm" are _not_ synonymous (when groff is
   configured to use U.S. letter as the default paper format), because
-  groff mm(7) uses a page offset of 0.963 inches on typesetters for
-  compatibility with DWB mm.  If the `W` or `O` registers are also set
-  on the command line, the line length and page offset, respectively,
-  are not overridden.
+  groff mm(7) uses a page offset of 0.963 inches on typesetting devices
+  for compatibility with DWB mm.  If the `W` or `O` registers are also
+  set on the command line, the line length and page offset,
+  respectively, are not overridden by "papersize.tmac".
 
 o The m (mm) macro package now recognizes a `V` register to set the
   vertical spacing for the document.  Like the existing `S`, it must be
   set from the command line.  Further, both registers are interpreted
   correctly if suffixed with a scaling unit, instead of requiring an
   unscaled value assumed to be points.
+
+o The m (mm) macro package now supports AT&T/DWB mm's `Sm` string.
 
 o The m (mm) macro package now requires a title to be declared when
   memorandum type 5 is used (".MT 5"), just as type 4 has since groff
@@ -394,12 +420,6 @@ o The m (mm) package now offers a `PY` macro, which serves the function
 o The "ptx.tmac" macro file, a counterpart to the GNU coreutils ptx(1)
   command for generating permuted indexes, is now installed.  It has
   long been part of the source distribution.
-
-o The s (ms) macro package no longer implements the `IX` macro.  This
-  4.2BSD extension was not documented by Berkeley, nor in the
-  groff_ms(7) man page.  No applications of it are attested.  We
-  recommend makeindex(1), which supports troff and is available with
-  most TeX distributions, for your ms document indexing needs.
 
 o The s (ms) macro package supports a new string, `FR`, which defines
   the ratio of the footnote line length to the current line length.  The
@@ -448,6 +468,12 @@ o The s (ms) macro package supports new macros `XN` and `XH` to ease the
   without requiring retyping of the heading text as the package
   previously encouraged.  Thanks to Keith Marshall.
 
+o The s (ms) macro package now uses a default line length of 6.5 inches
+  by default, resulting in 1-inch left and right margins.  When the
+  "papersize.tmac" package is used by employing the "-d paper" groff(1)
+  option on typesetting devices, the default page offset and line length
+  are adjusted to maintain these margins.
+
 o The "a4.tmac" file has been dropped from the distribution.  Its
   successor, "papersize.tmac", has been present and documented for
   nearly 20 years.  See subsection "Paper format" of groff(1).
@@ -484,7 +510,7 @@ o A new device control command, "background", enables boxes to be drawn
   underneath other page content.  The boxes can be shaded with colors,
   drawn with a colored border of configurable thickness, and interrupted
   by page breaks with special support for breaking before footnotes and
-  similar material.  For convenience, `pdf.tmac` exposes a new macro,
+  similar material.  For convenience, "pdf.tmac" exposes a new macro,
   `pdfbackground`.  Thanks to Deri James.
 
 grotty
@@ -573,19 +599,19 @@ o Manual section titles for man pages (those that appear by default in
   the page header, like "General Commands Manual") are now localized for
   Czech, German, French, Italian, and Swedish.
 
-o The semantics of the environment variable SOURCE_DATE_EPOCH (support
-  for which was added in 1.22.4) to groff were not established with
-  respect to time zone selection, prompting divergent interpretations;
-  Debian and distributions derived from it have for several years
-  patched groff to implicitly use UTC as the time zone when interpreting
-  the current time (or SOURCE_DATE_EPOCH) as a local time.  While a
-  convenient and defensible choice for reproducible build efforts, it
-  runs against the grain of user expectations.  Systems programmers like
-  time zone-invariant, monotonically increasing clocks; the broader
-  user base usually prefers a clock that follows an applicable civil
-  calendar.  groff programs now reckon SOURCE_DATE_EPOCH with respect to
-  the local time zone.  Users of SOURCE_DATE_EPOCH may wish to also set
-  the TZ environment variable.
+o The semantics of the environment variable SOURCE_DATE_EPOCH to groff,
+  support for which was added in 1.22.4, were not established at that
+  time with respect to time zone selection, prompting divergent
+  interpretations; Debian and distributions derived from it have for
+  several years patched groff to implicitly use UTC as the time zone
+  when interpreting the current time (or SOURCE_DATE_EPOCH) as a local
+  time.  While a convenient and defensible choice for reproducible build
+  efforts, it runs against the grain of user expectations.  Systems
+  programmers like time zone-invariant, monotonically increasing clocks;
+  the broader user base usually prefers a clock that follows an
+  applicable civil calendar.  groff programs now reckon
+  SOURCE_DATE_EPOCH with respect to the local time zone.  Users of
+  SOURCE_DATE_EPOCH may wish to also set the TZ environment variable.
 
 o xtotroff now supports a "-d" option to specify the directory in which
   to generate font description files.
@@ -2906,7 +2932,7 @@ Groff
 -----
 
 The environment variable GROFF_COMMAND_PREFIX can be used to control
-whether groff looks for `gtroff' or `troff' (similarily for the
+whether groff looks for `gtroff' or `troff' (similarly for the
 preprocessors.)
 
 Troff

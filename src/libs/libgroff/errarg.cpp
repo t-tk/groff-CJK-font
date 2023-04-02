@@ -20,8 +20,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 #include <config.h>
 #endif
 
+#include <assert.h>
 #include <stdio.h>
-#include "assert.h"
+
 #include "errarg.h"
 
 errarg::errarg(const char *p) : type(STRING)

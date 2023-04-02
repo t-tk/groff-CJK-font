@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (C) 2020 Free Software Foundation, Inc.
+# Copyright (C) 2020, 2022 Free Software Foundation, Inc.
 #
 # This file is part of groff.
 #
@@ -20,28 +20,81 @@
 
 groff="${abs_top_builddir:-.}/test-groff"
 
-# We can't run these tests if the environment doesn't support UTF-8.
-test "$(locale charmap)" = UTF-8 || exit 77 # skip
+# Keep this list of programs in sync with GROFF_CHECK_GROHTML_PROGRAMS
+# in m4/groff.m4.
+for cmd in pnmcrop pnmcut pnmtopng pnmtops psselect
+do
+    if ! command -v $cmd >/dev/null
+    then
+        echo "cannot locate '$cmd' command; skipping test" >&2
+        exit 77 # skip
+    fi
+done
 
-set -e
+fail=
+
+wail () {
+  echo ...FAILED >&2
+  fail=yes
+}
+
+cleanup () {
+  rm -f grohtml-[0-9]*-[12].png
+  trap - HUP INT QUIT TERM
+}
+
+trap 'trap "" HUP INT QUIT TERM; cleanup; kill -s INT $$' \
+  HUP INT QUIT TERM
+
+input='.TS
+L.
+foobar
+.TE'
+
+# Inline images are named grohtml-$$-<image sequence number>.png.
+
+echo "checking production of inline image for tbl(1) table" >&2
+output=$(echo "$input" | "$groff" -t -Thtml)
+echo "$output" | grep -q '<img src="grohtml-[0-9]\+-1.png"' || wail
+
+input='.EQ
+x sup 2 + y sup 2 = z sup 2
+.EN'
+
+echo "checking production of inline image for eqn(1) equation" >&2
+output=$(echo "$input" | "$groff" -e -Thtml)
+echo "$output" | grep -q '<img src="grohtml-[0-9]\+-2.png"' || wail
+
+cleanup
+
+# We can't run remaining tests if the environment doesn't support UTF-8.
+test "$(locale charmap)" = UTF-8 || exit 77 # skip
 
 # Check two forms of character transformation.
 #
 # dash's built-in printf doesn't support \x or \u escapes, so likely
 # other shells don't either, and expecting one that does to be in the
 # $PATH seems optimistic.  So use UTF-8 octal bytes directly.
-echo "testing -k -Thtml" >&2
-printf '\303\241' | "$groff" -k -Thtml | grep -qx '<p>&aacute;</p>'
+echo "checking -k -Thtml" >&2
+printf '\303\241' | "$groff" -k -Thtml | grep -qx '<p>&aacute;</p>' \
+  || wail
 
 # We test compatibility-mode HTML output somewhat differently since
 # preconv only emits groffish \[uXXXX] escapes for non-ASCII codepoints.
-echo "testing -C -k -Thtml" >&2
-printf "\('a" | "$groff" -C -k -Thtml | grep -qx '<p>&aacute;</p>'
+echo "checking -C -k -Thtml" >&2
+printf "\('a" | "$groff" -C -k -Thtml | grep -qx '<p>&aacute;</p>' \
+  || wail
 
 # test for Japanese, preprocessor
 echo "testing -Kutf8 -Thtml -Z" >&2
-printf ".ft JPM\nさざ波" | "$groff" -Kutf8 -Thtml -Z | tr '\n' ';' | grep -q 'Cu3055;H48;Cu3055_3099;h48;Cu6CE2;h48;'
+printf ".ft JPM\nさざ波" | "$groff" -Kutf8 -Thtml -Z | tr '\n' ';' | grep -q 'Cu3055;H48;Cu3055_3099;h48;Cu6CE2;h48;' \
+  || wail
 
 # test for Japanese
 echo "testing -Kutf8 -Thtml -P-U" >&2
-printf ".ft JPM\nさざ波" | "$groff" -Kutf8 -Thtml -P-U | grep -qx '<p>さざ波</p>'
+printf ".ft JPM\nさざ波" | "$groff" -Kutf8 -Thtml -P-U | grep -qx '<p>さざ波</p>' \
+  || wail
+
+test -z "$fail"
+
+# vim:set autoindent expandtab shiftwidth=2 tabstop=2 textwidth=72:
