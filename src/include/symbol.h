@@ -1,5 +1,4 @@
-// -*- C++ -*-
-/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2023 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
 This file is part of groff.
@@ -17,6 +16,8 @@ for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
+#include <stdint.h> // uintptr_t
+
 #define DONT_STORE 1
 #define MUST_ALREADY_EXIST 2
 
@@ -30,7 +31,7 @@ class symbol {
 public:
   symbol(const char *p, int how = 0);
   symbol();
-  unsigned long hash() const;
+  uintptr_t hash() const;
   int operator ==(symbol) const;
   int operator !=(symbol) const;
   const char *contents() const;
@@ -56,9 +57,9 @@ inline int symbol::operator!=(symbol p) const
   return s != p.s;
 }
 
-inline unsigned long symbol::hash() const
+inline uintptr_t symbol::hash() const
 {
-  return (unsigned long)s;
+  return reinterpret_cast<uintptr_t>(s);
 }
 
 inline const char *symbol::contents() const
@@ -79,3 +80,9 @@ inline int symbol::is_empty() const
 symbol concat(symbol, symbol);
 
 extern symbol default_symbol;
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

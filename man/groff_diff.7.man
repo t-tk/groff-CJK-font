@@ -29,6 +29,21 @@ and AT&T
 .do nr *groff_groff_diff_7_man_C \n[.cp]
 .cp 0
 .
+.\" Define fallback for groff 1.23's MR macro if the system lacks it.
+.nr do-fallback 0
+.if !\n(.f           .nr do-fallback 1 \" mandoc
+.if  \n(.g .if !d MR .nr do-fallback 1 \" older groff
+.if !\n(.g           .nr do-fallback 1 \" non-groff *roff
+.if \n[do-fallback]  \{\
+.  de MR
+.    ie \\n(.$=1 \
+.      I \%\\$1
+.    el \
+.      IR \%\\$1 (\\$2)\\$3
+.  .
+.\}
+.rr do-fallback
+.
 .
 .\" ====================================================================
 .\" Local definitions
@@ -193,17 +208,12 @@ and defaults to\~1.
 (See
 .MR groff_font @MAN5EXT@ .)
 .
-The scaling
-.RB unit\~\[lq] z \[rq]
-has multiplies by
-.IR sizescale .
-.
 Requests and escape sequences in GNU
 .I troff \" GNU
-interpret arguments that represent a type size scaled points;
-that is,
-they evaluate such arguments using a default scaling unit
-.RB of\~\[lq] z \[rq].
+interpret arguments that represent a type size in points,
+which the formatter multiplies by
+.I sizescale
+and converts to an integer.
 .
 Arguments treated in this way comprise those to the escape sequences
 .B \[rs]H
@@ -217,6 +227,10 @@ request,
 and the second and fourth arguments to the
 .B tkf
 request.
+.
+Scaled points may be specified explicitly with the
+.B z
+scaling unit.
 .
 .
 .P
@@ -963,14 +977,29 @@ argument to the
 .B ds
 request.
 .
+.
 .TP
 .B \[rs])
-Like
+Interpolate a
+.I transparent
+dummy character\[em]one that is transparent to end-of-sentence
+detection.
+.
+It behaves as
+.BR \[rs]& ,
+except that
 .B \[rs]&
-except that it behaves like a character declared with the
-.B .cflags
-request to be transparent for the purposes of end-of-sentence
-recognition.
+is treated as letters and numerals normally are after
+\[lq].\[rq],
+\[lq]?\[rq],
+and
+\[lq]!\[rq];
+.B \[rs]&
+cancels end-of-sentence detection,
+and
+.B \[rs])
+does not.
+.
 .
 .TP
 .BI \[rs]*[ "xxx arg1 arg2\~"\c
@@ -2645,7 +2674,7 @@ above.
 .B .hpf
 or
 .B .hpfa
-aplly the mapping
+apply the mapping
 after reading or appending to the active list of patterns.
 .
 Its arguments are pairs of character codes\[em]integers from 0 to\~255.
@@ -3269,12 +3298,14 @@ or uppercase
 version
 (if one exists).
 .
-.I groff
-special characters
+Special characters
 (see
 .MR groff_char @MAN7EXT@ )
-can be used and the output will usually transform in the expected way
-due to the regular glyph naming convention for accented characters.
+will often transform in the expected way due to the regular naming
+convention for accented characters.
+.
+When they do not,
+use substrings and/or catenation.
 .
 .IP
 .RS
@@ -4428,8 +4459,7 @@ is
 If the font description file contains pairwise kerning information,
 glyphs from that font are kerned.
 .
-Kerning between two glyphs can be inhibited by placing a non-printing
-input break
+Kerning between two glyphs can be inhibited by placing a dummy character
 .B \[rs]&
 between them.
 .

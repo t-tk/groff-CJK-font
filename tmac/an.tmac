@@ -1,6 +1,6 @@
 .\" groff implementation of man(7) package
 .\"
-.\" Copyright (C) 1989-2022 Free Software Foundation, Inc.
+.\" Copyright (C) 1989-2023 Free Software Foundation, Inc.
 .\"      Written by James Clark (jjc@jclark.com)
 .\" Enhanced by: Werner Lemberg <wl@gnu.org>
 .\"              Larry Kollar <kollar@alltel.net>
@@ -128,13 +128,13 @@
 .      pl +1v
 .      nf
 .      ti 0
-\D'l \\n[LL]u 0'
+.      nop \D'l \\n[LL]u 0'
 .      fi
 .    \}
 .  \}
 .  rr an-TH-was-called
 .  ch an-header
-.  bp
+.  an*break-page-with-new-number
 ..
 .
 .\" Move macros into place for continuous rendering.
@@ -176,13 +176,18 @@
 .  nr an-saved-prevailing-indent1 \\n[IN]
 ..
 .
-.\" Cause a page transition to a new man(7) document.  Clear the page
-.\" header trap so it is not sprung with stale information.  Update the
-.\" page number depending on the C (consecutive numbering) register.
-.de an-start-new-document
-.  ch an-header
+.\" Break the page and update its number depending on the C (consecutive
+.\" numbering) register.
+.\"
+.\" Corner case: if formatting multiple documents and P (starting page
+.\" number) is defined but C is not set, start numbering each document
+.\" at \n[P].  Not strictly necessary if not switching macro packages.
+.de an*break-page-with-new-number
 .  ie \\n[C] .bp (\\n[%] + 1) \" argument NOT redundant before page 1
-.  el        .bp 1
+.  el \{\
+.    ie r P .bp \\n[P]
+.    el     .bp 1
+.  \}
 ..
 .
 .\" Localize manual section titles for English.
@@ -200,7 +205,7 @@
 .
 .\" Write a bookmark/anchor/link target $2 at hierarchical depth $1.
 .de an*bookmark
-.  if '\\*[.T]'pdf' .pdfbookmark \\$1 \\$2
+.  if \\n[an*is-output-pdf] .pdfbookmark \\$1 \\$2
 ..
 .
 .\" Begin man page.
@@ -214,11 +219,15 @@
 .
 .  \" If batch processing (rendering multiple) man page documents, we
 .  \" must handle the end of a previous document.
-.  if !\\n[an-is-first-page-of-document] \{\
-.    ie \\n[cR] .an-end
-.    el         .an-start-new-document
-.    nr an-is-first-page-of-document 1
+.  if \\n[an*need-titles-reset] \{\
+.    if \\n[cR] .an-end
+.
+.    \" Clear the page header trap so it is not sprung with stale
+.    \" information.
+.    ch an-header
+.    an*break-page-with-new-number
 .  \}
+.  if \\n[C] .rr P
 .
 .  nr an-TH-was-called 1 \" an-end can make certain assumptions.
 .
@@ -229,7 +238,7 @@
 .  fam \\*[an*body-family]
 .  ft R
 .
-.  nr PS    10z \" default point size
+.  nr PS    10z \" default type size
 .  nr PS-SS 10z
 .  nr PS-SH 10.95z
 .  nr VS    12p
@@ -332,7 +341,7 @@
 .  ev
 .
 .  \" HTML gets the topic without any abbreviation, since it's metadata.
-.  if \\n[an-is-output-html] \{\
+.  if \\n[an*is-output-html] \{\
 .    DEVTAG-TL
 .    nop \\*[an*topic]
 .    DEVTAG-EO-TL
@@ -345,14 +354,15 @@
 .
 .  if !\\n[cR] \{\
 .    wh 0 an-header
-.    ie r FT .nr an-footer-location \\n[FT]
-.    el      .nr an-footer-location (-.5i)
-.    wh (2u * \\n[an-footer-location]u) an-break-body-text
-.    wh \\n[an-footer-location]u an-footer
+.    ie r FT .nr an*footer-location \\n[FT]
+.    el      .nr an*footer-location (-.5i)
+.    wh \\n[an*footer-location]u an-footer
+.    wh (\\n[an*footer-location]u - .5i) an-break-body-text
+.    rr an*footer-location
 .    \}
 .  \}
 .
-.  nr an-is-first-page-of-document 0
+.  nr an*need-titles-reset 1
 ..
 .
 .\" Support legacy AT&T and BSD Unix man pages.
@@ -360,7 +370,7 @@
 .\" Designate an AT&T Unix man page.
 .\" .AT [system-id[ release-id]]
 .de1 AT
-\\*[an-deprecation-warn]\\
+.  nop \\*[an-deprecation-warn]\\
 .  ds an-extra2 "7th Edition\"
 .  if "\\$1"3" .ds an-extra2 "7th Edition\"
 .  if "\\$1"4" .ds an-extra2 "System III\"
@@ -376,7 +386,7 @@
 .\" Designate a BSD Unix man page.
 .\" .UC [system-id]
 .de1 UC
-\\*[an-deprecation-warn]\\
+.  nop \\*[an-deprecation-warn]\\
 .  ds an-extra2 "3rd Berkeley Distribution\"
 .  if "\\$1"3" .ds an-extra2 "3rd Berkeley Distribution\"
 .  if "\\$1"4" .ds an-extra2 "4th Berkeley Distribution\"
@@ -390,15 +400,15 @@
 .
 .\" Restore tab stops to defaults.
 .de1 DT
-\\*[an-deprecation-warn]\\
+.  nop \\*[an-deprecation-warn]\\
 .  an-reset-tab-stops
 ..
 .
 .\" Restore inter-paragraph spacing to default (or set it to argument).
 .\" .PD [distance]
 .de1 PD
-\\*[an-deprecation-warn]\\
-\\*[an-reset-paragraph-spacing]\\
+.  nop \\*[an-deprecation-warn]\\
+.  nop \\*[an-reset-paragraph-spacing]\\
 ..
 .
 .\" Write the page header; can be redefined by man.local.
@@ -452,9 +462,9 @@
 .  while (\\n[an-header-width] >= \\n[.lt]) \{\
 .    \" The page topic is too long; trim some bits out of the middle.
 .    length an*topic-length \\*[an*topic-string]
-.    \" roff division rounds integers toward zero.  Remove an additional
-.    \" character on each side of the midpoint to account for the
-.    \" ellipsis we add later.
+.    \" roff uses truncating division.  Remove an additional character
+.    \" on each side of the midpoint to account for the ellipsis we add
+.    \" later.
 .    nr an-mark1 (\\n[an*topic-length] / 2 - 2)
 .    nr an-mark2 (\\n[an*topic-length] / 2 + 2)
 .    ds an-prefix \\*[an*topic-string]\"
@@ -686,7 +696,7 @@ contains unsupported escape sequence
 .    ds an-section-heading \\$*\"
 .    if \\n[CS] .stringup an-section-heading
 .    an*bookmark 2 \E*[an-section-heading]
-\&\\*[an-section-heading]
+.    nop \&\\*[an-section-heading]
 .  \}
 .  if \\n[an-remap-I-style-in-headings] .ftr I I
 ..
@@ -742,8 +752,7 @@ contains unsupported escape sequence
 ..
 .
 .\" Set arguments (or next input line producing written or drawn output
-.\" if none) in bold style at smaller
-.\" type size.
+.\" if none) in bold style at smaller type size.
 .de1 SB
 .  it 1 an-input-trap
 .  ps -1
@@ -789,7 +798,7 @@ contains unsupported escape sequence
 .  el \{\
 .    ie (\\n[.$] > 1) .TP "\\$2"
 .    el               .TP
-\&\\$1
+.    nop \&\\$1
 .  \}
 ..
 .
@@ -810,11 +819,11 @@ contains unsupported escape sequence
 .\"
 .\" Implementation notes:
 .\"
-.\" We always emit a non-printing input break \& before the first
-.\" argument.  This is necessary only when the calling man page is in
-.\" compatibility mode; it works around the surprising AT&T semantics of
-.\" \f escapes at the beginning of an input line.  See "Implementation
-.\" differences" in groff_diff(7) or the groff Texinfo manual.
+.\" We always emit a dummy character \& before the first argument.  This
+.\" is necessary only when the calling man page is in compatibility
+.\" mode; it works around the surprising AT&T semantics of \f escapes at
+.\" the beginning of an input line.  See "Implementation differences" in
+.\" groff_diff(7) or the groff Texinfo manual.
 .\"
 .\" The italic correction escapes can be visually confusing.  We apply
 .\" the following rules, always on the same input line.
@@ -847,7 +856,7 @@ contains unsupported escape sequence
 .      shift 2
 .    \}
 .    if \\n[.$] .as an-result \f[B]\\$1\"
-\\*[an-result]
+.    nop \\*[an-result]
 .    rm an-result
 .    ft R
 .  \}
@@ -864,7 +873,7 @@ contains unsupported escape sequence
 .      shift 2
 .    \}
 .    if \\n[.$] .as an-result \f[B]\\$1\"
-\\*[an-result]
+.    nop \\*[an-result]
 .    rm an-result
 .    ft R
 .  \}
@@ -881,7 +890,7 @@ contains unsupported escape sequence
 .      shift 2
 .    \}
 .    if \\n[.$] .as an-result \,\f[I]\\$1\/\"
-\\*[an-result]
+.    nop \\*[an-result]
 .    rm an-result
 .    ft R
 .  \}
@@ -898,7 +907,7 @@ contains unsupported escape sequence
 .      shift 2
 .    \}
 .    if \\n[.$] .as an-result \,\f[I]\\$1\/\"
-\\*[an-result]
+.    nop \\*[an-result]
 .    rm an-result
 .    ft R
 .  \}
@@ -915,7 +924,7 @@ contains unsupported escape sequence
 .      shift 2
 .    \}
 .    if \\n[.$] .as an-result \f[R]\\$1\"
-\\*[an-result]
+.    nop \\*[an-result]
 .    rm an-result
 .    ft R
 .  \}
@@ -932,14 +941,14 @@ contains unsupported escape sequence
 .      shift 2
 .    \}
 .    if \\n[.$] .as an-result \f[R]\\$1\"
-\\*[an-result]
+.    nop \\*[an-result]
 .    rm an-result
 .    ft R
 .  \}
 ..
 .
 .\" Start a relative inset level (by the amount given in the argument).
-.\" .RS [indent]
+.\" .RS [inset-amount]
 .de1 RS
 .  nr an-saved-margin\\n[an-inset-level] \\n[an-margin]
 .  nr an-saved-prevailing-indent\\n[an-inset-level] \
@@ -983,7 +992,7 @@ contains unsupported escape sequence
 .\" specified) for a command synopsis.
 .\" .OP flag [option-parameter]
 .de1 OP
-\\*[an-deprecation-warn]\\
+.  nop \\*[an-deprecation-warn]\\
 .  if ((\\n[.$] < 1) : (\\n[.$] > 2)) \
 .    an-style-warn .\\$0 expects 1 or 2 arguments, got \\n[.$]
 .  ie (\\n[.$] > 1) \
@@ -1042,26 +1051,148 @@ contains unsupported escape sequence
 .  nr an*is-in-example 0
 ..
 .
+.\" Store the argument and begin a diversion for link text.
+.de an*begin-hyperlink
+.  ds an*hyperlink \\$1\"
+.  \" We want the diversion to format as if it has an indentation of
+.  \" zero (that comes for free when we switch environments), and we
+.  \" want the line length reduced by the amount of indentation that
+.  \" obtains when we output it.
+.  nr an*saved-line-length \\n[.l]
+.  nr an*saved-indentation \\n[.i]
+.  \" We can only hyperlink if we're not in a diversion.
+.  \" XXX: There's no fundamental reason for that, just a simple matter
+.  \" of macro programming.
+.  nr an*is-in-link-text-diversion 0
+.  if '\\n(.z'' .nr an*is-in-link-text-diversion 1
+.  if (\\n[an*is-in-link-text-diversion] & \\n[an*do-hyperlink]) \{\
+.    \" Start diversion in a new environment.
+.    ev an*link-text-env
+.    di an*link-text-div
+.    ll (\\n[an*saved-line-length]u - \\n[an*saved-indentation]u)
+.  \}
+.  rr an*saved-indentation
+.  rr an*saved-line-length
+..
+.
+.\" Emit hyperlinked text with optional trailing text.
+.\"
+.\" The caller should set the `an*prefix` string if the hyperlink should
+.\" be prefixed with a scheme; for example, email addresses get
+.\" "mailto:", but this need not be visible when rendering an email
+.\" address on a device incapable of hyperlinking.
+.de an*end-hyperlink
+.  ie (\\n[an*is-in-link-text-diversion] & \\n[an*do-hyperlink]) \{\
+.    br
+.    di
+.    ev
+.
+.    \" Was any link text present?
+.    ie \\n[dn] \{\
+.      if \\n[an*is-output-html] \
+.        nop \X^html:<a href="\\*[an*prefix]\\*[an*hyperlink]">^\c
+.      if \\n[an*is-output-terminal] \
+.        nop \X^tty: link \\*[an*prefix]\\*[an*hyperlink]^\c
+.      \" Strip off the final newline of the diversion and emit it.
+.      chop an*link-text-div
+.      an*link-text-div
+\c\" XXX: If we .nop this, HTML output is corrupted (Savannah #63470).
+.      if \\n[an*is-output-html] \
+.        nop \X^html:</a>^\c
+.      if \\n[an*is-output-terminal] \
+.        nop \X^tty: link^\c
+.    \}
+.    \" If there was no link text, format URI as its own link text.  We
+.    \" don't add angle brackets here.
+.    el \{\
+.      if \\n[an*is-output-html] \
+.        nop \X^html:<a href="\\*[an*prefix]\\*[an*hyperlink]">\
+\\*[an*hyperlink]</a>^\c
+.      if \\n[an*is-output-terminal] \
+.        nop \X^tty: link \\*[an*prefix]\\*[an*hyperlink]^\
+\\*[an*hyperlink]\X^tty: link^\c
+.    \}
+.    nop \&\\$1\"
+.  \}
+.  \" If not hyperlinking, format URI in angle brackets.  There was no
+.  \" diversion, so the link text has already been formatted normally.
+.  el \{\
+.    nh
+.    nop \\[la]\\*[an*hyperlink]\\[ra]\\$1
+.    hy \\n[an*hyphenation-mode]
+.  \}
+.
+.  rr an*is-in-link-text-diversion
+..
+.
+.\" Begin email hyperlink.  Input until the next `ME` call is stored in
+.\" a diversion; it becomes the link text for the hyperlinked address.
+.\" .MT nobody@example.com
+.de1 MT
+.  if !(\\n[.$] = 1) \
+.    an-style-warn .\\$0 expects 1 argument, got \\n[.$]
+.  ds an*prefix mailto:
+.  an*begin-hyperlink \\$1
+..
+.
+.\" End email hyperlink.  The optional argument supplies trailing
+.\" punctuation (or, rarely, other text) after link text.
+.\" .ME [trailing-text]
+.de1 ME
+.  an*end-hyperlink \\$1
+.  rm an*prefix
+..
+.
+.\" Begin web hyperlink.  Input until the next `UE` call is stored in
+.\" a diversion; it becomes the link text for the hyperlinked address.
+.\" .UR nobody@example.com
+.de1 UR
+.  if !(\\n[.$] = 1) \
+.    an-style-warn .\\$0 expects 1 argument, got \\n[.$]
+.  ds an*prefix \" empty
+.  an*begin-hyperlink \\$1
+..
+.
+.\" End web hyperlink.  The optional argument supplies trailing
+.\" punctuation (or, rarely, other text) after link text.
+.\" .UE [trailing-text]
+.de1 UE
+.  an*end-hyperlink \\$1
+.  rm an*prefix
+..
+.
+.\" There is no standardized format for man page URLs, but the default
+.\" is expected to work (or be harmlessly ignored) everywhere except
+.\" macOS.  Override in man.local if desired.
+.nr an*MR-URL-format 1
+.
 .\" Set a man page cross reference.
 .\" .MR page-topic page-section [trailing-text]
 .de1 MR
 .  if ((\\n[.$] < 2) : (\\n[.$] > 3)) \
 .    an-style-warn .\\$0 expects 2 or 3 arguments, got \\n[.$]
+.  ds an*url man:\\$1(\\$2)\" used everywhere but macOS
+.  if (\\n[an*MR-URL-format] = 2) \
+.    ds an*url x-man-page://\\$2/\\$1\" macOS/Mac OS X since 10.3
+.  if (\\n[an*MR-URL-format] = 3) \
+.    ds an*url man:\\$1.\\$2\" Bwana (Mac OS X)
+.  if (\\n[an*MR-URL-format] = 4) \
+.    ds an*url x-man-doc://\\$2/\\$1\" ManOpen (Mac OS X pre-2005)
 .  nh
-.  if (\\n[U] & \\n[mU]) \{\
-.    if \\n(mH \
-\X^html:<a href="man:\\$1(\\$2)">^\c
-.    if \\n(mY \
-\X^tty: link man:\\$1(\\$2)^\c
+.  if \\n[an*do-hyperlink] \{\
+.    if \\n[an*is-output-html] \
+.      nop \X^html:<a href="\\*[an*url]">^\c
+.    if \\n[an*is-output-terminal] \
+.      nop \X^tty: link \\*[an*url]^\c
 .  \}
-\&\\*[an-lic]\f[\\*[MF]]\\$1\\*[an-ic]\f[R](\\$2)\c
-.  if (\\n[U] & \\n[mU]) \{\
-.    if \\n(mH \
-\X^html:</a>^\c
-.    if \\n(mY \
-\X^tty: link^\c
+.      nop \&\\*[an-lic]\f[\\*[MF]]\\$1\\*[an-ic]\f[R](\\$2)\c
+.  if \\n[an*do-hyperlink] \{\
+.    if \\n[an*is-output-html] \
+.      nop \X^html:</a>^\c
+.    if \\n[an*is-output-terminal] \
+.      nop \X^tty: link^\c
 .  \}
-\&\\$3
+.  nop \&\\$3
 .  hy \\n[an*hyphenation-mode]
 ..
 .
@@ -1072,7 +1203,7 @@ contains unsupported escape sequence
 .  \" If continuous rendering, tell tbl not to use keeps.
 .  ie \\n[cR] .nr 3usekeeps 0
 .  el         .nr 3usekeeps 1
-.  if \\n[an-is-output-html] \{\
+.  if \\n[an*is-output-html] \{\
 .    nr an-TS-ll \\n[.l]
 .    ll 1000n
 .  \}
@@ -1086,7 +1217,7 @@ contains unsupported escape sequence
 .\" End table.
 .de1 TE
 .  HTML-IMAGE-END
-.  if \\n[an-is-output-html] .ll \\n[an-TS-ll]u
+.  if \\n[an*is-output-html] .ll \\n[an-TS-ll]u
 .  if !r TW .if !\\n[an-was-tbl-failure-reported] \{\
 .    ds an-msg tbl preprocessor failed, or it or soelim was not run;\"
 .    as an-msg " table(s) likely not rendered\"
@@ -1101,7 +1232,7 @@ contains unsupported escape sequence
 .
 .\" Start equation.
 .de1 EQ
-.  if \\n[an-is-output-html] \{\
+.  if \\n[an*is-output-html] \{\
 .    nr an-EQ-ll \\n[.l]
 .    ll 1000n
 .  \}
@@ -1111,32 +1242,17 @@ contains unsupported escape sequence
 .\" End equation.
 .de1 EN
 .  HTML-IMAGE-END
-.  if \\n[an-is-output-html] .ll \\n[an-EQ-ll]u
+.  if \\n[an*is-output-html] .ll \\n[an-EQ-ll]u
 ..
 .
-.\" Define R "string".  Some ms(7) veterans confusedly use '.R' in man
-.\" pages to try to switch to the roman font style.  Attempt to catch
-.\" this misuse by checking for arguments and warning about it.
-.de1 R
-\c
-.  ie \\n[.$] \{\
-.    ds an-msg 'R' is a string (producing the registered sign),\"
-.    as an-msg " not a macro\"
-.    an-warn \\*[an-msg]
-.    rm an-msg
-.    nop \\$*
-.  \}
-.  el \{\
-.    ie c\[rg] .nop \[rg]\c
-.    el        .nop (Reg.)\c
-.  \}
-..
 .
 .\" === Define strings. ===
 .\"
 .\" These strings must work in compatibility mode also.
 .
 .ds S \s'\\n(PSu'\"
+.ie c\[rg] .ds R \(rg\"
+.el        .ds R (Reg.)\"
 .ie c\[tm] .ds Tm \(tm\"
 .el        .ds Tm (TM)\"
 .ie c\[lq] .ds lq \(lq\"
@@ -1157,10 +1273,26 @@ contains unsupported escape sequence
 .nr an-devtag-needs-end-of-heading 0
 .nr an-devtag-needs-second-column 0
 .
-.nr an-is-first-page-of-document 1
+.\" Track whether the strings that set header and footer text need to be
+.\" reconfigured.  This happens when batch-rendering and starting a new
+.\" page.
+.nr an*need-titles-reset 0
 .
-.nr an-is-output-html 0
-.if '\*[.T]'html' .nr an-is-output-html 1
+.nr an*is-output-html 0
+.if '\*[.T]'html' .nr an*is-output-html 1
+.nr an*is-output-pdf 0
+.if '\*[.T]'pdf' .nr an*is-output-pdf 1
+.nr an*is-output-terminal 0
+.if '\*(.T'ascii'  .nr an*is-output-terminal 1
+.if '\*(.T'cp1047' .nr an*is-output-terminal 1
+.if '\*(.T'latin1' .nr an*is-output-terminal 1
+.if '\*(.T'utf8'   .nr an*is-output-terminal 1
+.
+.nr an*can-hyperlink 0
+.if (  \n[an*is-output-html] \
+     : \n[an*is-output-pdf] \
+     : \n[an*is-output-terminal]) \
+.  nr an*can-hyperlink 1
 .
 .ds an*body-family T \" Times
 .ds an*example-family C \" Courier
@@ -1173,6 +1305,10 @@ contains unsupported escape sequence
 .  ftr CBI BI
 .\}
 .
+.\" undocumented register; unset to test an-ext.tmac extension macros
+.if !r mG \
+.  nr mG 1
+.
 .\" Load man macro extensions.
 .mso an-ext.tmac
 .
@@ -1182,7 +1318,7 @@ contains unsupported escape sequence
 .\" Set each rendering parameter only if its -[dr] option or man.local
 .\" did not.
 .
-.if '\*[.T]'pdf' \{\
+.if \n[an*is-output-pdf] \{\
 .  \" FIXME: The following registers are documented only in pdf.tmac.
 .  if !r PDFOUTLINE.FOLDLEVEL .nr PDFOUTLINE.FOLDLEVEL 1
 .  if !r PDFHREF.VIEW.LEADING .nr PDFHREF.VIEW.LEADING 10p
@@ -1204,11 +1340,11 @@ contains unsupported escape sequence
 .  nr C 0
 .el \
 .  if !\n[C] \
-.    if \n[an-is-output-html] \{\
+.    if \n[an*is-output-html] \{\
 .       tm \*[an]: consecutive page numbering required for HTML output
 .       nr C 1
 .    \}
-.if \n[an-is-output-html] \
+.if \n[an*is-output-html] \
 .  nr C 1
 .if r ps4html \
 .  nr C 1
@@ -1230,7 +1366,7 @@ contains unsupported escape sequence
 .  nr D 0
 .el \
 .  if \n[D] \
-.    if \n[an-is-output-html] \{\
+.    if \n[an*is-output-html] \{\
 .       tm \*[an]: ignoring double-sided layout in HTML output
 .       nr D 0
 .    \}
@@ -1248,14 +1384,22 @@ contains unsupported escape sequence
 .  ie \n[cR] \
 .    ds an-msg footer distance when continuously rendering\"
 .  el \{\
+.    nr an*tmp 1v
+.    ds an*help " (1v=\n[an*tmp]u)\"
 .    ie (\n[FT] : (\n[FT] = 0)) \
-.      ds an-msg non-negative footer distance: \n[FT]u\"
+.      ds an-msg non-negative footer distance: \n[FT]u\*[an*help]\"
 .    el \{\
-.      ie (-(\n[FT]) > (\n[.p] / 2)) \
-.        ds an-msg implausibly large footer distance: \n[FT]u\"
+.      ie (-(\n[FT]) > (\n[.p] / 2)) \{\
+.        ds an-msg implausibly large footer distance:\"
+.        as an-msg " \n[FT]u\*[an*help]\"
+.      \}
 .      el \
-.        if ((v;\n[FT]) < 1v) \
-.          ds an-msg implausibly small footer distance: \n[FT]u\"
+.        if (-(\n[FT]) < 1v) \{\
+.          ds an-msg implausibly small footer distance:\"
+.          as an-msg " \n[FT]u\*[an*help]\"
+.        \}
+.    rm an*help
+.    rr an*tmp
 .    \}
 .  \}
 .  if d an-msg \{\
@@ -1298,7 +1442,7 @@ contains unsupported escape sequence
 .\" internal purposes like image embedding.  Page numbers are not
 .\" rendered at all in continuous rendering mode.
 .if r P \{\
-.  if \n[an-is-output-html] \
+.  if \n[an*is-output-html] \
 .    if !(\n[P] = 1) \
 .      ds an-msg in HTML output\"
 .  if \n[cR] \
@@ -1310,11 +1454,32 @@ contains unsupported escape sequence
 .  rm an-msg
 .\}
 .
-.if !r ps4html \
-.  if r P \
-.    pn 0\n[P]
+.\" Setting the page number turns out to be tricky when batch rendering
+.\" and switching macro packages.  We must use different techniques
+.\" depending on whether the transition to the first output page has
+.\" happened yet.  If it has not, `nl` will be `-1` and we use `pn`.  If
+.\" it has, we set `%`.  Technically this is fragile since in theory a
+.\" page could assign a negative value to `nl`.  We might then be
+.\" justified in saying they've broken the macro package and they get to
+.\" keep both pieces.  But if not, consider using a nonce register,
+.\" initially set but then permanently cleared adjacent to this logic,
+.\" and whose state is shared with mdoc (and andoc.tmac, if necessary).
+.\"
+.\" Also, we can't use the `P` register with grohtml at all.
+.ie r ps4html \{\
+.  if r P \{\
+.     tm \*[an]: ignoring starting page number in HTML output
+.     rr P
+.  \}
+.\}
+.el \{\
+.  if r P \{\
+.    ie (\n[nl] = -1) .pn 0\n[P]
+.    el               .nr % 0\n[P]
+.  \}
+.\}
 .
-.\" point size
+.\" type size
 .if !r S \{\
 .  nr S 10
 .  if '\*[.T]'X75-12' \
@@ -1327,9 +1492,12 @@ contains unsupported escape sequence
 .if !r SN \
 .  nr SN 3n
 .
-.\" URI enablement
+.\" URI enablement desired
 .if !r U \
 .  nr U 1
+.
+.nr an*do-hyperlink 0
+.if (\n[U] & \n[an*can-hyperlink]) .nr an*do-hyperlink 1
 .
 .\" page number after which to apply letter suffixes
 .\"
@@ -1338,7 +1506,7 @@ contains unsupported escape sequence
 .\" in continuous rendering mode.
 .if r X \{\
 .  af an-page-letter a
-.  if \n[an-is-output-html] \
+.  if \n[an*is-output-html] \
 .    ds an-msg in HTML output\"
 .  if \n[cR] \
 .    ds an-msg when continuously rendering
@@ -1393,7 +1561,7 @@ contains unsupported escape sequence
 .
 .\" If rendering HTML, suppress headers and footers.
 .nr an-suppress-header-and-footer 0
-.if \n[an-is-output-html] .nr an-suppress-header-and-footer 1
+.if \n[an*is-output-html] .nr an-suppress-header-and-footer 1
 .if r ps4html             .nr an-suppress-header-and-footer 1
 .
 .cp \n[*groff_an_tmac_C]

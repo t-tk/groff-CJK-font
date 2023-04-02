@@ -42,7 +42,11 @@ OUTPUT=$(echo "$EXAMPLE" | "$groff" -Tascii -P-cbou -ms)
 # test is the presence, adjacency, and ordering of non-blank lines.
 FILTERED_OUTPUT=$(echo "$OUTPUT" \
     | sed '/^$/d' \
-    | sed -n '/i/{N;/Table of Contents/{N;/Foo[. ][. ]*1/p;};}')
+    | sed -n '/i/{
+N;/Table of Contents/{
+N;/Foo[. ][. ]*1/p;
+};
+}')
 test -n "$FILTERED_OUTPUT"
 
 # vim:set ai et sw=4 ts=4 tw=72:

@@ -31,6 +31,21 @@ output driver for HP LaserJet 4 and compatible printers
 .do nr *groff_grolj4_1_man_C \n[.cp]
 .cp 0
 .
+.\" Define fallback for groff 1.23's MR macro if the system lacks it.
+.nr do-fallback 0
+.if !\n(.f           .nr do-fallback 1 \" mandoc
+.if  \n(.g .if !d MR .nr do-fallback 1 \" older groff
+.if !\n(.g           .nr do-fallback 1 \" non-groff *roff
+.if \n[do-fallback]  \{\
+.  de MR
+.    ie \\n(.$=1 \
+.      I \%\\$1
+.    el \
+.      IR \%\\$1 (\\$2)\\$3
+.  .
+.\}
+.rr do-fallback
+.
 .\" This macro definition is poor style from a portability standpoint,
 .\" but it's a good test and demonstration of the standard font
 .\" repertoire for the devices where it has any effect at all, and so
@@ -447,9 +462,9 @@ supports paper formats
 .RB \[lq] C5 \[rq],
 .RB \[lq] com10 \[rq],
 .RB \[lq] DL \[rq],
-.RB \[lq] executive \[rq],
-.RB \[lq] legal \[rq],
-.RB \[lq] letter \[rq],
+.RB \%\[lq] executive \[rq],
+.RB \%\[lq] legal \[rq],
+.RB \%\[lq] letter \[rq],
 and
 .RB \[lq] monarch \[rq].
 .
@@ -471,7 +486,7 @@ If neither specifies a paper format,
 .I grolj4
 recognizes four font description file directives in addition to those
 documented in
-.MR groff_font @MAN5EXT@ ,
+.MR groff_font @MAN5EXT@ .
 .
 .
 .TP

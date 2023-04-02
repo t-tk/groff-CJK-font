@@ -95,9 +95,6 @@
 .\" Use -rCT=1 to force capitalization of page titles in headers.
 .if !r CT .nr CT 0
 .
-.\" Use -rD=1 for double-sided printing.
-.if !r D .nr D 0
-.
 .\" Use -rcR=0 for multiple pages instead of a single, very long page.
 .if !r cR \{\
 .  if t .nr cR 0
@@ -110,10 +107,75 @@
 .el \
 .  nr 3usekeeps 1
 .
-.\" TODO: Implement HF string.
+.\" double-sided layout
+.ie !r D \
+.  nr D 0
+.el \
+.  if \n[D] \
+.    if \n[doc-is-output-html] \{\
+.       tm mdoc: ignoring double-sided layout in HTML output
+.       nr D 0
+.    \}
 .
-.\" \n[HY] is recognized for groff_man(7) compatibility, particuarly via
-.\" andoc.tmac and man(1); see \n[doc-hyphen-flags] in doc-common.
+.\" footer distance
+.\"
+.\" Unlike most of these parameters, we do not set a default for FT; the
+.\" doc-set-up-titles macro places page location traps only if not
+.\" continuously rendering.
+.if r FT \{\
+.  \" Validate it.  Continuous rendering ignores FT.  Measuring a footer
+.  \" distance from the page top isn't done.  A footer distance of over
+.  \" half the page length is unlikely.  A footer distance of less than
+.  \" one line height is too.
+.  ie \n[cR] \
+.    ds doc-msg footer distance when continuously rendering\"
+.  el \{\
+.    nr doc-tmp 1v
+.    ds doc-help " (1v=\n[doc-tmp]u)\"
+.    ie (\n[FT] : (\n[FT] = 0)) \
+.      ds doc-msg non-negative footer distance: \n[FT]u\*[doc-help]\"
+.    el \{\
+.      ie (-(\n[FT]) > (\n[.p] / 2)) \{\
+.        ds doc-msg implausibly large footer distance:\"
+.        as doc-msg " \n[FT]u\*[doc-help]\"
+.      \}
+.      el \
+.        if (-(\n[FT]) < 1v) \{\
+.          ds doc-msg implausibly small footer distance:\"
+.          as doc-msg " \n[FT]u\*[doc-help]\"
+.        \}
+.    rm doc-help
+.    rr doc-tmp
+.    \}
+.  \}
+.  if d doc-msg \{\
+.    tm mdoc: ignoring \*[doc-msg]
+.    rr FT
+.    rm doc-msg
+.  \}
+.\}
+.
+.\" (sub)section heading font
+.if !d HF \
+.  ds HF B\"
+.
+.\" If HF is a bold style, use bold italics for italics in headings.
+.ds doc-heading-style \*[HF]\"
+.substring doc-heading-style -1 -1
+.ds doc-heading-family \" empty
+.length doc-HF-length \*[HF]
+.if (\n[doc-HF-length] > 1) \{\
+.  as doc-heading-family \*[HF]\"
+.  substring doc-heading-family 0 -2
+.\}
+.if '\*[doc-heading-style]'B' \
+.  if F \*[doc-heading-family]BI \
+.    nr doc-remap-I-style-in-headings 1
+.rr doc-HF-length
+.rm doc-heading-style
+.
+.\" \n[HY] is recognized for groff_man(7) compatibility, particularly
+.\" via andoc.tmac and man(1); see \n[doc-hyphen-flags] in doc-common.
 .if !r HY .nr HY 1
 .
 .\" Use -rIN=<xxx> to set the paragraph indentation amount.
@@ -129,14 +191,73 @@
 .
 .\" TODO: Implement MF string.
 .
-.\" TODO: Implement P register.
+.\" starting page number
+.\"
+.\" Unlike most of these parameters, we do not set a default for P;
+.\" troff supplies a default starting page number (1).  When rendering
+.\" for the HTML output device, page numbers are concealed and used for
+.\" internal purposes like image embedding.  Page numbers are not
+.\" rendered at all in continuous rendering mode.
+.if r P \{\
+.  if \n[doc-is-output-html] \
+.    if !(\n[P] = 1) \
+.      ds doc-msg in HTML output\"
+.  if \n[cR] \
+.    ds doc-msg when continuously rendering
+.\}
+.if d doc-msg \{\
+.  tm mdoc: ignoring starting page number \*[doc-msg]
+.  rr P
+.  rm doc-msg
+.\}
+.
+.\" Setting the page number turns out to be tricky when batch rendering
+.\" and switching macro packages.  We must use different techniques
+.\" depending on whether the transition to the first output page has
+.\" happened yet.  If it has not, `nl` will be `-1` and we use `pn`.  If
+.\" it has, we set `%`.  Technically this is fragile since in theory a
+.\" page could assign a negative value to `nl`.  We might then be
+.\" justified in saying they've broken the macro package and they get to
+.\" keep both pieces.  But if not, consider using a nonce register,
+.\" initially set but then permanently cleared adjacent to this logic,
+.\" and whose state is shared with man (and andoc.tmac, if necessary).
+.\"
+.\" Also, we can't use the `P` register with grohtml at all.
+.ie r ps4html \{\
+.  if r P \{\
+.     tm mdoc: ignoring starting page number in HTML output
+.     rr P
+.  \}
+.\}
+.el \{\
+.  if r P \{\
+.    ie (\n[nl] = -1) .pn 0\n[P]
+.    el               .nr % 0\n[P]
+.  \}
+.\}
 .
 .\" Use -rSN=<xxx> to set the subsection heading indentation amount.
 .if !r SN .nr SN 3n
 .
 .\" TODO: Implement U register.
 .
-.\" TODO: Implement X register.
+.\" page number after which to apply letter suffixes
+.\"
+.\" Unlike most of these parameters, we do not set a default for X; only
+.\" the macro an-footer uses it.  Page numbers are not rendered at all
+.\" in continuous rendering mode.
+.if r X \{\
+.  af doc-page-letter a
+.  if \n[doc-is-output-html] \
+.    ds doc-msg in HTML output\"
+.  if \n[cR] \
+.    ds doc-msg when continuously rendering
+.\}
+.if d doc-msg \{\
+.  tm mdoc: ignoring page number suffix \*[doc-msg]
+.  rr X
+.  rm doc-msg
+.\}
 .
 .
 .\" Load startup files.
@@ -158,6 +279,8 @@
 .
 .\" NS doc-arg-count global register
 .\" NS   total number of arguments
+.\" XXX: This register name and description aren't quite right, but its
+.\" old name `doc-arg-limit` doesn't seem accurate either.  Demystify.
 .
 .nr doc-arg-count 0
 .
@@ -1042,7 +1165,7 @@
 .    ie \n[.$] \{\
 .      \" Handle '.Nm ...' in "Name" section: don't use a special font.
 .      ie \n[doc-in-name-section] \{\
-.        ie "\*[doc-topic-name]"" \
+.        if "\*[doc-topic-name]"" \
 .          ds doc-topic-name "\$1\"
 .        No \$@
 .      \}

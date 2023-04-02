@@ -29,6 +29,11 @@ use warnings;
 
 my $no_exec;
 
+if (grep(/^--help$/, @ARGV)) {
+	print "usage: mmroff [-x] [groff-option ...] [file ...]\n";
+	exit;
+}
+
 if (grep(/^--version$/, @ARGV)) {
 	print "mmroff (groff) @VERSION@\n";
 	exit;

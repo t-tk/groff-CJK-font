@@ -144,7 +144,7 @@ do
     echo "$output" | grep -Fqx 'abcdefghijklmnopqrstuvwxyz{|}' || wail
     printf '" ' >&2
     echo "$output" | grep -Fqx 'neutral double quote: "' || wail
-    printf "\\ " >&2
+    printf '\\ ' >&2
     echo "$output" | grep -Fqx 'backslash: \' || wail
     case $D in
     (utf8)

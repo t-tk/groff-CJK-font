@@ -28,11 +28,11 @@ input='.pl 15v
 Sed ut perspiciatis, unde omnis iste natus error sit voluptatem
 accusantium doloremque laudantium, totam rem aperiam eaque ipsa, quae ab
 illo inventore veritatis et quasi architecto beatae vitae dicta sunt,
-explicabo.
-'
+explicabo.'
 
 output=$(printf '%s\n' "$input" | "$groff" -Tascii -P-cbou -ms)
+echo "$output"
 
-echo "$output" | grep -Eq 'Sed +ut +perspiciatis, +sit +voluptatem'
+echo "$output" | grep -Eq 'Sed +ut +perspiciatis, unde  +voluptatem'
 
 # vim:set ai et sw=4 ts=4 tw=72:

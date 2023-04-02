@@ -248,15 +248,16 @@ man-all: $(GROFF_MAN_PAGES_ALL)
 man-clean:
 	$(RM) $(GROFF_MAN_PAGES_ALL)
 
-# Many pages use tbl, a few use eqn, and soelim(1) uses pic.
+# Many pages use tbl, a few use eqn, and soelim(1) uses pic.  We also
+# need groff's FreeEuro font so we can embed it.
 #
 # We embed the fonts (-P-e) to (1) honor the current PDF standard, (2)
 # ensure consistent rendering of the document, and (3) exercise this
 # feature of gropdf.
 doc/groff-man-pages.pdf: $(GROFF_MAN_PAGES_ALL) eqn pic tbl \
-  $(TMAC_PACKAGE_MAN) $(TMAC_PACKAGE_MDOC)
-	$(GROFF_V)$(DOC_GROFF) -pet -mandoc -rC1 -rCHECKSTYLE=3 \
-	  -Tpdf -P-e \
+  $(TMAC_PACKAGE_MAN) $(TMAC_PACKAGE_MDOC) font/devps/freeeuro.pfa
+	$(GROFF_V)$(DOC_GROFF) -pet -mandoc -dHF=HB -rC1 \
+	  -rCHECKSTYLE=3 -Tpdf -P-e \
 	  $(GROFF_MAN_PAGES1) \
 	  $(tmac_srcdir)/sv.tmac $(GROFF_MAN_PAGES2) \
 	  $(tmac_srcdir)/en.tmac $(GROFF_MAN_PAGES3) > $@
@@ -455,7 +456,7 @@ if USE_GROHTML
 endif
 
 uninstall-hook: \
-  uninstall_doc_examples uninstall_doc_htmldoc uninstall_mom
+  uninstall_doc_examples uninstall_doc_htmldoc
 uninstall_doc_examples:
 	$(RM) $(DESTDIR)$(exampledir)/gnu.eps
 if USE_GROHTML
@@ -610,13 +611,20 @@ else
 	exit 1
 endif # HAVE_TEXI2DVI
 
-install-doc: install-pdf install-html
+install-doc: install-dvi install-html install-pdf
 
 maintainer-clean-local:
 	$(RM) $(doc_builddir)/groff.info*
 	$(RM) $(doc_builddir)/groff.pdf
 	$(RM) $(doc_builddir)/groff.dvi
+	$(RM) $(doc_builddir)/groff.txt
 	$(RM) -r $(doc_builddir)/groff.html.*
+
+install-data-local: install-txt
+install-txt:
+	-test -d $(DESTDIR)$(docdir) \
+	  || $(mkinstalldirs) $(DESTDIR)$(docdir)
+	cp $(top_srcdir)/doc/groff.txt $(DESTDIR)$(docdir)
 
 install-data-local: install_infodoc
 install_infodoc: doc/groff.info
@@ -634,16 +642,17 @@ install_infodoc: doc/groff.info
 install-pdf-local: doc/groff.pdf
 	-test -d $(DESTDIR)$(pdfdocdir) \
 	  || $(mkinstalldirs) $(DESTDIR)$(pdfdocdir)
-	cp $(top_builddir)/doc/groff.pdf $(DESTDIR)$(pdfdocdir)
+	cp $(top_srcdir)/doc/groff.pdf $(DESTDIR)$(pdfdocdir)
 install-html-local: doc/groff.html
 	-test -d $(DESTDIR)$(htmldocdir)/groff.html.mono \
 	  || $(mkinstalldirs) $(DESTDIR)$(htmldocdir)/groff.html.mono
-	cp -r $(top_builddir)/doc/groff.html \
+	cp -r $(top_srcdir)/doc/groff.html \
 	  $(DESTDIR)$(htmldocdir)/groff.html.mono
-	cp -r $(top_builddir)/doc/groff.html.node \
+	cp -r $(top_srcdir)/doc/groff.html.node \
 	  $(DESTDIR)$(htmldocdir)
 
-uninstall-local: uninstall_infodoc uninstall-pdf uninstall-html
+uninstall-local: uninstall_infodoc uninstall-pdf uninstall-html \
+  uninstall-txt
 uninstall_doc: uninstall-local
 uninstall-doc: uninstall-local
 uninstall_infodoc:
@@ -654,8 +663,12 @@ uninstall_infodoc:
 	done
 uninstall-pdf:
 	$(RM) $(DESTDIR)$(pdfdocdir)/groff.pdf
+	-rmdir $(DESTDIR)$(pdfdocdir)
 uninstall-html:
-	$(RM) $(DESTDIR)$(htmldocdir)/groff.html.*
+	$(RM) $(DESTDIR)$(htmldocdir)/groff.html.mono/*
+	$(RM) $(DESTDIR)$(htmldocdir)/groff.html.node/*
+uninstall-txt:
+	$(RM) $(DESTDIR)$(docdir)/groff.txt
 
 # An image of a gnu in enscapsulated PostScript is generated during the
 # build process if necessary.  Our configure script assumes pnmdepth is

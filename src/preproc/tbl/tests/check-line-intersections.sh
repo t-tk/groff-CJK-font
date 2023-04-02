@@ -23,6 +23,7 @@ fail=
 
 wail () {
     echo "...FAILED" >&2
+    echo "$output"
     fail=yes
 }
 
@@ -36,11 +37,12 @@ g@h@i
 '
 
 output=$(printf "%s" "$input" | "$groff" -Tascii -t)
+echo "$output"
 
 for l in 1 3 5 7
 do
     echo "checking intersections on line $l"
-    echo "$output" | sed -n ${l}p | grep -Fqx '+--+---+---+' || wail
+    echo "$output" | sed -n ${l}p | grep -Fqx '+---+---+---+' || wail
 done
 
 # TODO: Check `-Tutf8` output for correct crossing glyph identities.

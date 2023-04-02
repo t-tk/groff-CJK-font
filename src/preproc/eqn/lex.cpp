@@ -702,9 +702,11 @@ void init_lex(const char *str, const char *filename, int lineno)
 
 void get_delimited_text()
 {
-  char *filename;
+  char *filename, *last_seen_filename;
   int lineno;
   int got_location = get_location(&filename, &lineno);
+  // `filename` gets invalidated if we iterate off the end of the file.
+  last_seen_filename = strdup(filename);
   int start = get_char();
   while (start == ' ' || start == '\t' || start == '\n')
     start = get_char();
@@ -712,10 +714,11 @@ void get_delimited_text()
   if (start == EOF) {
     current_lineno = 0;
     if (got_location)
-      error_with_file_and_line(filename, lineno,
+      error_with_file_and_line(last_seen_filename, lineno,
 			       "end of input while defining macro");
     else
       error("end of input while defining macro");
+    free(last_seen_filename);
     return;
   }
   for (;;) {
@@ -723,11 +726,12 @@ void get_delimited_text()
     if (c == EOF) {
       current_lineno = 0;
       if (got_location)
-	error_with_file_and_line(filename, lineno,
+	error_with_file_and_line(last_seen_filename, lineno,
 				 "end of input while defining macro");
       else
 	error("end of input while defining macro");
       add_context(start + token_buffer);
+      free(last_seen_filename);
       return;
     }
     if (c == start)
@@ -735,6 +739,7 @@ void get_delimited_text()
     token_buffer += char(c);
   }
   add_context(start + token_buffer + start);
+  free(last_seen_filename);
 }
 
 void interpolate_macro_with_args(const char *body)

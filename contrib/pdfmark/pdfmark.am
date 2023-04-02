@@ -35,7 +35,7 @@ dist_pdfmarktmac_DATA = $(TMACFILES)
 # Files installed in $(pdfdocdir)
 PDFDOCFILES = \
   contrib/pdfmark/pdfmark.pdf
-if USE_GROPDF
+if USE_PDFROFF
 pdfmarkpdfdocdir = $(pdfdocdir)
 nodist_pdfmarkpdfdoc_DATA = $(PDFDOCFILES)
 MOSTLYCLEANFILES += $(PDFDOCFILES)
@@ -87,10 +87,8 @@ mostlyclean_pdfmark:
 
 uninstall_groffdirs: uninstall-pdfmark-hook
 uninstall-pdfmark-hook:
-if USE_GROPDF
-	if test -d $(DESTDIR)$(pdfmarkpdfdocdir); then \
-	  rmdir $(DESTDIR)$(pdfmarkpdfdocdir); \
-	fi
+if USE_PDFROFF
+	-rmdir $(DESTDIR)$(pdfmarkpdfdocdir)
 endif
 
 

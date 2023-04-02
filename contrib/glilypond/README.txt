@@ -28,7 +28,7 @@ Add 'AC_DEFUN([GROFF_GROFFERDIR_DEFAULT])'.
 Add 'GROFF_GROFFERDIR_DEFAULT'.
 
 3) <groff_src_dir>/Makefile.in:
-Add several informations of 'glilypond_dir'
+Add several information of 'glilypond_dir'
 
 With that, the program 'autoconf' can be run in order to update the
 configure files and Makefile's.

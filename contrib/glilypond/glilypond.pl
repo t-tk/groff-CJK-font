@@ -322,7 +322,7 @@ BEGIN {
       $dir_grow = File::Spec->catdir(@dir_grow);
 
       die "'$dir_grow' is not writable, " .
-	"so directory '$dir_arg' can't be createdd."
+	"so directory '$dir_arg' can't be created."
 	  unless ( -w $dir_grow );
 
       # former directory is writable, so '$dir_arg' can be created
@@ -597,7 +597,7 @@ use integer;
 
 # ------------------------------ FH_STDOUT ----------------------------
 
-{			     # FH_STDOUT: print to noral output STDOUT
+{			     # FH_STDOUT: print to normal output STDOUT
 
   package FH_STDOUT;
   use strict;
@@ -826,7 +826,7 @@ use integer;
 our $stdout = new FH_STDOUT();
 our $stderr = new FH_STDERR();
 
-# verbose printing, not clear wether this will be set by '--verbose',
+# verbose printing, not clear whether this will be set by '--verbose',
 # so store this now into a string, which can be gotten later on, when
 # it will become either STDERR or /dev/null
 our $v = new FH_STRING();
@@ -1241,7 +1241,7 @@ our $Args =
   #----------
   sub run_second {
       # Second run of args with new @ARGV from the former splitting.
-      # Arguments are now splitted and transformed into special long
+      # Arguments are now split and transformed into special long
       # options.
 
       my $double_minus = FALSE;
@@ -1867,7 +1867,7 @@ END {
 
   if ( $Temp->{'eps_dir'} ) {
     # EPS files in $Temp->{'eps_dir'} are always kept
-    $v->print( "As EPS directrory is set as '" .
+    $v->print( "As EPS directory is set as '" .
       $Temp->{'eps_dir'} . "', no EPS files there will be deleted." );
 
     opendir my $dh_temp, $Temp->{'eps_dir'} or

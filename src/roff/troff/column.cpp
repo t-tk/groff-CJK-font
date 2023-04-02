@@ -721,11 +721,11 @@ void init_column_requests()
   init_request("colt", column_trim);
   init_request("nvj", no_vjustify);
   init_request("rvj", restore_vjustify);
-  number_reg_dictionary.define(".colb", new column_bottom_reg);
-  number_reg_dictionary.define(".colx", new column_extra_space_reg);
-  number_reg_dictionary.define(".cola", new column_active_reg);
-  number_reg_dictionary.define(".nvj",
-			       new constant_int_reg(&no_vjustify_mode));
+  register_dictionary.define(".colb", new column_bottom_reg);
+  register_dictionary.define(".colx", new column_extra_space_reg);
+  register_dictionary.define(".cola", new column_active_reg);
+  register_dictionary.define(".nvj",
+			       new readonly_register(&no_vjustify_mode));
 }
 
 #endif /* COLUMN */

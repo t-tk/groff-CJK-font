@@ -20,7 +20,7 @@ for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-Version 2.5_b
+Version 2.5_c
 -------------
 Antoine de St-Exupéry asserted that elegance in engineering is
 achieved not when there is nothing left to add, but when there is
@@ -53,7 +53,7 @@ extensions, and float management).
 .if (\n[.x]\n[.y] < 118) \
 .   ab [mom]: You need GNU troff version 1.18 or higher to run this version of mom.
 \# Mom version
-.ds version 2.5_b
+.ds version 2.5_c
 .if dVERSION \{\
 .   ab [mom]: Version \*[version]
 .\}
@@ -2101,9 +2101,19 @@ end
 .    nr #SAVED_UNDERSCORE_WEIGHT     \\n[#UNDERSCORE_WEIGHT]
 .    nr #SAVED_UNDERSCORE_WEIGHT_ADJ \\n[#UNDERSCORE_WEIGHT_ADJ]
 .    ds $SAVED_UNDERSCORE_GAP        \\*[$UNDERSCORE_GAP]
-.    if \\n[#NUM_ARGS]=2 \{\
-.       ds $UNDERSCORE_GAP \\$1
-.       shift
+.    if \\n[#NUM_ARGS]>=2 \{\
+.       if \B'\\$1' \{\
+.          ds $UNDERSCORE_GAP \\$1
+.          shift
+.       \}
+.       if '\\$1'PREFIX' \{\
+.          ds $PREFIX \\$2
+.          shift 2
+.       \}
+.       if '\\$1'SUFFIX' \{\
+.          ds $SUFFIX \\$2
+.          shift 2
+.       \}
 .    \}
 .    if !'\\*[$TITLE_TYPE]'' \{\
 .       nr #UNDERSCORE_WEIGHT     \\n[#\\*[$TITLE_TYPE]_UNDERLINE_WEIGHT]
@@ -2112,21 +2122,21 @@ end
 .    \}
 .    nr #TEXT_WIDTH \w'\\$1'
 .    ie \\n[.u]=1 \{\
-\Z'\\$1'\
+\\*[$PREFIX]\Z'\\$1'\
 \Z'\D't \\n[#UNDERSCORE_WEIGHT]''\
 \v'\\*[$UNDERSCORE_GAP]+\\n[#UNDERSCORE_WEIGHT_ADJ]u'\
 \D'l \\n[#TEXT_WIDTH]u 0'\
 \Z'\D't \\n[#RULE_WEIGHT]''\
-\v'-(\\*[$UNDERSCORE_GAP]+\\n[#UNDERSCORE_WEIGHT_ADJ]u)'\c
+\v'-(\\*[$UNDERSCORE_GAP]+\\n[#UNDERSCORE_WEIGHT_ADJ]u)'\\*[$SUFFIX]\c
 .       nop
 .    \}
 .    el \{\
-\Z'\\$1'\
+\\*[$PREFIX]\Z'\\$1'\
 \Z'\D't \\n[#UNDERSCORE_WEIGHT]''\
 \v'\\*[$UNDERSCORE_GAP]+\\n[#UNDERSCORE_WEIGHT_ADJ]u'\
 \D'l \\n[#TEXT_WIDTH]u 0'\
 \Z'\D't \\n[#RULE_WEIGHT]''\
-\v'-(\\*[$UNDERSCORE_GAP]+\\n[#UNDERSCORE_WEIGHT_ADJ]u)'
+\v'-(\\*[$UNDERSCORE_GAP]+\\n[#UNDERSCORE_WEIGHT_ADJ]u)\\*[$SUFFIX]'
 .    \}
 .    nr #UNDERSCORE_WEIGHT     \\n[#SAVED_UNDERSCORE_WEIGHT]
 .    nr #UNDERSCORE_WEIGHT_ADJ \\n[#SAVED_UNDERSCORE_WEIGHT_ADJ]
@@ -2134,6 +2144,8 @@ end
 .    rr #SAVED_UNDERSCORE_WEIGHT
 .    rr #SAVED_UNDERSCORE_WEIGHT_ADJ
 .    rm $SAVED_UNDERSCORE_GAP
+.    rm $PREFIX
+.    rm $SUFFIX
 .    rm $TITLE_TYPE
 .END
 \#
@@ -2152,10 +2164,23 @@ end
 .    nr #SAVED_UNDERSCORE_WEIGHT_ADJ \\n[#UNDERSCORE_WEIGHT_ADJ]
 .    ds $SAVED_UNDERSCORE_GAP        \\*[$UNDERSCORE_GAP]
 .    ds $SAVED_RULE_GAP              \\*[$RULE_GAP]
-.    if \\n[#NUM_ARGS]=2 \{\
-.       ds $UNDERSCORE_GAP \\$1
-.       shift
-.    \}
+.    if \\n[#NUM_ARGS]>=2 \{\
+.       if \B'\\$1' \{\
+.          ds $UNDERSCORE_GAP \\$1
+.          shift
+.       \}
+.       if \B'\\$1' \{\
+.          ds $RULE_GAP \\$1
+.          shift
+.       \}
+.       if '\\$1'PREFIX' \{\
+.          ds $PREFIX \\$2
+.          shift 2
+.       \}
+.       if '\\$1'SUFFIX' \{\
+.          ds $SUFFIX \\$2
+.          shift 2
+.       \}
 .    if \\n[#NUM_ARGS]=3 \{\
 .       ds $UNDERSCORE_GAP \\$1
 .       ds $RULE_GAP \\$2
@@ -2169,30 +2194,32 @@ end
 .    \}
 .    nr #TEXT_WIDTH \w'\\$1'
 .    ie \\n[.u]=1 \{\
-\Z'\\$1'\
+\\*[$PREFIX]\Z'\\$1'\
 \Z'\D't \\n[#UNDERSCORE_WEIGHT]''\
 \v'\\*[$UNDERSCORE_GAP]+\\n[#UNDERSCORE_WEIGHT_ADJ]u'\
 \Z'\D'l \\n[#TEXT_WIDTH]u 0''\
 \v'\\*[$RULE_GAP]+\\n[#UNDERSCORE_WEIGHT]u'\
 \D'l \\n[#TEXT_WIDTH]u 0'\
 \Z'\D't \\n[#RULE_WEIGHT]''\
-\v'-(\\*[$UNDERSCORE_GAP]+\\*[$RULE_GAP])-(\\n[#UNDERSCORE_WEIGHT]u*2u)'\c
+\v'-(\\*[$UNDERSCORE_GAP]+\\*[$RULE_GAP])-(\\n[#UNDERSCORE_WEIGHT]u*2u)'\\*[$SUFFIX]\c
 .    \}
 .    el \{\
-\Z'\\$1'\
+\\*[$PREFIX]\Z'\\$1'\
 \Z'\D't \\n[#UNDERSCORE_WEIGHT]''\
 \v'\\*[$UNDERSCORE_GAP]+\\n[#UNDERSCORE_WEIGHT_ADJ]u'\
 \Z'\D'l \\n[#TEXT_WIDTH]u 0''\
 \v'\\*[$RULE_GAP]+\\n[#UNDERSCORE_WEIGHT]u'\
 \D'l \\n[#TEXT_WIDTH]u 0'\
 \Z'\D't \\n[#RULE_WEIGHT]''\
-\v'-(\\*[$UNDERSCORE_GAP]+\\*[$RULE_GAP])-(\\n[#UNDERSCORE_WEIGHT]u*2u)'
+\v'-(\\*[$UNDERSCORE_GAP]+\\*[$RULE_GAP])-(\\n[#UNDERSCORE_WEIGHT]u*2u)\\*[$SUFFIX]'
 .    \}
 .    nr #UNDERSCORE_WEIGHT     \\n[#SAVED_UNDERSCORE_WEIGHT]
 .    nr #UNDERSCORE_WEIGHT_ADJ \\n[#SAVED_UNDERSCORE_WEIGHT_ADJ]
 .    ds $UNDERSCORE_GAP        \\*[$SAVED_UNDERSCORE_GAP]
 .    rr #SAVED_UNDERSCORE_WEIGHT
 .    rr #SAVED_UNDERSCORE_WEIGHT_ADJ
+.    rm $PREFIX
+.    rm $SUFFIX
 .    rm $SAVED_UNDERSCORE_GAP
 .    rm $SAVED_RULE_GAP
 .    rm $TITLE_TYPE
@@ -4250,6 +4277,12 @@ y\R'#DESCENDER \\n[.cdp]'
 \#   Number registers: TYPEWRITE=1, TYPESET=2.
 \#
 .MAC PRINTSTYLE END
+.    if n \{\
+.       if '\\$1'TYPESET' \{\
+.         pl 1
+.         ab [mom]: Terminal output requires PRINTSTYLE TYPEWRITE.  Aborting.
+.       \}
+.    \}
 .    if !\\n[#COLLATE]=1 \{\
 .       if !d$PAPER \{\
 .          PAGELENGTH 11i
@@ -4956,7 +4989,8 @@ y\R'#DESCENDER \\n[.cdp]'
 \# *Function:
 \#   Creates strings and sets registers for document types.
 \# *Notes:
-\#   Number registers: DEFAULT=1, CHAPTER=2, NAMED=3, LETTER=4
+\#   Number registers: DEFAULT=1, CHAPTER=2, NAMED=3, LETTER=4,
+\#   SLIDES=5
 \#
 .MAC DOCTYPE END
 .    if '\\$1'DEFAULT' .nr #DOC_TYPE 1
@@ -5834,7 +5868,7 @@ SMALLCAPS takes precedence.
 .MAC DEFAULTS END
 .    if !\\n[#DOC_TYPE]=5 \{\
 .       ie !d $PAPER \{\
-.          PAGEWIDITH \\n[#PAGE_WIDTH]u
+.          PAGEWIDTH \\n[#PAGE_WIDTH]u
 .          PAGELENGTH \\n[.p]u
 .       \}
 .       el .PAPER \\*[$PAPER]
@@ -12971,9 +13005,16 @@ Shimming must be disabled with NO_SHIM before using FLEX.
 \#   Default is on.
 \#
 .MAC PAGINATE END
-.    ie '\\$1'' .nr #PAGINATE 1
+.    ie '\\$1'' \{\
+.       nr #PAGINATE 1
+.       if \\n[#SAVED_V_POS] \{\
+.          nr #PAGE_NUM_V_POS \\n[#SAVED_V_POS]
+.          rr #SAVED_V_POS
+.       \}
+.    \}
 .    el \{\
 .      nr #PAGINATE 0
+.      nr #SAVED_V_POS \\n[#PAGE_NUM_V_POS]
 .      rr #PAGE_NUM_V_POS
 .    \}
 .    if \\n[#HF_OFF]=1 \{\

@@ -131,7 +131,7 @@
      independence by scaling the intermediate output to the resolution
      of the postprocessor device if different from the one specified
      with 'x T', groff have not.  So implement full quasi device
-     indepedence, including the mapping of the strange classical
+     independence, including the mapping of the strange classical
      devices to the postprocessor device (seems to be reasonably
      easy).
    - The external, global pointer variables are not optimally handled.

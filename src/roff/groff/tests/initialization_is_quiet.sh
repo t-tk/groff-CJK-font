@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (C) 2021 Free Software Foundation, Inc.
+# Copyright (C) 2021-2023 Free Software Foundation, Inc.
 #
 # This file is part of groff.
 #
@@ -20,19 +20,40 @@
 
 groff="${abs_top_builddir:-.}/test-groff"
 
-set -e
+fail=
+
+wail () {
+    echo ...FAILED >&2
+    fail=YES
+}
 
 # Regression-test Savannah #60874.
 #
 # groff should start up in any supported locale, in compatibility mode
 # or not, without producing diagnostics.
 
-for COMPAT in "" -C
+# Keep preconv from being run.
+#
+# The "unset" in Solaris /usr/xpg4/bin/sh can actually fail.
+if ! unset GROFF_ENCODING
+then
+    echo "unable to clear environment; skipping" >&2
+    exit 77
+fi
+
+for compat in "" " -C"
 do
-  for LOCALE in cs de en fr it ja sv zh
+  for locale in cs de en fr it ja sv zh
   do
-    echo "testing \"-m $LOCALE\"; COMPAT=\"$COMPAT\""
-    OUTPUT=$("$groff" -ww -m $LOCALE "$COMPAT" < /dev/null 2>&1)
-    test -z "$OUTPUT"
+    echo testing \"-m $locale$compat\" >&2
+    output=$("$groff" -ww -m $locale$compat -a </dev/null 2>/dev/null)
+    error=$("$groff" -ww -m $locale$compat -z </dev/null 2>&1)
+    test -n "$error" && echo "$error"
+    test -n "$output" && echo "$output"
+    test -n "$error$output" && wail
   done
 done
+
+test -z "$fail"
+
+# vim:set autoindent expandtab shiftwidth=4 tabstop=4 textwidth=72:

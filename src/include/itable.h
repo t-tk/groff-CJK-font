@@ -16,7 +16,7 @@ for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
-#include "assert.h"
+#include <assert.h>
 
 // 'class ITABLE(T)' is the type of a hash table mapping an integer (int >= 0)
 // to an object of type T.

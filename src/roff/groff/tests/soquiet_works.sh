@@ -22,9 +22,13 @@ groff="${abs_top_builddir:-.}/test-groff"
 
 set -e
 
+# Keep preconv from being run.
+unset GROFF_ENCODING
+
 DOC='.soquiet nonexistent'
 
 OUTPUT=$(echo "$DOC" | "$groff" -Tascii 2>&1)
+echo "$OUTPUT"
 
 echo "testing that .soquiet of nonexistent file produces no error" >&2
 test -z "$OUTPUT"

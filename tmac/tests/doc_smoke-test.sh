@@ -20,12 +20,18 @@
 
 groff="${abs_top_builddir:-.}/test-groff"
 
+fail=
+
+wail () {
+    echo ...FAILED >&2
+    fail=yes
+}
+
 # Regression-test Savannah #51003.
 #
 # Ensure we can render mdoc man pages from a build tree.
 
-EXAMPLE='\
-.Dd August 25, 2020
+input='.Dd August 25, 2020
 .Dt mdoc\-test 7
 .Os
 .Sh Name
@@ -35,39 +41,26 @@ EXAMPLE='\
 If you can read this without a hailstorm of warnings,
 things are probably working.'
 
-OUTPUT=$(printf "%s\n" "$EXAMPLE" | "$groff" -Tascii -P-cbou -mdoc)
-FAIL=
+output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -mdoc)
+echo "$output"
+fail=
 
-if ! echo "$OUTPUT" | grep -qE '^mdoc-test\(7\) +Miscellaneous'
-then
-    FAIL=yes
-    echo "header check failed" >&2
-fi
+echo "checking header for correct content" >&2
+echo "$output" | grep -qE '^mdoc-test\(7\) +Miscellaneous' || wail
 
-if ! echo "$OUTPUT" | grep -qE '^Name$'
-then
-    FAIL=yes
-    echo "\"Name\" section heading missing" >&2
-fi
+echo "checking for section heading \"Name\"" >&2
+echo "$output" | grep -qE '^Name$' || wail
 
-if ! echo "$OUTPUT" | grep -qE '^Description$'
-then
-    FAIL=yes
-    echo "\"Description\" section heading missing" >&2
-fi
+echo "checking for section heading \"Description\"" >&2
+echo "$output" | grep -qE '^Description$' || wail
 
-if ! echo "$OUTPUT" | grep -qE 'you can read this'
-then
-    FAIL=yes
-    echo "paragraph body check failed" >&2
-fi
+echo "checking paragraph body for correct content" >&2
+echo "$output" | grep -qE 'you can read this' || wail
 
-if ! echo "$OUTPUT" | grep -qE '^GNU +August 25, 2020 +mdoc-test\(7\)'
-then
-    FAIL=yes
-    echo "footer check failed" >&2
-fi
+echo "checking footer for correct content" >&2
+echo "$output" | grep -qE '^GNU +August 25, 2020 +mdoc-test\(7\)' \
+    || wail
 
-test -z "$FAIL"
+test -z "$fail"
 
 # vim:set ai et sw=4 ts=4 tw=72:

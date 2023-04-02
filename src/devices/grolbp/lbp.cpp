@@ -23,7 +23,7 @@ TODO
  - Add X command to include bitmaps
 */
 
-#include "assert.h"
+#include <assert.h>
 
 #include "driver.h"
 #include "lbp.h"

@@ -21,6 +21,12 @@
 .\" Convention: Auxiliary macros and registers start with 'm' followed
 .\"             by an uppercase letter or digit.
 .
+.\" Setting the `mG` register to a positive value (e.g., on the command
+.\" line) enables usage of macros defined here that have alternative
+.\" definitions in the main groff man macro file.  This is for testing.
+.\" The logic uses subtraction due to frustrating, AT&T troff-compatible
+.\" limitations on the '!' operator.
+.
 .
 .\" Protect against being sourced twice.
 .nr mZ +1
@@ -29,50 +35,28 @@
 .
 .\" Define this to your implementation's constant-width typeface.
 .ds mC CW
+.if n .ds mC R
 .
+.\" Save the automatic hyphenation mode.
+.\"
 .\" In AT&T troff, there was no register exposing the hyphenation mode,
-.\" and no way to save and restore it.  Set this to a reasonable value
+.\" and no way to save and restore it.  Set `mH` to a reasonable value
 .\" for your implementation and preference.
-.ie !\n(.g \
-.  nr mJ 1
-.el \
-.  do nr mJ \n[.hy]
+.de mY
+.  ie !\\n(.g \
+.    nr mH 14
+.  el \
+.    do nr mH \\n[.hy] \" groff extension register
+..
 .
-.\" Check if we're using grohtml or grotty, and therefore support URIs.
-.nr mH 0
-.nr mY 0
-.nr mU 0
-.if \n(.g \{\
-.  if '\*(.T'html' \
-.    nr mH 1
-.  if '\*(.T'ascii' \
-.    nr mY 1
-.  if '\*(.T'cp1047' \
-.    nr mY 1
-.  if '\*(.T'latin1' \
-.    nr mY 1
-.  if '\*(.T'utf8' \
-.    nr mY 1
-.  nr mU \n(mH+\n(mY
-.\}
-.
-.
-.\" groff has glyph entities for angle brackets.
-.ie \n(.g \{\
-.  ds mL \(la\"
-.  ds mR \(ra\"
-.\}
-.el \{\
-.  ds mL <\"
-.  ds mR >\"
-.\}
-.
-.nr mS 0
+.nr mS 0 \" in a synopsis (SY/YS)?
+.nr mE 0 \" in an example (EX/EE)?
 .
 .
 .\" Declare start of command synopsis.  Sets up hanging indentation.
 .de SY
 .  ie !\\n(mS \{\
+.    mY
 .    nh
 .    nr mS 1
 .    nr mA \\n(.j
@@ -86,6 +70,7 @@
 .
 .  nr mT \w'\fB\\$1\fP\ '
 .  HP \\n(mTu
+.  rr mT
 .  B "\\$1"
 ..
 .
@@ -94,138 +79,74 @@
 .de YS
 .  in \\n(mIu
 .  ad \\n(mA
-.  hy \\n(mJ
+.  hy \\n(mH
+.  rr mA
+.  rr mI
 .  nr mS 0
 ..
+.
 .
 .\" Prepare link text for mail/web hyperlinks.  `MT` and `UR` call this.
 .de mV
 .  ds m1 \\$1\"
-.  \" Save the indentation and line length.  We want the diversion to
-.  \" format as if it has an indentation of zero (that comes for free
-.  \" when we switch environments), but we want the line length reduced
-.  \" by the amount of indentation that obtains when we output it.
-.  nr mK \\n(.l
-.  nr mI \\n(.i
-.  \" We can only hyperlink if we're not in a diversion.
-.  nr mD 0
-.  if '\\n(.z'' .nr mD 1
-.  if \\n(mD&\\nU&\\n(mU \{\
-.    \" Start diversion in a new environment.
-.    do ev link-text-env
-.    do di link-text-div
-.    ll (\\n(mKu-\\n(mIu)
-.  \}
-.  rr mK
 ..
 .
-.\" Start URL.
-.de UR
-.  mV \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.
+.\" Emit hyperlink.  The optional argument supplies trailing punctuation
+.\" after link text.  `ME` and `UE` call this.
+.de mQ
+.  mY
+.  nh
+<\\*(m1>\\$1
+.  hy \\n(mH
 ..
+.
+.
+.\" Start URL.
+.if \n(.g-\n(mG \{\
+.de UR
+.  mV \\$1
+..
+.\}
 .
 .
 .\" End URL.
+.if \n(.g-\n(mG \{\
 .de UE
-.  ie \\n(mD&\\nU&\\n(mU \{\
-.    br
-.    di
-.    ev
-.
-.    \" Has there been at least one input line of hyperlinked text?
-.    ie \\n(dn \{\
-.      if \\n(mH \
-\X^html:<a href="\\*(m1">^\c
-.      if \\n(mY \
-\X^tty: link \\*(m1^\c
-.      \" Strip off the final newline of the diversion and emit it.
-.      do chop link-text-div
-.      do link-text-div
-\c
-.      if \\n(mH \
-\X^html:</a>^\c
-.      if \\n(mY \
-\X^tty: link^\c
-.    \}
-.    el \{\
-.      if \\n(mH \
-\X^html:<a href="\\*(m1">\\*(m1</a>^\c
-.      if \\n(mY \
-\X^tty: link \\*(m1^\\*(m1\X^tty: link^\c
-.    \}
-\&\\$*\"
-.  \}
-.  el \{\
-.    nh
-\\*(mL\\*(m1\\*(mR\\$1
-.    do shift
-.    ie \n(.g .if \\n(.$ \&\\$*\"
-.    el .if \\n(.$>1 \&\\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9\"
-.    hy \\n(mJ
-.  \}
-.  rr mD
+.  mQ \\$1
 ..
+.\}
 .
 .
 .\" Start email address.
+.if \n(.g-\n(mG \{\
 .de MT
-.  mV \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.  mV \\$1
 ..
+.\}
 .
 .
 .\" End email address.
+.if \n(.g-\n(mG \{\
 .de ME
-.  ie \\n(mD&\\nU&\\n(mU \{\
-.    br
-.    di
-.    ev
-.
-.    \" Has there been at least one input line of hyperlinked text?
-.    ie \\n(dn \{\
-.      if \\n(mH \
-\X^html:<a href="mailto:\\*(m1">^\c
-.      if \\n(mY \
-\X^tty: link mailto:\\*(m1^\c
-.      \" Strip off the final newline of the diversion and emit it.
-.      do chop link-text-div
-.      do link-text-div
-\c
-.      if \\n(mH \
-\X^html:</a>^\c
-.      if \\n(mY \
-\X^tty: link^\c
-.    \}
-.    el \{\
-.      if \\n(mH \
-\X^html:<a href="mailto:\\*(m1">\\*(m1</a>^\c
-.      if \\n(mY \
-\X^tty: link mailto:\\*(m1^\\*(m1\X^tty: link^\c
-.    \}
-\&\\$*\"
-.  \}
-.  el \{\
-.    nh
-\\*(mL\\*(m1\\*(mR\\$1
-.    do shift
-.    ie \n(.g .if \\n(.$ \&\\$*\"
-.    el .if \\n(.$>1 \&\\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9\"
-.    hy \\n(mJ
-.  \}
-.  rr mD
+.  mQ \\$1
 ..
+.\}
 .
 .
 .\" Set a man page cross reference.
 .\" .MR page-topic page-section [trailing-text]
-.if \n(.g .ig
+.if \n(.g-\n(mG \{\
 .de MR
+.  mY
 .  nh
 .  ie \\n(.$=1 \
 .    I \\$1
 .  el \
 .    IR \\$1 (\\$2)\\$3
-.  hy \\n(mJ
+.  hy \\n(mH
 ..
+.\}
 .
 .
 .\" Continuation line for .TP header.
@@ -237,31 +158,33 @@
 .
 .
 .\" Start example.
-.if \n(.g .ig
+.if \n(.g-\n(mG \{\
 .de EX
 .  br
-.  if !\\n(mX \{\
+.  if !\\n(mE \{\
 .    nr mF \\n(.f
 .    nr mP \\n(PD
 .    nr PD 1v
 .    nf
 .    ft \\*(mC
-.    nr mX 1
+.    nr mE 1
 .  \}
 ..
+.\}
 .
 .
 .\" End example.
-.if \n(.g .ig
+.if \n(.g-\n(mG \{\
 .de EE
 .  br
-.  if \\n(mX \{\
+.  if \\n(mE \{\
 .    ft \\n(mF
 .    nr PD \\n(mP
 .    fi
-.    nr mX 0
+.    nr mE 0
 .  \}
 ..
+.\}
 .
 .
 .\" Start display.

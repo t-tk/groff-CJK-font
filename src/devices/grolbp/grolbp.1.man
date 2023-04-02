@@ -36,6 +36,21 @@ output driver for Canon CaPSL printers
 .do nr *groff_grolbp_1_man_C \n[.cp]
 .cp 0
 .
+.\" Define fallback for groff 1.23's MR macro if the system lacks it.
+.nr do-fallback 0
+.if !\n(.f           .nr do-fallback 1 \" mandoc
+.if  \n(.g .if !d MR .nr do-fallback 1 \" older groff
+.if !\n(.g           .nr do-fallback 1 \" non-groff *roff
+.if \n[do-fallback]  \{\
+.  de MR
+.    ie \\n(.$=1 \
+.      I \%\\$1
+.    el \
+.      IR \%\\$1 (\\$2)\\$3
+.  .
+.\}
+.rr do-fallback
+.
 .
 .\" ====================================================================
 .SH Synopsis
@@ -158,10 +173,10 @@ font names used to access them.
 .P
 .TS
 tab(|) allbox center;
-c c c c c
-ab c c c c
+Cb Cb Cb Cb Cb
+L L L L L
 .
-Typeface | Regular | Bold | Italic | Bold-Italic
+Typeface | Roman | Bold | Italic | Bold-Italic
 Dutch | TR | TB | TI | TBI
 Swiss | HR | HB | HI | HBI
 Swiss Narrow | HNR | HNB | HNI | HNBI

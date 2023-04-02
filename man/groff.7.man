@@ -10,7 +10,7 @@ language reference
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 2000-2018, 2020-2022 Free Software Foundation, Inc.
+.\" Copyright (C) 2000-2023 Free Software Foundation, Inc.
 .\"
 .\" This file is part of groff, the GNU roff type-setting system.
 .\"
@@ -27,6 +27,21 @@ language reference
 .\" Save and disable compatibility mode (for, e.g., Solaris 10/11).
 .do nr *groff_groff_7_man_C \n[.cp]
 .cp 0
+.
+.\" Define fallback for groff 1.23's MR macro if the system lacks it.
+.nr do-fallback 0
+.if !\n(.f           .nr do-fallback 1 \" mandoc
+.if  \n(.g .if !d MR .nr do-fallback 1 \" older groff
+.if !\n(.g           .nr do-fallback 1 \" non-groff *roff
+.if \n[do-fallback]  \{\
+.  de MR
+.    ie \\n(.$=1 \
+.      I \%\\$1
+.    el \
+.      IR \%\\$1 (\\$2)\\$3
+.  .
+.\}
+.rr do-fallback
 .
 .
 .\" ====================================================================
@@ -49,13 +64,6 @@ language reference
 .\"
 .de Text
 .  nop \)\\$*
-..
-.
-.\" ========= command=line option =========
-.
-.de option
-.  Text \f[CB]\\$*
-.  ft P
 ..
 .
 .\" ========= characters =========
@@ -522,9 +530,10 @@ When filling is enabled
 (the default),
 a line may be broken at a space.
 .
-When adjustment is enabled and set to both margins
+When adjustment to both margins is enabled
 (the default),
-inter-word spaces may be expanded to justify the line.
+inter-word spaces are expanded until the output line reaches the
+configured length.
 .
 An adjustable but non-breaking space is available with
 .esc \[ti] .
@@ -594,9 +603,12 @@ respectively.
 .SH "Line continuation"
 .\" ====================================================================
 .
+When filling is enabled,
+input and output line breaks generally do not correspond.
+.
 The
 .I roff
-language distinguishes input and output line continuation.
+language therefore distinguishes input and output line continuation.
 .
 .
 .P
@@ -752,8 +764,14 @@ Measurements are scaled by the scaling unit and stored internally
 (with any fractional part discarded)
 in basic units.
 .
+The device resolution can therefore be obtained by storing a value of
+.RB \[lq] 1i \[rq]
+to a register.
+.
 The only constraint on the basic unit is that it is at least as small as
 any other unit.
+.\" That's a fib.  A device resolution of around 2^31 would surely also
+.\" cause problems.  But nobody does that.
 .
 .
 .P
@@ -940,7 +958,7 @@ provides a set of mathematical and logical operators familiar to
 programmers\[em]as well as some unusual ones\[em]but supports only
 integer arithmetic.
 .
-(Provision is made for intepreting and
+(Provision is made for interpreting and
 reporting decimal fractions in certain cases.)
 .
 The internal data type used for computing results is usually a 32-bit
@@ -1109,7 +1127,8 @@ In other words,
 it must be the \[lq]outermost\[rq] operator.
 .
 Including it elsewhere in the expression produces a warning in the
-\[lq]number\[rq] category
+.RB \%\[lq] number \[rq]
+category
 (see
 .MR @g@troff @MAN1EXT@ ),
 and its expression evaluates false.
@@ -1211,6 +1230,8 @@ The
 escape sequence tests its argument for validity as a numeric expression.
 .
 .
+.br
+.ne 2v
 .P
 A register interpolated as an operand in a numeric expression must have
 an Arabic format;
@@ -1428,12 +1449,11 @@ and
 requests,
 respectively.
 .
-When writing a macro,
+Within a macro definition,
 .\" you might wish to know
-use the
+register
 .B .br
-register to determine
-which control character was used to call it.
+indicates the control character used to call it.
 .\" END Keep (roughly) parallel with groff.texi node "Control
 .\" Characters".
 .
@@ -1460,9 +1480,12 @@ The
 .B als
 request can alias requests,
 permitting them to be wrapped or non-destructively replaced.
-.\" @xref{Strings}.
+.
+See section \[lq]Strings\[rq] below.
 .
 .
+.br
+.ne 4v
 .P
 There is no general limit on argument length or quantity.
 .
@@ -1500,7 +1523,8 @@ Some requests,
 like
 .BR ds ,
 interpret the remainder of the control line as a single argument.
-.\" @xref{Strings}.
+.
+See section \[lq]Strings\[rq] below.
 .
 .
 .P
@@ -1567,8 +1591,13 @@ respectively.
 .
 AT&T
 .I troff \" AT&T
-did not define these special characters,
-but any of its descendants can be made to support them.
+did not consistently define these special characters,
+.\" It seems that AT&T troff never recognized \(rs, though DWB 3.3
+.\" defined \(bs as an alias of "\" on its "Latin1" device, in
+.\" deliberate(?) collision with the Bell System logo identifier.  It
+.\" also defined \(dq for several devices (pcl, Latin1, nroff, ...)
+.\" along with \(aq.
+but its descendants can be made to support them.
 .
 See
 .MR groff_font @MAN5EXT@ .
@@ -1833,6 +1862,49 @@ See section \[lq]Implementation differences\[rq] in
 .
 .
 .\" ====================================================================
+.SH "Dummy characters"
+.\" ====================================================================
+.
+.\" BEGIN Keep (roughly) parallel with groff.texi node "Dummy
+.\" Characters".
+As discussed in
+.MR roff @MAN7EXT@ ,
+the first character on an input line is treated specially.
+.
+Further,
+formatting a glyph has many
+consequences on formatter state
+(see section \[lq]Environments\[rq] below).
+.
+Occasionally,
+we want to escape this context or embrace some of those consequences
+without actually rendering a glyph to the output.
+.
+.B \[rs]&
+interpolates a dummy character,
+which is constitutive of output but invisible.
+.
+Its presence alters the interpretation context of a subsequent input
+character,
+and enjoys several applications:
+preventing the insertion of extra space after an end-of-sentence
+character,
+preventing interpretation of a control character at the beginning of an
+input line,
+preventing kerning between two glyphs,
+and permitting the
+.B tr
+request to remap a character to nothing.
+.
+.B \[rs])
+works as
+.B \[rs]&
+does,
+except that it does not cancel a pending end-of-sentence state.
+.\" END Keep (roughly) parallel with groff.texi node "Dummy Characters".
+.
+.
+.\" ====================================================================
 .SH "Control structures"
 .\" ====================================================================
 .
@@ -1943,7 +2015,7 @@ their truth values are as shown below.
 .
 .
 .br
-.ne 14v
+.ne 3v
 .P
 .TS
 rf(BI) lB
@@ -2027,9 +2099,20 @@ T}
 .
 .
 .P
-The first of the above,
+If the first argument to an
+.BR .if ,
+.BR .ie ,
+or
+.B .while
+request begins with a non-alphanumeric character apart from
+.B !\&
+(see below);
+it performs an
+.I output comparison test.
+.
+Shown first in the table above,
 the
-.I "output comparison operator,"
+.I output comparison operator
 interpolates a true value if formatting its comparands
 .I s1
 and
@@ -2153,7 +2236,24 @@ except when it is read in copy mode.
 .
 .TPx
 .I n
-is a numeric expression that evaluates to an integer value.
+is a numeric expression.
+.
+.TPx
+.I npl
+is a numeric expression constituting a count of subsequent
+.I productive
+input lines;
+that is,
+those that directly produce formatted output.
+.
+Text lines produce output,
+as do control lines containing requests like
+.request .tl
+or escape sequences like
+.esc D .
+.
+Macro calls are not themselves productive,
+but their interpolated contents can be.
 .
 .TPx
 .I N
@@ -2208,9 +2308,9 @@ an increment or decrement is applied as if to\~0.
 .SH "Request short reference"
 .\" ====================================================================
 .
-Not all details of each request's behavior are outlined here.
+Not all details of request behavior are outlined here.
 .
-Refer to the
+See the
 .I groff
 Texinfo manual or
 .MR groff_diff @MAN7EXT@ .
@@ -2220,9 +2320,14 @@ Texinfo manual or
 .LS
 .
 .TPx
-.REQ .ab "\f[R][\f[]message\f[R]]"
+.REQ .ab
 Abort processing;
-write any
+exit with failure status.
+.
+.TPx
+.REQ .ab message
+Abort processing;
+write
 .I message
 to the standard error stream and exit with failure status.
 .
@@ -2348,21 +2453,30 @@ Same as
 but with compatibility mode switched off during macro expansion.
 .
 .TPx
-.REQ .as "string \fR[\fPcontents\fR]\fP"
-Append
-.I contents
-to
-.IR string ;
+.REQ .as name
+Create string
+.I name
+with empty contents;
 no operation if
-.I contents
-omitted.
+.I string
+already exists.
 .
 .TPx
-.REQ .as1 "string \fR[\fPcontents\fR]\fP"
-Same as
-.request .as
-but with compatibility mode switched off during string expansion.
+.REQ .as "name contents"
+Append
+.I contents
+to string
+.IR name .
 .
+.TPx
+.REQ .as1 string
+.TQ
+.REQ .as1 "string contents"
+As
+.request .as ,
+but with compatibility mode disabled when
+.I contents
+interpolated.
 .
 .TPx
 .REQ .asciify "diversion"
@@ -2435,20 +2549,22 @@ omitting a partially collected line.
 .
 .TPx
 .REQ .bp
-Eject current page and begin new page.
+Break page and start a new one.
 .
 .TPx
 .REQ .bp "\[+-]N"
-Eject current page; next page number
+Break page,
+starting a new one numbered
 .IR \[+-]N .
 .
 .TPx
 .REQ .br
-Line break.
+Break output line.
 .
 .TPx
 .REQ .brp
-Break output line; adjust if applicable.
+Break output line;
+adjust if applicable.
 .
 .TPx
 .REQ .break
@@ -2476,13 +2592,21 @@ Set control character to
 .
 .TPx
 .REQ .ce
-Center the next input line.
+Break,
+center the output of the next productive input line without filling,
+and break again.
 .
 .TPx
-.REQ .ce "N"
-Center following
-.I N
-input lines.
+.REQ .ce npl
+Break,
+center the output of the next
+.I npl
+productive input lines without filling,
+then break again.
+.
+If
+.IR npl =0,
+stop centering.
 .
 .TPx
 .REQ .cf "filename"
@@ -2501,14 +2625,19 @@ and so on.
 .
 .
 .TPx
-.REQ .ch "name \fR[\fPN\fR]"
+.REQ .ch name
+Unplant page location trap
+.IR name .
+.
+.
+.TPx
+.REQ .ch "name N"
 Change a planted page location trap
 .I name
 by moving its location to
-.IR N ,
-or by unplanting it altogether if
 .I N
-is absent.
+(default scaling unit\~\c
+.scaleindicator v ).
 .
 .
 .TPx
@@ -2587,11 +2716,21 @@ to
 ems with em
 .IR M .
 .
+.
 .TPx
-.REQ .cu "N"
-Continuous underline in nroff, like
-.request .ul
-in troff.
+.REQ .cu
+Continuously underline the output of the next productive input line.
+.
+.
+.TPx
+.REQ .cu npl
+Continuously underline the output of the next
+.I npl
+productive input lines.
+.
+If
+.IR npl =0,
+stop continuously underlining.
 .
 .
 .TPx
@@ -2766,22 +2905,26 @@ of
 is interpreted.
 .
 .TPx
-.REQ .ds "name \fR[\fPcontents\fR]\fP"
-Define a string variable
-.I name
-with contents
-.IR string ,
-or as empty if
-.I string
-is omitted.
-.
+.REQ .ds name
+Create empty string
+.I string .
 .
 .TPx
-.REQ .ds1 "name \fR[\fPcontents\fR]\fP"
-Same as
-.request .ds
-but with compatibility mode switched off during string expansion.
+.REQ .ds "name contents"
+Create a string
+.I name
+containing
+.IR contents .
 .
+.TPx
+.REQ .ds1 name
+.TQ
+.REQ .ds1 "name contents"
+As
+.request .ds ,
+but with compatibility mode disabled when
+.I contents
+interpolated.
 .
 .TPx
 .REQ .dt
@@ -3187,23 +3330,35 @@ Set indentation to
 .scaleindicator m ).
 .
 .TPx
-.REQ .it "n name"
-Set an input trap,
+.REQ .it
+Cancel any pending input line trap.
+.
+.TPx
+.REQ .it "npl name"
+Set
+(or replace)
+an input line trap in the environment,
 calling macro
 .IR name ,
 after the next
-.IR n\~ lines
-lines of input that directly produce formatted output have been read.
+.I npl
+productive input lines have been read.
 .
+Lines interrupted with the
+.B \[rs]c
+escape sequence are counted separately.
 .
 .TPx
-.REQ .itc "n name"
+.REQ .itc
+Cancel any pending input line trap.
+.
+.TPx
+.REQ .itc "npl name"
 As
 .request .it ,
-but lines interrupted with the
+except that input lines interrupted with the
 .B \[rs]c
-escape sequence are not applied to the line count.
-.
+escape sequence are not counted.
 .
 .TPx
 .REQ .kern
@@ -3336,13 +3491,15 @@ from right margin (default scaling indicator\~\c
 .scaleindicator m ).
 .
 .TPx
-.REQ .mk "\fR[\fPregister\fR]\fP"
-Mark current vertical position in
-.IR register ,
-or in an internal register used by
-.B .rt
-if no argument.
+.REQ .mk
+Mark vertical drawing position in an internal register;
+see
+.BR .rt .
 .
+.TPx
+.REQ .mk register
+Mark vertical drawing position in
+.IR register .
 .
 .TPx
 .REQ .mso "file"
@@ -3371,13 +3528,13 @@ Disable output line adjustment.
 .
 .TPx
 .REQ .ne
-Need a one-line vertical space.
+Break page if distance to next page location trap is less than one vee.
 .
 .TPx
 .REQ .ne "N"
-Need
+Break page if distance to next page location trap is less than
 .I N
-vertical space (default scaling indicator\~\c
+(default scaling unit:
 .scaleindicator v ).
 .
 .
@@ -3398,21 +3555,47 @@ same as
 .
 .TPx
 .REQ .nm
-Number mode off.
+Deactivate output line numbering.
 .
 .TPx
-.REQ .nm "\[+-]N \fR[\fPM \fR[\fPS \fR[\fPI\fR]]]\fP"
-In line number mode, set number, multiple, spacing, and indentation.
+.REQ .nm \[+-]N
+.TQ
+.REQ .nm "\[+-]N M"
+.TQ
+.REQ .nm "\[+-]N M S"
+.TQ
+.REQ .nm "\[+-]N M S I"
+Activate output line numbering:
+number the next output line
+.IR N ,
+writing numbers every
+.I M
+lines,
+with
+.I S
+numeral widths
+.RB ( \[rs]0 )
+between the line number and the output
+(default 1),
+and indenting the line number by
+.I I
+numeral widths (default 0).
 .
 .TPx
 .REQ .nn
-Do not number next line.
+Suppress numbering of the next output line to be numbered with
+.BR nm .
 .
 .TPx
-.REQ .nn "N"
-Do not number next
-.I N
-lines.
+.REQ .nn n
+Suppress numbering of the next
+.I n
+output lines to be numbered with
+.BR nm .
+.
+If
+.IR n =0,
+cancel suppression.
 .
 .
 .TPx
@@ -3421,19 +3604,25 @@ Interpret
 .I anything
 as if it were an input line.
 .
+.TPx
+.REQ .nr "reg \[+-]N"
+Define or update register
+.I reg
+with value
+.IR N .
 .
 .TPx
-.REQ .nr "register \[+-]N \fR[\fPM\fR]\fP"
-Define or modify
-.I register
-using
-.I \[+-]N
-with auto-increment
-.IR M .
+.REQ .nr "reg \[+-]N I"
+Define or update register
+.I reg
+with value
+.I N
+and auto-increment
+.IR I .
 .
 .TPx
 .REQ .nroff
-Make the built-in conditions
+Make the conditional expressions
 .B n
 true and
 .B t
@@ -3441,7 +3630,16 @@ false.
 .
 .TPx
 .REQ .ns
-Turn on no-space mode.
+Enable
+.IR "no-space mode" ,
+ignoring
+.B .sp
+requests until a glyph or
+.B \[rs]D
+primitive is output.
+.
+See
+.BR .rs .
 .
 .TPx
 .REQ .nx
@@ -3626,10 +3824,23 @@ Remove the font-specific definitions of glyphs
 .RI font\~ f .
 .
 .TPx
-.REQ .rj "n"
-Right justify the next
-.I n
-input lines.
+.REQ .rj npl
+Break,
+right-align the output of the next productive input line without
+filling,
+then break again.
+.
+.TPx
+.REQ .rj npl
+Break,
+right-align the output of the next
+.I npl
+productive input lines without filling,
+then break again.
+.
+If
+.IR npl =0,
+stop right-aligning.
 .
 .TPx
 .REQ .rm "name"
@@ -3659,7 +3870,11 @@ Remove register
 .
 .TPx
 .REQ .rs
-Restore spacing; turn no-space mode off.
+Restore spacing;
+disable no-space mode.
+.
+See
+.BR .ns .
 .
 .TPx
 .REQ .rt
@@ -3670,11 +3885,13 @@ to vertical position marked by
 on the current page.
 .
 .TPx
-.REQ .rt "\[+-]N"
+.REQ .rt N
 Return
 .I (upward only)
-to specified distance from the top of the page (default scaling
-indicator\~\c
+to vertical position
+.I N
+(default scaling
+unit\~\c
 .scaleindicator v ).
 .
 .TPx
@@ -3735,14 +3952,14 @@ does not exist.
 .
 .TPx
 .REQ .sp
-Move the drawing position down one vee.
+Break line and move drawing position down one vee.
 .
 .
 .TPx
 .REQ .sp N
-Move the drawing position vertically by
+Break line and move drawing position vertically by
 .I N
-(default scaling indicator\~\c
+(default scaling unit\~\c
 .scaleindicator v ).
 .
 Positive values are downwards.
@@ -3996,27 +4213,43 @@ transparently throughput into a diversion with
 .
 .TPx
 .REQ .troff
-Make the built-in conditions
+Make the conditional expressions
 .B t
 true and
 .B n
 false.
 .
 .TPx
-.REQ .uf "font"
-Set underline font to
-.I font
-(to be switched to by
-.request .ul ).
+.REQ .uf font
+Set underline font used by
+.request .ul
+to
+.I font.
+.
 .
 .TPx
-.REQ .ul "N"
+.REQ .ul
 Underline
 (italicize in
 .I troff
 mode)
-.I N
-input lines.
+the output of the next productive input line.
+.
+.
+.TPx
+.REQ .ul npl
+Underline
+(italicize in
+.I troff
+mode)
+the output of the next
+.I npl
+productive input line.
+.
+If
+.IR npl =0,
+stop underlining.
+.
 .
 .TPx
 .REQ .unformat "diversion"
@@ -4067,16 +4300,18 @@ see
 .
 .
 .TPx
-.REQ .warnscale "si"
-Set scaling indicator used in warnings to
-.IR si .
+.REQ .warnscale "su"
+Set scaling unit used in warnings to
+.IR su .
 .
 .
 .TPx
 .REQ .wh N
 Remove active trap at vertical position
 .IR N ;
-a negative value is measured upward from page bottom.
+a negative value is measured upward from page bottom
+(default scaling unit\~\c
+.scaleindicator v ).
 .
 .
 .TPx
@@ -4087,11 +4322,13 @@ calling macro
 when page location
 .I N
 is reached or passed;
-a negative value is measured upward from page bottom.
+a negative value is measured upward from page bottom
+(default scaling unit\~\c
+.scaleindicator v ).
 .
 Any active trap already present at
 .I N
-is replaced.
+is hidden.
 .
 .
 .TPx
@@ -4126,63 +4363,6 @@ to the stream named
 .IR stream .
 .
 .LE
-.
-.
-.\" TODO: This doesn't really belong here; these aren't part of the
-.\" (g)roff _language_.  groff(1) may be a better place.
-.br
-.ne 6v
-.\" ====================================================================
-.SH "Preprocessor tokens"
-.\" ====================================================================
-.
-Most preprocessors enclose content between a pair of characteristic
-tokens.
-.
-Such a token must occur at the beginning of an input line and use the
-dot control character.
-.
-Spaces and tabs must not follow the control character or precede the
-end of the input line.
-.
-Deviating from these rules defeats a token's recognition by the
-preprocessor.
-.
-Tokens are generally preserved in preprocessor output and interpreted as
-macro calls subsequently by
-.IR @g@troff .
-.
-The
-.I @g@ideal
-preprocessor is not yet available in
-.IR groff .
-.
-.
-.P
-.TS
-box, center, tab (^);
-c | c | c
-CfCB | CfCB | CfCB.
-preprocessor^starting token^ending token
-=
-@g@chem^.cstart^.cend
-@g@eqn^.EQ^.EN
-grap^.G1^.G2
-@g@grn^.GS^.GE
-.\" Keep the .IF line below the @g@ideal line.
-@g@ideal^.IS^.IE
-^^.IF
-.\" Keep the .PF line below the @g@pic line.
-@g@pic^.PS^.PE
-^^.PF
-^^.PY
-@g@refer^.R1^.R2
-@g@tbl^.TS^.TE
-_
-glilypond^.lilypond start^.lilypond stop
-gperl^.Perl start^.Perl stop
-gpinyin^.pinyin start^.pinyin stop
-.TE
 .
 .
 .\" ====================================================================
@@ -4391,13 +4571,13 @@ Move one-twelfth em to the right on typesetters.
 .
 .TP
 .ESC &
-Non-printing input break.
+Interpolate a dummy character.
 .
 .
 .TP
 .ESC )
-Non-printing input break,
-transparent to end-of-sentence recognition.
+Interpolate a dummy character that is transparent to end-of-sentence
+recognition.
 .
 .
 .TP
@@ -5016,8 +5196,14 @@ then restore it.
 .SH Strings
 .\" ====================================================================
 .
+.\" BEGIN Keep (roughly) parallel with groff.texi node "Strings".
 .I groff
-has string variables primarily for user convenience.
+supports strings primarily for user convenience.
+.
+Conventionally,
+if one would define a macro only to interpolate a small amount of text,
+without invoking requests or calling any other macros,
+one defines a string instead.
 .
 Only one string is predefined by the language.
 .
@@ -5034,13 +5220,77 @@ or
 .P
 The
 .request .ds
-request creates a string with a specified name and contents
-and the
+request creates a string with a specified name and contents and the
 .esc *
 escape sequence dereferences its name,
-retrieving the contents.
+interpolating the contents.
 .
-Dereferencing an undefined string name defines it as empty.
+If the string named by the
+.esc *
+escape sequence does not exist,
+it is defined as empty,
+nothing is interpolated,
+and a warning in category
+.RB \%\[lq] mac \[rq]
+is emitted.
+.
+See section \[lq]Warnings\[rq] in
+.MR @g@troff 1 .
+.
+.
+.P
+The bracketed interpolation form accepts arguments that are handled as
+macro arguments are;
+see section \[lq]Calling Macros\[rq] above.
+.
+In contrast to macro calls,
+however,
+if a closing bracket
+.B ]
+occurs in a string argument,
+that argument must be enclosed in double quotes.
+.
+.B \[rs]*
+is interpreted even in copy mode
+(see subsection \[lq]Copy mode\[rq] below).
+.
+When defining strings,
+argument interpolations must be escaped if they are to reference
+parameters from the calling context;
+see section \[lq]Parameters\[rq] below.
+.
+.
+.P
+An initial neutral double quote
+.B \[dq]
+in the string contents is stripped to allow embedding of leading spaces.
+.
+Any other
+.B \[dq]
+is interpreted literally,
+but it is wise to use the special character escape sequence
+.B \[rs][dq]
+instead if the string might be interpolated as part of a macro argument;
+see section \[lq]Calling macros\[rq] above.
+.
+Strings are not limited to a single input line of text.
+.BI \[rs] newline
+works just as it does elsewhere.
+.
+The resulting string is stored
+.I without
+the newlines.
+.
+Care is therefore required when interpolating strings while filling is
+disabled.
+.
+It is not possible to embed a newline in a string that will be
+interpreted as such when the string is interpolated.
+.
+To achieve that effect,
+use
+.B \[rs]*
+to interpolate a macro instead.\" see @ref{Punning Names}.
 .
 .
 .P
@@ -5054,21 +5304,25 @@ If
 .request .as
 is called with only one argument,
 no operation is performed
-(beyond dereferencing it).
+(beyond dereferencing the string).
 .
 .
 .P
+Because strings are similar to macros,
+they too can be defined to suppress AT&T
+.I troff \" AT&T
+compatibility mode enablement when interpolated;
+see section \[lq]Compatibility mode\[rq] below.
+.
 The
 .request .ds1
-request defines a string such that compatibility mode is off when the
+request defines a string that suspends compatibility mode when the
 string is later interpolated.
 .
-Likewise,
-the
 .request .as1
-request is similar to
+is likewise similar to
 .BR .as ,
-but compatibility mode is switched off when the appended portion of the
+with compatibility mode suspended when the appended portion of the
 string is later interpolated.
 .
 .
@@ -5079,43 +5333,12 @@ the second argument to these requests consumes the remainder of the
 input line,
 including trailing spaces.
 .
-It is good style to end string definitions
+Ending string definitions
 (and appendments)
 with a comment,
 even an empty one,
-to prevent unwanted space from creeping into them during source document
+prevents unwanted space from creeping into them during source document
 maintenance.
-.
-.
-.P
-To store leading space in a string,
-start it with a double quote.
-.
-A double quote is special only in that position;
-double quotes in any other location are included in the string
-(the effects of escape sequences notwithstanding).
-.
-.
-.P
-Macros,
-strings,
-and diversions share a name space;
-see section \[lq]Identifiers\[rq] above.
-.
-Internally,
-the same mechanism is used to store them.
-.
-You can thus call a macro with string interpolation syntax and vice
-versa.
-.
-Interpolating a string does not hide existing macro arguments.
-.
-The sequence
-.B \[rs]\[rs]
-can be placed at the end of a line in a macro definition or,
-within a macro definition,
-immediately after the interpolation of a macro as a string to suppress
-the effect of a newline.
 .
 .
 .P
@@ -5137,28 +5360,61 @@ and aliasing
 .request .rn ,
 .request .rm ,
 .request .als).
+.\" END Keep (roughly) parallel with groff.texi node "Strings".
+.
+.
+.\" We don't have a "Diversions" section for this to follow yet.  When
+.\" we do, it should become part of a "Punning Names" section.  See
+.\" groff.texi.
+.ig
+.P
+Macros,
+strings,
+and diversions share a name space;
+see section \[lq]Identifiers\[rq] above.
+.
+Internally,
+the same mechanism is used to store them.
+.
+You can thus call a macro with string interpolation syntax and vice
+versa.
+.
+Interpolating a string does not hide existing macro arguments.
+.
+The sequence
+.B \[rs]\[rs]
+can be placed at the end of a line in a macro definition or,
+within a macro definition,
+immediately after the interpolation of a macro as a string to suppress
+the effect of a newline.
+..
 .
 .
 .\" ====================================================================
 .SH Registers
 .\" ====================================================================
 .
-Most registers store numeric values
-(see section \[lq]Numerical Expressions\[rq] above),
-but some
-(predefined,
-read-only ones)
-interpolate text.
+.\" BEGIN Keep (roughly) parallel with groff.texi node "Registers".
+In the
+.I roff
+language,
+numbers can be stored in
+.I registers.
 .
-Each register has a name.
+Many built-in registers exist,
+supplying anything from the date to details of formatting parameters.
 .
-A register is defined and assigned with the
-.request .nr
+You can also define your own.
+.
+See section \[lq]Identifiers\[rq] above for information on constructing
+a valid name for a register.
+.
+.
+.P
+Define registers and update their values with the
+.B nr
 request or the
-.esc R
-escape sequence;
-its value is interpolated with the
-.esc n
+.B \[rs]R
 escape sequence.
 .
 .
@@ -5203,681 +5459,722 @@ Bear in mind that the symbols
 are
 .I not
 part of the register name.
+.\" END Keep (roughly) parallel with groff.texi node "Registers".
 .
 .
 .\" ====================================================================
 .SS "Read-only registers"
 .\" ====================================================================
 .
-The following registers have predefined values that should not be
-modified by the user (usually, registers starting with a dot are
-read-only).
+Predefined registers whose identifiers start with a dot are read-only.
 .
-Mostly, they provide information on the current settings or store
-results from request calls.
+Many are Boolean-valued,
+interpolating a true or false value testable with
+.request .if ,
+.request .ie ,
+or
+.request .while .
+.
+Some are string-valued,
+meaning that they interpolate text.
+.
+A register name
+(without the dot)
+is often associated with a request of the same name;
+exceptions are noted.
 .
 .
 .P
 .LS
 .
-.TPx
-.REG $$
-The process ID of
-.IR @g@troff .
-.
-.TPx
+.TP 15n
 .REG .$
-Number of arguments in the current macro or string.
+Count of arguments passed to currently interpolated macro or string.
 .
-.TPx
+.TP
 .REG .a
-Post-line extra line-space most recently utilized using
+Amount of extra post-vertical line space;
+see
 .esc x .
 .
-.TPx
+.TP
 .REG .A
-Set to\~1 in
-.I @g@troff
-if option
-.option \-A
-is used; always\~1 in
-.IR @g@nroff .
-.
-.TPx
-.REG .b
-The emboldening offset while
-.request .bd
-is active.
-.
-.TPx
-.REG .br
-Interpolates\~1 if the currently executing macro was called using the
-normal control character and\~0 otherwise.
-.
-.TPx
-.REG .c
-Current input line number.
-.
-.TPx
-.REG .C
-1\~if compatibility mode is in effect, 0\~otherwise.
-.
-Always\~0 in a
-.request .do
-request;
+Approximate output is being formatted (Boolean-valued);
 see
-.register .cp
-below.
+.I @g@troff
+.B \-a
+option.
 .
-.TPx
+.TP
+.REG .b
+Font emboldening offset;
+see
+.request .bd .
+.
+.TP
+.REG .br
+The normal control character was used to call the currently interpolated
+macro (Boolean-valued).
+.
+.TP
+.REG .c
+Input line number.
+.
+.TP
+.REG .C
+Compatibility mode is enabled (Boolean-valued);
+see
+.request .cp .
+.
+Always false when processing
+.request .do ;
+see
+.register .cp .
+.
+.TP
 .REG .cdp
-The depth of the last glyph added to the current environment.
+Depth of last glyph formatted in the environment;
+.\" TODO: Give page a discussion of glyph properties and move this.
+positive if glyph extends below the baseline.
 .
-It is positive if the glyph extends below the baseline.
-.
-.
-.TPx
+.TP
 .REG .ce
-The count of lines remaining to be centered.
+Count of output lines remaining to be centered.
 .
-.
-.TPx
+.TP
 .REG .cht
-The height of the last glyph added to the current environment.
+Height of last glyph formatted in the environment;
+.\" TODO: Give page a discussion of glyph properties and move this.
+positive if glyph extends above the baseline.
 .
-It is positive if the glyph extends above the baseline.
-.
-.
-.TPx
+.TP
 .REG .color
-1\~if colors are enabled,
-0\~otherwise.
+Color output is enabled (Boolean-valued).
 .
-.
-.TPx
+.TP
 .REG .cp
-Within a
-.request .do
-request,
-the saved value of compatibility mode (see
-.register .C
-above).
+Within
+.request .do ,
+the saved value of compatibility mode;
+see
+.register .C .
 .
-.TPx
+.TP
 .REG .csk
-The skew of the last glyph added to the current environment.
+Skew of the last glyph formatted in the environment;
+.\" TODO: Give page a discussion of glyph properties and move this.
+skew is how far to the right of the center of a glyph the center of an
+accent over that glyph should be placed.
 .
-The skew of a glyph is how far to the right of the center of a glyph
-the center of an accent over that glyph should be placed.
-.
-.TPx
+.TP
 .REG .d
-Current vertical place in current diversion; equal to register
-.BR nl .
+Vertical drawing position in diversion.
 .
-.TPx
+.TP
 .REG .ev
-The name of the current environment (string-valued).
+Name of environment (string-valued).
 .
-.
-.TPx
+.TP
 .REG .f
-Mounting position index of the current font.
+Mounting position of selected font;
+see
+.request .ft
+and
+.esc f .
 .
-.
-.TPx
+.TP
 .REG .F
-The name of the current input file (string-valued).
+Name of input file (string-valued).
 .
-.TPx
+.
+.TP
 .REG .fam
-The current font family (string-valued).
+Name of font family (string-valued).
 .
-.TPx
+.
+.TP
 .REG .fn
-The current (internal) real font name (string-valued).
+Resolved name of selected font (string-valued);
+see
+.request .ft
+and
+.esc f .
 .
-.
-.TPx
+.TP
 .REG .fp
-The next free font mounting position index.
+Next free font mounting position index.
 .
-.
-.TPx
+.TP
 .REG .g
-Always 1 in GNU
-.IR troff . \" GNU
+Always true in GNU
+.I troff \" GNU
+(Boolean-valued).
 .
-Use to test if running under
-.IR groff .
-.
-.
-.TPx
+.TP
 .REG .h
 Text baseline high-water mark on page or in diversion.
 .
-.
-.TPx
+.TP
 .REG .H
-Horizontal motion quantum of the output device in basic units.
+Horizontal motion quantum of output device in basic units.
 .
-.TPx
+.TP
 .REG .height
-The current font height as set with
+Font height;
+see
 .esc H .
 .
-.TPx
+.TP
 .REG .hla
-The hyphenation language in the current environment.
+Hyphenation language in environment (string-valued).
 .
-.TPx
+.TP
 .REG .hlc
-The count of immediately preceding consecutive hyphenated lines in the
-current environment.
+Count of immediately preceding consecutive hyphenated lines in
+environment.
 .
-.
-.TPx
+.TP
 .REG .hlm
-The maximum quantity of consecutive hyphenated lines allowed in the
-current environment.
+Maximum quantity of consecutive hyphenated lines allowed in environment.
 .
-.
-.TPx
+.TP
 .REG .hy
-The automatic hyphenation mode in the current environment.
+Automatic hyphenation mode in environment.
 .
-.TPx
+.TP
 .REG .hym
-The hyphenation margin in the current environment.
+Hyphenation margin in environment.
 .
-.TPx
+.TP
 .REG .hys
-The hyphenation space adjustment threshold in the current environment.
+Hyphenation space adjustment threshold in environment.
 .
-.TPx
+.TP
 .REG .i
-Indentation.
-.
-.TPx
-.REG .in
-Indentation applicable to the pending output line;
+Indentation amount;
 see
-.request .ti
-request.
+.request .in .
 .
-.TPx
+.TP
+.REG .in
+Indentation amount applicable to the pending output line;
+see
+.request .ti .
+.
+.TP
 .REG .int
-Positive if last output line contains
-.esc c .
+Previous output line was \[lq]interrupted\[rq] or continued with
+.esc c
+(Boolean-valued).
 .
-.
-.TPx
+.TP
 .REG .j
-Adjustment mode encoded as an integer.
+Adjustment mode encoded as an integer;
+see
+.request .ad
+and
+.request .na .
 .
 Do not interpret or perform arithmetic on its value.
 .
-.
-.TPx
+.TP
 .REG .k
-The current horizontal output position (relative to the current
-indentation).
+Horizontal drawing position relative to indentation.
 .
-.
-.TPx
+.TP
 .REG .kern
-1\~if pairwise kerning is enabled, 0\~otherwise.
+Enablement status of pairwise kerning (Boolean-valued).
 .
-.TPx
+.TP
 .REG .l
-Current line length.
+Line length;
+see
+.request .ll .
 .
-.TPx
+.TP
 .REG .L
-The current line spacing setting as set by
+Line spacing;
+see
 .request .ls .
 .
-.TPx
+.TP
 .REG .lg
-The current ligature mode (as set by the
-.request .lg
-request).
+Ligature mode enablement (Boolean-valued).
 .
-.TPx
+.TP
 .REG .linetabs
-The current line-tabs mode (as set by the
-.request .linetabs
-request).
+Line-tabs mode enablement (Boolean-valued).
 .
-.TPx
+.TP
 .REG .ll
-Line length of the pending output line.
+Length of pending output line.
 .
-.TPx
+.TP
 .REG .lt
 Title length.
 .
-.TPx
+.TP
 .REG .m
-Stroke color (string-valued).
+Stroke color (string-valued);
+see
+.request .gcolor
+and
+.esc m .
 .
+Empty if the stroke color is the default.
 .
-.TPx
+.TP
 .REG .M
-Fill color (string-valued).
+Fill color (string-valued);
+see
+.request .fcolor
+and
+.esc M .
 .
+Empty if the fill color is the default.
 .
-.TPx
+.TP
 .REG .n
-Length of text portion on previous output line.
+Length of formatted output on previous output line.
 .
-.TPx
+.TP
 .REG .ne
-The amount of space that was needed in the last
+Amount of vertical space required by last
 .request .ne
-request that caused a trap to be sprung.
+that caused a trap to be sprung;
+also see
+.register .trunc .
 .
-Useful in conjunction with register
-.BR .trunc .
-.
-.
-.TPx
+.TP
 .REG .nm
-1\~if output line numbering is enabled
-(even if temporarily suppressed),
-0\~otherwise.
+Output line numbering enablement (Boolean-valued).
 .
+.TP
+.REG .nn
+Count of output lines remaining to have numbering suppressed.
 .
-.TPx
+.TP
 .REG .ns
-1\~if in no-space mode, 0\~otherwise.
+No-space mode enablement (Boolean-valued).
 .
-.TPx
+.TP
 .REG .o
-Current page offset.
+Page offset;
+see
+.request .po .
 .
-.TPx
+.TP
 .REG .O
-The suppression nesting level (see
-.esc O ).
+Output suppression nesting level;
+see
+.esc O .
 .
-.TPx
+.TP
 .REG .p
-Current page length.
+Page length;
+see
+.request .pl .
 .
-.TPx
+.TP
 .REG .P
-1\~if the current page is being printed, 0\~otherwise (as determined by
-the
-.option \-o
-command-line option).
+Output page selection status (Boolean-valued);
+see
+.I @g@troff
+.B \-o
+option.
 .
-.TPx
+.TP
 .REG .pe
-1\~during page ejection, 0\~otherwise.
+Page ejection status (Boolean-valued).
 .
-.TPx
+.TP
 .REG .pn
-The number of the next page: either the value set by a
-.request .pn
-request, or the number of the current page plus\ 1.
+Number of the next page.
 .
-.TPx
+.TP
 .REG .ps
-The current type size in scaled points.
+Type size in scaled points.
 .
-.
-.TPx
+.TP
 .REG .psr
-The last-requested type size in scaled points.
+Most recently requested type size in scaled points;
+see
+.request .ps
+and
+.esc s .
 .
-.
-.TPx
+.TP
 .REG .pvs
-The current post-vertical line spacing.
+Post-vertical line spacing.
 .
-.
-.TPx
+.TP
 .REG .R
-The count of available unused registers;
+Count of available unused registers;
 always 10,000 in GNU
 .IR troff . \" GNU
 .
-.
-.TPx
+.TP
 .REG .rj
-The count of lines remaining to be right-aligned.
+Count of lines remaining to be right-aligned.
 .
-.
-.TPx
+.TP
 .REG .s
-Current type size in points as a decimal fraction
-(string-valued).
+Type size in points as a decimal fraction (string-valued);
+see
+.request .ps
+and
+.esc s .
 .
-.
-.TPx
+.TP
 .REG .slant
-The slant of the current font as set with
+Slant of font in degrees;
+see
 .esc S .
 .
-.
-.TPx
+.TP
 .REG .sr
-The last requested type size in points as a decimal fraction
-(string-valued).
+Most recently requested type size in points as a decimal fraction
+(string-valued);
+see
+.request .ps
+and
+.esc s .
 .
-.
-.TPx
+.TP
 .REG .ss
-Size of minimal inter-word spacing in twelfths of the space width of the
-current font.
+Size of minimal inter-word spacing in twelfths of the space width of
+selected font.
 .
-.TPx
+.TP
 .REG .sss
 Size of additional inter-sentence space in twelfths of the space width
-of the current font.
+of selected font.
 .
-.TPx
+.TP
 .REG .sty
-The current font style (string-valued).
+Font style (string-valued);
+see
+.request .ft
+and
+.esc f .
 .
-.
-.TPx
+.TP
 .REG .t
-Distance to the next vertical position trap.
+Distance to next vertical position trap;
+see
+.request .wh
+and
+.request .ch .
 .
-.
-.TPx
+.TP
 .REG .T
-Set to\~1
-if option
-.option \-T
-is used.
+Indicator of output device selection (Boolean-valued);
+see
+.I @g@troff
+.B \-T
+option.
 .
-.TPx
+.TP
 .REG .tabs
-A string representation of the current tab settings suitable for use
-as an argument to the
+Representation of tab settings suitable for use as argument to
 .request .ta
-request.
+(string-valued).
 .
-.TPx
+.TP
 .REG .trunc
-The amount of vertical space truncated by the most recently sprung
+Amount of vertical space truncated by the most recently sprung
 vertical position trap,
 or,
 if the trap was sprung by an
-.request .ne
-request,
+.request .ne ,
 minus the amount of vertical motion produced by
-.request .ne .
-.
-Useful in conjunction with the
+.request .ne ;
+also see
 .register .ne .
 .
-.
-.TPx
+.TP
 .REG .u
-Equal to 1 if filling is enabled,
-0 otherwise.
+Filling enablement (Boolean-valued);
+see
+.request .fi
+and
+.request .nf .
 .
-.
-.TPx
+.TP
 .REG .U
-1\~in unsafe mode and 0\~otherwise.
+Unsafe mode enablement (Boolean-valued);
+see
+.I @g@troff
+.B \-U
+option.
 .
-.
-.TPx
+.TP
 .REG .v
-Current vertical line spacing.
+Vertical line spacing;
+see
+.request .vs .
 .
-.TPx
+.TP
 .REG .V
 Vertical motion quantum of the output device in basic units.
 .
-.
-.TPx
+.TP
 .REG .vpt
-1\~if vertical position traps are enabled, 0\~otherwise.
+Vertical position trap enablement (Boolean-valued).
 .
-.
-.TPx
+.TP
 .REG .w
-Width of previous glyph.
+Width of previous glyph formatted in the environment.
 .
-.
-.TPx
+.TP
 .REG .warn
-The sum of the numeric codes of currently enabled warning categories.
+Sum of the numeric codes of enabled warning categories.
 .
-.
-.TPx
+.TP
 .REG .x
-The major version number of the running
+Major version number of the running
 .I @g@troff
 formatter.
 .
-.
-.TPx
+.TP
 .REG .y
-The minor version number of the running
+Minor version number of the running
 .I @g@troff
 formatter.
 .
-.
-.TPx
+.TP
 .REG .Y
-The revision number of the running
+Revision number of the running
 .I @g@troff
 formatter.
 .
-.
-.TPx
+.TP
 .REG .z
-Name of current diversion.
+Name of diversion (string-valued).
 .
-.TPx
+.TP
 .REG .zoom
-Zoom factor for current font (in multiples of 1/1000th; zero if no
-magnification).
+Zoom multiplier of current font
+(in thousandths;
+zero if no magnification).
 .LE
 .
 .
 .\" ====================================================================
-.SS "Writable registers"
+.SS "Writable predefined registers"
 .\" ====================================================================
 .
-The following registers can be read and written by the user.
-They have predefined default values, but these can be modified for
-customizing a document.
+Several registers are predefined but also modifiable;
+some are updated upon interpretation of certain requests or escape
+sequences.
+.
+Date- and time-related registers are set to the local time as determined
+by
+.MR localtime 3
+when the formatter launches.
+.
+This initialization can be overridden by
+.I \%SOURCE_DATE_EPOCH
+and
+.IR TZ ;
+see section \[lq]Environment\[rq] of
+.MR groff @MAN1EXT@ .
 .
 .
 .P
 .LS
-.TPx
+.
+.TP 15n
+.REG $$
+Process ID of
+.IR @g@troff .
+.
+.TP
 .REG %
-Current page number.
+Page number.
 .
-.TPx
+.TP
 .REG c.
-Current input line number.
+Input line number.
 .
-.TPx
+.TP
 .REG ct
-Character type (set by width function
-.esc w ).
+Union of character types of each glyph rendered into dummy environment
+by
+.esc w .
 .
-.TPx
+.TP
 .REG dl
-Maximal width of last completed diversion.
+Width of last closed diversion.
 .
-.TPx
+.TP
 .REG dn
-Height of last completed diversion.
+Height of last closed diversion.
 .
-.TPx
+.TP
 .REG dw
-Current day of week (1\(en7).
+Day of the week (1\[en]7;
+1 is Sunday).
 .
-.TPx
+.TP
 .REG dy
-Current day of month (1\(en31).
+Day of the month (1\[en]31).
 .
-.TPx
+.TP
 .REG hours
-The number of hours past midnight.
+Count of hours elapsed since midnight (0\[en]23).
 .
-Initialized at startup.
-.
-.TPx
+.TP
 .REG hp
-Current horizontal position at input line.
+Horizontal drawing position relative to start of input line.
 .
-.TPx
+.TP
 .REG llx
-Lower left x-coordinate (in PostScript units) of a given PostScript
-image (set by
-.request .psbb ).
+Lower-left
+.I x
+coordinate
+(in PostScript units)
+of PostScript image;
+see
+.request .psbb .
 .
-.TPx
+.TP
 .REG lly
-Lower left y-coordinate (in PostScript units) of a given PostScript
-image (set by
-.request .psbb ).
+Lower-left
+.I y
+coordinate
+(in PostScript units)
+of PostScript image;
+see
+.request .psbb .
 .
-.TPx
+.TP
 .REG ln
-Output line number.
+Output line number;
+see
+.request .nm .
 .
-.
-.TPx
+.TP
 .REG lsn
-The count of leading spaces on an input line.
+Count of leading spaces on input line.
 .
-.
-.TPx
+.TP
 .REG lss
-The amount of horizontal space corresponding to the leading spaces
-on an input line.
+Amount of horizontal space corresponding to leading spaces on input
+line.
 .
-.
-.TPx
+.TP
 .REG minutes
-The number of minutes after the hour.
+Count of minutes elapsed in the hour (0\[en]59).
 .
-Initialized at startup.
-.
-.TPx
+.TP
 .REG mo
-Current month (1\(en12).
+Month of the year (1\[en]12).
 .
-.
-.TPx
+.TP
 .REG nl
-Current vertical position.
+Vertical drawing position.
 .
-.
-.TPx
+.TP
 .REG opmaxx
-.TPx
+.TP
 .REG opmaxy
-.TPx
+.TP
 .REG opminx
-.TPx
+.TP
 .REG opminy
-These four registers mark the top left and bottom right hand corners of
-a box which encompasses all written glyphs.
+These four registers mark the top left- and bottom right-hand corners of
+a rectangle encompassing all formatted output on the page.
+.
 They are reset to \-1 by
 .B \[rs]O0
 or
 .BR \[rs]O1 .
 .
-.TPx
+.TP
 .REG rsb
 As
 .register sb ,
 adding maximum glyph height to measurement.
 .
-.TPx
+.TP
 .REG rst
 As
 .register st ,
 adding maximum glyph depth to measurement.
 .
-.TPx
+.TP
 .REG sb
 Maximum displacement of text baseline below its original position
-in the argument to
+after rendering into dummy environment by
 .esc w .
 .
-.TPx
+.TP
 .REG seconds
-The number of seconds after the minute.
+Count of seconds elapsed in the minute (0\[en]60). \" not 59; see POSIX
 .
-Initialized at startup.
-.
-.TPx
+.TP
 .REG skw
-Right skip width from the center of the last glyph in the
-.esc w
-argument.
+Skew of last glyph rendered into dummy environment by
+.esc w .
 .
-.
-.TPx
+.TP
 .REG slimit
-If >0,
-sets the maximum quantity of objects on
+The maximum depth of
 .IR @g@troff 's
 internal input stack.
 .
 If \[<=]0,
 there is no limit:
-recursion can continue until program memory is exhausted.
+recursion can continue until available memory is exhausted.
 .
 The default is 1,000.
 .
-.
-.TPx
+.TP
 .REG ssc
-The amount of horizontal space (possibly negative) that should be
-added to the last glyph before a subscript (generated by width
-function
-.esc w ).
-.
-.TPx
-.REG st
-Maximum displacement of text baseline above its original position
-in the argument to
+Subscript correction of last glyph rendered into dummy environment by
 .esc w .
 .
-.TPx
+.TP
+.REG st
+Maximum displacement of text baseline above its original position
+after rendering into dummy environment by
+.esc w .
+.
+.TP
 .REG systat
-The return value of the
+Return value of
 .I system()
-function executed by the last
-.request .sy
-request.
+function; see
+.request .sy .
 .
-.TPx
+.TP
 .REG urx
-Upper right x-coordinate (in PostScript units) of a given PostScript
-image (set by
-.request .psbb ).
+Upper-right
+.I x
+coordinate
+(in PostScript units)
+of PostScript image;
+see
+.request .psbb .
 .
-.TPx
+.TP
 .REG ury
-Upper right y-coordinate (in PostScript units) of a given PostScript
-image (set by
-.request .psbb ).
+Upper-right
+.I y
+coordinate
+(in PostScript units)
+of PostScript image;
+see
+.request .psbb .
 .
-.TPx
+.TP
 .REG year
-The current year.
+Gregorian year.
 .
-.TPx
+.TP
 .REG yr
-The current year minus 1900.
-.
+Gregorian year minus 1900.
 .LE
 .
 .
@@ -5997,8 +6294,8 @@ enables hyphenation after the first character of a word.
 Apart from value\~2,
 restrictions imposed by the hyphenation mode are
 .I not
-respected for words whose hyphenations have been explicitly specified
-with the hyphenation character
+respected for words whose hyphenations have been specified with the
+hyphenation character
 .RB (\[lq] \|\[rs]% \[rq]
 by default)
 or the
@@ -6007,10 +6304,10 @@ request.
 .
 .
 .P
-The nonzero values above are additive.
+Nonzero values are additive.
 .
 For example,
-value\~12 causes
+mode\~12 causes
 .I groff
 to hyphenate neither the last two nor the first two characters of a
 word.
@@ -6037,13 +6334,13 @@ and
 .BR .hpfcode ).
 .
 Furthermore,
-hyphenation of a word might be suppressed because too many previous
-lines have been hyphenated
+hyphenation of a word might be suppressed due to a limit on
+consecutive hyphenated lines
 .RB ( .hlm ),
-the line has not reached a certain minimum length
+a minimum line length threshold
 .RB ( .hym ),
-or the line can instead be adjusted with up to a certain amount of
-additional inter-word space
+or because the line can instead be adjusted with additional inter-word
+space
 .RB ( .hys ).
 .
 .
@@ -6078,6 +6375,8 @@ English
 French
 .RI ( fr ),
 Japanese
+.RI ( it ),
+Italian
 .RI ( ja ),
 Swedish
 .RI ( sv ),
@@ -6138,14 +6437,15 @@ and end inside another.
 .P
 Variants of
 .B .de
-that disable compatibility mode and/or indirect the names of the macros
-being defined or ending the definition through strings are available as
+disable compatibility mode and/or indirect the names of the macros
+specified for definition or termination:
+these are
 .BR .de1 ,
 .BR .dei ,
 and
 .BR .dei1 .
 .
-Existing macro definitions can be appended to with
+Append to macro definitions with
 .BR .am ,
 .BR .am1 ,
 .BR .ami ,
@@ -6244,7 +6544,7 @@ can be termed
 The escape character,
 .B \[rs]
 by default,
-can escape a backslash.
+can escape itself.
 .
 This enables you to control whether a given
 .BR \[rs]n ,
@@ -6277,7 +6577,10 @@ that
 does not recognize,
 the escape character is ignored and
 .IR X \~is
-output,
+output.
+.
+An unrecognized escape sequence causes a warning in category
+.RB \%\[lq] escape \[rq],
 with two exceptions,
 .B \[rs]\[rs]
 being one.
@@ -6308,9 +6611,9 @@ to obtain a backslash glyph,
 and
 .B \[rs]&
 before
-.RB \[lq] .\& \[rq]
+.B .\&
 and
-.RB \[lq] \[aq] \[rq]
+.B \[aq]
 where
 .I @g@troff
 expects them as control characters if you mean to use them literally.
@@ -6323,7 +6626,7 @@ In
 .RB \[lq] \|\[rs]\[rs] \[rq],
 each escape character is interpreted twice\[em]once in copy mode,
 when the macro is defined,
-and once outside of it,
+and once in interpretation mode,
 when the macro is called.
 .
 This fact leads to exponential growth in the quantity of escape
@@ -6359,11 +6662,12 @@ use end macros.
 .SH Traps
 .\" ====================================================================
 .
+.\" BEGIN Keep (roughly) parallel with groff.texi node "Traps".
 .I Traps
 are locations in the output,
 or conditions on the input that,
 when reached or fulfilled,
-cause a specified macro to be called.
+call a specified macro.
 .
 These traps can occur at a given location on the page
 .RB ( .wh ,\~ .ch );
@@ -6377,7 +6681,7 @@ at a blank line
 .RB ( .blm );
 at a line with leading space characters
 .RB ( .lsm );
-after a certain number of input lines
+after a certain number of productive input lines
 .RB ( .it ,\~ .itc );
 or at the end of input
 .RB ( .em ).
@@ -6391,6 +6695,7 @@ one.
 It is said that a trap is
 .I sprung
 if its condition is fulfilled.
+.\" END Keep (roughly) parallel with groff.texi node "Traps".
 .
 .
 .P
@@ -6400,7 +6705,7 @@ vertical position trap enablement status
 distance to the next trap
 .RB ( \[rs]n[.t] ),
 amount of needed
-.RB ( .ne -requested )
+.RB ( .ne -requested)
 space that caused the most recent vertical position trap to be sprung
 .RB ( \[rs]n[.ne] ),
 amount of needed space truncated from the amount requested
@@ -6412,6 +6717,135 @@ leading space count
 .RB ( \[rs]n[.lsn] )
 with its corresponding amount of motion
 .RB ( \[rs]n[.lss] ).
+.
+.
+.\" ====================================================================
+.SH Diversions
+.\" ====================================================================
+.
+.\" BEGIN Keep (roughly) parallel with groff.texi node "Diversions".
+In
+.I roff
+systems systems it is possible to format text as if for output,
+but instead of writing it immediately,
+one can
+.I divert
+the formatted text into a named storage area.
+.
+It is retrieved later by specifying its name after a control character.
+.
+The same name space is used for such
+.I diversions
+as for strings and macros;
+see section \[lq]Identifiers\[rq] above.
+.
+Such text is sometimes said to be \[lq]stored in a macro\[rq],
+but this coinage obscures the important distinction between macros and
+strings on one hand and diversions on the other;
+the former store
+.I unformatted
+input text,
+and the latter capture
+.I formatted
+output.
+.
+Diversions also do not interpret arguments.
+.
+Applications of diversions include \[lq]keeps\[rq]
+(preventing a page break from occurring at an inconvenient place by
+forcing a set of output lines to be set as a group),
+footnotes,
+tables of contents,
+and indices.
+.
+For orthogonality it is said that GNU
+.I troff \" GNU
+is in the
+.I top-level diversion
+if no diversion is active
+(that is,
+formatted output is being \[lq]diverted\[rq] immediately to the output
+device.
+.
+.
+.P
+Dereferencing an undefined diversion will create an empty one of that
+name and cause a warning in category
+.B mac
+to be emitted.
+(see section \[lq]Warnings\[rq] in
+.MR @g@troff @MAN1EXT@ ).
+.
+A diversion does not exist for the purpose of testing with the
+.B d
+conditional operator until its initial definition ends
+(see subsection \[lq]Conditional expressions\[rq] above).
+.\" The following requests are used to create and alter diversions.
+.\" END Keep (roughly) parallel with groff.texi node "Diversions".
+.
+.
+.P
+The
+.B di
+request creates a diversion,
+including any partially collected line.
+.
+.B da
+appends to an existing diversion,
+creating one if it does not already exist.
+.
+.B box
+and
+.B boxa
+works similarly,
+but ignore partially collected lines.
+.
+Call any of these macros again without an argument to end the diversion.
+.
+.
+.br
+.ne 2v
+.P
+Diversions can be nested.
+.
+The registers
+.BR .d ,
+.BR .z ,
+.BR dn ,
+and
+.B dl
+report information about the current
+(or last closed)
+diversion.
+.
+.B .h
+is meaningful in diversions,
+including the top level.
+.
+.
+.P
+The
+.B \[rs]!\%
+and
+.B \[rs]?\%
+escape sequences and
+.B output
+request escape from a diversion,
+the first two to the enclosing level and the last to the top level.
+.
+This facility is termed
+.IR "transparent embedding" .
+.
+.
+.P
+The
+.B asciify
+and
+.B unformat
+requests reprocess diversions.
+.\" XXX: That's a weak statement.  What we need is a `for` request and
+.\" a new conditional operator that tests whether an item in a node list
+.\" is an (otherwise unrepresentable) node.  See Savannah #62264.
 .
 .
 .\" ====================================================================
@@ -6443,8 +6877,6 @@ The current environment is at the top of the stack.
 The same environment name can be pushed onto the stack multiple times,
 possibly interleaved with others.
 .
-.
-.P
 Popping the environment stack does not destroy the current environment;
 it remains accessible by name and can be made current again by pushing
 it at any time.
@@ -6464,11 +6896,25 @@ Environments store the following information.
 .
 .
 .IP \[bu] 2n
+a partially collected line, if any
+.
+.
+.IP \[bu]
+data about the most recently output glyph and line
+(registers
+.BR .cdp ,
+.BR .cht ,
+.BR .csk ,
+.BR .n ,
+.BR .w )
+.
+.
+.IP \[bu]
 typeface parameters
 (size,
 family,
 style,
-glyph height and slant,
+height and slant,
 inter-word and inter-sentence space sizes)
 .
 .
@@ -6477,35 +6923,34 @@ page parameters
 (line length,
 title length,
 vertical spacing,
-line
-spacing,
+line spacing,
 indentation,
 line numbering,
 centering,
-right-justifying,
+right-alignment,
 underlining,
-hyphenation data)
+hyphenation parameters)
 .
 .
 .IP \[bu]
-filling enablement,
+filling enablement;
 adjustment enablement and mode
 .
 .
 .IP \[bu]
-tab stops; tab and leader characters; escape,
+tab stops;
+tab,
+leader,
+escape,
 control,
 no-break control,
-hyphenation control,
-and margin characters
+hyphenation,
+and
+margin characters
 .
 .
 .IP \[bu]
-partially collected lines
-.
-.
-.IP \[bu]
-input traps
+input line traps
 .
 .
 .IP \[bu]
@@ -6592,9 +7037,12 @@ to
 .SS "Underlining without macro definitions"
 .\" ====================================================================
 .
-If one does not want to use macro definitions, e.g., when
-.B doclifter
-gets lost, use the following:
+If one does not want to use macro definitions,
+e.g.,
+when
+.I doclifter
+gets lost,
+use the following.
 .
 .RS
 .EX
@@ -6608,8 +7056,9 @@ gets lost, use the following:
 .EE
 .RE
 .
+.ne 2v
 When using
-.BR doclifter ,
+.IR doclifter ,
 it might be necessary to change syntax forms such as
 .B \e[xy]
 and
@@ -6649,79 +7098,67 @@ after
 .
 .
 .\" ====================================================================
-.SS "Underlining with overstriking \ez and \e(ul"
+.SS "Underlining by overstriking with \e(ul"
 .\" ====================================================================
 .
-There is another possibility for underlining by using overstriking
-with
-.BI \ez c
-(print
+You can use the
+.B \[rs]z
+escape sequence to format a glyph while suppressing advancement of its
+drawing position;
+this is another form of overstriking.
+.
+Thus,
+.BI \[rs]z c \[rs](ul
+formats
 .I c
-with zero width without spacing) and
-.B \e(ul
-(underline character).
+without advancement,
+then draws the underrule glyph on top of it.
 .
-This produces the underlining of 1 character, both in
-.B nroff
-and in
-.BR troff .
-.
-.
-.P
-For example the underlining of a character say
-.B t
-looks like
-.B \ez\e[ul]t
-or
-.B \ez\e(ult
+Because video terminals implement the underrule glyph by setting the
+underline attribute on the character cell,
+this works in both
+.I nroff \" mode
+and
+.I troff \" mode
+modes.
 .
 .
 .P
-Longer words look then a bit strange, but a useful mode is to write
-each character into a whole own line.
+Long words may then look intimidating in the input;
+a clarifying approach might be to use the input line continuation escape
+sequence
+.BI \[rs] newline
+to place each underlined character on its own input line.
 .
-To underlines the 3 character part "tar" of the word "start":
+Thus,
 .
 .RS
 .EX
-.br
-before s\[rs]
-\[rs]z\[rs][ul]t\[rs]
-\[rs]z\[rs][ul]a\[rs]
-\[rs]z\[rs][ul]r\[rs]
-t after
+\&.nf
+\[rs]&\[rs]fB: ${\[rs]fIvar\[rs]fR\[rs]c
+\[rs]zo\[rs](ul\[rs]
+\[rs]zp\[rs](ul\[rs]c
+\[rs]&\[rs]fIvalue\[rs]fB}
+\&.fi
 .EE
 .RE
 .
-or
+produces
 .
 .RS
 .EX
-.br
-before s\[rs]
-\[rs]z\[rs](ult\[rs]
-\[rs]z\[rs](ula\[rs]
-\[rs]z\[rs](ulr\[rs]
-t after
+.BI ": ${" var \c
+\zo\(ul\
+\zp\(ul\c
+.IB value }
 .EE
 .RE
 .
-.
-.P
-The result looks like
-.RS
-.ft CR
-before s\
-\z\[ul]t\
-\z\[ul]a\
-\z\[ul]r\
-t after
-.ft R
-.RE
+as output.
 .
 .
 .\" ====================================================================
-.SH Compatibility
+.SH "Compatibility mode"
 .\" ====================================================================
 .
 The differences between the
@@ -6736,12 +7173,16 @@ and device-independent intermediate output formats described by
 CSTR\~#54 are documented in
 .MR groff_diff @MAN7EXT@ .
 .
-.
-.P
 .I groff
-provides an AT&T compatibility mode;
-see
-.MR groff @MAN1EXT@ .
+provides an AT&T compatibility mode.
+.
+The
+.request .cp
+request and registers
+.B .C
+and
+.B .cp
+set and test the enablement of this mode.
 .
 .
 .\" ====================================================================
@@ -6831,6 +7272,7 @@ G.\& Branden Robinson
 .SH "See also"
 .\" ====================================================================
 .
+.ne 2v
 .IR "Groff: The GNU Implementation of troff" ,
 by Trent A.\& Fisher and Werner Lemberg,
 is the primary
@@ -6840,6 +7282,8 @@ manual.
 You can browse it interactively with \[lq]info groff\[rq].
 .
 .
+.br
+.ne 2v
 .P
 \[lq]Troff User's Manual\[rq]
 by Joseph F.\& Ossanna,
@@ -6857,6 +7301,8 @@ documentation as
 .RI \[lq]AT&T\~ troff \[rq].
 .
 .
+.br
+.ne 3v
 .P
 \[lq]A Typesetter-independent TROFF\[rq]
 by Brian W.\& Kernighan,

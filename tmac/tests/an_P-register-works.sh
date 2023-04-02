@@ -19,36 +19,32 @@
 #
 
 groff="${abs_top_builddir:-.}/test-groff"
+
 fail=
 
 wail () {
     echo "...FAILED" >&2
-    echo "$output"
-    fail=yes
+    fail=YES
 }
 
-# GNU tbl draws vertical lines 1v taller than they need to be on nroff
-# devices to enable them to cross a potential horizontal line in the
-# table.  This can lead to a spurious top border.
+input='.TH foo 1 2022-12-11 "groff test suite"
+.SH Name
+foo \- frobinicate a bar
+.bp
+.SH Description
+It took a while to get here.'
 
-input='.ll 12n
-.TS
-| L |.
-_
-1234567890
-.TE
-.pl \n(nlu
-'
+output=$(printf "%s\n" "$input" | "$groff" -rcR=0 -rP13 -man -Tascii \
+    -P-cbou)
+echo "$output"
 
-echo "checking height of table with plain vertical rules" >&2
-output=$(printf "%s" "$input" | "$groff" -Tascii -t)
-lines=$(echo "$output" | wc -l)
-test $lines -eq 1 || wail
+echo "checking first page footer" >&2
+echo "$output" | grep -En "^groff test suite +2022-12-11 +13$" \
+    | grep '^64:' || wail
 
-echo "checking content of table with plain vertical rules" >&2
-output=$(printf "%s" "$input" | "$groff" -Tascii -t)
-# If we fix the horizontal width issue (Savannah #62471), take out " ?".
-echo "$output" | sed -n '1p' | grep -Eqx -- '\|1234567890 ?\|' || wail
+echo "checking second page footer" >&2
+echo "$output" | grep -En "^groff test suite +2022-12-11 +14$" \
+    | grep '^130:' || wail
 
 test -z "$fail"
 

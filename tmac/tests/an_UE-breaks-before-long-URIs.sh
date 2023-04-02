@@ -48,15 +48,16 @@ wail () {
     fail=yes
 }
 
-echo "testing that no diagnostic messages are produced" >&2
-output=$(printf "%s" "$input" \
-    | "$groff" -Tascii -P-cbou -man -ww -z 2>&1)
-test -z "$output" || wail
-
-echo "testing that lines break where expected" >&2
 output=$(printf "%s" "$input" | "$groff" -Tascii -P-cbou -man)
-break1=$(echo "$output" | grep -x "  *Commerce")
-break2=$(echo "$output" | grep -x "  *<https.*actionscript/")
+echo "$output"
+error=$(printf "%s" "$input" \
+    | "$groff" -Tascii -P-cbou -man -ww -z 2>&1)
+
+echo "testing that no diagnostic messages are produced" >&2
+test -z "$error" || wail
+echo "testing that lines break where expected" >&2
+break1=$(echo "$output" | grep -x "  *Commerce  *<https.*devnet/")
+break2=$(echo "$output" | grep -x "  *actionscript/.* transaction  *in")
 break3=$(echo "$output" | grep -x "  *<https.*612")
 test -n "$break1" || wail "first break"
 test -n "$break2" || wail "second break"

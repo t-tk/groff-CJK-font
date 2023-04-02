@@ -14,7 +14,7 @@ _ifstyle()dnl
 ; that is,
 approximately the width of the letter \(lqn\(rq in the font current when
 the macro is called
-(see section \(lqNumerical Expressions\(rq in
+(see section \(lqMeasurements\(rq in
 .MR groff @MAN7EXT@ )\c
 _endif()dnl
 \&.
@@ -82,6 +82,21 @@ _endif()dnl
 .\" Save and disable compatibility mode (for, e.g., Solaris 10/11).
 .do nr *groff_groff_man_7_man_C \n[.cp]
 .cp 0
+.
+.\" Define fallback for groff 1.23's MR macro if the system lacks it.
+.nr do-fallback 0
+.if !\n(.f           .nr do-fallback 1 \" mandoc
+.if  \n(.g .if !d MR .nr do-fallback 1 \" older groff
+.if !\n(.g           .nr do-fallback 1 \" non-groff *roff
+.if \n[do-fallback]  \{\
+.  de MR
+.    ie \\n(.$=1 \
+.      I \%\\$1
+.    el \
+.      IR \%\\$1 (\\$2)\\$3
+.  .
+.\}
+.rr do-fallback
 .
 .
 .\" ====================================================================
@@ -180,7 +195,7 @@ _
 .
 .
 .P
-Macros whose use we discourage
+We discuss other macros
 .RB ( .AT ,
 .BR .DT ,
 .BR .HP ,
@@ -188,7 +203,7 @@ Macros whose use we discourage
 .BR .PD ,
 and
 .BR .UC )
-are described in subsection \(lqDeprecated features\(rq below.
+in subsection \(lqDeprecated features\(rq below.
 .
 .
 .P
@@ -201,19 +216,6 @@ _ifstyle()dnl
 .
 .
 .\" ====================================================================
-.\" .SS "Fundamental concepts"
-.\" ====================================================================
-.\" TODO: Write an introduction for non-typographers.  Cover the
-.\" following:
-.\"
-.\" filling, hyphenation, breaking, adjustment (elsewhere known as
-.\" justification)
-.\" font (family, style [elsewhere known as face])
-.\" type size
-.\" typesetter (troff device, PostScript, PDF)
-.\" terminal (nroff device, emulator, typewriter, TTY)
-.\"
-.\" ====================================================================
 .\" .SS "Input file format"
 .\" ====================================================================
 .P
@@ -224,90 +226,93 @@ and employ the Unix line-ending convention
 .\" What about rare English words that require diacritics, and
 .\" proper names that require more than basic Latin?
 .\"
-.\" text lines vs. control lines (macro calls)
-.\" word (delimited by spaces or newlines)
 .\" sentence (including end-of-sentence detection)
 .\" The above distinction works well with filling.
 .\" Don't fill your input text yourself; let groff do the work.
 .\" Also good for diffs.
 .\" escape sequences--pretty much just "see Portability"
-.\"
-.\" ====================================================================
-.\" .SS "Why have a tutorial and style guide?"
-.\" ====================================================================
-.\" the processing pipeline in brief
-.\"   preprocessors, roff itself, various output devices
-.\" Things that aren't groff--why you want the man page language to be
-.\" small (mandoc, Kerrisk's man7.org, manpages.debian.org, non-expert
-.\" humans).
-.\" possibly exhibit a horrorshow docbook-to-man example
-_endif()dnl
-.
 .
 .\" ====================================================================
-.SS "Macro reference preliminaries"
+.SS "Fundamental concepts"
 .\" ====================================================================
+.\" font (family, style [elsewhere known as face])
+.\" type size
+.\" typesetter (troff device, PostScript, PDF)
+.\" terminal (nroff device, emulator, typewriter, TTY)
+.I groff
+is a programming system for typesetting:
+we thus often use the verb \(lqto set\(rq in the sense
+\(lqto typeset\(rq.
 .
-Each macro is described in a tagged paragraph.
+The formatter
+.MR @g@troff @MAN1EXT@
+collects words from the input and
+.I fills
+output lines with as many as will fit.
 .
-Closely related macros,
-such as
-.B .EX
-and
-.BR .EE ,
-are grouped together.
+.I Words
+are separated by spaces and newlines.
+.\" Also tabs and leaders, but let's not discuss those in man(7).
+.
+A transition to a new output line is called a
+.I break.
+.
+When formatted,
+a word may be broken at hyphens,
+at
+.B \e%
+or
+.B \e:
+escape sequences
+(see subsection \(lqPortability\(rq below),
+or at predetermined locations
+if automatic hyphenation is enabled
+(see the
+.B \-rHY
+option in section \(lqOptions\(rq below).
+.
+An output line may be supplemented with
+.I inter-sentence space,
+and then optionally
+.I adjusted
+with more space to a consistent line length
+(see the
+.B \-dAD
+option).
+.
+.MR roff @MAN7EXT@
+details these processes.
 .
 .
-_ifstyle()dnl
 .P
-A macro call appears on a line starting with a dot (\(lq.\(rq),
-followed by zero or more spaces and then the macro name.
+An input line that starts with a dot (.\&)
+or neutral apostrophe (\(aq)
+is a
+.I control line.
 .
-Some macros accept arguments;
-each such argument is separated from the macro name and any subsequent
-arguments by one or more spaces.
+To call a macro,
+put its name after a dot on a control line.
+.\" You never need to indent macro calls in man(7), or call them with
+.\" the no-break control character.
+.
+We refer to macros in this document using this leading dot.
+.
+Some macros interpret
+.I arguments,
+words that follow the macro name.
 .
 A newline,
 unless escaped
 (see subsection \(lqPortability\(rq below),
-terminates the macro call.
+marks the end of the macro call.
 .
+An input line consisting of a dot followed by a newline
+is called the
+.I empty request;
+it does nothing.
 .
-_endif()dnl
-.P
-_ifstyle()dnl
-Optional macro arguments are indicated by surrounding them with square
-brackets.
-.
-If a macro accepts multiple arguments,
-those containing space \" or tab (in Plan 9 troff [only?])
-characters must be double-quoted to be interpreted correctly.
-.
-_endif()dnl
-An empty macro argument can be specified with a pair of double-quotes
-(\(lq""\(rq),
-but the
-.I man
-package is designed such that this should seldom be necessary.
-_ifstyle()dnl
-.
-See section \(lqNotes\(rq below for examples of cases where better
-alternatives to empty arguments in macro calls are available.
-_endif()dnl
-.
-Most macro arguments wll be formatted as text in the output;
-exceptions are noted.
-.
-.
-_ifstyle()dnl
-.P
-Bear in mind that
-.I groff
-is fundamentally a programming system for typesetting.
-.
-Consequently,
-the verb \(lqto set\(rq is frequently used below in the sense \(lqto
-typeset\(rq.
+.I Text lines
+are input lines that are not control lines.
 .
 .
 .P
@@ -320,34 +325,89 @@ specially.
 .
 For
 .I man
-documents written in the language subset described in section
+documents that follow the advice in section
 \[lq]Portability\[rq] below,
 this means that control lines using the empty request
-and uncommented input lines ending with an escaped newline or the
-.B \[rs]c
-escape sequence do not spring the trap;
-anything else does.
+and uncommented input lines ending with an escaped newline
+do not spring the trap;
+anything else does
+(but see the
+.B .TP
+macro description).
 .
+.
+.\" ====================================================================
+.\" .SS "Why have a tutorial and style guide?"
+.\" ====================================================================
+.\" the processing pipeline in brief
+.\"   preprocessors, roff itself, various output devices
+.\" Things that aren't groff--why you want the man page language to be
+.\" small (mandoc, Kerrisk's man7.org, manpages.debian.org, non-expert
+.\" humans).
+.\" possibly exhibit a horrorshow docbook-to-man example
+_endif()dnl
+.
+.
+.br
+.ne 6v
+.\" ====================================================================
+.SS "Macro reference preliminaries"
+.\" ====================================================================
+.
+A tagged paragraph describes each macro.
+.
+We present coupled pairs together,
+as with
+.B .EX
+and
+.BR .EE .
+.
+.
+.br
+.ne 2v
+.P
+_ifstyle()dnl
+Optional macro arguments are indicated by surrounding them with square
+brackets.
+.
+If a macro accepts multiple arguments,
+those containing space \" or tab (in Plan 9 troff [only?])
+characters must be double-quoted to be interpreted correctly.
 .
 _endif()dnl
+An empty macro argument can be specified with a pair of double-quotes
+(""),
+but the
+.I man
+package is designed such that this should seldom be necessary.
+_ifstyle()dnl
+.
+See section \(lqNotes\(rq below for examples of cases where better
+alternatives to empty arguments in macro calls are available.
+_endif()dnl
+.
+Most macro arguments will be formatted as text in the output;
+exceptions are noted.
+.
+.
 .\" ====================================================================
 .SS "Document structure macros"
 .\" ====================================================================
 .
-The highest level of organization of a man page is determined by this
-group of macros.
+Document structure macros organize a man page's content.
+.
+All of them break the output line.
 .
 .B .TH
 (title heading)
-identifies the document as a man page and defines information enabling
-.MR mandb 8
-or a similar tool to `index' it.
+identifies the document as a man page and configures the page headers
+and footers.
 .
 Section headings
 .RB ( .SH ),
-one of which is mandatory and many of which are standardized,
-facilitate quick location of relevant material by the reader and aid
-the man page writer to discuss all essential aspects of the topic.
+one of which is mandatory and many of which are conventionally expected,
+facilitate location of material by the reader and aid the man page
+writer to discuss all essential aspects of the topic.
 .
 Subsection headings
 .RB ( .SS )
@@ -364,11 +424,9 @@ and
 .BR .EE .
 .
 When none of the foregoing meets a structural demand,
-a region within a (sub)section can be manually inset within
-.B .RS
-and
-.B .RE
-macros.
+use
+.BR .RS / .RE
+to inset a region within a (sub)section.
 .
 .
 .TP
@@ -397,8 +455,9 @@ _endif()dnl
 .
 See
 .MR man 1
-for details on the section numbers and suffixes applicable to your
-system.
+or
+.MR intro 1
+for the manual sectioning applicable to your system.
 .
 .I topic
 and
@@ -439,7 +498,7 @@ is centered in the header.
 .
 If
 .I section
-is a simple integer between 1 and\~9 (inclusive),
+is an integer between 1 and\~9 (inclusive),
 there is no need to specify
 .I header-middle;
 .I an.tmac
@@ -453,7 +512,7 @@ with ellipses
 _ifstyle()dnl
 .RB ( .\|.\|.\& )
 _endif()dnl
-if they overrun the space available in the header and footer,
+if they would overrun the space available in the header and footer,
 respectively.
 .
 For HTML output,
@@ -462,19 +521,24 @@ headers and footers are suppressed.
 .
 .IP
 Additionally,
-this macro starts a new page;
-the page number is reset to\~1
+this macro breaks the page,
+resetting the number to\~1
 (unless the
 .B \-rC1
 option is given).
 .
-This feature is intended only for formatting multiple man pages.
+This feature is intended only for formatting multiple
+.I man
+documents.
 .
 .
 .IP
-A man page should contain exactly one
+A valid
+.I man
+document calls
 .B .TH
-call at or near the beginning of the file,
+once,
+early in the file,
 prior to any other macro calls.
 _ifstyle()dnl
 .
@@ -508,7 +572,7 @@ in bold
 (or the font specified by the string
 .BR HF )
 and,
-on typesetter devices,
+on typesetting devices,
 slightly larger than the base type size.
 .
 If the heading font
@@ -529,7 +593,7 @@ is set as an ordinary paragraph
 .IP
 The content of
 .I heading-text
-and ordering of sections has been standardized by common practice,
+and ordering of sections follows a set of common practices,
 as has much of the layout of material within sections.
 .
 For example,
@@ -537,7 +601,7 @@ a section called \(lqName\(rq or \(lqNAME\(rq must exist,
 must be the first section after the
 .B .TH
 call,
-and must contain only a line of the form
+and must contain only text of the form
 .RS \" Invisibly move left margin to current .IP indentation.
 .RS \" Now indent further, visibly.
 .IR topic [\c
@@ -640,7 +704,7 @@ or
 .B ?\&
 followed by multiple spaces can change.
 .
-Use the non-printing input break escape sequence
+Use the dummy character escape sequence
 .B \(rs&
 before the spaces.
 .
@@ -648,24 +712,18 @@ before the spaces.
 _endif()dnl
 .IP
 .\" Also see subsection "History" below...
-These macros are extensions,
-introduced in Ninth Edition Research Unix,
-to the original
-.I man
-package.
+These macros are extensions introduced in Ninth Edition Research Unix.
 .
-Many systems running
-AT&T,
+Systems running that
+.IR troff , \" AT&T Research Unix
+or those from
+Documenter's Workbench,
 Heirloom Doctools,
 or Plan\~9
 .I troff
 support them.
-.\" Solaris 10 troff does not support .EX/.EE.
-.\"
-.\" Plan 9 troff does, but its implementation doesn't manipulate filling
-.\" or hyphenation, so AT&T Unix's probably didn't either.
-.\"
-.\" Neatroff doesn't ship (m)an macros.
+.\" Solaris 10 troff does not support .EX/.EE.  Neatroff doesn't ship
+.\" (m)an macros.
 .
 To be certain your page will be portable to systems that do not,
 copy their definitions from the
@@ -677,10 +735,11 @@ installation.
 .
 .TP
 .BR .RS " ["\c
-.IR indentation ]
-Start a new relative inset level,
-moving the left margin right by
-.I indentation,
+.IR inset-amount ]
+Start a new relative inset level.
+.
+The left margin moves right by
+.I inset-amount,
 if specified,
 and by a default amount otherwise;
 see subsection \(lqHorizontal and vertical spacing\(rq below.
@@ -688,10 +747,11 @@ see subsection \(lqHorizontal and vertical spacing\(rq below.
 Calls to
 .B .RS
 can be nested;
-each call increments by\~1 the inset level used by
+each increments \" by\~1
+the inset level used by
 .BR .RE .
 .
-The inset level prior to any
+The level prior to any
 .B .RS
 calls is\~1.
 .
@@ -734,7 +794,7 @@ with
 .BR .TP ,
 or to present an itemized or ordered list.
 .
-All paragraph macros break the output line at the current position.
+All of these macros break the output line.
 .
 If another paragraph macro has occurred since the previous
 .B .SH
@@ -787,6 +847,10 @@ which can be formatted with a macro,
 becomes the tag,
 which is placed at the current left margin.
 .
+The tag can be extended with the
+.B \(rsc
+escape sequence.
+.
 Subsequent text is indented by
 .I indentation,
 if specified,
@@ -814,7 +878,7 @@ was used to write the first paragraph of this description of
 .BR .TP ,
 and
 .B .IP
-the subsequent ones.
+the subsequent one.
 _endif()dnl
 .
 .
@@ -823,9 +887,7 @@ _endif()dnl
 Set an additional tag for a paragraph tagged with
 .BR .TP .
 .
-The pending output line is broken.
-.
-A one-line input trap is planted as with
+An input trap is planted as with
 .BR .TP .
 .
 .
@@ -915,19 +977,18 @@ _endif()dnl
 .SS "Command synopsis macros"
 .\" ====================================================================
 .
-Command synopses are a staple of section\~1 and\~8 man pages.
-.
-These macros aid you to construct one that has the classical Unix
+.B .SY
+and
+.B .YS
+aid you to construct a command synopsis that has the classical Unix
 appearance.
+.
+They break the output line.
 .
 .\" TODO: Determine whether this (is still? was ever?) true.
 .\" Furthermore,
 .\" some tools are able to interpret these macros semantically and treat
 .\" them appropriately for localization and/or presentation.
-.
-A command synopsis is wrapped in
-.BR .SY / .YS
-calls.
 .
 .
 .P
@@ -989,12 +1050,13 @@ each will be vertically separated as paragraphs are.
 .
 .P
 .B .SY
-can also be repeated multiple times before a closing
-.BR .YS ,
-which is useful to indicate synonymous ways of invoking a particular
-mode of operation.
+can be repeated before
+.B .YS
+to indicate synonymous ways of invoking a particular mode of operation.
 .
 .
+.br
+.ne 2v
 .P
 .IR groff 's
 own command-line interface serves to illustrate most of the specimens
@@ -1160,7 +1222,8 @@ repeated arbitrarily.
 The non-breaking adjustable space escape sequence
 .B \e\(ti
 is used to prevent the output line from being broken within the option
-brackets.
+brackets;
+see subsection \(lqPortability\(rq below.
 .
 .
 .IP \(bu
@@ -1172,7 +1235,7 @@ see subsection \(lqPortability\(rq below.
 .
 .
 .IP \(bu
-The non-printing input break escape sequence
+The dummy character escape sequence
 .B \e&
 follows the ellipsis when further text will follow after space on the
 output line,
@@ -1198,9 +1261,9 @@ _endif()dnl
 are best presented with
 .BR .MR .
 .
-Email addresses are bracketed with
+Text may be hyperlinked to email addresses with
 .BR .MT / .ME
-and other forms of hyperlink with
+or other URIs with
 .BR .UR / .UE .
 .
 Hyperlinked text is supported on HTML
@@ -1295,9 +1358,10 @@ ampersands,
 and number signs in HTTP(S) URIs.
 .
 _endif()dnl
+The formatter removes
 .B \e:
-escape sequences are ignored when supplied to device control commands
-for hyperlink-aware output drivers.
+escape sequences from hyperlinks when supplying device control commands
+to output drivers.
 .
 .
 .TP
@@ -1359,7 +1423,7 @@ calls as the link text.
 .
 An argument to
 .B .ME
-is placed at the end of the link text without intervening space.
+is placed after the link text without intervening space.
 .
 .I address
 may not be visible in the rendered document if hyperlinks are enabled
@@ -1369,9 +1433,17 @@ If they are not,
 .I address
 is set in angle brackets after the link text and before
 .I trailing-text.
+.
+If hyperlinking is enabled but there is no link text,
+.I address
+is formatted and hyperlinked
+.I without
+angle brackets.
 _ifstyle()dnl
 .
 .
+.br
+.ne 6v
 .IP
 When rendered by
 .I groff
@@ -1406,7 +1478,7 @@ as the link text.
 .
 An argument to
 .B .UE
-is placed at the end of the link text without intervening space.
+is placed after the link text without intervening space.
 .
 .I uri
 may not be visible in the rendered document if hyperlinks are enabled
@@ -1416,6 +1488,12 @@ If they are not,
 .I uri
 is set in angle brackets after the link text and before
 .I trailing-text.
+.
+If hyperlinking is enabled but there is no link text,
+.I uri
+is formatted and hyperlinked
+.I without
+angle brackets.
 _ifstyle()dnl
 .
 .
@@ -1481,7 +1559,7 @@ macros set text in roman or bold,
 respectively,
 at a smaller type size;
 these differ visually from regular-sized roman or bold text only on
-typesetter devices.
+typesetting devices.
 .
 It is often necessary to set text in different styles without
 intervening space.
@@ -1514,8 +1592,10 @@ and inlined literals.
 _endif()dnl
 .
 .
+.br
+.ne 2v
 .P
-The default type size and family for typesetter devices is 10-point
+The default type size and family for typesetting devices is 10-point
 Times,
 except on the
 .B \%X75\-12
@@ -1581,25 +1661,25 @@ for file and path names,
 for environment variables,
 for C data types,
 for enumeration or preprocessor constants in C,
-for variable (user-determined) portions of syntax synopses,
+for variant (user-replaceable) portions of syntax synopses,
 for the first occurrence (only) of a technical concept being introduced,
 for names of journals and of literary works longer than an article,
 and anywhere a parameter requiring replacement by the user is
 encountered.
 .
-An exception involves variable text in a context that is already marked
-up in italics,
-such as file or path names with variable components;
+An exception involves variant text in a context already typeset in
+italics,
+such as file or path names with replaceable components;
 in such cases,
 follow the convention of mathematical typography:
 set the file or path name in italics as usual
-but use roman for the variable part
+but use roman for the variant part
 (see
 .B .IR
 and
 .B .RI
 below),
-and italics again in running roman text when referring to the variable
+and italics again in running roman text when referring to the variant
 material.
 .
 .
@@ -1609,7 +1689,7 @@ _endif()dnl
 .IR text ]
 Set
 .I text
-one point smaller than the default type size on typesetter devices.
+one point smaller than the default type size on typesetting devices.
 .
 If no argument is given,
 a one-line input trap is planted;
@@ -1639,7 +1719,7 @@ _endif()dnl
 Set
 .I text
 in bold and
-(on typesetter devices)
+(on typesetting devices)
 one point smaller than the default type size.
 .
 If no argument is given,
@@ -1647,6 +1727,8 @@ a one-line input trap is planted;
 text on the next line,
 which can be further formatted with a macro,
 is set smaller and in bold.
+.
+This macro is an extension introduced in SunOS\~4.0.
 .
 .
 _ifstyle()dnl
@@ -1678,7 +1760,7 @@ Unicode\~13.0,
 or
 POSIX.1-2017;
 acronyms;
-and occurrences after the first of a technical term or piece of jargon.
+and occurrences after the first of a technical term.
 .
 .
 .P
@@ -1720,8 +1802,9 @@ it is possible with the
 .B \ec
 and/or
 .B \ef
-escape sequences,
-but see subsection \(lqPortability\(rq
+escape sequences.
+.
+See subsection \(lqPortability\(rq
 below for approaches.
 _endif()dnl
 .
@@ -1738,7 +1821,7 @@ _ifstyle()dnl
 .IP
 .\" from src/roff/troff/troff.1.man
 .EX
-\&.BI \(rs\-r\(rs\(ti reg = n
+\&.BI \-r\~ register = numeric-expression
 .EE
 .RE
 .
@@ -1756,9 +1839,9 @@ _ifstyle()dnl
 .IP
 .\" from tmac/groff_ms.7.man
 .EX
-After invocation of
-\&.BR .NH ,
-the assigned number is made available in the strings
+After
+\&.B .NH
+is called,
 .EE
 .RE
 .
@@ -1774,13 +1857,11 @@ alternately.
 _ifstyle()dnl
 .RS
 .IP
-.\" from man/groff_tmac.5.man
+.\" from src/preproc/pic/pic.1.man
 .EX
-\&.I groff
-copes with this situation by searching for both
-\&.IB anything .tmac
-and
-\&.BI tmac. anything
+In places where
+\&.IB n th
+is allowed,
 .EE
 .RE
 .
@@ -1796,12 +1877,12 @@ alternately.
 _ifstyle()dnl
 .RS
 .IP
-.\" from src/utils/tfmtodit/tfmtodit.1.man
+.\" from src/preproc/pic/pic.1.man
 .EX
-The
-\&.I groff
-font file is written to
-\&.I font.
+Use GNU
+\&.IR pic \[aq]s
+\&.B figname
+command to change the name of the vbox.
 .EE
 .RE
 .
@@ -1817,11 +1898,13 @@ alternately.
 _ifstyle()dnl
 .RS
 .IP
-.\" from src/preproc/eqn/eqn.1.man
+.\" from src/preproc/pic/pic.1.man
 .EX
-and do not handle the
-\&.RB \e(lq "delim on" \e(rq
-statement specially.
+if
+\&.I file
+is
+\&.RB \[rs][lq] \[rs]\- \[rs][rq],
+the standard input stream is read.
 .RE
 .EE
 .
@@ -1837,9 +1920,12 @@ alternately.
 _ifstyle()dnl
 .RS
 .IP
-.\" from various pages
+.\" from src/preproc/pic/pic.1.man
 .EX
-\&.RI [ file\e\(ti .\e|.\e|.]
+\&.RI ( tpic
+was a fork of AT&T
+\&.I pic \" AT&T
+by Tim Morgan of the University of California at Irvine
 .EE
 .RE
 .
@@ -1852,12 +1938,14 @@ _endif()dnl
 The
 .I indentation
 argument accepted by
-.BR .RS ,
 .BR .IP ,
 .BR .TP ,
 and the deprecated
 .B .HP
-is a number plus an optional scaling unit.
+is a number plus an optional scaling unit,
+as is
+.BR .RS 's
+.IR inset-amount .
 .
 If no scaling unit is given,
 the
@@ -1867,7 +1955,7 @@ package assumes \(lqn\(rq;
 that is,
 the width of a letter \(lqn\(rq in the font current when the macro is
 called
-(see section \(lqNumerical Expressions\(rq in
+(see section \(lqMeasurements\(rq in
 .MR groff @MAN7EXT@ ).
 _endif()dnl
 _ifnotstyle()dnl
@@ -1880,7 +1968,7 @@ An indentation specified in a call to
 or the deprecated
 .B .HP
 persists until
-(1) another of these macros is called with an explicit
+(1) another of these macros is called with an
 .I indentation
 argument,
 or
@@ -1892,9 +1980,14 @@ or
 or its synonyms is called;
 these clear the indentation entirely.
 .
-Relative insets created by
+A relative inset created by
 .B .RS
-move the left margin and persist until
+saves the current indentation,
+resets it to zero,
+and
+moves the left margin.
+.
+The new left margin persists until
 .BR .RS ,
 .BR .RE ,
 .BR .SH ,
@@ -1917,7 +2010,7 @@ and the default used when
 and the deprecated
 .B .HP
 are not given an indentation argument,
-is 7.2n for typesetter devices
+is 7.2n for typesetting devices
 and 7n for terminal devices
 (but see the
 .B \-rIN
@@ -2041,6 +2134,8 @@ only the former affects the tag,
 but both affect the text of the paragraph.
 .
 .
+.br
+.ne 3v
 .P
 This ordinary
 .RB ( .P )
@@ -2090,7 +2185,7 @@ _endif()dnl
 .
 .
 .P
-Several macros break the output line and insert vertical space:
+Several macros insert vertical space:
 .BR .SH ,
 .BR .SS ,
 .BR .TP ,
@@ -2103,13 +2198,13 @@ and the deprecated
 The default inter-section and inter-paragraph spacing is
 is 1v for terminal devices
 _ifstyle()dnl
-and 0.4v for typesetter devices
+and 0.4v for typesetting devices
 (\(lqv\(rq is a unit of vertical distance,
 where 1v is the distance between adjacent text baselines in a
 single-spaced document).
 _endif()dnl
 _ifnotstyle()dnl
-and 0.4v for typesetter devices.
+and 0.4v for typesetting devices.
 _endif()dnl
 .
 (The deprecated macro
@@ -2117,20 +2212,13 @@ _endif()dnl
 can change this vertical spacing,
 but its use is discouraged.)
 .
-In
-.BR .EX / .EE
-sections,
+Between
+.B .EX
+and
+.B .EE
+calls,
 the inter-paragraph spacing is 1v regardless of output
 device.
-.
-The macros
-.BR .RS ,
-.BR .RE ,
-.BR .EX ,
-.BR .EE ,
-and
-.B .TQ
-also cause a break but no insertion of vertical space.
 .
 .
 .\" ====================================================================
@@ -2145,6 +2233,8 @@ file as well;
 see section \(lqFiles\(rq below.
 .
 .
+.br
+.ne 7v
 .\" ====================================================================
 .SS Strings
 .\" ====================================================================
@@ -2265,6 +2355,8 @@ supplement the functionality of
 with these lower-level elements where necessary.
 .
 .
+.br
+.ne 2v
 .P
 However,
 using raw
@@ -2299,10 +2391,11 @@ The macros we have described as extensions
 .BR .TQ ,
 .BR .UR / .UE ,
 .BR .MT / .ME ,
+.BR .MR ,
 and
-.BR .MR )
+.BR .SB )
 should be used with caution,
-as they may not yet be built in to some viewer that is important to your
+as they may not be built in to some viewer that is important to your
 audience.
 .
 See
@@ -2345,7 +2438,7 @@ Everything after the double-quote to the end of the input line is
 ignored.
 .
 Whole-line comments should be placed immediately after the empty request
-.RB \(lq . \(rq).
+.RB (\(lq . \(rq).
 .
 .
 .TP
@@ -2465,7 +2558,7 @@ or Documenter's Workbench
 .
 .TP
 .B \e&
-Non-printing input break.
+Dummy character.
 .
 Insert at the beginning of an input line to prevent a dot or apostrophe
 from being interpreted as the beginning of a
@@ -2485,7 +2578,7 @@ a non-breaking space.
 .
 Used primarily in ellipses
 (\(lq.\e|.\e|.\(rq)
-to space the dots more pleasantly on typesetter devices like PostScript
+to space the dots more pleasantly on typesetting devices like PostScript
 and PDF.
 .
 .
@@ -2517,9 +2610,10 @@ The next line is interpreted as usual and can `include' a macro call
 .BI \e newline\/\c
 ).
 .
-This escape sequence is useful when three different font styles are
+.B \(rsc
+is useful when three font styles are
 needed in a single word,
-as in a command synopsis,
+as in a command synopsis.
 .
 .
 .RS
@@ -2533,10 +2627,10 @@ as in a command synopsis,
 .
 .
 .IP
-or on a single line,
-as in
+It also helps when changing font styles in
 .BR .EX / .EE
-examples.
+examples,
+since they are not filled.
 .
 .
 .RS
@@ -2658,15 +2752,25 @@ escape sequences do.
 .
 .P
 Several special characters are also widely portable.
+.\" meaning: groff, Heirloom Doctools troff, neatroff, mandoc
 .
+Except for
+.BR \[rs]\- ,
+.BR \[rs](em ,
+and
+.BR \[rs](ga ,
 AT&T
 .I troff
-did not `define' the reverse solidus or quotation characters listed
-below,
-but any of its descendants,
+did not consistently `define' the characters listed below,
+.\" Only \-, \(em, and \(ga were documented in CSTR #54 (1976).  CSTR
+.\" #54 (1992) offers no _comprehensive_ list but shows \(en in its
+.\" PostScript DESC file example.  In DWB 3.3, \(aq was supported by the
+.\" "post" device, and \(dq by "pcl" and "Latin1".
+but its descendants,
 like Plan\~9 or Solaris
 .IR troff , \" Plan 9, Solaris
-can support them by defining their glyphs in font description files;
+can be made to support them by defining them in font description files,
+making them aliases of existing glyphs if necessary;
 see
 .MR groff_font @MAN5EXT@ .
 .
@@ -2691,10 +2795,9 @@ or similar.
 .B \e(aq
 Basic Latin neutral apostrophe.
 .
-Some
-output devices replace
+Some output devices format
 .RB \(lq\| \(aq \|\(rq
-with a right single quotation mark.
+as a right single quotation mark.
 .
 .
 .br
@@ -2768,9 +2871,9 @@ for example,
 .B \e(ga
 Basic Latin grave accent.
 .
-Some output devices replace
+Some output devices format
 .RB \(lq\| \(ga \|\(rq
-with a left single quotation mark.
+as a left single quotation mark.
 .
 .
 .TP
@@ -2778,9 +2881,9 @@ with a left single quotation mark.
 Basic Latin circumflex accent
 (\(lqhat\(rq).
 .
-Some output devices replace
+Some output devices format
 .RB \(lq \(ha \(rq
-with U+02C6
+as U+02C6
 (modifier letter circumflex accent)
 or similar.
 .
@@ -2797,16 +2900,16 @@ so it does not represent itself in output.
 .
 Also see
 .B \ee
-below.
+above.
 .
 .
 .TP
 .B \e(ti
 Basic Latin tilde.
 .
-Some output devices replace
+Some output devices format
 .RB \(lq \(ti \(rq
-with U+02DC
+as U+02DC
 (small tilde)
 or similar.
 .
@@ -2868,7 +2971,7 @@ Set the page header text
 .
 .
 .P
-If you want to remove a page header or footer entirely,
+To remove a page header or footer entirely,
 `define' the appropriate macro as empty rather than deleting it.
 .
 .
@@ -2969,12 +3072,15 @@ is handled as with
 Use of this presentation-oriented macro is deprecated.
 .
 A hanging indentation cannot be expressed naturally under HTML,
-and HTML-based man page processors may interpret it as starting an
-ordinary paragraph.
+and
+.RI non- roff -based
+man page interpreters may treat
+.B .HP
+as an ordinary paragraph.
 .
 Thus,
-any information or distinction you mean to express with the indentation
-may be lost.
+information or distinctions you mean to express with indentation may be
+lost.
 .
 .
 .TP
@@ -3094,13 +3200,25 @@ can be any of the following.
 .SS History
 .\" ====================================================================
 .
-Unix Version\~7 (1979) introduced the
+.MT m.douglas.mcilroy@dartmouth.edu
+M.\& Douglas McIlroy
+.ME
+designed,
+implemented,
+and documented the AT&T
 .I man
-macro package and supported the macros listed in this page not described
-as extensions,
+macros
+for
+Unix Version\~7 (1979) and employed them
+to edit the first volume of its
+.IR "Programmer's Manual" ,
+a compilation of all man pages supplied by the system.
+.
+That
+.I man
+supported the macros listed in this page not described as extensions,
 except
-.BR .P ,
-.BR .SB ,
+.B .P
 .\" .SS was implemented in tmac.an but not documented in man(7).
 and the deprecated
 .B .AT
@@ -3113,6 +3231,8 @@ and
 .BR S ;
 no registers were documented.
 .
+.
+.P
 .B .UC
 appeared in 3BSD (1980) and
 .B .P
@@ -3149,6 +3269,17 @@ which had been internal to Seventh Edition Unix
 .IR man .
 .\" ...as well as a PD register, which we use but don't expose.
 .
+.\" The SunOS inferences here and below are based on inspection of SunOS
+.\" 2.0 (May 1985), 3.2 (September 1986), 3.5 (January 1988), and 4.0
+.\" (December 1988) tape archives (only).
+SunOS\~2.0 (1985) recognized
+.BR C ,
+.BR D ,
+.BR P ,
+and
+.B X
+registers.
+.
 4.3BSD (1986) added
 .\" undocumented .DS and .DE macros for "displays", which are .RS/.RE
 .\" wrappers with filling disabled and vertical space of 1v before and
@@ -3164,12 +3295,9 @@ Ninth Edition Research Unix (1986) introduced
 and
 .BR .EE .
 .
-SunOS\~4.0 (1988) may have been the first to support
-.BR .SB .
-.\" ...which appeared in a few man pages distributed in 4.3BSD-Reno and
-.\" 4.4BSD even though BSD was already transitioning to mdoc(7) by that
-.\" time and did not support the macro.  SunOS 4.0.3 (May 1989)
-.\" contained over 2,100 uses of .SB.
+SunOS\~4.0 (1988) added the
+.B .SB
+macro.
 .
 .I groff
 1.20 (2009) originated
@@ -3191,6 +3319,8 @@ in 2020.
 .\"  36cd4c58c1346375b98f517fb8568be5bb47618d
 .
 .
+.br
+.ne 4v
 .\" ====================================================================
 .SH Options
 .\" ====================================================================
@@ -3248,14 +3378,19 @@ This is the default for terminal and HTML devices.
 .
 Use
 .B \-rcR=0
-to disable it.
+to disable it on terminal devices;
+on HTML devices,
+it cannot be disabled.
 .
 .
 .TP
 .B \-rC1
 Number output pages consecutively,
 in strictly increasing sequence,
-rather than resetting the page number to\~1 with each new
+rather than resetting the page number to\~1
+(or the value of register
+.BR P )
+with each new
 .I man
 document.
 .
@@ -3297,7 +3432,7 @@ Set distance of the footer relative to the bottom of the page to
 .I footer-distance;
 this amount is always negative.
 .
-At twice this distance,
+At one half-inch above this location,
 the page text is broken before writing the footer.
 .
 Ignored if continuous rendering is enabled.
@@ -3325,7 +3460,9 @@ See
 Disable automatic hyphenation.
 .
 Normally,
-it is enabled using a mode appropriate to the
+it is enabled\~(1).
+.
+The hyphenation mode is determined by the
 .I groff
 locale;
 see section \[lq]Localization\[lq] of
@@ -3359,7 +3496,7 @@ indentation.
 .BI \-rLL= line-length
 Set line length;
 the default is 78n for terminal devices
-and 6.5i for typesetter devices.
+and 6.5i for typesetting devices.
 .
 .
 .TP
@@ -3392,9 +3529,7 @@ the default is
 .
 Any valid argument to
 .IR groff 's
-\[lq].ft\[rq] request may be used;
-see
-.MR groff @MAN7EXT@ .
+\[lq].ft\[rq] request may be used.
 .
 If the
 .B MF
@@ -3406,8 +3541,9 @@ and italic corrections are applied before and after man page topics.
 .TP
 .BI \-rP n
 Start enumeration of pages at
-.I n
-rather than\~1.
+.IR n .
+.
+The default is\~1.
 .
 .
 .TP
@@ -3431,6 +3567,8 @@ See subsection \(lqHorizontal and vertical spacing\(rq above for the
 default.
 .
 .
+.br
+.ne 4v
 .TP
 .B \-rU1
 Enable generation of URI hyperlinks in the
@@ -3457,9 +3595,9 @@ calls visible in the document text produced by link-capable drivers.
 .
 .TP
 .BI \-rX p
-After
-.RI page\~ p ,
-number pages as
+Number successors of
+.RI page\~ p
+as
 .IR p a,
 .IR p b,
 .IR p c,
@@ -3535,14 +3673,9 @@ reloads each macro package as necessary.
 .
 .TP
 .I @MACRODIR@/\:\%an\-ext\:.tmac
-Definitions of macros described above as extensions
-.RB ( .SY / .YS ,
-.BR .TQ ,
-.BR .EX / .EE ,
-.BR .UR / .UE ,
-.BR .MT / .ME ,
-and
-.BR .MR )
+Except for
+.BR .SB ,
+definitions of macros described above as extensions
 are contained in this file;
 in some cases,
 they are simpler versions of definitions appearing in
@@ -3558,12 +3691,13 @@ To reduce the risk of name space collisions,
 string and register names begin only with
 .RB \[lq] m \[rq] .
 .
-Man page authors concerned about portability to legacy Unix systems are
-encouraged to copy these definitions into their pages,
+We encourage man page authors
+who are concerned about portability to legacy Unix systems
+to copy these definitions into their pages,
 and maintainers of
 .I troff \" generic
-implementations or work-alike systems that format man pages are
-encouraged to re-use them.
+implementations or work-alike systems that format man pages
+to re-use them.
 .
 .
 .IP
@@ -3581,6 +3715,8 @@ Furthermore,
 it is wise to `define' such page-local macros
 (if at all)
 after the \(lqName\(rq section to accommodate timid
+.I makewhatis
+or
 .I mandb
 implementations that may give up their scan for indexing material early.
 .
@@ -3628,9 +3764,11 @@ or to permit their override with a user-specific
 .I man.local
 file.
 .
-This can be achieved by placing one or both of following requests at the
-end of the site-local file.
+Place the requests below at the end of the site-local file to
+manifest courtesy.
 .
+.br
+.ne 3v
 .RS
 .RS
 .EX
@@ -3676,7 +3814,7 @@ rfCB lfCB.
 To get a \(lqliteral\(rq.\|.\|.	.\|.\|.should be input.
 _
 \(aq	\(rs(aq
-\-	\(rs-
+\-	\(rs\-
 \(rs	\(rs(rs
 \(ha	\(rs(ha
 \(ga	\(rs(ga
@@ -3806,7 +3944,7 @@ will be set.
 .BR .TP ,
 and the deprecated
 .B .HP
-all use the same default indentation.
+use the same default indentation.
 .
 If not given an argument,
 .B .RS
@@ -3940,7 +4078,7 @@ Since dots both begin control lines and are candidate end-of-sentence
 characters,
 however,
 it is sometimes necessary to prefix and/or suffix an ellipsis with the
-non-printing input break escape sequence
+dummy character escape sequence
 .BR \[rs]& .
 .
 That fact stands even if a string is defined to contain the sequence;
@@ -3956,9 +4094,9 @@ but not always.)
 A hypothetical string
 .B EL
 that contained an ellipsis,
-but not the trailing input break,
-would then need to be suffixed with
-.B \[rs]&
+but not the trailing dummy character
+.BR \[rs]& ,
+would then need to be suffixed with the latter
 when not ending a sentence.
 .
 .
@@ -3996,14 +4134,16 @@ font-dependent
 escape sequence.
 .
 We discourage the use of these;
-they usually crowd the dots into a single character cell,
+on terminals,
+they may crowd the dots into a half-width character cell,
 and will not render at all if the output device doesn't have the glyph.
 .
 In syntax synopses,
 missing ellipses can cause great confusion.
 .
 Dots and space are universally supported.
-.\" XXX: Does an unconditional _preceding_ input break cause problems?
+.\" XXX: Does an unconditional _preceding_ dummy character cause
+.\" problems?
 _endif()dnl
 .
 .
@@ -4011,30 +4151,13 @@ _endif()dnl
 .SH Authors
 .\" ====================================================================
 .
-.MT m.douglas.mcilroy@dartmouth.edu
-M.\& Douglas McIlroy
-.ME
-designed,
-implemented,
-and documented the AT&T
-.I man
-macros,
-employing them to edit the first volume of the Seventh Edition Unix
-manual,
-a compilation of all man pages supplied by the system.
-.
-.
-.P
-The GNU version of the
+The GNU implementation of the
 .I man
 macro package was written by James Clark;
-he added the
-.BR C ,
-.BR D ,
-.BR P ,
-and
-.B X
-registers. \" sometime before 1.02
+.\" by 1.01
+beyond Version\~7 Unix compatibility,
+he supported the SunOS extensions listed in subsection \(lqHistory\(rq
+above.
 .
 .MT wl@\:gnu\:.org
 Werner Lemberg
@@ -4044,6 +4167,10 @@ supplied the
 and
 .B cR \" 1.17
 registers.
+.\" ...the latter a 4.3BSD-Reno mdoc(7) feature.
+.\" "Assume nroff on crt's [sic] only if cR==1"
+.\" https://minnie.tuhs.org/cgi-bin/utree.pl
+.\"   ?file=4.3BSD-Reno/share/tmac/tmac.doc
 .
 .MT kollar@\:alltel\:.net
 Larry Kollar
@@ -4081,15 +4208,19 @@ and the
 macro. \" all 1.23
 .
 .
-The extension macros were written by
+Except for
+.BR .SB , \" Clark, as noted above
+the extension macros were written by
 Lemberg,
 .MT esr@\:thyrsus\:.com
 Eric S.\& Raymond
 .ME ,
 and
-Robinson. \" 1.23: the MR for non-groffs
+Robinson. \" 1.23: MR
 .
 .
+.br
+.ne 3v
 .P
 This document was originally written for the Debian GNU/Linux system by
 .MT sgk@\:debian\:.org

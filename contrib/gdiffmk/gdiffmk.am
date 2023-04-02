@@ -22,14 +22,13 @@
 ########################################################################
 gdiffmk_srcdir = $(top_srcdir)/contrib/gdiffmk
 bin_SCRIPTS += gdiffmk
-TESTS += contrib/gdiffmk/tests/gdiffmk_tests.sh
+TESTS += contrib/gdiffmk/tests/runtests.sh
 man1_MANS += contrib/gdiffmk/gdiffmk.1
 EXTRA_DIST += \
   contrib/gdiffmk/gdiffmk.1.man \
   contrib/gdiffmk/ChangeLog \
   contrib/gdiffmk/README \
   contrib/gdiffmk/gdiffmk.sh \
-  contrib/gdiffmk/tests/gdiffmk_tests.sh \
   contrib/gdiffmk/tests/runtests.sh \
   contrib/gdiffmk/tests/baseline \
   contrib/gdiffmk/tests/baseline.6 \
@@ -51,13 +50,6 @@ gdiffmk: $(gdiffmk_srcdir)/gdiffmk.sh
 	    -e $(SH_SCRIPT_SED_CMD)  $(gdiffmk_srcdir)/gdiffmk.sh \
 	    >$@ \
 	&& chmod +x $@
-
-clean-local: clean_gdiffmk_check
-clean_gdiffmk_check:
-	if test -d $(top_builddir)/contrib/gdiffmk/tests; then \
-	  cd $(top_builddir)/contrib/gdiffmk/tests && \
-	  $(abs_top_srcdir)/contrib/gdiffmk/tests/runtests.sh clean; \
-	fi
 
 
 # Local Variables:

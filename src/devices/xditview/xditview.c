@@ -470,7 +470,7 @@ DoPrint (const char *name)
     FILE *print_file;
     RETSIGTYPE (*handler)(int);
 
-    /* Avoid dieing because of an invalid command. */
+    /* Avoid dying because of an invalid command. */
     handler = signal(SIGPIPE, SIG_IGN);
 
     print_file = popen(name, "w");

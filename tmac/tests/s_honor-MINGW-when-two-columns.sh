@@ -30,7 +30,8 @@ Sed ut perspiciatis, unde omnis iste natus error sit voluptatem
 accusantium doloremque laudantium, totam rem aperiam eaque ipsa,'
 
 output=$(printf '%s\n' "$input" | "$groff" -Tascii -P-cbou -ms)
+echo "$output"
 
-echo "$output" | grep -Eq 'Sed +ut +perspiciatis, {5}[a-z]'
+echo "$output" | grep -Eq 'Sed +ut +perspiciatis, +unde {5}[a-z]'
 
 # vim:set ai et sw=4 ts=4 tw=72:

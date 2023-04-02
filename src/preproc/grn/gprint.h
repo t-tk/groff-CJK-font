@@ -21,7 +21,7 @@
 #define DOTDASHED 024		/* 054 */
 #define LONGDASHED 074
 
-#define DEFTHICK	-1	/* default thicknes */
+#define DEFTHICK	-1	/* default thickness */
 #define DEFSTYLE	SOLID	/* default line style */
 
 #define TRUE	1

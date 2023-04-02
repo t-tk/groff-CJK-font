@@ -73,7 +73,7 @@ output=$(printf "%s\n" "$input" | "$groff" -Tascii -ww \
   | LC_ALL=C od -t c)
 # 7 spaces between C and D.
 printf "%s\n" "$output" \
-  | grep -Eqx '0000000 +A +\\b +B +\\b +C       D +\\n' || wail
+  | grep -Eqx '0000000 +A +\\b +B +\\b +C       D +\\n *' || wail
 
 input="\w
 ABC
@@ -120,7 +120,7 @@ test -z "$error" || wail
 echo "checking correct handling of newline delimiter to 'Z' escape" >&2
 output=$(printf "%s\n" "$input" | "$groff" -Tascii -ww \
   | LC_ALL=C od -t c)
-printf "%s\n" "$output" | grep -Eqx '0000000 +A +B +\\b +D +C +\\n' \
+printf "%s\n" "$output" | grep -Eqx '0000000 +A +B +\\b +D +C +\\n *' \
   || wail
 
 test -z "$fail"

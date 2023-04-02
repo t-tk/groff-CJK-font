@@ -48,12 +48,13 @@ both be zero. */
 
 #include "lib.h"
 
-#include <stdlib.h>
-#include <math.h>
+#include <assert.h>
 #include <errno.h>
+#include <math.h>
+#include <stdlib.h>
+
 #include "errarg.h"
 #include "error.h"
-#include "assert.h"
 #include "cset.h"
 #include "nonposix.h"
 

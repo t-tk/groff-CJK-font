@@ -1,4 +1,4 @@
-# Copyright (C) 1989-2020 Free Software Foundation, Inc.
+# Copyright (C) 1989-2023 Free Software Foundation, Inc.
 # Original Makefile.in written by James Clark (jjc@jclark.com)
 # Migrated to Automake by Bertrand Garrigues
 #
@@ -276,7 +276,7 @@ tmac_an_prefix=\
   fi`
 
 # Extension to be used for refer index files.  Index files are not
-# sharable between different architectures, so you might want to use
+# shareable between different architectures, so you might want to use
 # different suffixes for different architectures.  Choose an extension
 # that doesn't conflict with refer or any other indexing program.
 indexext=.i
@@ -449,6 +449,7 @@ CCC=@CXX@
 # LIBS
 # LIBM
 # LIBICONV
+# AR
 # RANLIB
 # INSTALL
 # INSTALL_PROGRAM
@@ -457,7 +458,6 @@ CCC=@CXX@
 # INSTALL_INFO
 # LN_S
 
-AR=ar
 ETAGS=etags
 ETAGSFLAGS=
 # Flag that tells etags to assume C++.
@@ -774,6 +774,12 @@ uninstall_groffdirs:
 	    rmdir $(DESTDIR)$(exampledir); \
 	  fi; \
 	  if test -d $(DESTDIR)$(htmldocdir); then \
+	    if test -d $(DESTDIR)$(htmldocdir)/groff.html.mono; then \
+	      rmdir $(DESTDIR)$(htmldocdir)/groff.html.mono; \
+	    fi; \
+	    if test -d $(DESTDIR)$(htmldocdir)/groff.html.node; then \
+	      rmdir $(DESTDIR)$(htmldocdir)/groff.html.node; \
+	    fi; \
 	    rmdir $(DESTDIR)$(htmldocdir); \
 	  fi; \
 	  rmdir $(DESTDIR)$(docdir); \

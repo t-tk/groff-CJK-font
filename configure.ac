@@ -1,5 +1,5 @@
 # Autoconf configuration file for groff.
-# Copyright (C) 1989-2020 Free Software Foundation, Inc.
+# Copyright (C) 1989-2023 Free Software Foundation, Inc.
 #
 # This file is part of groff.
 #
@@ -79,7 +79,6 @@ AC_PROG_MKDIR_P
 GROFF_PROG_XPMTOPPM
 PKG_PROG_PKG_CONFIG
 GROFF_UCHARDET
-GROFF_POPPLER
 
 # use a dummy substitution if no csh hack is necessary to avoid errors
 # with non-GNU sed programs
@@ -167,7 +166,8 @@ GROFF_TMAC
 GROFF_WITH_COMPATIBILITY_WRAPPERS
 GROFF_TARGET_PATH_SEPARATOR
 GROFF_CHECK_GROHTML_PROGRAMS
-GROFF_CHECK_GROPDF_PROGRAMS
+GROFF_PDFROFF_DEPENDENCIES_CHECK
+GROFF_GROPDF_DEPENDENCIES_CHECK
 GROFF_PNMTOOLS_CAN_BE_QUIET
 GROFF_PNMTOPS_NOSETPAGE
 GROFF_MAKE_DEFINES_RM
@@ -177,10 +177,6 @@ GROFF_BASH
 GROFF_GHOSTSCRIPT_VERSION_CHECK
 gl_GLIBC21
 gl_LOCALCHARSET
-
-# Check for presence of URW fonts (these require Ghostscript, which is
-# checked for by GROFF_CHECK_GROHTML_PROGRAMS).
-GROFF_URW_FONTS_CHECK
 
 AM_CONDITIONAL([BUILD_WINSCRIPTS], [test -n "$make_winscripts"])
 
@@ -201,11 +197,13 @@ AM_CONDITIONAL([MAKE_DEFINES_RM], [test "$groff_make_defines_rm" = yes])
 AM_CONDITIONAL([USEPROGRAMPREFIX], [test "$g" = g])
 
 AM_CONDITIONAL([USE_GROHTML], [test "$use_grohtml" = yes])
+AM_CONDITIONAL([USE_PDFROFF], [test "$use_pdfroff" = yes])
 AM_CONDITIONAL([USE_GROPDF], [test "$use_gropdf" = yes])
 AM_CONDITIONAL([USE_GROFF_ALLOCATOR],
                [test "$groff_use_own_allocator" = yes])
+AM_CONDITIONAL([HAVE_GHOSTSCRIPT], [test "$GHOSTSCRIPT" != no \
+                && test "$GHOSTSCRIPT" != missing])
 AM_CONDITIONAL([HAVE_URW_FONTS], [test "$groff_have_urw_fonts" = yes ])
-AM_CONDITIONAL([HAVE_PDFTOOLS], [test "$groff_have_pdftools" = yes ])
 AM_CONDITIONAL([HAVE_TEXI2DVI], [test "$groff_have_texi2dvi" = yes ])
 AM_CONDITIONAL([USE_TEX], [test "$groff_use_tex" = yes ])
 
@@ -252,12 +250,14 @@ fi
 echo "\
  preconv can use uchardet library : $groff_have_uchardet
  can build groff.dvi, groff.pdf   : $groff_use_tex
- tests can use poppler PDF tools  : $groff_have_pdftools
 ----------------------------------------------------------------------"
 
 GROFF_APPDEFDIR_NOTICE
+GROFF_AWK_NOTICE
+GROFF_GHOSTSCRIPT_AVAILABILITY_NOTICE
+GROFF_GHOSTSCRIPT_VERSION_NOTICE
 GROFF_URW_FONTS_NOTICE
 GROFF_UCHARDET_NOTICE
-GROFF_GHOSTSCRIPT_VERSION_NOTICE
 GROFF_GROHTML_PROGRAM_NOTICE
+GROFF_PDFROFF_PROGRAM_NOTICE
 GROFF_GROPDF_PROGRAM_NOTICE

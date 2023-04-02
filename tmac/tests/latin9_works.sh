@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (C) 2022 Free Software Foundation, Inc.
+# Copyright (C) 2022-2023 Free Software Foundation, Inc.
 #
 # This file is part of groff.
 #
@@ -22,9 +22,9 @@ groff="${abs_top_builddir:-.}/test-groff"
 
 input=$(printf '\\[Eu]\\[vS]\\[vs]\\[vZ]\\[vz]\\[OE]\\[oe]\\[:Y]\n')
 output=$(printf "%s\n" "$input" | "$groff" -Tlatin1 -mlatin9 \
-    | LC_ALL=C od -t c)
+    | LC_ALL=C od -t o1)
 printf "%s\n" "$output"
 printf "$output" \
-    | grep -Eq '^0000000 244 246 250 264 270 274 275 276 +'
+    | grep -Eq '^0000000 +244 246 250 264 270 274 275 276 +'
 
 # vim:set ai et sw=4 ts=4 tw=72:

@@ -1,0 +1,99 @@
+#!/bin/sh
+#
+# Copyright (C) 2022-2023 Free Software Foundation, Inc.
+#
+# This file is part of groff.
+#
+# groff is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# groff is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+
+devpdf_fontbuilddir="${abs_top_builddir:-.}"/font/devpdf
+ghostscript=@GHOSTSCRIPT@
+
+wail () {
+    echo ...FAILED >&2
+    fail=yes
+}
+
+fail=
+
+# The are the base 14 fonts required by the PDF standard.  They should
+# _always_ be present and supported.  If their corresponding Type 1 font
+# files are available, they too can be embedded in a PDF using gropdf's
+# "-e" option.  groff's "EURO" font is always available; we ship it.
+mandatory_fonts='CB
+CBI
+CI
+CR
+HB
+HBI
+HI
+HR
+S
+TB
+TBI
+TI
+TR
+ZD'
+
+# These fonts are commonly, but not universally, available; if used,
+# their corresponding Type 1 font files must be embedded in a document.
+#
+# Their groff font descriptions will always be available: we ship them.
+# But they are not usable with gropdf(1) if the Type 1 files are absent.
+# We thus will not test them if they are not expected to work.
+supplementary_fonts='AB
+ABI
+AI
+AR
+BMB
+BMBI
+BMI
+BMR
+HNB
+HNBI
+HNI
+HNR
+NB
+NBI
+NI
+NR
+PB
+PBI
+PI
+PR
+ZCMI'
+
+for f in $mandatory_fonts
+do
+    printf "checking for font description %s...\n" "$f" >&2
+    test -f "$devpdf_fontbuilddir"/"$f" || wail
+done
+
+if [ "$ghostscript" = no ] || [ "$ghostscript" = missing ]
+then
+    echo "Ghostscript not available; skipping check for any further" \
+         "fonts in the default foundry" >&2
+    exit 77 # skip
+fi
+
+for f in $supplementary_fonts
+do
+    printf "checking for font description %s...\n" "$f" >&2
+    test -f "$devpdf_fontbuilddir"/"$f" || wail
+done
+
+test -z "$fail"
+
+# vim:set ai et sw=4 ts=4 tw=72:

@@ -20,17 +20,18 @@
 
 groff="${abs_top_builddir:-.}/test-groff"
 
-EXAMPLE='.TH ue\-punct 1 2020-08-15 "groff test suite"
+EXAMPLE='.TH mt\-body 1 2020-08-15 "groff test suite"
 .SH Name
-ue\-punct \- URL trailing material is subject to hyphenation
+mt\-body \- mailto: link text is subject to hyphenation
 .SH Description
 Do not try to
-.UR https://www.gnu.org/software/groff/
-hyphenate a ridiculous word* without machine assistance
-.UE (*pneumonoultramicroscopicsilicovolcanoconiosis).'
+.MT groff@gnu.org
+hyphenate the word
+pneumonoultramicroscopicsilicovolcanoconiosis
+without machine assistance
+.ME .'
 
-# Turn off break warnings; we expect an adjustment problem.
-printf "%s\n" "$EXAMPLE" | "$groff" -Tascii -Wbreak -P-cbou -man \
+printf "%s\n" "$EXAMPLE" | "$groff" -rmG=0 -Tascii -P-cbou -man \
     | grep -qE 'pn.*-'
 
 # vim:set ai et sw=4 ts=4 tw=72:

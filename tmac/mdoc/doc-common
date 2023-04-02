@@ -253,8 +253,9 @@
 .
 .\" NS doc-set-up-titles macro
 .\" NS   install and initialize header and footer support
-.\"
-.\" TODO: Support man(7)'s `FT` register.
+.\" NS
+.\" NS local variables:
+.\" NS   doc-footer-location
 .
 .eo
 .de doc-set-up-titles
@@ -262,8 +263,11 @@
 .
 .  if !\n[cR] \{\
 .    wh 0 doc-header
-.    wh -1.0i doc-break-body-text
-.    wh -.5i doc-footer
+.    ie r FT .nr doc-footer-location \n[FT]
+.    el      .nr doc-footer-location (-.5i)
+.    wh \n[doc-footer-location]u doc-footer
+.    wh (\n[doc-footer-location]u - .5i) doc-break-body-text
+.    rr doc-footer-location
 .  \}
 .
 .  e@ doc-end-macro
@@ -291,19 +295,16 @@
 .  \" must handle the end of a previous document.
 .  \"
 .  \" If also continuously rendering, cause a page transition to a new
-.  \" mdoc(7) document.  Clear the page header trap first so it is not
-.  \" sprung with stale information.  Update the page number depending
-.  \" on the C (consecutive numbering) register.
-.  if !\n[doc-is-first-page-of-document] \{\
-.    ie \n[cR] .doc-end-macro
-.    el \{\
-.      ch doc-header
+.  \" mdoc(7) document.
+.  if \n[doc-need-titles-reset] \{\
+.    if \n[cR] .doc-end-macro
 .
-.      ie \n[C] .bp (\n[%] + 1) \" argument NOT redundant before page 1
-.      el       .bp 1
-.    \}
-.    nr doc-is-first-page-of-document 1
+.    \" Clear the page header trap so it is not sprung with stale
+.    \" information.
+.    ch doc-header
+.    doc-break-page-with-new-number
 .  \}
+.  if \n[C] .rr P
 .
 .  if !\n[.$] \
 .    tm mdoc warning: .Dd directive expects an argument (#\n[.c])
@@ -976,7 +977,7 @@
 .    pdfbookmark 1 "\*[doc-page-topic](\*[doc-section])"
 .
 .  doc-header
-.  nr doc-is-first-page-of-document 0
+.  nr doc-need-titles-reset 1
 ..
 .ec
 .
@@ -1055,29 +1056,36 @@
 .\"
 .\" NS local variables:
 .\" NS   doc-xref
-.\"
-.\" TODO: Support man(7)'s `X` register.
+.\" NS   doc-page-id
 .
 .eo
 .de doc-footer
 .  ds doc-xref \*[doc-page-topic-font]\*[doc-page-topic]\f[]\"
 .  as doc-xref \*[doc-page-section-font](\*[doc-section])\f[]\"
+.  ds doc-page-id \n[%]
+.  if r X \{\
+.    if (\n[%] > \n[X]) \{\
+.      nr doc-page-letter (\n[%] - \n[X])
+.      ds doc-page-id \n[X]\n[doc-page-letter]\"
+.    \}
+.  \}
 .  ev doc-caption-enviroment
 .  doc-setup-page-layout
 .  ie \n[D] \{\
 .    ie e \
 .      tl '%'\*[doc-date-string]'\*[doc-operating-system]'
 .    el \
-.      tl '\*[doc-operating-system]'\*[doc-date-string]'%'
+.      tl '\*[doc-operating-system]'\*[doc-date-string]'\*[doc-page-id]'
 .  \}
 .  el \{\
 .    ie \n[cR] \
 .      tl '\*[doc-operating-system]'\*[doc-date-string]'\*[doc-xref]'
 .    el \
-.      tl '\*[doc-operating-system]'\*[doc-date-string]'%'
+.      tl '\*[doc-operating-system]'\*[doc-date-string]'\*[doc-page-id]'
 .  \}
 .  if !\n[cR] .bp
 .  ev
+.  rm doc-page-id
 .  rm doc-xref
 ..
 .ec
@@ -1108,7 +1116,7 @@
 .\" NS   finish output
 .\" NS
 .\" NS modifies:
-.\" NS   doc-is-first-page-of-document
+.\" NS   doc-need-titles-reset
 .
 .eo
 .de doc-end-macro
@@ -1139,8 +1147,7 @@
 .    pl \n[nl]u
 .  \}
 .  ch doc-header
-.  bp
-.  nr doc-is-first-page-of-document 1
+.  doc-break-page-with-new-number
 .
 .  \" Reset strings to reduce info leaks from one man page to the next.
 .  ds doc-date-string UNDATED\"
@@ -1149,6 +1156,26 @@
 .  ds doc-section \" empty
 .  ds doc-operating-system \" empty
 .  ds doc-topic-name \" empty
+..
+.ec
+.
+.
+.\" NS doc-break-page-with-new-number macro
+.\" NS   Break the page and update its number depending on the C
+.\" NS   (consecutive numbering) register.
+.\" NS
+.\" NS  Corner case: if formatting multiple documents and P (starting
+.\" NS  page number) is defined but C is not set, start numbering each
+.\" NS  document at \n[P].  Not strictly necessary if not switching
+.\" NS  macro packages.
+.
+.eo
+.de doc-break-page-with-new-number
+.  ie \n[C] .bp (\n[%] + 1) \" argument NOT redundant before page 1
+.  el \{\
+.    ie r P .bp \n[P]
+.    el     .bp 1
+.  \}
 ..
 .ec
 .
@@ -1258,13 +1285,13 @@
 .nr doc-in-authors-section 0
 .
 .
-.\" NS doc-is-first-page-of-document global register (bool)
-.\" NS   whether the drawing position is at the top of the first page of
-.\" NS   a document
+.\" NS doc-need-titles-reset global register (bool)
+.\" NS   whether the strings that set header and footer text need to be
+.\" NS   reconfigured
 .\" NS
-.\" NS This is necessarily true when the macro package is loaded.
+.\" NS This happens when batch-rendering and starting a new page.
 .
-.nr doc-is-first-page-of-document 1
+.nr doc-need-titles-reset 0
 .
 .
 .\" NS doc-first-parameter macro
@@ -1444,6 +1471,9 @@
 .      ss (\n[.ss] * 5 / 3) (\n[.sss] * 5 / 3)
 .    \}
 .
+.  if \n[doc-remap-I-style-in-headings] \
+.    ftr \*[doc-heading-family]I \*[doc-heading-family]BI
+.
 .    nr doc-arg-ptr +1
 .    nr doc-curr-font \n[.f]
 .    nop \*[doc-Sh-font]\c
@@ -1456,7 +1486,10 @@
 .    ns
 .
 .    doc-check-depth
+.  if \n[doc-remap-I-style-in-headings] \
+.    ftr \*[doc-heading-family]I \*[doc-heading-family]I
 .  \}
+.
 .
 .  \" Don't let doc-print-recursive force caps on anything else.
 .  nr doc-do-capitalize 0
@@ -1519,6 +1552,9 @@
 .    nr doc-reg-Ss1 \n[.sss]
 .    ss (\n[.ss] * 5 / 4) (\n[.sss] * 5 / 4)
 .
+.  if \n[doc-remap-I-style-in-headings] \
+.    ftr \*[doc-heading-family]I \*[doc-heading-family]BI
+.
 .    nr doc-arg-ptr +1
 .    nr doc-curr-font \n[.f]
 .    nop \*[doc-Sh-font]\c
@@ -1534,7 +1570,10 @@
 .    ns
 .
 .    doc-check-depth
+.  if \n[doc-remap-I-style-in-headings] \
+.    ftr \*[doc-heading-family]I \*[doc-heading-family]I
 .  \}
+.
 ..
 .ec
 .

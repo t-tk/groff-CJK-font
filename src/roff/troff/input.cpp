@@ -110,7 +110,7 @@ int have_input = 0;		// whether \f, \F, \D'F...', \H, \m, \M,
 				// \O[345], \R, \s, or \S has been processed
 				// in token::next()
 int old_have_input = 0;		// value of have_input right before \n
-bool device_has_tcommand = false;	// 't' ouput command supported
+bool device_has_tcommand = false;	// 't' output command supported
 int unsafe_flag = 0;		// safer by default
 
 bool have_multiple_params = false;	// e.g., \[e aa], \*[foo bar]
@@ -2069,7 +2069,7 @@ void token::next()
 	  // environment::set_font warns if a bogus mounting position is
 	  // requested.  We must warn here if a bogus font name is
 	  // selected.
-	  if (*p != 0 /* nullptr */ || s.is_empty()) {
+	  if (*p != '\0' || s.is_empty()) {
 	    if (!curenv->set_font(s))
 	      warning(WARN_FONT, "cannot select font '%1'",
 		      s.contents());
@@ -4921,7 +4921,7 @@ void length_request()
     ++len;
     c = get_copy(&n);
   }
-  reg *r = (reg*)number_reg_dictionary.lookup(ret);
+  reg *r = (reg*)register_dictionary.lookup(ret);
   if (r)
     r->set_value(len);
   else
@@ -5004,7 +5004,7 @@ void interpolate_number_reg(symbol nm, int inc)
 
 static void interpolate_number_format(symbol nm)
 {
-  reg *r = (reg *)number_reg_dictionary.lookup(nm);
+  reg *r = (reg *)register_dictionary.lookup(nm);
   if (r)
     input_stack::push(make_temp_iterator(r->get_format()));
 }
@@ -5256,7 +5256,7 @@ static void do_register()
     return;
   while (tok.is_space())
     tok.next();
-  reg *r = (reg *)number_reg_dictionary.lookup(nm);
+  reg *r = (reg *)register_dictionary.lookup(nm);
   int prev_value;
   if (!r || !r->get_value(&prev_value))
     prev_value = 0;
@@ -5808,7 +5808,7 @@ int do_if_request()
     }
     result = (c == 'd'
 	      ? request_dictionary.lookup(nm) != 0
-	      : number_reg_dictionary.lookup(nm) != 0);
+	      : register_dictionary.lookup(nm) != 0);
   }
   else if (c == 'm') {
     tok.next();
@@ -7543,27 +7543,27 @@ const char *break_flag_reg::get_string()
   return i_to_a(input_stack::get_break_flag());
 }
 
-class constant_reg : public reg {
+class readonly_text_register : public reg {
   const char *s;
 public:
-  constant_reg(const char *);
+  readonly_text_register(const char *);
   const char *get_string();
 };
 
-constant_reg::constant_reg(const char *p) : s(p)
+readonly_text_register::readonly_text_register(const char *p) : s(p)
 {
 }
 
-const char *constant_reg::get_string()
+const char *readonly_text_register::get_string()
 {
   return s;
 }
 
-constant_int_reg::constant_int_reg(int *q) : p(q)
+readonly_register::readonly_register(int *q) : p(q)
 {
 }
 
-const char *constant_int_reg::get_string()
+const char *readonly_register::get_string()
 {
   return i_to_a(*p);
 }
@@ -8245,7 +8245,7 @@ int main(int argc, char **argv)
   init_column_requests();
 #endif /* COLUMN */
   init_node_requests();
-  number_reg_dictionary.define(".T", new constant_reg(tflag ? "1" : "0"));
+  register_dictionary.define(".T", new readonly_text_register(tflag ? "1" : "0"));
   init_registers();
   init_reg_requests();
   init_hyphen_requests();
@@ -8313,8 +8313,8 @@ static void init_registers()
   set_number_reg("year", int(1900 + tt->tm_year));
   set_number_reg("yr", int(tt->tm_year));
   set_number_reg("$$", getpid());
-  number_reg_dictionary.define(".A",
-			       new constant_reg(ascii_output_flag
+  register_dictionary.define(".A",
+			       new readonly_text_register(ascii_output_flag
 						? "1"
 						: "0"));
 }
@@ -8458,44 +8458,44 @@ void init_input_requests()
   init_request("write", write_request);
   init_request("writec", write_request_continue);
   init_request("writem", write_macro_request);
-  number_reg_dictionary.define(".$", new nargs_reg);
-  number_reg_dictionary.define(".br", new break_flag_reg);
-  number_reg_dictionary.define(".C", new constant_int_reg(&compatible_flag));
-  number_reg_dictionary.define(".cp", new constant_int_reg(&do_old_compatible_flag));
-  number_reg_dictionary.define(".O", new variable_reg(&begin_level));
-  number_reg_dictionary.define(".c", new lineno_reg);
-  number_reg_dictionary.define(".color", new constant_int_reg(&color_flag));
-  number_reg_dictionary.define(".F", new filename_reg);
-  number_reg_dictionary.define(".g", new constant_reg("1"));
-  number_reg_dictionary.define(".H", new constant_int_reg(&hresolution));
-  number_reg_dictionary.define(".R", new constant_reg("10000"));
-  number_reg_dictionary.define(".U", new constant_int_reg(&unsafe_flag));
-  number_reg_dictionary.define(".V", new constant_int_reg(&vresolution));
-  number_reg_dictionary.define(".warn", new constant_int_reg(&warning_mask));
+  register_dictionary.define(".$", new nargs_reg);
+  register_dictionary.define(".br", new break_flag_reg);
+  register_dictionary.define(".C", new readonly_register(&compatible_flag));
+  register_dictionary.define(".cp", new readonly_register(&do_old_compatible_flag));
+  register_dictionary.define(".O", new variable_reg(&begin_level));
+  register_dictionary.define(".c", new lineno_reg);
+  register_dictionary.define(".color", new readonly_register(&color_flag));
+  register_dictionary.define(".F", new filename_reg);
+  register_dictionary.define(".g", new readonly_text_register("1"));
+  register_dictionary.define(".H", new readonly_register(&hresolution));
+  register_dictionary.define(".R", new readonly_text_register("10000"));
+  register_dictionary.define(".U", new readonly_register(&unsafe_flag));
+  register_dictionary.define(".V", new readonly_register(&vresolution));
+  register_dictionary.define(".warn", new readonly_register(&warning_mask));
   extern const char *major_version;
-  number_reg_dictionary.define(".x", new constant_reg(major_version));
+  register_dictionary.define(".x", new readonly_text_register(major_version));
   extern const char *revision;
-  number_reg_dictionary.define(".Y", new constant_reg(revision));
+  register_dictionary.define(".Y", new readonly_text_register(revision));
   extern const char *minor_version;
-  number_reg_dictionary.define(".y", new constant_reg(minor_version));
-  number_reg_dictionary.define("c.", new writable_lineno_reg);
-  number_reg_dictionary.define("llx", new variable_reg(&llx_reg_contents));
-  number_reg_dictionary.define("lly", new variable_reg(&lly_reg_contents));
-  number_reg_dictionary.define("lsn", new variable_reg(&leading_spaces_number));
-  number_reg_dictionary.define("lss", new variable_reg(&leading_spaces_space));
-  number_reg_dictionary.define("opmaxx",
+  register_dictionary.define(".y", new readonly_text_register(minor_version));
+  register_dictionary.define("c.", new writable_lineno_reg);
+  register_dictionary.define("llx", new variable_reg(&llx_reg_contents));
+  register_dictionary.define("lly", new variable_reg(&lly_reg_contents));
+  register_dictionary.define("lsn", new variable_reg(&leading_spaces_number));
+  register_dictionary.define("lss", new variable_reg(&leading_spaces_space));
+  register_dictionary.define("opmaxx",
 			       new variable_reg(&output_reg_maxx_contents));
-  number_reg_dictionary.define("opmaxy",
+  register_dictionary.define("opmaxy",
 			       new variable_reg(&output_reg_maxy_contents));
-  number_reg_dictionary.define("opminx",
+  register_dictionary.define("opminx",
 			       new variable_reg(&output_reg_minx_contents));
-  number_reg_dictionary.define("opminy",
+  register_dictionary.define("opminy",
 			       new variable_reg(&output_reg_miny_contents));
-  number_reg_dictionary.define("slimit",
+  register_dictionary.define("slimit",
 			       new variable_reg(&input_stack::limit));
-  number_reg_dictionary.define("systat", new variable_reg(&system_status));
-  number_reg_dictionary.define("urx", new variable_reg(&urx_reg_contents));
-  number_reg_dictionary.define("ury", new variable_reg(&ury_reg_contents));
+  register_dictionary.define("systat", new variable_reg(&system_status));
+  register_dictionary.define("urx", new variable_reg(&urx_reg_contents));
+  register_dictionary.define("ury", new variable_reg(&ury_reg_contents));
 }
 
 object_dictionary request_dictionary(501);

@@ -475,6 +475,7 @@ options *process_options(table_input &in)
       if (arg)
 	error("'expand' region option does not take an argument");
       opt->flags |= table::EXPAND;
+      opt->flags |= table::GAP_EXPAND;
     }
     else if (strieq(p, "box") || strieq(p, "frame")) {
       if (arg)
@@ -707,7 +708,7 @@ struct input_entry_format : public entry_format {
   string width;
   int separation;
   int vline;
-  int pre_vline;
+  int vline_count;
   bool is_last_column;
   bool is_equal_width;
   int expand;
@@ -722,7 +723,7 @@ input_entry_format::input_entry_format(format_type t, input_entry_format *p)
   separation = -1;
   is_last_column = false;
   vline = 0;
-  pre_vline = 0;
+  vline_count = 0;
   is_equal_width = false;
   expand = 0;
 }
@@ -743,7 +744,7 @@ void free_input_entry_format_list(input_entry_format *list)
 void input_entry_format::debug_print()
 {
   int i;
-  for (i = 0; i < pre_vline; i++)
+  for (i = 0; i < vline_count; i++)
     putc('|', stderr);
   entry_format::debug_print();
   if (!width.empty()) {
@@ -771,11 +772,12 @@ void input_entry_format::debug_print()
 format *process_format(table_input &in, options *opt,
 		       format *current_format = 0)
 {
-  input_entry_format *list = 0;
+  input_entry_format *list = 0 /* nullptr */;
   bool have_expand = false;
+  bool is_first_row = true;
   int c = in.get();
   for (;;) {
-    int pre_vline = 0;
+    int vline_count = 0;
     bool got_format = false;
     bool got_period = false;
     format_type t = FORMAT_LEFT;
@@ -784,7 +786,8 @@ format *process_format(table_input &in, options *opt,
 	error("end of input while processing table format"
 	      " specification");
 	free_input_entry_format_list(list);
-	return 0;
+	list = 0 /* nullptr */;
+	return 0 /* nullptr */;
       }
       switch (c) {
       case 'n':
@@ -825,6 +828,8 @@ format *process_format(table_input &in, options *opt,
       case '-':			// tbl also accepts this
 	got_format = true;
 	t = FORMAT_HLINE;
+	if (is_first_row)
+	  opt->flags |= table::HAS_TOP_HLINE;
 	break;
       case '=':
 	got_format = true;
@@ -834,7 +839,10 @@ format *process_format(table_input &in, options *opt,
 	got_period = true;
 	break;
       case '|':
-	pre_vline++;
+	// leading vertical line in row
+	opt->flags |= table::HAS_TOP_VLINE;
+	vline_count++;
+	// list->vline_count is updated later
 	break;
       case ' ':
       case '\t':
@@ -845,7 +853,8 @@ format *process_format(table_input &in, options *opt,
 	  break;
 	error("invalid column classifier '%1'", char(c));
 	free_input_entry_format_list(list);
-	return 0;
+	list = 0 /* nullptr */;
+	return 0 /* nullptr */;
       }
       if (got_period)
 	break;
@@ -856,9 +865,14 @@ format *process_format(table_input &in, options *opt,
     if (got_period)
       break;
     list = new input_entry_format(t, list);
-    if (pre_vline)
-      list->pre_vline = pre_vline;
-    int success = 1;
+    if (vline_count > 2) {
+      vline_count = 2;
+      error("more than 2 vertical lines at beginning of row description");
+    }
+    list->vline_count = vline_count;
+    // Now handle modifiers.
+    vline_count = 0;
+    bool is_valid_modifier_sequence = true;
     do {
       switch (c) {
       case '0':
@@ -1058,7 +1072,8 @@ format *process_format(table_input &in, options *opt,
 	    if (c == EOF || c == '\n') {
 	      error("'w' column modifier missing closing parenthesis");
 	      free_input_entry_format_list(list);
-	      return 0;
+	      list = 0 /* nullptr */;
+	      return 0 /* nullptr */;
 	    }
 	    list->width += c;
 	    c = in.get();
@@ -1099,8 +1114,10 @@ format *process_format(table_input &in, options *opt,
 	list->zero_width = 1;
 	break;
       case '|':
+	if (is_first_row)
+	  opt->flags |= table::HAS_TOP_VLINE;
 	c = in.get();
-	list->vline++;
+	vline_count++;
 	break;
       case ' ':
       case '\t':
@@ -1110,15 +1127,18 @@ format *process_format(table_input &in, options *opt,
 	if (c == opt->tab_char)
 	  c = in.get();
 	else
-	  success = 0;
+	  is_valid_modifier_sequence = false;
 	break;
       }
-    } while (success);
-    if (list->vline > 2) {
-      list->vline = 2;
-      error("more than 2 vertical bars between column descriptors");
+    } while (is_valid_modifier_sequence);
+    if (vline_count > 2) {
+      vline_count = 2;
+      error("more than 2 vertical lines after column descriptor");
     }
+    list->vline += vline_count;
     if (c == '\n' || c == ',') {
+      vline_count = 0;
+      is_first_row = false;
       c = in.get();
       list->is_last_column = true;
     }
@@ -1130,13 +1150,15 @@ format *process_format(table_input &in, options *opt,
     if (c != '\n') {
       error("'.' is not the last character of the table format");
       free_input_entry_format_list(list);
-      return 0;
+      list = 0 /* nullptr */;
+      return 0 /* nullptr */;
     }
   }
   if (!list) {
     error("table format specification is empty");
     free_input_entry_format_list(list);
-    return 0;
+    list = 0 /* nullptr */;
+    return 0 /* nullptr */;
   }
   list->is_last_column = true;
   // now reverse the list so that the first row is at the beginning
@@ -1175,7 +1197,8 @@ format *process_format(table_input &in, options *opt,
     if (ncolumns > current_format->ncolumns) {
       error("cannot increase the number of columns in a continued format");
       free_input_entry_format_list(list);
-      return 0;
+      list = 0 /* nullptr */;
+      return 0 /* nullptr */;
     }
     f = current_format;
     row = f->nrows;
@@ -1219,10 +1242,8 @@ format *process_format(table_input &in, options *opt,
 	error("multiple widths for column %1", col + 1);
       f->width[col] = tem->width;
     }
-    if (tem->pre_vline) {
-      assert(col == 0);
-      f->vline[row][col] = tem->pre_vline;
-    }
+    if (tem->vline_count)
+      f->vline[row][col] = tem->vline_count;
     f->vline[row][col + 1] = tem->vline;
     if (tem->is_last_column) {
       row++;
@@ -1232,6 +1253,7 @@ format *process_format(table_input &in, options *opt,
       col++;
   }
   free_input_entry_format_list(list);
+  list = 0 /* nullptr */;
   for (col = 0; col < ncolumns; col++) {
     entry_format *e = f->entry[f->nrows - 1] + col;
     if (e->type != FORMAT_HLINE
@@ -1242,7 +1264,7 @@ format *process_format(table_input &in, options *opt,
   if (col >= ncolumns) {
     error("last row of format is all lines");
     delete f;
-    return 0;
+    return 0 /* nullptr */;
   }
   if (have_expand && (opt->flags & table::EXPAND)) {
     error("'x' column modifier encountered; ignoring region option"
@@ -1287,6 +1309,8 @@ table *process_data(table_input &in, format *f, options *opt)
 	  type = SINGLE_HLINE;
 	else
 	  type = DOUBLE_HLINE;
+	if (0 == current_row)
+	  tbl->flags |= table::HAS_TOP_HLINE;
       }
       else {
 	in.unget(d);
@@ -1557,12 +1581,12 @@ table *process_data(table_input &in, format *f, options *opt)
 
 void process_table(table_input &in)
 {
-  options *opt = 0;
-  format *form = 0;
-  table *tbl = 0;
-  if ((opt = process_options(in)) != 0 
-      && (form = process_format(in, opt)) != 0
-      && (tbl = process_data(in, form, opt)) != 0) {
+  options *opt = 0 /* nullptr */;
+  format *fmt = 0 /* nullptr */;
+  table *tbl = 0 /* nullptr */;
+  if ((opt = process_options(in)) != 0 /* nullptr */
+      && (fmt = process_format(in, opt)) != 0 /* nullptr */
+      && (tbl = process_data(in, fmt, opt)) != 0 /* nullptr */) {
     tbl->print();
     delete tbl;
   }
@@ -1572,7 +1596,7 @@ void process_table(table_input &in)
       ;
   }
   delete opt;
-  delete form;
+  delete fmt;
   if (!in.ended())
     error("premature end of file");
 }
@@ -1635,8 +1659,10 @@ int main(int argc, char **argv)
       else {
 	errno = 0;
 	FILE *fp = fopen(argv[i], "r");
-	if (fp == 0)
+	if (fp == 0) {
+	  current_filename = 0 /* nullptr */;
 	  fatal("can't open '%1': %2", argv[i], strerror(errno));
+	}
 	else {
 	  current_lineno = 1;
 	  string fn(argv[i]);

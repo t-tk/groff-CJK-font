@@ -331,8 +331,8 @@ sub LocateFile
 
 sub FindGSpath
 {
-    my (@res)=`@GROFF_GHOSTSCRIPT_INTERPRETERS@ -h 2>/dev/null`;
-    return '' if $?;
+    my (@res)=`@GHOSTSCRIPT@ -h 2>/dev/null`;
+    return [] if $?;
     my $buildpath=[];
     my $stg=1;
 

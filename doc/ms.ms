@@ -1,3 +1,18 @@
+.\" This file is part of groff.
+.\"
+.\" groff is free software; you can redistribute it and/or modify it
+.\" under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation, either version 3 of the License, or
+.\" (at your option) any later version.
+.\"
+.\" groff is distributed in the hope that it will be useful, but WITHOUT
+.\" ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+.\" or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
+.\" License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public License
+.\" along with this program. If not, see <http://www.gnu.org/licenses/>.
+.
 .\" Handle font requests with families, for instance in tbl(1) tables.
 .if n \{\
 .  ftr CR B \" for a visible distinction from roman
@@ -6,24 +21,23 @@
 .  ftr CBI BI
 .  \" Redefine CW to use bold instead for a visible font change.
 .  als CW B
+.  \" The "document control settings" table imposes this minimum width.
+.  nr LL 87n
 .\}
 .\" This document doesn't require the minus sign (in Times) but we do
 .\" want a copy- and-pastable hyphen-minus.
-.char \- \N'45'
+.ie '\*[.T]'cp1047' .char \- \N'96'
+.el                 .char \- \N'45'
 .\" A very limited output device might not have a dagger glyph.
 .fchar \[dg] *
-.\".RP
-.ie t .nr LL 6.5i
-.el   .nr LL 84n
-.nr LT \n[LL]
 .nr PS 11
 .nr VS 13
 .ds FR 1
 .nr TC-MARGIN \w'00' \" expect 2-digit page numbers at most
 .ie t .nr PI 3.5n
 .el   .nr PI 4n
-.ND October 2022
-.EH '%''October 2022'
+.ND February 2023
+.EH '%''February 2023'
 .EF ''''
 .OH 'Using \f[I]groff\f[] with the \f[I]ms\f[] macros''%'
 .OF ''''
@@ -185,12 +199,12 @@ can be useful for previewing.
 .
 .TS
 box center;
-lf(CB).
-\f[CR]$\f[] editor radical.ms
-\f[CR]$\f[] nroff -ww -z -ms radical.ms # check for errors
-\f[CR]$\f[] nroff \-ms radical.ms | less \-R
-\f[CR]$\f[] groff \-T ps \-ms radical.ms > radical.ps
-\f[CR]$\f[] see radical.ps
+Lf(CR)1 Lf(CB).
+$	editor radical.ms # vim, emacs, ...
+$	nroff -ww -z -ms radical.ms # check for errors
+$	nroff \-ms radical.ms | less \-R
+$	groff \-T pdf \-ms radical.ms > radical.pdf
+$	see radical.pdf # or your favorite PDF viewer
 .TE
 .
 .
@@ -517,13 +531,16 @@ see the discussion in the applicable section.
 .TS H
 box;
 cb | cb cb cb cb
-l | lf(CR) lx l lf(CR).
+l | lf(CR)p-1 lx l lf(CR)p-1.
 Type	Parameter	Definition	Next	Default
 _
 .TH
-Margins	\[rs]n[PO]	Page offset (left margin)	page	1i
-\^	\[rs]n[LL]	Line length	paragraph	6i
-\^	\[rs]n[LT]	Title line length	paragraph	6i
+Margins	\[rs]n[PO]	Page offset (left margin)	page\
+	1i (0)\*{*\*}
+\^	\[rs]n[LL]	Line length	paragraph	\
+6.5i (65n)\*{*\*}
+\^	\[rs]n[LT]	Title line length	paragraph	\
+6.5i (65n)\*{*\*}
 \^	\[rs]n[HM]	Top (header) margin	page	1i
 \^	\[rs]n[FM]	Bottom (footer) margin	page	1i
 _
@@ -547,7 +564,7 @@ Text	\[rs]n[PS]	Type (point) size	paragraph	10p
 _
 Paragraphs	\[rs]n[PI]	Indentation	paragraph	5n
 \^	\[rs]n[PD]	Paragraph distance (spacing)	paragraph\
-	0.3v \f[R](\f[]1v\f[R])
+	0.3v \f[R](\f[]1v\f[R])\*{\[dg]\*}
 \^	\[rs]n[QI]	Quotation indentation	paragraph	5n
 \^	\[rs]n[PORPHANS]	# of initial lines kept	paragraph\
 	1
@@ -571,7 +588,7 @@ Footnotes	\[rs]n[FI]	Indentation	footnote	2n
 \^	\[rs]*[FR]	Line length ratio	\f[I]special	11/12
 _
 Displays	\[rs]n[DD]	Display distance (spacing)\
-	\f[I]special	0.5v \f[R](\f[]1v\f[R])
+	\f[I]special	0.5v \f[R](\f[]1v\f[R])\*{\[dg]\*}
 \^	\[rs]n[DI]	Display indentation	\f[I]special	0.5i
 _
 Other	\[rs]n[MINGW]	Minimum gutter width	page	2n
@@ -582,7 +599,17 @@ Other	\[rs]n[MINGW]	Minimum gutter width	page	2n
 .TE
 .
 .
-.LP
+.IP \*{*\*}
+Defaults vary by output device and paper format;
+the values shown are for typesetters using U.S.\& letter paper,
+and then terminals.
+.
+See section \[lq]Paper format\[rq] of the
+.I groff (1)
+man page.
+.
+.
+.IP \*{\[dg]\*}
 The
 .CW PD
 and
@@ -1003,6 +1030,10 @@ the amount stored in the
 .CW PD
 register,
 except at page or column breaks.
+.
+Alternatively,
+a blank input line breaks the output line and vertically spaces by one
+vee.
 .KE
 .
 .
@@ -1548,9 +1579,10 @@ similarly.
 Without arguments,
 .I ms
 styles subsequent text in bold
-until the next highlighting,
+until the next
 paragraphing,
-or heading macro call.
+heading,
+or no-argument typeface macro call.
 T}
 _
 \&.R \f[R][\f[I]text\f[] [\f[I]post\f[] [\f[I]pre\f[]]]]	T{
@@ -1624,10 +1656,9 @@ Typeset
 with an
 .UL underline .
 .
-Set
 .I post,
 if present,
-after
+is set after
 .I text
 with no intervening space.
 T}
@@ -1638,9 +1669,8 @@ Set subsequent text in
 larger type
 .NL
 (2\~points larger than the current size)
-until
-the next font size,
-highlighting,
+until the next
+type size,
 paragraphing,
 or heading macro call.
 .
@@ -1659,9 +1689,8 @@ Set subsequent text in
 smaller type
 .NL
 (2\~points smaller than the current size)
-until
-the next type size,
-highlighting,
+until the next
+type size,
 paragraphing,
 or heading macro call.
 .
@@ -1706,13 +1735,14 @@ Lf(CR) L.
 Input	Result
 T{
 .na
-The course\[aq]s students found one C language keyword
+.nh
+The CS course\[aq]s students found one C language keyword
 .br
 \&.CW static ) \[rs]%(
 .br
 most troublesome.
 T}	T{
-The course's students found one C language keyword
+The CS course's students found one C language keyword
 .CW static ) \%(
 most troublesome.
 T}
@@ -1723,9 +1753,9 @@ You can use the output line continuation escape sequence
 .CW \[rs]c
 to achieve the same result.
 .
-It is also portable to older
+It is also portable to some older
 .I ms
-implementations.
+implementations. \" DWB 3.3 ms: no; Heirloom Doctools ms: yes
 .
 .TS
 box center;
@@ -1734,18 +1764,19 @@ Lf(CR) L.
 Input	Result
 T{
 .na
-The course\[aq]s students found one C language keyword
+.nh
+The CS course\[aq]s students found one C language keyword
 .br
-(\[rs]c
+\[rs]%(\[rs]c
 .br
-\&.CW \[rs]%static \[rs]c
+\&.CW static )
 .br
-) most troublesome.
+most troublesome.
 T}	T{
-The course's students found one C language keyword
-(\c
-.CW \%static \c
-) most troublesome.
+The CS course's students found one C language keyword
+\%(\c
+.CW static )
+most troublesome.
 T}
 .TE
 .KE
@@ -2077,6 +2108,11 @@ Indented regions
 You may need to indent a region of text while otherwise formatting it
 normally.
 .
+Indented regions can be nested;
+you can change
+.CW \[rs]n[PI]
+before each call to vary the amount of inset.
+.
 .
 .TS
 box;
@@ -2091,17 +2127,12 @@ and displays are indented (further) by
 .CW \[rs]n[PI] .
 T}
 \&.RE	T{
-End the most recent indented region.
+End the (next) most recent indented region.
 T}
 .TE
 .
 .
 .PP
-Indented regions can be nested;
-you can change
-.CW \[rs]n[PI]
-before each call to vary the amount of inset.
-.
 This feature enables you to easily line up text under hanging and
 indented paragraphs.
 .
@@ -2591,14 +2622,10 @@ giving us more flexibility to reorganize the document.
 p ~ = ~ q sqrt { 1 + ~ ( x / q sup 2 ) }
 .EN
 .
-.
-.PP
-Remember to run any desired preprocessors on the input;
+Use
 .I groff
 options
-will take care of this.
-.
-Use
+to run preprocessors on the input:
 .CW \-e
 for
 .I eqn ,
@@ -3063,10 +3090,12 @@ Input	Appearance	Description
 _
 \[rs][\-]	\[mi]	minus sign
 \[rs][\->]	\[->]	right arrow
+\[rs][aq]	\[aq]	neutral apostrophe
 \[rs][bu]	\[bu]	bullet
+\[rs][dq]	\[dq]	neutral double quote
 \[rs][dg]	\[dg]	dagger
 \[rs][em]	\[em]	em dash
-\[rs][ha]	\[ha]	circumflex accent (caret)
+\[rs][ha]	\[ha]	circumflex accent (caret, hat)
 \[rs][lg]	\[lq]	left double quotation mark
 \[rs][rq]	\[rq]	right double quotation mark
 \[rs][rs]	\[rs]	reverse solidus (backslash)
@@ -3084,17 +3113,16 @@ Page layout
 .XE
 .LP
 .I ms 's
-default page layout is simple:
-it arranges text in a single column
+default page layout arranges text
+in a single column
 with the page number
-centered between hyphens
-in a header
+between hyphens
+centered in a header
 on each page
-except the first.
+except the first,
+and produces no footers.
 .
-It produces no footers.
-.
-You can customize this arrangement extensively.
+You can customize this arrangement.
 .
 .
 .NH 2
@@ -3123,9 +3151,9 @@ and
 .CW RF
 to set the left,
 center,
-and right footers similarly.
+and right footers.
 .
-This approach works best for documents that do not distinguish odd- and
+This approach suffices for documents that do not distinguish odd- and
 even-numbered pages.
 .
 .
@@ -3283,17 +3311,16 @@ Margins
 .
 .
 .LP
-Control margins using registers.
+Control margins using the registers summarized in the \[lq]Margins\[rq]
+portion of the table in section \[lq]Document control settings\[rq]
+above.
 .
-These are summarized in the \[lq]Margins\[rq] portion of the table in
-section \[lq]Document control settings\[rq] above.
-.
-There is no explicit right margin setting;
+There is no setting for the right margin;
 the combination of page offset
 .CW \[rs]n[PO]
 and line length
 .CW \[rs]n[LL]
-provides the information necessary to derive the right margin.
+determines it.
 .KE
 .
 .
@@ -3656,7 +3683,7 @@ T}
 .
 .KS
 .PP
-.I groff ms
+.I "groff ms"
 encourages customization of table of contents entry production.
 .
 .
@@ -3859,6 +3886,23 @@ manual [Lesk 1978].
 .
 .
 .PP
+The error-handling policy of
+.I groff ms
+is to detect and report errors,
+rather than silently to ignore them.
+.
+.
+.PP
+Tenth Edition \" possibly 9th
+Research Unix supported
+.B P1 /
+.B P2
+macros to bracket code examples;
+.I groff ms
+does not.
+.
+.
+.PP
 .I "groff ms"
 does not work in GNU
 .I troff 's \" GNU
@@ -3866,6 +3910,11 @@ AT&T compatibility mode.
 .
 If loaded when that mode is enabled,
 it aborts processing with a diagnostic message.
+.
+.
+.PP
+Multiple line spacing is not supported
+(use a larger vertical spacing instead).
 .
 .
 .PP
@@ -3907,14 +3956,13 @@ but by setting it absolutely.
 This can cause problems for documents that define additional macros of
 their own that try to manipulate indentation.
 .
-The solution is to use,
-not the
-.CW in
-request,
-but
+Use
 .CW .RS
 and
-.CW .RE .
+.CW .RE
+instead of the
+.CW in
+request.
 .
 .
 .PP
@@ -3942,19 +3990,20 @@ Register values are converted to and stored as basic units.
 .
 See \[lq]Measurements\[rq] in the
 .I groff
-Texinfo manual or the
-.I groff (7)
-man page.
+Texinfo manual or in
+.I groff (7).
 .FE
 .
 This threshold makes use of a scaling unit with these parameters
 practical for high-resolution devices while preserving backward
 compatibility.
 .
+It also permits expression of non-integral type sizes.
+.
 For example,
-.CW "groff \-rPS=10.5p"
+.CW "groff \-rPS=10.5p" \[rq] \[lq]
 at the shell prompt is equivalent to placing
-.CW ".nr PS 10.5p"
+.CW ".nr PS 10.5p" \[rq] \[lq]
 at the beginning of the document.
 .
 .
@@ -3980,6 +4029,24 @@ but it doesn't work\[rq].
 In
 .I "groff ms" ,
 it does.
+.
+.
+.PP
+To make
+.I groff ms
+use the default page offset
+(which also specifies the left margin),
+the
+.B PO
+register must stay undefined until the first
+.I ms
+macro is called.
+.
+This implies that
+.B \[rs]n[PO]
+should not be used early in the document,
+unless it is changed also:
+accessing an undefined register automatically defines it.
 .
 .
 .PP
@@ -4054,10 +4121,10 @@ The AT&T
 .I ms
 manual did not document the
 .CW QI
-register,
-whereas Berkeley did;
+register;
+Berkeley and
 .I "groff ms"
-accordingly supports it.
+do.
 .
 .
 .PP
@@ -4078,6 +4145,8 @@ or another implementation should test this register.
 .\" XXX: We can't use a keep here because the wrong page number will be
 .\" recorded in the table of contents; see Savannah #63159.
 .\"KS
+.br
+.ne 6v
 .NH 2
 Unix Version\~7
 .BI ms
@@ -4100,7 +4169,7 @@ some of which also require a glyph for the Bell System logo that
 .I groff
 does not support.
 .
-These include macros implementing several document type formats
+These macros implemented several document type formats
 (\c
 .CW EG , \" engineer's notes
 .CW IM , \" internal memorandum
@@ -4123,7 +4192,7 @@ stored the postal addresses of Bell Labs sites
 .CW MH , \" Murray Hill
 .CW PY , \" Piscataway
 .CW WH ), \" Whippany
-or lack a stable definition historically
+or lacked a stable definition over time
 (\c
 .CW UX ). \" Unix; on 1st use, add footnote identifying trademark owner
 .
@@ -4168,8 +4237,8 @@ Legacy features
 .
 .LP
 .I "groff ms"
-retains support for some legacy features solely to support formatting of
-historical documents;
+retains some legacy features solely to support formatting of historical
+documents;
 contemporary ones should not use them because they can render poorly.
 .
 See
@@ -4337,6 +4406,19 @@ enabling colored,
 bordered boxes when the
 .CW pdf
 output device is used.
+.
+This document is distributed with
+.I groff
+as the file
+.I msboxes.pdf .
+.
+.
+.LP
+This manual was composed using
+.I "groff ms" ;
+the curious may consult its source in the file
+.I ms.ms
+to see how its formatting was achieved.
 .\" ------------------------
 .TC
 .

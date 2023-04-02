@@ -27,16 +27,23 @@ groff="${abs_top_builddir:-.}/test-groff"
 # we want to ensure that font remapping for the headings doesn't affect
 # page footers and headers.
 
-INPUT='.TH \\fIfoo\\fP 1 2021-10-04 "groff test suite"
+# Keep preconv from being run.
+unset GROFF_ENCODING
+
+input='.TH \\fIfoo\\fP 1 2021-10-04 "groff test suite"
 .SH Name
 foo \\- a command with a very short name
 .sp 50v
 .SH "\\fIgroff\\fP integration"
 A complicated situation.'
 
-OUTPUT=$(echo "$INPUT" | "$groff" -Tascii -man -rcR=0 -Z)
+output=$(echo "$input" | "$groff" -Tascii -man -rcR=0)
+echo "$output"
+output=$(echo "$input" | "$groff" -Tascii -man -rcR=0 -Z | nl)
+echo "$output"
 
 # Expected:
+#   74  V2640
 #   75  p2
 #   76  x font 2 I
 #   77  f2
@@ -44,7 +51,10 @@ OUTPUT=$(echo "$INPUT" | "$groff" -Tascii -man -rcR=0 -Z)
 #   79  V160
 #   80  H0
 #   81  tfoo
+#   82  x font 1 R
+#   83  f1
+#   84  t(1)
 
-echo "$OUTPUT" | nl | grep -E '77[[:space:]]+f2'
+echo "$output" | grep -E '77[[:space:]]+f2'
 
 # vim:set ai et sw=4 ts=4 tw=72:

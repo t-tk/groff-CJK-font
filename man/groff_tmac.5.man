@@ -27,6 +27,21 @@ typesetting system
 .do nr *groff_groff_tmac_5_man_C \n[.cp]
 .cp 0
 .
+.\" Define fallback for groff 1.23's MR macro if the system lacks it.
+.nr do-fallback 0
+.if !\n(.f           .nr do-fallback 1 \" mandoc
+.if  \n(.g .if !d MR .nr do-fallback 1 \" older groff
+.if !\n(.g           .nr do-fallback 1 \" non-groff *roff
+.if \n[do-fallback]  \{\
+.  de MR
+.    ie \\n(.$=1 \
+.      I \%\\$1
+.    el \
+.      IR \%\\$1 (\\$2)\\$3
+.  .
+.\}
+.rr do-fallback
+.
 .
 .\" TODO: Consider parallelizing with our Texinfo node "Macro Packages".
 .\" ====================================================================
@@ -654,7 +669,8 @@ output devices support such inclusions;
 for all other drivers,
 the image is replaced with a rectangular border of the same size.
 .
-This macro file is automatically loaded at startup by the
+.I pspic.tmac
+is loaded at startup by the
 .I troffrc
 file.
 .
@@ -773,14 +789,14 @@ macro.
 .
 .TP
 .I ptx
-provides a single macro,
+provides a macro,
 .BR xx ,
 to format permuted index entries as produced by the GNU
 .MR ptx 1
 program.
 .
-If you need different formatting, copy the macro into your document and
-adapt it to your needs.
+If your formatting needs differ,
+copy the macro into your document and adapt it to your needs.
 .
 .
 .TP
@@ -794,7 +810,7 @@ See
 .
 .TP
 .I sboxes
-offers a simple interface to the
+offers an interface to the
 .RB \[lq] "pdf: background" \[rq]
 device control command supported by
 .MR gropdf @MAN1EXT@ .
@@ -974,8 +990,8 @@ commands permit space between an option and its argument.
 .
 The syntax
 .RB \[lq] "groff \-m s" \[rq]
-makes the macro file name more clear but may be jarring to users
-familiar with the original convention,
+makes the macro file name more clear but may surprise users familiar
+with the original convention,
 unaware that the package's \[lq]real\[rq] name was \[lq]s\[rq] all
 along.
 .
@@ -997,15 +1013,9 @@ serve to load the manuscript macros.
 .
 .
 .P
-Wrappers are not provided for packages of more recent vintage.
-.
-For example,
-the
-.I www
-package may be requested at the command line only with
-.RB \[lq] "groff \-m www" \[rq]
-or
-.RB \[lq] "groff \-mwww" \[rq].
+Wrappers are not provided for packages of more recent vintage,
+like
+.IR www.tmac .
 .
 .
 .P
@@ -1018,119 +1028,98 @@ named macro files in the form
 It has since become conventional in operating systems to use a suffixed
 file name extension to suggest a file type or format.
 .
-.IR @g@troff 's
-.B \-m
-option
-and
-.B mso
-request attempt to load a macro package using either naming convention;
-if one fails,
-the other is tried.
-.
 .
 .\" ====================================================================
 .SH Inclusion
 .\" ====================================================================
 .
-There are several ways to use a macro package in a document.
-.
-The classical way is to specify the troff/groff option
+The traditional method of employing a macro package is to specify the
 .B \-m
-.I name
-at run time; this makes the contents of the macro package
-.I name
-available.
+.I package
+option to the formatter,
+which then reads
+.IR package 's
+macro file prior to any input files.
 .
-In groff, the file
-.RI name .tmac
-is searched within the tmac path; if not found,
-.IR tmac. name
-is searched for instead.
+Historically,
+.I package
+was sought in a file named
+.IR tmac. package
+(that is,
+with a
+.RB \[lq] tmac.\& \[rq]
+prefix).
+.
+GNU
+.I troff \" GNU
+searches for
+.RI package .tmac
+in the macro path;
+if not found,
+it looks for
+.IR tmac. package
+instead,
+and vice versa.
 .
 .
 .P
-Alternatively, it is also possible to include a macro file by adding
-the request
-.B .so
-.I filename
-to the document; the argument must be the full file name of an
-existing file, possibly with the directory where it is kept.
+Alternatively,
+one could include a macro file by using the request
+.RB \[lq] .so
+.IR file-name \[rq]
+in the document;
+.I file-name
+is resolved relative to the location of the input document.
 .
-In groff, this was improved by the similar request
-.B .mso
-.IR package ,
-which added searching in the tmac path, just like option
-.B \-m
-does.
+GNU
+.I troff \" GNU
+offers an improved feature in the similar request
+.RB \[lq] mso
+.IR package-file-name \[rq],
+which searches the macro path for
+.IR package-file-name .
+.
+Because its argument is a file name,
+its
+.RB \[lq] .tmac \[rq]
+component must be included for the file to be found;
+however,
+as a convenience,
+if opening it fails,
+.B mso
+strips any such suffix and tries again with a
+.RB \[lq] tmac.\& \[rq]
+prefix,
+and vice versa.
 .
 .
 .P
-In order to resolve the
-.B .so
-and
-.B .mso
-requests,
-the roff preprocessor
+If a sourced file requires preprocessing,
+for example if it includes
+.I tbl \" generic
+tables
+or
+.I eqn \" generic
+equations,
+the preprocessor
 .MR @g@soelim @MAN1EXT@
-must be called if the files to be included need preprocessing.
+must be used.
 .
-This can be done either directly by a pipeline on the command line or
-by giving the formatter the
+This can be achieved with a pipeline or,
+in
+.IR groff ,
+by specifying
+the
 .B \-s
-option.
+option to the formatter
+(or front end).
 .
 .MR man 1
-calls
+librarian programs generally call
 .I @g@soelim
 automatically.
 .
-.
-.P
-For example, suppose a macro file is stored as
-.
-.IP
-.I @MACRODIR@/\:\%macros\:.tmac
-.
-.P
-and is used in some document called
-.IR docu.roff .
-.
-.
-.P
-At run time, the formatter call for this is
-.
-.IP
-.EX
-\fIsh#\fP groff \-m macros docu.roff
-.EE
-.
-.
-.P
-To include the macro file directly in the document, use either
-.
-.IP
-.EX
-\&.mso macros.tmac
-.EE
-.
-.P
-or
-.
-.IP
-.EX
-\&.so @MACRODIR@/macros.tmac
-.EE
-.
-.
-.P
-In both cases, the formatter should be called with option
-.B \-s
-to invoke
-.IR @g@soelim .
-.IP
-.EX
-\fIsh#\fP groff \-s docu.roff
-.EE
+(Macro packages themselves generally do not require preprocessing.)
 .
 .
 .ig

@@ -28,6 +28,21 @@ typesetter and document formatter
 .do nr *groff_troff_1_man_C \n[.cp]
 .cp 0
 .
+.\" Define fallback for groff 1.23's MR macro if the system lacks it.
+.nr do-fallback 0
+.if !\n(.f           .nr do-fallback 1 \" mandoc
+.if  \n(.g .if !d MR .nr do-fallback 1 \" older groff
+.if !\n(.g           .nr do-fallback 1 \" non-groff *roff
+.if \n[do-fallback]  \{\
+.  de MR
+.    ie \\n(.$=1 \
+.      I \%\\$1
+.    el \
+.      IR \%\\$1 (\\$2)\\$3
+.  .
+.\}
+.rr do-fallback
+.
 .
 .\" ====================================================================
 .SH Synopsis
@@ -355,8 +370,11 @@ and ordering.
 .
 .TP
 .BI \-n\~ num
-Number the first page
+Begin numbering pages at
 .I num.
+.
+The default
+.RB is\~ 1 .
 .
 .
 .TP
@@ -429,8 +447,9 @@ and
 .TP
 .BI \-T\~ dev
 Prepare output for device
-.I dev,
-rather than the default,
+.I dev.
+.
+The default is
 .BR @DEVICE@ ;
 see
 .MR groff @MAN1EXT@ .
@@ -635,8 +654,8 @@ When such an object is dereferenced,
 an empty one of that name is automatically created.
 .
 So,
-in most cases,
-at most one warning is given for each name.
+unless it is later deleted,
+at most one warning is given for each.
 .
 .
 .IP
@@ -674,7 +693,9 @@ An undefined register was used.
 When an undefined register is dereferenced,
 it is automatically defined with a value of\~0.
 .
-So, in most cases, at most one warning is given for each name.
+So,
+unless it is later deleted,
+at most one warning is given for each.
 .
 .
 .TP
@@ -686,7 +707,8 @@ was encountered where a number was expected.
 .
 .TP
 .BR scale "\t32"
-An inappropriate scaling unit was used in a numeric expression.
+A scaling unit inappropriate to its context was used in a numeric
+expression.
 .
 .
 .TP
@@ -835,7 +857,7 @@ A timestamp
 to use as the output creation timestamp in place of the current time.
 .
 The time is converted to human-readable form using
-.MR ctime 3
+.MR localtime 3
 when the formatter starts up and stored in registers usable by documents
 and macro packages.
 .

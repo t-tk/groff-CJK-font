@@ -39,9 +39,10 @@ input='.Dd 2022-11-17
 .Nm
 is a program.'
 
+echo "checking Nm's interpolation of text after initial call" >&2
 output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -mdoc)
 echo "$output"
-echo "$output" | grep 'foo is a program\.' || wail
+echo "$output" | grep -q 'foo is a program\.' || wail
 
 # Handle multiple declarations in "Name" section.
 
@@ -61,7 +62,12 @@ an angle
 
 output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -mdoc)
 echo "$output"
-echo "$output" | grep 'sin returns the sine' || wail
+
+echo "checking Nm behavior when called multiple times (Name)" >&2
+echo "$output" | grep -q 'sin, cos, tan -- trigonometric' || wail
+
+echo "checking Nm behavior when called multiple times (Description)" >&2
+echo "$output" | grep -q 'sin returns the sine' || wail
 
 test -z "$fail"
 

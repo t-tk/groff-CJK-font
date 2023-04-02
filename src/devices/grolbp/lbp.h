@@ -346,8 +346,8 @@ vdmpolygon(int numpoints, int *points)
 
 
 /************************************************************************
- *		Highter level auxiliary functions			*
- ************************************************************************/		
+ *		Higher level auxiliary functions			*
+ ************************************************************************/
 static inline int
 vdminited()
 {

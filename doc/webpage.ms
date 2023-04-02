@@ -86,7 +86,7 @@ and its mirrors;
 the current development version is available from a
 .URL "https://\:savannah.gnu.org/\:git/\:?group=groff" "git repository" .
 .
-The current version is 1.23.0 (Autumn 2020).
+The current version is 1.23.0 (March 2023).
 
 To view the git repository in your browser, use
 .URL "http://\:git.savannah.gnu.org/\:cgit/\:groff.git" \
@@ -1853,7 +1853,7 @@ groffer
 
 .ULS
 .LI
-New option \-\-shell to select the shell under wich groffer shall run.
+New option \-\-shell to select the shell under which groffer shall run.
 .ULE
 .
 .SH 2

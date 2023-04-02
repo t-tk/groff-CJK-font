@@ -19,15 +19,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 #include "lib.h"
 #include "color.h"
 #include "cset.h"
+
+#include <assert.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-
-#include <stdio.h>
-#include <fcntl.h>
-#include <stdlib.h>
-
-#include "assert.h"
 
 #include "errarg.h"
 #include "error.h"

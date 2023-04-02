@@ -30,6 +30,21 @@ special character and glyph repertoire
 .do nr *groff_groff_char_7_man_C \n[.cp]
 .cp 0
 .
+.\" Define fallback for groff 1.23's MR macro if the system lacks it.
+.nr do-fallback 0
+.if !\n(.f           .nr do-fallback 1 \" mandoc
+.if  \n(.g .if !d MR .nr do-fallback 1 \" older groff
+.if !\n(.g           .nr do-fallback 1 \" non-groff *roff
+.if \n[do-fallback]  \{\
+.  de MR
+.    ie \\n(.$=1 \
+.      I \%\\$1
+.    el \
+.      IR \%\\$1 (\\$2)\\$3
+.  .
+.\}
+.rr do-fallback
+.
 .
 .\" ====================================================================
 .SH Description
@@ -64,8 +79,9 @@ printable code points.
 .P
 AT&T
 .I troff
-in the 1970s faced a similar problem of typesetter devices with a glyph
-repertoire differing from that of the computers that controlled them.
+in the 1970s faced a similar problem:
+the available typesetter's glyph repertoire differed from that of the
+computers that controlled it.
 .
 Its solution was a form of escape sequence known as a
 .I special character
@@ -131,7 +147,7 @@ these exist for syntactical or historical reasons.
 and
 .B \e_
 are translated on input to the special character escape sequences
-.BR \e[aq] ,
+.BR \e[aa] ,
 .BR \e[ga] ,
 .BR \e[\-] ,
 and
@@ -466,6 +482,8 @@ A Winter\[aq]s Tale@A Winter\[aq]s Tale
 \[ga]\[ga]U.S.\& \[ga]inner\[aq] quotes\[aq]\[aq]\
 @\[rs][lq]U.S.\& \[rs][oq]inner\[rs][cq] quotes\[rs][rq]
 .TE
+.\" Keep bottom border of box from sitting on the ascenders below.
+.if t .sp 0.2v
 .
 If you frequently require quotation marks in your document,
 see if the macro package you're using supplies strings or macros to
@@ -896,7 +914,7 @@ When using the AT&T special character syntax
 Entries marked with \[lq]***\[rq] denote glyphs used for mathematical
 purposes.
 .
-On typesetter devices,
+On typesetting devices,
 such glyphs are typically drawn from a
 .I special
 font
@@ -967,13 +985,13 @@ L Lf(CR) L Lx.
 \[lB]	\e[lB]	u005B	left square bracket
 \[rs]	\e[rs]	u005C	reverse solidus
 \[rB]	\e[rB]	u005D	right square bracket
-\[ha]	\e[ha]	u005E	circumflex, caret, \[lq]hat\[rq] +
+\[ha]	\e[ha]	u005E	circumflex, caret, \[lq]hat\[rq]
 \[lC]	\e[lC]	u007B	left brace
 |	|	u007C	bar
 \[ba]	\e[ba]	u007C	bar
 \[or]	\e[or]	u007C	bitwise or +
 \[rC]	\e[rC]	u007D	right brace
-\[ti]	\e[ti]	u007E	tilde +
+\[ti]	\e[ti]	u007E	tilde
 .TE
 .
 .
@@ -1443,7 +1461,7 @@ L Lf(CR) L Lx.
 .SS "Rules and lines"
 .\" ====================================================================
 .
-On typesetter devices,
+On typesetting devices,
 the font-invariant glyphs
 (see subsection \[lq]Brackets\[rq] above)
 .BR \[rs][br] ,
@@ -1467,7 +1485,7 @@ always accesses the underscore glyph in a font;
 .\" concern--what font doesn't support every ASCII codepoint these days?
 .BR \[rs][ul] ,
 by contrast,
-may be font-invariant on typesetter devices.
+may be font-invariant on typesetting devices.
 .
 .
 .P
@@ -1623,7 +1641,7 @@ The variants of the not sign may differ in appearance or spacing
 depending on the device and font selected.
 .
 Unicode does not encode a discrete \[lq]bitwise or\[rq] sign:
-on typesetter devices,
+on typesetting devices,
 it is drawn shorter than the bar,
 about the same height as a capital letter.
 .

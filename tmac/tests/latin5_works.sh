@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (C) 2022 Free Software Foundation, Inc.
+# Copyright (C) 2022-2023 Free Software Foundation, Inc.
 #
 # This file is part of groff.
 #
@@ -22,9 +22,9 @@ groff="${abs_top_builddir:-.}/test-groff"
 
 input=$(printf '\\[G ab]\\[g ab]\\[u0130]\\[.i]\\[S ac]\\[s ac]')
 output=$(printf "%s\n" "$input" | "$groff" -Tlatin1 -mlatin5 \
-    | LC_ALL=C od -t c)
+    | LC_ALL=C od -t o1)
 printf "%s\n" "$output"
 printf "$output" \
-    | grep -Eq '^0000000 320 360 335 375 336 376 +'
+    | grep -Eq '^0000000 +320 360 335 375 336 376 +'
 
 # vim:set ai et sw=4 ts=4 tw=72:

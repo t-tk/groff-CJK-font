@@ -311,6 +311,7 @@ public:
   hunits get_hyphenation_margin();
   int get_center_lines();
   int get_right_justify_lines();
+  int get_no_number_count();
   int get_prev_line_interrupted() { return prev_line_interrupted; }
   color *get_fill_color();
   color *get_glyph_color();

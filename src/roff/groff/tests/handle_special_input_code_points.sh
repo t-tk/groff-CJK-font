@@ -22,6 +22,9 @@ groff="${abs_top_builddir:-.}/test-groff"
 
 # Regression-test Savannah #58962.
 
+# Keep preconv from being run.
+unset GROFF_ENCODING
+
 input='.if " "\~" .tm input no-break space matches \\~
 .if "­"\%" .tm input soft hyphen matches \\%'
 
@@ -32,7 +35,8 @@ wail () {
    fail=yes
 }
 
-output=$(printf "%s\n" "$input" | "$groff" -z 2>&1)
+output=$(printf "%s\n" "$input" | "$groff" -Z 2>&1)
+echo "$output"
 
 printf "checking that input no-break space is mapped to \\~\n"
 echo "$output" | grep -qx 'input no-break space matches \\~' || wail

@@ -71,7 +71,7 @@ font/devpdf/util/BuildFoundries: \
 	&& if test -n "$(PERL)"; then \
 	     sed -f $(SH_DEPS_SED_SCRIPT) \
 	         -e "s|/usr/bin/perl|$(PERL)|" \
-	         -e "s|[@]GROFF_GHOSTSCRIPT_INTERPRETERS[@]|$(GHOSTSCRIPT)|" \
+	         -e "s|[@]GHOSTSCRIPT[@]|$(GHOSTSCRIPT)|" \
 	         -e "s|[@]PATH_SEPARATOR[@]|$(PATH_SEPARATOR)|" \
 	         -e "s|[@]VERSION[@]|$(VERSION)|" \
 	         -e "s|[@]GROFF_FONT_DIR[@]|$(fontdir)|" \
@@ -178,15 +178,30 @@ uninstall_devpdf:
 	  rmdir $(DESTDIR)$(devpdffontdir); \
 	fi
 
-font_devpdf_TESTS = \
-  font/devpdf/tests/basic-fonts-present.sh
+font_devpdf_default_test=\
+  $(devpdf_srcdir)/tests/check-default-foundry.sh.in
+font_devpdf_urw_test=$(devpdf_srcdir)/tests/check-urw-foundry.sh.in
 
-if HAVE_URW_FONTS
-font_devpdf_TESTS += font/devpdf/tests/urw-fonts-present.sh
-endif
+font/devpdf/tests/check-default-foundry.sh: $(font_devpdf_default_test)
+	$(AM_V_GEN)$(MKDIR_P) `dirname $@` \
+	&& sed -e "s|[@]GHOSTSCRIPT[@]|$(GHOSTSCRIPT)|g" \
+	  $(font_devpdf_default_test) > $@ \
+	&& chmod +x $@
+
+font/devpdf/tests/check-urw-foundry.sh: $(font_devpdf_urw_test)
+	$(AM_V_GEN)$(MKDIR_P) `dirname $@` \
+	&& sed -e "s|[@]urwfontsdir[@]|$(urwfontsdir)|g" \
+	  $(font_devpdf_urw_test) > $@ \
+	&& chmod +x $@
+
+font_devpdf_TESTS = \
+  font/devpdf/tests/check-default-foundry.sh \
+  font/devpdf/tests/check-urw-foundry.sh
 
 TESTS += $(font_devpdf_TESTS)
-EXTRA_DIST += $(font_devpdf_TESTS)
+MOSTLYCLEANFILES += $(font_devpdf_TESTS)
+EXTRA_DIST += $(font_devpdf_default_test) $(font_devpdf_urw_test)
+
 
 # Local Variables:
 # mode: makefile-automake

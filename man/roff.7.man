@@ -31,6 +31,21 @@ typesetting
 .do nr *groff_roff_7_man_C \n[.cp]
 .cp 0
 .
+.\" Define fallback for groff 1.23's MR macro if the system lacks it.
+.nr do-fallback 0
+.if !\n(.f           .nr do-fallback 1 \" mandoc
+.if  \n(.g .if !d MR .nr do-fallback 1 \" older groff
+.if !\n(.g           .nr do-fallback 1 \" non-groff *roff
+.if \n[do-fallback]  \{\
+.  de MR
+.    ie \\n(.$=1 \
+.      I \%\\$1
+.    el \
+.      IR \%\\$1 (\\$2)\\$3
+.  .
+.\}
+.rr do-fallback
+.
 .
 .\" ====================================================================
 .SH Description
@@ -170,7 +185,7 @@ or one of them is followed by two spaces on the same input line,
 it appends an inter-word space
 followed by an inter-sentence space in the formatted output.
 .
-The non-printing input break escape sequence
+The dummy character escape sequence
 .B \[rs]&
 can be used after an end-of-sentence character to defeat end-of-sentence
 detection on a per-instance basis.
@@ -184,7 +199,7 @@ character cancels detection of the end of a sentence.
 However,
 several characters are treated
 .I transparently
-after the occurence of an end-of-sentence character.
+after the occurrence of an end-of-sentence character.
 .
 That is,
 a
@@ -398,8 +413,8 @@ If you require a formatted period or apostrophe
 where
 .\" GNU @code{troff}
 the formatter is expecting a control character,
-prefix the dot or neutral apostrophe with the non-printing input break
-escape sequence,
+prefix the dot or neutral apostrophe with the dummy character escape
+sequence,
 .RB \[lq] \[rs]& \[rq].
 .
 .
@@ -585,8 +600,8 @@ Typographic tradition sets this quantity to 120% of the type size.
 The initial vertical drawing position is one unit of vertical spacing
 below the page top.
 .
-Typographers have a name for this unit:
-\[lq]vee\[rq].
+Typographers term this unit a
+.I vee.
 .
 .
 .P
@@ -611,8 +626,8 @@ this is a
 .
 .
 .P
-When the last line of input text is also the last output line that can
-fit on the page,
+When the last line of input text corresponds to the last output line
+that fits on the page,
 the break caused by the end of input will also break the page,
 producing a useless blank one.
 .
@@ -1075,7 +1090,7 @@ systems:
 .
 definition of macros
 .RB ( .de ),
-diversion of text thence
+diversion of text thither
 .RB ( .di ),
 and removal thereof
 .RB ( .rm );
@@ -1522,8 +1537,8 @@ pipelines may have to be simulated.)
 .RI $\~ preproc1 \~\c
 .BI <\~ input-file \~|\~ preproc2 \~|\~\c
 .RB .\|.\|.\&\~ "| troff\~"\c
-.BI [ option\~\c
-.RB "\~.\|.\|.\&]\~" \[rs]
+.RI [ option ]\~\c
+.RB .\|.\|.\&\~ \[rs]
 .BI "    |\~" output-driver \" 4 leading spaces
 .EE
 .RE
@@ -1784,7 +1799,7 @@ formatting elements.
 The
 .I roff
 language is powerful enough to support arbitrary computation and
-supply facilities that encourage their extension.
+it supplies facilities that encourage extension.
 .
 The primary such facility is macro definition;
 with this feature,
@@ -1817,7 +1832,7 @@ in
 .
 .
 .P
-A macro package anticipated for use in a document can be delcared to
+A macro package anticipated for use in a document can be declared to
 the formatter by the command-line option
 .BR \-m ;
 see
@@ -1876,17 +1891,17 @@ and control of execution flow.
 The theoretically-minded will observe that a
 .I roff
 is not a mere markup language,
-but Turing-complete,
-and would be even stripped of its macro-definition facility.
+but Turing-complete.
 .
 It has storage
 (registers);
 it can perform tests
 (as in conditional expressions like
 .RB \[lq] "(\[rs]n[i] >= 1)" \[rq]);
-and it can jump or branch using the
+it can jump or branch using the
 .B .if
-request.
+request;
+and macro definition permits unbounded recursion.
 .
 .
 .P
@@ -2362,7 +2377,7 @@ after any Emacs configuration:
 .
 .P
 Replace \[lq]groff\[rq] in the above with \[lq]nroff\[rq] if you want
-highlighing that does
+highlighting that does
 .I not
 recognize many of the GNU extensions to
 .IR roff ,
@@ -2569,8 +2584,11 @@ For GNU
 .IR roff ,
 the
 .MR groff @MAN1EXT@
-man page offers a survey of all the documentation distributed with the
-system.
+man page enumerates all man pages distributed with the system,
+and individual pages frequently refer to external resources as well as
+manuals distributed with
+.I groff
+on a variety of topics.
 .
 .
 .P

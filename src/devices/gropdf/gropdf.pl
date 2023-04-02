@@ -286,46 +286,61 @@ LoadDownload();
 LoadDesc();
 
 my $unitwidth=$desc{unitwidth};
-my $papersz=$desc{papersize};
-$papersz=lc($fpsz) if $fpsz;
 
 $env{FontHT}=0;
 $env{FontSlant}=0;
 MakeMatrix();
 
-if (substr($papersz,0,1) eq '/' and -r $papersz)
+my $possiblesizes = $desc{papersize};
+$possiblesizes = $fpsz if $fpsz;
+my $papersz;
+for $papersz ( split(" ", lc($possiblesizes).' #duff#') )
 {
-    if (open(P,"<$papersz"))
+    # No valid papersize found?
+    if ($papersz eq '#duff#')
     {
-	while (<P>)
-	{
-	    chomp;
-	    s/# .*//;
-	    next if $_ eq '';
-	    $papersz=$_;
-	    last
-	}
-
-	close(P);
+	Warn("ignoring unrecognized paper format(s) '$possiblesizes'");
+	last;
     }
-}
 
-if ($papersz=~m/([\d.]+)([cipP]),([\d.]+)([cipP])/)
-{
-    @defaultmb=@mediabox=(0,0,ToPoints($3,$4),ToPoints($1,$2));
-}
-elsif (exists($ppsz{$papersz}))
-{
-    @defaultmb=@mediabox=(0,0,$ppsz{$papersz}->[0],$ppsz{$papersz}->[1]);
-}
-elsif (substr($papersz,-1) eq 'l' and exists($ppsz{substr($papersz,0,-1)}))
-{
-    # Note 'legal' ends in 'l' but will be caught above
-    @defaultmb=@mediabox=(0,0,$ppsz{substr($papersz,0,-1)}->[1],$ppsz{substr($papersz,0,-1)}->[0]);
-}
-else
-{
-    Warn("ignoring unrecognized paper format '$papersz'");
+    # Check for "/etc/papersize"
+    elsif (substr($papersz,0,1) eq '/' and -r $papersz)
+    {
+        if (open(P,"<$papersz"))
+        {
+            while (<P>)
+            {
+                chomp;
+                s/# .*//;
+                next if $_ eq '';
+                $papersz=lc($_);
+                last;
+            }
+            close(P);
+        }
+    }
+
+    # Allow height,width specified directly in centimeters, inches, or points.
+    if ($papersz=~m/([\d.]+)([cipP]),([\d.]+)([cipP])/)
+    {
+        @defaultmb=@mediabox=(0,0,ToPoints($3,$4),ToPoints($1,$2));
+        last;
+    }
+    # Look $papersz up as a name such as "a4" or "letter".
+    elsif (exists($ppsz{$papersz}))
+    {
+        @defaultmb=@mediabox=(0,0,$ppsz{$papersz}->[0],$ppsz{$papersz}->[1]);
+        last;
+    }
+    # Check for a landscape version
+    elsif (substr($papersz,-1) eq 'l' and exists($ppsz{substr($papersz,0,-1)}))
+    {
+	# Note 'legal' ends in 'l' but will be caught above
+	@defaultmb=@mediabox=(0,0,$ppsz{substr($papersz,0,-1)}->[1],$ppsz{substr($papersz,0,-1)}->[0]);
+	last;
+    }
+
+    # If we get here, $papersz was invalid, so try the next one.
 }
 
 my (@dt)=localtime($ENV{SOURCE_DATE_EPOCH} || time);
@@ -428,7 +443,7 @@ if ($cpageno > 0)
 
 		my $pg=$bg->[3] || \@mediabox;
 
-		$bg->[5]=$pg->[3];	# box is continueing to next page
+		$bg->[5]=$pg->[3];	# box is continuing to next page
 		$box.=DrawBox($bg);
 		$bg->[4]=$pg->[1];	# will continue from page top
 	    }
@@ -2822,7 +2837,7 @@ sub NewPage
 
 		my $pg=$bg->[3] || \@defaultmb;
 
-		$bg->[5]=$pg->[3];	# box is continueing to next page
+		$bg->[5]=$pg->[3];	# box is continuing to next page
 		$box.=DrawBox($bg);
 		$bg->[4]=$pg->[1];	# will continue from page top
 	    }
@@ -3029,7 +3044,7 @@ sub do_m
     # PDF uses G/RG/K for graphic stroke, and g/rg/k for text & graphic fill.
     #
     # This means that we must maintain g/rg/k state separately for text colour & graphic fill (this is
-    # probably why 'gs' maintains seperate graphic states for text & graphics when distilling PS -> PDF).
+    # probably why 'gs' maintains separate graphic states for text & graphics when distilling PS -> PDF).
     #
     # To facilitate this:-
     #

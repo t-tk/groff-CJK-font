@@ -18,62 +18,41 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-# Ensure that groff's PDF device has URW font descriptions it expects.
-
-devpdf_fontbuilddir="${abs_top_builddir:-.}"/font/devpdf
-
-# TODO: Scrape this list out of Foundry or Foundry.in.  Not possible
-# with grep, likely a little tedious with sed.
-urwfonts='AB
-ABI
-AI
-AR
-BMB
-BMBI
-BMI
-BMR
-CB
-CBI
-CI
-CR
-HB
-HBI
-HI
-HNB
-HNBI
-HNI
-HNR
-HR
-NB
-NBI
-NI
-NR
-PB
-PBI
-PI
-PR
-S
-TB
-TBI
-TI
-TR
-ZCMI
-ZD'
+groff="${abs_top_builddir:-.}/test-groff"
 
 fail=
 
-for basefontname in $urwfonts
-do
-    f=U-$basefontname
-    printf "checking for font description %s...\n" $f >&2
-    if ! test -f "$devpdf_fontbuilddir"/$f
-    then
-        echo test -f "$devpdf_fontbuilddir"/$f
-        echo FAILED >&2
-        fail=yes
-    fi
-done
+wail () {
+    echo ...FAILED >&2
+    fail=yes
+}
 
-test -z "$fail"
+# Ensure that italics in a section heading get remapped to bold italics
+# (if the heading font is bold).
+
+input='.Dd 2022-12-26
+.Dt foo 1
+.Os "groff test suite"
+.Sh Name
+.Nm foo
+.Nd frobnicate a bar
+.Sh Hacking Xr groff
+Have fun!'
+
+output=$(printf "%s\n" "$input" | "$groff" -mdoc -Tascii -Z)
+echo "$output"
+
+echo "$output" | sed -n '/tHacking/{n
+/x font 4 BI/{n
+/f4/{n
+/h/{n
+/tgroff/{n
+/n/{n
+/f1/p;}
+}
+}
+}
+}
+}' | grep -Fqx f1
 
 # vim:set ai et sw=4 ts=4 tw=72:

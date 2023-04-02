@@ -27,6 +27,21 @@ document formatting system
 .do nr *groff_groff_1_man_C \n[.cp]
 .cp 0
 .
+.\" Define fallback for groff 1.23's MR macro if the system lacks it.
+.nr do-fallback 0
+.if !\n(.f           .nr do-fallback 1 \" mandoc
+.if  \n(.g .if !d MR .nr do-fallback 1 \" older groff
+.if !\n(.g           .nr do-fallback 1 \" non-groff *roff
+.if \n[do-fallback]  \{\
+.  de MR
+.    ie \\n(.$=1 \
+.      I \%\\$1
+.    el \
+.      IR \%\\$1 (\\$2)\\$3
+.  .
+.\}
+.rr do-fallback
+.
 .\" Define a string for the TeX logo.
 .ie t .ds TeX T\h'-.1667m'\v'.224m'E\v'-.224m'\h'-.125m'X
 .el   .ds TeX TeX
@@ -842,7 +857,7 @@ the size of the output medium can be set in its
 .I DESC
 file.
 .
-Most also recognize a command-line option
+Most output drivers also recognize a command-line option
 .B \-p
 to override the default dimensions and an option
 .B \-l
@@ -924,7 +939,7 @@ An overview of GNU
 language syntax and features,
 including lists of all supported escape sequences,
 requests,
-and pre-defined registers,
+and predefined registers,
 can be found in
 .MR groff @MAN7EXT@ .
 .
@@ -1021,6 +1036,56 @@ can understand.
 .
 When used,
 it is run before any other preprocessors.
+.
+.
+.P
+Most preprocessors enclose content between a pair of characteristic
+tokens.
+.
+Such a token must occur at the beginning of an input line and use the
+dot control character.
+.
+Spaces and tabs must not follow the control character or precede the
+end of the input line.
+.
+Deviating from these rules defeats a token's recognition by the
+preprocessor.
+.
+Tokens are generally preserved in preprocessor output and interpreted as
+macro calls subsequently by
+.IR @g@troff .
+.
+The
+.I @g@ideal
+preprocessor is not yet available in
+.IR groff .
+.
+.
+.P
+.TS
+box, center, tab (^);
+c | c | c
+CfCR | CfCR | CfCR.
+preprocessor^starting token^ending token
+=
+@g@chem^.cstart^.cend
+@g@eqn^.EQ^.EN
+grap^.G1^.G2
+@g@grn^.GS^.GE
+.\" Keep the .IF line below the @g@ideal line.
+@g@ideal^.IS^.IE
+^^.IF
+.\" Keep the .PF line below the @g@pic line.
+@g@pic^.PS^.PE
+^^.PF
+^^.PY
+@g@refer^.R1^.R2
+@g@tbl^.TS^.TE
+_
+glilypond^.lilypond start^.lilypond stop
+gperl^.Perl start^.Perl stop
+gpinyin^.pinyin start^.pinyin stop
+.TE
 .
 .
 .\" ====================================================================
@@ -1800,7 +1865,7 @@ A time stamp
 to use as the output creation time stamp in place of the current time.
 .
 The time is converted to human-readable form using
-.MR ctime 3
+.MR localtime 3
 when the formatter starts up and stored in registers usable by documents
 and macro packages.
 .
@@ -2121,39 +2186,17 @@ see
 .SH Availability
 .\" ====================================================================
 .
-Information on how to get
+Obtain links to
 .I groff
-and related information is available at the
+releases for download,
+its source repository,
+discussion mailing lists,
+a support ticket tracker,
+and further information from the
 .UR http://\:www\:.gnu\:.org/\:software/\:groff
-groff page of the GNU website
+.I groff
+page of the GNU website
 .UE .
-.
-.
-.P
-Three
-.I groff
-mailing lists are available
-for
-.MT bug\-groff@\:gnu\:.org
-bug tracker activity
-.ME
-(read-only),
-.
-.MT groff@\:gnu\:.org
-general discussion
-.ME ,
-and
-.
-.MT groff\-commit@\:gnu\:.org
-source code repository commit activity
-.ME
-(read-only).
-.
-Details of repository access and more can be found in the file
-.I README
-in the top-level directory of the
-.I groff
-source distribution.
 .
 .
 .P
@@ -2181,17 +2224,23 @@ supports only this
 .\" ====================================================================
 .
 .I groff
-was written by
+(both the front-end command and the overall system)
+was primarily written by
 .MT jjc@\:jclark\:.com
 James Clark
 .ME .
 .
-This document was rewritten,
-enhanced,
-and put under the GNU FDL license in
-2002 by
+Contributors to this document include Clark,
+Trent A.\& Fisher,
+.MT wl@gnu.org
+Werner Lemberg
+.ME ,
 .MT groff\-bernd.warken\-72@\:web\:.de
 Bernd Warken
+.ME ,
+and
+.MT g.branden\:.robinson@\:gmail\:.com
+G.\& Branden Robinson
 .ME .
 .
 .
