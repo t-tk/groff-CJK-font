@@ -16,7 +16,7 @@ for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>. */
-#define ENABLE_UCSRANGE
+
 // A function of this type can be registered to define the semantics of
 // arbitrary commands in a font DESC file.
 typedef void (*FONT_COMMAND_HANDLER)(const char *,	// command
@@ -287,12 +287,10 @@ private:
 			// font (if !is_unicode) or for just some characters
 			// (if is_unicode).  The indices of this array are
 			// font-specific, found as values in ch_index[].
-#ifdef ENABLE_UCSRANGE
   // font metric for wchar
   font_char_metric *wch;
   // get font metric for wchar indexed by uc
   font_char_metric *get_font_wchar_metric(int uc);
-#endif
   int ch_used;
   int ch_size;
   font_widths_cache *widths_cache;	// A cache of scaled character

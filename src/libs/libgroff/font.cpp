@@ -43,10 +43,8 @@ struct font_char_metric {
   int italic_correction;
   int subscript_correction;
   char *special_device_coding;
-#ifdef ENABLE_UCSRANGE
   struct font_char_metric *next;
   int end_code;
-#endif
 };
 
 struct font_kern_list {
@@ -161,7 +159,6 @@ void text_file::fatal(const char *format,
     fatal_with_file_and_line(path, lineno, format, arg1, arg2, arg3);
 }
 
-#ifdef ENABLE_UCSRANGE
 int glyph_to_ucs_codepoint(glyph *g)
 {
   const char *nm = glyph_to_name(g);
@@ -173,7 +170,6 @@ int glyph_to_ucs_codepoint(glyph *g)
   }
   return -1;
 }
-#endif
 
 int glyph_to_unicode(glyph *g)
 {
@@ -222,10 +218,7 @@ int glyph_to_unicode(glyph *g)
 font::font(const char *s) : ligatures(0), kern_hash_table(0),
   space_width(0), special(false), internalname(0), slant(0.0), zoom(0),
   ch_index(0), nindices(0), ch(0), ch_used(0), ch_size(0),
-  widths_cache(0)
-#ifdef ENABLE_UCSRANGE
-  ,wch(0)
-#endif
+  widths_cache(0), wch(0)
 {
   name = new char[strlen(s) + 1];
   strcpy(name, s);
@@ -256,7 +249,6 @@ font::~font()
     widths_cache = widths_cache->next;
     delete tem;
   }
-#ifdef ENABLE_UCSRANGE
   struct font_char_metric *wcp, *nwcp;
   for (wcp = wch; wcp != 0; wcp = nwcp) {
     nwcp = wcp->next;
@@ -264,7 +256,6 @@ font::~font()
       delete [] wcp->special_device_coding;
     delete wcp;
   }
-#endif
 }
 
 static int scale_round(int n, int x, int y)
@@ -347,14 +338,12 @@ bool font::contains(glyph *g)
   // Explicitly enumerated glyph?
   if (idx < nindices && ch_index[idx] >= 0)
     return true;
-#ifdef ENABLE_UCSRANGE
   int uc  = glyph_to_ucs_codepoint(g);
   if (uc>0) {
     font_char_metric *wcp = get_font_wchar_metric(uc);
     if (wcp != 0)
       return true;
   }
-#endif
   if (is_unicode) {
     // Unicode font
     // ASCII or Unicode character, or groff glyph name that maps to Unicode?
@@ -386,7 +375,6 @@ font_widths_cache::~font_widths_cache()
   delete[] width;
 }
 
-#ifdef ENABLE_UCSRANGE
 struct font_char_metric *
 font::get_font_wchar_metric(int uc)
 {
@@ -398,7 +386,6 @@ font::get_font_wchar_metric(int uc)
   }
   return 0;
 }
-#endif
 
 int font::get_width(glyph *g, int point_size)
 {
@@ -414,14 +401,12 @@ int font::get_width(glyph *g, int point_size)
     else
       real_size = int(point_size * double(zoom) / 1000.0 + .5);
   }
-#ifdef ENABLE_UCSRANGE
   int uc  = glyph_to_ucs_codepoint(g);
   font_char_metric *wcp;
   if (uc>0) wcp = get_font_wchar_metric(uc);
   if (wcp != 0 && !(idx < nindices && ch_index[idx] >= 0)) {
     return scale(wcp->width, point_size);
   }
-#endif
   if (idx < nindices && ch_index[idx] >= 0) {
     // Explicitly enumerated glyph
     int i = ch_index[idx];
@@ -473,14 +458,12 @@ int font::get_height(glyph *g, int point_size)
     // Explicitly enumerated glyph
     return scale(ch[ch_index[idx]].height, point_size);
   }
-#ifdef ENABLE_UCSRANGE
   int uc  = glyph_to_ucs_codepoint(g);
   font_char_metric *wcp;
   if (uc>0) wcp = get_font_wchar_metric(uc);
   if (wcp != 0) {
     return scale(wcp->height, point_size);
   }
-#endif
   if (is_unicode) {
     // Unicode font
     return 0;
@@ -497,14 +480,12 @@ int font::get_depth(glyph *g, int point_size)
     // Explicitly enumerated glyph
     return scale(ch[ch_index[idx]].depth, point_size);
   }
-#ifdef ENABLE_UCSRANGE
   int uc  = glyph_to_ucs_codepoint(g);
   font_char_metric *wcp;
   if (uc>0) wcp = get_font_wchar_metric(uc);
   if (wcp != 0) {
     return scale(wcp->depth, point_size);
   }
-#endif
   if (is_unicode) {
     // Unicode font
     return 0;
@@ -521,14 +502,12 @@ int font::get_italic_correction(glyph *g, int point_size)
     // Explicitly enumerated glyph
     return scale(ch[ch_index[idx]].italic_correction, point_size);
   }
-#ifdef ENABLE_UCSRANGE
   int uc  = glyph_to_ucs_codepoint(g);
   font_char_metric *wcp;
   if (uc>0) wcp = get_font_wchar_metric(uc);
   if (wcp != 0) {
     return scale(wcp->italic_correction, point_size);
   }
-#endif
   if (is_unicode) {
     // Unicode font
     return 0;
@@ -545,14 +524,12 @@ int font::get_left_italic_correction(glyph *g, int point_size)
     // Explicitly enumerated glyph
     return scale(ch[ch_index[idx]].pre_math_space, point_size);
   }
-#ifdef ENABLE_UCSRANGE
   int uc  = glyph_to_ucs_codepoint(g);
   font_char_metric *wcp;
   if (uc>0) wcp = get_font_wchar_metric(uc);
   if (wcp != 0) {
     return scale(wcp->pre_math_space, point_size);
   }
-#endif
   if (is_unicode) {
     // Unicode font
     return 0;
@@ -569,14 +546,12 @@ int font::get_subscript_correction(glyph *g, int point_size)
     // Explicitly enumerated glyph
     return scale(ch[ch_index[idx]].subscript_correction, point_size);
   }
-#ifdef ENABLE_UCSRANGE
   int uc  = glyph_to_ucs_codepoint(g);
   font_char_metric *wcp;
   if (uc>0) wcp = get_font_wchar_metric(uc);
   if (wcp != 0) {
     return scale(wcp->subscript_correction, point_size);
   }
-#endif
   if (is_unicode) {
     // Unicode font
     return 0;
@@ -651,14 +626,12 @@ int font::get_character_type(glyph *g)
     // Explicitly enumerated glyph
     return ch[ch_index[idx]].type;
   }
-#ifdef ENABLE_UCSRANGE
   int uc  = glyph_to_ucs_codepoint(g);
   font_char_metric *wcp;
   if (uc>0) wcp = get_font_wchar_metric(uc);
   if (wcp != 0) {
     return wcp->type;
   }
-#endif
   if (is_unicode) {
     // Unicode font
     return 0;
@@ -675,14 +648,12 @@ int font::get_code(glyph *g)
     // Explicitly enumerated glyph
     return ch[ch_index[idx]].code;
   }
-#ifdef ENABLE_UCSRANGE
   int uc  = glyph_to_ucs_codepoint(g);
   font_char_metric *wcp;
   if (uc>0) wcp = get_font_wchar_metric(uc);
   if (wcp != 0) {
     return uc;
   }
-#endif
   if (is_unicode) {
     // Unicode font
     // ASCII or Unicode character, or groff glyph name that maps to Unicode?
@@ -717,13 +688,11 @@ const char *font::get_special_device_encoding(glyph *g)
     // Explicitly enumerated glyph
     return ch[ch_index[idx]].special_device_coding;
   }
-#ifdef ENABLE_UCSRANGE
   int uc  = glyph_to_ucs_codepoint(g);
   font_char_metric *wcp;
   if (uc>0) wcp = get_font_wchar_metric(uc);
   if (wcp != 0)
     return wcp->special_device_coding;
-#endif
   if (is_unicode) {
     // Unicode font
     return 0;
@@ -991,12 +960,8 @@ bool font::load(bool load_header_only)
     else if (strcmp(p, "special") == 0) {
       special = true;
     }
-#ifdef ENABLE_UCSRANGE
     else if (strcmp(p, "kernpairs") != 0 && strcmp(p, "charset") != 0 &&
              strcmp(p, "charset-range") != 0) {
-#else
-    else if (strcmp(p, "kernpairs") != 0 && strcmp(p, "charset") != 0) {
-#endif
       char *directive = p;
       p = strtok(0, "\n");
       handle_unknown_font_command(directive, trim_arg(p), t.path,
@@ -1042,7 +1007,6 @@ bool font::load(bool load_header_only)
 	add_kern(g1, g2, n);
       }
     }
-#ifdef ENABLE_UCSRANGE
     else if (strcmp(directive, "charset-range") == 0) {
       if (load_header_only)
 	return true;
@@ -1117,7 +1081,6 @@ bool font::load(bool load_header_only)
 	return false;
       }
     }
-#endif
     else if (strcmp(directive, "charset") == 0) {
       if (load_header_only)
 	return true;
