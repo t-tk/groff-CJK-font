@@ -1249,27 +1249,34 @@ as a heading.
 .
 .
 .TP
-.BI EF\  \fR[\fParg\fR]\fP
-Even-page footer,
-printed just above the normal page footer on even pages.
+.BR EF\~ [ \[dq]\|\[aq]\c
+.IB left \[aq] center \[aq] right \[aq]\|\[dq]\c
+]
+Define the even-page footer,
+which is formatted just above the normal page footer on even-numbered
+pages.
 .
 See
 .BR PF .
 .
-.IP
-This macro defines string
+.B EF
+defines the string
 .BR EOPef .
 .
+.
 .TP
-.BI EH\  \fR[\fParg\fR]\fP
-Even-page header,
-printed just below the normal page header on even pages.
+.BR EH\~ [ \[dq]\|\[aq]\c
+.IB left \[aq] center \[aq] right \[aq]\|\[dq]\c
+]
+Define the even-page header,
+which is formatted just below the normal page header on even-numbered
+pages.
 .
 See
 .BR PH .
 .
-.IP
-This macro defines string
+.B EH
+defines the string
 .BR TPeh .
 .
 .
@@ -2712,30 +2719,36 @@ l l.
 .
 .
 .TP
-.BI OF\  \fR[\fParg\fR]\fP
-Odd-page footer, a line printed just above the normal footer.
+.BR OF\~ [ \[dq]\|\[aq]\c
+.IB left \[aq] center \[aq] right \[aq]\|\[dq]\c
+]
+Define the odd-page footer,
+which is formatted just above the normal page footer on odd-numbered
+pages.
 .
 See
-.B EF
-and
 .BR PF .
 .
-.IP
-This macro defines string
+.B OF
+defines the string
 .BR EOPof .
 .
+.
 .TP
-.BI OH\  \fR[\fParg\fR]\fP
-Odd-page header, a line printed just below the normal header.
+.BR OH\~ [ \[dq]\|\[aq]\c
+.IB left \[aq] center \[aq] right \[aq]\|\[dq]\c
+]
+Define the odd-page header,
+which is formatted just below the normal page header on odd-numbered
+pages.
 .
 See
-.B EH
-and
 .BR PH .
 .
-.IP
-This macro defines string
+.B OH
+defines the string
 .BR TPoh .
+.
 .
 .TP
 .B OP
@@ -2744,6 +2757,9 @@ odd-numbered page.
 .
 Does not output an empty page if currently at the top of an odd page.
 .
+.
+.br
+.ne 4v
 .TP
 .BI P\  \fR[\fPtype\fR]\fP
 Begin new paragraph.
@@ -2866,57 +2882,76 @@ see
 .
 .
 .TP
-.BI PF\  \fR[\fParg\fR]\fP
-Page footer.
+.BR PF\~ [ \[dq]\|\[aq]\c
+.IB left \[aq] center \[aq] right \[aq]\|\[dq]\c
+]
+Define the page footer.
+.
+The footer is formatted at the bottom of each page;
+the argument is otherwise as described in
+.BR PH .
+.
 .B PF
-sets the line to be printed at the bottom of each page.
-.
-Empty by default.
-.
-See
-.B PH
-for the argument specification.
-.
-.IP
-This macro defines string
+defines the string
 .BR EOPf .
 .
-.TP
-.BI PH\  \fR[\fParg\fR]\fP
-Page header, a line printed at the top of each page.
-.
-The argument should be specified as
-.
-.RS
-.IP
-.RI \[dq]\[aq] left-part \[aq] center-part \[aq] right-part \[aq]\[dq]
-.RE
-.
-.IP
-where
-.IR left-part ,
-.IR center-part ,
+See
+.BR EF ,
+.BR OF ,
 and
-.I right-part
-are printed left-justified, centered, and right justified, respectively.
+.BR EOP .
 .
-Within the argument to
-.BR PH ,
-the character \[lq]%\[rq] is changed to the current page number.
 .
-The default argument is
+.TP
+.BR PH\~ [ \[dq]\|\[aq]\c
+.IB left \[aq] center \[aq] right \[aq]\|\[dq]\c
+]
+.RS
+Define the page header,
+formatted at the top of each page,
+as the argument,
+where
+.IR left ,
+.IR center ,
+and
+.I right
+are aligned to the respective locations on the line.
+.
+A
+.RB \[lq] % \[rq]
+character appearing within
+.I arg
+is replaced by the current page number.
+.
+If the argument is absent,
+no page header is set.
+.
+The default page header is
 .
 .RS
-.IP
+.EX
 \[dq]\[aq]\[aq]\- % \-\[aq]\[aq]\[dq]
+.EE
 .RE
 .
-.IP
-which gives the page number between two dashes.
+which centers the page number between hyphens and formats nothing at the
+upper left and right.
 .
-.IP
-This macro defines string
+Header macros call
+.B PX
+(if defined)
+after formatting the header.
+.
+.B PH
+defines the string
 .BR TPh .
+.
+See
+.BR EH ,
+.BR OH ,
+and
+.BR TP .
+.RE
 .
 .
 .TP
@@ -3275,10 +3310,19 @@ as a heading.
 .
 .
 .TP
-.BI TC\  "\fR[\fPslevel \fR[\fPspacing \fR[\fPtlevel \fR[\fPtab \fR[\fPh1 \fR[\fPh2 \fR[\fPh3 \fR[\fPh4 \fR[\fPh5\fR]]]]]]]]]\fP"
-Table of contents.
+.BR TC \~\c
+.RI [ slevel\~\c
+.RI [ spacing\~\c
+.RI [ tlevel\~\c
+.RI [ tab\~\c
+.RI [ h1\~\c
+.RI [ h2\~\c
+.RI [ h3\~\c
+.RI [ h4\~\c
+.RI [ h5 ]]]]]]]]]
+Output table of contents.
 .
-This macro is normally used as the last line of the document.
+This macro is normally the last called in the document.
 .
 It flushes any pending displays and,
 if any references are pending
@@ -3287,106 +3331,105 @@ if any references are pending
 calls
 .BR RP .
 .
-The pages of the table of contents are numbered with Roman numerals;
-their appearance can be suppressed with the
-.B Oc
-register.
+It then begins a new page with the contents caption,
+stored in the string
+.BR Licon ,
+centered at the top.
 .
-It generates a table of contents with headings up to the level
-controlled by register
-.BR Cl .
+The entries follow after three vees of space.
 .
-Note that
+Each entry is a
+saved section
+(number and)
+heading title
+(see the
 .B Cl
-controls the saving of headings, it has nothing to do with
-.BR TC .
+register),
+along with its associated page number.
 .
-Headings with a level less than or equal to
+By default,
+an entry is indented by an amount corresponding to its heading level
+and the maximum heading length encountered at that heading level;
+if defined,
+the string
+.B Ci
+overrides these indentations.
+.
+Entries at heading levels up to and including
 .I slevel
-get
+are preceded by
 .I spacing
-number of lines before them.
+vees of space.
 .
-Headings with a level less than or equal to
+Entries at heading levels up to and including
 .I tlevel
-have their page numbers right\-justified with dots or spaces separating
-the text and the page number.
+are followed by a leader and a right-aligned page number.
 .
-Spaces are used if
+If the Boolean-valued
 .I tab
-is greater than zero, dots otherwise.
+argument is true,
+the leader is replaced with horizontal motion in the same amount.
 .
-Other headings have the page number directly at the end of the heading
-text
-.RI ( ragged-right ).
+For entries above heading level
+.IR tlevel ,
+the page number follows the heading text after a word space.
+.
+Each argument
+.IR h1 .\|.\|. h5
+appears in order on its own line,
+centered,
+above the contents caption.
+.
+Page numbering restarts at 1,
+in register format \[lq]i\[rq].
+.
+If the
+.B Oc
+register is true,
+numbering of these pages is suppressed.
+.
 .
 .IP
-The rest of the arguments is printed, centered, before the table of
-contents.
-.
-.IP
-The user-defined macros
-.B TX
-and
-.B TY
-are used if
+If
 .B TC
-is called with at most four arguments.
-.
+is called with at most four arguments,
+it calls the user-defined macro
 .B TX
-is called before the printing of the string \[lq]CONTENTS\[rq],
+(if defined)
+prior to formatting the contents caption,
 and
 .B TY
-is called instead of printing \[lq]CONTENTS\[rq].
+(if defined)
+.I instead
+of formatting the contents caption.
+.
 .
 .IP
-Equivalent macros can be defined for list of figures, tables, equations
-and exhibits by defining
+Analogous handling of lists of figures,
+tables,
+equations,
+and exhibits is achieved by defining
 .BI TX xx
-or
-.BI TY xx\fR,\fP
+and
+.BI TY xx
+macros,
 where
 .I xx
-is \[lq]Fg\[rq],
+is \[lq]FG\[rq],
 \[lq]TB\[rq],
 \[lq]EC\[rq],
 or \[lq]EX\[rq],
 respectively.
 .
-.IP
-String
-.B Ci
-can be set to control the indentations for each heading-level.
-.
-It must be scaled, like
-.
-.RS
-.IP
-.EX
-\&.ds Ci .25i .5i .75i 1i 1i
-.EE
-.RE
-.
-.IP
-By default, the indentation is controlled by the maximum length of
-headings in each level.
-.
-.IP
-The strings
+Similarly,
+the strings
 .BR Lifg ,
 .BR Litb ,
 .BR Liex ,
-.BR Liec ,
 and
-.B Licon
-contain \[lq]Figure\[rq],
-\[lq]TABLE\[rq],
-\[lq]Exhibit\[rq],
-\[lq]Equation\[rq],
-and \[lq]CONTENTS\[rq],
-respectively.
+.B Liec
+determine captions for their respective lists.
 .
-These can be redefined to other languages.
 .
 .TP
 .B TE
@@ -3687,8 +3730,16 @@ interpolates a bullet
 .
 .TP
 .B Ci
-list of indentation amounts to use for table of contents heading levels,
-overriding automatic computation
+is a list of indentation amounts to use for table of contents heading
+levels,
+overriding their automatic computation.
+.
+Each word must be a horizontal measurement
+(like
+.RB \[lq] 1i \[rq])
+and is mapped one-to-one to heading levels 1,
+2,
+and so on.
 .
 .
 .TP
@@ -4102,6 +4153,21 @@ see
 and
 .B TC
 .RB ( 2 ).
+.
+The
+.B Cl
+register controls whether a heading is
+.I saved
+for output in the table of contents at the time
+.B H
+or
+.B HU
+is called;
+if you change
+.BR Cl 's
+value immediately prior to calling
+.BR TC ,
+you are unlikely to get the result you want.
 .
 .
 .TP
