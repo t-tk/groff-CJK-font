@@ -28,6 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 #include "html-text.h"
 #include "html-table.h"
 #include "curtime.h"
+#include "unicode.h"
 
 #include <time.h>
 
@@ -1400,44 +1401,14 @@ void page::add_line (style *s,
 }
 
 /*
- *  to_utf8_string - returns a utf string of int, ch.
+ *  to_numerical_char_ref - returns a numerical character reference of unicode ch.
  */
 
-static char *to_utf8_string (unsigned int ch)
+static char *to_numerical_char_ref (unsigned int ch)
 {
-  static char buf[30];
+  static char buf[16];
 
-  if      (ch<0x80  )
-    sprintf(buf, "%c", ch & 0xff);
-  else if (ch<0x800 )
-    sprintf(buf, "%c%c",
-      0xc0 + (((ch) >>  6) & 0x1f),
-      0x80 + (((ch)      ) & 0x3f) );
-  else if (ch<0xD800 || (ch>0xDFFF && ch<0x10000))
-    sprintf(buf, "%c%c%c",
-      0xe0 + (((ch) >> 12) & 0x0f),
-      0x80 + (((ch) >>  6) & 0x3f),
-      0x80 + (((ch)      ) & 0x3f) );
-  else if (ch<0x120000)
-    sprintf(buf, "%c%c%c%c",
-      0xf0 + (((ch) >> 18) & 0x07),
-      0x80 + (((ch) >> 12) & 0x3f),
-      0x80 + (((ch) >>  6) & 0x3f),
-      0x80 + (((ch)      ) & 0x3f) );
-  else
-    sprintf(buf, "&#%u;", ch);
-  return buf;
-}
-
-/*
- *  to_unicode - returns a unicode translation of int, ch.
- */
-
-static char *to_unicode (unsigned int ch)
-{
-  static char buf[30];
-
-  sprintf(buf, "&#%u;", ch);
+  sprintf(buf, "&#x%X;", ch);
   return buf;
 }
 
@@ -4447,7 +4418,7 @@ void html_printer::add_to_sbuf (glyph *g, const string &s)
       html_glyph = 0;
 
     if ((0 /* nullptr */ == html_glyph) && (code >= UNICODE_DESC_START))
-      html_glyph = charset_utf8 ? to_utf8_string(code) : to_unicode(code);
+      html_glyph = charset_utf8 ? to_utf8_string(code) : to_numerical_char_ref(code);
   } else
     html_glyph = get_html_translation(sbuf_style.f, s);
 
@@ -4769,7 +4740,7 @@ static const char *get_html_entity (unsigned int code)
       case 0x2666: return "&diams;";
       case 0x27E8: return "&lang;";
       case 0x27E9: return "&rang;";
-      default: return to_unicode(code);
+      default: return to_numerical_char_ref(code);
     }
   }
 }

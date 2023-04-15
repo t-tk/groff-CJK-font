@@ -60,4 +60,6 @@ const char *decompose_unicode(const char *);
 // of success, NULL otherwise.
 const char *check_unicode_name(const char *);
 
+char *to_utf8_string (unsigned int);
+
 // end of unicode.h
