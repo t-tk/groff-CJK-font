@@ -18,17 +18,23 @@ grout: dankeCJK.grout dankeJK0.grout dankeJK1.grout
 dankeCJK.html: ../dankeCJK.1
 	groff -K utf8 -T html -P-U ../dankeCJK.1 > ./dankeCJK.html
 
+dankeCJK_partial.html: ../dankeCJK.1
+	groff -K utf8 -T html -P-U1 ../dankeCJK.1 > ./dankeCJK_partial.html
+
 dankeCJK_ascii.html: ../dankeCJK.1
-	groff -K utf8 -T html ../dankeCJK.1 > ./dankeCJK_ascii.html
+	groff -K utf8 -T html -P-U0 ../dankeCJK.1 > ./dankeCJK_ascii.html
 
 dankeCJK.grout: ../dankeCJK.1
 	groff -K utf8 -T html -Z ../dankeCJK.1 > ./dankeCJK.grout
 
 dankeCJK1.html: ../dankeCJK1.1
-	groff -K utf8 -T html -P-U ../dankeCJK1.1 > ./dankeCJK1.html
+	groff -K utf8 -T html -P-U2 ../dankeCJK1.1 > ./dankeCJK1.html
+
+dankeCJK1_partial.html: ../dankeCJK1.1
+	groff -K utf8 -T html ../dankeCJK1.1 > ./dankeCJK1_partial.html
 
 dankeCJK1_ascii.html: ../dankeCJK1.1
-	groff -K utf8 -T html ../dankeCJK1.1 > ./dankeCJK1_ascii.html
+	groff -K utf8 -T html -P-U0 ../dankeCJK1.1 > ./dankeCJK1_ascii.html
 
 dankeCJK2.html: ../dankeCJK2.1
 	groff -K utf8 -T html -P-U ../dankeCJK2.1 > ./dankeCJK2.html
