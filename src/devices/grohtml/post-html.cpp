@@ -4029,11 +4029,6 @@ void html_printer::end_font (const char *fontname)
     current_paragraph->done_bold();
     current_paragraph->done_italic();
     current_paragraph->done_tt();
-  } else if (strcmp(fontname, "CSH") == 0 ||
-             strcmp(fontname, "CTH") == 0 ||
-             strcmp(fontname, "JPG") == 0 ||
-             strcmp(fontname, "KOG") == 0) {
-    current_paragraph->done_bold();
   }
 }
 
@@ -4082,18 +4077,6 @@ void html_printer::start_font (const char *fontname)
     current_paragraph->do_tt();
     current_paragraph->do_italic();
     current_paragraph->do_bold();
-  } else if (strcmp(fontname, "CSS") == 0 ||
-             strcmp(fontname, "CTS") == 0 ||
-             strcmp(fontname, "JPM") == 0 ||
-             strcmp(fontname, "KOM") == 0) {
-    current_paragraph->done_bold();
-    current_paragraph->done_italic();
-  } else if (strcmp(fontname, "CSH") == 0 ||
-             strcmp(fontname, "CTH") == 0 ||
-             strcmp(fontname, "JPG") == 0 ||
-             strcmp(fontname, "KOG") == 0) {
-    current_paragraph->do_bold();
-    current_paragraph->done_italic();
   }
 }
 
