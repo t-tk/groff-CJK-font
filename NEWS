@@ -104,7 +104,7 @@ o nroff now recognizes the -b, -E, -k, -K, -R, and -z options and passes
   them through to groff.
 
 o nroff now supports spaces and tabs between option flag letters and
-  option arguments, like groff and troff themselves.
+  arguments to options, like groff and troff themselves.
 
 groff
 -----
@@ -132,11 +132,11 @@ pic
 ---
 
 o The token `.PY` is now recognized as a synonym of `.PF` to work around
-  a name space collision with the m (mm) macro package, which uses the
-  same name for a page footer management macro.  (This problem dates
-  back at least to Unix System V Release 2, 1983.)  You should continue
-  to use `.PF` to end pictures with flyback unless a similar problem
-  faces your document.
+  a name space collision with the m (mm) macro package, which defines
+  `PF` as a page footer management macro.  (This problem dates back at
+  least to Unix System V Release 2, 1983.)  You should continue to use
+  `.PF` to end pictures with flyback unless a similar problem faces your
+  document.
 
 tbl
 ---
@@ -420,6 +420,13 @@ o The m (mm) package now offers a `PY` macro, which serves the function
 o The "ptx.tmac" macro file, a counterpart to the GNU coreutils ptx(1)
   command for generating permuted indexes, is now installed.  It has
   long been part of the source distribution.
+
+o The s (ms) macro package now enables the formatter's "no-space mode"
+  after ending displays (`DE`) and equations (`EQ`); this is to improve
+  the fidelity of rendering of historical ms(7) documents such as
+  Kernighan & Cherry's "Typesetting Mathematics".  This change means
+  that display distance spacing (the `DD` register) overrides paragraph
+  spacing (the `PD` register) instead of accumulating with it.
 
 o The s (ms) macro package supports a new string, `FR`, which defines
   the ratio of the footnote line length to the current line length.  The

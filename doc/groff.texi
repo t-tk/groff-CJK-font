@@ -464,7 +464,7 @@ Documentation License''.
 @title groff
 @subtitle The GNU implementation of @code{troff}
 @subtitle Edition 1.23.0
-@subtitle February 2023
+@subtitle April 2023
 @author Trent@tie{}A.@: Fisher
 @author Werner Lemberg
 @author G.@tie{}Branden Robinson
@@ -2688,8 +2688,7 @@ Set register @var{reg} to @var{value}.  If @var{reg} doesn't exist, GNU
 @endDefreq
 
 @Defreq {ds, name contents}
-Set string @var{name} to @var{contents}.  If @var{name} exists, it is
-removed first.
+Set string @var{name} to @var{contents}.
 @endDefreq
 
 A list of document control registers and strings follows.  For any
@@ -4231,8 +4230,9 @@ and even-numbered (verso) pages, respectively; the @code{OF} and
 @code{EF} macros define footers for them.
 @endDefmac
 
-By default, @file{ms} places no header on any page numbered ``1''
-(regardless of its number format).
+With either method, a percent sign @code{%} in header or footer text is
+replaced by the current page number.  By default, @file{ms} places no
+header on a page numbered ``1'' (regardless of its number format).
 
 @Defmac {P1, , ms}
 Typeset the header even on page@tie{}1.  To be effective, this macro
@@ -4247,10 +4247,10 @@ redefinition of the macros that are called when the @code{groff} traps
 that ordinarily cause the headers and footers to be output are sprung.
 @code{PT} (``page trap'') is called by @file{ms} when the header is to
 be written, and @code{BT} (``bottom trap'') when the footer is to be.
-The page location trap that @file{ms} sets up to format the header also
-calls the (normally undefined) @code{HD} macro after @code{PT}; you can
-define @code{HD} if you need additional processing after setting the
-header (for example, to draw a line below it).
+The @code{groff} page location trap that @file{ms} sets up to format the
+header also calls the (normally undefined) @code{HD} macro after
+@code{PT}; you can define @code{HD} if you need additional processing
+after setting the header (for example, to draw a line below it).
 @c Although undocumented in Tuthill's 4.2BSD ms.diffs paper...
 The @code{HD} hook is a Berkeley extension.  Any such macros you
 (re)define must implement any desired specialization for odd-, even-, or
@@ -5338,9 +5338,9 @@ Heywood Jabuzzoff
 .ENDNAME
 @endExample
 
-In fact, the ending marker is itself the name of a macro that will be
-called if it is defined by that time (or the name of a request to be
-invoked).
+In fact, the ending marker is itself the name of a macro to be
+called, or a request to be invoked, if it is defined at the time its
+contol line is read.
 
 @Example
 .de END
@@ -5452,6 +5452,11 @@ load it with the @code{mso} (``macro source'') request.
 
 @c ---------------------------------------------------------------------
 
+@c TODO: Move a lot of this node to the "Invoking groff" chapter.  Some
+@c of the discussion is better placed in discussion of output drivers
+@c (e.g., what character encodings _they_ support for output and their
+@c responsibility for converting to them) as well.
+
 @node Input Encodings, Input Conventions, Macro Packages, Text
 @subsection Input Encodings
 
@@ -5495,8 +5500,7 @@ are interchangeable in their first 128 code points.@footnote{The
 with the successive standards, a cause of some frustration among man
 page writers; see the @cite{groff_char@r{(7)}} man page.}
 
-The remaining encodings require support that is not built-in to the GNU
-@code{troff} executable; instead, they use macro packages.
+Other encodings are supported by means of macro packages.
 
 @table @code
 @item latin2
@@ -8437,7 +8441,7 @@ Set automatic hyphenation mode to @var{mode}, an integer encoding
 conditions for hyphenation; if omitted, @samp{1} is implied.  The
 hyphenation mode is available in the read-only register @samp{.hy}; it
 is associated with the environment (@pxref{Environments}).  The default
-hyphenation mode depends on the localization package loaded when GNU
+hyphenation mode depends on the localization file loaded when GNU
 @code{troff} starts up; see the @code{hpf} request below.
 
 Typesetting practice generally does not avail itself of every
@@ -8641,14 +8645,9 @@ be used.  By default, every code maps to itself except those for letters
 @pindex zh.tmac
 The set of hyphenation patterns is associated with the language set by
 the @code{hla} request (see below).  The @code{hpf} request is usually
-invoked by a localization file loaded by the @file{troffrc} file.  By
-default, @file{troffrc} loads the localization file for
-English.@footnote{As of @code{groff} 1.23.0, localization files for
-Czech (@code{cs}), German (@code{de}), English (@code{en}), French
-(@code{fr}), Italian (@code{it}), Japanese (@code{ja}), Swedish
-(@code{sv}), and Chinese (@code{zh}) exist.}  For Western languages, the
-localization file sets the hyphenation mode and loads hyphenation
-patterns and exceptions.
+invoked by a localization file loaded by the @file{troffrc}
+file.@footnote{For more on localization, see the
+@cite{groff_tmac@r{(5)}} man page.}
 
 A second call to @code{hpf} (for the same language) replaces the
 hyphenation patterns with the new ones.  Invoking @code{hpf} or
@@ -8966,7 +8965,7 @@ any.
 @cindex @code{\t}, and copy mode
 @cindex copy mode, and @code{\t}
 @cindex mode, copy, and @code{\t}
-Interpolate a tab in copy mode.
+Interpolate a tab in copy mode; see @ref{Copy Mode}.
 @endDefesc
 
 @DefreqList {ta, [[@Var{n1} @Var{n2} @dots{} @Var{nn} ]@t{T} @Var{r1} @
@@ -9191,7 +9190,7 @@ period @samp{.}.
 @cindex @code{\a}, and copy mode
 @cindex copy mode, and @code{\a}
 @cindex mode, copy, and @code{\a}
-Interpolate a leader in copy mode.
+Interpolate a leader in copy mode; see @ref{Copy Mode}.
 @endDefesc
 
 @Defreq {lc, [@Var{fill-glyph}]}
@@ -12167,9 +12166,11 @@ warnings.
 @cindex string arguments
 @cindex arguments, of strings
 Define a string called @var{name} with contents @var{contents}.  If
-@var{name} already exists, it is removed first (see @code{rm} below).
-If @code{ds} is called with only one argument, @var{name} is defined as
-an empty string.
+@var{name} already exists as an alias, the target of the alias is
+redefined; see @code{als} and @code{rm} below.  If @code{ds} is called
+with only one argument, @var{name} is defined as an empty string.
+Otherwise, GNU @code{troff} stores @var{contents} in copy
+mode.@footnote{@xref{Copy Mode}.}
 
 The @code{\*} escape sequence interpolates a previously defined string
 variable @var{name} (one-character name@tie{}@var{n}, two-character name
@@ -12177,9 +12178,9 @@ variable @var{name} (one-character name@tie{}@var{n}, two-character name
 handled as macro arguments are; recall @ref{Calling Macros}.  In
 contrast to macro calls, however, if a closing bracket @samp{]} occurs
 in a string argument, that argument must be enclosed in double quotes.
-@code{\*} is interpreted even in copy mode (@pxref{Copy Mode}).  When
-defining strings, argument interpolations must be escaped if they are to
-reference parameters from the calling context; @xref{Parameters}.
+@code{\*} is interpreted even in copy mode.  When defining strings,
+argument interpolations must be escaped if they are to reference
+parameters from the calling context; @xref{Parameters}.
 
 @Example
 .ds cite (\\$1, \\$2)
@@ -12480,6 +12481,11 @@ an error.  @xref{Writing Macros}.
 @cindex diversion, removing alias for (@code{rm})
 To remove an alias, call @code{rm} on its name.  The object itself is
 not destroyed until it has no more names.
+
+When a request, macro, string, or diversion is aliased, redefinitions
+and appendments ``write through'' alias names.  To replace an alias with
+a separately defined object, you must use the @code{rm} request on its
+name first.
 @endDefreq
 @c END Keep (roughly) parallel with section "Strings" of groff(7).
 
@@ -13004,8 +13010,10 @@ defined as empty.  @xref{Identifiers}.
 
 @Defreq {de, name [@Var{end}]}
 Define a macro @var{name}, replacing the definition of any existing
-request, macro, string, or diversion called @var{name}.  GNU
-@code{troff} enters ``copy mode'', storing subsequent input lines as the
+request, macro, string, or diversion called @var{name}.  If
+@var{name} already exists as an alias, the target of the alias is
+redefined; recall @ref{Strings}.  GNU @code{troff} enters copy
+mode,@footnote{@xref{Copy Mode}.} storing subsequent input lines as the
 macro definition.  If the optional second argument is not specified, the
 definition ends with the control line @samp{..} (two dots).
 Alternatively, @var{end} identifies a macro whose call syntax at the
@@ -14948,10 +14956,12 @@ create and alter diversions.
 @cindex appending to a diversion (@code{da})
 @cindex diversion, appending (@code{da})
 Start collecting formatted output in a diversion called @var{name}.  The
-@code{da} request appends to the existing diversion called @var{name},
-creating it if necessary.  The pending output line is diverted as well.
-Switching to another (empty) environment (with the @code{ev} request)
-avoids the inclusion of the current partially collected line;
+@code{da} request appends to a diversion called @var{name}, creating it
+if necessary.  If @var{name} already exists as an alias, the target of
+the alias is replaced or appended to; recall @ref{Strings}.  The pending
+output line is diverted as well.  Switching to another environment (with
+the @code{ev} request) before invoking @code{di} or @code{da} avoids
+including any pending output line in the diversion; see
 @ref{Environments}.
 
 Invoking @code{di} or @code{da} without an argument stops diverting

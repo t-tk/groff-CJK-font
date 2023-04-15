@@ -1726,7 +1726,7 @@ numerals,
 and leaders can be used.
 .
 Punctuation characters are likely better choices,
-except for those defined as infix operators in numeric expressions,
+except for those defined as infix operators in numeric expressions;
 see below.
 .
 .
@@ -5220,14 +5220,31 @@ or
 .P
 The
 .request .ds
-request creates a string with a specified name and contents and the
-.esc *
-escape sequence dereferences its name,
-interpolating the contents.
+request creates a string with a specified name and contents.
 .
-If the string named by the
+If the identifier named by
+.request .ds
+already exists as an alias,
+the target of the alias is redefined.
+.
+If
+.request .ds
+is called with only one argument,
+the named string becomes empty.
+.
+Otherwise,
+.I @g@troff
+stores the remainder of the control line in copy mode;
+see subsection \[lq]Copy mode\[rq] below.
+.
+.
+.P
+The
 .esc *
-escape sequence does not exist,
+escape sequence dereferences a string's name,
+interpolating its contents.
+.
+If the name does not exist,
 it is defined as empty,
 nothing is interpolated,
 and a warning in category
@@ -5237,11 +5254,9 @@ is emitted.
 See section \[lq]Warnings\[rq] in
 .MR @g@troff 1 .
 .
-.
-.P
 The bracketed interpolation form accepts arguments that are handled as
 macro arguments are;
-see section \[lq]Calling Macros\[rq] above.
+see section \[lq]Calling macros\[rq] above.
 .
 In contrast to macro calls,
 however,
@@ -5251,8 +5266,7 @@ occurs in a string argument,
 that argument must be enclosed in double quotes.
 .
 .B \[rs]*
-is interpreted even in copy mode
-(see subsection \[lq]Copy mode\[rq] below).
+is interpreted even in copy mode.
 .
 When defining strings,
 argument interpolations must be escaped if they are to reference
@@ -5360,34 +5374,20 @@ and aliasing
 .request .rn ,
 .request .rm ,
 .request .als).
-.\" END Keep (roughly) parallel with groff.texi node "Strings".
 .
 .
-.\" We don't have a "Diversions" section for this to follow yet.  When
-.\" we do, it should become part of a "Punning Names" section.  See
-.\" groff.texi.
-.ig
 .P
-Macros,
-strings,
-and diversions share a name space;
-see section \[lq]Identifiers\[rq] above.
+When a request,
+macro,
+string,
+or diversion is aliased,
+redefinitions and appendments \[lq]write through\[rq] alias names.
 .
-Internally,
-the same mechanism is used to store them.
-.
-You can thus call a macro with string interpolation syntax and vice
-versa.
-.
-Interpolating a string does not hide existing macro arguments.
-.
-The sequence
-.B \[rs]\[rs]
-can be placed at the end of a line in a macro definition or,
-within a macro definition,
-immediately after the interpolation of a macro as a string to suppress
-the effect of a newline.
-..
+To replace an alias with a separately defined object,
+you must use the
+.B rm
+request on its name first.
+.\" END Keep (roughly) parallel with groff.texi node "Strings".
 .
 .
 .\" ====================================================================
@@ -6359,38 +6359,10 @@ request is usually invoked by a localization file loaded by the
 .I troffrc
 file.
 .
-By default,
-.I troffrc
-loads the localization file for English.
-.
-(As of
 .I groff
-1.23.0,
-localization files for Czech
-.RI ( cs ),
-German
-.RI ( de ),
-English
-.RI ( en ),
-French
-.RI ( fr ),
-Japanese
-.RI ( it ),
-Italian
-.RI ( ja ),
-Swedish
-.RI ( sv ),
-and Chinese
-.RI ( zh )
-exist.)
-.
-For Western languages,
-the localization file sets the hyphenation mode and loads hyphenation
-patterns and exceptions.
-.
-It also (re-)defines translatable strings and macros that packages use
-to handle localization tasks,
-such as formatting the calendar date.
+provides localization files for several languages;
+see
+.MR groff_tmac @MAN5EXT@ .
 .
 .
 .\" ====================================================================
@@ -6399,11 +6371,11 @@ such as formatting the calendar date.
 .
 The
 .B .de
-request defines a macro replacing the definition of any existing
-request,
-macro,
-string,
-or diversion of the same name.
+request defines a macro named for its argument.
+.
+If that name already exists as an alias,
+the target of the alias is redefined;
+see section \[lq]Strings\[rq] above.
 .
 .I @g@troff
 enters \[lq]copy mode\[rq]
@@ -6791,8 +6763,12 @@ request creates a diversion,
 including any partially collected line.
 .
 .B da
-appends to an existing diversion,
+appends to a diversion,
 creating one if it does not already exist.
+.
+If the diversion's name already exists as an alias,
+the target of the alias is replaced or appended to;
+see section \[lq]Strings\[rq] above.
 .
 .B box
 and
@@ -6846,6 +6822,33 @@ requests reprocess diversions.
 .\" XXX: That's a weak statement.  What we need is a `for` request and
 .\" a new conditional operator that tests whether an item in a node list
 .\" is an (otherwise unrepresentable) node.  See Savannah #62264.
+.
+.
+.\" ====================================================================
+.SH "Punning names"
+.\" ====================================================================
+.
+.\" BEGIN Keep (roughly) parallel with groff.texi node "Punning names".
+Macros,
+strings,
+and diversions share a name space;
+see section \[lq]Identifiers\[rq] above.
+.
+Internally,
+the same mechanism is used to store them.
+.
+You can thus call a macro with string interpolation syntax and vice
+versa.
+.
+Interpolating a string does not hide existing macro arguments.
+.
+The sequence
+.B \[rs]\[rs]
+can be placed at the end of a line in a macro definition or,
+within a macro definition,
+immediately after the interpolation of a macro as a string to suppress
+the effect of a newline.
+.\" END Keep (roughly) parallel with groff.texi node "Punning names".
 .
 .
 .\" ====================================================================
@@ -7342,7 +7345,7 @@ predefined special character escape sequences.
 .
 .TP
 .MR groff_diff @MAN7EXT@
-covers the differences between the
+covers differences between the
 GNU
 .I troff \" GNU
 formatter,
