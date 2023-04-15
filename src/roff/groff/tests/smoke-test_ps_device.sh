@@ -23,10 +23,12 @@ groff="${abs_top_builddir:-.}/test-groff"
 set -e
 
 # test for PostScript with Japanese, preprocessor
+#   "さざ波" -> \343\201\225\343\201\226\346\263\242
+jstr='\343\201\225\343\201\226\346\263\242'
 echo "testing -Kutf8 -Tps -Z" >&2
-printf ".ft JPM\nさざ波" | "$groff" -Kutf8 -Tps -Z | tr '\n' ';' | grep -q 'Cu3055;h10000;Cu3055_3099;h10000;Cu6CE2;h10000;'
+printf ".ft JPM\n${jstr}" | "$groff" -Kutf8 -Tps -Z | tr '\n' ';' | grep -q 'Cu3055;h10000;Cu3055_3099;h10000;Cu6CE2;h10000;'
 
 
 # test for PostScript with Japanese, UTF16 encoding
 echo "testing -Kutf8 -Tps" >&2
-printf ".ft JPM\nさざ波" | "$groff" -Kutf8 -Tps | grep -q '/Ryumin-Light-UniJIS-UTF16-H SF<305530566CE2>'
+printf ".ft JPM\n${jstr}" | "$groff" -Kutf8 -Tps | grep -q '/Ryumin-Light-UniJIS-UTF16-H SF<305530566CE2>'

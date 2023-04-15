@@ -23,11 +23,13 @@ groff="${abs_top_builddir:-.}/test-groff"
 set -e
 
 # test for upTeX dvi with Japanese, preprocessor
+#   "さざ波" -> \343\201\225\343\201\226\346\263\242
+jstr='\343\201\225\343\201\226\346\263\242'
 echo "testing -Kutf8 -Tdvi -Z" >&2
-printf ".ft JPM\nさざ波" | "$groff" -Kutf8 -Tdvi -Z | tr '\n' ';' | grep -q 'Cu3055;h8000;Cu3055_3099;h8000;Cu6CE2;h8000;'
+printf ".ft JPM\n${jstr}" | "$groff" -Kutf8 -Tdvi -Z | tr '\n' ';' | grep -q 'Cu3055;h8000;Cu3055_3099;h8000;Cu6CE2;h8000;'
 
 
 # test for upTeX dvi with Japanese
 echo "testing -Kutf8 -Tdvi" >&2
-#printf ".ft JPM\nさざ波" | "$groff" -Kutf8 -Tdvi > grodvi.dvi && updvitype grodvi.dvi | grep -qx '\[さざ波\]'
-printf ".ft JPM\nさざ波" | "$groff" -Kutf8 -Tdvi | od -tx1 | grep -q "81 30 55 81 30 56 81 6c e2"
+#printf ".ft JPM\n${jstr}" | "$groff" -Kutf8 -Tdvi > grodvi.dvi && updvitype grodvi.dvi | grep -qx `echo "\[${jstr}\]"`
+printf ".ft JPM\n${jstr}" | "$groff" -Kutf8 -Tdvi | od -tx1 | grep -q '81 30 55 81 30 56 81 6c e2'

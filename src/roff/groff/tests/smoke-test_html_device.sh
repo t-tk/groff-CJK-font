@@ -86,13 +86,15 @@ printf "\('a" | "$groff" -C -k -Thtml | grep -qx '<p>&aacute;</p>' \
   || wail
 
 # test for Japanese, preprocessor
-echo "testing -Kutf8 -Thtml -Z" >&2
-printf ".ft JPM\nさざ波" | "$groff" -Kutf8 -Thtml -Z | tr '\n' ';' | grep -q 'Cu3055;H48;Cu3055_3099;h48;Cu6CE2;h48;' \
+#   "さざ波" -> \343\201\225\343\201\226\346\263\242
+jstr='\343\201\225\343\201\226\346\263\242'
+echo "checking -Kutf8 -Thtml -Z" >&2
+printf ".ft JPM\n${jstr}" | "$groff" -Kutf8 -Thtml -Z | tr '\n' ';' | grep -q 'Cu3055;H48;Cu3055_3099;h48;Cu6CE2;h48;' \
   || wail
 
 # test for Japanese
-echo "testing -Kutf8 -Thtml -P-U" >&2
-printf ".ft JPM\nさざ波" | "$groff" -Kutf8 -Thtml -P-U | grep -qx '<p>さざ波</p>' \
+echo "checking -Kutf8 -Thtml -P-U" >&2
+printf ".ft JPM\n${jstr}" | "$groff" -Kutf8 -Thtml -P-U | grep -qx `echo "<p>${jstr}</p>"` \
   || wail
 
 test -z "$fail"
