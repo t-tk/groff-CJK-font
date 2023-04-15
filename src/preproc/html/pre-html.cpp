@@ -1570,7 +1570,7 @@ static int scanArguments(int argc, char **argv)
     { 0 /* nullptr */, 0, 0, 0 }
   };
   while ((c = getopt_long(argc, argv,
-	  "+a:bCdD:eF:g:Ghi:I:j:lno:prs:S:UvVx:y", long_options,
+	  "+a:bCdD:eF:g:Ghi:I:j:lno:prs:S:U::vVx:y", long_options,
 	  0 /* nullptr */))
 	 != EOF)
     switch(c) {

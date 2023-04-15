@@ -95,7 +95,14 @@ static int valid_flag = FALSE;              /* has user requested a valid flag a
                                             /* end of each page?                        */
 static int groff_sig = FALSE;               /* "This document was produced using"       */
 html_dialect dialect = html4;               /* which html dialect should grohtml output */
-static int charset_utf8 = FALSE;            /* charset in UTF-8, default isUS-ASCII     */
+#define PARTIAL 1
+#define FULL    2
+static int charset_utf8 = PARTIAL;          /* charset partially in "UTF-8" or in       */
+                                            /* character entity references by default.  */
+                                            /* If false then "US-ASCII".                */
+                                            /* If FULL then all Unicode characters are  */
+                                            /* written in UTF-8 and do not use character*/
+                                            /* entity references.                       */
 
 
 /*
@@ -4499,7 +4506,7 @@ static const char *get_html_entity (unsigned int code)
       case 0x003E: return "&gt;";
       default: return 0;
     }
-  } else if (charset_utf8) {
+  } else if (charset_utf8==FULL) {
       return to_utf8_string(code);
   } else {
     switch (code) {
@@ -4740,7 +4747,7 @@ static const char *get_html_entity (unsigned int code)
       case 0x2666: return "&diams;";
       case 0x27E8: return "&lang;";
       case 0x27E9: return "&rang;";
-      default: return to_numerical_char_ref(code);
+      default: return (charset_utf8 ? to_utf8_string(code) : to_numerical_char_ref(code));
     }
   }
 }
@@ -5569,7 +5576,7 @@ int main(int argc, char **argv)
     { NULL, 0, 0, 0 }
   };
   while ((c = getopt_long(argc, argv,
-	  "a:bCdD:eF:g:Ghi:I:j:lno:prs:S:UvVx:y", long_options, NULL))
+	  "a:bCdD:eF:g:Ghi:I:j:lno:prs:S:U::vVx:y", long_options, NULL))
 	 != EOF)
     switch(c) {
     case 'a':
@@ -5639,7 +5646,18 @@ int main(int argc, char **argv)
       split_level = atoi(optarg) + 1;
       break;
     case 'U':
-      charset_utf8 = TRUE;
+      /* default: PARTIAL */
+      if (optarg) {
+        if ((strcmp(optarg, "0") == 0 || strcmp(optarg, "-") == 0))
+          charset_utf8 = FALSE;
+        else if ((strcmp(optarg, "1") == 0))
+          charset_utf8 = PARTIAL;
+        else if (optarg && (strcmp(optarg, "2") == 0 || strcmp(optarg, "+") == 0))
+          charset_utf8 = FULL;
+        else
+          charset_utf8 = FULL;
+      } else
+        charset_utf8 = FULL;
       break;
     case 'v':
       printf("GNU post-grohtml (groff) version %s\n", Version_string);

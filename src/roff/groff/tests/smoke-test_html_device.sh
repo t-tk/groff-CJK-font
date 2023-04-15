@@ -81,8 +81,8 @@ printf '\303\241' | "$groff" -k -Thtml | grep -qx '<p>&aacute;</p>' \
 
 # We test compatibility-mode HTML output somewhat differently since
 # preconv only emits groffish \[uXXXX] escapes for non-ASCII codepoints.
-echo "checking -C -k -Thtml" >&2
-printf "\('a" | "$groff" -C -k -Thtml | grep -qx '<p>&aacute;</p>' \
+echo "checking -C -k -Thtml -P-U0" >&2
+printf "\('a" | "$groff" -C -k -Thtml -P-U0 | grep -qx '<p>&aacute;</p>' \
   || wail
 
 # test for Japanese, preprocessor
@@ -93,8 +93,8 @@ printf ".ft JPM\n${jstr}" | "$groff" -Kutf8 -Thtml -Z | tr '\n' ';' | grep -q 'C
   || wail
 
 # test for Japanese
-echo "checking -Kutf8 -Thtml -P-U" >&2
-printf ".ft JPM\n${jstr}" | "$groff" -Kutf8 -Thtml -P-U | grep -qx `echo "<p>${jstr}</p>"` \
+echo "checking -Kutf8 -Thtml" >&2
+printf ".ft JPM\n${jstr}" | "$groff" -Kutf8 -Thtml | grep -qx `echo "<p>${jstr}</p>"` \
   || wail
 
 test -z "$fail"
