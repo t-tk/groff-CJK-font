@@ -10,7 +10,7 @@ special character and glyph repertoire
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 1989-2022 Free Software Foundation, Inc.
+.\" Copyright (C) 1989-2023 Free Software Foundation, Inc.
 .\"
 .\" This file is part of groff (GNU roff), which is a free software
 .\" project.
@@ -58,11 +58,17 @@ professional,
 technical,
 and mathematical documents.
 .
-However,
-its input character set is restricted to that defined by the standards
+.I groff
+works with
+.I characters;
+an output device renders
+.I glyphs.
+.
+.IR groff 's
+input character set is restricted to that defined by the standards
 ISO Latin-1
 (ISO 8859-1)
-and IBM code page 1047
+and CCSID \[lq]code page\[rq] 1047
 (an EBCDIC arrangement of Latin-1).
 .
 For ease of document maintenance in UTF-8 environments,
@@ -74,6 +80,13 @@ printable code points.
 .\" In groff, 0x20 SP is mapped to a space node, not a glyph node, and
 .\" all kinds of special behavior attaches to such nodes, so we count
 .\" only to 94 and not 95 as is often done in other ASCII contexts.
+In
+.I groff,
+these are termed
+.I "ordinary characters."
+.
+Often,
+many more are desired in output.
 .
 .
 .P
@@ -83,7 +96,8 @@ in the 1970s faced a similar problem:
 the available typesetter's glyph repertoire differed from that of the
 computers that controlled it.
 .
-Its solution was a form of escape sequence known as a
+.IR troff 's \" AT&T
+solution was a form of escape sequence known as a
 .I special character
 to access several dozen additional glyphs available in the fonts
 prepared for mounting in the phototypesetter.
@@ -97,17 +111,12 @@ encoded an acute accent and
 .B \e(sc
 a section sign.
 .
-(Characters that don't require an escape sequence for their expression,
-like \[lq]a\[rq],
-are termed \[lq]ordinary\[rq].)
-.
 .
 .P
-As in other respects,
 .I groff
-has removed historical
+has lifted historical
 .I roff
-limitations on the lengths of special character escape sequences,
+limitations on special character name lengths,
 but recognizes and retains compatibility with the historical names.
 .
 .I groff
@@ -115,6 +124,16 @@ expands the lexicon of glyphs available by name and permits users to
 define their own special character escape sequences with the
 .B char
 request.
+.
+Special character names are
+.I groff
+identifiers;
+see section \[lq]Identifiers\[rq] in
+.MR groff @MAN7EXT@ .
+.
+Our discussion uses the terms \[lq]glyph name\[rq] and \[lq]special
+character name\[rq] interchangeably;
+we assume no character translations or redefinitions.
 .
 .
 .P
@@ -247,7 +266,7 @@ which is one reason it does not support UTF-8 natively.
 .SS "Fundamental character set"
 .\" ====================================================================
 .
-The ninety-four characters catalogued above,
+The ordinary characters catalogued above,
 plus the space,
 tab,
 newline,
@@ -291,9 +310,8 @@ a b c d e f g h i j k l m n o p q r s t u v w x y z { | }
 .\" The bottom border of that box is practically kissin' the tittles.
 .if t .sp 0.2v
 .
-The remaining seven of the ninety-four code points in this range
-surprise computing professionals and others intimately familiar with the
-ISO character encodings.
+The remaining ordinary characters surprise computing professionals and
+others intimately familiar with the ISO character encodings.
 .
 The developers of AT&T
 .I troff
@@ -304,7 +322,7 @@ the U.S.\& government.
 .
 Further,
 the prevailing character encoding standard in the 1970s,
-USAS X3.4-1968 (\[lq]ASCII\[rq])
+USAS X3.4-1968 (\[lq]ASCII\[rq]),
 deliberately supported semantic ambiguity at some code points,
 and outright substitution at several others,
 to suit the localization demands of various national standards bodies.
@@ -527,7 +545,7 @@ input.
 .
 .
 .P
-Two characters in the Latin-1 supplement are handled specially on input.
+Two Latin-1 supplement characters are handled specially on input.
 .
 .I @g@troff
 never produces them as output.
@@ -561,6 +579,9 @@ both to other
 systems and to UTF-8 environments,
 to use their special character escape sequences,
 shown below.
+.
+The glyph descriptions we use are non-standard in some cases,
+for brevity.
 .
 .
 .P
@@ -632,10 +653,6 @@ encoding standards,
 whereas glyph names as used here originated in AT&T
 .I troff \" AT&T
 special character escape sequences.
-.
-Any character valid in a
-.I groff
-identifier may be used in a glyph name.
 .
 Predefined glyph names use only characters in the basic Latin
 repertoire.
@@ -722,7 +739,7 @@ or
 .
 .
 .TP
-.BI \[rs][ "base-glyph composite-1 composite-2"\~\c
+.BI \[rs][ "base-char composite-1 composite-2"\~\c
 \&.\|.\|.\~\c
 .IB composite-n ]
 is a composite glyph.
@@ -744,12 +761,11 @@ special character escape forms based on numerical code points enable
 access to any of them.
 .
 Frequently used glyphs or glyph combinations can be stored in strings,
-and new glyph names can be created with the
+and new glyph names can be created
+.I "ad hoc"
+with the
 .B char
-request,
-enabling the user to devise
-.I ad hoc
-names for them;
+request;
 see
 .MR groff @MAN7EXT@ .
 .
@@ -761,9 +777,8 @@ see
 .B ]
 is a Unicode numeric special character escape sequence.
 .
-With this form,
-any Unicode character can be accessed by code point using four to six
-hexadecimal digits,
+Any Unicode code point can be accessed with four to six hexadecimal
+digits,
 with hexadecimal letters accepted in uppercase form only.
 .
 Thus,
@@ -811,7 +826,7 @@ on ISO Latin-1 systems.)
 .
 .
 .TP
-.BI \[rs][u base-glyph\c
+.BI \[rs][u base-char\c
 [\c
 .BI _ combining-component\c
 ].\|.\|.]
@@ -968,8 +983,6 @@ signs normally drawn from this range.
 .
 .
 .P
-.if t .ne 2v
-.if n .ne 3v \" account for horizontal rule
 .TS
 L L L Lx.
 Output	Input	Unicode	Notes
@@ -1095,8 +1108,8 @@ and
 .
 .
 .P
-.if t .ne 2v
-.if n .ne 3v \" account for horizontal rule
+.if t .ne 3v
+.if n .ne 4v \" account for horizontal rule
 .TS
 L L L Lx.
 Output	Input	Unicode	Notes
@@ -1277,7 +1290,7 @@ L Lf(CR) L Lx.
 .SS Brackets
 .\" ====================================================================
 .
-On typestter devices,
+On typesetting devices,
 the bracket extensions are font-invariant glyphs;
 that is,
 they are rendered the same way regardless of font

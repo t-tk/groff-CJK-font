@@ -1965,8 +1965,8 @@ See the section on grotty for the
 . nop GROFF_NO_SGR
 environment variable also.
 
-For defining color components as fractions between 0 and\~1, a new scaling
-indicator `f' has been defined: 1f\~=\~65536u.
+For defining color components as fractions between 0 and\~1, a new
+scaling unit `f' has been defined: 1f\~=\~65536u.
 For testing whether a color is defined (with \&.if and \&.ie), a new
 conditional operator `m' is available.
 

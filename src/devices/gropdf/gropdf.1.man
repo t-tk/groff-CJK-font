@@ -182,7 +182,7 @@ Search the directory
 .I dir
 for files named in
 .B \[rs]X\[aq]pdf: pdfpic\[aq]
-escape sequences.
+device control commands.
 .
 .B \-I
 may be specified more than once;
@@ -235,7 +235,7 @@ complains about this line if it is included, but works anyway.
 .TP
 .BR \-u \~[\c
 .IR cmap-file ]
-.B gropdf
+.I gropdf
 normally includes a ToUnicode CMap with any font created using
 .I text.enc
 as the encoding file,
@@ -273,8 +273,6 @@ must be in the format output by
 This is described in
 .MR groff_out @MAN5EXT@ .
 .
-.
-.LP
 In addition, the device and font description files for the device used
 must meet certain requirements:
 .
@@ -666,7 +664,8 @@ the \[lq]hand pointing left\[rq] glyph
 .RB ( \[rs][lh] )
 is available since it has been defined using the
 .B \[rs]X\[aq]pdf: xrev\[aq]
-extension which reverses the direction of letters within words.
+device control command,
+which reverses the direction of letters within words.
 .
 .
 .LP
@@ -676,21 +675,22 @@ and
 .B \[rs]M
 is black.
 .
+.
 .LP
 .I gropdf
-understands some of the X\~commands produced using the
-.B \[rs]X
-escape sequences supported by
-.B grops.
-Specifically, the following is supported.
+understands some of the device control commands supported by
+.MR grops 1 .
+.
 .
 .TP
 .B \[rs]X\[aq]ps: invis\[aq]
 Suppress output.
 .
+.
 .TP
 .B \[rs]X\[aq]ps: endinvis\[aq]
 Stop suppressing output.
+.
 .
 .TP
 .BI "\[rs]X\[aq]ps: exec gsave currentpoint 2 copy translate\~" n\~\c
@@ -700,21 +700,25 @@ where
 is the angle of rotation.
 .
 This is to support the
-.I align
+.B align
 command in
-.BR gpic .
+.MR @g@pic 1 .
+.
 .
 .TP
 .B \[rs]X\[aq]ps: exec grestore\[aq]
-Again used by
-.B gpic
-to restore after rotation.
+Used by
+.MR @g@pic 1
+to restore state after rotation.
+.
 .
 .TP
 .BI "\[rs]X\[aq]ps: exec " "n\~" "setlinejoin\[aq]"
 where
 .I n
 can be one of the following values.
+.
+.
 .IP
 0 = Miter join
 .br
@@ -722,11 +726,14 @@ can be one of the following values.
 .br
 2 = Bevel join
 .
+.
 .TP
 .BI "\[rs]X\[aq]ps: exec " "n " "setlinecap\[aq]"
 where
 .I n
 can be one of the following values.
+.
+.
 .IP
 0 = Butt cap
 .br
@@ -749,13 +756,19 @@ or
 .
 A subset of these macros are installed automatically when you use
 .B \-Tpdf
-so you should not need to use \[oq]\-m pdfmark\[cq] for using most of
-the PDF functionality.
+so you should not need to use
+.RB \[lq] "\-m pdfmark" \[rq]
+to access most PDF functionality.
+.
 .
 .LP
 .I gropdf
-also supports a subset of the commands introduced in present.tmac.
+also supports a subset of the commands introduced in
+.IR present.tmac .
+.
 Specifically it supports:-
+.
+.
 .IP
 PAUSE
 .br
@@ -763,14 +776,20 @@ BLOCKS
 .br
 BLOCKE
 .
+.
 .LP
 Which allows you to create presentation type PDFs.
+.
 Many of the other
 commands are already available in other macro packages.
+.
+.
 .LP
 These commands are implemented with
 .I groff
 X commands:-
+.
+.
 .LP
 .TP
 .B \[rs]X\[aq]ps: exec %%%%PAUSE\[aq]
@@ -782,14 +801,14 @@ transition setting
 .RB \[lq] "\[rs]X\[aq]pdf: transition\[aq]" \[rq]
 below).
 .
-This command
-can be introduced using the macro
-.BR .pdfpause .
+Equivalently,
+.B \%.pdfpause
+is available as a macro.
 .TP
 .B \[rs]X\[aq]ps: exec %%%%BEGINONCE\[aq]
 Any text following this command (up to %%%%ENDONCE) is shown only once,
 the next %%%%PAUSE will remove it.
-If producing a non presentation pdf, i.e.\&
+If producing a non-presentation PDF, i.e.\&
 ignoring the pauses, see
 .I \%GROPDF_NOSLIDE
 below, this text is ignored.
@@ -798,19 +817,28 @@ below, this text is ignored.
 .B \[rs]X\[aq]ps: exec %%%%ENDONCE\[aq]
 This terminates the block defined by %%%%BEGINONCE.
 This pair of commands
-is what implements the \&.BLOCKS Once/.BLOCKE commands in present.tmac.
+is what implements the \&.BLOCKS Once/.BLOCKE commands in
+.IR present.tmac .
+.
+.
 .LP
 The
-.B mom
-macro set already has integration with these extensions so you can build
-slides with
-.BR mom .
+.I mom
+macro package already integrates these extensions,
+so you can build slides with
+.IR mom .
+.
+.
 .LP
-If you use present.tmac with
+If you use
+.I present.tmac
+with
 .I gropdf
 there is no need to run the program
 .MR presentps @MAN1EXT@
-since the output will already be a presentation pdf.
+since the output will already be a presentation PDF.
+.
+.
 .LP
 All other
 .B ps:
@@ -820,7 +848,8 @@ tags are silently ignored.
 .LP
 One
 .B \[rs]X
-special used by the DVI driver is also recognised:
+device control command used by the DVI driver is also recognised.
+.
 .
 .TP
 .BI \[rs]X\[aq]papersize= paper-format \[aq]
@@ -842,13 +871,15 @@ it must be done before you start creating the page.
 .
 .
 .LP
-In addition,
 .I gropdf
-supports its own suite of
+supports several more device control features using the
 .B pdf:
-tags.
+tag.
 .
-The following tags are supported:
+Some have counterpart
+.I convenience macros
+that take the same arguments and behave equivalently.
+.
 .
 .TP
 .BI "\[rs]X\[aq]pdf: pdfpic\~" file\~\c
@@ -869,14 +900,14 @@ If
 .I alignment
 is
 .B \-L
-the drawing is left aligned.
+the drawing is left-aligned.
 .
 If it is
 .B \-C
 or
 .B \-R
 a
-.I linelength
+.I line-length
 greater than the width of the drawing is required as well.
 .
 If
@@ -894,24 +925,29 @@ height.
 .
 .TP
 .B \[rs]X\[aq]pdf: xrev\[aq]
-This toggles a flag which reverses the direction of printing
-.IR "letter by letter" ,
-i.e., each separate letter is reversed, not the entire word.
+Toggle the reversal of glyph direction.
 .
-This is useful for reversing the direction of glyphs in the Dingbats
-font.
+This feature works \[lq]letter by letter\[rq],
+that is,
+each letter in a word is reversed left-to-right,
+not the entire word.
 .
-To return to normal printing repeat the command again.
+One application is the reversal of glyphs in the Zapf Dingbats font.
+.
+To restore the normal glyph orientation,
+repeat the command.
 .
 .
 .TP
 .BI "\[rs]X\[aq]pdf: markstart " "/ANN-definition" \[aq]
 .TQ
 .B \[rs]X\[aq]pdf: markend\[aq]
-The macros which support PDF bookmarks use these calls internally to
-start and stop (respectively) the definition of bookmark hot spot;
-the user will have called \[lq].pdfhref\~L\[rq] with the text which will
-become the hot spot region).
+Macros that support PDF bookmarks use these calls internally to
+start and stop (respectively) the placement of the bookmark's
+.I hot spot;
+the user will have called
+.RB \[lq] .pdfhref\~L \[rq]
+with the text of the hot spot.
 .
 Normally,
 these are never used except from within the
@@ -923,33 +959,35 @@ macros.
 .B \[rs]X\[aq]pdf: marksuspend\[aq]
 .TQ
 .B \[rs]X\[aq]pdf: markrestart\[aq]
-If you are using page traps to produce headings, footings, etc., you
-need to use these in case a \[oq]hot spot\[cq] crosses a page
-boundary, otherwise any text output by the heading or footing macro
-will be marked as part of the \[oq]hot spot\[cq].
+If you use a page location trap to produce a header or footer,
+or otherwise interrupt a document's text,
+you need to use these commands if a PDF
+.I hot spot
+crosses a trap boundary;
+otherwise any text output by the trap will be marked as part of the hot
+spot.
 .
-To stop this happening just place \[oq].pdfmarksuspend\[cq] and
-\[oq].pdfmarkrestart\[cq] at the start and end of the page trap macro,
+To prevent this error,
+place these device control commands or their corresponding
+convenience macros
+.B \%.pdfmarksuspend
+and
+.B \%.pdfmarkrestart
+at the start and end of the trap macro,
 respectively.
-.
-(These are just convenience macros which emit the corresponding
-.B \[rs]X
-escapes sequence.
-.
-These macros must be used only within page traps.)
 .
 .
 .TP
 .BI "\[rs]X\[aq]pdf: pagename\~" name \[aq]
-This gives the current page a
+Assign the current page a
 .IR name .
-.IP
-There are two default names for any document which do not need to
-be declared
-.RI \[oq] top "\[cq] and \[oq]" bottom \[cq].
-.IP
-The convenience command for this is
-.BR .pdfpagename .
+.
+All documents bear two default names,
+.RB \[oq] top "\[cq] and \[oq]" bottom \[cq].
+.
+The convenience macro for this command is
+.BR \%.pdfpagename .
+.
 .
 .TP
 .BI "\[rs]X'pdf: switchtopage\~" "when name" \[aq]
@@ -962,15 +1000,16 @@ can be either
 .RI \[oq] after "\[cq] or \[oq]" before \[cq].
 If it is omitted it defaults to
 .RI \[oq] before \[cq].
-.IP
-The convenience command for this is
-.BR .pdfswitchtopage .
+.
 It should be used at the end of the page before you want the switch to
 happen.
-.IP
+.
 This allows pages such as a TOC to be moved to elsewhere in the
 document,
 but more esoteric uses are possible.
+.
+The convenience macro for this command is
+.BR \%.pdfswitchtopage .
 .
 .
 .TP
@@ -1302,6 +1341,38 @@ see
 .
 .
 .\" ====================================================================
+.SS Macros
+.\" ====================================================================
+.
+.IR gropdf 's
+support macros in
+.I pdf\.tmac
+define the convenience macros described above.
+.
+Some features have no direct device control command counterpart.
+.
+.
+.\" pdfhref
+.
+.
+.TP
+.BI ".pdfinfo /" "field content"\~\c
+\&.\|.\|.
+Define PDF metadata.
+.
+.I field
+may be be one of
+.BR Title ,
+.BR Author ,
+.BR Subject ,
+.BR Keywords ,
+or another datum supported by the PDF standard or your reader.
+.
+.I field
+must be prefixed with a slash.
+.
+.
+.\" ====================================================================
 .SS "Importing graphics"
 .\" ====================================================================
 .
@@ -1586,10 +1657,13 @@ and
 .
 .TP
 .I GROPDF_NOSLIDE
-If this is set true,
+If set and evaluates to a true value
+(to Perl),
+.\" XXX: The above is inconsistent with the way grotty(1) handles
+.\" "GROFF_NO_SGR".
 .I gropdf
-will ignore all commands which produce a presentation pdf,
-and produce a normal pdf instead.
+ignores commands specific to presentation PDFs,
+producing a normal PDF instead.
 .
 .
 .TP
@@ -1599,7 +1673,7 @@ A timestamp
 to use as the output creation timestamp in place of the current time.
 .
 The time is converted to human-readable form using Perl's
-.I localtime()
+.I \%localtime()
 function and recorded in a PDF comment.
 .
 .
@@ -1706,6 +1780,17 @@ It is automatically loaded by
 .
 .
 .\" ====================================================================
+.SH Authors
+.\" ====================================================================
+.
+.I gropdf
+was written and is maintained by
+.MT deri@\:chuzzlewit\:.myzen\:.co\:.uk
+Deri James
+.ME .
+.
+.
+.\" ====================================================================
 .SH "See also"
 .\" ====================================================================
 .
@@ -1719,6 +1804,19 @@ and the
 .I ms
 macros\[rq],
 by Deri James.
+.
+.
+.TP
+.I present.tmac
+is part of
+.UR https://\:bob\:.diertens\:.org/\:corner/\:useful/\:gpresent/
+.I gpresent
+.UE ,
+a software package by Bob Diertens that works with
+.I groff
+to produce presentations
+(\[lq]foils\[rq],
+or \[lq]slide decks\[rq]).
 .
 .
 .P

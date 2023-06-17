@@ -128,7 +128,8 @@ or if
 .I file
 is
 .RB \[lq] \- \[rq],
-the standard input stream is read.
+.I @g@tbl
+reads the standard input stream.
 .
 .
 .\" ====================================================================
@@ -217,11 +218,7 @@ token may specify region options,
 keywords that influence the interpretation or rendering of the region as
 a whole or all table entries within it indiscriminately.
 .
-They can be specified in any lettercase
-(unlike AT&T
-.IR tbl , \" AT&T
-which accepted only options with all characters in the same case)
-and must be separated by commas,
+They must be separated by commas,
 spaces,
 or tabs.
 .
@@ -413,10 +410,20 @@ entries within it are to be typeset.
 The format specification is a series of column
 .I descriptors.
 .
+Each descriptor encodes a
+.I classifier
+followed by zero or more
+.I modifiers.
+.
+Classifiers are letters
+(recognized case-insensitively)
+or punctuation symbols;
+modifiers consist of or begin with letters or numerals.
+.
 Spaces,
 tabs,
 newlines,
-and commas are valid descriptor separators.
+and commas separate descriptors.
 .
 Newlines and commas are special;
 they apply the descriptors following them to a subsequent row of the
@@ -436,11 +443,6 @@ is often optional;
 only some modifiers,
 described below,
 make separation necessary.
-.
-Column classifiers are letters or punctuation symbols,
-whereas modifiers consist of or begin with letters or numerals.
-.
-Letters are recognized case-insensitively.
 .
 .
 .P
@@ -847,11 +849,6 @@ This modifier must be followed by an
 .RI integer\~ n
 with an optional leading sign.
 .
-(The parameter corresponds to that accepted by the
-.I troff \" generic
-.B ps
-request.)
-.
 If unsigned,
 the type size is set to
 .IR n \~scaled
@@ -863,6 +860,11 @@ the type size is incremented or decremented per the sign by
 points.
 .
 The use of a signed multi-digit number is a GNU extension.
+.
+(The parameter corresponds to that accepted by the
+.I troff \" generic
+.B ps
+request.)
 .
 If a type size modifier is followed by a column separation modifier
 (see below),
@@ -890,11 +892,6 @@ This is a GNU extension.
 .BR v ,\~ V
 Set the vertical spacing to be used in a text block.
 .
-(This parameter corresponds to that accepted by the
-.I troff \" generic
-.B vs
-request.)
-.
 This modifier must be followed by an
 .RI integer\~ n
 with an optional leading sign.
@@ -908,6 +905,11 @@ the vertical spacing is incremented or decremented per the sign by
 .IR n\~ points.
 .
 The use of a signed multi-digit number is a GNU extension.
+.
+(This parameter corresponds to that accepted by the
+.I troff \" generic
+.B vs
+request.)
 .
 If a vertical spacing modifier is followed by a column separation
 modifier
@@ -1037,7 +1039,8 @@ adjusted,
 or populated with additional inter-sentence space.
 .
 .I @g@tbl
-measures each table entry as it occurs in the input,
+instructs the formatter to measure each table entry as it occurs in the
+input,
 updating the width required by its corresponding column.
 .
 If the
@@ -1348,7 +1351,7 @@ macro,
 and diversion names beginning with the
 .RB numeral\~ 3 .
 .
-A document to be preproccessed with GNU
+A document to be preprocessed with GNU
 .I tbl \" GNU
 should not use any such identifiers.
 .\" XXX: Why are they not named starting with "gtbl*" or something?  GNU
@@ -1396,6 +1399,10 @@ removes constraints endured by users of AT&T
 .
 .
 .IP \[bu] 2n
+Region options can be specified in any lettercase.
+.
+.
+.IP \[bu]
 There is no limit on the number of columns in a table,
 regardless of their classification,
 nor any limit on the number of text blocks.
@@ -1498,6 +1505,8 @@ and restoring its value at a convenient location after applicable
 arithmetic.
 .
 .
+.br
+.ne 5v
 .\" ====================================================================
 .SH Options
 .\" ====================================================================
@@ -1820,6 +1829,8 @@ Total;\[ti]24.4
 .RE
 .
 .
+.br
+.ne 12v
 .P
 Next,
 we'll lightly adapt a compact presentation of spanning,

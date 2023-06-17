@@ -142,6 +142,16 @@ or user-defined macros.
 .
 All three approaches can be combined.
 .
+If no
+.I file
+operands are specified,
+or if
+.I file
+is
+.RB \[lq] \- \[rq],
+.I groff
+reads the standard input stream.
+.
 .
 .P
 A reimplementation and extension of the typesetter from AT&T Unix,
@@ -206,8 +216,9 @@ options can be given to
 .SS "\f[I]groff\f[]-specific options"
 .\" ====================================================================
 .
-The following options either do not exist for
-.I @g@troff
+The following options either do not exist in
+GNU
+.I troff \" GNU
 or are interpreted differently by
 .IR groff .
 .
@@ -477,14 +488,14 @@ to the formatter and any pre- or postprocessors invoked.
 .
 .TP
 .B \-V
-Output the pipeline that would be run by
+Output the pipeline that
 .I groff
-(as a wrapper program)
-to the standard output stream,
+would run to the standard output stream,
 but do not execute it.
 .
 If given more than once,
-the pipeline is both written to the standard error stream and run.
+.I groff
+both writes and runs the pipeline.
 .
 .
 .TP
@@ -777,6 +788,7 @@ $ \c
 .B .nr a 1
 .B \[rs]# Do integer arithmetic with operators evaluated left-to-right.
 .B .nr b \[rs]n[a]+5/2
+.ne 2v
 .B \[rs]# Let\[aq]s get the result on the standard error stream.
 .B .tm \[rs]n[b]
 3
@@ -838,9 +850,7 @@ like \[lq]letter\[rq] or
 see
 .MR groff_tmac @MAN5EXT@ .
 .
-The default used by the formatter depends on its build configuration;
-in this installation,
-it is
+The formatter's default in this installation is
 .RB \[lq] @PAGE@ \[rq].
 .
 .
@@ -911,9 +921,9 @@ required of users of traditional
 .MR roff @MAN7EXT@
 systems can be avoided.
 .
-The
+Use the
 .MR grog @MAN1EXT@
-program can be used to infer an appropriate
+program to infer an appropriate
 .I groff
 command line to format a document.
 .
@@ -1308,10 +1318,11 @@ described in the next subsection.
 .
 .
 .P
-The formatter generates device-independent,
+GNU
+.I troff \" GNU
+generates output in a device-independent,
 but not device-agnostic,
-.I intermediate output
-in a page description language whose syntax is detailed in
+page description language detailed in
 .MR groff_out @MAN5EXT@ .
 .
 .
@@ -1437,12 +1448,12 @@ and a
 .\" ====================================================================
 .
 Any program that interprets the output of
-.I @g@troff
-is a GNU
-.I roff
+GNU
+.I troff \" GNU
+is a
 postprocessor.
 .
-All of the postprocessors provided by GNU
+The postprocessors provided by GNU
 .I roff
 are
 .IR "output drivers" ,

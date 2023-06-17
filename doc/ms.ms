@@ -36,8 +36,8 @@
 .nr TC-MARGIN \w'00' \" expect 2-digit page numbers at most
 .ie t .nr PI 3.5n
 .el   .nr PI 4n
-.ND April 2023
-.EH '%''April 2023'
+.ND May 2023
+.EH '%''May 2023'
 .EF ''''
 .OH 'Using \f[I]groff\f[] with the \f[I]ms\f[] macros''%'
 .OF ''''
@@ -177,7 +177,7 @@ After that,
 start typing normally.
 .
 It is a good practice to start each sentence on a new line,
-or to put two spaces after sentence-ending puncutation,
+or to put two spaces after sentence-ending punctuation,
 so that the formatter knows where the sentence boundaries are.
 .
 You can separate paragraphs with further paragraphing macro calls,
@@ -197,15 +197,17 @@ command.
 can be useful for previewing.
 .
 .
+.if n .ftr TI I
 .TS
 box center;
 Lf(CR)1 Lf(CB).
-$	editor radical.ms # vim, emacs, ...
-$	nroff -ww -z -ms radical.ms # check for errors
+$	editor radical.ms \f[TI]# vim, emacs, .\|.\|.
+$	nroff -ww -z -ms radical.ms \f[TI]# check for errors
 $	nroff \-ms radical.ms | less \-R
 $	groff \-T pdf \-ms radical.ms > radical.pdf
-$	see radical.pdf # or your favorite PDF viewer
+$	see radical.pdf \f[TI]# or your favorite PDF viewer
 .TE
+.if n .ftr TI
 .
 .
 .PP
@@ -346,7 +348,7 @@ Interpolate glyph of special character named
 T}
 \[rs]&	non-printing, zero-width dummy character
 \[rs]\[ti]	T{
-Insert an unbreakble space of adjustable width like a normal space.
+Insert an unbreakable space of adjustable width like a normal space.
 T}
 \[rs]|	T{
 Move horizontally by one-sixth em
@@ -1209,6 +1211,9 @@ Headings are available with and without automatic numbering.
 Text on input lines following the macro call becomes the heading's
 title.
 .
+Call a paragraphing macro to end the heading text and start the
+section's content.
+.
 .
 .TS
 box;
@@ -1233,7 +1238,7 @@ reset to zero when a more significant depth increases.
 \[lq]1\[rq]\~is the most significant or coarsest division of the
 document.
 .
-Only nonzero values are output.
+Only non-zero values are output.
 .
 If
 .I depth
@@ -2392,9 +2397,13 @@ cf(CR) s | lx .
 .PP
 The distance stored in
 .CW \[rs]n[DD]
-is inserted before and after each pair of display macros,
-replacing any adjacent inter-paragraph distance;
+is inserted before and after each pair of display macros;
 this is a Berkeley extension.
+.
+In
+.I "groff ms" ,
+this distance replaces any adjacent inter-paragraph distance
+or subsequent spacing prior to a section heading.
 .
 The
 .CW DI
@@ -3912,9 +3921,9 @@ manual [Lesk 1978].
 .
 .PP
 The error-handling policy of
-.I groff ms
+.I "groff ms"
 is to detect and report errors,
-rather than silently to ignore them.
+rather than to ignore them silently.
 .
 .
 .PP
@@ -3923,7 +3932,7 @@ Research Unix supported
 .B P1 /
 .B P2
 macros to bracket code examples;
-.I groff ms
+.I "groff ms"
 does not.
 .
 .
@@ -3938,8 +3947,9 @@ it aborts processing with a diagnostic message.
 .
 .
 .PP
-Multiple line spacing is not supported
-(use a larger vertical spacing instead).
+Multiple line spacing is not supported.
+.
+Use a larger vertical spacing instead.
 .
 .
 .PP
@@ -4058,7 +4068,7 @@ it does.
 .
 .PP
 To make
-.I groff ms
+.I "groff ms"
 use the default page offset
 (which also specifies the left margin),
 the
@@ -4248,6 +4258,7 @@ lf(CR).
 \&.rm UX
 \&.ds UX Unix\[rs]"
 .TE
+.rs \" XXX: Work around Savannah #64005.
 .\"KE
 .
 .
@@ -4374,6 +4385,7 @@ _
 \[rs]*[oe]	Interpolate small oe ligature.
 \[rs]*[OE]	Interpolate capital oe ligature.
 .TE
+.rs \" XXX: Work around Savannah #64005.
 .
 .
 .\" ------------------------

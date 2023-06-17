@@ -529,7 +529,7 @@ option is given).
 .
 This feature is intended only for formatting multiple
 .I man
-documents.
+documents in sequence.
 .
 .
 .IP
@@ -546,7 +546,8 @@ _ifstyle()dnl
 .IP
 By convention,
 .I footer-middle
-is the most recent modification date of the man page source document,
+is the date of the most recent modification to the man page source
+document,
 and
 .I footer-inside
 is the name and version or release of the project providing it.
@@ -567,10 +568,9 @@ text on the next line
 becomes
 .I heading-text.
 .
-This text is set at the left margin,
-in bold
+The left margin is reset to zero to set the heading text in bold
 (or the font specified by the string
-.BR HF )
+.BR HF ),
 and,
 on typesetting devices,
 slightly larger than the base type size.
@@ -582,7 +582,10 @@ use of an italic style in
 .I heading-text
 is mapped to the bold-italic style if available in the font family.
 .
-The inset level is reset to 1 and paragraph indentation to the default.
+The inset level is reset to 1,
+setting the left margin to the value of the
+.B IN \" TODO: future: BP or BI register ("base paragraph indentation")
+register.
 .
 Text after
 .I heading-text
@@ -630,9 +633,6 @@ as a subsection heading indented between a section heading and an
 ordinary paragraph
 .RB ( .P ).
 .
-See subsection \(lqHorizontal and vertical spacing\(rq below for the
-indentation amount.
-.
 If no argument is given,
 a one-line input trap is planted;
 text on the next line
@@ -640,7 +640,9 @@ text on the next line
 becomes
 .I subheading-text.
 .
-This text is set in bold
+The left margin is reset to the value of the
+.B SN
+register to set the heading text in bold
 (or the font specified by the string
 .BR HF ).
 .
@@ -651,7 +653,10 @@ use of an italic style in
 .I subheading-text
 is mapped to the bold-italic style if available in the font family.
 .
-The inset level is reset to 1 and paragraph indentation to the default.
+The inset level is reset to 1,
+setting the left margin to the value of the
+.B IN \" TODO: future: BP or BI register ("base paragraph indentation")
+register.
 .
 Text after
 .I subheading-text
@@ -738,16 +743,18 @@ installation.
 .IR inset-amount ]
 Start a new relative inset level.
 .
-The left margin moves right by
+The position of the left margin is saved,
+then moved right by
 .I inset-amount,
 if specified,
-and by a default amount otherwise;
-see subsection \(lqHorizontal and vertical spacing\(rq below.
+and by the amount of the
+.B IN
+register otherwise.
 .
 Calls to
 .B .RS
 can be nested;
-each increments \" by\~1
+each increments by\~1
 the inset level used by
 .BR .RE .
 .
@@ -759,12 +766,14 @@ calls is\~1.
 .TP
 .BR .RE " ["\c
 .IR level ]
-End a relative inset;
-move the left margin back to that corresponding to inset level
-.I level.
+End a relative inset.
+.
+The left margin corresponding to inset level
+.I level
+is restored.
 .
 If no argument is given,
-move the left margin one level back.
+the inset level is reduced by\~1.
 .
 .
 .\" ====================================================================
@@ -854,8 +863,9 @@ escape sequence.
 Subsequent text is indented by
 .I indentation,
 if specified,
-and by a default amount otherwise;
-see subsection \(lqHorizontal and vertical spacing\(rq below.
+and by the amount of the
+.B IN
+register otherwise.
 .
 If the tag is not as wide as the indentation,
 the paragraph starts on the same line as the tag,
@@ -1982,36 +1992,15 @@ or
 or its synonyms is called;
 these clear the indentation entirely.
 .
-A relative inset created by
-.B .RS
-saves the current indentation,
-resets it to zero,
-and
-moves the left margin.
-.
-The new left margin persists until
-.BR .RS ,
-.BR .RE ,
-.BR .SH ,
-or
-.B .SS
-is called.
-.
 .
 .P
-The indentation amount exhibited by ordinary paragraphs set with
+The left margin used by ordinary paragraphs set with
 .B .P
 (and its synonyms)
 not within an
 .BR .RS / .RE
-relative inset,
-and the default used when
-.BR .IP ,
-.BR .RS ,
-.BR .TP ,
-and the deprecated
-.B .HP
-are not given an indentation argument,
+relative inset
+.\" TODO: future: BP or BI register ("base paragraph indentation")
 is 7.2n for typesetting devices
 and 7n for terminal devices
 (but see the
@@ -2024,7 +2013,9 @@ footers
 .BR .TH ),
 and section headings
 .RB ( .SH )
-are set at the left margin,
+are set at the page offset
+(see
+.MR groff @MAN7EXT@ )
 and subsection headings
 .RB ( .SS )
 indented from it by 3n
@@ -2032,7 +2023,8 @@ indented from it by 3n
 .B \-rSN
 option).
 .
-HTML output devices ignore indentation.
+.\" XXX: This is not true, but they do handle it badly.
+.\" HTML output devices ignore indentation.
 _ifstyle()dnl
 .
 .
@@ -2563,9 +2555,9 @@ or Documenter's Workbench
 Dummy character.
 .
 Insert at the beginning of an input line to prevent a dot or apostrophe
-from being interpreted as the beginning of a
+from being interpreted as beginning a
 .I roff
-request.
+control line.
 .
 Append to an end-of-sentence punctuation sequence to keep it from being
 recognized as such.
@@ -2580,8 +2572,11 @@ a non-breaking space.
 .
 Used primarily in ellipses
 (\(lq.\e|.\e|.\(rq)
-to space the dots more pleasantly on typesetting devices like PostScript
-and PDF.
+to space the dots more pleasantly on typesetting devices like
+.BR dvi ,
+.BR pdf ,
+and
+.BR ps .
 .
 .
 .TP
@@ -3236,9 +3231,20 @@ no registers were documented.
 .
 .P
 .B .UC
-appeared in 3BSD (1980) and
+appeared in 3BSD (1980).
+.
+.\" per https://archive.org/details/\
+.\" bitsavers_attunixSysalRelease3Jun80_33886798
+Unix System\~III (1980) introduced
 .B .P
-in Unix System\~III (1980).
+.\" ...and de-documented .LP...
+and exposed the registers
+.B IN
+and
+.BR LL ,
+.\" ...as well as \n[PD], which we implement but don't expose.
+which had been internal to Seventh Edition Unix
+.IR man .
 .
 .\" This inference is based on RCS idents of "PWB Manual Entry Macros"
 .\" from various forms of "an.src" distributed with System III (an.src
@@ -3259,17 +3265,6 @@ string.
 and
 .B rq
 strings.
-.
-.\" per <https://minnie.tuhs.org/pipermail/tuhs/2022-March/025544.html>
-.\" and <https://minnie.tuhs.org/pipermail/tuhs/2022-March/025545.html>
-Documenter's Workbench 1.0 (1984) exposed the
-.B IN
-and
-.B LL
-registers,
-which had been internal to Seventh Edition Unix
-.IR man .
-.\" ...as well as a PD register, which we use but don't expose.
 .
 .\" The SunOS inferences here and below are based on inspection of SunOS
 .\" 2.0 (May 1985), 3.2 (September 1986), 3.5 (January 1988), and 4.0
@@ -3297,9 +3292,8 @@ Ninth Edition Research Unix (1986) introduced
 and
 .BR .EE .
 .
-SunOS\~4.0 (1988) added the
-.B .SB
-macro.
+SunOS\~4.0 (1988) added
+.BR .SB .
 .
 .I groff
 1.20 (2009) originated

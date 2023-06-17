@@ -297,8 +297,9 @@ o The an (man) macro package no longer honors an `ll` request to set the
   deprecated in groff 1.18 (July 2002), and all known man program and
   macro package implementations either have set an LL register since
   2002 (man-db man), 2005 (Brouwer/Lucifredi man), or don't let the user
-  vary the line length freely (DWB troff, Solaris troff, Plan 9 troff)
-  or at all (mandoc, Heirloom Doctools troff).
+  vary the line length freely (DWB troff, Solaris troff, Plan 9 troff,
+  mandoc), don't permit its configuation via the `ll` request (mandoc),
+  or at all (Heirloom Doctools troff).
 
 o The an (man) macro package now interprets the value of the `HY`
   register as a Boolean; using it to set a specific hyphenation mode is
@@ -332,8 +333,9 @@ o The doc (mdoc) macro package now renders man page (sub)section cross
 o The e (me) macro package has changed its default line length on
   typesetting devices from 6i to the output device's default (for
   example, 6.5i on the 'ps' and 'pdf' devices).  You can use
-  "papersize.tmac" to override this length, as in "groff -d paper=a4l",
-  without needing to alter the document.
+  "papersize.tmac" to override this length, as in "groff -d paper=a4l"
+  to select A4 paper in landscape orientation, without needing to alter
+  the document.
 
 o The e (me) macro package has changed its support for output line
   numbering with the `n1` and `n2` macros to resolve several bugs in the
@@ -422,11 +424,15 @@ o The "ptx.tmac" macro file, a counterpart to the GNU coreutils ptx(1)
   long been part of the source distribution.
 
 o The s (ms) macro package now enables the formatter's "no-space mode"
-  after ending displays (`DE`) and equations (`EQ`); this is to improve
-  the fidelity of rendering of historical ms(7) documents such as
-  Kernighan & Cherry's "Typesetting Mathematics".  This change means
-  that display distance spacing (the `DD` register) overrides paragraph
-  spacing (the `PD` register) instead of accumulating with it.
+  after ending displays (`DE`), equations (`EN`), tables (`TS`), and
+  pictures without flyback (`PE`).  This means that display distance
+  spacing (the `DD` register) overrides the spacing that may follow in a
+  subsequent paragraph, section heading, or display instead of
+  accumulating with that distance.  This change is to make the behavior
+  of the package more predictable; you can fine-tune such spacing by
+  setting the `DD` register in desired places.  It has also helped us to
+  improve groff ms's rendering of historical ms(7) documents such as
+  Kernighan & Cherry's "Typesetting Mathematics".
 
 o The s (ms) macro package supports a new string, `FR`, which defines
   the ratio of the footnote line length to the current line length.  The
@@ -1918,8 +1924,8 @@ o It is now possible to have whitespace between the first and second dot
     .  !
     ..
 
-o `.fn' is a new string-valued register which returns the (internal)
-  real font name; styles and families are properly concatenated.
+o `.fn' is a new string-valued register that returns the resolved font
+  font name; a font family and abstract style are catenated.
 
 o Three new read/write registers `seconds', `minutes', and `hours'
   contain the current time, set at start-up of troff.  Use the `af'

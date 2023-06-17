@@ -94,34 +94,38 @@ documents,
 .I file1
 and
 .IR file2 ,
-and creates an output which is
+and creates a
+.I roff
+document consisting of
 .I file2
 with added margin character
 .RB ( .mc )
-requests that indicate the lines with differences.
+requests indicating output lines that differ from
+.I file1.
 .
-.
-.LP
 If the
 .I file1
 or
 .I file2
 argument is
 .RB \[lq] \- \[rq],
-the standard input stream is read for that input.
+.I gdiffmk
+reads the standard input stream for that input.
 .
 If the
 .I output
-filename is present,
-the output is written there.
+operand is present,
+.I gdiffmk
+writes output to a file of that name.
 .
 If it is
 .RB \[lq] \- \[rq]
 or absent,
-the output is written to the standard output stream.
+.I gdiffmk
+writes output to the standard output stream.
 .
 .RB \[lq] \- \[rq]
-cannot be both input and output.
+cannot be both an input and output operand.
 .
 .
 .\" ====================================================================
@@ -191,9 +195,6 @@ Default:
 .B \-D
 Show the deleted portions from changed and deleted text.
 .
-Default delimiting marks:
-.RB \[lq] [[ "\[rq] .\|.\|.\& \[lq]" ]] \[rq].
-.
 .
 .TP
 .BI \-M\~ "mark1 mark2"
@@ -203,6 +204,10 @@ option.
 .
 It makes no sense to use this option without
 .BR \-D .
+.
+Default delimiting marks:
+.RB \[lq] [[ "\[rq] .\|.\|.\& \[lq]" ]] \[rq].
+.
 .
 .TP
 .BI \-x\~ diff-command
@@ -251,9 +256,9 @@ option of GNU
 .I diff
 to make a merged \[lq]#ifdef\[rq] output format.
 .
-It hasn't been tested whether other versions of
+Busybox
 .I diff
-support this option.
+is known to not support it.
 .
 Also see the
 .BI \-x\~ diff-command
