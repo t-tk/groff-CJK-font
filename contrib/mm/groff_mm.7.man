@@ -81,6 +81,65 @@ and books.
 .
 .
 .P
+Call an
+.I mm
+macro at the beginning of a document to initialize the package.
+.
+A simple
+.I mm
+document might use only
+.B P
+for paragraphing.
+.
+Set numbered and unnumbered section headings with
+.B H
+and
+.BR HU ,
+respectively.
+.
+Change the style of the typeface with
+.BR B ,
+.BR I ,
+and
+.BR R ;
+you can alternate styles with
+.BR BI ,
+.BR BR ,
+.BR IB ,
+.BR IR ,
+.BR RB ,
+and
+.BR RI .
+.
+Several nestable list types are available via
+.BR AL ,
+.BR BL ,
+.BR BVL ,
+.BR DL ,
+.BR ML ,
+.BR RL ,
+and
+.BR VL ;
+each of these begins a list,
+to which
+.B LI
+adds an item and
+.B LE
+ends the (nested) list.
+.
+Customized list arrangements are supported by
+.BR LB .
+.
+.B DS
+and
+.B DF
+start static and floating displays,
+respectively;
+either is terminated with
+.BR DE .
+.
+.
+.P
 .I groff mm
 is intended to be compatible with the
 .I mm
@@ -229,17 +288,6 @@ Your document can select at most one of these approaches;
 when used,
 each disables the others.
 .
-A simple
-.I mm
-document might use only
-.B H
-(or
-.BR HU )
-and
-.B P
-for headings and paragraphing,
-respectively.
-.
 .
 .\" ====================================================================
 .SS Localization
@@ -255,12 +303,13 @@ where
 .I xx
 is an ISO\~639 two-letter language identifier.
 .
-For Swedish,
-this is
-.IR sv.tmac ;
-\[lq]sv\[rq],
-not
-\[lq]se\[rq].
+Localization packages should be loaded after
+.IR mm ;
+for example,
+you might format a Swedish
+.I mm
+document with the command
+.RB \[lq] "groff \-mm \-msv" \[rq].
 .
 .
 .P
@@ -467,7 +516,7 @@ are mounted at font positions
 respectively.
 .
 Internally,
-font positions are used for backwards compatibility.
+font positions are used for backward compatibility.
 .
 From a practical point of view,
 it doesn't make a big difference\[em]a different font family can still
@@ -548,7 +597,7 @@ to the table of contents with
 which is either\~0 or in the range 1 to\~7.
 .
 See also
-.BR .H .
+.BR H .
 .
 This undocumented DWB
 .I mm
@@ -559,12 +608,13 @@ to enable customized tables of contents.
 .
 .TP
 .BR 1C\~ [ 1 ]
-Begin one-column formatting after breaking the page.
+Format page text in one column.
+.
+The page is broken.
 .
 .RB A\~ 1
-argument suppresses the page break,
-but if a footnote is pending,
-it may be overprinted.
+argument suppresses this break;
+its use may cause body text and a pending footnote to overprint.
 .
 See
 .BR 2C ,
@@ -595,19 +645,35 @@ See
 .BR AS .
 .
 .
+.\" In DWB mm, the mnemonic for `AF` was "alternate first-page format",
+.\" and was described in the context of the `A` and `E` registers and
+.\" `}Z` and `]S` strings, none of which we support.
 .TP
-.BI AF\ \fR[\fP name-of-firm \fR]\fP
-Author's firm, should be called before
-.BR AU ,
-see also
-.BR \%COVER .
+.BR AF \~[\c
+.IR firm-name ]
+Specify firm associated with the document.
+.
+At most one can be declared;
+the firm name is used by memorandum types and available to cover sheets.
+.
+.B AF
+terminates a document title started with
+.BR TL ,
+and can be called without an argument for that purpose.
+.
+See
+.B MT
+and
+.BR COVER .
 .
 .
 .TP
-.BI AL\~ \fR[\fPtype\~\fR[\fPtext-indent\~ \fR[\fP1\fR]]]\fP
-Start an auto-incrementing list.
+.BR AL \~[\c
+.IR type \~[ text-indent \~[\c
+.BR 1 ]]]
+Begin an auto-incrementing numbered list.
 .
-Items are numbered beginning with one.
+Item numbers start at one.
 .
 The
 .I type
@@ -622,16 +688,13 @@ An explicitly empty
 .I type
 also indicates the default.
 .
+A
 .I text-indent
-sets the indentation in ens,
-overriding register
+argument overrides register
 .BR Li .
 .
-If a third argument,
-conventionally
-.BR 1 ,
-is given,
-the blank line that normally precedes each list item is suppressed.
+A third argument suppresses the blank line that normally precedes each
+list item.
 .
 Use
 .B LI
@@ -684,7 +747,7 @@ and made empty otherwise.
 .BI APPSK\~ "id n" \~\c
 .RI [ title ]
 As
-.BR .APP ,
+.BR APP ,
 but increment the page number by
 .IR n .
 .
@@ -727,13 +790,13 @@ placement@Effect
 0@T{
 The abstract appears on page\~1 and cover sheet if the document is a
 \[lq]released paper\[rq] memorandum
-.RB ( ".MT 4" );
+.RB (\[lq] ".MT 4" \[rq]);
 otherwise,
 it appears on page\~1 without a cover sheet.
 T}
 1@T{
 The abstract appears only on the cover sheet
-.RB ( ".MT 4"
+.RB (\[lq] ".MT 4" \[rq]
 only).
 T}
 .\" XXX: This does not appear to be implemented.
@@ -748,7 +811,7 @@ T}
 .
 .IP
 An abstract does not appear at all in external letters
-.RB ( ".MT 5" ).
+.RB (\[lq] ".MT 5" \[rq]).
 .
 .RI A\~ placement
 of
@@ -784,19 +847,32 @@ The default is \[lq]ABSTRACT\[rq].
 .TP
 .BI AT\~ title\c
 \~[.\|.\|.]
-Author's title(s).
+Specify author's title(s).
 .
 If present,
 .B AT
 must appear just after the corresponding author's
 .BR AU .
 .
-Each title shows up on a separate output line after the name in the
-signature block and in the
+Each
+.I title
+occupies an output line beneath the author's name in the signature block
+used by
+.B LT
+letters
+(see
+.BR SG )
+and in
+.B MT
+memoranda.
+.
+The
 .B ms
-cover sheet style.
+cover sheet style also uses it.
 .
 .
+.br
+.ne 7v
 .TP
 .BR AU \~\c
 .RI [ name\~\c
@@ -811,20 +887,23 @@ cover sheet style.
 Specify author.
 .
 .B AU
-terminates a document title being collected with
+terminates a document title started with
 .BR TL ,
-and can be called without arguments for that sole purpose.
+and can be called without arguments for that purpose.
 .
-Author information is used by cover sheets and predefined memorandum
-types
-.RB ( MT ).
+Author information is used by cover sheets,
+.B MT
+memoranda,
+and
+.BR SG .
 .
-It can contain initials,
+Further arguments comprise
+initials,
 location,
 department,
 telephone extension,
 room number or name,
-and up to three additional arguments.
+and up to three additional items.
 .
 Repeat
 .B AU
@@ -839,25 +918,37 @@ instead to identify the author for documents employing
 .
 .
 .TP
-.BI AV\  \fR[\fPname\  \fR[\fP1\fR]]\fP
-Approval signature.
+.BR AV \~[\c
+.IR name \~[\c
+.BR 1 ]]
+Format approval lines for a handwritten signature and date.
 .
-Generates an approval line with place for signature and date.
+Two horizontal rules are drawn,
+with the specified
+.I name
+and the text of the string
+.B Letdate
+beneath them.
 .
-The text \[lq]APPROVED:\[rq] can be changed with the string
-.BR Letapp ;
-it is replaced with an empty line if there is a second argument.
+Above these rules,
+the text in the string
+.B Letapp
+is formatted;
+a second argument replaces this text with a blank line.
 .
-The text \[lq]Date\[rq] can be changed with the string
-.BR Letdate .
+See
+.BR LT .
 .
 .
 .\" XXX: AVL is misnamed; it should have been called SGL or similar.
 .TP
-.BI AVL\  \fR[\fPname\fR]\fP
-Letter signature.
-.
-Generates a line with place for signature.
+.BR AVL \~[\c
+.IR name ]
+As
+.BR AV ,
+but the date,
+date rule,
+and approval notations are omitted.
 .
 .
 .TP
@@ -896,7 +987,7 @@ This is a GNU extension.
 .
 .TP
 .B BE
-End bottom block, see
+End bottom block; see
 .BR BS .
 .
 .
@@ -913,19 +1004,26 @@ without space between the arguments.
 .
 .
 .TP
-.BI BL\  \fR[\fPtext-indent\  \fR[\fP1\fR]]\fP
-Start bullet list.
+.BR BL \~[\c
+.IR text-indent \~[\c
+.BR 1 ]]
+Begin bulleted list.
 .
-Initializes a list with a bullet and a space in the beginning of each
-list item (see
-.BR LI ).
+Items are prefixed with a bullet and a space.
 .
+A
 .I text-indent
-sets the indentation in ens,
-overriding register
+argument overrides register
 .BR Pi .
 .
-A third argument prohibits printing of a blank line before each item.
+A second argument suppresses blank lines between items.
+.
+Use
+.B LI
+to declare list items,
+and
+.B LE
+to end the list.
 .
 .
 .TP
@@ -942,41 +1040,51 @@ without space between the arguments.
 .
 .TP
 .B BS
-Bottom block start.
+Begin bottom block.
 .
-Begins the definition of a text block which is printed at the bottom
-of each page.
+Input is collected until
+.B BE
+is called,
+and output between the footnote area and footer of each page.
 .
-The block ends with
-.BR BE .
 .
+.\" XXX: Couldn't this have been done with an extra parameter to `VL`?
 .TP
-.BI BVL\  "text-indent \fR[\fPmark-indent\ " \fR[\fP1\fR]]\fP
-Start of broken variable-item list.
+.BR BVL \~[\c
+.IR text-indent \~[ mark-indent \~[\c
+.BR 1 ]]]
+Begin broken variable-item list.
 .
-Broken variable-item list has no fixed mark,
-it assumes that every
-.B LI
-has a mark instead.
+Each item is expected to supply its own mark.
 .
-The text always begins at the next line after the mark.
+The line is always broken after the mark;
+contrast
+.BR VL .
 .
 .I text-indent
-sets the indentation to the text, and
+sets the indentation of the text,
+and
 .I mark-indent
-the distance from the current indentation to the mark.
+the distance from the current list indentation to the mark.
 .
-A third argument prohibits printing of a blank line before each item.
+A third argument suppresses the blank line that normally precedes each
+list item.
+.
+Use
+.B LI
+to declare list items,
+and
+.B LE
+to end the list.
 .
 .
 .TP
 .BR \%COVER \~\c \" space in roman; we must use 2-font macro with \c
 .RI [ style ]
-Begin a cover sheet description.
+Begin a cover page description.
 .
-It is important that
 .B \%COVER
-appear before any of the body text
+must appear before the body text
 (or main matter)
 of a document.
 .
@@ -988,25 +1096,31 @@ and load it with the
 .B mso
 request.
 .
-Therefore it is possible to create unlimited types of cover sheets.
-.
 The default
 .I style
 is
 .BR ms ;
-it structures a cover sheet to resemble that used by the
+the
+.I ms.cov
+file prepares a cover page resembling those of the
 .I ms
 package.
 .
-.B \%COVER
-requires a
+A
+.I .cov
+file must define a
 .B \%COVEND
-at the end of the cover description.
+macro,
+which a document must call at the end of the cover description.
 .
-Always use the following ordering of the cover sheet macros.
+Use cover description macros in the following order;
+only
+.B TL
+and
+.B AU
+are required.
 .
 .
-.RS
 .IP
 .EX
 \&.COVER
@@ -1018,29 +1132,16 @@ Always use the following ordering of the cover sheet macros.
 \&.AE
 \&.COVEND
 .EE
-.RE
-.
-.
-.IP
-Only
-.B .TL
-and
-.B .AU
-are required.
 .
 .
 .TP
 .B COVEND
-End the cover description and output the cover page.
-.
-This macro is defined in the cover sheet macro file.
+End the cover description.
 .
 .
 .TP
 .B DE
-Display end.
-.
-Ends a block of text or display that begins with
+End static or floating display begun with
 .B DS
 or
 .BR DF .
@@ -1048,58 +1149,63 @@ or
 .
 .TP
 .BR DF\~ [\c
-.IR format \~[ fill \~[ rindent ]]]
+.IR format \~[ fill \~[ right-indentation ]]]
 Begin floating display.
 .
-A floating display is saved in a queue and is printed in the order
-entered.
+A floating display is saved in a queue and output in the order entered.
 .
-The arguments
-.I format,
-.I fill,
-and
-.I rindent
-are handled as in
+Arguments are handled as in
 .BR DS .
 .
 Floating displays cannot be nested.
 .
-Floating display output is controlled by the registers
+Placement of floating displays is controlled by the registers
 .B De
 and
 .BR Df .
 .
 .
 .TP
-.BI DL\  \fR[\fPtext-indent\  "\fR[\fP\fB1\fP \fR[\fP\fB1\fP\fR]]]\fP"
-Dash list start.
+.BR DL \~[\c
+.IR text-indent \~[\c
+.BR 1 ]]
+Begin dashed list.
 .
-Begins a list where each item is printed after a dash.
+Items are prefixed with an em dash and a space.
 .
+A
 .I text-indent
-sets the indentation in ens,
-overriding register
+argument overrides register
 .BR Pi .
 .
-A second argument prevents an empty line between each list item.
+A second argument suppresses blank lines between items.
 .
-See
-.BR LI .
+Use
+.B LI
+to declare list items,
+and
+.B LE
+to end the list.
 .
-A third argument prohibits printing of a blank line before each item.
 .
 .TP
-.BI DS\  "\fR[\fPformat \fR[\fPfill \fR[\fPrindent\fR]]]\fP"
-Static display start.
+.BR DS \~[\c
+.IR format \~[\c
+.IR fill \~[\c
+.IR right-indentation ]]]
+Begin static display.
 .
-Begins collection of text until
-.BR DE .
+Input until
+.B DE
+is called is collected into a display.
 .
-The text is printed together on the same page, unless it is longer
-than the height of the page.
+The display is output on a single page unless it is taller than the
+height of the page.
 .
 .B DS
-can be nested arbitrarily.
+can be nested
+(contrast with
+.BR DF ).
 .
 .
 .IP
@@ -1108,13 +1214,11 @@ tab(@);
 Lf(BI) Lb
 L Lx.
 format@Effect
-\[dq]\[dq]@No indentation.
-none@No indentation.
-L@No indentation.
+\f[I]none\f[]@Do not indent the display.
+L@Do not indent the display.
 I@T{
 Indent text by
-.B \[rs]n[Si]
-ens.
+.BR \[rs]n[Si] .
 T}
 C@Center each line.
 CB@Center the whole display as a block.
@@ -1133,7 +1237,8 @@ and \[lq]CB\[rq] can also be specified as \[lq]0\[rq],
 and
 \[lq]3\[rq],
 respectively,
-for compatibility reasons.
+for compatibility with
+.RI DWB\~ mm.
 .
 .
 .IP
@@ -1142,27 +1247,34 @@ tab(@);
 Lf(BI) Lb
 L Lx.
 fill@Effect
-\[dq]\[dq]@Line-filling turned off.
-none@Line-filling turned off.
-N@Line-filling turned off.
-F@Line-filling turned on.
+\f[I]none\f[]@Disable filling.
+N@Disable filling.
+F@Enable filling.
 .TE
 .
 .
 .IP
 \[lq]N\[rq] and \[lq]F\[rq] can also be specified as \[lq]0\[rq] and
 \[lq]1\[rq],
-respectively.
+respectively,
+for compatibility with
+.RI DWB\~ mm.
+.
 .
 .IP
-By default, an empty line is printed before and after the display.
+A third argument
+reduces the line length by
+.I right-indentation.
 .
-Setting register
+.
+.IP
+.I mm
+normally
+places blank lines before and after the display.
+.
+Set register
 .B Ds
-to\~0 prevents this.
-.
-.I rindent
-shortens the line length by that amount.
+to\~0 to suppress these.
 .
 .
 .TP
@@ -1300,17 +1412,19 @@ without any trap active.
 See
 .BR TP .
 .
+.
 .IP
-.B Strings available to EOP
-.RS
 .TS
 tab(@);
-l l.
-EOPf@argument of \fBPF\fP
-EOPef@argument of \fBEF\fP
-EOPof@argument of \fBOF\fP
+Cb S
+Lb L.
+Strings available to EOP
+_
+EOPf@argument to \fBPF\fP
+EOPef@argument to \fBEF\fP
+EOPof@argument to \fBOF\fP
 .TE
-.RE
+.
 .
 .TP
 .BI EPIC\  "\fR[\fP\fB\-L\fP\fR]\fP width height \fR[\fPname\fR]\fP"
@@ -1355,7 +1469,7 @@ and not to produce output.
 .
 If present,
 .I label
-appears at the aligned to the right and
+appears aligned to the right and
 centered vertically within the display;
 see register
 .BR Eq .
@@ -1405,32 +1519,38 @@ as a heading.
 .
 .
 .TP
-.BI FC\  \fR[\fPclosing\fR]\fP
-Print \[lq]Yours very truly,\[rq]
-as a formal closing of a letter or memorandum.
+.BR FC \~[\c
+.IR closing-text ]
+Output the string
+.BR Letfc ,
+or the specified
+.I closing-text,
+as the formal closing of a letter.
 .
-The argument replaces the default string.
-.
-The default is stored in the string
-.BR Letfc .
 .
 .TP
-.BI FD\  \fR[\fParg\  \fR[\fP1\fR]]\fP
-Footnote default format.
+.BR FD \~[\c
+.IR arg \~[\c
+.BR 1 ]]
+Configure display of footnotes.
 .
-Controls the hyphenation (hyphen),
-adjustment to the right margin (adjust),
-and indentation of footnote text (indent).
+The first argument encodes enablement of
+automatic hyphenation,
+adjustment to the right margin,
+indentation of footnote text,
+and left- vs.\& right-alignment of the footnote label within the space
+allocated for it.
 .
-It can also change the label justification (ljust).
 .
-.RS
+.br
+.ne 5v
 .IP
+.\" XXX: We can fit one more row using "nokeep" vs. not using it.
 .TS
-tab(@);
-lb lb lb lb lb
-l l l l l.
-arg@hyphen@adjust@indent@ljust
+tab(@) nokeep;
+Lf(BI) Lb Lb Lb Lb
+L L L L L.
+arg@Hyphenate?@Adjust?@Indent?@Label alignment
 0@no@yes@yes@left
 1@yes@yes@yes@left
 2@no@no@yes@left
@@ -1444,19 +1564,33 @@ arg@hyphen@adjust@indent@ljust
 10@no@no@yes@right
 11@yes@no@yes@right
 .TE
-.RE
+.
 .
 .IP
-An argument greater than or equal to 11 is considered as value\~0.
+An
+.I arg
+greater than 11 is treated
+.RB as\~ 0 .
 .
-The default for
-.I mm
-is 10.
+.IR mm 's
+default
+.RB is\~ 0 .
+.
+.
+.IP
+If a second argument,
+conventionally
+.BR 1 ,
+is given,
+footnote numbering is reset when a first-level heading is encountered.
+.
+See
+.BR FS .
 .
 .
 .TP
 .B FE
-Footnote end;
+End footnote;
 see
 .BR FS .
 .
@@ -1498,9 +1632,9 @@ as a heading.
 .TP
 .BR FS \~[\c
 .IR label ]
-Footnote start.
+Start footnote.
 .
-Text until
+Input until
 .B FE
 is called is collected into a footnote.
 .
@@ -1630,12 +1764,17 @@ Set a numbered section heading at
 .IR level .
 .
 .I mm
-produces numbered headings in the form
+produces numbered
+.I "heading marks"
+of the form
 .IR a . b . c .\|.\|.,
 with up to fourteen levels of nesting.
 .
-The numbering of each level increases automatically and is
-reset to zero when a more significant level is specified.
+Each level's number increases automatically with each
+.B H
+call and is reset to zero when a more significant
+.I level
+is specified.
 .
 .RB \[lq] 1 \[rq]\~is
 the most significant or coarsest division of the document.
@@ -1653,17 +1792,22 @@ is unnecessary.
 specifies an optional title;
 it must be double-quoted if it contains spaces.
 .
+.I mm
+appends
 .I suffix
-is appended to the heading title in the body of the document,
-but omitted from any table of contents
+to
+.I title
+in the body of the document,
+but omits it from any table of contents
 (see
 .BR TC ).
 .
 This facility can be used to annotate the heading title with a footnote.
 .
 .I suffix
-should not include
-.BR \[rs]*F ;
+should not interpolate
+.RB the\~ F
+string;
 specify a footnote mark explicitly.
 .
 See
@@ -1889,7 +2033,7 @@ calls
 .B HY
 after determing the header typeface and size.
 .
-It might be used to change indentation.
+It could be used to change indentation.
 .
 .
 .TP
@@ -1904,7 +2048,7 @@ or
 .B HU
 returns.
 .
-It might be used to change the page header to include a section heading.
+It could be used to change the page header to include a section heading.
 .\" XXX: ...but only for the _next_ page, not the current one.  See
 .\" Savannah #62825.
 .RE
@@ -1946,19 +2090,6 @@ Except for a heading number,
 it is treated as a numbered heading of the level stored in
 .RB register\~ Hu ;
 .RB see\~ H .
-see\~\c
-.BR H .
-.
-.
-.TP
-.B HX
-.TQ
-.B HY
-.TQ
-.B HZ
-See
-.B H
-for descriptions of these user-definable hooks.
 .
 .
 .TP
@@ -1977,13 +2108,22 @@ switch font to italic style.
 .
 .
 .TP
-.BI IA\  "\fR[\fPaddressee-name \fR[\fPtitle\fR]]\fP"
-Begin specification of the addressee and addressee's address in
-letter style.
+.BR IA \~[\c
+.IR recipient-name \~[\c
+.IR title ]]
+Specify the inside address in a letter.
 .
-Several names can be specified with empty
-.BR IA / IE -pairs,
-but only one address.
+Input is collected into the inside address until
+.B IE
+is called,
+and then output.
+.
+You can specify multiple recipients with empty
+.BR IA / IE
+pairs;
+only the last address is used.
+.
+The arguments give each recipient a name and title.
 .
 See
 .BR LT .
@@ -2003,27 +2143,80 @@ without space between the arguments.
 .
 .TP
 .B IE
-End the address specification after
+End the inside address begun with
 .BR IA .
 .
+.
 .TP
-.BI INITI\  "type filename \fR[\fPmacro\fR]\fP"
-Initialize the new index system and set the filename to collect index
-lines in with
-.BR IND .
+.BI IND\~ argument\~\c
+\&.\|.\|.
+If the Boolean register
+.B Ref
+is true,
+write an index entry as a specially prepared
+.I roff
+comment to the standard error stream.
 .
-Argument
-.I type
-selects the type of index: page number, header marks or both.
+The entry is arranged as configured by the most recent
+.B INITI
+call.
 .
-The default is page numbers.
+Each
+.I argument
+is separated from its predecessor by a tab character.
+.
+.
+.TP
+.B INDP
+Output the index set up by
+.B INITI
+and populated by
+.B IND
+calls.
+.
+By default,
+.B INDP
+calls
+.B SK
+and writes a centered header interpolating the string
+.BR Index .
+.
+It then disables filling and calls
+.BR 2C ;
+afterward,
+it restores filling and calls
+.BR 1C .
+.
 .
 .IP
-It is also possible to create a macro that is responsible
-for formatting each row;
-just add the name of the macro as a third argument.
+Define macros to customize this behavior.
 .
-The macro is then called with the index as argument(s).
+.B INDP
+calls
+.B TXIND
+before the header,
+.B TYIND
+.I instead
+of writing the header,
+and
+.B TZIND
+after formatting the index.
+.
+.
+.TP
+.BI INITI\~ "location-type file-name\~"\c
+.RI [ macro ]
+Initialize
+.IR "groff mm" 's
+indexing system.
+.
+Argument
+.I location-type
+selects how the location of each index entry is reported.
+.
+.I file-type
+defines an internal string used later by
+.BR INDP .
 .
 .
 .IP
@@ -2031,14 +2224,20 @@ The macro is then called with the index as argument(s).
 tab(@);
 Lf(BI) Lb
 L Lx.
-type@entry format
-N@Page numbers
-H@Header marks
-B@T{
-Both page numbers and header marks,
-separated with a tab character.
-T}
+location-type@Entry format
+N@page number
+H@heading mark
+B@page number, tab character, heading mark
 .TE
+.
+.
+.IP
+If
+.I macro
+is specified,
+it is called for each index entry
+with the arguments given to
+.BR IND .
 .
 .
 .TP
@@ -2076,64 +2275,6 @@ and
 .
 .
 .TP
-.BI IND\  "arg1 \fR[\fParg2 \fR[.\|.\|.]]\fP"
-Write a line in the index file selected by
-.B INITI
-with all arguments and the page number or header mark separated by tabs.
-.
-.RS
-.IP
-.B Examples
-.
-.IP
-arg1\[rs]tpage number
-.br
-arg1\[rs]targ2\[rs]tpage number
-.br
-arg1\[rs]theader mark
-.br
-arg1\[rs]tpage number\[rs]theader mark
-.RE
-.
-.TP
-.B INDP
-Print the index by running the command specified by the string
-.BR Indcmd ,
-which has
-.RB \[lq] sort\~\-t\[rs]t \[rq]
-as the default value.
-.
-.B INDP
-reads the output from the command to form the index,
-by default in two columns (this can be changed by defining
-.BR TYIND ).
-.
-The index is printed with the string
-.B Index
-as header;
-the default is \[lq]INDEX\[rq].
-.
-One-column processing is reactivated after the list.
-.
-.B INDP
-calls the user-defined macros
-.BR TXIND ,
-.BR TYIND ,
-and
-.B TZIND
-if defined.
-.
-.B TXIND
-is called before printing the string \[lq]INDEX\[rq],
-.B TYIND
-is called instead of printing \[lq]INDEX\[rq],
-and
-.B TZIND
-is called after the printing and should take care of restoring to
-normal operation again.
-.
-.
-.TP
 .BR IR \~\c \" space in roman; we must use 2-font macro with \c
 .RI [ italic-text\~\c
 .RI [ roman-text ]]\~.\|.\|.
@@ -2166,49 +2307,55 @@ this is also the default.
 .
 .
 .TP
-.BI LB\  "text-indent mark-indent pad type \fR[\fPmark \fR[\fPLI-space \fR[\fPLB-space\fR]]]\fP"
-List-begin macro.
+.BI LB\~ "text-indent mark-indent pad type"\~\c
+.RI [ mark \~[ pre-item-space \~[ pre-list-space ]]]
+Begin list.
 .
-This is the common macro used for all lists.
-.
-.I text-indent
-is the number of spaces to indent the text from the current indentation.
-.
-.IP
-.I pad
+The macros
+.BR AL ,
+.BR BL ,
+.BR BVL ,
+.BR DL ,
+.BR ML ,
+.BR RL ,
 and
-.I mark-indent
-control where to put the mark.
+.B VL
+call
+.B LB
+in various ways;
+they are simpler to use and may be preferred if they suit the desired
+purpose.
 .
-The mark is placed within the mark area, and
-.I mark-indent
-sets the number of spaces before this area.
 .
-By default it is\~0.
-.
-The mark area ends where the text begins.
-.
-The start of the text is still controlled by
-.IR text-indent .
-.
+.br
+.ne 5v
 .IP
-The mark is left-justified within the mark area if
-.I pad
-is\~0.
+The nesting level of lists is tracked by
+.I mm;
+the outermost level is\~0.
+.
+The text of each list item is indented by
+.I text-indent;
+the default is taken from the
+.B Li
+register
+(in ens).
+.
+Each item's mark is indented by
+.I mark-indent;
+the default is
+.BR 0n .
+.
+The mark is normally left-aligned.
 .
 If
 .I pad
-is greater than\~0,
+is greater than zero,
 .I mark-indent
-is ignored,
-and the mark is placed
+is overridden such that
 .I pad
-spaces before the text.
+ens of space follow the mark.
 .
-This right-justifies the mark.
-.
-.
-.IP
 .I type
 selects one of six possible ways to display the mark.
 .
@@ -2231,242 +2378,268 @@ type@Output for a mark \[lq]x\[rq]
 .IP
 If
 .I type
-is\~0 the list either has a hanging indentation or,
-if argument
+is\~0 and
 .I mark
-is given,
-the string
-.I mark
-as a mark.
+is unspecified,
+the items are set with a hanging indent.
 .
-.IP
+Otherwise,
+.I mark
+is interpreted as a string defining the mark.
+.
 If
 .I type
-is greater than\~0 automatic numbering occurs,
-using Arabic numerals if
+is greater than zero,
+items are automatically numbered;
 .I mark
-is empty.
+is interpreted as a register format.
 .
-.I mark
-can then be any of \[lq]1\[rq],
-\[lq]A\[rq],
-\[lq]a\[rq],
-\[lq]I\[rq],
-or \[lq]i\[rq].
+The default
+.I type
+.RB is\~ 0 .
 .
 .
 .IP
-Every item in the list gets
-.I LI-space
-number of blank lines before them.
+The last two arguments manage vertical space.
 .
-Default is\~1.
+Unless a list's nesting level is greater than the value of register
+.BR Ls ,
+its items are preceded by
+.I pre-item-space
+multiplied by the register
+.BR Lsp ;
+the default
+.RB is\~ 1 .
 .
-.IP
 .B LB
-itself prints
-.I LB-space
-blank lines.
+precedes the list by
+.I pre-list-space
+multiplied by the register
+.BR Lsp ;
+the default
+.RB is\~ 0 .
 .
-Default is\~0.
 .
 .TP
-.BI LC\  \fR[\fPlist-level\fR]\fP
-List-status clear.
+.BR LC \~[\c
+.IR list-level ]
+Clear list state.
 .
-Terminates all current active lists down to
-.IR list-level ,
-or\~0 if no argument is given.
+Active lists are terminated as if with
+.BR LE ,
+either all
+(the default)
+or only those from the current level down to
+.I list-level
+if specified.
 .
-This is used by\~\c
 .B H
-to clear any active list.
+calls
+.B LC
+automatically.
 .
 .
 .TP
 .BR LE \~[ 1 ]
-List end.
+End list.
 .
 The current list is terminated.
 .
-If an argument
-.B 1
-is present,
+An argument
+.RB of\~ 1
+causes
 vertical space in the amount of register
 .B Lsp
-follows.
+to follow the list.
 .
 .
 .TP
-.BI LI\  \fR[\fPmark\  \fR[\fP1\fR|\fP2\fR]]\fP
-List item preceding every item in a list.
+.BR LI \~[\c
+.IR mark \~[ item-mark-mode ]]
+Begin a list item.
 .
-Without argument,
+Input is collected into a list item until the current list is terminated
+or
 .B LI
-prints the mark determined by the current list type.
+is called again.
 .
-By giving
-.B LI
-one argument, it uses that as the mark instead.
+By default,
+the item's text is preceded by any mark configured by the current list.
 .
-Two arguments to
-.B LI
-makes
+If only
 .I mark
-a prefix to the current mark.
+is specified,
+it replaces the configured mark.
 .
-There is no separating space between the prefix and the mark if the
-second argument is \[lq]2\[rq] instead of \[lq]1\[rq].
-.
-This behaviour can also be achieved by setting register
-.B Limsp
-to zero.
-.
-A zero length
+A second argument
+prefixes
 .I mark
-makes a hanging indentation instead.
+to the configured mark;
+an
+.I item-mark-mode
+value of\~1 places an unbreakable space after
+.I mark,
+while
+a value of\~2 does not
+(rendering the two adjacent).
 .
-.IP
-A list item is preceded by vertical space unless its nesting level is
-greater than the value of register
-.BR Ls .
-.
-The amount of space is determined by the register
-.B Lsp
-and an argument to
-.BR LB .
-.
-.
-.IP
-The
-.B Li
-register configures the indentation amount in ens.
-.
-.
-.IP
-All lists begin with a list initialization macro,
-.BR LB .
-.
-There are, however, seven predefined list types to make lists easier
-to use.
-.
-They all call
-.B LB
-with different default values.
-.
-.RS
-.IP
-.TS
-tab(@);
-l l.
-\fBAL\fP@Automatically Incremented List
-\fBML\fP@Marked List
-\fBVL\fP@Variable-Item List
-\fBBL\fP@Bullet List
-\fBDL\fP@Dash List
-\fBRL\fP@Reference List
-\fBBVL\fP@Broken Variable List.
-.TE
-.RE
+Also see register
+.BR Limsp .
 .
 .
 .TP
-.BI LO\  "type \fR[\fParg\fR]\fP"
-Specify options in letter (see
-.BR .LT ).
+.BI LO\~ option\~\c
+.RI [ value ]
+Specify letter options;
+see
+.BR LT .
 .
-This is a list of the standard options:
+Standard options are as follows.
 .
-.RS
+See
+.B IA
+regarding the inside address and string
+.B DT
+regarding the date.
+.
+.
 .IP
 .TS
 tab(@);
-l lx.
+Lf(BI) Lb
+L Lx.
+option@Effect
+AT@T{
+Attention;
+put contents of string
+.B LetAT
+and
+.I value
+left-aligned after the inside address.
+T}
 CN@T{
-Confidential notation.
-Prints \[lq]CONFIDENTIAL\[rq] on the second line below the date line.
-.
-Any argument replaces \[lq]CONFIDENTIAL\[rq].
-.
-See also string
-.BR LetCN .
+Confidential;
+put
+.I value,
+or contents of string
+.BR LetCN ,
+left-aligned after the date.
 T}
 RN@T{
-Reference notation.
-Prints \[lq]In reference to:\[rq] and the argument two lines below the
-date line.
-.
-See also string
-.BR LetRN .
-T}
-AT@T{
-Attention.
-Prints \[lq]ATTENTION:\[rq] and the argument below the inside address.
-See also string
-.BR LetAT .
+Reference;
+put contents of string
+.B LetRN
+and
+.I value
+after the confidental notation
+(if any)
+and the date,
+aligned with the latter.
 T}
 SA@T{
-Salutation.
-Prints \[rq]To Whom It May Concern:\[rq] or the argument if it was
-present.
-.
-The salutation is printed two lines below the inside address.
-See also string
-.BR LetSA .
+Salutation;
+put
+.I value,
+or contents of string
+.BR LetSA ,
+left-aligned after the inside address
+and the confidental notation
+(if any).
 T}
 SJ@T{
-Subject line.
-Prints the argument as subject prefixed with \[lq]SUBJECT:\[rq]
-two lines below the inside address,
-except in letter type \[lq]SP\[rq],
-where the subject is printed in all-capital without any prefix.
-See also string
-.BR LetSJ .
+Subject;
+put contents of string
+.B LetSJ
+and
+.I value
+left-aligned after the inside address
+and the attention and salutation notations
+(if any).
+.
+In letter type \[lq]SP\[rq],
+.B LetSJ
+is ignored and
+.I value
+is set in full capitals.
 T}
 .TE
-.RE
 .
 .
+.br
+.ne 5v
 .TP
-.BI LT\  \fR[\fIarg\/\fR]\fI
-Format a letter in one of four different styles depending
-on the argument.
+.BR LT \~[\c
+.IR style ]
+Format a letter in the designated
+.I style,
+defaulting to
+.B BL
+(see below).
 .
-Also see section \[lq]Internals\[rq] below.
+A letter begins with the writer's address
+.RB ( WA / WE ),
+followed by the date
+.RB ( ND ),
+the inside address
+.RB ( IA / IE ),
+the body of the letter
+.RB ( P
+and other general-purpose
+.I mm
+macros),
+the formal closing
+.RB ( FC ),
+the signature
+.RB ( SG ),
+and notations
+.RB ( NS / NE ).
 .
-.RS
+Any of these may be omitted.
+.
+Letter options specified with
+.B LO
+add further annotations,
+which are extensible;
+see section \[lq]Internals\[rq] below.
+.
+.
+.br
+.ne 6v
 .IP
 .TS
 tab(@);
-lb lb
-l lx.
-Arg@Style
+Lf(BI) Lb
+Lb Lx.
+style@Description
 BL@T{
-Blocked.
-Date line, return address, writer's address and closing
-begins at the center of the line.
+Blocked:
+the writer's address,
+date,
+formal closing,
+and signature are indented to the center of the line.
 .
-All other lines begin at the left margin.
+Everything else is left-aligned.
 T}
 SB@T{
-Semi-blocked.
-Same as blocked,
-except that the first line in every paragraph is indented five spaces.
+Semi-blocked:
+as
+.BR BL ,
+but the first line of each paragraph is indented by
+.BR 5n .
+.\" XXX: 5m or 5n?
 T}
 FB@T{
-Full-blocked.
-All lines begin at the left margin.
+Fully blocked:
+everything begins at the left margin.
 T}
 SP@T{
-Simplified.
-As full-blocked,
-but the salutation is replaced by a fully-capitalized subject,
-any formal closing is omitted,
-and the author's signature is presented on a single line in full
-capitals.
+Simplified:
+as
+.BR FB ,
+but a formal closing is omitted,
+and the signature is set in full capitals.
 T}
 .TE
-.RE
 .
 .
 .TP
@@ -2604,9 +2777,10 @@ Begin alternative multi-column mode.
 All column widths must be specified,
 as must the amount of space between each column pair.
 .
-The default unit for the width and space arguments is \[lq]n\[rq].
+The arguments' default scaling unit is
+.BR n .
 .
-.B .MULB
+.B MULB
 uses a diversion and operates in a separate environment.
 .
 .
@@ -2633,14 +2807,15 @@ Contrast with
 .
 .
 .TP
-.BI ND\  new-date
-New date.
+.BR ND \~[\c
+.IR arg ]
+Set the document's date.
 .
-Overrides the current date.
-.
-Date is not printed if
-.I new-date
-is an empty string.
+.I mm
+does not interpret
+.IR arg ;
+it can be a revision identifier
+(or empty).
 .
 .
 .TP
@@ -2652,34 +2827,49 @@ filling is enabled.
 .
 .TP
 .BI nP\  \fR[\fPtype\fR]\fP
-Print numbered paragraph with header level two.
+Begin a numbered paragraph at heading level two.
 .
 See
-.BR .P .
+.BR P .
 .
 .
+.br
+.ne 6v
 .TP
-.BI NS\  \fR[\fParg\  \fR[\fP1\fR]]\fP
-Collect notations of the type specified by
-.I arg
+.BR NS \~[\c
+.IR code \~[\c
+.BR 1 ]]
+Declare notations,
+typically for letters or memoranda,
+of the type specified by
+.IR code .
+.
+The text corresponding to
+.I code
+is output,
+and filling is disabled
 until
 .B NE
-is called;
-filling is disabled.
+is called.
+.
+Typically,
+a list of names or attachments lies within
+.BR NS / NE .
+.
+If
+.I code
+is absent or does not match one of the values listed below,
+each line of notations is formatted as
+.RI "\[lq]Copy (" line ") to\[rq]."
 .
 If a second argument,
 conventionally
 .BR 1 ,
 is given,
-then the argument becomes the entire notation and
+.I code
+becomes the entire notation and
 .B NE
 is not necessary.
-.
-If
-.I arg
-does not match one of the predefined types listed below,
-the notations are prefixed with
-.RI "\[lq]Copy (" arg ") to\[rq]."
 .
 In
 .IR "groff mm" ,
@@ -2692,14 +2882,13 @@ and
 below.
 .
 .
-.RS
 .IP
 .TS
 tab(@);
-l l.
-\fBArg@Notation\fP
-\fInone\/\fP@Copy To
-\[dq]\[dq]@Copy To
+Lf(BI) Lb
+Lb L.
+code@Notation
+\f[I]none\f[]@Copy To
 1@Copy To (with att.\&) to
 2@Copy To (without att.\&) to
 3@Att.
@@ -2715,7 +2904,6 @@ l l.
 13@Complete Memorandum to
 14@CC
 .TE
-.RE
 .
 .
 .TP
@@ -2802,8 +2990,7 @@ and is\~1 by default (one blank line).
 .BI PGFORM\  "\fR[\fPlinelength \fR[\fPpagelength \fR[\fPpageoffset\ " \fR[\fP1\fR]]]]\fP
 Set line length, page length, and/or page offset.
 .
-This macro can be used for special formatting,
-like letter heads and other.
+This macro can be used for letterheads and similar.
 .
 It is normally the first macro call in a file,
 though it is not necessary.
@@ -2825,12 +3012,10 @@ line length, page length, and page offset instead.)
 .
 .TP
 .B PGNH
-No header is printed on the next page.
+Suppress header on the next page.
 .
-Used to get rid of the header in letters or other special texts.
-.
-This macro must be used before any text to inhibit the page header
-on the first page.
+This macro must be called before any macros that produce output to
+affect the layout of the first page.
 .
 .
 .TP
@@ -2919,9 +3104,9 @@ are aligned to the respective locations on the line.
 .
 A
 .RB \[lq] % \[rq]
-character appearing within
+character in
 .I arg
-is replaced by the current page number.
+is replaced by the page number.
 .
 If the argument is absent,
 no page header is set.
@@ -2958,14 +3143,6 @@ and
 .B PS
 Picture start; see
 .MR @g@pic @MAN1EXT@ .
-.
-.
-.TP
-.B PX
-Page header hook.
-.
-This macro is called just after the printing of the page header in
-no-space mode.
 .
 .
 .TP
@@ -3049,14 +3226,30 @@ without space between the arguments.
 .
 .
 .TP
-.BI RL\  \fR[\fPtext-indent \fR[\fP1\fR]]\fP
-Reference list start.
+.BR RL \~[\c
+.IR text-indent \~[\c
+.BR 1 ]]
+Begin reference list.
 .
-Begins a list where each item is preceded with an automatically
-incremented number between square brackets.
+Each item is preceded by an automatically incremented number between
+square brackets;
+compare
+.BR AL .
 .
 .I text-indent
 changes the default indentation.
+.
+Use
+.B LI
+to declare list items,
+and
+.B LE
+to end the list.
+.
+A second argument,
+conventionally
+.BR 1 ,
+suppresses the blank line that normally precedes each list item.
 .
 .
 .TP
@@ -3099,40 +3292,59 @@ The string
 contains the reference page caption.
 .
 .
+.br
+.ne 5v
 .TP
-.BI RS\  \fR[\fPstring-name\fR]\fP
+.BR RS \~[\c
+.IR reference-string ]
 Begin an automatically numbered reference definition.
 .
-Put the string
-.B \[rs]*(Rf
-where the reference mark should be and write the reference between
-.BR RS / RF
-at next new line after the reference mark.
-.
-The reference number is stored in register
+By default,
+references are automatically numbered starting at 1;
+the number is available in register
 .BR :R .
 .
-If
-.I string-name
-is given, a string with that name is defined and contains the current
-reference mark.
+Interpolate the string
+.B Rf
+where the reference mark should be and write the reference between
+.BR RS / RF
+on an input line after the reference mark.
 .
-The string can be referenced as
-.BI \[rs]*[ string-name ]
-later in the text.
+If
+.I reference-string
+is specified,
+.I "groff ms"
+also stores the reference mark in a string of that name,
+which can be interpolated as
+.BI \[rs]*[ reference-string ]
+subsequently.
+.
 .
 .TP
-.BI S\  "\fR[\fPsize \fR[\fPspacing\fR]]\fP"
-Set point size and vertical spacing.
+.BR S \~[\c
+.IR type-size \~[ vertical-spacing ]]
+Set type size and vertical spacing.
 .
-If any argument is equal to \[lq]P\[rq],
-the previous value is used.
+Each argument is a
+.I groff
+measurement,
+using an appropriate scaling unit and an optional
+.B +
+or
+.B \-
+prefix to increment or decrement the current value.
 .
-A \[lq]C\[rq] means the current value,
-and \[lq]D\[rq] the default value.
+An argument of
+.B P
+restores the previous value,
+.B C
+indicates the current value,
+and
+.B D
+requests the default.
 .
-If \[lq]+\[rq] or \[lq]\-\[rq] is used before the value,
-the current value is incremented or decremented, respectively.
+An empty or omitted argument is treated as
+.BR P .
 .
 .
 .TP
@@ -3181,7 +3393,7 @@ is defined.
 .
 .I string
 is retrieved with
-.BR .GETST .
+.BR GETST .
 .
 See
 .BR INITR .
@@ -3197,13 +3409,13 @@ first or last author.
 .
 The reference data is the location, department, and initials specified
 with
-.BR .AU .
+.BR AU .
 .
 It is printed at the first author if the second argument is given,
 otherwise at the last.
 .
 No reference data is printed if the author(s) is specified through
-.BR .WA / .WE .
+.BR WA / WE .
 .
 See section \[lq]Internals\[rq] below.
 .
@@ -3228,23 +3440,22 @@ blank except for any headers and footers,
 are printed.
 .
 .
+.br
+.ne 4v \" XXX: 3v should suffice
 .TP
-.BI SM\  "string1 \fR[\fPstring2 \fR[\fPstring3\fR]]\fP"
-Make a string smaller.
+.BI SM\~ text\~\c
+.RI [ post ]
+.TQ
+.BI SM\~ "pre text post"
+Format
+.I text
+at a smaller type size,
+joined with any specified
+.I pre
+and
+.I post
+at normal size.
 .
-If
-.I string2
-is given,
-.I string1
-is made smaller and
-.I string2
-stays at normal size,
-concatenated with
-.IR string1 .
-.
-With three arguments, everything is concatenated, but only
-.I string2
-is made smaller.
 .
 .TP
 .BI SP\  \fR[\fPlines\fR]\fP
@@ -3457,11 +3668,14 @@ Argument \[lq]N\[rq] isn't implemented yet.
 .BR TL \~[\c
 .IR charging-case-number \~[\c
 .IR filing-case-number ]]
-Begin collecting document title.
+Begin document title.
 .
-Text up to the next
+Input is collected into the title until
+.B AF
+or
 .B AU
-call is included in the title.
+is called,
+and output as directed by the cover page.
 .
 .I charging-case-number
 and
@@ -3495,17 +3709,19 @@ Line length is preserved, though.
 See
 .BR EOP .
 .
+.
 .IP
-.B strings available to TP
-.RS
 .TS
 tab(@);
-l l.
-TPh@argument of \fBPH\fP
-TPeh@argument of \fBEH\fP
-TPoh@argument of \fBOH\fP
+Cb S
+Lb L.
+Strings available to TP
+_
+TPh@argument to \fBPH\fP
+TPeh@argument to \fBEH\fP
+TPoh@argument to \fBOH\fP
 .TE
-.RE
+.
 .
 .TP
 .B TS \fR[\fPH\fR]\fP
@@ -3524,14 +3740,6 @@ that the table has a header.
 .
 See
 .BR TH .
-.
-.TP
-.B TX
-.TQ
-.B TY
-See
-.B TC
-for descriptions of these user-definable hooks.
 .
 .
 .TP
@@ -3585,19 +3793,35 @@ End verbatim display.
 .
 .
 .TP
-.BI VL\  "text-indent \fR[\fPmark-indent\ " \fR[\fP1\fR]]\fP
-Variable-item list.
+.BR VL \~[\c
+.IR text-indent \~[ mark-indent \~[\c
+.BR 1 ]]]
+Begin variable-item list.
 .
-It has no fixed mark, it assumes that every
-.B LI
-has a mark instead.
+Each item is expected to supply its own mark.
+.
+If the mark is wider than
+.I mark-indent,
+one space separates it from subsequent text;
+contrast
+.BR BVL .
 .
 .I text-indent
-sets the indent to the text, and
+sets the indentation of the text,
+and
 .I mark-indent
-the distance from the current indentation to the mark.
+the distance from the current list indentation to the mark.
 .
-A third argument prohibits printing of a blank line before each item.
+A third argument suppresses the blank line that normally precedes each
+list item.
+.
+Use
+.B LI
+to declare list items,
+and
+.B LE
+to end the list.
+.
 .
 .TP
 .BI "VM \fR[\fP\-T\fR] [\fP" "top \fR[\fPbottom\fR]]\fP"
@@ -3638,12 +3862,22 @@ to increase user control of page layout.
 .
 .
 .TP
-.BI WA\  "\fR[\fPwriter-name \fR[\fPtitle\fR]]\fP"
-Begin specification of the writer and writer's address.
+.BR WA \~[\c
+.IR sender-name \~[\c
+.IR title ]]
+Specify the writer's address in a letter.
 .
-Several names can be specified with empty
+Input is collected into the writer's address until
+.B WA
+is called,
+and then output.
+.
+You can specify multiple senders with empty
 .BR WA / WE
-pairs, but only one address.
+pairs;
+only the last address is used.
+.
+The arguments give each sender a name and title.
 .
 .
 .TP
@@ -3691,7 +3925,7 @@ T}
 .
 .TP
 .B WE
-End the address specification after
+End the writer's address begun with
 .BR WA .
 .
 .
@@ -3835,14 +4069,6 @@ The default is
 .TP
 .B Index
 \[lq]INDEX\[rq]
-.
-.
-.TP
-.B Indcmd
-Contains the index command.
-.
-Default value is
-.RB \[lq] sort\~\-t\[rs]t \[rq].
 .
 .
 .TP
@@ -4016,6 +4242,23 @@ page \[rs]\[rs]n[Qrfp].\[rq]
 .
 .
 .TP
+.B Rf
+interpolates an automatically numbered reference mark;
+the number is used by the next
+.B RS
+call.
+.
+In
+.I troff
+mode,
+the marker is superscripted;
+in
+.I nroff
+mode,
+it is surrounded by square brackets.
+.
+.
+.TP
 .B Rp
 \[lq]REFERENCES\[rq]
 .
@@ -4039,7 +4282,6 @@ Empty outside of
 Useful in user-defined macros like
 .BR .TP .
 .
-.RS
 .IP
 .TS
 tab(@);
@@ -4053,7 +4295,6 @@ ec@List of equations
 ex@List of exhibits
 ap@Appendix
 .TE
-.RE
 .
 .
 .TP
@@ -4065,13 +4306,13 @@ the trade mark sign.
 .
 .TP
 .B Verbnm
-Argument to
-.B .nm
-in the
-.B .VERBON
+supplies argument(s) to the
+.B nm
+request employed by the
+.B VERBON
 macro.
 .
-Default is\~1.
+The default is\~\[lq]1\[rq].
 .
 .
 .br
@@ -4555,7 +4796,7 @@ output device.
 .B Lt
 .TQ
 .B Lx
-configures the report of lists of equation,
+configure the report of lists of equation,
 figure,
 table,
 and exhibit captions,
@@ -4851,6 +5092,19 @@ T}
 .TE
 .
 .
+.TP
+.B Ref
+is used internally to control
+.MR mmroff 1 's
+two-pass approach to index and reference management;
+see
+.B INITI
+and
+.B RS
+(Boolean-valued;
+.BR 0 ).
+.
+.
 .\" XXX: Why is this not named `Rpej`?
 .TP
 .B Rpe
@@ -4982,7 +5236,7 @@ It is therefore possible to define other letter types,
 either in the territory-specific macro file,
 or as local additions.
 .
-.B .LT
+.B LT
 sets the registers
 .B Pt
 and
@@ -4995,7 +5249,7 @@ The following strings and macros must be defined for a new letter type.
 .TP
 .BI let@init_ type
 This macro is called directly by
-.BR .LT .
+.BR LT .
 .
 It is supposed to initialize registers and other stuff.
 .
@@ -5012,7 +5266,7 @@ otherwise it is called for all pages.
 .TP
 .BI let@sg_ type\~\c
 .IR "name title n is-surname\~" [ SG-arg\~ .\|.\|.]
-.B .SG
+.B SG
 calls this macro only for letters;
 memoranda have their own processing.
 .
@@ -5020,7 +5274,7 @@ memoranda have their own processing.
 and
 .I title
 are specified through
-.BR .WA / .WE .
+.BR WA / WE .
 .
 .IR n \~is
 the index of the
@@ -5031,19 +5285,19 @@ and
 is true for the last name.
 .
 Further
-.B .SG
+.B SG
 arguments are appended to the signature line.
 .
 .
 .TP
 .BI let@fc_ "type closing"
 This macro is called by
-.BR .FC ,
+.BR FC ,
 and has the formal closing as the argument.
 .
 .
 .LP
-.B .LO
+.B LO
 is implemented as a general option-macro.
 .
 It demands that a string named
@@ -5052,7 +5306,7 @@ is defined, where
 .I type
 is the letter type.
 .
-.B .LO
+.B LO
 then assigns the argument to the string
 .BI let*lo- type\fR.\fP
 .

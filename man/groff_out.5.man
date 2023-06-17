@@ -10,7 +10,7 @@ intermediate output format
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 1989-2020 Free Software Foundation, Inc.
+.\" Copyright (C) 1989-2023 Free Software Foundation, Inc.
 .\"
 .\" This file is part of groff, the GNU roff type-setting system.
 .\"
@@ -305,46 +305,39 @@ commands must have all of their arguments on the same line as the
 command, i.e., the arguments may not be split by a line break.
 .
 .P
-Empty lines, i.e., lines containing only space and/or a comment, can
-occur everywhere.
-.
-They are just ignored.
+Lines containing only spaces and/or a comment are treated as empty and
+ignored.
 .
 .
 .\" ====================================================================
 .SS "Argument units"
 .\" ====================================================================
 .
-Some commands take integer arguments that are assumed to represent
-values in a measurement unit, but the letter for the corresponding
-.I scaling indicator
-is not written with the output command arguments;
+Some commands accept integer arguments that represent measurements,
+but the scaling units of the formatter's language are never used.
+.
+Most commands assume a scaling unit
+.RB of\~\[lq] u \[rq]
+(basic units),
+and others
+.RB use\~\[lq] z \[rq]
+(scaled points);
+.
+These are defined by the parameters specified in the device's
+.I DESC
+file;
 see
+.MR groff_font @MAN5EXT@
+and,
+for more on scaling units,
 .MR groff @MAN7EXT@
 and
 .IR "Groff: The GNU Implementation of troff" ,
 the
 .I groff
-Texinfo manual,
-for more on this topic.
+Texinfo manual.
 .
-Most commands assume the scaling
-.RB indicator\~\[lq] u \[rq],
-the basic unit of the device, some
-.RB use\~\[lq] z \[rq],
-the
-.I scaled point unit
-of the device,
-while others,
-such as the color commands,
-expect plain integers.
-.
-Note that these scaling indicators are relative to the chosen device.
-.
-They are defined by the parameters specified in the device's
-.I DESC
-file; see
-.MR groff_font @MAN5EXT@ .
+Color-related commands use dimensionless integers.
 .
 .
 .P
@@ -495,7 +488,7 @@ same line.
 .
 A separating
 .I syntactical space
-is only necessary when two integer arguments would clash or if the
+is necessary only when two integer arguments would clash or if the
 preceding argument ends with a string argument.
 .
 .
@@ -521,55 +514,54 @@ stack as the current device configuration data.
 .
 .
 .TP
-.command C xxx \[la]white-space\[ra]
-Print a glyph (special character) named
-.IR xxx .
+.command C id \[la]white-space\[ra]
+Typeset the glyph of the special character
+.IR id .
 .
-The trailing
-.I syntactical space
-or
-.I line break
-is necessary to allow glyph names of arbitrary length.
+Trailing syntactical space is necessary to allow special character names
+of arbitrary length.
 .
-The glyph is printed at the current print position;
-its size is read from the font description file.
-.
-The print position is not changed.
+The drawing position is not advanced.
+.\" XXX: Why does it matter that we read its size if we don't advance
+.\" the drawing position?
+.\" its size is read from the font description file.
 .
 .
 .TP
 .command c c
-Print glyph with single-letter name\~\c
-.I c
-at the current print position;
-its size is read from the font description file.
+Typeset the glyph of the ordinary character
+.RI character\~ c .
 .
-The print position is not changed.
+The drawing position is not advanced.
+.\" XXX: Why does it matter that we read its size if we don't advance
+.\" the drawing position?
+.\" its size is read from the font description file.
 .
 .
 .TP
 .command f n
-Set font to font number\~\c
-.I n
-(a non-negative integer).
+Select the font mounted at
+.RI position\~ n .
+.
+.IR n\~ cannot
+be negative.
 .
 .
 .TP
 .command H n
-Move right to the absolute vertical position\~\c
-.I n
-(a non-negative integer in basic units\~\c
-.BR u )
-relative to left edge of current page.
+Horizontally move the drawing position to
+.IR n\~ basic
+units from the left edge of the page.
+.
+.IR n\~ cannot
+be negative.
 .
 .
 .TP
 .command h n
-Move
+Move the drawing position right
 .I n
-(a non-negative integer) basic units\~\c
-.B u
-horizontally to the right.
+basic units.
 .
 AT&T
 .I troff \" AT&T
@@ -584,123 +576,129 @@ output driver library handles them.
 .
 .
 .TP
-.command m "color-scheme \f[R][\f[]component\f[R]] .\|.\|."
-Set the color for text (glyphs), line drawing, and the outline of
-graphic objects using different color schemes; the analogous command
-for the filling color of graphic objects is
-.BR DF .
+.command m "scheme \f[R][\f[]component\f[R] .\|.\|.]"
+Select the stroke color using the
+.IR component s
+in the color space
+.IR scheme .
 .
-The color components are specified as integer arguments between 0 and
-\n[@maxcolor].
+Each
+.I component
+is an integer between 0 and \n[@maxcolor].
 .
-The number of color components and their meaning vary for the
-different color schemes.
+The quantity of components and their meanings vary with each
+.IR scheme .
 .
-These commands are generated by the
+This command is a
 .I groff
-escape sequence
-.BR \*[@backslash]m .
-.
-They are
-.I groff
-extensions.
+extension.
 .
 .
 .RS
-.
 .TP
 .command mc "cyan magenta yellow"
-Set color using the CMY color scheme, having the 3\~color components
-cyan, magenta, and yellow.
+Use the CMY color scheme with components
+cyan,
+magenta,
+and yellow.
 .
 .
 .TP
 .command md
-Set color to the default color value
-(black in most cases).
-.
-No component arguments.
+Use the default color
+(no components;
+black in most cases).
 .
 .
 .TP
-.command mg "gray"
-Set color to the shade of gray given by the argument, an integer
+.command mg gray
+Use a grayscale color scheme with a component ranging
 between 0 (black) and \n[@maxcolor] (white).
 .
 .
 .TP
 .command mk "cyan magenta yellow black"
-Set color using the CMYK color scheme, having the 4\~color components
-cyan, magenta, yellow, and black.
+Use the CMYK color scheme with components
+cyan,
+magenta,
+yellow,
+and black.
+.
 .
 .TP
 .command mr "red green blue"
-Set color using the RGB color scheme, having the 3\~color components
-red, green, and blue.
-.
+Use the RGB color scheme with components
+red,
+green,
+and blue.
 .RE
 .
 .
 .TP
 .command N n
-Print glyph with index\~\c
+Typeset the glyph with
+.RI index\~ n
+in the current font.
+.
+.IR n\~ is
+normally a non-negative integer.
+.
+The drawing position is not advanced.
+.
+The
+.B html
+and
+.B xhtml
+devices use this command with
+.RI negative\~ n
+to produce unbreakable space;
+the absolute value of
 .I n
-(an integer, normally non-negative) of the current font.
-.
-The print position is not changed.
-.
-If
-.B \-T\~html
-or
-.B \-T\~xhtml
-is used, negative values are emitted also to indicate an unbreakable
-space with given width.
-.
-For example,
-.B N\~\-193
-represents an unbreakable space which has a width of 193\|u.
-.
+is taken and interpreted in basic units.
 .
 .
 .TP
-.command n b\ a
-Inform the device about a line break, but no positioning is done by
-this command.
+.command n b\~a
+Indicate a break.
 .
-In
-.I classical
-.IR troff ,
-the integer arguments
+No action is performed;
+the command is present to make the output more easily parsed.
+.
+The integers
 .I b
-and\~\c
-.I a
-informed about the space before and after the current line to
-make the
-.I intermediate output
-more human readable without performing any action.
+.RI and\~ a
+describe the vertical space amounts before and after the break,
+respectively.
 .
-In
-.IR groff ,
-they are just ignored, but they must be provided for compatibility
-reasons.
+GNU
+.I troff \" GNU
+issues this command but
+.IR groff 's
+output driver library ignores it.
+.
+See
+.B v
+and
+.BR V .
 .
 .
 .TP
 .command p n
-Begin a new page in the outprint.
+Begin a new page,
+setting its number
+.RI to\~ n .
 .
-The page number is set to\~\c
-.IR n .
+Each page is independent,
+even from those using the same number.
 .
-This page is completely independent of pages formerly processed even
-if those have the same page number.
+The vertical drawing position is set to\~0.
 .
-The vertical position on the outprint is automatically set to\~0.
-.
-All positioning, writing, and drawing is always done relative to a
-page, so a
+All positioning,
+writing,
+and drawing commands are interpreted in the context of a page,
+so a
 .BR p \~command
-must be issued before any of these commands.
+must precede them.
 .
 .
 .TP
@@ -721,7 +719,7 @@ see section \[lq]Compatibility\[rq] below.
 .
 .
 .TP
-.command t xyz\f[R]\|.\|.\|.\& \[la]white-space\[ra]
+.command t xyz\f[R]\|.\|.\|.\& \f[R]\[la]white-space\[ra]
 .TQ
 .command t "xyz\f[R]\|.\|.\|.\&\f[] dummy-arg" \[la]white-space\[ra]
 Typeset a word
@@ -763,7 +761,7 @@ see
 .
 .
 .TP
-.command u "n xyz\f[R]\|.\|.\|." \[la]white-space\[ra]
+.command u xyz\f[R]\|.\|.\|.\& \f[R]\[la]white-space\[ra]
 Typeset word
 .I xyz
 with track kerning.
@@ -791,22 +789,19 @@ see
 .
 .TP
 .command V n
-Move down to the absolute vertical position\~\c
-.I n
-(a non-negative integer in basic units\~\c
-.BR u )
-relative to upper edge of current page.
+Vertically move the drawing position to
+.IR n\~ basic
+units from the top edge of the page.
+.
+.IR n\~ cannot
+be negative.
 .
 .
 .TP
 .command v n
-Move
+Move the drawing position down
 .I n
-basic units\~\c
-.B u
-down
-.RI ( n
-is a non-negative integer).
+basic units.
 .
 AT&T
 .I troff \" AT&T
@@ -822,12 +817,25 @@ output driver library handles them.
 .
 .TP
 .command w
-Describe an adjustable space.
+Indicate an inter-word space.
 .
-This performs no action;
-it is present for documentary purposes.
+No action is performed;
+the command is present to make the output more easily parsed.
 .
-The spacing itself must be performed explicitly by a move command.
+Only adjustable,
+breakable inter-word spaces are thus described;
+those resulting from horizontal motion escape sequences are not.
+.
+GNU
+.I troff \" GNU
+issues this command but
+.IR groff 's
+output driver library ignores it.
+.
+See
+.B h
+and
+.BR H .
 .
 .
 .\" ====================================================================
@@ -1811,6 +1819,8 @@ describes the output device
 .IR name .
 .
 .
+.br
+.ne 4v
 .\" ====================================================================
 .SH Authors
 .\" ====================================================================

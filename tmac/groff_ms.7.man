@@ -834,6 +834,9 @@ Headings are available with and without automatic numbering.
 Text on input lines following the macro call becomes the heading's
 title.
 .
+Call a paragraphing macro to end the heading text and start the
+section's content.
+.
 .
 .TP
 .BR .NH \~[\c
@@ -850,7 +853,7 @@ reset to zero when a more significant depth is increased.
 .RB \[lq] 1 \[rq]\~is
 the most significant or coarsest division of the document.
 .
-Only nonzero values are output.
+Only non-zero values are output.
 .
 If
 .I depth
@@ -1439,9 +1442,13 @@ End any display.
 .P
 The distance stored in
 .B \[rs]n[DD]
-is inserted before and after each pair of display macros,
-replacing any adjacent inter-paragraph distance;
+is inserted before and after each pair of display macros;
 this is a Berkeley extension.
+.
+In
+.IR "groff ms" ,
+this distance replaces any adjacent inter-paragraph distance
+or subsequent spacing prior to a section heading.
 .
 The
 .B DI
@@ -2290,8 +2297,8 @@ they cannot be used with AT&T
 .IR troff .
 .
 .I groff ms
-supports several features described above as Berkeley and Tenth Edition
-Research Unix extensions,
+supports features described above as Berkeley and Tenth Edition Research
+Unix extensions,
 and adds several of its own.
 .
 .
@@ -2323,7 +2330,7 @@ Bell Laboratories,
 The error-handling policy of
 .I groff ms
 is to detect and report errors,
-rather than silently to ignore them.
+rather than to ignore them silently.
 .
 .
 .IP \[bu]
@@ -2346,8 +2353,9 @@ it aborts processing with a diagnostic message.
 .
 .
 .IP \[bu]
-Multiple line spacing is not supported
-(use a larger vertical spacing instead).
+Multiple line spacing is not supported.
+.
+Use a larger vertical spacing instead.
 .
 .
 .IP \[bu]
@@ -2728,8 +2736,10 @@ macros contain only uppercase letters and digits.
 .
 .
 .LP
-Internally the macros are divided into modules;
-naming conventions are as follows:
+Internally,
+the macros are divided into modules.
+.
+Conventions for identifier names are as follows.
 .
 .IP \[bu] 3n
 Names used only within one module are of the form

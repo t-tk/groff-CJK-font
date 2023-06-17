@@ -10,6 +10,19 @@ system and build groff using the instructions in 'INSTALL.repo'.
 Familiarize yourself with the structure of the source tree by studying
 its 'MANIFEST' file at the top level.
 
+Implementation languages
+------------------------
+
+Beyond what is said under "Dependencies" in 'INSTALL.extra',
+contributors should note that due to the age of the code base, much of
+the C++ dialect employed by groff components, while standard, is older
+than C++98--closer to Annotated Reference Manual C++ (Ellis, Stroustrup;
+Addison-Wesley, 1990).  groff implements its own string class and the
+Standard Template Library is little used.  A modest effort is underway
+to update the code to more idiomatic C++98.  Where a C++11 feature
+promises to be advantageous, it may be annotated in a code comment.
+
+
 Automake
 --------
 
@@ -85,11 +98,8 @@ Here are some portability notes on writing automated tests.
 * The GNU coreutils "seq" command is handy but not standardized by
   POSIX.  Replace it with a while loop.
 
-    seq 53
-    n=1; while [ $n -le 53 ]; do echo $n; n=$(( n + 1 )); done
-
-  "unset" is supported by POSIX-conformant shell; use it to remove
-  temporary shell variables after use.
+    # emulate "seq 53"
+    n=1; while [ $n -le 53 ]; do echo $n; n=$(( n + 1 )); done; unset n
 
 * The "od" command on macOS can put extra space characters (i.e., spaces
   that don't correspond to the input) at the ends of lines when using
@@ -158,3 +168,11 @@ Here are some portability notes on writing automated tests.
     N;/Foo[. ][. ]*1/p;
     };
     }
+
+
+##### Editor settings
+Local Variables:
+fill-column: 72
+mode: text
+End:
+vim: set autoindent textwidth=72:
