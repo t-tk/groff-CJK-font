@@ -722,7 +722,7 @@ see section \[lq]Compatibility\[rq] below.
 .command t xyz\f[R]\|.\|.\|.\& \f[R]\[la]white-space\[ra]
 .TQ
 .command t "xyz\f[R]\|.\|.\|.\&\f[] dummy-arg" \[la]white-space\[ra]
-Typeset a word
+Typeset word
 .IR xyz ;
 that is,
 set a sequence of ordinary glyphs named
@@ -730,7 +730,7 @@ set a sequence of ordinary glyphs named
 .IR y ,
 .IR z ,
 \&.\|.\|.\|,
-terminated by a space character or a line break;
+terminated by a space or newline;
 an optional second integer argument is ignored
 (this allows the formatter to generate an even number of arguments).
 .\" XXX: Why?
@@ -742,10 +742,9 @@ A glyph's width is read from its metrics in the font description file,
 scaled to the current type size,
 and rounded to a multiple of the horizontal motion quantum.
 .
-Only ordinary characters can be set using this command;
-use the
+Use the
 .B C
-command to emplace special characters.
+command to emplace glyphs of special characters.
 .
 The
 .BR t \~command
@@ -761,7 +760,9 @@ see
 .
 .
 .TP
-.command u xyz\f[R]\|.\|.\|.\& \f[R]\[la]white-space\[ra]
+.command u "n xyz"\f[R]\|.\|.\|.\& \f[R]\[la]white-space\[ra]
+.TQ
+.command u "xyz\f[R]\|.\|.\|.\&\f[] dummy-arg" \[la]white-space\[ra]
 Typeset word
 .I xyz
 with track kerning.
@@ -771,8 +772,7 @@ As
 but after placing each glyph,
 the drawing position is further advanced horizontally
 .RI by\~ n
-basic units
-.RB ( u ).
+basic units.
 .
 The
 .BR u \~command
@@ -824,7 +824,9 @@ the command is present to make the output more easily parsed.
 .
 Only adjustable,
 breakable inter-word spaces are thus described;
-those resulting from horizontal motion escape sequences are not.
+those resulting from
+.B \[rs]\[ti]
+or horizontal motion escape sequences are not.
 .
 GNU
 .I troff \" GNU

@@ -627,10 +627,10 @@ adjustment of inter-word space size to justify text, and of
 inter-sentence space size to suit local style conventions
 
 @item
-automatic determination of hyphenation break points
+automatic and manual determination of hyphenation break points
 
 @item
-pagination control
+pagination
 
 @item
 selection of any font available to the output device
@@ -1635,6 +1635,7 @@ required leading dashes @samp{-}
 @c No GNU roff postprocessor uses long options for anything except
 @c --help or --version.
 @c or @samp{--}
+@c XXX: grolbp does.
 because @command{groff} passes the arguments as-is to the postprocessor;
 this permits arbitrary arguments to be transmitted.  For example, to
 pass a title to the @command{gxditview} postprocessor,
@@ -1655,9 +1656,6 @@ groff -X -Z mydoc.t | gxditview -title 'trial run' -
 are equivalent.
 @c END Keep parallel with groff(1), section "Examples".
 
-@codequotebacktick off
-@codequoteundirected off
-
 
 
 @c =====================================================================
@@ -1671,13 +1669,13 @@ are equivalent.
 @cindex user's macro tutorial
 
 Most users of the @code{roff} language employ a macro package to format
-their documents.  Successful macro packages tend to ease the composition
+their documents.  Successful macro packages ease the composition
 process; their users need not have mastered the full formatting
-language, nor even some of its major features like diversions, traps,
-and environments.  A familiarity with some basic concepts and mechanisms
-common to macro packages (like ``displays'') remains helpful; this
-chapter aims to bring you to this level.  If you prefer a meticulous and
-comprehensive presentation, try @ref{GNU troff Reference} instead.
+language, nor understand features like diversions, traps, and
+environments.  This chapter aims to familiarize you with basic concepts
+and mechanisms common to many macro packages (like ``displays'').  If
+you prefer a meticulous and comprehensive presentation, try @ref{GNU
+troff Reference} instead.
 
 @menu
 * Basics::
@@ -1689,24 +1687,24 @@ comprehensive presentation, try @ref{GNU troff Reference} instead.
 
 @node Basics, Common Features, Tutorial for Macro Users, Tutorial for Macro Users
 @section Basics
-@cindex basics of macros
-@cindex macro basics
+@cindex basics of macro package usage
+@cindex macro package usage, basics of
 
-This section covers some of the basic concepts necessary to understand
-how to use a macro package.@footnote{This section is derived from
-@cite{Writing Papers with nroff using -me} by Eric@tie{}P.@: Allman.}
-References are made throughout to more detailed information, if desired.
+Let us first survey some basic concepts necessary to use a macro package
+fruitfully.@footnote{The remainder of this chapter is based on
+@cite{Writing Papers with nroff using -me} by Eric@tie{}P.@: Allman,
+which is distributed with @code{groff} as @file{meintro.me}.}
+References are made throughout to more detailed information.
 
 GNU @code{troff} reads an input file prepared by the user and outputs a
 formatted document suitable for publication or framing.  The input
 consists of text, or words to be printed, and embedded commands
-(@dfn{requests} and @dfn{escape sequences}), which tell GNU @code{troff}
-how to format the output.  For more detail on this, see @ref{Formatter
-Instructions}.
+(@slanted{requests} and @slanted{escape sequences}), which tell GNU
+@code{troff} how to format the output.  @xref{Formatter Instructions}.
 
-The word @dfn{argument} is used in this chapter to mean a word or number
-that appears on the same line as a request, and which modifies the
-meaning of that request.  For example, the request
+The word @slanted{argument} is used in this chapter to mean a word or
+number that appears on the same line as a request, and which modifies
+the meaning of that request.  For example, the request
 
 @Example
 .sp
@@ -1722,12 +1720,12 @@ spaces one line, but
 @noindent
 spaces four lines.  The number@tie{}4 is an argument to the @code{sp}
 request, which says to space four lines instead of one.  Arguments are
-separated from the request and from each other by spaces (@emph{no}
+separated from the request and from each other by spaces (@emph{not}
 tabs).  @xref{Invoking Requests}.
 
-The primary function of @code{gtroff} is to collect words from input
-lines, fill output lines with those words, justify the right-hand margin
-by inserting extra spaces in the line, and output the result.  For
+The primary function of GNU @code{troff} is to collect words from input
+lines, fill output lines with those words, adjust the line to the
+right-hand margin by widening spaces, and output the result.  For
 example, the input:
 
 @Example
@@ -1742,34 +1740,33 @@ years ago, etc.
 @noindent
 is read, packed onto output lines, and justified to produce:
 
-@quotation
-Now is the time for all good men to come to the aid of their party.
-Four score and seven years ago, etc.
-@end quotation
+@Example
+  @result{} Now is the time for all good men to come to the aid of
+  @result{} their party.  Four score and seven years ago, etc.
+@endExample
 
-@cindex break
-@cindex line break
 Sometimes a new output line should be started even though the current
-line is not yet full; for example, at the end of a paragraph.  To do
-this it is possible to cause a @dfn{break}, which starts a new output
-line.  Some requests cause a break automatically, as normally do blank
-input lines and input lines beginning with a space.
+line is not yet full---for example, at the end of a paragraph.  To do
+this it is possible to force a @slanted{break}, starting a new output
+line.  Some requests cause a break automatically, as do (normally) blank
+input lines and input lines beginning with a space or tab.
 
-Not all input lines are text to be formatted.  Some input lines are
-requests that describe how to format the text.  Requests always have a
-period (@samp{.}) or an apostrophe (@samp{'}) as the first character of
-the input line.
+Not all input lines are @slanted{text lines}---words to be formatted.
+Some are @slanted{control lines} that tell a macro package (or GNU
+@code{troff} directly) how to format the text.  Control lines start with
+a dot (@samp{.}) or an apostrophe (@samp{'}) as the first character, and
+can be followed by a @slanted{macro call}.
 
-The text formatter also does more complex things, such as automatically
+The formatter also does more complex things, such as automatically
 numbering pages, skipping over page boundaries, putting footnotes in the
 correct place, and so forth.
 
-Here are a few hints for preparing text for input to @code{gtroff}.
+Here are a few hints for preparing text for input to GNU @code{troff}.
 
 @itemize @bullet
 @item
 First, keep the input lines short.  Short input lines are easier to
-edit, and @code{gtroff} packs words onto longer lines anyhow.
+edit, and GNU @code{troff} packs words onto longer lines anyhow.
 
 @item
 In keeping with this, it is helpful to begin a new line after every
@@ -1778,35 +1775,38 @@ or phrases.
 
 @item
 End each sentence with two spaces---or better, start each sentence on a
-new line.  @code{gtroff} recognizes characters that usually end a
+new line.  GNU @code{troff} recognizes characters that usually end a
 sentence, and inserts inter-sentence space accordingly.
 
 @item
-Do not hyphenate words at the end of lines---@code{gtroff} is smart
+Do not hyphenate words at the end of lines---GNU @code{troff} is smart
 enough to hyphenate words as needed, but is not smart enough to take
 hyphens out and join a word back together.  Also, words such as
 ``mother-in-law'' should not be broken over a line, since then a space
 can occur where not wanted, such as ``@w{mother- in}-law''.
 @end itemize
 
-@cindex double-spacing (@code{ls})
-@cindex spacing
-@code{gtroff} double-spaces output text automatically if you use the
-request @w{@samp{.ls 2}}.  Reactivate single-spaced mode by typing
-@w{@samp{.ls 1}}.@footnote{If you need finer granularity of the vertical
-space, use the @code{pvs} request (@pxref{Changing the Type Size}).}
+We offer further advice in @ref{Input Conventions}.
+
+@cindex vertical spacing (introduction)
+@cindex spacing, vertical (introduction)
+GNU @code{troff} permits alteration of the distance between lines of
+text.  This is termed @slanted{vertical spacing} and is expressed in the
+same units as the type size---the point.  The default is 10-point type
+on 12-point spacing.  To get @slanted{double-spaced} text you would set
+the vertical spacing to 24 points.  Some, but not all, macro packages
+expose a macro or register to configure the vertical spacing.
 
 A number of requests allow you to change the way the output is arranged
-on the page, sometimes called the @dfn{layout} of the output page.
+on the page, sometimes called the @slanted{layout} of the output page.
+Most macro packages don't supply macros for performing these (at least
+not without performing other actions besides), as they are such basic
+operations.  The macro packages for writing man pages, @file{man} and
+@file{mdoc}, don't encourage explicit use of these requests at all.
 
-@cindex new page (@code{bp})
-The @code{bp} request starts a new page, causing a line break.
-
-@cindex blank line (@code{sp})
-@cindex empty line (@code{sp})
-@cindex line, empty (@code{sp})
+@cindex spacing (introduction)
 The request @w{@samp{.sp @var{N}}} leaves @var{N}@tie{}lines of blank
-space.  @var{N}@tie{}can be omitted (meaning skip a single line) or can
+space.  @var{N}@tie{}can be omitted (skipping a single line) or can
 be of the form @var{N}i (for @var{N}@tie{}inches) or @var{N}c (for
 @var{N}@tie{}centimeters).  For example, the input:
 
@@ -1819,10 +1819,18 @@ My thoughts on the subject
 @noindent
 leaves one and a half inches of space, followed by the line ``My
 thoughts on the subject'', followed by a single blank line (more
-measurement units are available, see @ref{Measurements}).
+measurement units are available; see @ref{Measurements}).
 
-@cindex centering lines (@code{ce})
-@cindex lines, centering (@code{ce})
+If you seek precision in spacing, be advised when using a macro package
+that it might not honor @code{sp} requests as you expect; it can use a
+formatter feature called @slanted{no-space mode} to prevent excess space
+from accumulating.  Macro packages typically offer registers to control
+spacing between paragraphs, before section headings, and around displays
+(discussed below); use these facilities preferentially.
+@xref{Manipulating Spacing}.
+
+@cindex centering lines (introduction)
+@cindex lines, centering (introduction)
 Text lines can be centered by using the @code{ce} request.  The line
 after @code{ce} is centered (horizontally) on the page.  To center more
 than one line, use @w{@samp{.ce @var{N}}} (where @var{N} is the number
@@ -1836,14 +1844,29 @@ lines to center
 @endExample
 
 @noindent
-The @w{@samp{.ce 0}} request tells @code{groff} to center zero more
+The @w{@samp{.ce 0}} request tells GNU @code{troff} to center zero more
 lines, in other words, stop centering.
 
-@cindex line break (@code{br})
-@cindex break (@code{br})
+@cindex right-aligning lines (introduction)
+@cindex lines, right-aligning (introduction)
+@cindex right-justifying lines (introduction)
+@cindex lines, right-justifying (introduction)
+GNU @code{troff} also offers the @code{rj} request for right-aligning
+text.  It works analogously to @code{ce} and is convenient for setting
+epigraphs.
+
+@cindex page break (introduction)
+@cindex break, page (introduction)
+The @code{bp} request starts a new page; this necessarily implies an
+ordinary (line) break.
+
+@cindex break (introduction)
+@cindex line break (introduction)
 All of these requests cause a break; that is, they always start a new
 line.  To start a new line without performing any other action, use
-@code{br}.
+@code{br}.  If you invoke them with the apostrophe @samp{'}, the
+@slanted{no-break control character}, the (initial) break they normally
+perform is suppressed.  @samp{'br} does nothing.
 
 
 @c =====================================================================
@@ -1853,27 +1876,35 @@ line.  To start a new line without performing any other action, use
 @cindex common features
 @cindex features, common
 
-@code{gtroff} provides very low-level operations for formatting a
-document.  There are many common routine operations that are done in
-all documents.  These common operations are written into @dfn{macros}
-and collected into a @dfn{macro package}.
+GNU @code{troff} provides low-level operations for formatting a
+document.  Many routine operations are undertaken in nearly all
+documents that require a series of such primitive operations to be
+performed.  These common tasks are grouped into @slanted{macros}, which
+are then collected into a @slanted{macro package}.
 
-All macro packages provide certain common capabilities that fall into
-the following categories.
+Macro packages come in two varieties:@: ``major'' or ``full-service''
+ones that manage page layout, and ``minor'' or ``auxiliary'' ones that
+do not, instead fulfilling narrow, specific tasks.  Find a list in the
+@cite{groff_tmac@r{(5)}} man page.  Type @samp{man groff_tmac} at the
+command line to view it.
+
+We survey several capabilities of full-service macro package below.
+Each package employs its own macros to exercise them.  For details,
+consult its man page or, for @file{ms}, see @ref{ms}.
 
 @menu
 * Paragraphs::
 * Sections and Chapters::
 * Headers and Footers::
 * Page Layout Adjustment::
-* Displays::
-* Footnotes and Annotations::
+* Displays and Keeps::
+* Footnotes and Endnotes::
 * Table of Contents::
-* Indices::
-* Paper Formats::
-* Multiple Columns::
+* Indexing::
+* Document Formats::
+* Columnation::
 * Font and Size Changes::
-* Predefined Strings::
+* Predefined Text::
 * Preprocessor Support::
 * Configuration and Customization::
 @end menu
@@ -1884,44 +1915,56 @@ the following categories.
 @subsection Paragraphs
 @cindex paragraphs
 
-One of the most common and most used capability is starting a paragraph.
-There are a number of different types of paragraphs, any of which can be
-initiated with macros supplied by the macro package.  Normally,
-paragraphs start with a blank line and the first line indented, like the
-text in this manual.  There are also block style paragraphs, which omit
-the indentation:
+Paragraphs can be separated and indented in various ways.  Some start
+with a blank line and have a first-line indentation, like most of the
+ones in this manual.  Block paragraphs omit the indentation.
 
 @Example
-Some   men  look   at  constitutions   with  sanctimonious
-reverence, and deem them like the ark of the covenant, too
-sacred to be touched.
+  @result{} Some  men  look  at constitutions with sanctimonious
+  @result{} reverence,  and  deem  them  like  the  ark  of  the
+  @result{} covenant, too sacred to be touched.
+@endExample
+
+@cindex tags, paragraph
+@cindex tagged paragraphs
+@cindex lists
+@noindent
+We also frequently encounter @slanted{tagged} paragraphs, which begin
+with a tag or label at the left margin and indent the remaining text.
+
+@Example
+  @result{} one  This  is the first paragraph.  Notice how the
+  @result{}      first line of the resulting  paragraph  lines
+  @result{}      up with the other lines in the paragraph.
 @endExample
 
 @noindent
-And there are also indented paragraphs, which begin with a tag or label
-at the margin and the remaining text indented.
+If the tag is too wide for the indentation, the line is broken.
 
 @Example
-one   This is  the first paragraph.  Notice  how the first
-      line of  the resulting  paragraph lines up  with the
-      other lines in the paragraph.
+  @result{} longlabel
+  @result{}      The  label does not align with the subsequent
+  @result{}      lines, but they align with each other.
 @endExample
 
+@noindent
+A variation of the tagged paragraph is the itemized or enumerated
+paragraph, which might use punctuation or a digit for a tag,
+respectively.  These are frequently used to construct lists.
+
 @Example
-longlabel
-      This  paragraph   had  a  long   label.   The  first
-      character of text on the first line does not line up
-      with  the  text  on  second  and  subsequent  lines,
-      although they line up with each other.
+  @result{} o    This  list  item  starts with a bullet.  When
+  @result{}      producing output for a device using the ASCII
+  @result{}      character set, an 'o' is formatted instead.
 @endExample
 
-A variation of this is a bulleted list.
+@noindent
+Often, use of the same macro without a tag continues such a discussion.
 
 @Example
-.     Bulleted lists start with a bullet.   It is possible
-      to use other glyphs instead of the bullet.  In nroff
-      mode using the ASCII character set for output, a dot
-      is used instead of a real bullet.
+  @result{} -xyz  This option is recognized but ignored.
+  @result{}
+  @result{}       It had a security hole that we don't discuss.
 @endExample
 
 @c ---------------------------------------------------------------------
@@ -1929,179 +1972,180 @@ A variation of this is a bulleted list.
 @node Sections and Chapters, Headers and Footers, Paragraphs, Common Features
 @subsection Sections and Chapters
 
-Most macro packages supply some form of section headers.  The simplest
-kind is simply the heading on a line by itself in bold type.  Others
-supply automatically numbered section heading or different heading
-styles at different levels.  Some, more sophisticated, macro packages
-supply macros for starting chapters and appendices.
+The simplest kind of section heading is unnumbered, set in a bold or
+italic style, and occupies a line by itself.  Others possess
+automatically numbered multi-level headings and/or different typeface
+styles or sizes at different levels.  More sophisticated macro packages
+supply macros for designating chapters and appendices.
 
 @c ---------------------------------------------------------------------
 
 @node Headers and Footers, Page Layout Adjustment, Sections and Chapters, Common Features
 @subsection Headers and Footers
 
-Every macro package gives some way to manipulate the @dfn{headers} and
-@dfn{footers} (also called @dfn{titles}) on each page.  This is text put
-at the top and bottom of each page, respectively, which contain data
-like the current page number, the current chapter title, and so on.  Its
-appearance is not affected by the running text.  Some packages allow for
-different ones on the even and odd pages (for material printed in a book
-form).
+@slanted{Headers} and @slanted{footers} occupy the top and bottom of
+each page, respectively, and contain data like the page number and the
+article or chapter title.  Their appearance is not affected by the
+running text.  Some packages allow for different titles on even- and
+odd-numbered pages (for printed, bound material).
 
-The titles are called @dfn{three-part titles}, that is, there is a
-left-justified part, a centered part, and a right-justified part.  An
-automatically generated page number may be put in any of these fields
-with the @samp{%} character (@pxref{Page Layout}).
+Headers and footers are together called @slanted{titles}, and comprise
+three parts:@: left-aligned, centered, and right-aligned.  A @samp{%}
+character appearing anywhere in a title is automatically replaced by the
+page number.  @xref{Page Layout}.
 
 @c ---------------------------------------------------------------------
 
-@node Page Layout Adjustment, Displays, Headers and Footers, Common Features
+@node Page Layout Adjustment, Displays and Keeps, Headers and Footers, Common Features
 @subsection Page Layout
 
-Most macro packages let the user specify top and bottom margins and
-other details about the appearance of the printed pages.
+Most macro packages let the user specify the size of the page margins.
+The top and bottom margins are typically handled differently than the
+left and right margins; the latter two are derived from the
+@slanted{page offset}, @slanted{indentation}, and @slanted{line length}.
+@xref{Line Layout}.  Commonly, packages support registers to tune these
+values.
 
 @c ---------------------------------------------------------------------
 
-@node Displays, Footnotes and Annotations, Page Layout Adjustment, Common Features
-@subsection Displays
+@node Displays and Keeps, Footnotes and Endnotes, Page Layout Adjustment, Common Features
+@subsection Displays and Keeps
 @cindex displays
 
-@dfn{Displays} are sections of text to be set off from the body of the
-paper.  Major quotes, tables, and figures are types of displays, as are
-all the examples used in this document.
+@slanted{Displays} are sections of text set off from the surrounding
+material (typically paragraphs), often differing in indentation, and/or
+spacing.  Tables, block quotations, and figures are displayed.
+Equations and code examples, when not much shorter than an output line,
+often are.  Lists may or may not be.  Packages for setting man pages
+support example displays but not keeps.
+@c XXX: man, mdoc keep support planned
 
-@cindex quotes, major
-@cindex major quotes
-@dfn{Major quotes} are quotes that are several lines long, and hence
-are set in from the rest of the text without quote marks around them.
-
-@cindex list
-A @dfn{list} is an indented, single-spaced, unfilled display.  Lists
-should be used when the material to be printed should not be filled and
-justified like normal text, such as columns of figures or the examples
-used in this paper.
-
-@cindex keep
-A @dfn{keep} is a display of lines that are kept on a single page if
-possible.  An example for a keep might be a diagram.  Keeps differ from
-lists in that lists may be broken over a page boundary whereas keeps are
-not.
+@cindex keeps (introduction)
+A @slanted{keep} is a group of output lines, often a display, that is
+formatted on a single page if possible; it causes a page break to happen
+early so as to not interrupt the kept material.
 
 @cindex keep, floating
 @cindex floating keep
-@dfn{Floating keeps} move relative to the text.  Hence, they are good
-for things that are referred to by name, such as ``See figure@tie{}3''.
-A floating keep appears at the bottom of the current page if it fits;
-otherwise, it appears at the top of the next page.  Meanwhile, the
-surrounding text `flows' around the keep, thus leaving no blank areas.
+@slanted{Floating keeps} can move, or ``float'', relative to the text
+around them in the input.  They are useful for displays that are
+captioned and referred to by name, as with ``See figure@tie{}3''.
+Depending on the package, a floating keep appears at the bottom of the
+current page if it fits, and at the top of the next otherwise.
+Alternatively, floating keeps might be deferred to the end of a section.
+Using a floating keep can avoid the large vertical spaces that may
+precede a tall keep of the ordinary sort when it won't fit on the page.
 
 @c ---------------------------------------------------------------------
 
-@node Footnotes and Annotations, Table of Contents, Displays, Common Features
-@subsection Footnotes and Annotations
+@node Footnotes and Endnotes, Table of Contents, Displays and Keeps, Common Features
+@subsection Footnotes and Endnotes
 @cindex footnotes
-@cindex annotations
+@cindex endnotes
 
-There are a number of requests to save text for later printing.
-
-@dfn{Footnotes} are printed at the bottom of the current page.
-
-@cindex delayed text
-@dfn{Delayed text} is very similar to a footnote except that it is
-printed when called for explicitly.  This allows a list of references to
-appear (for example) at the end of each chapter, as is the convention in
-some disciplines.
-
-Most macro packages that supply this functionality also supply a means
-of automatically numbering either type of annotation.
+@slanted{Footnotes} and @slanted{endnotes} are forms of delayed
+formatting.  They are recorded at their points of relevance in
+the input, but not formatted there.  Instead, a @slanted{mark} cues the
+reader to check the ``foot'', or bottom, of the current page, or in the
+case of endnotes, an annotation list later in the document.  Macro
+packages that support these features also supply a means of
+automatically numbering either type of annotation.
 
 @c ---------------------------------------------------------------------
 
-@node Table of Contents, Indices, Footnotes and Annotations, Common Features
+@node Table of Contents, Indexing, Footnotes and Endnotes, Common Features
 @subsection Table of Contents
 @cindex table of contents
 @cindex contents, table of
 
-@dfn{Tables of contents} are a type of delayed text having a tag
-(usually the page number) attached to each entry after a row of dots.
-The table accumulates throughout the paper until printed, usually after
-the paper has ended.  Many macro packages provide the ability to have
-several tables of contents (e.g., a standard table of contents, a list
-of tables, etc).
+A package may handle a @slanted{table of contents} by directing section
+heading macros to save section heading text and the page number where it
+occurs for use in a later @slanted{entry} for a table of contents.  It
+writes the collected entries at the end of the document, once all are
+known, upon request.  A row of dots (a @slanted{leader}) bridges the
+text on the left with its location on the right.  Other collections
+might work in this manner, providing lists of figures or tables.
+
+A table of contents is often found at the end of a GNU @code{troff}
+document because the formatter processes the document in a single pass.
+The @command{gropdf} output driver supports a PDF feature that relocates
+pages at the time the document is rendered; see the @cite{gropdf@r{(1)}}
+man page.  Type @samp{man gropdf} at the command line to view it.
 
 @c ---------------------------------------------------------------------
 
-@node Indices, Paper Formats, Table of Contents, Common Features
-@subsection Indices
+@node Indexing, Document Formats, Table of Contents, Common Features
+@subsection Indexing
 @cindex index, in macro package
 
-While some macro packages use the term @dfn{index}, none actually
-provide that functionality.  The facilities they call indices are
-actually more appropriate for tables of contents.
-
 @pindex makeindex
-To produce a real index in a document, external tools like the
-@code{makeindex} program are necessary.
+An index is similar to a table of contents, in that entry labels and
+locations must be collected, but poses a greater challenge because it
+needs to be sorted before it is output.  Here, processing the document
+in multiple passes is inescapable, and tools like the @code{makeindex}
+program are necessary.
 
 @c ---------------------------------------------------------------------
 
-@node Paper Formats, Multiple Columns, Indices, Common Features
-@subsection Paper Formats
-@cindex paper formats
+@node Document Formats, Columnation, Indexing, Common Features
+@subsection Document Formats
+@cindex document formats
 
-Some macro packages provide stock formats for various kinds of
-documents.  Many of them provide a common format for the title and
-opening pages of a technical paper.  The @file{mm} macros in particular
-provide formats for letters and memoranda.
-
-@c ---------------------------------------------------------------------
-
-@node Multiple Columns, Font and Size Changes, Paper Formats, Common Features
-@subsection Multiple Columns
-
-Some macro packages (but not @file{man}) provide the ability to have two
-or more columns on a page.
+Some macro packages supply stock configurations of certain documents,
+like business letters and memoranda.  These often also have provision
+for a @slanted{cover sheet}, which may be rigid in its format.  With
+these features, it is even more important to use the package's macros in
+preference to the formatter requests presented earlier, where possible.
 
 @c ---------------------------------------------------------------------
 
-@node Font and Size Changes, Predefined Strings, Multiple Columns, Common Features
+@node Columnation, Font and Size Changes, Document Formats, Common Features
+@subsection Columnation
+
+Macro packages apart from @file{man} and @file{mdoc} for man page
+formatting offer a facility for setting multiple columns on the page.
+
+@c ---------------------------------------------------------------------
+
+@node Font and Size Changes, Predefined Text, Columnation, Common Features
 @subsection Font and Size Changes
 
-The built-in font and size functions are not always intuitive, so all
-macro packages provide macros to make these operations simpler.
+The formatter's requests and escape sequences for setting the typeface
+and size are not always intuitive, so all macro packages provide macros
+to make these operations simpler.  They also make it more convenient to
+change typefaces in the middle of a word and can handle italic
+corrections automatically.  @xref{Italic Corrections}.
 
 @c ---------------------------------------------------------------------
 
-@node Predefined Strings, Preprocessor Support, Font and Size Changes, Common Features
-@subsection Predefined Strings
+@node Predefined Text, Preprocessor Support, Font and Size Changes, Common Features
+@subsection Predefined Text
 
-Most macro packages provide various predefined strings for a variety of
-uses; examples are sub- and superscripts, printable dates, quotes and
-various special characters.
+Most macro packages supply predefined strings to set prepared text like
+the date, or to perform operations like super- and subscripting.
 
 @c ---------------------------------------------------------------------
 
-@node Preprocessor Support, Configuration and Customization, Predefined Strings, Common Features
+@node Preprocessor Support, Configuration and Customization, Predefined Text, Common Features
 @subsection Preprocessor Support
 
 All macro packages provide support for various preprocessors and may
-extend their functionality.
-
-For example, all macro packages mark tables (which are processed with
-@code{gtbl}) by placing them between @code{TS} and @code{TE} macros.
-The @file{ms} macro package has an option, @samp{.TS@tie{}H}, that
-prints a caption at the top of a new page (when the table is too long to
-fit on a single page).
+extend their functionality by defining macros to set their contents in
+displays.  Examples include @code{TS} and @code{TE} for @command{gtbl},
+@code{EQ} and @code{EN} for @command{geqn}, and @code{PS} and @code{PE}
+for @command{gpic}.
 
 @c ---------------------------------------------------------------------
 
 @node Configuration and Customization,  , Preprocessor Support, Common Features
 @subsection Configuration and Customization
 
-Some macro packages provide means of customizing many of the details of
-how the package behaves.  This ranges from setting the default type size
-to changing the appearance of section headers.
+Packages provide means of customizing many of the details of how the
+package behaves.  These range from setting the default type size to
+changing the appearance of section headers.
+
+@codequotebacktick off
+@codequoteundirected off
 
 
 
@@ -2648,10 +2692,9 @@ the page number of a division of the text until it has been set and
 output.  Since @file{ms} was designed for the production of hard copy,
 the traditional procedure was to manually relocate the pages containing
 the table of contents between the cover page and the body text.  Today,
-page resequencing can be done in the digital domain with tools like
-@cite{pdfjam@r{(1)}}.  An index works similarly, but because it
-typically needs to be sorted after collection, its preparation requires
-separate processing.
+page resequencing is more often done in the digital domain.  An index
+works similarly, but because it typically needs to be sorted after
+collection, its preparation requires separate processing.
 @end table
 
 @c ---------------------------------------------------------------------
@@ -4309,9 +4352,11 @@ maintaining it.  @file{ms} enables the collection of material to be
 presented in the table of contents as it appears, saving its page number
 along with it, and then emitting the collected contents on demand toward
 the end of the document.  The table of contents can then be resequenced
-to its desired location as part of post-processing---with a PDF page
-relocation tool, or by physically rearranging the pages of a printed
-document, depending on the output format and circumstances.
+to its desired location by physically rearranging the pages of a printed
+document, or as part of post-processing---with a @cite{sed@r{(1)}}
+script to reorder the pages in @command{troff}'s output, with
+@cite{pdfjam@r{(1)}}, or with @cite{gropdf@r{(1)}}'s
+@samp{.pdfswitchtopage} feature, for example.
 
 Define an entry to appear in the table of contents by bracketing its
 text between calls to the @code{XS} and @code{XE} macros.  A typical
@@ -8019,6 +8064,15 @@ register.  Using @code{ad} without an argument is the same as @samp{.ad
 lines in the same way it did before adjustment was disabled by
 invocation of the @code{na} request.
 
+@cindex adjustment mode register (@code{.j})
+The adjustment mode and enablement status are encoded in the read-only
+register @code{.j}.  These parameters are associated with the
+environment (@pxref{Environments}).
+
+The value of @code{.j} for any adjustment mode is an implementation
+detail and should not be relied upon as a programmer's interface.  Do
+not write logic to interpret or perform arithmetic on it.
+
 @Example
 .ll 48n
 .de AD
@@ -8052,15 +8106,6 @@ right
     @result{}                      center
     @result{}                                            right
 @endExample
-
-@cindex adjustment mode register (@code{.j})
-The adjustment mode and enablement status are encoded in the read-only
-register @code{.j}.  These parameters are associated with the
-environment (@pxref{Environments}).
-
-The value of @code{.j} for any adjustment mode is an implementation
-detail and should not be relied upon as a programmer's interface.  Do
-not write logic to interpret or perform arithmetic on it.
 @endDefreq
 
 @Defreq {na, }
@@ -8444,8 +8489,8 @@ within a word that are eligible for hyphenation are determined by
 language-specific data and lettercase relationships.  Furthermore,
 hyphenation of a word might be suppressed due to a limit on
 consecutive hyphenated lines (@code{hlm}), a minimum line length
-threshold, certain minimum length (@code{hym}), or because the line can
-instead be adjusted with additional inter-word space (@code{hys}).
+threshold (@code{hym}), or because the line can instead be adjusted with
+additional inter-word space (@code{hys}).
 
 @cindex hyphenation mode register (@code{.hy})
 @DefreqList {hy, [@Var{mode}]}
@@ -9802,7 +9847,7 @@ The formatter permits configuration of the page length and page number.
 Change (increase or decrease) the page length per the numeric expression
 @var{length}.  The default scaling unit is @samp{v}.  A negative
 @var{length} is valid, but an uncommon application:@: it prevents page
-location traps from being sprung,@footnote{@xref{Traps}.}  and each
+location traps from being sprung,@footnote{@xref{Traps}.} and each
 output line is placed on a new page.  If @var{length} is invalid, GNU
 @code{troff} emits a warning in category @samp{number}.  If @var{length}
 is absent or invalid, @samp{11i} is assumed.
@@ -14000,8 +14045,8 @@ figures, except where noted.  GNU @code{troff} draws stroked (outlined)
 objects with the stroke color, and shades filled ones with the fill
 color.  @xref{Colors}.  Coordinates @var{h} and @var{v} are horizontal
 and vertical motions relative to the drawing position or previous point
-in the command.  The default scaling unit for horizontal measurements is
-@samp{m}; for vertical ones, @samp{v}.
+in the command.  The default scaling unit for horizontal measurements
+(and diameters of circles) is @samp{m}; for vertical ones, @samp{v}.
 
 Circles, ellipses, and polygons can be drawn filled or stroked.  These
 are independent properties; if you want a filled, stroked figure, you
@@ -14302,10 +14347,11 @@ It is said that a trap is @dfn{sprung} if its condition is fulfilled.
 @cindex vertical position traps
 @cindex traps, vertical position
 
-@dfn{Vertical position traps} perform an action when GNU @code{troff}
-reaches or passes a certain vertical location on the output page or in a
-diversion.  Their applications include setting page headers and footers,
-body text in multiple columns, and footnotes.
+A @dfn{vertical position trap} calls a macro when the formatter's
+vertical drawing position reaches or passes, in the downward direction,
+a certain location on the output page or in a diversion.  Its
+applications include setting page headers and footers, body text in
+multiple columns, and footnotes.
 
 @DefreqList {vpt, [@Var{flag}]}
 @DefregListEndx {.vpt}
@@ -14323,7 +14369,8 @@ stored in the @code{.vpt} read-only register.
 @cindex break, page, prevented by @code{vpt}
 @cindex page ejection, prevented by @code{vpt}
 @cindex ejection, page, prevented by @code{vpt}
-A page can't be ejected if @code{vpt} is set to zero.
+A page can't be ejected if @code{vpt} is set to zero; see @ref{The
+Implicit Page Trap}.
 @endDefreq
 
 @menu
@@ -14339,9 +14386,9 @@ A page can't be ejected if @code{vpt} is set to zero.
 @cindex page location traps
 @cindex traps, page location
 
-A @dfn{page location trap} is sprung when the vertical drawing position
-reaches or passes, in the downward direction, the place at which it is
-planted.
+A @dfn{page location trap} is a vertical position trap that applies to
+the page; that is, to undiverted output.  Many can be present; manage
+them with the @code{wh} and @code{ch} requests.
 
 @Defreq {wh, dist [@Var{name}]}
 Plant macro @var{name} as page location trap at @var{dist}.  The default
@@ -14613,8 +14660,8 @@ not the expected behaviour.
 @cindex break, page
 @cindex page ejection
 @cindex ejection, page
-If, after starting @code{troff} without loading a macro package, you use
-the @code{ptr} request to dump a list of the active traps to the
+If, after starting GNU @code{troff} without loading a macro package, you
+use the @code{ptr} request to dump a list of the active traps to the
 standard error stream,@footnote{@xref{Debugging}.}  nothing is reported.
 Yet the @code{.t} register will report a steadily decreasing value with
 every output line your document produces, and once the value of
@@ -14640,14 +14687,17 @@ are disabled with GNU @code{troff}'s @code{vpt} request.
 @cindex diversion traps
 @cindex traps, diversion
 
+A diversion is not formatted in the context of a page, so it lacks page
+location traps; instead it can have a @dfn{diversion trap}.  There can
+exist at most one such vertical position trap per diversion.
+
 @Defreq {dt, [@Var{dist} @Var{name}]}
 @cindex @code{.t} register, and diversions
 @cindex setting diversion trap (@code{dt})
 @cindex diversion trap, setting (@code{dt})
 @cindex trap, diversion, setting (@code{dt})
 Set a trap @emph{within} a diversion at location @var{dist}, which is
-interpreted relative to diversion rather than page boundaries.  There
-exists only a single diversion trap per diversion.  If invoked with
+interpreted relative to diversion rather than page boundaries.  If invoked with
 fewer than two arguments, any diversion trap in the current diversion is
 removed.  The register @code{.t} works within diversions.  It is an
 error to invoke @code{dt} in the top-level diversion.
@@ -14670,10 +14720,10 @@ error to invoke @code{dt} in the top-level diversion.
 @cindex input line trap, clearing (@code{it}, @code{itc})
 @cindex trap, input line, clearing (@code{it}, @code{itc})
 Set an input line trap, calling macro @var{name} after processing the
-next @var{n}@tie{}productive input lines (@pxref{Manipulating Filling
-and Adjustment}).  Any existing input line trap in the environment is
-replaced.  Without arguments, @code{it} and @code{itc} clear any
-input line trap that has not yet sprung.
+next @var{n}@tie{}productive input lines (recall @ref{Manipulating
+Filling and Adjustment}).  Any existing input line trap in the
+environment is replaced.  Without arguments, @code{it} and @code{itc}
+clear any input line trap that has not yet sprung.
 
 Consider a macro @samp{.ST @var{s n}} which sets the next
 @var{n}@tie{}input lines in the font style@tie{}@var{s}.
@@ -15435,8 +15485,8 @@ This is \*[xxx].
 @cindex environments
 
 As discussed in @ref{Deferring Output}, environments store most of the
-parameters that control text processing.  A default environment named
-@samp{0} exists when GNU @code{troff} starts up; it is modified by
+parameters that determine the appearance of text.  A default environment
+named @samp{0} exists when GNU @code{troff} starts up; it is modified by
 formatting-related requests and escape sequences.
 
 @cindex stack
@@ -17319,7 +17369,7 @@ the character escape @code{\(rs} or @code{\[rs]}, for ``reverse
 solidus'', from its name in the @acronym{ECMA-6} (@acronym{ISO/IEC} 646)
 standard.@footnote{The @code{rs} special character identifier was not
 defined in @acronym{AT&T} @code{troff}'s font description files, but is
-in those if its lineal descendant, Heirloom Doctools @code{troff}, as of
+in those of its lineal descendant, Heirloom Doctools @code{troff}, as of
 the latter's 060716 release (July 2006).}
 
 To store an escape sequence in a diversion that is interpreted when the
@@ -17684,11 +17734,10 @@ Each glyph is set at the current drawing position, and the position is
 then advanced horizontally by the glyph's width.  A glyph's width is
 read from its metrics in the font description file, scaled to the
 current type size, and rounded to a multiple of the horizontal motion
-quantum.  Only ordinary characters can be set using this command; use
-the @code{C} command to emplace special characters.  The
-@code{t}@tie{}command is a @code{groff} extension and is output only for
-devices whose @file{DESC} file contains the @code{tcommand} directive;
-see @ref{DESC File Format}.
+quantum.  Use the @code{C} command to emplace glyphs of special
+characters.  The @code{t}@tie{}command is a @code{groff} extension and
+is output only for devices whose @file{DESC} file contains the
+@code{tcommand} directive; see @ref{DESC File Format}.
 
 @item u @var{n} @var{xyz}@angles{whitespace}
 Typeset word @var{xyz} with track kerning.  As @code{t}, but after
@@ -17711,9 +17760,9 @@ such values, but @code{groff}'s output driver library handles them.
 Indicate an inter-word space.  No action is performed; the command is
 present to make the output more easily parsed.  Only adjustable,
 breakable inter-word spaces are thus described; those resulting from
-horizontal motion escape sequences are not.  GNU @code{troff} issues
-this command but @code{groff}'s output driver library ignores it.  See
-@code{h} and @code{H} above.
+@code{\~} or horizontal motion escape sequences are not.  GNU
+@code{troff} issues this command but @code{groff}'s output driver
+library ignores it.  See @code{h} and @code{H} above.
 @end table
 
 @node Graphics Commands, Device Control Commands, Simple Commands, Command Reference
