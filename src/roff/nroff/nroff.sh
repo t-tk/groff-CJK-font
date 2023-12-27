@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/sh
 # Emulate nroff with groff.
 #
 # Copyright (C) 1992-2021 Free Software Foundation, Inc.

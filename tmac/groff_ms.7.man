@@ -111,7 +111,7 @@ and behavior of AT&T Unix Version\~7
 .
 Many extensions from 4.2BSD (Berkeley)
 .\" Few changes were made in 4.3, Reno, Tahoe, or 4.4.
-and Tenth Edition Research Unix have been recreated.
+and Research Tenth Edition Unix have been recreated.
 .
 .
 .\" ====================================================================
@@ -291,7 +291,7 @@ lf(CR) lx l  lf(CR).
 Text settings
 Parameter	Definition	Effective	Default
 _
-\[rs]n[PS]	Point size	next paragraph	10p
+\[rs]n[PS]	Point (type) size	next paragraph	10p
 \[rs]n[VS]	Vertical spacing (leading)	next paragraph	12p
 \[rs]n[HY]	Hyphenation mode	next paragraph	6
 \[rs]*[FAM]	Font family	next paragraph	T
@@ -326,7 +326,7 @@ lf(CR) lx l  lf(CR).
 Heading settings
 Parameter	Definition	Effective	Default
 _
-\[rs]n[PSINCR]	Point size increment	next heading	1p
+\[rs]n[PSINCR]	Point (type) size increment	next heading	1p
 \[rs]n[GROWPS]	Size increase depth limit	next heading	0
 \[rs]n[HORPHANS]	# of following lines kept	next heading	1
 \[rs]*[SN\-STYLE]	Numbering style (alias)	next heading	\[rs]*[SN\-DOT]
@@ -354,7 +354,7 @@ Parameter	Definition	Effective	Default
 _
 \[rs]n[FI]	Indentation	next footnote	2n
 \[rs]n[FF]	Format	next footnote	0
-\[rs]n[FPS]	Point size	next footnote	\[rs]n[PS]\-2p
+\[rs]n[FPS]	Point (type) size	next footnote	\[rs]n[PS]\-2p
 \[rs]n[FVS]	Vertical spacing (leading)	next footnote	\[rs]n[FPS]+2p
 \[rs]n[FPD]	Paragraph distance (spacing)	next footnote	\[rs]n[PD]/2
 \[rs]*[FR]	Line length ratio	\f[I]special	11/12
@@ -421,7 +421,7 @@ and
 registers use the larger value if the vertical motion quantum of the
 output device is too coarse for the smaller one;
 usually,
-this is the case only for output to terminals and emulators thereof.
+this is the case only for output to terminals.
 .
 The \[lq]gutter\[rq] affected by
 .B \[rs]n[MINGW]
@@ -490,7 +490,7 @@ If the optional
 .B no\-\:\%repeat\-\:\%info
 argument is given,
 .I ms
-produces a cover page but does not repeat any of its information on
+produces a cover page but does not repeat any of its information
 subsequently
 (but see the
 .B DA
@@ -542,7 +542,7 @@ Call it repeatedly to specify multiple authors.
 .
 .TP
 .B .AI
-Specify the preceding author's institution.
+Specify the preceding author's institutional affiliation.
 .
 An
 .B .AU
@@ -637,11 +637,12 @@ registers set the type size and vertical spacing
 (distance between text baselines),
 respectively.
 .
-The font family and type size are ignored on terminal devices.
+The font family and type size are ignored on terminals.
 .
-Setting these parameters before the first call of a heading,
+Set these parameters before the first call of a heading,
 paragraphing,
-or (non-date) document description macro also applies them to headers,
+or (non-date) document description macro to apply them to
+headers,
 footers,
 and
 (for
@@ -665,7 +666,7 @@ is equivalent to using the
 .B nh
 request.
 .
-This is a Tenth Edition Research Unix extension.
+This is a Research Tenth Edition Unix extension.
 .
 .
 .\" ====================================================================
@@ -718,8 +719,7 @@ to the first output line of the paragraph,
 all output lines,
 or all but the first.
 .
-All paragraphing macro calls cause the insertion of vertical space in
-the amount stored in the
+These calls insert vertical space in the amount stored in the
 .B PD
 register,
 except at page or column breaks,
@@ -892,6 +892,8 @@ resumes using the specified indices as their predecessors.
 This feature is a Berkeley extension.
 .
 .
+.br
+.ne 3v
 .P
 After
 .B .NH
@@ -904,7 +906,10 @@ and
 .B SN\-NO\-DOT
 (with the terminating period omitted).
 .
-These are GNU extensions.
+These,
+and
+.BR SN\-STYLE ,
+are GNU extensions.
 .
 .
 .P
@@ -1013,6 +1018,11 @@ multiplied by the difference of
 and
 .IR depth .
 .
+.B GROWPS
+and
+.B PSINCR
+are GNU extensions.
+.
 .
 .P
 The
@@ -1037,6 +1047,8 @@ or
 .I eqn
 region between the heading and the subsequent paragraph suppresses this
 grouping.
+.
+This is a GNU extension.
 .
 .
 .\" ====================================================================
@@ -1109,7 +1121,7 @@ As
 .BR .B ,
 but use a bold italic or bold oblique style instead of upright bold.
 .
-This is a Tenth Edition Research Unix extension.
+This is a Research Tenth Edition Unix extension.
 .\" possibly 9th, but definitely not Berkeley
 .
 .
@@ -1120,7 +1132,7 @@ As
 .BR .B ,
 but use a constant-width (monospaced) roman typeface instead of bold.
 .
-This is a Tenth Edition Research Unix extension.
+This is a Research Tenth Edition Unix extension.
 .\" possibly 9th, but definitely not Berkeley
 .
 .
@@ -1131,7 +1143,7 @@ Typeset
 .I text
 and draw a box around it.
 .
-On terminal devices,
+On terminals,
 reverse video is used instead.
 .
 If you want
@@ -1155,6 +1167,10 @@ Typeset
 .I text
 with an underline.
 .
+On terminals,
+.I text
+is bracketed with underscores (\[lq]_\[rq]).
+.
 .I post,
 if present,
 is set after
@@ -1171,8 +1187,7 @@ type size,
 paragraphing,
 or heading macro call.
 .
-You can specify this macro multiple times to enlarge the type size as
-needed.
+Call the macro multiple times to enlarge the type size further.
 .
 .
 .TP
@@ -1184,8 +1199,7 @@ type size,
 paragraphing,
 or heading macro call.
 .
-You can specify this macro multiple times to reduce the type size as
-needed.
+Call the macro multiple times to reduce the type size further.
 .
 .
 .TP
@@ -1234,10 +1248,9 @@ respectively.
 .SS "Indented regions"
 .\" ====================================================================
 .
-You may need to indent a region of text while otherwise formatting it
-normally.
+You can indent a region of text while otherwise formatting it normally.
 .
-Indented regions can be nested.
+Such indented regions can be nested.
 .
 .
 .TP
@@ -1273,12 +1286,12 @@ You can alternatively specify a
 .I floating keep:
 if a keep cannot fit on the current page,
 .I ms
-holds its contents and allows text following the keep
+holds it,
+allowing text following the keep
 (in the source document)
 to fill in the remainder of the current page.
 .
-When the page breaks,
-whether by reaching the end or
+When the page breaks by reaching its bottom or by
 .B bp
 request,
 .I ms
@@ -1308,6 +1321,8 @@ request forces a page break if there is not at least the amount of
 vertical space specified in its argument remaining on the page.
 .
 .
+.br
+.ne 5v
 .PP
 A
 .I boxed keep
@@ -1326,27 +1341,27 @@ End boxed keep.
 .
 .P
 Boxed keep macros cause breaks;
-if you need to box a word or phrase within a line,
-see the
-.B BX
-macro in section \[lq]Highlighting\[rq] above.
+to box words within a line,
+recall
+.B .BX
+in section \[lq]Highlighting\[rq] above.
 .
 Box lines are drawn as close as possible to the text they enclose so
 that they are usable within paragraphs.
 .
-If you wish to place one or more paragraphs in a boxed keep,
+When boxing entire paragraphs thus,
 you may improve their appearance by calling
 .B .B1
 after the first paragraphing macro,
-and by adding a small amount of vertical space before calling
-.BR .B2 .
+and invoking the
+.B sp
+request before calling
+.B .B2 .
 .
 .
-.br
-.ne 2v
 .P
 If you want a boxed keep to float,
-you will need to enclose the
+enclose the
 .B .B1
 and
 .B .B2
@@ -1357,6 +1372,8 @@ and
 calls.
 .
 .
+.br
+.ne 2v
 .P
 .I Displays
 turn off filling;
@@ -1439,14 +1456,13 @@ End any display.
 .
 .
 .P
-The distance stored in
+.I "groff ms"
+inserts the distance stored in
 .B \[rs]n[DD]
-is inserted before and after each pair of display macros;
+before and after each pair of display macros;
 this is a Berkeley extension.
 .
-In
-.IR "groff ms" ,
-this distance replaces any adjacent inter-paragraph distance
+This distance replaces any adjacent inter-paragraph distance
 or subsequent spacing prior to a section heading.
 .
 The
@@ -1521,7 +1537,7 @@ examples of its use.
 .
 .
 .TP
-.B .PS
+.BI .PS\~ "h v"
 .TQ
 .B .PE
 .TQ
@@ -1536,6 +1552,13 @@ or
 .B .PF
 ends it,
 the latter with \[lq]flyback\[rq] to the vertical position at its top.
+.
+.I h
+and
+.I v
+are the horizontal and vertical dimensions of the picture;
+.I pic
+supplies them automatically.
 .
 .
 .TP
@@ -1565,6 +1588,8 @@ If specified,
 is set right-aligned.
 .
 .
+.br
+.ne 3v
 .TP
 .B .[
 .TQ
@@ -1578,6 +1603,8 @@ provides a comprehensive reference to the preprocessor and the format of
 its bibliographic database.
 .
 .
+.br
+.ne 2v
 .P
 When
 .I @g@refer
@@ -1596,7 +1623,7 @@ Attempting to place a multi-page table inside a keep can lead to
 unpleasant results,
 particularly if the
 .I tbl \" generic
-.RB \[lq] allbox \[rq]
+.RB \%\[lq] allbox \[rq]
 option is used.
 .
 .
@@ -1730,7 +1757,7 @@ or a specified
 .I marker
 argument,
 as a superscript
-(on typesetter devices)
+(on typesetters)
 or surrounded by square brackets
 (on terminals).
 .
@@ -2296,8 +2323,8 @@ they cannot be used with AT&T
 .IR troff .
 .
 .I groff ms
-supports features described above as Berkeley and Tenth Edition Research
-Unix extensions,
+supports features described above as Berkeley and
+Research Tenth Edition Unix extensions,
 and adds several of its own.
 .
 .
@@ -2333,8 +2360,8 @@ rather than to ignore them silently.
 .
 .
 .IP \[bu]
-Tenth Edition \" possibly 9th
-Research Unix supported
+Research Tenth Edition \" possibly 9th
+Unix supported
 .BR P1 / P2
 macros to bracket code examples;
 .I groff ms
@@ -2394,7 +2421,7 @@ they do so not by incrementing or decrementing it,
 but by setting it absolutely.
 .
 This can cause problems for documents that define additional macros of
-their own that try to manipulate indentation.
+their own that manipulate indentation.
 .
 Use
 .B .RS
@@ -2803,8 +2830,8 @@ support for
 .
 .TP
 .I @MACRODIR@/\:ms\:.tmac
-is a wrapper enabling the package to be loaded with
-.RB \[lq] "groff \-m ms" \[rq].
+is a wrapper enabling the package to be loaded with the option
+.RB \[lq] "\-m ms" \[rq].
 .
 .
 .

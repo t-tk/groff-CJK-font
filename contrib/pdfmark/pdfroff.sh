@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/sh
 # ------------------------------------------------------------------------------
 #
 # Function: Format PDF Output from groff Markup
@@ -577,16 +577,16 @@
   fi
 #
 # We now extend the local copy of the reference dictionary file,
-# to create a full 'pdfmark' reference map for the document ...
+# to create a full 'pdfmark' reference map for the document; when
+# one or more reference marks has been mapped, append one further
+# dummy map reference, to ensure that at least one such is always
+# present; (this is required, to suppress any further intermediate
+# output to stderr during the "press-ready" runs of groff, for PDF
+# output file production).
 #
-  $AWK '/^grohtml-info/ {print ".pdfhref Z", $2, $3, $4}' $WRKFILE >> $REFCOPY
-#
-# ... appending a dummy map reference, to ensure that at least
-# one such is always present; (this is required, to suppress any
-# further intermediate output to stderr during the "press-ready"
-# runs of groff, for PDF output file production).
-#
-  echo ".pdfhref Z 0 0 0" >> $REFCOPY
+  $AWK '/^grohtml-info/ {zflag = 1; print ".pdfhref Z", $2, $3, $4}
+	END {if(zflag) print ".pdfhref Z 0 0 0"}
+  ' $WRKFILE >> $REFCOPY
 #
 # Evaluate any processing options which may have been specified
 # as a result of parsing the document source ...
@@ -609,7 +609,7 @@
 #
 # Re-enable progress reporting, if necessary ...
 # (Missing 'awk' or 'diff' may have disabled it, to avoid display
-#  of spurious messages associated with reference resolution).
+# of spurious messages associated with reference resolution).
 #
   test x${SHOW_PROGRESS+"set"} = x"set" && SAY=echo
 #

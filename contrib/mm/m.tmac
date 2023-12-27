@@ -268,8 +268,6 @@ Index		array!index
 .\"
 .\" header text for the index
 .ds Index INDEX
-.\" command to sort the index
-.ds Indcmd sort
 .\"
 .\" flag for mkindex
 .if !r Idxf .nr Idxf 0
@@ -300,7 +298,7 @@ Index		array!index
 .ds MO11 November
 .ds MO12 December
 .\" for GETR
-.ds Qrf See chapter \\*[Qrfh], page \\*[Qrfp].
+.ds Qrf See chapter \E*[Qrfh], page \E*[Qrfp].
 .\"
 .\" header- and footer-size will only change to the current
 .\" if Pgps is > 0.
@@ -375,10 +373,9 @@ Index		array!index
 .\" for .INITR
 .\"
 .\" Output references to stderr if non-zero
-.ie !r Ref \{\
+.if !r Ref \{\
 .	nr Ref 0
 .\}
-.el .warn 0
 .\"
 .\"---------------------------------------------
 .\" set local variables.
@@ -1035,7 +1032,8 @@ numeric; got '\\$1'
 .ds \\$1 \\$[\\n[hd*sp-tmp]]
 ..
 .de HU
-.H 0 "\\$1"
+.if \\n[.$]=0 .@error \\$0: expected 1 or 2 arguments, got \\n[.$]
+.H 0 \\$@
 ..
 .\"-------------
 .de H
@@ -1245,6 +1243,7 @@ numeric; got '\\$1'
 .nr pg*cols-per-page 1
 .nr pg*cur-po \n[@po]
 .nr pg*head-mark 0
+.nr pg*at-end-of-input 0
 .\"
 .nr pg*ps \n[@ps]
 .nr pg*vs \n[@vs]
@@ -1297,6 +1296,8 @@ numeric; got '\\$1'
 .\" stop output and begin on next page. Fix footnotes and all that.
 .de pg@next-page
 .\".debug next-page
+.br
+.if \\n[pg*at-end-of-input] \c
 .ne 999i		\" activate trap
 .\" .pg@footer
 ..
@@ -1545,6 +1546,7 @@ numeric; got '\\$1'
 .\"-------------------------
 .\" print out all pending text
 .de pg@end-of-text
+.nr pg*at-end-of-input 1
 .if \\n[D]>2 .tm ---------- End of text processing ----------------
 .df@eot-print
 .ref@eot-print
@@ -3251,25 +3253,48 @@ exceeds depth of nested lists (\\n[li*lvl])
 .\" This was needed when I discovered that groff was considered unsafe
 .\" and groff -U didn't work. It's a workaround like the original
 .\" index method, but not in my view elegant enough.
+.
+.\" Store name of the interface macro calling qrf*validate-identifier.
+.\" Re-empty it after use to catch internal logic errors.
+.ds qrf*caller \" empty
+.
+.\" Validate argument as roff identifier.
+.\" qrf*validate-identifier candidate
+.de qrf*validate-identifier
+.if !\\n[.$]=1 .@abort expected an argument, got \\n[.$]
+.if '\\*[qrf*caller]'' .@abort qrf*caller string not initialized
+.if !\A'\\$1' \{
+.	ds qref*msg \\*[qrf*caller]: '\\$1' is not a valid roff string\"
+.	as qref*msg " name\"
+.	@error \\*[qref*msg]
+.\}
+.ds qrf*caller \" empty
+..
 .\"
-.\" init reference system
+.\" INITR id
+.\" Initialize reference system.  Read/write file id.qrf.
 .de INITR
+.if \\n[.$]<1 .@error \\$0: expected an argument
 .ds qrf*file \\$1.qrf
-.nr qrf*pass 2
+.nr qrf*pass 2 \" magic number
 .if \\n[D]>1 .tm INITR: source \\*[qrf*file]
 .ie \\n[Ref] \{\
 .	tm .\\\\" Rfilename: \\*[qrf*file]
 .\}
-.el 'so  \\*[qrf*file]
+.el .so \\*[qrf*file]
 ..
 .\"---------------
-.\" set a reference.
+.\" SETR ref-name [string]
+.\" Set (define) a reference ref-name; store auxiliary datum in string.
 .de SETR
 .if \\n[.$]<1 .@error \\$0: expected 1 or 2 arguments, got \\n[.$]
-.if !r qrf*pass .tm \\$0: no .INITR in this file \" XXX: .@error?
+.if !r qrf*pass .@error \\$0: references uninitialized; call INITR first
+.ds qrf*caller \\$0\"
 .if \\n[Ref] \{\
+.	qrf*validate-identifier \\$1
 .	ds qrf*name qrf*ref-\\$1
-.	if \\n[D]>2 .tm SETR: ref \\*[qrf*name]=\\*[hd@mark-trimmed],\\n[%]
+.	if \\n[D]>2 \
+.		tm \\$0: ref \\*[qrf*name]=\\*[hd@mark-trimmed],\\n[%]
 .	\" heading-number
 .	ds \\*[qrf*name]-hn \\*[hd@mark-trimmed]
 .	\" page-number
@@ -3278,88 +3303,127 @@ exceeds depth of nested lists (\\n[li*lvl])
 .	if \\n[Ref] \{\
 .		tm .ds \\*[qrf*name]-hn \\*[hd@mark-trimmed]
 .		tm .ds \\*[qrf*name]-pn \\n[%]
-.		if !'\\$2'' .tm .ds \\*[qrf*name]-xx \\$2
+.		if \\n[.$]>1 \{\
+.			qrf*validate-identifier \\$2
+.			tm .ds \\*[qrf*name]-xx \\$2
+.		\}
 .	\}
 .\}
 ..
 .\"---------------
-.\" get misc-string
-.\" If two arg -> set var. arg to misc-string.
+.\" Interpolate or retrieve reference ref-name's auxiliary datum.
+.\" GETST ref-name [string]
 .de GETST
 .if \\n[.$]<1 .@error \\$0: expected 1 or 2 arguments, got \\n[.$]
-.if !r qrf*pass .tm \\$0: no .INITR in this file \" XXX: .@error?
+.if !r qrf*pass .@error \\$0: references uninitialized; call INITR first
+.ds qrf*caller \\$0\"
+.qrf*validate-identifier \\$1
 .ds qrf*name qrf*ref-\\$1
-.	if d \\*[qrf*name]-xx \{\
-.		ie \\n[.$]>1 .ds \\$2 \\*[\\*[qrf*name]-xx]
-.		el \\*[\\*[qrf*name]-xx]\c
+.if d \\*[qrf*name]-xx \{\
+.	ie \\n[.$]>1 \{\
+.		ds qrf*caller \\$0\"
+.		qrf*validate-identifier \\$2
+.		ds \\$2 \\*[\\*[qrf*name]-xx]
 .	\}
+.	el \\*[\\*[qrf*name]-xx]\c
 .\}
 ..
 .\"---------------
-.\" get header-number
-.\" If two arg -> set var. arg to header-number.
+.\" Interpolate or retrieve reference ref-name's heading number.
+.\" GETHN ref-name [string]
 .de GETHN
 .if \\n[.$]<1 .@error \\$0: expected 1 or 2 arguments, got \\n[.$]
-.if !r qrf*pass .tm \\$0: no .INITR in this file \" XXX: .@error?
+.if !r qrf*pass .@error \\$0: references uninitialized; call INITR first
+.ds qrf*caller \\$0\"
+.qrf*validate-identifier \\$1
 .ds qrf*name qrf*ref-\\$1
 .if d \\*[qrf*name]-hn \{\
-.	ie \\n[.$]>1 .ds \\$2 \\*[\\*[qrf*name]-hn]
+.	ie \\n[.$]>1 \{\
+.		ds qrf*caller \\$0\"
+.		qrf*validate-identifier \\$2
+.		ds \\$2 \\*[\\*[qrf*name]-hn]
+.	\}
 .	el \\*[\\*[qrf*name]-hn]\c
 .\}
 ..
 .\"---------------
-.\" get page-number
-.\" If two arg -> set var. arg to page-number.
+.\" Interpolate or retrieve reference ref-name's page number.
+.\" GETPN ref-name [string]
 .de GETPN
 .if \\n[.$]<1 .@error \\$0: expected 1 or 2 arguments, got \\n[.$]
-.if !r qrf*pass .tm \\$0: no .INITR in this file \" XXX: .@error?
+.if !r qrf*pass .@error \\$0: references uninitialized; call INITR first
+.ds qrf*caller \\$0\"
+.qrf*validate-identifier \\$1
 .ds qrf*name qrf*ref-\\$1
 .if d \\*[qrf*name]-pn \{\
-.	ie \\n[.$]>1 .ds \\$2 \\*[\\*[qrf*name]-pn]
+.	ie \\n[.$]>1 \{\
+.		ds qrf*caller \\$0\"
+.		qrf*validate-identifier \\$2
+.		ds \\$2 \\*[\\*[qrf*name]-pn]
+.	\}
 .	el \\*[\\*[qrf*name]-pn]\c
 .\}
 ..
 .\"----------
+.\" Retrieve and interpolate reference ref-name's heading and page data.
+.\" GETR ref-name
 .de GETR
 .if \\n[.$]<1 .@error \\$0: expected an argument
-.ie !r qrf*pass .tm \\$0: no .INITR in this file" \" XXX: .@error?
-.el \{\
-.	GETHN \\$1 Qrfh
-.	GETPN \\$1 Qrfp
+.if !r qrf*pass .@error \\$0: references uninitialized; call INITR first
+.ds qrf*caller \\$0\"
+.qrf*validate-identifier \\$1
+.GETHN \\$1 Qrfh
+.GETPN \\$1 Qrfp
 \\*[Qrf]
-.\}
 ..
 .\"########################### module ind ############################
 .\"--------------------
-.\" Another type of index system
+.\" initialize index
 .\" INITI type filename [macro]
+.\" XXX: Since we can build only one index at a time[1], it shouldn't be
+.\" necessary to have a mandatory filename argument[2].  Consider
+.\" letting the mmroff Perl script generate a temporary filename for us.
+.\"
+.\" [1] Why?  Indexes go through Perl anyway, and it can keep track of
+.\" an arbitrary number of lists to sort independently.
+.\"
+.\" [2] Just "name" would be a better term for it since we
+.\" unconditionally suffix it with ".ind".
 .de INITI
 .if \\n[.$]<2 .@error \\$0: expected 2 or 3 arguments, got \\n[.$]
-.\" ignore if INITI has already been used
+.ds ind*ref \" empty
+.ds ind*type \\$1
+.nr ind*type-is-valid 0
+.if '\\*[ind*type]'N' .nr ind*type-is-valid 1
+.if '\\*[ind*type]'H' .nr ind*type-is-valid 1
+.if '\\*[ind*type]'B' .nr ind*type-is-valid 1
+.if !\\n[ind*type-is-valid] .@error \\$0: invalid index type '\\$1'
+.rr ind*type-is-valid
+.if \\n[D]>1 .tm INITI: type=\\*[ind*type]
+.if '\\$2'' .@error \\$0: index file name not specified
 .if d ind*file .@error \\$0: index file name already set
 .ds ind*file \\$2.ind
 .if \\n[D]>1 .tm INITI: source \\*[ind*file]
-.if !d ind*file .@error \\$0: index file name not specified
-.ds ind*type \\$1
 .if \\n[Ref] \{\
 .	if \\n[.$]>2 .tm .\\\\" Imacro: \\$3
 .\}
 ..
 .\"---------------
+.\" collect index entry
+.\" IND term ...
 .de IND
-.if !d ind*file .@error \\$0: no active index; call INITI"
-.if \\n[D]>1 .tm IND: type=\\*[ind*type]
-.ds ind*ref \" empty
-.if '\\*[ind*type]'N' .ds ind*ref \\n[%]
-.if '\\*[ind*type]'H' .ds ind*ref \\*[hd*mark]
-.if '\\*[ind*type]'B' .ds ind*ref \\*[hd*mark]\t\\n[%]
-.if '\\*[ind*ref]'' .@abort invalid index type '\\*[ind*type]'
-.\"
+.if !d ind*file .@error \\$0: no active index; call INITI first
+.if \\n[.$]<1 .@error \\$0: expected at least 1 argument, got \\n[.$]
+.if '\\$1'' .@error \\$0: cannot record empty index entry
+.if \\n[nl]<0 .@error \\$0: cannot record index entry when not on a page
 .ds ind*line \\$1
 .while \\n[.$]>0 \{\
 .	shift
 .	as ind*line \t\\$1
 .\}
+.if '\\*[ind*type]'N' .ds ind*ref \\n[%]
+.if '\\*[ind*type]'H' .ds ind*ref \\*[hd@mark-trimmed]
+.if '\\*[ind*type]'B' .ds ind*ref \\*[hd@mark-trimmed]\t\\n[%]
 .as ind*line \\*[ind*ref]
 .if \\n[Ref] .tm .\\\\" IND \\*[ind*line]
 ..
@@ -3370,10 +3434,10 @@ exceeds depth of nested lists (\\n[li*lvl])
 .	if !\\n[Cp] .pg@next-page
 .	\" print INDEX
 .	\" execute user-defined macros
-.	if d TXIND .TXIND
+.	ie d TXIND .TXIND
+.	el .SK
 .	ie d TYIND .TYIND
 .	el \{\
-.		SK
 .		ce
 \\*[Index]
 .		SP 3
@@ -3398,10 +3462,10 @@ exceeds depth of nested lists (\\n[li*lvl])
 .ie \\n[.$] .ds let*i \\$1
 .el .ds let*i \\*[Letfc]
 .ie d let*type .let@fc_\\*[let*type] "\\*[let*i]" \\$@
-.el .let@mt-closing "\\*[let*i]" \\$@
+.el .let@formal-closing "\\*[let*i]" \\$@
 ..
 .\"-------
-.de let@mt-closing
+.de let@formal-closing
 .ne 5v
 .in (u;\\n[.l]/2)
 .sp
@@ -3527,7 +3591,7 @@ undefined
 .if \w'\\$5'&\\$4 \\$5
 .fi
 ..
-.als let@fc_BL let@mt-closing
+.als let@fc_BL let@formal-closing
 .\"-----------
 .\" Semiblocked letter
 .de let@init_SB
@@ -3538,7 +3602,7 @@ undefined
 .let@print-head 1
 ..
 .als let@sg_SB let@sg_BL
-.als let@fc_SB let@mt-closing
+.als let@fc_SB let@formal-closing
 .\"-----------
 .\" Full-blocked letter
 .de let@init_FB
@@ -3635,14 +3699,15 @@ undefined
 .	ie '\\*[let*type]'SP' \{\
 .		sp 2
 .		misc@toupper "\\*[let*lo-SJ]"
-.		sp
 .	\}
 .	el \{\
 .		sp
 .		if '\\*[let*type]'SB' .ti +5m
 \\*[LetSJ] \f[\\*[@sdf_font]]\\*[let*lo-SJ]\fP
 .	\}
+.	sp
 .\}
+.sp
 ..
 .\"-------------------
 .\" .IA [name [title]]

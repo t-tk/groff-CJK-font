@@ -864,7 +864,7 @@ and \fBoutlined\fP.
 .PP
 Predefined color names for \fI[gtn]roff\/\fP-based \fBpic\fP
 implementations are defined in the device macro files, for example
-\f(CWps.tmac\fP; additional colors can be defined with the
+\f(CRps.tmac\fP; additional colors can be defined with the
 \fB.defcolor\fP request (see the manual page of GNU \fItroff\/\fP(1)
 for more details).
 Currently, color support is not available at all in \*[tx] mode.
@@ -1661,7 +1661,7 @@ A number is a valid expression, of course (all numbers are stored
 internally as floating-point).
 Decimal-point notation is acceptable;
 in GNU \fBgpic\fR, scientific notation in C's `e' format (like
-\f(CW5e-2\fP) is accepted.
+\f(CR5e-2\fP) is accepted.
 .PP
 Anywhere a number is expected, the language also accepts a
 variable.
@@ -1877,8 +1877,8 @@ tripped up by the comma by wrapping the pair in parentheses.
 Macros persist through pictures.
 To undefine a macro, say \fBundef\fP \fIname\fR; for example,
 .DS
-\f(CWundef jumper\fP
-\f(CWundef jumperblock\fP
+\f(CRundef jumper\fP
+\f(CRundef jumperblock\fP
 .DE
 .LP
 would undefine the two macros in the jumper block example.
@@ -1895,7 +1895,7 @@ File and Table Insertion
 .PP
 The statement
 .DS
-\f(CWcopy\fP \fIfilename\fR
+\f(CRcopy\fP \fIfilename\fR
 .DE
 .LP
 inserts the contents of \fIfilename\fR in the \fBpic\fP input stream.
@@ -1906,7 +1906,7 @@ A variant of this statement replicates the \fBcopy thru\fP feature of
 \fIgrap\/\fP(1).
 The call
 .DS
-\f(CWcopy\fP \fIfilename\fR \f(CWthru\fP \fImacro\fP
+\f(CRcopy\fP \fIfilename\fR \f(CRthru\fP \fImacro\fP
 .DE
 .LP
 calls \fImacro\fP (which may be either a name or replacement text)
@@ -1918,7 +1918,7 @@ instances of any character not appearing in the rest of the text.
 .PP
 If you write
 .DS
-\f(CWcopy\fP \f(CWthru\fP \fImacro\fP
+\f(CRcopy\fP \f(CRthru\fP \fImacro\fP
 .DE
 .LP
 omitting the filename, lines to be parsed are taken from the input
@@ -2017,7 +2017,7 @@ Executing Shell Commands
 .PP
 The command
 .DS
-\f(CWsh\fP \f(CW{\fP \fIanything.\|.\|.\fP \f(CW}\fP
+\f(CRsh\fP \f(CR{\fP \fIanything.\|.\|.\fP \f(CR}\fP
 .DE
 .LP
 macro-expands the text in braces, then executes it as a shell command.
@@ -2168,7 +2168,8 @@ With two non-zero arguments, it scales to the maximum height.
 How Scaling is Handled
 .PP
 When \fBpic\fP processes a picture description on input, it passes
-\fB.PS\fP, \fB.PE\fP, and \fB.PF\fP through to the postprocessor.
+\fB.PS\fP, \fB.PE\fP, \fB.PF\fP, and \fB.PY\fP through to the
+postprocessor.
 The \fB.PS\fP gets decorated with two numeric arguments which are the X
 and Y\~dimensions of the picture in inches.
 The post-processor can use these to reserve space for the picture and
@@ -2200,13 +2201,18 @@ the following definitions:
 .vs
 .KE
 .LP
-Equivalent definitions of these and of \fB.PF\fP are supplied by GNU
-\fIpic\/\fP(1) if you use the \-mpic option; this should make it usable
-with macro pages other than \fIms\/\fR(1).
+Equivalent definitions of these and of \fB.PF\fP and \fB.PY\fP are
+supplied by GNU \fIpic\/\fP(1) if you use the \-mpic option; this should
+make it usable with macro packages other than \fIms\/\fR.
 .PP
 If \fB.PF\fP is used instead of \fB.PE\fP, the \fBtroff\fP position is
 restored to what it was at the picture start (Kernighan notes that
 the\~F stands for \[lq]flyback\[rq]).
+GNU \fIpic\/\fP(1) supports \fB.PY\fP as a synonym of \fB.PF\fP to work
+around a name space collision with the \fImm\fP macro package, which
+uses the same name for a page footer management macro.
+Use \fB.PF\fP preferentially unless a similar problem faces your
+document.
 .PP
 The invocation
 .DS
@@ -2304,7 +2310,7 @@ below it;
 would avoid this.
 .PP
 To make the vbox having a positive height and a depth of zero (as used
-e.g.\& by \*(lx's \f(CW\%graphics.sty\fP), define the following macro in
+e.g.\& by \*(lx's \f(CR\%graphics.sty\fP), define the following macro in
 your document:
 .KS
 .DS
@@ -2754,14 +2760,14 @@ In no case, however, the X and Y\~dimensions of the picture exceed the
 values of the style variables \fBmaxpswid\fP and \fBmaxpsheight\fP
 (which default to the normal 8.5\^i by 11\^i page size).
 .PP
-If the ending `.PE' is replaced by `.PF', the page vertical position is
-restored to its value at the time `.PS' was encountered.
+If the ending `.PE' is replaced by `.PF' or `.PY', the page vertical
+position is restored to its value at the time `.PS' was encountered.
 Another alternate form of invocation is `.PS\~<\s[-1]FILENAME\s[0]',
 which replaces the `.PS' line with a file to be interpreted by \fBpic\fR
 (but this feature is deprecated).
 .PP
-The `.PS', `.PE', and `.PF' macros to perform centering and scaling are
-normally supplied by the post-processor.
+The `.PS', `.PE', `.PF', and `.PY' macros to perform centering and
+scaling are normally supplied by the post-processor.
 .PP
 In the following, either `|' or a new line starts an alternative.
 .DS

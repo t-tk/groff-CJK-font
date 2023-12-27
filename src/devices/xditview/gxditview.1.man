@@ -1,8 +1,8 @@
 .TH gxditview @MAN1EXT@ "@MDATE@" "groff @VERSION@"
 .SH Name
 gxditview \- display
-.I groff
-intermediate output files in X11
+.I troff
+output in X11
 .
 .
 .\" ====================================================================
@@ -85,7 +85,7 @@ intermediate output files in X11
 .B \-version
 .
 .SY gxditview
-.B \-\-version
+.B \%\-\-version
 .YS
 .
 .
@@ -94,30 +94,27 @@ intermediate output files in X11
 .\" ====================================================================
 .
 .I gxditview
-interprets and displays the intermediate output format of
-.MR groff @MAN1EXT@
-on an X11\~display.
+renders the output of GNU
+.I troff \" GNU
+to an X11 display.
 .
 It uses the standard X11 fonts,
-so it does not require access to the server machine for font loading.
-.
-There are several ways to use
-.IR gxditview .
+which are rendered by the X server.
 .
 .
-.PP
-The
-intermediate output format of
-.IR groff ,
-documented in
-.MR groff_out @MAN5EXT@ ,
-is produced by
-.I @g@troff
-or the
+.P
+The output of
+.MR @g@troff @MAN1EXT@
+is in a page description language documented in
+.MR groff_out @MAN5EXT@ .
+.
+Normally,
+users do not observe this output because the
+.MR groff @MAN1EXT@
+wrapper automatically runs an output driver to interpret it;
+.IR groff 's
 .B \-Z
-option to
-.IR groff .
-.
+option leaves it on the standard output stream instead.
 .
 It can be viewed by explicitly calling
 .RB \[lq] gxditview
@@ -132,9 +129,9 @@ will read the standard input stream;
 .I file
 cannot be omitted.
 .
-The intermediate output format of
-.I groff
-is device-independent but not device-agnostic.
+GNU
+.IR troff 's \" GNU
+page description language is device-independent but not device-agnostic.
 .
 .I gxditview
 can view it for all typesetter devices,
@@ -150,7 +147,7 @@ devices.
 The best results are achieved with the
 .BR X *
 devices for
-.IR groff 's
+.IR @g@troff 's
 .B \-T
 option,
 of which there are four:
@@ -169,8 +166,8 @@ They are especially built for
 .IR gxditview .
 .
 When using one of these,
-.I groff
-generates the intermediate output for this device and calls
+.I @g@troff
+generates output for this device and calls
 .I gxditview
 automatically for viewing.
 .
@@ -212,14 +209,14 @@ Display the previous page.
 .
 .TP
 .B Select Page
-Select a particular numbered page specified by a dialog box.
+Collect a page number from a dialog box and render it.
 .
 .
 .TP
 .B Print
-Print the
-.I groff
-intermediate output using a command specified by a dialog box.
+Collect a command from a dialog box and use it to print
+.I @g@troff
+output.
 .
 The default command initially displayed is controlled by the
 .B printCommand
@@ -231,13 +228,13 @@ option.
 .
 .TP
 .B Open
-Open for display a new file specified by a dialog box.
+Collect a file name from a dialog box and render it.
 .
-The file should contain
-.I groff
-intermediate output.
+The named file should contain
+.I @g@troff
+output.
 .
-If the filename starts with a bar or pipe symbol,
+If the file name starts with a bar or pipe symbol,
 .RB \[lq] | \[rq]
 it will be interpreted as a command from which to read.
 .
@@ -274,6 +271,18 @@ and
 .RI ( PgUp )
 keys are bound to the
 .B PreviousPage
+action.
+.
+The
+.I p
+key with any modifier
+(Shift,
+Control,
+Alt,
+or
+Meta)
+is bound to the
+.B Print
 action.
 .
 The
@@ -325,14 +334,14 @@ are also bound to the obvious scrolling actions.
 .
 .PP
 The
-.B paperlength
+.B \%paperlength
 and
-.B paperwidth
+.B \%paperwidth
 commands in the
 .I DESC
 file describing a
 .I groff
-output device specify the length and width in machine units of the
+output device specify the length and width in basic units of the
 virtual page displayed by
 .IR gxditview ;
 see
@@ -379,11 +388,12 @@ font names to X\~font names.
 This must be a string containing a sequence of lines.
 .
 Each line contains two whitespace-separated fields:
-firstly the
+the
 .I groff
-font name,
-and secondly the XLFD
-(X Logical Font Description).
+font name is first,
+and the XLFD
+(X Logical Font Description)
+second.
 .
 The default is shown in subsection \[lq]Default font map\[rq] below.
 .
@@ -451,7 +461,7 @@ display a usage message,
 while
 .B \-version
 and
-.B \-\-version
+.B \%\-\-version
 show version information;
 all exit afterward.
 .
@@ -469,9 +479,9 @@ This option specifies the page number of the document to be displayed.
 .
 .TP
 .BI \-backingStore\~ backing-store-type
-Because redisplay of the
-.I groff
-intermediate output window can take a perceiptible amount of time,
+Because redisplay of the rendered
+.I @g@troff
+output can take a perceiptible amount of time,
 this option causes the server to save the window contents so that when
 it is scrolled around the viewport,
 the window is painted from contents saved in backing store.
@@ -494,16 +504,15 @@ menu entry will be
 .
 .TP
 .BI \-resolution\~ res
-The
-.I groff
-intermediate output file will be displayed at a resolution of
+.I @g@troff
+output file will be displayed at a resolution of
 .I res
 dots per inch,
 unless the
 .I DESC
 file contains the
 .B X11
-command,
+directive,
 in which case the device resolution will be used.
 .
 This corresponds to the
@@ -518,12 +527,12 @@ The default is
 .
 .TP
 .BI \-filename\~ string
-The default filename displayed in the dialog box for the
+The default file name displayed in the dialog box for the
 .B Open
 menu entry will be
 .IR string .
 .
-This can be either a filename,
+This can be either a file name,
 or a command starting with
 .RB \[lq] | \[rq].
 .

@@ -144,7 +144,7 @@ string &string::operator=(const char *p)
     sz = 0;
   }
   else {
-    int slen = strlen(p);
+    size_t slen = strlen(p);
     ptr = sfree_alloc(ptr, sz, slen, &sz);
     len = slen;
     if (len != 0)
@@ -180,7 +180,7 @@ void string::grow1()
 string &string::operator+=(const char *p)
 {
   if (p != 0) {
-    int n = strlen(p);
+    size_t n = strlen(p);
     int newlen = len + n;
     if (newlen > sz)
       ptr = srealloc(ptr, sz, len, newlen, &sz);

@@ -59,27 +59,27 @@ echo "$output"
 
 echo "checking first document, first page footer (discontinuous)" >&2
 echo "$output" | grep -En "^groff test suite +2022-12-11 +13$" \
-    | grep '^64:' || wail
+    | grep '^63:' || wail
 
 echo "checking first document, second page footer (discontinuous)" >&2
 echo "$output" | grep -En "^groff test suite +2022-12-11 +14$" \
-    | grep '^130:' || wail
+    | grep '^129:' || wail
 
 echo "checking second document, first page footer (discontinuous)" >&2
 echo "$output" | grep -En "^groff test suite +2022-12-11 +13$" \
-    | grep '^196:' || wail
+    | grep '^195:' || wail
 
 echo "checking second document, second page footer (discontinuous)" >&2
 echo "$output" | grep -En "^groff test suite +2022-12-11 +14$" \
-    | grep '^262:' || wail
+    | grep '^261:' || wail
 
 echo "checking third document, first page footer (discontinuous)" >&2
 echo "$output" | grep -En "^groff test suite +2022-12-11 +13$" \
-    | grep '^328:' || wail
+    | grep '^327:' || wail
 
 echo "checking third document, second page footer (discontinuous)" >&2
 echo "$output" | grep -En "^groff test suite +2022-12-11 +14$" \
-    | grep '^394:' || wail
+    | grep '^393:' || wail
 
 # Now, check _with_ continuous numbering.  Only the first page is
 # numbered P.
@@ -90,27 +90,27 @@ echo "$output"
 
 echo "checking first document, first page footer (continuous)" >&2
 echo "$output" | grep -En "^groff test suite +2022-12-11 +13$" \
-    | grep '^64:' || wail
+    | grep '^63:' || wail
 
 echo "checking first document, second page footer (continuous)" >&2
 echo "$output" | grep -En "^groff test suite +2022-12-11 +14$" \
-    | grep '^130:' || wail
+    | grep '^129:' || wail
 
 echo "checking second document, first page footer (continuous)" >&2
 echo "$output" | grep -En "^groff test suite +2022-12-11 +15$" \
-    | grep '^196:' || wail
+    | grep '^195:' || wail
 
 echo "checking second document, second page footer (continuous)" >&2
 echo "$output" | grep -En "^groff test suite +2022-12-11 +16$" \
-    | grep '^262:' || wail
+    | grep '^261:' || wail
 
 echo "checking third document, first page footer (continuous)" >&2
 echo "$output" | grep -En "^groff test suite +2022-12-11 +17$" \
-    | grep '^328:' || wail
+    | grep '^327:' || wail
 
 echo "checking third document, second page footer (continuous)" >&2
 echo "$output" | grep -En "^groff test suite +2022-12-11 +18$" \
-    | grep '^394:' || wail
+    | grep '^393:' || wail
 
 test -z "$fail"
 

@@ -22,6 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
 #include "ps.h"
 
+#include <errno.h> // errno
+
 #ifdef NEED_DECLARATION_PUTENV
 extern "C" {
   int putenv(const char *);
@@ -316,9 +318,14 @@ void resource_manager::output_prolog(ps_output &out)
   }
   char *prologue = getenv("GROPS_PROLOGUE");
   FILE *fp = font::open_file(prologue, &path);
-  if (!fp)
-    fatal("failed to open PostScript prologue '%1': %2", prologue,
+  if (0 /* nullptr */ == fp) {
+    // If errno not valid, assume file rejected due to '/'.
+    if (errno <= 0)
+      fatal("refusing to traverse directories to open PostScript"
+	    " prologue file '%1'");
+    fatal("failed to open PostScript prologue file '%1': %2", prologue,
 	  strerror(errno));
+  }
   fputs("%%BeginResource: ", outfp);
   procset_resource->print_type_and_name(outfp);
   putc('\n', outfp);
@@ -353,17 +360,21 @@ void resource_manager::supply_resource(resource *r, int rank,
   if (r->filename != 0 /* nullptr */) {
     if (r->type == RESOURCE_FONT) {
       fp = font::open_file(r->filename, &path);
-      if (!fp) {
-	error("failed to open PostScript resource '%1': %2",
-	      r->filename, strerror(errno));
+      if (0 /* nullptr */ == fp) {
+	// If errno not valid, assume file rejected due to '/'.
+	if (errno <= 0)
+	  error("refusing to traverse directories to open PostScript"
+		" resource file '%1'");
+	else
+	  error("failed to open PostScript resource file '%1': %2",
+		r->filename, strerror(errno));
 	delete[] r->filename;
 	r->filename = 0 /* nullptr */;
       }
     }
     else {
-      errno = 0;
       fp = include_search_path.open_file_cautious(r->filename);
-      if (!fp) {
+      if (0 /* nullptr */ == fp) {
 	error("can't open '%1': %2", r->filename, strerror(errno));
 	delete[] r->filename;
 	r->filename = 0 /* nullptr */;

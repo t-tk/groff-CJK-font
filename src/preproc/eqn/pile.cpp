@@ -1,4 +1,4 @@
-/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2023 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
 This file is part of groff.
@@ -18,6 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
 // piles and matrices
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <assert.h>
 
 #include "eqn.h"
@@ -36,16 +40,18 @@ int pile_box::compute_metrics(int style)
     printf(">?\\n[" WIDTH_FORMAT "]", col.p[i]->uid);
   printf("\n");
   printf(".nr " BASELINE_SEP_FORMAT " %dM",
-	 uid, baseline_sep+col.space);
+	 uid, get_param("baseline_sep") + col.space);
   for (i = 1; i < col.len; i++)
     printf(">?(\\n[" DEPTH_FORMAT "]+\\n[" HEIGHT_FORMAT "]+%dM)",
-	   col.p[i-1]->uid, col.p[i]->uid, default_rule_thickness*5);
+	   col.p[i-1]->uid, col.p[i]->uid,
+	   get_param("default_rule_thickness") * 5);
   // round it so that it's a multiple of the vertical motion quantum
   printf("+(\\n(.V/2)/\\n(.V*\\n(.V\n");
 
   printf(".nr " SUP_RAISE_FORMAT " \\n[" BASELINE_SEP_FORMAT "]*%d/2"
 	 "+%dM\n",
-	 uid, uid, col.len-1, axis_height - shift_down);
+	 uid, uid, col.len-1, get_param("axis_height")
+			      - get_param("shift_down"));
   printf(".nr " HEIGHT_FORMAT " \\n[" SUP_RAISE_FORMAT "]+\\n["
 	 HEIGHT_FORMAT "]\n",
 	 uid, uid, col.p[0]->uid);
@@ -127,9 +133,9 @@ pile_box::pile_box(box *pp) : col(pp)
 {
 }
 
-void pile_box::check_tabs(int level)
+void pile_box::diagnose_tab_stop_usage(int level)
 {
-  col.list_check_tabs(level);
+  col.list_diagnose_tab_stop_usage(level);
 }
 
 void pile_box::debug_print()
@@ -157,21 +163,24 @@ int matrix_box::compute_metrics(int style)
     printf("\n");
   }
   printf(".nr " WIDTH_FORMAT " %dM",
-	 uid, column_sep*(len-1)+2*matrix_side_sep);
+	 uid, get_param("column_sep") * (len - 1) + 2
+	 * get_param("matrix_side_sep"));
   for (i = 0; i < len; i++)
     printf("+\\n[" COLUMN_WIDTH_FORMAT "]", uid, i);
   printf("\n");
   printf(".nr " BASELINE_SEP_FORMAT " %dM",
-	 uid, baseline_sep+space);
+	 uid, get_param("baseline_sep") + space);
   for (i = 0; i < len; i++)
     for (j = 1; j < p[i]->len; j++)
       printf(">?(\\n[" DEPTH_FORMAT "]+\\n[" HEIGHT_FORMAT "]+%dM)",
-	   p[i]->p[j-1]->uid, p[i]->p[j]->uid, default_rule_thickness*5);
+	   p[i]->p[j-1]->uid, p[i]->p[j]->uid,
+	   get_param("default_rule_thickness") * 5);
   // round it so that it's a multiple of the vertical motion quantum
   printf("+(\\n(.V/2)/\\n(.V*\\n(.V\n");
   printf(".nr " SUP_RAISE_FORMAT " \\n[" BASELINE_SEP_FORMAT "]*%d/2"
 	 "+%dM\n",
-	 uid, uid, max_len-1, axis_height - shift_down);
+	 uid, uid, max_len-1, get_param("axis_height")
+	 - get_param("shift_down"));
   printf(".nr " HEIGHT_FORMAT " 0\\n[" SUP_RAISE_FORMAT "]+(0",
 	 uid, uid);
   for (i = 0; i < len; i++)
@@ -190,7 +199,7 @@ int matrix_box::compute_metrics(int style)
 void matrix_box::output()
 {
   if (output_format == troff) {
-    printf("\\h'%dM'", matrix_side_sep);
+    printf("\\h'%dM'", get_param("matrix_side_sep"));
     for (int i = 0; i < len; i++) {
       int j;
       printf("\\v'-\\n[" SUP_RAISE_FORMAT "]u'", uid);
@@ -232,9 +241,9 @@ void matrix_box::output()
       printf("\\v'-(%du*\\n[" BASELINE_SEP_FORMAT "]u)'", p[i]->len - 1, uid);
       printf("\\h'\\n[" COLUMN_WIDTH_FORMAT "]u'", uid, i);
       if (i != len - 1)
-	printf("\\h'%dM'", column_sep);
+	printf("\\h'%dM'", get_param("column_sep"));
     }
-    printf("\\h'%dM'", matrix_side_sep);
+    printf("\\h'%dM'", get_param("matrix_side_sep"));
   }
   else if (output_format == mathml) {
     int n = p[0]->len;	// Each column must have the same number of rows in it
@@ -295,10 +304,10 @@ void matrix_box::append(column *pp)
   p[len++] = pp;
 }
 
-void matrix_box::check_tabs(int level)
+void matrix_box::diagnose_tab_stop_usage(int level)
 {
   for (int i = 0; i < len; i++)
-    p[i]->list_check_tabs(level);
+    p[i]->list_diagnose_tab_stop_usage(level);
 }
 
 void matrix_box::debug_print()

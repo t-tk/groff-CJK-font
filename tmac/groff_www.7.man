@@ -75,64 +75,56 @@ file when the formatter
 (usually
 .MR groff @MAN1EXT@ )
 is called with either of the options
-.B \-Thtml
+.RB \[lq] \-T\~html \[rq]
 or
-.BR \-Txhtml .
+.RB \[lq] \-T\~xhtml \[rq].
 .
-To see hyperlinks in action,
-format this man page using one of those options.
-.
-.
-.P
-This document is a basic guide;
-the HTML output driver
-.RI ( \%grohtml )
-remains in an alpha state.
-.
-It has been included with the distribution to encourage testing.
-.
-.
-.P
-Here is a summary of the functions found in this macro set.
+The HTML output driver
+.MR grohtml 1
+is in a beta state;
+.I groff
+distributes these macros to encourage its testing.
 .
 .
 .P
 .TS
 tab(@);
-l l.
-\&.JOBNAME@split output into multiple files
-\&.HX@automatic heading level cut off
-\&.BCL@specify colours on a web page
-\&.BGIMG@specify background image
-\&.URL@create a URL using two parameters
-\&.FTP@create an FTP reference
-\&.MTO@create an HTML email address
-\&.TAG@generate an HTML name
-\&.IMG@include an image file
-\&.PIMG@include PNG image
-\&.MPIMG@place PNG on the margin and wrap text around it
-\&.HnS@begin heading
-\&.HnE@end heading
-\&.LK@emit automatically collected links.
-\&.HR@produce a horizontal rule
-\&.NHR@suppress automatic generation of rules.
-\&.HTL@only generate HTML title
-\&.HEAD@add data to <head> block
-\&.ULS@unorder list begin
-\&.ULE@unorder list end
-\&.OLS@ordered list begin
-\&.OLE@ordered list end
-\&.DLS@definition list begin
-\&.DLE@definition list end
-\&.LI@insert a list item
-\&.DC@generate a drop capital
-\&.HTML@pass an HTML raw request to the device driver
-\&.CDS@code example begin
-\&.CDE@code example end
-\&.ALN@place links on left of main text.
-\&.LNS@start a new two-column table with links in the left.
-\&.LNE@end the two-column table.
-\&.LINKSTYLE@initialize default URL attributes.
+L  L
+Lb L.
+Macro@Meaning
+_
+JOBNAME@split output into multiple files
+HX@automatic heading level cut-off
+BCL@specify colours on a web page
+BGIMG@specify background image
+URL@create a URL using two parameters
+MTO@create an HTML email address
+TAG@generate an HTML name
+IMG@include an image file
+PIMG@include PNG image
+MPIMG@place PNG on the margin and wrap text around it
+HnS@begin heading
+HnE@end heading
+LK@emit automatically collected links
+HR@produce a horizontal rule
+NHR@suppress automatic generation of rules
+HTL@record document title as HTML metadata only
+HEAD@add data to <head> block
+ULS@unordered list begin
+ULE@unordered list end
+OLS@ordered list begin
+OLE@ordered list end
+DLS@definition list begin
+DLE@definition list end
+LI@insert a list item
+DC@generate a drop capital
+HTML@transmit raw HTML to output driver
+CDS@code example begin
+CDE@code example end
+ALN@place links on left of main text
+LNS@start two-column table with links on the left
+LNE@end two-column table started with \fB.LNS\fP
+LINKSTYLE@initialize default URL attributes
 .TE
 .
 .
@@ -140,541 +132,388 @@ l l.
 .SH Macros
 .\" ====================================================================
 .
-.TP
-.B .JOBNAME filename
+.TP 9n \" "HTML" + 2n + hand-tuned for PDF
+.BI JOBNAME\~ file-name-stem
 Split output into multiple HTML files.
 .
-A file is split whenever a \&.SH or \&.NH\ 1 is encountered.
+In
+.I ms
+documents,
+a file is split whenever an
+.B .SH
+or
+.RB \[lq] ".NH\~1" \[rq]
+call is encountered.
 .
-Its argument is the file stem name for future output files.
+Its argument is the file name stem used for output files.
 .
 This option is equivalent to
 .IR \%grohtml 's
 .B \-j
 option.
 .
-.TP
-.B .HX n
-Specify the cut off depth when generating links from section headings.
 .
-For example, a parameter of\~2 would cause
+.TP
+.BI HX\~ n
+Set section heading level above which
+.I \%grohtml
+is not to automatically generate links to
+.I n.
+.
+For example,
+when used with the
+.MR groff_ms @MAN7EXT@
+package,
+.RB \[lq] ".HX\~2" \[rq]
+causes
 .I \%grohtml
 to generate a list of links for
-.B .NH\ 1
+.I ms
+macro calls
+.RB \[lq] ".NH\~1" \[rq]
 and
-.B .NH\ 2
+.RB \[lq] ".NH\~2" \[rq]
 but not for
-.BR .NH\ 3 .
+.RB \[lq] ".NH\~3" \[rq],
+whereas
+.RB \[lq] ".HX\~0" \[rq]
+generates no hyperlinks to section headings.
 .
-Whereas
-.
-.
-.RS
-.IP
-.EX
-\&.HX 0
-.EE
-.RE
-.
-.
-.IP
-tells
-.I \%grohtml
-that no heading links should be created at all.
-.
-Another method for turning automatic headings off is by issuing the
-command-line switch
-.B \-P\-l
-to
-.IR groff .
+Giving
+.I groff
+the option
+.RB \[lq] "\-P\~\-l" \[rq]
+disables automatic heading linkage.
 .
 .
 .TP
-.BI .BCL\~ "foreground background active not-visited visited"
-This macro takes five parameters:
-foreground,
-background,
+.BI BCL\~ "foreground background active not-visited visited"
+Configure colours used for
+page foreground,
+page background,
 active hypertext link,
-hypertext link not yet visited,
-and visited hypertext link colour.
+hypertext links not yet visited,
+and visited hypertext links.
+.
 .
 .TP
-.B .BGIMG imagefile
-the only parameter to this macro is the background image file.
+.BI BGIMG\~ file
+Set the background image
+to
+.I file.
+.
 .
 .TP
-.B .URL url [description] [after]
-generates a URL using either one,
-two,
-or three arguments.
+.BI URL\~ url\~\c
+.RI [ link-text \~[ post ]]
+Generate a hyperlink to
+.I url
+with optional
+.I link-text
+followed immediately by non-linked text
+.I post.
 .
-The first parameter is the actual URL, the second is the name of the
-link, and the third is optional stuff to be printed immediately
-afterwards.
 .
+.IP
 If
-.B description
-and
-.B after
-are absent then the
-.B URL
-becomes the anchor text.
+.I link-text
+is absent,
+.I url
+is formatted as the link text.
 .
-Hyphenation is disabled while printing the actual URL;
-explicit breakpoints should be inserted with the
+Hyphenation is disabled while formatting a URL;
+insert explicit break points with the
 .B \[rs]:
 escape sequence.
 .
-Here is how to encode
-.UR http://\:foo\:.org/
-foo
-.UE :
-.RS
-.IP
-.B .URL http://\[rs]:foo\[rs]:.org/ "foo" :
-.RE
+.
+.TP
+.BI MTO\~ address\~\c
+.RI [ link-text \~[ post ]]
+Generate an email hyperlink to
+.I address
+with optional
+.I link-text
+followed immediately by non-linked text
+.I post.
+.
 .
 .IP
-If this is processed by a device other than
-.B \-Thtml
+If
+.I link-text
+is absent,
+.I address
+is formatted as the link text.
+.
+Hyphenation is disabled while formatting a URL;
+insert explicit break points with the
+.B \[rs]:
+escape sequence.
+.
+.
+.TP
+.BI TAG\~ name
+Generate an anchor
+.I name
+marking its location in the document as a target for hyperlinks.
+.
+.
+.TP
+.BI IMG\~ file-name\~\c
+.RB [ \-C | \-L | \-R ]\~\c
+.RI [ width \~[ height ]]
+Insert graphical image
+.I file-name.
+.
+The optional second argument aligns the image to the center
+.RB ( \-C ;\~default),
+left
+.RB ( \-L ),
 or
-.B \-Txhtml
-it appears as:
-.RS
-.IP
-foo \[la]\f[CR]http://\:foo\:.org\f[]\[ra]:
-.RE
+right
+.RB ( \-R ).
 .
-.IP
-The URL macro can be of any type;
-for example, we can reference
-.UR pic\:.html
-Eric Raymond's
-.I pic
-guide
-.UE
-by:
-.RS
-.IP
-.B .URL pic\[rs]:.html \[dq]Eric Raymond\[aq]s pic guide\[dq]
-.RE
-.
-.TP
-.B .MTO address [description] [after]
-Generate an email HTML reference.
-.
-The first argument is mandatory as the email address.
-.
-The optional second argument is the text you see in your browser.
-.
-If an empty argument is given,
-.B address
-is used instead.
-.
-An optional third argument is stuff printed immediately afterwards.
-.
-Hyphenation is disabled while printing the actual email address.
-.
-For example,
-.MT joe@\:user\:.org
-Joe User
-.ME
-can be achieved by the following macro:
-.RS
-.IP
-.B .MTO joe@user.org \[dq]Joe User\[dq]
-.RE
-.
-.IP
-All URLs currently are treated as consuming no textual
-space in
-.IR groff .
-.
-This could be considered as a bug since it causes some problems.
-.
-To circumvent this,
-.B www.tmac
-inserts a zero-width character which expands to a harmless space (only
-if run with
-.B \-Thtml
-or
-.BR \-Txhtml ).
-.
-.TP
-.B .FTP url [description] [after]
-indicates that data can be obtained via FTP.
-.
-The first argument is the URL and the second is the browser text.
-.
-A third argument, similar to the macros above, is intended for stuff
-printed immediately afterwards.
-.
-The second and the third parameter are optional.
-.
-Hyphenation is disabled while printing the actual URL.
-.
-As an example, here is the location of the
-.UR ftp://\:ftp\:.gnu\:.org/
-GNU FTP server
-.UE .
-.
-The macro example above can be specified as:
-.RS
-.IP
-.B .FTP ftp://\[rs]:ftp\[rs]:.gnu\[rs]:.org/ \[dq]GNU FTP server\[dq] .
-.RE
-.
-.TP
-.B .TAG name
-Generates an HTML name tag from its argument.
-.
-This can then be referenced using the
-.UR #URL
-URL
-.UE
-macro.
-.
-As you can see, you must precede the tag name with
-.B #
-since it is a local reference.
-.
-This link was achieved via placing a TAG in the URL description above;
-the source looks like this:
-.
-.
-.RS
-.IP
-.EX
-\&.TP
-\&.B URL
-generates
-\&.TAG URL
-a URL using either two or three arguments.
-\&.\|.\|.
-.EE
-.RE
+The optional
+.I width
+defaults to 100 units
+(in the context of the HTML renderer)
+and the optional
+.I height
+to the same measurement as
+.I width .
 .
 .
 .TP
-.B .IMG [\-R|\-L|\-C] filename [width] [height]
-Include a picture into the document.
+.BR PIMG\~ [ \-C | \-L | \-R ]\~\c
+.IR file-name\~ [ width \~[ height ]]
+Insert graphical image
+.I file-name,
+assumed to be in PNG format.
 .
-The first argument is the horizontal location: right, left, or center
-.RB ( \-R ,
-.BR \-L ,
-or
-.BR \-C ).
-.
-Alignment is centered by default
-.RB ( \-C ).
-.
-The second argument is the filename.
-.
-The optional third and fourth arguments are the width and height.
-.
-If the width is absent it defaults to 1\~inch.
-.
-If the height is absent it defaults to the width.
-.
-This maps onto an HTML img tag.
-.
-If you are including a PNG image then it is advisable to use the
-.B PIMG
-macro.
-.
-.TP
-.B .PIMG [\-R|\-L|\-C] filename [width [height]]
-Include an image in PNG format.
-.
-This macro takes exactly the same parameters as the
-.B IMG
-macro; it has the advantage of working with PostScript and HTML devices
-also since it can automatically convert the image into the EPS format,
-using the following programs of the
-.B netpbm
-package:
-.BR pngtopnm ,
-.BR pnmcrop ,
+Compared to
+.BR IMG ,
+this macro has the advantage of working with both PostScript and HTML
+devices since it converts
+.I file-name
+into EPS format using
+.MR pngtopnm 1 ,
+.MR pnmcrop 1 ,
 and
-.BR pnmtops .
+.MR pnmtops 1 .
 .
+.I height
+and
+.I width
+may be given as percentages
+(of the line length
+.B \[rs]n[.l]
+and page length
+.BR \[rs]n[.p] ,
+respectively).
+.
+.
+.IP
 If the document isn't processed with
-.B \-Thtml
+.RB \[lq] \-T\~html \[rq]
 or
-.B \-Txhtml
-it is necessary to use the
+.RB \[lq] \-T\~xhtml \[rq],
+you must use
+.MR groff @MAN1EXT@ 's
 .B \-U
-option of
-.IR groff .
+option.
+.\" XXX: stale?  Does this predate the `psbb` request?
+.
 .
 .TP
-.B .MPIMG [\-R|\-L] [\-G gap] filename [width [height]]
-Place a PNG image on the margin and wrap text around it.
+.BR MPIMG\~ [ \-L | \-R ]\~[ \-G\~\c
+.IR gap ]\~\c
+.IR file-name\~ [ width \~[ height ]]
+As
+.BR PIMG ,
+but place the image at a margin and wrap text around it.
 .
-The first parameters are optional.
+The image is aligned the to the left
+.RB ( \-L ,
+default)
+or right
+.RB ( \-R )
+margin.
 .
-The alignment: left or right
-.RB ( \-L
-or
-.BR \-R )
-specifies the margin where the picture is placed at.
-.
-The default alignment is left
-.RB ( \-L ).
-.
-Optionally,
 .BI \-G \~gap
-can be used to arrange a gap between the picture and the text that
-wraps around it.
+imposes horizontal space of
+.I gap
+pixels between the picture and the text that wraps around it.
 .
-The default gap width is zero.
-.
-.br
-The first non-optional argument is the filename.
-.
-The optional following arguments are the width and height.
-.
-If the width is absent it defaults to 1\~inch.
-.
-If the height is absent it defaults to the width.
-.
-Example:
-.
-.
-.RS
-.IP
-.EX
-\&.MPIMG \-L \-G 2c foo.png 3c 1.5c
-.EE
-.RE
-.
-.
-.IP
-The height and width may also be given as percentages.
-.
-The PostScript device calculates the width from the
-.B .l
-register and the height from the
-.B .p
-register.
-.
-For example:
-.
-.
-.RS
-.IP
-.EX
-\&.MPIMG \-L \-G 2c foo.png 15%
-.EE
-.RE
+The default
+.I gap
+is zero.
 .
 .
 .TP
-.B .HnS n
-Begin heading.
-.
-The numeric heading level
-.I n
-is specified by the first parameter.
-.
-Use this macro if your headings contain URL, FTP or MTO macros.
-.
-Example:
-.
-.
-.RS
-.IP
-.EX
-\&.HnS 1
-\&.HR
-GNU Troff
-\&.URL https://\[rs]:www\[rs]:.gnu\[rs]:.org/\[rs]:software/\[rs]:groff/
-\&\[rs][em]a
-\&.URL http://www\[rs]:.gnu\[rs]:.org/ GNU
-\&project.
-\&.HR
-\&.HnE
-.EE
-.RE
-.
-.
-.IP
-In this case you might wish to disable automatic links to headings.
-.
-This can be done via
-.B \-P\-l
-from the command line.
-.\" or by using a call to \[lq].HX 0\[rq].
+.BI HnS\~ n
+Begin heading at level
+.I n.
 .
 .
 .TP
-.B .HnE
-End heading.
+.B HnE
+End heading text.
 .
 .
 .TP
-.B .LK
-Force
+.B LK
+Direct
 .I \%grohtml
-to place the automatically generated links at this position.
+to emit the list of automatically generated hyperlinks at this location.
 .
 .
 .TP
-.B .HR
-Generate a full-width horizontal rule for
-.B \-Thtml
-and
-.BR \-Txhtml .
+.B HR
+Generate a full-width horizontal rule when used with
+.RB \[lq] \-T\~html \[rq]
+or
+.RB \[lq] \-T\~xhtml \[rq].
 .
-No effect for all other devices.
 .
 .TP
-.B .NHR
-Suppress generation of the top and bottom rules which
+.B NHR
+Suppress the horizontal rules at the document's top and bottom that
 .I \%grohtml
 emits by default.
 .
+.
 .TP
-.B .HTL
+.B HTL
 Generate an HTML title only.
 .
-This differs from the
+This differs from
+.MR groff_ms @MAN7EXT@ 's
 .B TL
-macro of the
-.B ms
-macro package which generates both an HTML title and an <H1> heading.
+macro,
+which generates both an HTML title and an <H1> heading.
 .
-Use it to provide an HTML title as search engine fodder but a graphic
-title in the document.
+Use it to provide an HTML title as document metadata but not as
+formatted text.
 .
-The macro terminates when a space or break is seen (.sp, \&.br).
+The title ends when vertical space
+.RB ( .sp )
+or a break
+.RB ( .br )
+is seen.
+.
 .
 .TP
-.B .HEAD
-Add arbitrary HTML data to the <head> block.
+.B HEAD
+Add arbitrary data to the HTML <head> element.
 .
 Ignored if not processed with
-.B \-Thtml
+.RB \[lq] \-T\~html \[rq]
 or
-.BR \-Txhtml .
-.
-Example:
-.
-.
-.RS
-.IP
-.EX
-\&.HEAD \[dq]<link \[rs]
-  rel=\[dq]\[dq]icon\[dq]\[dq] \[rs]
-  type=\[dq]\[dq]image/png\[dq]\[dq] \[rs]
-  href=\[dq]\[dq]http://foo.org//bar.png\[dq]\[dq]/>\[dq]
-.EE
-.RE
+.RB \[lq] \-T\~xhtml \[rq].
 .
 .
 .TP
-.B .HTML
+.B HTML
 All text after this macro is treated as raw HTML.
 .
-If the document is processed without
-.B \-Thtml
+Ignored if not processed with
+.RB \[lq] \-T\~html \[rq]
 or
-.B \-Txhtml
-then the macro is ignored.
-.
-Internally, this macro is used as a building block for other
-higher-level macros.
-.
-.IP
-For example, the
-.B BGIMG
-macro is defined as
-.
-.
-.RS
-.IP
-.EX
-\&.de BGIMG
-\&.\&   HTML <body background=\[rs]\[rs]$1>
-\&..
-.EE
-.RE
+.RB \[lq] \-T\~xhtml \[rq].
 .
 .
 .TP
-.B .DC l text [color]
-Produce a drop capital.
+.BI DC\~ "L text"\~\c
+.RI [ color ]
+Format a \[lq]drop cap\[rq]\[em]a large character
+.I L
+(usually a capital letter)
+at a larger size and with a lower text baseline
+than the following
+.I text,
+such that the cap-heights of
+.I L
+and
+.I text
+align,
+in the specified
+.I color
+(default: black).
 .
-The first parameter is the letter to be dropped and enlarged, the second
-parameter
-.B text
-is the adjoining text whose height the first letter should not exceed.
-.
-The optional third parameter is the color of the dropped letter.
-.
-It defaults to black.
 .
 .TP
-.B ".CDS"
-Start displaying a code section in constant width font.
+.B CDS
+Begin code display;
+a monospaced font is selected and filling is disabled.
+.
 .
 .TP
-.B ".CDE"
-End code display
+.B CDE
+End code display.
+.
 .
 .TP
-.B ".ALN [color] [percentage]"
-Place section heading links automatically to the left of the main text.
+.BR ALN \~\c
+.RI [ color\~ [ width-percentage ]]
+Enable a \[lq]navigation pane\[rq] containing links to section headings,
+aligned to the left of running text,
+and configure its rendering parameters.
 .
-The color argument is optional and if present indicates which HTML
-background color is to be used under the links.
+Columnation is achieved with an HTML table.
 .
-The optional percentage indicates the amount of width to devote to
-displaying the links.
+.I color
+indicates an HTML background color to be used in the navigation column;
+the default is
+.BR #eeeeee .
 .
-The default values are #eeeeee and 30 for color and percentage width,
-respectively.
+.I width-percentage
+allocates the given percentage of the the navigation pane's table
+column;
+the default is
+.BR 30 .
 .
-This macro should only be called once at the beginning of the document.
+Call this macro at most once,
+at the beginning of the document.
 .
-After calling this macro each section heading emits an HTML table
-consisting of the links in the left and the section text on the right.
 .
 .TP
-.B ".LNS"
-Start a new two-column table with links in the left column.
+.B LNS
+Begin text indexed by the navigation pane configured by
+.BR ALN .
 .
-This can be called if the document has text before the first \&.SH and
-if \&.ALN is used.
-.
-Typically this is called just before the first paragraph and after the
-main title as it indicates that text after this point should be
-positioned to the right of the left-hand navigational links.
 .
 .TP
-.B ".LNE"
-End a two-column table.
+.B LNE
+End text indexed by navigation pane started by
+.BR LNS .
 .
-This should be called at the end of the document if \&.ALN was used.
 .
 .TP
-.B ".LINKSTYLE color [ fontstyle [ openglyph closeglyph ] ]"
-Initialize default URL attributes to be used if this macro set is not
-used with the HTML device.
-.
-The macro set initializes itself with the following call
-.
-.
-.RS
-.IP
-.EX
-\&.LINKSTYLE blue CR \e[la] \e[ra]
-.EE
-.RE
-.
-.
-.IP
-but these values will be superseded by a user call to LINKSTYLE.
+.BI LINKSTYLE\~ color\~\c
+.RI [ font-style\~ [ "open-glyph close-glyph" ]]
+Configure rendering of formatted hyperlink targets for devices other
+than
+.B html
+and
+.BR xhtml ;
+render
+targets in
+.I color
+(default:
+blue) \" XXX: whose default?  the browser's?
+using the typeface
+.I font-style
+(default:
+.BR CR )
+bracketed with
+.I open-glyph
+and
+.I close-glyph
+(defaults:
+.B \[rs][la]
+and
+.BR \[rs][ra] ,
+respectively).
 .
 .
 .\" ====================================================================
@@ -686,11 +525,10 @@ By default
 generates links to all section headings and places these at the top of
 the HTML document.
 .
-(See
-.UR #LK
-LINKS
-.UE
-for details of how to switch this off or alter the position).
+Configure this behavior with
+.B HX
+and/or
+.BR LK .
 .
 .
 .\" ====================================================================
@@ -708,6 +546,35 @@ part of the
 distribution
 .UE ,
 should be explored.
+.
+.
+.P
+All URLs currently are treated as consuming no textual
+space in
+.IR groff .
+.
+This could be considered as a bug since it causes some problems.
+.
+To circumvent this,
+.I www.tmac
+inserts a zero-width character which expands to a harmless space
+(only
+if run with
+.B \-Thtml
+or
+.BR \-Txhtml ).
+.
+.
+.P
+Some of the macros,
+like
+.BR ALN ,
+.BR LNS ,
+and
+.BR LNE ,
+are integrated only with the
+.MR groff_ms @MAN7EXT@
+package.
 .
 .
 .\" ====================================================================

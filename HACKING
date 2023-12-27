@@ -22,6 +22,12 @@ Standard Template Library is little used.  A modest effort is underway
 to update the code to more idiomatic C++98.  Where a C++11 feature
 promises to be advantageous, it may be annotated in a code comment.
 
+Portability notes:
+
+* `std::size` is not available in C++98.  Use the `array_length`
+  template function in src/include/lib.h instead of `sizeof` and
+  dividing.
+
 
 Automake
 --------
@@ -134,7 +140,7 @@ Here are some portability notes on writing automated tests.
   But see below regarding the opening braces.
 
 * POSIX doesn't say that sed has to accept semicolons as command
-  separators after label (':') and branch ('t') commands, or after brace
+  separators after label (':') and test ('t') commands, or after brace
   commands, so macOS sed doesn't.  GNU sed does.
 
   So rewrite tidy, compact sed scripts like this:

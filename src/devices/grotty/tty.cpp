@@ -474,7 +474,7 @@ void tty_printer::special_link(const char *arg, const environment *env)
     is_link_active = false;
   }
   else {
-    // Our caller ensures that we see white space after 'link'.
+    // Our caller ensures that we see whitespace after 'link'.
     assert(c == ' ' || c == '\t');
     if (is_link_active) {
       warning("new hyperlink started without ending previous one;"

@@ -20,6 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
 #include "lib.h"
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <assert.h>
 #include <errno.h>
 #include <signal.h>
@@ -251,14 +255,15 @@ int main(int argc, char **argv)
     case 'v':
       vflag = 1;
       printf("GNU groff version %s\n", Version_string);
-      printf(
-	"Copyright (C) 2022 Free Software Foundation, Inc.\n"
-	"GNU groff comes with ABSOLUTELY NO WARRANTY.\n"
-	"You may redistribute copies of groff and its subprograms\n"
-	"under the terms of the GNU General Public License.\n"
-	"For more information about these matters, see the file\n"
-	"named COPYING.\n");
-      printf("\ncalled subprograms:\n\n");
+      puts(
+"Copyright (C) 2023 Free Software Foundation, Inc.\n"
+"This is free software, distributed under the terms of the GNU General"
+" Public\n"
+"License, version 3, or any later version, at your option.  There is NO"
+" warranty;\n"
+"not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+      );
+      puts("\nprograms called:\n");
       fflush(stdout);
       // Pass -v to all possible subprograms
       commands[PRECONV_INDEX].append_arg(buf);

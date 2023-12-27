@@ -37,14 +37,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 #define LEADER "a"
 #define LEADER_CHAR 'a'
 
-struct inc_number {
-  short inc;
-  short val;
+struct size_expression {
+  enum { DECREMENT = -1, ABSOLUTE, INCREMENT } relativity;
+  int whole;
 };
 
 struct entry_modifier {
-  inc_number point_size;
-  inc_number vertical_spacing;
+  size_expression type_size;
+  size_expression vertical_spacing;
   string font;
   string macro;
   enum { CENTER, TOP, BOTTOM } vertical_alignment;
@@ -63,8 +63,8 @@ enum format_type {
   FORMAT_ALPHABETIC,
   FORMAT_SPAN, 
   FORMAT_VSPAN,
-  FORMAT_HLINE,
-  FORMAT_DOUBLE_HLINE
+  FORMAT_HRULE,
+  FORMAT_DOUBLE_HRULE
 };
 
 struct entry_format : public entry_modifier {
@@ -92,7 +92,7 @@ class table {
   table_entry *entry_list;
   table_entry **entry_list_tailp;
   table_entry ***entry;
-  char **vline;
+  char **vrule;
   char *row_is_all_lines;
   string *minimum_width;
   int *column_separation;
@@ -121,7 +121,7 @@ class table {
   void build_vrule_list();
   void add_vertical_rule(int, int, int, int);
   void define_bottom_macro();
-  int vline_spanned(int r, int c);
+  int vrule_spanned(int r, int c);
   int row_begins_section(int);
   int row_ends_section(int);
   void make_columns_equal();
@@ -141,8 +141,8 @@ public:
     NOSPACES      = 0x00000040,
     NOWARN        = 0x00000080,
     // The next few properties help manage nroff mode output.
-    HAS_TOP_VLINE = 0x00000100,
-    HAS_TOP_HLINE = 0x00000200,
+    HAS_TOP_VRULE = 0x00000100,
+    HAS_TOP_HRULE = 0x00000200,
     GAP_EXPAND    = 0x00000400,
     EXPERIMENTAL  = 0x80000000 // undocumented
     };
@@ -151,11 +151,11 @@ public:
   ~table();
 
   void add_text_line(int r, const string &, const char *, int);
-  void add_single_hline(int r);
-  void add_double_hline(int r);
+  void add_single_hrule(int r);
+  void add_double_hrule(int r);
   void add_entry(int r, int c, const string &, const entry_format *,
 		 const char *, int lineno);
-  void add_vlines(int r, const char *);
+  void add_vrules(int r, const char *);
   void check();
   void print();
   void set_minimum_width(int c, const string &w);
@@ -163,8 +163,8 @@ public:
   void set_equal_column(int c);
   void set_expand_column(int c);
   void set_delim(char c1, char c2);
-  void print_single_hline(int r);
-  void print_double_hline(int r);
+  void print_single_hrule(int r);
+  void print_double_hrule(int r);
   int get_nrows();
 };
 

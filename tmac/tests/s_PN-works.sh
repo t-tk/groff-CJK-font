@@ -24,14 +24,12 @@ groff="${abs_top_builddir:-.}/test-groff"
 #
 # Ensure retention of superfluous but fossilized register PN.
 
-EXAMPLE=\
-'.bp 2
+input='.bp 2
 .LP
-This is page \n[PN].
-'
+This is page \n[PN].'
 
-printf "%s" "$EXAMPLE" \
-    | "$groff" -Tascii -P-cbou -ms \
-    | grep -Fqx 'This is page 2.'
+output=$(printf "%s\n" "$input" | "$groff" -ms -Tascii -P-cbou)
+echo "$output"
+echo "$output" | grep -Fqx 'This is page 2.'
 
 # vim:set ai et sw=4 ts=4 tw=72:

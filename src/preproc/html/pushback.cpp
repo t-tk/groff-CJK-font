@@ -190,8 +190,8 @@ void pushBackBuffer::skipUntilToken (void)
 
 int pushBackBuffer::isString (const char *s)
 {
-  int length=strlen(s);
-  int i=0;
+  ptrdiff_t length=ptrdiff_t(strlen(s));
+  ptrdiff_t i=0;
 
   while ((i<length) && (putPB(getPB())==s[i])) {
     if (getPB() != s[i]) {
@@ -301,7 +301,7 @@ double pushBackBuffer::readNumber (void)
 }
 
 /*
- *  readString - reads a string terminated by white space
+ *  readString - reads a string terminated by whitespace
  *               and returns a malloced area of memory containing
  *               a copy of the characters.
  */

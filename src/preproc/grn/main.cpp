@@ -14,7 +14,7 @@
  *
  * Inside the GS and GE, commands are accepted to reconfigure the
  * picture.  At most one command may reside on each line, and each
- * command is followed by a parameter separated by white space.  The
+ * command is followed by a parameter separated by whitespace.  The
  * commands are as follows, and may be abbreviated down to one character
  * (with exception of 'scale' and 'stipple' down to "sc" and "st") and
  * may be upper or lower case.

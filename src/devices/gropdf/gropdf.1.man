@@ -87,7 +87,7 @@ output driver for Portable Document Format
 .B \-v
 .
 .SY gropdf
-.B \-\-version
+.B \%\-\-version
 .YS
 .
 .
@@ -128,7 +128,7 @@ is \[lq]\-\[rq],
 .I gropdf
 reads the standard input stream.
 .
-Output is written to the standard output stream.
+It writes to the standard output stream.
 .
 .
 .P
@@ -146,12 +146,12 @@ displays a usage message,
 while
 .B \-v
 and
-.B \-\-version
+.B \%\-\-version
 show version information;
 all exit afterward.
 .
 .
-.TP
+.TP 8n \" "-F dir" + 2n
 .B \-d
 Include debug information as comments within the PDF.
 .
@@ -347,15 +347,8 @@ name.
 Every character in the font file must exist in the PostScript font, and
 the widths given in the font file must match the widths used
 in the PostScript font.
-.
-.
-.LP
-Note that
-.I gropdf
-is currently only able to display the first 256 glyphs in any font.
-This restriction will be lifted in a later version.
-.
-.
+.\" .
+.\" .
 .\" .LP
 .\" Note that
 .\" .B grops
@@ -422,8 +415,15 @@ This default uses the same fonts as
 uses when it embeds fonts in a PDF file.
 .
 .
-.LP
-In the default setup there are styles called
+.P
+The default stroke and fill colors are black.
+.
+.
+.\" ====================================================================
+. SS Typefaces
+.\" ====================================================================
+.
+Styles called
 .BR R ,
 .BR I ,
 .BR B ,
@@ -431,7 +431,7 @@ and
 .B BI
 mounted at font positions 1 to\~4.
 .
-The fonts are grouped into families
+Text fonts are grouped into families
 .BR A ,
 .BR BM ,
 .BR C ,
@@ -439,12 +439,12 @@ The fonts are grouped into families
 .BR HN ,
 .BR N ,
 .BR P ,
-and\~\c
-.B T
-having members in each of these styles:
+.RB and\~ T ,
+each having members in each of these styles.
+.
 .
 .RS
-.TP
+.TP 8n \" BMBI + 2n + hand-tuned for PDF
 .B AR
 .FT AR
 AvantGarde-Book
@@ -638,11 +638,13 @@ Times-BoldItalic
 .RE
 .
 .
-.LP
-There is also the following font which is not a member of a family:
+.br
+.ne 3v
+.P
+Another text font is not a member of a family.
 .
 .RS
-.TP
+.TP 8n \" BMBI (above) + 2n + hand-tuned for PDF
 .B ZCMI
 .FT ZCMI
 ZapfChancery-MediumItalic
@@ -650,35 +652,67 @@ ZapfChancery-MediumItalic
 .RE
 .
 .
-.LP
-There are also some special fonts called
-.B S
-for the PS Symbol font.
+.P
+Special fonts include
+.BR S ,
+the PostScript Symbol font,
+and
+.BR EURO ,
+which offers a Euro glyph for use with old devices lacking it.
 .
-The lower case greek characters are automatically slanted (to match
-the SymbolSlanted font (SS) available to PostScript).
+.\" XXX: This is expected to change in groff 1.24.
+Lowercase Greek letters are automatically slanted to match the
+SymbolSlanted font
+.RB ( SS )
+available to
+.MR grops @MAN1EXT@ .
 .
 Zapf Dingbats is available as
-.BR ZD ;
+.BR ZD .
+.
+In contrast to
+.I grops ,
+.I gropdf
+does not require a reversed variant of it
+.RB ( ZDR );
 the \[lq]hand pointing left\[rq] glyph
 .RB ( \[rs][lh] )
-is available since it has been defined using the
+is available nevertheless,
+since it is defined using the
 .B \[rs]X\[aq]pdf: xrev\[aq]
-device control command,
-which reverses the direction of letters within words.
+device control command
+(see below).
+.
+Most glyphs in these fonts are unnamed and must be accessed using
+.BR \[rs]N .
+.
+.B EURO
+is not a standard PDF font,
+but supplied by
+.I groff
+and therefore included in the default
+.I download
+file.
 .
 .
-.LP
-The default color for
-.B \[rs]m
-and
-.B \[rs]M
-is black.
+.\" ====================================================================
+. SS "Device control commands"
+.\" ====================================================================
 .
-.
-.LP
 .I gropdf
-understands some of the device control commands supported by
+supports many device control functions,
+accessed with the
+.I groff
+request
+.B device
+or
+.I roff
+.B \[rs]X
+escape sequence.
+.
+First,
+it
+understands many of the device control commands supported by
 .MR grops 1 .
 .
 .
@@ -761,24 +795,27 @@ so you should not need to use
 to access most PDF functionality.
 .
 .
-.LP
+.br
+.ne 3v
+.P
 .I gropdf
 also supports a subset of the commands introduced in
+.IR gpresent 's
 .IR present.tmac .
 .
-Specifically it supports:-
+.
+.RS
+.TP
+.B PAUSE
+.TQ
+.B BLOCKS
+.TQ
+.B BLOCKE
+.RE
 .
 .
-.IP
-PAUSE
-.br
-BLOCKS
-.br
-BLOCKE
-.
-.
-.LP
-Which allows you to create presentation type PDFs.
+.P
+These allow you to create presentation PDFs.
 .
 Many of the other
 commands are already available in other macro packages.
@@ -846,28 +883,34 @@ tags are silently ignored.
 .
 .
 .LP
-One
-.B \[rs]X
-device control command used by the DVI driver is also recognised.
+.I gropdf
+also recognizes a device control command used by the DVI driver.
 .
 .
 .TP
-.BI \[rs]X\[aq]papersize= paper-format \[aq]
-where the
-.I paper-format
-parameter is the same as that to the
-.B papersize
-directive.
+.BI \[rs]X\[aq]papersize= width , length \[aq]
+Set the page dimensions in centimeters to
+.I width
+by
+.I length.
 .
-See
-.MR groff_font @MAN5EXT@ .
+If the
+.B \-l
+option was specified,
+these dimensions are swapped.
 .
-This means that you can alter the page size at will within the PDF file
-being created by
-.IR gropdf .
+Changes to the paper dimensions should occur prior to the first page,
+or during page ejection before starting a subsequent one.
 .
-If you do want to change the paper format,
-it must be done before you start creating the page.
+.
+.IP
+.I Caution:
+the ordering of dimensions differs from that used by
+.I papersize.tmac
+and
+.MR @g@troff @MAN1EXT@ 's
+.RB \[lq] "\-d \%paper" \[rq]
+option.
 .
 .
 .LP
@@ -990,7 +1033,7 @@ The convenience macro for this command is
 .
 .
 .TP
-.BI "\[rs]X'pdf: switchtopage\~" "when name" \[aq]
+.BI "\[rs]X\[aq]pdf: switchtopage\~" "when name" \[aq]
 Normally each new page is appended to the end of the document,
 this command allows following pages to be inserted at a
 .I \[oq]named\[cq]
@@ -1449,7 +1492,7 @@ The following is a step-by-step font installation guide for
 .I gropdf.
 .
 .
-.IP \[bu] 2n
+.IP \[bu] 3n
 Convert your font to something
 .I groff
 understands.
@@ -1673,18 +1716,18 @@ A timestamp
 to use as the output creation timestamp in place of the current time.
 .
 The time is converted to human-readable form using Perl's
-.I \%localtime()
+.I \%gmtime()
 function and recorded in a PDF comment.
 .
 .
 .TP
 .I TZ
-The time zone to use when converting the current time
-(or value of
-.IR SOURCE_DATE_EPOCH )
-to human-readable form;
+The time zone to use when converting the current time to human-readable form;
 see
 .MR tzset 3 .
+If
+.I SOURCE_DATE_EPOCH
+is used, it is always converted to human-readable form using UTC.
 .
 .
 .\" ====================================================================

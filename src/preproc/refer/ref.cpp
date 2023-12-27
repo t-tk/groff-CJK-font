@@ -107,7 +107,7 @@ reference::reference(const char *start, int len, reference_id *ridp)
 	  const char *p = ptr;
 	  while (ptr < end && *ptr != '\n')
 	    ptr++;
-	  // strip trailing white space
+	  // strip trailing whitespace
 	  const char *q = ptr;
 	  while (q > p && q[-1] != '\n' && csspace(q[-1]))
 	    q--;

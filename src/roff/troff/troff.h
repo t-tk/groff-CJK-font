@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
@@ -17,8 +16,11 @@ for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
-
 #include "lib.h"
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <assert.h>
 #include <ctype.h>
@@ -37,10 +39,11 @@ extern units scale(units n, units x, units y); // scale n by x/y
 
 extern units units_per_inch;
 
-extern int ascii_output_flag;
+extern bool want_abstract_output;
 extern int suppress_output_flag;
 extern int color_flag;
 extern int is_html;
+extern bool in_nroff_mode;
 
 extern bool device_has_tcommand;
 extern int vresolution;

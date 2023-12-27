@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (C) 2021 Free Software Foundation, Inc.
+# Copyright (C) 2021-2023 Free Software Foundation, Inc.
 #
 # This file is part of groff.
 #
@@ -46,8 +46,12 @@ wail () {
 output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -me)
 output_cs=$(printf "%s\n" "$input" | "$groff" -Tutf8 -P-cbou -me -mcs)
 output_de=$(printf "%s\n" "$input" | "$groff" -Tutf8 -P-cbou -me -mde)
+output_es=$(printf "%s\n" "$input" \
+    | "$groff" -Tutf8 -P-cbou -me -mes -a)
 output_fr=$(printf "%s\n" "$input" | "$groff" -Tutf8 -P-cbou -me -mfr)
 output_it=$(printf "%s\n" "$input" | "$groff" -Tutf8 -P-cbou -me -mit)
+output_ru=$(printf "%s\n" "$input" \
+    | "$groff" -Tutf8 -P-cbou -me -mru -a)
 output_sv=$(printf "%s\n" "$input" | "$groff" -Tutf8 -P-cbou -me -msv)
 
 echo 'checking that `td` string updated correctly for English' >&2
@@ -90,6 +94,18 @@ echo "$output_de" | grep -Eqx ' +Kapitel 1' || wail
 echo 'checking for correct German "Appendix" string' >&2
 echo "$output_de" | grep -Eqx ' +Anhang A' || wail
 
+# Spanish localization
+echo "$output_es"
+echo 'checking that `td` string updated correctly for Spanish' >&2
+echo "$output_es" \
+    | grep -q 'The day was lunes, 15 de diciembre de 2008\.$' || wail
+
+echo 'checking for correct Spanish "Chapter" string' >&2
+echo "$output_es" | grep -Eqx " +Cap<'i>tulo 1" || wail
+
+echo 'checking for correct Spanish "Appendix" string' >&2
+echo "$output_es" | grep -Eqx ' +Anexo A' || wail
+
 # French localization
 echo 'checking that `td` string updated correctly for French (1)' >&2
 echo "$output_fr" | grep -q 'The day was Lundi, 15 D'
@@ -113,9 +129,24 @@ echo "$output_it" | grep -Eqx ' +Capitolo 1' || wail
 echo 'checking for correct Italian "Appendix" string' >&2
 echo "$output_it" | grep -Eqx ' +Appendice A' || wail
 
+# Russian localization
+echo 'checking that `td` string updated correctly for Russian' >&2
+echo "$output_ru" | sed -n '4p' \
+    | grep -Fqx ' The day was <u043F><u043E><u043D><u0435><u0434><u0435><u043B><u044C><u043D><u0438><u043A>, 15 <u0434><u0435><u043A><u0430><u0431><u0440><u044F> 2008.' \
+    || wail
+
+echo 'checking for correct Russian "Chapter" string' >&2
+echo "$output_ru" | sed -n '2p' \
+    | grep -Fqx ' <u0413><u043B><u0430><u0432><u0430> 1' || wail
+
+echo 'checking for correct Russian "Appendix" string' >&2
+echo "$output_ru" | sed -n '6p' \
+    | grep -Fqx ' <u041F><u0440><u0438><u043B><u043E><u0436><u0435><u043D><u0438><u044F> A' \
+    || wail
+
 # Swedish localization
 echo 'checking that `td` string updated correctly for Swedish (1)' >&2
-echo "$output_sv" | grep -q 'The day was m'
+echo "$output_sv" | grep -q 'The day was m' || wail
 
 echo 'checking that `td` string updated correctly for Swedish (2)' >&2
 echo "$output_sv" | grep -q 'ndag, 15 december 2008\.$' || wail

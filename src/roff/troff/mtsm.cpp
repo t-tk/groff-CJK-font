@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
 // mtsm: minimum troff state machine
 
-extern int debug_state;
+extern bool want_html_debugging;
 
 #include "troff.h"
 #include "hvunits.h"
@@ -49,7 +49,7 @@ void int_value::diff(FILE *fp, const char *s, int_value compare)
     fputs("\n", fp);
     value = compare.value;
     is_known = 1;
-    if (debug_state)
+    if (want_html_debugging)
       fflush(fp);
   }
 }
@@ -93,7 +93,7 @@ void bool_value::diff(FILE *fp, const char *s, bool_value compare)
     fputs("\n", fp);
     value = compare.value;
     is_known = 1;
-    if (debug_state)
+    if (want_html_debugging)
       fflush(fp);
   }
 }
@@ -116,7 +116,7 @@ void units_value::diff(FILE *fp, const char *s, units_value compare)
     fputs("\n", fp);
     value = compare.value;
     is_known = 1;
-    if (debug_state)
+    if (want_html_debugging)
       fflush(fp);
   }
 }
@@ -225,7 +225,7 @@ void statem::flush(FILE *fp, statem *compare)
   bool_values[MTSM_BR].diff(fp, "devtag:.br",
 			    compare->bool_values[MTSM_BR]);
 #if defined(DEBUGGING)
-  if (debug_state) {
+  if (want_html_debugging) {
     fprintf(stderr, "compared state %d\n", compare->issue_no);
     fflush(stderr);
   }
@@ -381,7 +381,7 @@ void mtsm::push_state(statem *n)
 {
   if (is_html) {
 #if defined(DEBUGGING)
-    if (debug_state) {
+    if (want_html_debugging) {
       fprintf(stderr, "--> state %d pushed\n", n->issue_no);
       fflush(stderr);
     }
@@ -394,7 +394,7 @@ void mtsm::pop_state()
 {
   if (is_html) {
 #if defined(DEBUGGING)
-    if (debug_state) {
+    if (want_html_debugging) {
       fprintf(stderr, "--> state popped\n");
       fflush(stderr);
     }
@@ -432,7 +432,7 @@ void mtsm::inherit(statem *s, int reset_bool)
 	sp->state->bool_values[MTSM_BR].set(0);
       s->bool_values[MTSM_BR].set(1);
 #if defined(DEBUGGING)
-      if (debug_state)
+      if (want_html_debugging)
 	fprintf(stderr, "inherited br from pushed state %d\n",
 		sp->state->issue_no);
 #endif

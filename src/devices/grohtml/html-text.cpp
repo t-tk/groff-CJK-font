@@ -805,7 +805,7 @@ void html_text::do_newline (void)
 }
 
 /*
- *  emitted_text - returns FALSE if white space has just been written.
+ *  emitted_text - returns FALSE if whitespace has just been written.
  */
 
 int html_text::emitted_text (void)

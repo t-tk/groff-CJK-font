@@ -222,7 +222,7 @@ then
   if test -n "$tmac_wrap"
   then
   echo "\
- prefix used for macro packages   : $tmac_wrap"
+ wrappers used for macro packages : $tmac_wrap"
   fi
 fi
 echo "\
@@ -239,6 +239,8 @@ else
  X11 support                      : enabled
  X11 app defaults directory       : $appdefdir"
 fi
+echo "\
+ default paper format             : $PAGE"
 echo "\
  'groff -l' uses print spooler    : $groff_have_spooler
  use URW fonts for PDF output     : $groff_have_urw_fonts"

@@ -1,4 +1,4 @@
-/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2023 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
 This file is part of groff.
@@ -94,7 +94,8 @@ static struct {
   { "mark", MARK },
   { "lineup", LINEUP },
   { "space", SPACE },
-  { "gfont", GFONT },
+  { "gifont", GIFONT },
+  { "gfont", GFONT }, // for backward compatibility
   { "gsize", GSIZE },
   { "define", DEFINE },
   { "sdefine", SDEFINE },
@@ -109,6 +110,7 @@ static struct {
   { "type", TYPE },
   { "vcenter", VCENTER },
   { "set", SET },
+  { "reset", RESET },
   { "opprime", PRIME },
   { "grfont", GRFONT },
   { "gbfont", GBFONT },
@@ -222,7 +224,7 @@ static struct builtin_def common_defs[] = {
   { "half", "{1 smallover 2}" },
   { "hat_def", "roman \"^\"" },
   { "hat", "accent { hat_def }" },
-  { "tilde_def", "\"~\"" },
+  { "tilde_def", "roman \"~\"" },
   { "tilde", "accent { tilde_def }" },
   { "==", "type \"relation\" \\(==" },
   { "!=", "type \"relation\" \\(!=" },
@@ -251,7 +253,7 @@ static struct builtin_def troff_defs[] = {
   { "dot", "accent { dot_def }" },
   { "dotdot_def", "up 52 back 25 \"..\"" },
   { "dotdot", "accent { dotdot_def }" },
-  { "utilde_def", "down 75 \"~\"" },
+  { "utilde_def", "down 75 roman \"~\"" },
   { "utilde", "uaccent { utilde_def }" },
   { "vec_def", "up 52 size -5 \\(->" },
   { "vec", "accent { vec_def }" },
@@ -327,7 +329,8 @@ public:
   friend int get_char();
   friend int peek_char();
   friend int get_location(char **, int *);
-  friend void init_lex(const char *str, const char *filename, int lineno);
+  friend void init_lex(const char *str, const char *filename,
+		       int lineno);
 };
 
 class file_input : public input {
@@ -776,7 +779,8 @@ void interpolate_macro_with_args(const char *body)
 	level--;
     }
   } while (c != ')' && c != EOF);
-  current_input = new argument_macro_input(body, argc, argv, current_input);
+  current_input = new argument_macro_input(body, argc, argv,
+					   current_input);
 }
 
 /* If lookup flag is non-zero the token will be looked up to see
@@ -931,7 +935,7 @@ void do_include()
 {
   int t = get_token(2);
   if (t != TEXT && t != QUOTED_TEXT) {
-    lex_error("bad filename for include");
+    lex_error("invalid file name specified for inclusion");
     return;
   }
   token_buffer += '\0';
@@ -939,7 +943,7 @@ void do_include()
   errno = 0;
   FILE *fp = fopen(filename, "r");
   if (fp == 0) {
-    lex_error("can't open included file '%1'", filename);
+    lex_error("cannot open included file '%1'", filename);
     return;
   }
   current_input = new file_input(fp, filename, current_input);
@@ -949,7 +953,7 @@ void ignore_definition()
 {
   int t = get_token();
   if (t != TEXT) {
-    lex_error("bad definition");
+    lex_error("invalid definition");
     return;
   }
   get_delimited_text();
@@ -959,7 +963,7 @@ void do_definition(int is_simple)
 {
   int t = get_token();
   if (t != TEXT) {
-    lex_error("bad definition");
+    lex_error("invalid definition");
     return;
   }
   token_buffer += '\0';
@@ -983,7 +987,7 @@ void do_undef()
 {
   int t = get_token();
   if (t != TEXT) {
-    lex_error("bad undef command");
+    lex_error("invalid undefinition");
     return;
   }
   token_buffer += '\0';
@@ -994,7 +998,7 @@ void do_gsize()
 {
   int t = get_token(2);
   if (t != TEXT && t != QUOTED_TEXT) {
-    lex_error("bad argument to gsize command");
+    lex_error("invalid argument to gsize primitive");
     return;
   }
   token_buffer += '\0';
@@ -1006,18 +1010,29 @@ void do_gfont()
 {
   int t = get_token(2);
   if (t != TEXT && t != QUOTED_TEXT) {
-    lex_error("bad argument to gfont command");
+    lex_error("invalid argument to gfont primitive");
     return;
   }
   token_buffer += '\0';
-  set_gfont(token_buffer.contents());
+  set_gifont(token_buffer.contents());
+}
+
+void do_gifont()
+{
+  int t = get_token(2);
+  if (t != TEXT && t != QUOTED_TEXT) {
+    lex_error("invalid argument to gifont primitive");
+    return;
+  }
+  token_buffer += '\0';
+  set_gifont(token_buffer.contents());
 }
 
 void do_grfont()
 {
   int t = get_token(2);
   if (t != TEXT && t != QUOTED_TEXT) {
-    lex_error("bad argument to grfont command");
+    lex_error("invalid argument to grfont primitive");
     return;
   }
   token_buffer += '\0';
@@ -1028,7 +1043,7 @@ void do_gbfont()
 {
   int t = get_token(2);
   if (t != TEXT && t != QUOTED_TEXT) {
-    lex_error("bad argument to gbfont command");
+    lex_error("invalid argument to gbfont primitive");
     return;
   }
   token_buffer += '\0';
@@ -1039,14 +1054,15 @@ void do_space()
 {
   int t = get_token(2);
   if (t != TEXT && t != QUOTED_TEXT) {
-    lex_error("bad argument to space command");
+    lex_error("invalid argument to space primitive");
     return;
   }
   token_buffer += '\0';
   char *ptr;
   long n = strtol(token_buffer.contents(), &ptr, 10);
   if (n == 0 && ptr == token_buffer.contents())
-    lex_error("bad argument '%1' to space command", token_buffer.contents());
+    lex_error("invalid argument '%1' to space primitive",
+	      token_buffer.contents());
   else
     set_space(int(n));
 }
@@ -1055,7 +1071,7 @@ void do_ifdef()
 {
   int t = get_token();
   if (t != TEXT) {
-    lex_error("bad ifdef");
+    lex_error("invalid ifdef");
     return;
   }
   token_buffer += '\0';
@@ -1064,7 +1080,8 @@ void do_ifdef()
   get_delimited_text();
   if (result) {
     token_buffer += '\0';
-    current_input = new macro_input(token_buffer.contents(), current_input);
+    current_input = new macro_input(token_buffer.contents(),
+				    current_input);
   }
 }
 
@@ -1078,7 +1095,7 @@ void do_delim()
     c = get_char();
   int d;
   if (c == EOF || (d = get_char()) == EOF)
-    lex_error("end of file while reading argument to 'delim'");
+    lex_error("end of input while reading argument to 'delim'");
   else {
     if (c == 'o' && d == 'f' && peek_char() == 'f') {
       (void)get_char();
@@ -1101,14 +1118,15 @@ void do_chartype()
 {
   int t = get_token(2);
   if (t != TEXT && t != QUOTED_TEXT) {
-    lex_error("bad chartype");
+    lex_error("invalid type argument to chartype primitive");
     return;
   }
   token_buffer += '\0';
   string type = token_buffer;
   t = get_token();
   if (t != TEXT && t != QUOTED_TEXT) {
-    lex_error("bad chartype");
+    lex_error("invalid character sequence argument to chartype"
+	      " primitive");
     return;
   }
   token_buffer += '\0';
@@ -1119,23 +1137,35 @@ void do_set()
 {
   int t = get_token(2);
   if (t != TEXT && t != QUOTED_TEXT) {
-    lex_error("bad set");
+    lex_error("invalid parameter name argument to 'set' primitive");
     return;
   }
   token_buffer += '\0';
   string param = token_buffer;
   t = get_token();
   if (t != TEXT && t != QUOTED_TEXT) {
-    lex_error("bad set");
+    lex_error("invalid parameter value argument to 'set' primitive");
     return;
   }
   token_buffer += '\0';
   int n;
   if (sscanf(&token_buffer[0], "%d", &n) != 1) {
-    lex_error("bad number '%1'", token_buffer.contents());
+    lex_error("invalid number '%1'", token_buffer.contents());
     return;
   }
   set_param(param.contents(), n);
+}
+
+void do_reset()
+{
+  int t = get_token(2);
+  if (t != TEXT && t != QUOTED_TEXT) {
+    lex_error("invalid parameter name argument to 'reset' primitive");
+    return;
+  }
+  token_buffer += '\0';
+  string param = token_buffer;
+  reset_param(param.contents());
 }
 
 int yylex()
@@ -1153,13 +1183,13 @@ int yylex()
       do_definition(0);
       break;
     case TDEFINE:
-      if (!nroff)
+      if (!get_param("nroff"))
 	do_definition(0);
       else
 	ignore_definition();
       break;
     case NDEFINE:
-      if (nroff)
+      if (get_param("nroff"))
 	do_definition(0);
       else
 	ignore_definition();
@@ -1169,6 +1199,9 @@ int yylex()
       break;
     case GFONT:
       do_gfont();
+      break;
+    case GIFONT:
+      do_gifont();
       break;
     case GRFONT:
       do_grfont();
@@ -1194,6 +1227,9 @@ int yylex()
     case SET:
       do_set();
       break;
+    case RESET:
+      do_reset();
+      break;
     case QUOTED_TEXT:
     case TEXT:
       token_buffer += '\0';
@@ -1215,7 +1251,8 @@ void lex_error(const char *message,
   if (!get_location(&filename, &lineno))
     error(message, arg1, arg2, arg3);
   else
-    error_with_file_and_line(filename, lineno, message, arg1, arg2, arg3);
+    error_with_file_and_line(filename, lineno, message, arg1, arg2,
+			     arg3);
 }
 
 void yyerror(const char *s)

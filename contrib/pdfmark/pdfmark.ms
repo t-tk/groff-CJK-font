@@ -182,13 +182,13 @@ Publishing with GNU Troff
 .\" to \$2 and \$3 of standard "CW", acting as outer bracketting.
 .\"
 .de CWB
-\\$5\fC\\$3\fP\f(CB\\$1\fP\fC\\$2\fP\\$4
+\\$5\f(CR\\$3\fP\f(CB\\$1\fP\f(CR\\$2\fP\\$4
 ..
 .de CWI
-\\$5\fC\\$3\fP\f(CI\\$1\fP\fC\\$2\fP\\$4
+\\$5\f(CR\\$3\fP\f(CI\\$1\fP\f(CR\\$2\fP\\$4
 ..
 .de CWBI
-\\$5\fC\\$3\fP\f[CBI]\\$1\fP\fC\\$2\fP\\$4
+\\$5\f(CR\\$3\fP\f[CBI]\\$1\fP\f(CR\\$2\fP\\$4
 ..
 .\" Finally, augment this group with a variant string, which may be
 .\" used to set constant width tags on "IP" paragraphs, with \$1 set

@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by Gaius Mulley <gaius@glam.ac.uk>
      using adjust_arc_center() from printer.cpp, written by James Clark.
@@ -19,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <stdio.h>
@@ -178,3 +177,9 @@ void check_output_arc_limits(int x_1, int y_1,
   *miny += ycenter;
   *maxy += ycenter;
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

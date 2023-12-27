@@ -42,14 +42,15 @@ uflag=-rU0
 
 output=$(printf "%s" "$input" \
     | "$groff" -bww -Tascii -P-cbou $uflag -man)
+echo "$output"
 
 echo "checking for paragraph tag on line by itself ($uflag)" >&2
-echo "$output" | grep -qx '       Roff\.js' || wail # 7 spaces
+echo "$output" | grep -qx '     Roff\.js' || wail # 5 spaces
 
 echo "checking for presence of typeset URI ($uflag)" >&2
 echo "$output" \
-    | grep -q '^              <https://github\.com/Alhadis/Roff\.js/>' \
-    || wail # 14 spaces
+    | grep -q '^            <https://github\.com/Alhadis/Roff\.js/>' \
+    || wail # 12 spaces
 
 output=$(printf "%s" "$input" \
     | "$groff" -bww -Tascii -P-cbou -rU0 -rLL=130n -man)
@@ -65,7 +66,7 @@ output=$(printf "%s" "$input" \
     | "$groff" -bww -Tutf8 -P-cbou $uflag -man)
 
 echo "checking for paragraph tag on line by itself ($uflag)" >&2
-echo "$output" | grep -qx '       Roff\.js' || wail # 7 spaces
+echo "$output" | grep -qx '     Roff\.js' || wail # 5 spaces
 
 # Hyperlinking paragraph tags was not supported in groff 1.22.4 and
 # still isn't.

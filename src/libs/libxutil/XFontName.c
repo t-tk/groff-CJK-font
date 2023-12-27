@@ -21,7 +21,9 @@ internet at <http://www.gnu.org/licenses/gpl-2.0.txt>. */
  * build/parse X Font name strings
  */
 
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
 
 #include <X11/Xlib.h>
 #include <X11/Xos.h>
@@ -119,7 +121,7 @@ XParseFontName (XFontNameString fontNameString, XFontName *fontName,
 }
 
 static char *
-utoa (unsigned int u, char *s, int size)
+xu_utoa (unsigned int u, char *s, int size)
 {
 	char	*t;
 
@@ -156,7 +158,7 @@ XFormatFontName (XFontName *fontName, unsigned int fontNameAttributes,
 
 #define PutUnsigned(field, bit) \
 	f = (fontNameAttributes & bit) ? \
-		utoa (fontName->field, number, sizeof (number)) \
+		xu_utoa (fontName->field, number, sizeof (number)) \
 		: (char *)"*"; \
 	if ((left -= strlen (f)) < 0) \
 		return False; \

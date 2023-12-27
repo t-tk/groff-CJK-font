@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (C) 2021 Free Software Foundation, Inc.
+# Copyright (C) 2021-2023 Free Software Foundation, Inc.
 #
 # This file is part of groff.
 #
@@ -20,21 +20,33 @@
 
 groff="${abs_top_builddir:-.}/test-groff"
 
-set -e
+fail=
+
+wail () {
+    echo ...FAILED >&2
+    fail=YES
+}
 
 # Regression-test Savannah #59971.
 #
 # Hyphenation needs to be restored between (and after) text blocks just
 # as adjustment is.
 
-EXAMPLE='.nr LL 78n
+input='.nr LL 78n
 .hw a-bc-def-ghij-klmno-pqrstu-vwxyz
+.hym 2n
+.hys 1n
 .LP
+before: .hym=\n[.hym], .hys=\n[.hys]
+.br
+.
 Here is a table with hyphenation disabled in its text block.
 .
+.
 .TS
-l lx.
-foo	T{
+tab(@);
+L Lx.
+foo@T{
 .nh
 abcdefghijklmnopqrstuvwxyz
 abcdefghijklmnopqrstuvwxyz
@@ -42,17 +54,29 @@ abcdefghijklmnopqrstuvwxyz
 T}
 .TE
 .
+.
+.LP
+after: .hym=\n[.hym], .hys=\n[.hys]
+.br
+.
 Let us see if hyphenation is enabled again as it should be.
 abcdefghijklmnopqrstuvwxyz'
 
-OUTPUT=$(printf "%s\n" "$EXAMPLE" | "$groff" -Tascii -P-cbou -t -ms)
+output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -t -ms)
 
-echo "$OUTPUT"
+echo "$output"
 
-echo "testing whether hyphenation disabled in table text block" >&2
-! echo "$OUTPUT" | grep '^foo' | grep -- '-$'
+echo "checking whether hyphenation disabled in table text block" >&2
+echo "$output" | grep '^foo' | grep -- '-$' && wail
 
-echo "testing whether hyphenation enabled after table" >&2
-echo "$OUTPUT" | grep -qx 'Let us see.*lmno-'
+echo "checking whether hyphenation enabled after table" >&2
+echo "$output" | grep -qx 'Let us see.*lmno-' || wail
 
-# vim:set ai noet sw=4 ts=4 tw=72:
+# Regression-test Savannah #64122.
+
+echo "checking whether hyphenation margin and spacing preserved" >&2
+echo "$output" | grep -Fqx 'after: .hym=48, .hys=24' || wail
+
+test -z "$fail"
+
+# vim:set ai et sw=4 ts=4 tw=72:

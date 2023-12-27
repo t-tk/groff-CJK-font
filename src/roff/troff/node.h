@@ -613,8 +613,8 @@ inline hyphen_list::hyphen_list(unsigned char code, hyphen_list *p)
 
 extern void read_desc();
 extern bool mount_font(int, symbol, symbol = NULL_SYMBOL);
-extern int check_font(symbol, symbol);
-extern int check_style(symbol);
+extern bool is_font_name(symbol, symbol);
+extern bool is_abstract_style(symbol);
 extern bool mount_style(int, symbol);
 extern int is_good_fontno(int);
 extern int symbol_fontno(symbol);
@@ -645,9 +645,7 @@ public:
   mtsm state;
 };
 
-#ifndef POPEN_MISSING
 extern char *pipe_command;
-#endif
 
 extern output_file *the_output;
 extern void init_output();

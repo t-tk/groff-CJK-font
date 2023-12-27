@@ -36,7 +36,6 @@ my @requested_package = ();	# arguments to '-m' grog options
 my @inferred_preprocessor = ();	# preprocessors the document uses
 my @inferred_main_package = ();	# full-service package(s) detected
 my $main_package;		# full-service package we go with
-my $do_run = 0;			# run generated 'groff' command
 my $use_compatibility_mode = 0;	# is -C being passed to groff?
 
 my %preprocessor_for_macro = (
@@ -95,7 +94,6 @@ sub process_arguments {
   my $delayed_option = '';
   my $was_minus = 0;
   my $optarg = 0;
-  my $pdf_with_ligatures = 0;
 
   foreach my $arg (@ARGV) {
     if ( $optarg ) {
@@ -147,13 +145,8 @@ sub process_arguments {
     &usage(0) if ($arg eq '-h' || $arg eq '--help');
 
     if ($arg =~ '^--.') {
-      if ($arg =~ '^--(run|with-ligatures)$') {
-	$do_run = 1             if ($arg eq '--run');
-	$pdf_with_ligatures = 1 if ($arg eq '--with-ligatures');
-      } else {
-        &fail("unrecognized grog option '$arg'; ignored");
-	&usage(1);
-      }
+      &fail("unrecognized grog option '$arg'; ignored");
+      &usage(1);
       next;
     }
 
@@ -180,11 +173,6 @@ sub process_arguments {
     $use_compatibility_mode = 1 if ($arg =~ /C/);
 
     push @command, $arg;
-  }
-
-  if ($pdf_with_ligatures) {
-    push @command, '-P-y';
-    push @command, '-PU';
   }
 
   @input_file = ('-') unless (@input_file);
@@ -654,16 +642,7 @@ sub construct_command {
   push @command, '-m' . $main_package if ($main_package);
   push @command, @auxiliary_package_argument;
   push @command, @input_file unless ($file_args_included);
-
-  #########
-  # execute the 'groff' command here with option '--run'
-  if ( $do_run ) { # with --run
-    print STDERR "@command\n";
-    my $cmd = join ' ', @command;
-    system($cmd);
-  } else {
-    print "@command\n";
-  }
+  print "@command\n";
 } # construct_command()
 
 
@@ -672,8 +651,7 @@ sub usage {
   my $had_error = shift;
   $stream = *STDERR if $had_error;
   my $grog = $program_name;
-  print $stream "usage: $grog [--ligatures] [--run]" .
-    " [groff-option ...] [--] [file ...]\n" .
+  print $stream "usage: $grog [groff-option ...] [--] [file ...]\n" .
     "usage: $grog {-v | --version}\n" .
     "usage: $grog {-h | --help}\n";
   unless ($had_error) {

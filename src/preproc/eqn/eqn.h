@@ -1,4 +1,4 @@
-/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2023 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
 This file is part of groff.
@@ -35,7 +35,6 @@ extern int inline_flag;
 extern int draw_flag;
 extern int one_size_reduction_flag;
 extern int compatible_flag;
-extern int nroff;
 extern eqnmode_t output_format;
 extern int xhtml;
 

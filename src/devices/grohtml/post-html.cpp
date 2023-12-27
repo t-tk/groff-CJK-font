@@ -4838,9 +4838,7 @@ void html_printer::set_numbered_char(int num, const environment *env,
     return;
   }
   if (!f->contains(g)) {
-    error("font '%1' does not contain numbered character %2",
-	  f->get_name(),
-	  num);
+    error("font '%1' has no glyph at index %2", f->get_name(), num);
     return;
   }
   int w;
@@ -5081,11 +5079,7 @@ void html_printer::do_file_components (void)
     fclose(file_list.get_file());
     file_list.move_next();
     if (file_list.is_new_output_file()) {
-#ifdef LONG_FOR_TIME_T
-      long t;
-#else
-      time_t t;
-#endif
+      struct tm *t;
 
       if (fragment_no > 1)
 	write_navigation(top, prev, next, current);
@@ -5115,7 +5109,7 @@ void html_printer::do_file_components (void)
       if (do_write_date_comment) {
 	t = current_time();
 	html.begin_comment("CreationDate: ")
-	  .put_string(ctime(&t), strlen(ctime(&t))-1)
+	  .put_string(asctime(t), strlen(asctime(t))-1)
 	  .end_comment();
       }
 
@@ -5215,11 +5209,7 @@ void html_printer::writeHeadMetaStyle (void)
 
 html_printer::~html_printer()
 {
-#ifdef LONG_FOR_TIME_T
-  long t;
-#else
-  time_t t;
-#endif
+  struct tm *t;
 
   if (current_paragraph)
     current_paragraph->flush_text();
@@ -5240,7 +5230,7 @@ html_printer::~html_printer()
   if (do_write_date_comment) {
     t = current_time();
     html.begin_comment("CreationDate: ")
-      .put_string(ctime(&t), strlen(ctime(&t))-1)
+      .put_string(asctime(t), strlen(asctime(t))-1)
       .end_comment();
   }
 

@@ -61,6 +61,7 @@ TMACNORMALFILES = \
   tmac/latin5.tmac \
   tmac/latin9.tmac \
   tmac/cp1047.tmac \
+  tmac/koi8-r.tmac \
   tmac/X.tmac \
   tmac/Xps.tmac \
   tmac/lj4.tmac \
@@ -81,10 +82,14 @@ TMACNORMALFILES = \
   tmac/en.tmac \
   tmac/hyphen.en \
   tmac/hyphenex.en \
+  tmac/es.tmac \
+  tmac/hyphen.es \
   tmac/fr.tmac \
   tmac/hyphen.fr \
   tmac/it.tmac \
   tmac/hyphen.it \
+  tmac/ru.tmac \
+  tmac/hyphen.ru \
   tmac/sv.tmac \
   tmac/hyphen.sv \
   tmac/de.tmac \
@@ -128,7 +133,6 @@ MOSTLYCLEANFILES += \
    tmac/*-wrap
 
 EXTRA_DIST += \
-  tmac/fixmacros.sed \
   tmac/groff_ms.7.man \
   tmac/groff_man.7.man.in \
   tmac/groff_me.7.man \
@@ -147,6 +151,7 @@ EXTRA_DIST += \
 tmac_TESTS = \
   tmac/tests/an-ext_MR-works.sh \
   tmac/tests/an-ext_MT-works.sh \
+  tmac/tests/an-ext_SY-and-YS-work.sh \
   tmac/tests/an-ext_UR-works.sh \
   tmac/tests/an_AT-and-UC-footer-saved-and-restored.sh \
   tmac/tests/an_CS-register-off.sh \
@@ -199,6 +204,7 @@ tmac_TESTS = \
   tmac/tests/doc_Mt-works.sh \
   tmac/tests/doc_Nm-works.sh \
   tmac/tests/doc_P-register-works.sh \
+  tmac/tests/doc_TS-do-not-keep-tables-when-cR-set.sh \
   tmac/tests/doc_X-register-works.sh \
   tmac/tests/doc_accept-mixed-case-section-headings.sh \
   tmac/tests/doc_do-not-loop-infinitely-when-shortening-headers.sh \
@@ -206,6 +212,7 @@ tmac_TESTS = \
   tmac/tests/doc_indents-correctly.sh \
   tmac/tests/doc_output-footer-when-continuously-rendering.sh \
   tmac/tests/doc_smoke-test.sh \
+  tmac/tests/doc_synopsis-is-not-adjusted.sh \
   tmac/tests/e_chapter-titles-work.sh \
   tmac/tests/e_columns-work-on-long-pages.sh \
   tmac/tests/e_delayed-text-marks-work.sh \
@@ -221,6 +228,7 @@ tmac_TESTS = \
   tmac/tests/localization-works.sh \
   tmac/tests/pdfpic_does-not-choke-on-bad-pdfinfo-output.sh \
   tmac/tests/pdfpic_falls-back-to-PSPIC.sh \
+  tmac/tests/s_EQ-handles-empty-first-arg.sh \
   tmac/tests/s_IP-indents-using-paragraph-type-size.sh \
   tmac/tests/s_IP-respects-inter-sentence-space-in-tags.sh \
   tmac/tests/s_PN-works.sh \
@@ -229,6 +237,7 @@ tmac_TESTS = \
   tmac/tests/s_TC-works-with-percent-in-custom-titles.sh \
   tmac/tests/s_XA-literal-no-argument-suppresses-leader.sh \
   tmac/tests/s_honor-MINGW-when-two-columns.sh \
+  tmac/tests/s_honor-page-break-after-display.sh \
   tmac/tests/s_mark-column-start-correctly.sh \
   tmac/tests/s_no-excess-space-around-displays.sh \
   tmac/tests/s_rejects-too-short-page-lengths.sh
@@ -305,9 +314,6 @@ tmac/stamp-wrap:
 	$(AM_V_at)if test -n "$(tmac_wrap)"; then \
 	  for m in ""$(tmac_wrap); do \
 	    $(RM) $(top_builddir)/tmac/$$m-wrap; \
-	    if test "$$m" = an; then \
-	      echo .do mso an.tmac >>$(top_builddir)/tmac/$$m-wrap; \
-	    fi; \
 	    echo .cp 1 >>$(top_builddir)/tmac/$$m-wrap; \
 	    echo .so $(sys_tmac_prefix)$$m \
 	      >>$(top_builddir)/tmac/$$m-wrap; \
@@ -376,6 +382,8 @@ uninstall_tmac_hook:
 TMAC_PACKAGE_MAN = tmac/an.tmac tmac/an-ext.tmac
 TMAC_PACKAGE_MDOC = tmac/doc.tmac tmac/mdoc/doc-common \
   tmac/mdoc/doc-ditroff tmac/mdoc/doc-nroff tmac/mdoc/doc-syms
+TMAC_PACKAGE_ME = tmac/e.tmac
+TMAC_PACKAGE_MS = tmac/s.tmac
 
 
 # Local Variables:

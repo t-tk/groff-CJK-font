@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
@@ -163,26 +162,32 @@ static void add_tmp_file(const char *name)
   xtmpfiles_to_delete = x;
 }
 
-// Open a temporary file and with fatal error on failure.
+// Open a temporary file; any failure is fatal.
 
 FILE *xtmpfile(char **namep,
-	       const char *postfix_long, const char *postfix_short,
-	       int do_unlink)
+	       const char *postfix_long, const char *postfix_short)
 {
+  // `xtmptemplate()` allocates storage for `templ` with `new`.
   char *templ = xtmptemplate(postfix_long, postfix_short);
   errno = 0;
   int fd = mkstemp(templ);
   if (fd < 0)
     fatal("cannot create temporary file: %1", strerror(errno));
   errno = 0;
-  FILE *fp = fdopen(fd, FOPEN_RWB); // many callers of xtmpfile use binary I/O
+ // Many of our callers use binary I/O.
+  FILE *fp = fdopen(fd, FOPEN_RWB);
   if (!fp)
-    fatal("fdopen: %1", strerror(errno));
-  if (do_unlink)
-    add_tmp_file(templ);
-  if (namep)
+    fatal("cannot open temporary file: %1", strerror(errno));
+  add_tmp_file(templ);
+  if (namep != 0 /* nullptr */)
     *namep = templ;
   else
     delete[] templ;
   return fp;
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

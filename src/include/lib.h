@@ -85,10 +85,9 @@ int mkstemp(char *tmpl);
 int mksdir(char *tmpl);
 
 #ifdef __cplusplus
-  FILE *xtmpfile(char **namep = 0,
-		 const char *postfix_long = 0,
-		 const char *postfix_short = 0,
-		 int do_unlink = 1);
+  FILE *xtmpfile(char **namep = 0 /* nullptr */,
+		 const char *postfix_long = 0 /* nullptr */,
+		 const char *postfix_short = 0 /* nullptr */);
   char *xtmptemplate(const char *postfix_long,
 		     const char *postfix_short);
 #endif
@@ -151,6 +150,14 @@ int mksdir(char *tmpl);
 #endif
 
 static const double PI = 3.14159265358979323846;
+
+#ifdef __cplusplus
+template <typename T, size_t N>
+// constexpr // C++11
+size_t array_length(T(&)[N]) {
+    return N;
+}
+#endif
 
 #endif /* GROFF_LIB_H */
 

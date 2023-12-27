@@ -72,7 +72,7 @@ preconv \- prepare files for typesetting with
 .B \-v
 .
 .SY preconv
-.B \-\-version
+.B \%\-\-version
 .YS
 .
 .
@@ -131,21 +131,22 @@ options of
 .
 If no
 .I file
-operands are given on the command line,
+operands are present,
 or if
 .I file
 is
 .RB \[lq] \- \[rq],
-the standard input stream is read.
+.I preconv
+reads the standard input stream.
 .
 .
 .PP
 .I preconv
-tries to find the input encoding with the following algorithm,
+selects an input encoding with the following algorithm,
 stopping at the first success.
 .
 .
-.IP 1. 4n
+.IP 1. 4n \" "1." + 2n
 If the input encoding has been explicitly specified with option
 .BR \-e ,
 use it.
@@ -153,16 +154,16 @@ use it.
 .
 .IP 2.
 If the input starts with a Unicode Byte Order Mark,
-determine the encoding as UTF-8,
+select UTF-8,
 UTF-16,
 or UTF-32 accordingly.
 .
 .
 .IP 3.
 If the input stream is seekable,
-check the first and second input lines for a recognized GNU\~Emacs
-file-local variable identifying the character encoding,
-here referred to as the \[lq]coding tag\[rq] for brevity.
+check the first two input lines for a GNU\~Emacs file-local variable
+identifying the character encoding,
+here referred to as the \[lq]coding tag\[rq].
 .
 If found,
 use it.
@@ -238,8 +239,8 @@ Text editors that support more than a single character encoding need
 tags within the input files to mark the file's encoding.
 .
 While it is possible to guess the right input encoding with the help of
-heuristics that are reliable for a preponderance of natural language
-texts,
+heuristics that produce good results for a preponderance of natural
+language texts,
 they are not absolutely reliable.
 .
 Heuristics can fail on inputs that are too short or don't represent a
@@ -256,14 +257,17 @@ This notation appears in specially marked regions of an input file
 designated for \[lq]file-local variables\[rq].
 .
 .
-.PP
+.br
+.ne 4v
+.P
 .I preconv
 interprets the following syntax if it occurs in a
 .I roff
 comment
 in the first or second line of the input file.
 .
-Both \[lq]\[rs]"\[rq] and \[lq]\[rs]#\[rq] comment forms are recognized,
+Both \[lq]\^\[rs]"\^\[rq] and \[lq]\^\[rs]#\^\[rq] comment forms are
+recognized,
 but the control
 (or no-break control)
 character must be the default and must begin the line.
@@ -383,14 +387,14 @@ each of which is mapped to an appropriate value from the list above.
 .
 .
 .PP
-Trailing
+Any
 \[lq]\-dos\[rq],
 \[lq]\-unix\[rq],
-and
+or
 \[lq]\-mac\[rq]
-suffixes on coding tags
-(which indicate the end-of-line convention used in the file)
-are disregarded for the purpose of comparison with the above tags.
+suffix on a coding tag
+(which indicates the end-of-line convention used in the file)
+is ignored during comparison with the above tags.
 .
 .
 .\" ====================================================================
@@ -503,27 +507,27 @@ display a usage message,
 while
 .B \-v
 and
-.B \-\-version
-show version information;
+.B \%\-\-version
+show version and configuration information;
 all exit afterward.
 .
 .
-.TP
+.TP 10n \" "-D fbenc" + 2n
 .B \-d
 Emit debugging messages to the standard error stream.
 .
 .
 .TP
-.BI \-D\~ fallback-encoding
-Report
-.I fallback-encoding
+.BI \-D\~ fbenc
+Select the fallback encoding
+.I fbenc
 if all detection methods fail.
 .
 .
 .TP
-.BI \-e\~ encoding
-Skip detection and assume
-.IR encoding ;
+.BI \-e\~ enc
+Skip detection and select encoding
+.IR enc ;
 see
 .IR groff 's
 .B \-K

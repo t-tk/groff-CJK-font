@@ -50,8 +50,8 @@ xditview_srcdir = $(top_srcdir)/src/devices/xditview
 bin_PROGRAMS += gxditview
 gxditview_CPPFLAGS = $(AM_CPPFLAGS) $(X_CFLAGS) -Dlint \
   -I$(top_builddir)/src/devices/xditview
-gxditview_LDADD = $(X_LIBS) $(X_PRE_LIBS) -lXaw -lXmu -lXt -lX11 \
-  $(X_EXTRA_LIBS) $(LIBM) libxutil.a lib/libgnu.a
+gxditview_LDADD = $(X_LIBS) $(X_PRE_LIBS) -lXaw -lXmu $(X_AW_DEPS) \
+  -lXt -lX11 $(X_EXTRA_LIBS) $(LIBM) libxutil.a lib/libgnu.a
 XDITVIEW_GENHDRS = \
  src/devices/xditview/GXditview-ad.h \
  $(GXDITVIEW_GROFF_VERSION_H)
@@ -115,9 +115,9 @@ install_xditview: \
 	  $(DESTDIR)$(appdefdir)/GXditview-color
 
 uninstall_xditview:
-	rm -f $(DESTDIR)$(appdefdir)/GXditview
-	rm -f $(DESTDIR)$(appdefdir)/GXditview-color
-	rm -f $(DESTDIR)$(fontdir)/FontMap-X11
+	$(RM) $(DESTDIR)$(appdefdir)/GXditview
+	$(RM) $(DESTDIR)$(appdefdir)/GXditview-color
+	$(RM) $(DESTDIR)$(fontdir)/FontMap-X11
 	-rmdir $(DESTDIR)$(fontdir) 2>/dev/null
 
 endif

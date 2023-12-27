@@ -24,8 +24,7 @@ groff="${abs_top_builddir:-.}/test-groff"
 #
 # The interior of this text is fragile with respect to line count.
 
-EXAMPLE='
-.TH ts\-hell 1 2020-10-09 "groff test suite"
+input='.TH ts\-hell 1 2020-10-09 "groff test suite"
 .SH Name
 ts\-hell \- turn off tbl keeps when continuous rendering
 .SH Description
@@ -42,10 +41,11 @@ is set.
 .
 .TS
 l.
-'$(n=1; while [ $n -le 53 ]; do echo $n; n=$(( n + 1 )); done)'
+'$(n=1; while [ $n -le 66 ]; do echo $n; n=$(( n + 1 )); done)'
 .TE'
 
-OUTPUT=$(printf "%s\n" "$EXAMPLE" | "$groff" -Tascii -P-cbou -t -man)
-test -n "$(echo "$OUTPUT" | sed -n '/52/{N;/53/p;}')"
+output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -t -man)
+echo "$output"
+test -z "$(echo "$output" | sed -n '/^  *1$/,/^  *66$/s/^ *$/FNORD/p')"
 
 # vim:set ai et sw=4 ts=4 tw=72:

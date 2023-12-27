@@ -35,6 +35,6 @@ input='.TH foo 1 2022-11-08 "groff test suite"
 
 output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -man -rU1)
 echo "$output"
-echo "$output" | grep -q 'HP  PCL/PJL Reference:.*Reference Manu-'
+echo "$output" | grep -q 'HP  PCL/PJL Reference:.*Reference Manual'
 
 # vim:set ai et sw=4 ts=4 tw=72:

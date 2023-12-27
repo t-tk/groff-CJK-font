@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
@@ -27,24 +26,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 extern void change_filename(const char *);
 extern void change_lineno(int);
 
-int interpret_lf_args(const char *p)
+bool interpret_lf_args(const char *p)
 {
   while (*p == ' ')
     p++;
   if (!csdigit(*p))
-    return 0;
+    return false;
   int ln = 0;
   do {
     ln *= 10;
     ln += *p++ - '0';
   } while (csdigit(*p));
   if (*p != ' ' && *p != '\n' && *p != '\0')
-    return 0;
+    return false;
   while (*p == ' ')
     p++;
   if (*p == '\0' || *p == '\n')  {
     change_lineno(ln);
-    return 1;
+    return true;
   }
   const char *q;
   for (q = p;
@@ -55,11 +54,11 @@ int interpret_lf_args(const char *p)
   while (*q == ' ')
     q++;
   if (*q != '\n' && *q != '\0')
-    return 0;
+    return false;
   tem += '\0';
   change_filename(tem.contents());
   change_lineno(ln);
-  return 1;
+  return true;
 }
 
 #if defined(__MSDOS__) || (defined(_WIN32) && !defined(__CYGWIN__))
@@ -76,3 +75,9 @@ void normalize_for_lf (string &)
 {
 }
 #endif
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

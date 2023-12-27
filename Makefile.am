@@ -308,18 +308,6 @@ man5dir=$(manroot)/man$(man5ext)
 man7ext=7
 man7dir=$(manroot)/man$(man7ext)
 
-# The configure script checks whether all necessary utility programs for
-# grohtml are available -- only then can we build the HTML documentation.
-# make_htmldoc
-# make_install_htmldoc
-# make_uninstall_htmldoc
-
-# The configure script also checks whether all necessary utility programs
-# for pdfroff are available -- only then can we build PDF documentation.
-# make_pdfdoc
-# make_install_pdfdoc
-# make_uninstall_pdfdoc
-
 # Windows `.cmd' files
 # make_winscripts
 # make_install_winscripts
@@ -609,6 +597,17 @@ REVISION      = `echo $(VERSION) | cut -d . -f 3`
 # relative paths in the following .am files are relative to the top
 # source directory.
 
+# Initialize Automake variables we haven't already handled; see section
+# "3.8 Modifying the build rules of a Gnulib import directory" in the
+# Gnulib manual.
+AUTOMAKE_OPTIONS =
+SUBDIRS =
+noinst_HEADERS =
+noinst_LTLIBRARIES =
+pkgdata_DATA =
+MOSTLYCLEANDIRS =
+AM_CFLAGS =
+
 include $(top_srcdir)/lib/gnulib.mk
 include $(top_srcdir)/arch/mingw/mingw.am
 include $(top_srcdir)/arch/misc/misc.am
@@ -799,6 +798,11 @@ endif
 # Other files that should be present in the distribution tarball.
 EXTRA_DIST += \
   BUG-REPORT \
+  ChangeLog.old \
+  ChangeLog.111 \
+  ChangeLog.112 \
+  ChangeLog.113 \
+  ChangeLog.114 \
   ChangeLog.115 \
   ChangeLog.116 \
   ChangeLog.117 \
@@ -808,7 +812,6 @@ EXTRA_DIST += \
   ChangeLog.121 \
   ChangeLog.122 \
   FDL \
-  FOR-RELEASE \
   gendef.sh \
   HACKING \
   INSTALL.REPO \

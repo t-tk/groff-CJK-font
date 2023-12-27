@@ -391,7 +391,7 @@ A GNU extension
 
 .in 2m
 .nf
-.ft C
+.ft CR
 delim on
 .ft P
 .fi
@@ -612,7 +612,7 @@ This allows reliable modification of requests.
 
 .in 2m
 .nf
-.ft C
+.ft CR
 \&.als bp@orig bp
 \&.de bp
 \&.\&  tm before bp
@@ -633,7 +633,7 @@ factor is 1.1).
 
 .in 2m
 .nf
-.ft C
+.ft CR
 \&.fam P
 \&.fzoom CR 1100
 \&.ps 12
@@ -851,7 +851,7 @@ For example, a table with two cells and two rows looks like this:
 
 .in 2m
 .nf
-.ft C
+.ft CR
 \&.TBL cols=2
 \&.\&  TR .TD 1*1 .TD 1*2
 \&.\&  TR .TD 2*1 .TD 2*2
@@ -865,7 +865,7 @@ Here the same table using a more expanded syntax:
 
 .in 2m
 .nf
-.ft C
+.ft CR
 \&.TBL cols=2
 \&.\&  TR
 \&.\&    TD 1*1
@@ -895,7 +895,7 @@ packages.
 Example:
 
 .in 2m
-.ft C
+.ft CR
 .nf
 groff \-ms \-mfr foo > foo.ps
 .fi
@@ -1300,7 +1300,7 @@ added.
 Example use:
 
 .in 2m
-.ft C
+.ft CR
 groff \-Tdvi \-mlatin5 my_file > my_file.dvi
 .ft R
 .in
@@ -1480,7 +1480,7 @@ and \%latin-2 (ISO \%8859-2) have been added.
 Example use:
 
 .in 2m
-.ft C
+.ft CR
 groff \-Tdvi \-mlatin9 my_file > my_file.dvi
 .ft P
 .in
@@ -1503,7 +1503,7 @@ glyph components.
 Example:
 
 .in 2m
-.ft C
+.ft CR
 \e[A ho]
 .ft R
 .in
@@ -1517,7 +1517,7 @@ non-spacing ogonek U+0328 is needed for composite glyphs.
 The new request
 
 .in 2m
-.ft C
+.ft CR
 \&.composite from to
 .ft R
 .in
@@ -1526,7 +1526,7 @@ changes the mapping while a composite glyph name is constructed.
 To make \e[A\~ho] yield the expected result,
 
 .in 2m
-.ft C
+.ft CR
 \&.composite ho u0328
 .ft R
 .in
@@ -1572,7 +1572,7 @@ For orthogonality, new \eD subcommands to change the fill color are
 available:
 
 .in 2m
-.ft C
+.ft CR
 \eD\[aq]Fr \&.\|.\|.\&\[aq] \f[R](rgb)\f[]
 .br
 \eD\[aq]Fc \&.\|.\|.\&\[aq] \f[R](cmy)\f[]
@@ -1791,7 +1791,7 @@ For example, use the following for PS output on A4 paper in landscape
 orientation:
 
 .in 2m
-.ft C
+.ft CR
 groff \-Tps \-dpaper=a4l \-P\-pa4 \-P\-l \-ms foo.ms > foo.ps
 .ft R
 .in
@@ -1889,7 +1889,7 @@ This makes it possible to provide a fallback paper size.
 Example:
 
 .in 2m
-.ft C
+.ft CR
 papersize /etc/papersize a4
 .ft P
 .in
@@ -1903,7 +1903,7 @@ a \%dev\c
 subdirectory, e.g.,
 
 .in 2m
-.ft C
+.ft CR
 /usr/local/share/groff/site\-font/devps/FOO
 .ft P
 .in
@@ -2002,7 +2002,7 @@ Example:
 
 .in 2m
 .nf
-.ft C
+.ft CR
 \&.ds xxx This is a \e\e$1 test.
 \e*[xxx nice]
 .ft P
@@ -2016,7 +2016,7 @@ Example:
 
 .in 2m
 .nf
-.ft C
+.ft CR
 \&.de !
 \&..
 \&.
@@ -2107,7 +2107,7 @@ Example:
 
 .in 2m
 .nf
-.ft C
+.ft CR
 \&.trin ax
 \&.di xxx
 a
@@ -2138,7 +2138,7 @@ supported:
 
 .in 2m
 .nf
-.ft C
+.ft CR
 \&.pi foo
 \&.pi bar
 .ft P
@@ -2148,7 +2148,7 @@ supported:
 is now equivalent to
 
 .in 2m
-.ft C
+.ft CR
 \&.pi foo | bar
 .ft P
 .in
@@ -2341,7 +2341,7 @@ New keywords `color' (or `colour', `colored', `coloured'), `outline' (or
 Example:
 
 .in 2m
-.ft C
+.ft CR
 circle shaded "green" outline "black" ;
 .ft P
 .in
@@ -2425,7 +2425,7 @@ insert the following at the start of your document:
 
 .in 2m
 .nf
-.ft C
+.ft CR
 \&.if \[aq]\e*[.T]\[aq]dvi\[aq] \e
 \&.\&  sizes 500 600 700 800 900 1000 1095 1200 1400 1440 1600 \e
 \&         1728 1800 2000 2074 2200 2400 2488 2800 3600

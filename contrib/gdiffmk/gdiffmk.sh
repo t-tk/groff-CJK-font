@@ -22,14 +22,21 @@
 
 CMD=`basename $0`
 
+Diagnose () {
+	echo >&2 "${CMD}: $@"
+}
+
 Usage () {
+	status=0
 	if test $# -gt 0
 	then
-		echo >&2 "${CMD}:  $@"
+		Diagnose "usage error: $@"
+		exec 2>&1
+		echo
+		status=2
 	fi
-	echo >&2 "\
-
-Usage:  ${CMD} [ OPTIONS ] FILE1 FILE2 [ OUTPUT ]
+	cat >&2 <<EOF
+usage: ${CMD} [ OPTIONS ] FILE1 FILE2 [ OUTPUT ]
 Place difference marks into the new version of a groff/nroff/troff document.
 FILE1 and FILE2 are compared, using 'diff', and FILE2 is output with
 groff '.mc' requests added to indicate how it is different from FILE1.
@@ -60,8 +67,8 @@ OPTIONS:
                   such as GNU sed.
   --version      Print version information on the standard output and exit.
   --help         Print this message on the standard error.
-"
-	exit 255
+EOF
+	exit $status
 }
 
 
@@ -70,7 +77,7 @@ Exit () {
 	shift
 	for arg
 	do
-		echo >&2 "${CMD}:  $1"
+		echo >&2 "${CMD}: $1"
 		shift
 	done
 	exit ${exitcode}
@@ -137,7 +144,7 @@ WouldClobber () {
 	else
 		if test "$1" -ef "$3"
 		then
-			Exit 3 \
+			Exit 4 \
 			"The $2 and OUTPUT arguments both point to the same file," \
 			"'$1', and it would be overwritten."
 		fi
@@ -162,7 +169,7 @@ RequiresArgument () {
 
 	if test $# -lt 2
 	then
-		Exit 255 "Option '$1' requires a value."
+		Exit 2 "Option '$1' requires a value."
 	fi
 
 	echo "$2"
@@ -232,7 +239,7 @@ do
 		break
 		;;
 	-*)
-		BADOPTION="${CMD}:  invalid option '$1'"
+		BADOPTION="invalid option '$1'"
 		;;
 	*)
 		break
@@ -241,11 +248,13 @@ do
 	shift
 done
 
-${DIFFCMD} -Dx /dev/null /dev/null >/dev/null 2>&1  ||
-	Usage "The '${DIFFCMD}' program does not accept"	\
-		"the required '-Dname' option.
+if ! ${DIFFCMD} -Dx /dev/null /dev/null >/dev/null 2>&1
+then
+	Exit 3 "The '${DIFFCMD}' program does not accept"	\
+"the required '-Dname' option.
 Use GNU diff instead.  See the '-x DIFFCMD' option.  You can also
-install GNU diff as gdiff on your system"
+install GNU diff as 'gdiff' on your system."
+fi
 
 if test -n "${BADOPTION}"
 then

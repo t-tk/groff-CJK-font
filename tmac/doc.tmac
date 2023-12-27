@@ -178,14 +178,8 @@
 .\" via andoc.tmac and man(1); see \n[doc-hyphen-flags] in doc-common.
 .if !r HY .nr HY 1
 .
-.\" Use -rIN=<xxx> to set the paragraph indentation amount.
-.if !r IN \{\
-.  \" We select an integer indentation value in nroff mode because this
-.  \" value is used additively for multiple purposes; rounding of
-.  \" accumulating fractions would produce inconsistent results.
-.  ie t .nr IN 7.2n
-.  el   .nr IN 7n
-.\}
+.\" Use -rBP=<xxx> to set the paragraph indentation amount.
+.if !r BP .nr BP 5n
 .
 .\" LL and LT registers are handled by the doc-setup-page-layout macro.
 .
@@ -359,7 +353,7 @@
 .  ie        "\$1"|" \
 .    ds doc-arg\n[doc-arg-count] \f[R]|\f[]
 .  el \{ .ie "\$1"..." \
-.    ds doc-arg\n[doc-arg-count] \|.\|.\|.
+.    ds doc-arg\n[doc-arg-count] \f[R]\|.\|.\|.\f[]
 .  el \
 .    ds doc-arg\n[doc-arg-count] "\$1
 .  \}
@@ -795,7 +789,7 @@
 .\" NS
 .\" NS width register 'Ar' set in doc-common
 .
-.ds doc-str-Ar-default "file\ .\|.\|.
+.ds doc-str-Ar-default file\~\f[].\|.\|.\"
 .
 .eo
 .de Ar
@@ -808,7 +802,7 @@
 .
 .    \" no argument
 .    if !\n[.$] \
-.      nop \)\*[doc-str-Ar-default]\&\f[]
+.      nop \)\*[doc-str-Ar-default]\&
 .  \}
 .
 .  if !\n[doc-arg-count] \

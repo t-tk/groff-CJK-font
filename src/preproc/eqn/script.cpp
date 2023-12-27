@@ -1,4 +1,4 @@
-/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2023 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
 This file is part of groff.
@@ -15,6 +15,10 @@ for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>. */
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <assert.h>
 
@@ -33,7 +37,7 @@ public:
   void debug_print();
   int left_is_italic();
   void hint(unsigned);
-  void check_tabs(int);
+  void diagnose_tab_stop_usage(int);
 };
 
 /* The idea is that the script should attach to the rightmost box
@@ -88,9 +92,9 @@ int script_box::compute_metrics(int style)
   }
   else {
     printf(".nr " SUP_RAISE_FORMAT " \\n[" HEIGHT_FORMAT "]-%dM>?0\n",
-	   uid, p->uid, sup_drop);
+	   uid, p->uid, get_param("sup_drop"));
     printf(".nr " SUB_LOWER_FORMAT " \\n[" DEPTH_FORMAT "]+%dM\n",
-	   uid, p->uid, sub_drop);
+	   uid, p->uid, get_param("sub_drop"));
   }
   printf(".ps \\n[" SIZE_FORMAT "]u\n", uid);
   if (sup == 0) {
@@ -98,35 +102,37 @@ int script_box::compute_metrics(int style)
     // 18b
     printf(".nr " SUB_LOWER_FORMAT " \\n[" SUB_LOWER_FORMAT "]>?%dM>?(\\n["
 	   HEIGHT_FORMAT "]-(%dM*4/5))\n",
-	   uid, uid, sub1, sub->uid, x_height);
+	   uid, uid, get_param("sub1"), sub->uid,
+	   get_param("x_height"));
   }
   else {
     // sup != 0
     // 18c
     int pos;
     if (style == DISPLAY_STYLE)
-      pos = sup1;
+      pos = get_param("sup1");
     else if (style & 1)		// not cramped
-      pos = sup2;
+      pos = get_param("sup2");
     else
-      pos = sup3;
+      pos = get_param("sup3");
     printf(".nr " SUP_RAISE_FORMAT " \\n[" SUP_RAISE_FORMAT
 	   "]>?%dM>?(\\n[" DEPTH_FORMAT "]+(%dM/4))\n",
-	   uid, uid, pos, sup->uid, x_height);
+	   uid, uid, pos, sup->uid, get_param("x_height"));
     // 18d
     if (sub != 0) {
       printf(".nr " SUB_LOWER_FORMAT " \\n[" SUB_LOWER_FORMAT "]>?%dM\n",
-	     uid, uid, sub2);
+	     uid, uid, get_param("sub2"));
       // 18e
       printf(".nr " TEMP_REG " \\n[" DEPTH_FORMAT "]-\\n["
 	     SUP_RAISE_FORMAT "]+\\n[" HEIGHT_FORMAT "]-\\n["
 	     SUB_LOWER_FORMAT "]+(4*%dM)\n",
-	     sup->uid, uid, sub->uid, uid, default_rule_thickness);
+	     sup->uid, uid, sub->uid, uid,
+	     get_param("default_rule_thickness"));
       printf(".if \\n[" TEMP_REG "] \\{");
       printf(".nr " SUB_LOWER_FORMAT " +\\n[" TEMP_REG "]\n", uid);
       printf(".nr " TEMP_REG " (%dM*4/5)-\\n[" SUP_RAISE_FORMAT
 	     "]+\\n[" DEPTH_FORMAT "]>?0\n",
-	     x_height, uid, sup->uid);
+	     get_param("x_height"), uid, sup->uid);
       printf(".nr " SUP_RAISE_FORMAT " +\\n[" TEMP_REG "]\n", uid);
       printf(".nr " SUB_LOWER_FORMAT " -\\n[" TEMP_REG "]\n", uid);
       printf(".\\}\n");
@@ -136,12 +142,13 @@ int script_box::compute_metrics(int style)
   if (sub != 0 && sup != 0)
     printf("+((\\n[" WIDTH_FORMAT "]-\\n[" SUB_KERN_FORMAT "]>?\\n["
 	   WIDTH_FORMAT "])+%dM)>?0\n",
-	   sub->uid, p->uid, sup->uid, script_space);
+	   sub->uid, p->uid, sup->uid, get_param("script_space"));
   else if (sub != 0)
     printf("+(\\n[" WIDTH_FORMAT "]-\\n[" SUB_KERN_FORMAT "]+%dM)>?0\n",
-	   sub->uid, p->uid, script_space);
+	   sub->uid, p->uid, get_param("script_space"));
   else if (sup != 0)
-    printf("+(\\n[" WIDTH_FORMAT "]+%dM)>?0\n", sup->uid, script_space);
+    printf("+(\\n[" WIDTH_FORMAT "]+%dM)>?0\n", sup->uid,
+	   get_param("script_space"));
   else
     printf("\n");
   printf(".nr " HEIGHT_FORMAT " \\n[" HEIGHT_FORMAT "]",
@@ -234,13 +241,13 @@ void script_box::debug_print()
   }
 }
 
-void script_box::check_tabs(int level)
+void script_box::diagnose_tab_stop_usage(int level)
 {
   if (sup)
-    sup->check_tabs(level + 1);
+    sup->diagnose_tab_stop_usage(level + 1);
   if (sub)
-    sub->check_tabs(level + 1);
-  p->check_tabs(level);
+    sub->diagnose_tab_stop_usage(level + 1);
+  p->diagnose_tab_stop_usage(level);
 }
 
 // Local Variables:

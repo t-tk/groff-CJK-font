@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
@@ -18,14 +17,13 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
 
-
-// there is no distinction between name with no value and name with NULL value
-// null names are not permitted (they will be ignored).
+// There is no distinction between a name with no value and a name with
+// a 0 (nullptr) value.  Null names are not permitted; they are ignored.
 
 struct association {
   symbol s;
   void *v;
-  association() :  v(0) {}
+  association() : v(0 /* nullptr */) {}
 };
 
 class dictionary;
@@ -35,7 +33,7 @@ class dictionary_iterator {
   int i;
 public:
   dictionary_iterator(dictionary &);
-  int get(symbol *, void **);
+  bool get(symbol *, void **);
 };
 
 class dictionary {
@@ -47,15 +45,14 @@ class dictionary {
   void rehash(int);
 public:
   dictionary(int);
-  void *lookup(symbol s, void *v=0); // returns value associated with key
+  void *lookup(symbol s, void *v = 0 /* nullptr */);
   void *lookup(const char *);
-  // if second parameter not NULL, value will be replaced
   void *remove(symbol);
   friend class dictionary_iterator;
 };
 
 class object {
-  int rcount;
+  int refcount;
  public:
   object();
   virtual ~object();
@@ -69,23 +66,29 @@ class object_dictionary_iterator {
   dictionary_iterator di;
 public:
   object_dictionary_iterator(object_dictionary &);
-  int get(symbol *, object **);
+  bool get(symbol *, object **);
 };
 
 class object_dictionary {
   dictionary d;
 public:
   object_dictionary(int);
-  object *lookup(symbol nm);
-  void define(symbol nm, object *obj);
-  void rename(symbol oldnm, symbol newnm);
-  void remove(symbol nm);
-  int alias(symbol newnm, symbol oldnm);
+  object *lookup(symbol);
+  void define(symbol, object *);
+  void rename(symbol, symbol);
+  void remove(symbol);
+  bool alias(symbol, symbol);
   friend class object_dictionary_iterator;
 };
 
 
-inline int object_dictionary_iterator::get(symbol *sp, object **op)
+inline bool object_dictionary_iterator::get(symbol *sp, object **op)
 {
   return di.get(sp, (void **)op);
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

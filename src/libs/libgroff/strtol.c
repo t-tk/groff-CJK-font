@@ -123,9 +123,15 @@ long strtol(str, ptr, base)
 	val = val*base + n;
     }
   }
-  
+
   if (ptr)
     *ptr = str;
 
   return val;
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

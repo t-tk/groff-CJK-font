@@ -8,7 +8,7 @@
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 1989-2021 Free Software Foundation, Inc.
+.\" Copyright (C) 1989-2023 Free Software Foundation, Inc.
 .\"
 .\" Permission is granted to make and distribute verbatim copies of this
 .\" manual provided the copyright notice and this permission notice are
@@ -86,7 +86,7 @@
 .B \-v
 .
 .SY @g@refer
-.B \-\-version
+.B \%\-\-version
 .YS
 .
 .
@@ -103,7 +103,7 @@ document formatting system.
 .I @g@refer
 is a
 .MR @g@troff @MAN1EXT@
-preprocessor that prepares bibilographic citations by looking up
+preprocessor that prepares bibliographic citations by looking up
 keywords specified in a
 .MR roff @MAN7EXT@
 input document,
@@ -118,7 +118,9 @@ except that it interprets lines between
 .B .[
 and
 .B .]\&
-as citations to be translated into
+as
+.I citations
+to be translated into
 .I groff
 input,
 and lines between
@@ -126,6 +128,13 @@ and lines between
 and
 .B .R2
 as instructions regarding how citations are to be processed.
+.
+.I @g@refer
+interprets and generates
+.I roff
+.B lf
+requests so that file names and line numbers in messages produced by
+commands that read its output correctly describe the source document.
 .
 Normally,
 .I @g@refer
@@ -137,72 +146,83 @@ option to
 .
 If no
 .I file
-operands are given on the command line,
+operands are present,
 or if
 .I file
 is
 .RB \[lq] \- \[rq],
-the standard input stream is read.
+.I @g@refer
+reads the standard input stream.
 .
 .
-.LP
-Each citation specifies a reference.
+.P
+A citation identifies a work by reference to a
+.I "bibliographic record"
+detailing it.
 .
-The citation can specify a reference that is contained in a
-bibliographic database by giving a set of keywords that only that
-reference contains.
+Select a work from a database of records by listing keywords that
+uniquely identify its entry.
 .
-Alternatively it can specify a reference by supplying a database record
-in the citation.
+Alternatively,
+a document can specify a record for the work at the point its citation
+occurs.
 .
-A combination of these alternatives is also possible.
+A document can use either or both strategies as desired.
 .
 .
-.LP
+.P
 For each citation,
 .I @g@refer
-can produce a mark in the text.
+produces a
+.I mark
+in the text,
+like a superscripted footnote number or \[lq][Lesk1978a]\[rq].
 .
-This mark consists of some label which can be separated from the text
+A mark consists of a
+.I label
+between
+.I brackets.
+.
+The mark can be separated from surrounding text
 and from other labels in various ways.
 .
-For each reference it also outputs
-.MR groff @MAN7EXT@
-language commands that can be used by a macro package to produce a
-formatted reference for each citation.
-.
-The output of
 .I @g@refer
-must therefore be processed using a suitable macro package,
+produces
+.I roff
+language requests usable by a document or a macro package
 such as
 .\" .IR man ,
 .IR me ,
 .IR mm ,
 .IR mom ,
 or
-.IR ms .
+.I ms
+to produce a formatted reference for each citation.
 .
-The commands to format a citation's reference can be output immediately
-after the citation,
-or the references may be accumulated,
-and the commands output at some later point.
+A citation's reference can be output immediately after it occurs
+(as with footnotes),
+or references may
+.IR accumulate ,
+with corresponding output appearing later in the document
+(as with endnotes).
 .
-If the references are accumulated,
-then multiple citations of the same reference will produce a single
-formatted reference.
+When references accumulate,
+multiple citations of the same reference produce a single formatted
+entry.
 .
 .
-.LP
-The interpretation of lines between
+.P
+Interpretation of lines between
 .B .R1
 and
 .B .R2
-as prepreocessor commands is a feature of GNU
-.IR \%refer . \" GNU
+tokens as preprocessor commands is a GNU
+.I \%refer \" GNU
+extension.
 .
-Documents making use of this feature can still be processed by AT&T
+Documents employing this feature can still be processed by AT&T
 .I \%refer \" AT&T
-just by adding the lines
+by adding the lines
 .
 .RS
 .EX
@@ -214,76 +234,97 @@ just by adding the lines
 .
 to the beginning of the document.
 .
-This will cause
-.MR @g@troff @MAN1EXT@
+The foregoing input causes
+.I troff \" generic
 to ignore everything between
 .B .R1
 and
 .BR .R2 .
 .
-The effect of some commands can also be achieved by options.
-.
-These options are supported mainly for compatibility with AT&T
+The effects of some
+.I \%refer \" generic
+commands can be achieved by command-line options;
+these are supported for compatibility with AT&T
 .IR \%refer . \" AT&T
 .
 It is usually more convenient to use commands.
 .
 .
-.LP
-.I @g@refer
-generates
-.B .lf
-requests so that file names and line numbers in messages produced by
-commands that read
-.I @g@refer
-output will be correct;
-it also interprets lines beginning with
-.B .lf
-so that file names and line numbers in the messages and
-.B .lf
-lines that it produces will be accurate even if the input has been
-preprocessed by a command such as
-.MR @g@soelim @MAN1EXT@ .
-.
-.
 .\" ====================================================================
-.SS "Bibliographic databases"
+.SS "Bibliographic records"
 .\" ====================================================================
 .
-The bibliographic database is a text file consisting of records
-separated by one or more blank lines.
+A bibliographic record describes a referenced work in sufficient detail
+that it may be cited to accepted standards of scholarly and professional
+clarity.
 .
-Within each record fields start with a
-.B %
-at the beginning of a line.
+The record format permits annotation and extension that a document may
+use or ignore.
 .
-Each field has a one character name that immediately follows the
-.BR % .
-It is best to use only upper and lower case letters for the names
-of fields.
+A record is a plain text sequence of
+.I fields,
+one per line,
+each consisting of a percent sign
+.BR % ,
+an alphanumeric character classifying it,
+one space,
+and its contents.
 .
-The name of the field should be followed by exactly one space,
-and then by the contents of the field.
+If a field's contents are empty,
+the field is ignored.
 .
-Empty fields are ignored.
 .
-The conventional meaning of each field is as follows:
+.P
+Frequently,
+such records are organized into a
+.I "bibliographic database,"
+with each entry separated by blank lines or file boundaries.
+.
+This practice relieves documents of the need to maintain bibliographic
+data themselves.
+.
+The programs
+.MR @g@lookbib @MAN1EXT@
+and
+.MR lkbib @MAN1EXT@
+consult a bibliographic database,
+and
+.MR @g@indxbib @MAN1EXT@
+indexes one to speed retrieval from it,
+reducing document processing time.
+.
+Use of these tools is optional.
+.
+.
+.br
+.ne 4v
+.P
+The conventional uses of the bibliographic field entries are as
+follows.
+.
+Within a record,
+fields other than
+.B %A
+and
+.B %E
+replace previous occurrences thereof.
+.
+The ordering of multiple
+.B %A
+and
+.B %E
+fields is significant.
 .
 .
 .TP
 .B %A
-The name of an author.
+names an author.
 .
-If the name contains a suffix such as \[lq]Jr.\&\[rq],
-it should be separated from the last name by a comma.
+If the name contains a suffix such as \[lq]Jr.\&\[rq]
+or \[lq]III\[rq],
+it should be separated from the surname by a comma.
 .
-There can be multiple occurrences of the
-.B %A
-field.
-.
-The order is significant.
-.
-It is a good idea always to supply an
+We recommend always supplying an
 .B %A
 field or a
 .B %Q
@@ -292,174 +333,183 @@ field.
 .
 .TP
 .B %B
-For an article that is part of a book,
-the title of the book.
+records the title of the book within which a cited article
+is collected.
+.
+See
+.B %J
+and
+.BR %T .
 .
 .
 .TP
 .B %C
-The place (city) of publication.
+names the city or other place of publication.
 .
 .
 .TP
 .B %D
-The date of publication.
+indicates the date of publication.
 .
-The year should be specified in full.
+Specify the year in full.
+.\" even if the title of the conference proceedings abbreviates it
 .
 If the month is specified,
-the name rather than the number of the month should be used,
-but only the first three letters are required.
+use its name rather than its number;
+only the first three letters are required.
 .
-It is a good idea always to supply a
+We recommend always supplying a
 .B %D
 field;
 if the date is unknown,
-a value such as
-.B in press
+use
+.RB \[lq] "in press" \[rq]
 or
-.B unknown
-can be used.
+.RB \[lq] unknown \[rq]
+as its contents.
 .
 .
 .TP
 .B %E
-For an article that is part of a book,
-the name of an editor of the book.
+names an editor of the book within which a cited article is collected.
 .
-Where the work has editors and no authors,
-the names of the editors should be given as
+Where a work has editors but no authors,
+name the editors in
 .B %A
-fields and
+fields and append
 .RB \[lq] ,\~(ed.)\& \[rq]
 or
 .RB \[lq] ,\~(eds.)\& \[rq]
-should be appended to the last author.
+to the last of these.
 .
 .
 .TP
 .B %G
-U.S. government ordering number.
+records the U.S.\& government ordering number,
+ISBN,
+DOI,
+or other unique identifier.
 .
 .
 .TP
 .B %I
-The publisher (issuer).
+names the publisher (issuer).
 .
 .
 .TP
 .B %J
-For an article in a journal,
-the name of the journal.
+records the title of the journal within which a cited article is
+collected.
+.
+See
+.B %B
+and
+.BR %T .
 .
 .
 .TP
 .B %K
-Keywords to be used for searching.
+lists keywords intended to aid searches.
 .
 .
 .TP
 .B %L
-Label.
+is a label;
+typically unused in database entries,
+it can override the label format otherwise determined.
 .
 .
 .TP
 .B %N
-Journal issue number.
+records the issue number of the journal within which a cited article
+is collected.
 .
 .
 .TP
 .B %O
-Other information.
-.
-This is usually printed at the end of the reference.
+presents additional (\[lq]other\[rq]) information,
+typically placed at the end of the reference.
 .
 .
 .TP
 .B %P
-Page number.
+lists the page numbers of a cited work that is part of a larger
+collection.
 .
-A range of pages can be specified as
+Specify a range with
 .IB m \- \c
 .IR n .
+.\" XXX: Why not \[en]?  Does that break?
 .
 .
 .TP
 .B %Q
-The name of the author,
-if the author is not a person.
-.
-This will only be used if there are no
+names an institutional author when no
 .B %A
-fields.
+fields are present.
 .
-There can only be one
+Only one
 .B %Q
-field.
+field is permitted.
 .
 .
 .TP
 .B %R
-Technical report number.
+is an identifier for a report,
+thesis,
+memorandum,
+or other unpublished work.
 .
 .
 .TP
 .B %S
-Series name.
+records the title of a series to which the cited work belongs.
 .
 .
 .TP
 .B %T
-Title.
+is the work's title.
 .
-For an article in a book or journal,
-this should be the title of the article.
+See
+.B %B
+and
+.BR %J .
 .
 .
 .TP
 .B %V
-Volume number of the journal or book.
+is the volume number of the journal or book containing the cited work.
 .
 .
 .TP
 .B %X
-Annotation.
+is an annotation.
 .
-.
-.LP
-For all fields except
-.B %A
-and
-.BR %E ,
-if there is more than one occurrence of a particular field in a record,
-only the last such field will be used.
+By convention,
+it is not formatted in the citing document.
 .
 .
 .P
-If accent strings are used,
-they should follow the character to be accented.
-.
-This means that an
+If the obsolescent \[lq]accent strings\[rq] feature of the
+.I ms
+or
+.I me
+macro packages is used,
+such strings should follow the character to be accented;
+an
 .I ms
 document must call the
-.B .AM
-macro when it initializes.
+.B AM
+macro before using them.
 .
-Accent strings should not be quoted:
+Do not quote accent strings:
 use one
 .B \e
 rather than two.
 .
-Accent strings are an obsolescent feature of the
-.I me
-and
-.I ms
-macro packages;
-modern documents should use
-.I groff
-special character escape sequences instead;
-see
-.MR groff_char @MAN7EXT@ .
+See
+.MR groff_char @MAN7EXT@
+for a modern approach to the problem of diacritics.
 .
 .
 .\" ====================================================================
@@ -471,89 +521,99 @@ Citations have a characteristic format.
 .RS
 .EX
 .BI .[ opening-text
-.I flags keywords
-.I fields
+.IR "flags keyword\~" .\|.\|.
+.I field
+\&.\|.\|.
 .BI .] closing-text
 .EE
 .RE
 .
 .
-.LP
-The
+.P
 .IR opening-text ,
 .IR closing-text ,
 and
 .I flags
-components are optional.
+are optional,
+and only one
+.I keyword
+or
+.I field
+need be specified.
 .
-Only one of the
+If
 .I keywords
-and
+are present,
+.I @g@refer
+searches the bibliographic database(s) for a unique reference matching
+them.
+.
+Multiple matches are an error;
+add more
+.I keywords
+to disambiguate the reference.
+.
+In the absence of
+.I keywords,
 .I fields
-components need be specified.
+constitute the bibliographic record.
 .
-.
-.LP
-The
-.I keywords
-component says to search the bibliographic databases for a reference
-that contains all the words in
-.IR keywords .
-.
-It is an error if more than one reference is found.
-.
-.
-.LP
-The
+Otherwise,
 .I fields
-components specifies additional fields to replace or supplement those
-specified in the reference.
+specify additional data to replace or supplement those in the reference.
 .
-When references are being accumulated and the
+When references are accumulating and
 .I keywords
-component is non-empty,
-then additional fields should be specified only on the first occasion
-that a particular reference is cited,
-and will apply to all citations of that reference.
+are present,
+specify
+additional
+.I fields
+at most on the first citation of a particular
+reference;
+they apply to all further citations thereof.
 .
 .
 .br
 .ne 2v
-.LP
-The
+.P
 .I opening-text
 and
 .I closing-text
-components specify strings to be used to bracket the label instead of
-those in the
+are
+.I roff
+input used to bracket the label,
+overriding the
 .B \%bracket\-label
 command.
 .
-If either of these components is non-empty,
-the strings specified in the
+Leading and trailing spaces are significant.
+.
+If either of these is non-empty,
+the corresponding arguments to the
 .B \%bracket\-label
-command will not be used;
-this behavior can be altered using the
+command are not used;
+alter this behavior with the
 .B [
 and
 .B ]
-flags.
-.
-Leading and trailing spaces are significant for these components.
+.I flags.
 .
 .
-.LP
-The
+.br
+.ne 3v
+.P
 .I flags
-component is a list of non-alphanumeric characters each of which
-modifies the treatment of this particular citation.
+is a list of non-alphanumeric characters each of which modifies the
+treatment of the particular citation.
 .
 AT&T
 .I \%refer \" AT&T
-will treat these flags as part of the keywords and so will ignore them
-since they are non-alphanumeric.
+treats these flags as
+.I keywords,
+but ignores them since they are non-alphanumeric.
 .
-The following flags are currently recognized.
+The following flags direct GNU
+.IR \%refer . \" GNU
 .
 .
 .TP
@@ -561,25 +621,26 @@ The following flags are currently recognized.
 Use the label specified by the
 .B \%short\-label
 command,
-instead of that specified by the
-.B \%label
-command.
+if any.
 .
-If no short label has been specified,
-the normal label will be used.
+.I @g@refer
+otherwise uses the normal label.
 .
-Typically the short label is used with author-date labels and consists
-of only the date and possibly a disambiguating letter;
-the
+Typically,
+a short label implements author-date citation styles consisting of a
+name,
+a year,
+and a disambiguating letter if necessary.
+.
 .RB \[lq] # \[rq]
-is supposed to be suggestive of a numeric type of label.
+is meant to suggest such a (quasi-)numeric label.
 .
 .
 .TP
 .B [
 Precede
 .I opening-text
-with the first string specified in the
+with the first argument given to the
 .B \%bracket\-label
 command.
 .
@@ -588,56 +649,53 @@ command.
 .B ]
 Follow
 .I closing-text
-with the second string specified in the
+with the second argument given to the
 .B \%bracket\-label
 command.
 .
 .
-.LP
-An advantage of using the
+.P
+An advantage of the
 .B [
 and
 .B ]
-flags rather than including the brackets in
+flags over use of
 .I opening-text
 and
 .I closing-text
-is that
-.
-you can change the style of bracket used in the document just by
-changing the
+is that you can update the document's bracketing style in one place
+using the
 .B \%bracket\-label
 command.
 .
-Another is that sorting and merging of citations will not necessarily be
+Another is that sorting and merging of citations is not necessarily
 inhibited if the flags are used.
 .
 .
-.LP
-If a label is to be inserted into the text,
-it will be attached to the line preceding the
+.P
+.I @g@refer
+appends any label resulting from a citation to the
+.I roff
+input line preceding the
 .B .[
-line.
+token.
 .
 If there is no such line,
-then an extra line will be inserted before the
-.B .[
-line and a warning will be given.
+.I @g@refer
+issues a warning diagnostic.
 .
 .
-.LP
-There is no special notation for making a citation to multiple
-references.
+.P
+There is no special notation for citing multiple references in series.
 .
-Just use a sequence of citations,
-one for each reference.
+Use a sequence of citations,
+one for each reference,
+with nothing between them.
 .
-Don't put anything between the citations.
+.I @g@refer
+attaches all of their labels to the line preceding the first.
 .
-The labels for all the citations will be attached to the line preceding
-the first citation.
-.
-The labels may also be sorted or merged.
+These labels may be sorted or merged.
 .
 See the description of the
 .B <>
@@ -648,31 +706,32 @@ and
 .B \%abbreviate\-label\-ranges
 commands.
 .
-A label will not be merged if its citation has a non-empty
+A label is not merged if its citation has a non-empty
 .I opening-text
 or
 .IR closing-text .
 .
 However,
-the labels for a citation using the
+the labels for two adjacent citations,
+the former using the
 .B ]
 flag and without any
-.I closing-text
-immediately followed by a citation using the
+.I closing-text,
+and the latter using the
 .B [
 flag and without any
-.I opening-text
+.I opening-text,
 may be sorted and merged
-even though the first citation's
+even if the former's
 .I opening-text
-or the second citation's
+or the latter's
 .I closing-text
 is non-empty.
 .
-(If you wish to prevent this,
+(To prevent these operations,
 use the dummy character escape sequence
 .B \[rs]&
-as the first citation's
+as the former's
 .IR closing-text .)
 .
 .
@@ -685,13 +744,17 @@ Commands are contained between lines starting with
 and
 .BR .R2 .
 .
-Recognition of these lines can be prevented by the
+The
 .B \-R
-option.
+option prevents recognition of these lines.
 .
 When a
+.I @g@refer
+encounters a
 .B .R1
-line is recognized any accumulated references are flushed out.
+line,
+it
+flushes any accumulated references.
 .
 Neither
 .B .R1
@@ -729,7 +792,7 @@ Neither a number sign nor a semicolon is recognized inside double
 quotes.
 .
 A line can be continued by ending it with a backslash
-.RB \[lq] \[rs] \[rq];
+.RB \[lq]\^ \[rs] \[rq];
 this works everywhere except after a number sign.
 .
 .
@@ -773,7 +836,7 @@ Abbreviate the first names of
 .
 An initial letter will be separated from another initial letter by
 .IR string1 ,
-from the last name by
+from the surname by
 .IR string2 ,
 and from anything else
 (such as \[lq]von\[rq] or \[lq]de\[rq])
@@ -912,7 +975,7 @@ The default behavior is as follows.
 .RS \" RS twice to get inboard of the tagged paragraph indentation.
 .RS
 .EX
-.B bracket\-label \e*([. \e*(.] \[dq], \[dq]
+bracket\-label \e*([. \e*(.] \[dq], \[dq]
 .EE
 .RE
 .RE
@@ -978,7 +1041,7 @@ For example,
 .RS \" RS twice to get inboard of the tagged paragraph indentation.
 .RS
 .EX
-.B date\-as\-label D.+yD.y%a*D.\-y
+date\-as\-label D.+yD.y%a*D.\-y
 .EE
 .RE
 .
@@ -1022,17 +1085,17 @@ are
 .
 .TP
 .BI et\-al\*n\~ "string m n"
-Control use of
-.B et al.\&
+Configure use of
+.RB \[lq] "et al" \[rq]
 in the evaluation of
 .B @
 expressions in label expressions.
 .
-If the number of authors needed to make the author sequence unambiguous
-is
+If
 .I u
+is the number of authors needed to make the author sequence unambiguous
 and the total number of authors is
-.I t
+.I t,
 then the last
 .IR t \|\-\| u
 authors will be replaced by
@@ -1051,7 +1114,7 @@ The default behavior is as follows.
 .RS \" RS twice to get inboard of the tagged paragraph indentation.
 .RS
 .EX
-.B et\-al \[dq] et al\[dq] 2 3
+et\-al " et al" 2 3
 .EE
 .RE
 .
@@ -1159,8 +1222,8 @@ label expression.
 In the text,
 move any punctuation at the end of line past the label.
 .
-It is usually a good idea to give this command unless you are using
-superscripted numbers as labels.
+We recommend employing this command unless you are using superscripted
+numbers as labels.
 .
 .
 .TP
@@ -1169,11 +1232,9 @@ Reverse the fields whose names
 are in
 .IR string .
 .
-Each field name can be followed by a number which says how many such
-fields should be reversed.
-.
-If no number is given for a field,
-all such fields will be reversed.
+An optional integer after a field name limits the number of such fields
+to the given count;
+no integer means no limit.
 .
 .
 .TP
@@ -1263,7 +1324,7 @@ or if the label expression contains a
 .B <>
 expression.
 .
-This will have no effect unless references are being accumulated.
+This has no effect unless references are being accumulated.
 .
 .
 .\" ====================================================================
@@ -1298,12 +1359,10 @@ The description below applies to normal evaluation,
 except where otherwise specified.
 .
 .
-.TP
-.I field
-.TQ
-.I field\~n
-The
-.IR n -th
+.TP 8n \" "expr-n" + 2n
+.IR field\~ [ n ]
+is the
+.IR n th
 part of
 .IR field .
 .
@@ -1322,37 +1381,42 @@ literally.
 .
 .TP
 .B @
-All the authors joined as specified by the
+All authors joined as specified by the
 .B \%join\-authors
 command.
 .
-The whole of each author's name will be used.
+The whole of each author's name is used.
 .
 However,
 if the references are sorted by author
 (that is,
 the sort specification starts with
 .RB \[lq] A+ \[rq]),
-then authors' last names will be used instead,
+then authors' surnames will be used instead,
 provided that this does not introduce ambiguity,
 and also an initial subsequence of the authors may be used instead of
 all the authors,
 again provided that this does not introduce ambiguity.
 .
-The use of only the last name for the
-.IR i -th
-author of some reference
-is considered to be ambiguous if
-there is some other reference,
-such that the first
-.IR i \|\-\|1
-authors of the references are the same,
+Given any two referenced works with
+.I n
+authors,
+the use of only the surname for the
+.IR n th
+author of a reference
+is regarded as ambiguous if
+the other reference
+shares the first
+.IR n \|\-\|1
+authors,
 the
-.IR i -th
-authors are not the same,
+.IR n th
+authors of each reference are not identical,
 but the
-.IR i -th
-authors last names are the same.
+.IR n th
+authors' surnames
+.I are
+the same.
 .
 A proper initial subsequence of the sequence of authors for some
 reference is considered to be ambiguous if there is a reference with
@@ -1368,8 +1432,8 @@ met before an initial subsequence can be used.
 .
 .B @
 tentatively evaluates to a canonical representation of the authors,
-such that authors that compare equally for sorting purpose will have
-the same representation.
+such that authors that compare equally for sorting purposes have the
+same representation.
 .
 .
 .TP
@@ -1443,7 +1507,7 @@ converted to caps and small caps.
 .TP
 .IB expr .r
 .I expr
-reversed so that the last name is first.
+reversed so that the surname is first.
 .
 .
 .TP
@@ -1489,7 +1553,7 @@ does not contain a year.
 .
 .TP
 .IB expr .n
-The last name part of
+The surname part of
 .IR expr .
 .
 .
@@ -1673,7 +1737,7 @@ macro.
 .
 .
 .br
-.ne 4v
+.ne 5v
 .\" ====================================================================
 .SH Options
 .\" ====================================================================
@@ -1683,7 +1747,7 @@ displays a usage message,
 while
 .B \-v
 and
-.B \-\-version
+.B \%\-\-version
 show version information;
 all exit afterward.
 .
@@ -1843,8 +1907,7 @@ command instead of in the normal way.
 .
 .TP
 .I REFER
-If set,
-overrides the default database.
+Assign this variable a file name to override the default database.
 .
 .
 .\" ====================================================================
@@ -1996,13 +2059,22 @@ our non-bibliographic aside.
 .SH "See also"
 .\" ====================================================================
 .
+\[lq]Refer \[em] A Bibliography System\[rq],
+by Bill Tuthill,
+1983, \" 4.2BSD, /usr/doc/refer/refer.bib
+Computing Services,
+University of California,
+Berkeley.
+.
+.
+.P
 \[lq]Some Applications of Inverted Indexes on the Unix System\[rq],
 by M.\& E.\& Lesk,
 1978,
 AT&T Bell Laboratories Computing Science Technical Report No.\& 69.
 .
 .
-.LP
+.P
 .MR @g@indxbib @MAN1EXT@ ,
 .MR @g@lookbib @MAN1EXT@ ,
 .MR lkbib @MAN1EXT@

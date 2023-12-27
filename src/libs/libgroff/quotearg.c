@@ -17,7 +17,9 @@ for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -69,7 +71,7 @@ needs_quoting(const char *string)
         
   while (*string) {
     /* Scan non-NULL strings, up to '\0' terminator,
-     * returning 'TRUE' if quote or white space found.
+     * returning 'TRUE' if quote or whitespace found.
      */
 
     if (*string == '"' || isspace(*string))
@@ -80,7 +82,7 @@ needs_quoting(const char *string)
     ++string;
   }
 
-  /* Fall through, if no quotes or white space found,
+  /* Fall through, if no quotes or whitespace found,
    * in which case, return 'FALSE'.
    */
 
@@ -210,4 +212,8 @@ purge_quoted_args(char **argv)
     }
 }
 
-/* quotearg.c: end of file */
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

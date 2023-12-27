@@ -1,3 +1,196 @@
+2023-08-31  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	Rename test scripts for consistency.
+
+	* tests/LT_SP_AU_without_AT_works.sh:
+	* tests/LT_SP_multi-word_LO_SJ_works.sh:
+	* tests/MT_5_includes_AT_in_SG.sh:
+	* tests/ms_cover_sheet_robust_to_missing_AF.sh: Rename these...
+	* tests/LT-SP-AU-without-AT-works.sh:
+	* tests/LT-SP-multi-word-LO-SJ-works.sh:
+	* tests/MT-5-includes-AT-in-SG.sh:
+	* tests/ms-cover-sheet-robust-to-missing-AF.sh: ...to these.
+
+	* mm.am (mm_TESTS): Reflect renames.
+
+2023-08-24  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* m.tmac (Qrf): Define string contents using `\E` instead of
+	`\\` for better robustness.  See our Texinfo manual,
+	node/section "Copy mode".
+
+2023-08-24  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* mmroff.pl: Fix code style nits; resolve Perl warnings.
+	Initialize scalars `max_height` and `max_width` before using
+	them.  Add to `cur` hash instead of reinitializing it when
+	reading "PIC id" comment from input.
+	(ps_calc): Return early if bounding box keys in `cur` hash not
+	populated.
+	(psbb): Use `return` instead of `next` to exit early from
+	non-loop.  Improve diagnostic message: identify who is speaking,
+	what operation failed, and end with newline.
+
+	Fixes <https://savannah.gnu.org/bugs/?64312>.
+
+2023-08-23  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	Validate reference system state and user input.
+
+	* m.tmac (qrf*validate-identifier): New macro tests argument for
+	validity as roff identifier, since user input is applied to this
+	purpose.
+	(INITR): Throw error if mandatory argument omitted; keeps us
+	from creating a (likely unwanted) dotfile, ".qrf".
+	(SETR, GETST, GETHN, GETPN, GETR): Throw error if reference
+	system macros used without initialization.
+	(SETR, GETST, GETHN, GETPN): Validate arguments to be used as
+	string identifiers.
+
+2023-08-19  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* m.tmac: Flush displays at end of input even if they cause page
+	breaks.  Inspection of source code suggests that the problem
+	dates back to the introduction of the package in groff 1.04,
+	1991-11-17.  Our mm stumbled into a pitfall of AT&T
+	compatibility.  Our Texinfo manual (which did not exist yet in
+	1991) says: "For historical reasons (compatibility with AT&T
+	'troff'), the end-of-input macro exits as soon as it causes a
+	page break if no partially collected line remains. ..."
+
+	Fixes <https://savannah.gnu.org/bugs/?64336>.
+
+2023-08-19  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	Regression-test Savannah #64336.
+
+	* tests/flush-long-displays-at-end-of-input.sh: Do it.
+	* mm.am (mm_TESTS): Run test.
+
+2023-08-16 G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* groff_mm.7.man: Document difference from DWB in paragraph
+	indentation for semi-blocked letter style.  Correct
+	mischaracterization of it in `LT` macro descriptions.
+
+	Fixes <https://savannah.gnu.org/bugs/?64315>.
+
+2023-07-04 G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* m.tmac: Stop suppressing warnings if Boolean register `Ref` is
+	true.  Diagnostic output does not interfere with index/reference
+	output, the lines of which are prefixed in a way that is not
+	confusable with warnings.
+
+2023-06-30 G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* m.tmac (IND): Throw error if vertical drawing position is
+	negative.  (What page number can be recorded when that is the
+	case?)  Thanks to Damian McGuckin for raising this scenario.
+
+2023-06-30 G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	Trivially refactor.
+
+	* m.tmac (let@mt-closing): Rename this...
+	(let@formal-closing): ...to this, since it has nothing to do
+	with memorandum types.
+	(FC, let@fc_BL, let@fc_SB): Update call and alias sites.
+
+2023-05-25  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* m.tmac (let@print-head): Unconditionally put one vee of space
+	on the output before returning.
+
+	Fixes <https://savannah.gnu.org/bugs/?63695>.
+
+2023-05-25  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	Regression-test Savannah #63695.
+
+	* tests/LT-should-space-after-inside-address.sh: Do it.
+	* mm.am (mm_TESTS): Run test.
+
+2023-05-25  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	Accept a second argument to `HU`.
+
+	* m.tmac (HU): Pass `H` all of our arguments.  Also validate
+	quantity of arguments and throw error if called with none.
+
+	Fixes <https://savannah.gnu.org/bugs/?64204>.
+
+2023-05-25  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	Slightly revise index output.
+
+	* m.tmac (INDP): Call `SK` if `TXIND` is not defined, instead of
+	as the first thing if `TYIND` is not defined.  This is easier to
+	rationalize in the documentation as something that happens
+	before the index caption is written.  This way any page breaking
+	or spacing prior to the index is strictly `TXIND`'s
+	responsibility, and the formatting of the index caption itself,
+	followed by any formatting changes appropriate to the index
+	entries, belongs to `TYIND`.
+
+2023-07-04 G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* m.tmac (IND): Use `hd@mark-trimmed` instead of `hd*mark` in
+	index entries, just as is done with references; we don't want
+	trailing spaces in them.
+
+2023-05-18  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	Improve input validation of `INITI`, `IND` macros.
+
+	* m.tmac (INITI): Validate the index type (first argument) here
+	instead of only later when `IND` is called.  Actually verify
+	that the second argument is present and usable.
+	(IND): Verify that we're given arguments.
+
+	Fixes <https://savannah.gnu.org/bugs/?64205>.
+
+2023-05-18  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* m.tmac (Indcmd): Drop relic string.  Nothing interpolates it;
+	it hasn't been used since before groff 1.16 (February 2000).
+
+2023-05-17  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* m.tmac (let@print-head): Unconditionally `sp`ace after setting
+	the text produced by ".LO SJ", instead of only doing so if the
+	letter type was not "simplified" (".LT SP").
+
+	Fixes <https://savannah.gnu.org/bugs/?64209>.
+
+2023-05-17  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* m.tmac (pg@next-page): Break the line before `ne`eding a large
+	amount of space to force a page (or column) break.
+
+	Fixes <https://savannah.gnu.org/bugs/?64207>.
+
+2023-07-04  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* mmroff.pl: Honor `GROFF_BIN_PATH` environment variable.
+	* mmroff.1.man (Environment): Add section documenting this.
+
+2023-07-04  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* mmroff.pl: Trivially refactor.  Rename scalars.
+	- `check_macro` -> `first_pass`
+	- `run_macro` -> `second_pass`
+
+2023-04-01  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* mmroff.pl: Document `--help` and `--version` options in usage
+	message.
+
+2023-06-30  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tests/indexing-works.sh: Add unit test.
+	* mm.am (mm_TESTS): Run test.
+
 2023-05-25  G. Branden Robinson <g.branden.robinson@gmail.com>
 
 	* groff_mm.7.man (Macros) <INDP>: Clarify operation.
@@ -6,7 +199,7 @@
 
 2023-02-17  G. Branden Robinson <g.branden.robinson@gmail.com>
 
-	[mm]: Add `--help` option support to mmroff.
+	Add `--help` option support to mmroff.
 
 	* mmroff.pl: Recognize `--help` option.
 	* mmroff.1.man (Synopsis, Options): Document.
@@ -307,7 +500,7 @@
 
 2022-10-09  G. Branden Robinson <g.branden.robinson@gmail.com>
 
-	[mm]: Add `--version` option support to mmroff.
+	Add `--version` option support to mmroff.
 
 	* mm.am (mmroff): Replace `@VERSION@` token in script.
 	* mmroff.pl: Recognize `--version` option.
@@ -328,7 +521,7 @@
 
 2022-10-09  G. Branden Robinson <g.branden.robinson@gmail.com>
 
-	[mm]: Refactor generation of "mmroff" script.
+	Refactor generation of "mmroff" script.
 
 	* mmroff.pl: Replace absolute filespec with `@PERL@` replacement
 	token.  This is documentary; the filespec was getting replaced
@@ -620,9 +813,7 @@
 
 2021-05-30  G. Branden Robinson <g.branden.robinson@gmail.com>
 
-	[mm]: Cease warning level manipulation.
-
-	Stop mm macro package from manipulating warnings.
+	Cease warning level manipulation.
 
 	* m.tmac: Remove code that attempted to enable all warnings if
 	none were given on the command line.  It did this by simply
@@ -1658,13 +1849,14 @@ Sun Jan 1 00:00:00 1991 Joergen Haegg (jh at efd.lth.se)
 
 ________________________________________________________________________
 
-Copyright 1991-2020 Free Software Foundation, Inc.
+Copyright 1991-2023 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright
 notice and this notice are preserved.
 
 Local Variables:
+coding: latin-1
 fill-column: 72
 mode: change-log
 version-control: never

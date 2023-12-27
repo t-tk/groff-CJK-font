@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
@@ -23,17 +22,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
 // is 'p' a good size for a hash table
 
-static int is_good_size(unsigned int p)
+static bool is_good_size(unsigned int p)
 {
   const unsigned int SMALL = 10;
   unsigned int i;
-  for (i = 2; i <= p/2; i++)
+  for (i = 2; i <= (p / 2); i++)
     if (p % i == 0)
-      return 0;
+      return false;
   for (i = 0x100; i != 0; i <<= 8)
-    if (i % p <= SMALL || i % p > p - SMALL)
-      return 0;
-  return 1;
+    if ((i % p) <= SMALL || (i % p) > (p - SMALL))
+      return false;
+  return true;
 }
 
 dictionary::dictionary(int n) : size(n), used(0), threshold(0.5), factor(1.5)
@@ -47,11 +46,11 @@ dictionary::dictionary(int n) : size(n), used(0), threshold(0.5), factor(1.5)
 void *dictionary::lookup(symbol s, void *v)
 {
   int i;
-  for (i = int(s.hash() % size); 
-       table[i].v != 0;
+  for (i = int(s.hash() % size);
+       table[i].v != 0 /* nullptr */;
        i == 0 ? i = size - 1: --i)
     if (s == table[i].s) {
-      if (v != 0) {
+      if (v != 0 /* nullptr */) {
 	void *temp = table[i].v;
 	table[i].v = v;
 	return temp;
@@ -59,62 +58,62 @@ void *dictionary::lookup(symbol s, void *v)
       else
 	return table[i].v;
     }
-  if (v == 0)
-    return 0;
+  if (v == 0 /* nullptr */)
+    return 0 /* nullptr */;
   ++used;
   table[i].v = v;
   table[i].s = s;
   if ((double)used/(double)size >= threshold || used + 1 >= size) {
     int old_size = size;
-    size = int(size*factor);
+    size = int(size * factor);
     while (!is_good_size(size))
       ++size;
     association *old_table = table;
     table = new association[size];
     used = 0;
     for (i = 0; i < old_size; i++)
-      if (old_table[i].v != 0)
+      if (old_table[i].v != 0 /* nullptr */)
 	(void)lookup(old_table[i].s, old_table[i].v);
     delete[] old_table;
   }
-  return 0;
+  return 0 /* nullptr */;
 }
 
 void *dictionary::lookup(const char *p)
 {
   symbol s(p, MUST_ALREADY_EXIST);
   if (s.is_null())
-    return 0;
+    return 0 /* nullptr */;
   else
     return lookup(s);
 }
 
 // see Knuth, Sorting and Searching, p527, Algorithm R
-  
+
 void *dictionary::remove(symbol s)
 {
   // this relies on the fact that we are using linear probing
   int i;
   for (i = int(s.hash() % size);
-       table[i].v != 0 && s != table[i].s;
+       table[i].v != 0 /* nullptr */ && s != table[i].s;
        i == 0 ? i = size - 1: --i)
     ;
   void *p = table[i].v;
-  while (table[i].v != 0) {
-    table[i].v = 0;
+  while (table[i].v != 0 /* nullptr */) {
+    table[i].v = 0 /* nullptr */;
     int j = i;
     int r;
     do {
       --i;
       if (i < 0)
 	i = size - 1;
-      if (table[i].v == 0)
+      if (table[i].v == 0 /* nullptr */)
 	break;
       r = int(table[i].s.hash() % size);
     } while ((i <= r && r < j) || (r < j && j < i) || (j < i && i <= r));
     table[j] = table[i];
   }
-  if (p != 0)
+  if (p != 0 /* nullptr */)
     --used;
   return p;
 }
@@ -123,16 +122,16 @@ dictionary_iterator::dictionary_iterator(dictionary &d) : dict(&d), i(0)
 {
 }
 
-int dictionary_iterator::get(symbol *sp, void **vp)
+bool dictionary_iterator::get(symbol *sp, void **vp)
 {
   for (; i < dict->size; i++)
     if (dict->table[i].v) {
       *sp = dict->table[i].s;
       *vp = dict->table[i].v;
       i++;
-      return 1;
+      return true;
     }
-  return 0;
+  return false;
 }
 
 object_dictionary_iterator::object_dictionary_iterator(object_dictionary &od)
@@ -140,7 +139,7 @@ object_dictionary_iterator::object_dictionary_iterator(object_dictionary &od)
 {
 }
 
-object::object() : rcount(0)
+object::object() : refcount(0)
 {
 }
 
@@ -150,12 +149,12 @@ object::~object()
 
 void object::add_reference()
 {
-  rcount += 1;
+  refcount += 1;
 }
 
 void object::remove_reference()
 {
-  if (--rcount == 0)
+  if (--refcount == 0)
     delete this;
 }
 
@@ -195,7 +194,7 @@ void object_dictionary::remove(symbol nm)
 
 // Return non-zero if oldnm was defined.
 
-int object_dictionary::alias(symbol newnm, symbol oldnm)
+bool object_dictionary::alias(symbol newnm, symbol oldnm)
 {
   object *obj = (object *)d.lookup(oldnm);
   if (obj) {
@@ -203,7 +202,13 @@ int object_dictionary::alias(symbol newnm, symbol oldnm)
     obj = (object *)d.lookup(newnm, obj);
     if (obj)
       obj->remove_reference();
-    return 1;
+    return true;
   }
-  return 0;
+  return false;
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

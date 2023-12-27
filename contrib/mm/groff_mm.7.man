@@ -102,7 +102,7 @@ Change the style of the typeface with
 .BR I ,
 and
 .BR R ;
-you can alternate styles with
+you can alternate styles within a word with
 .BR BI ,
 .BR BR ,
 .BR IB ,
@@ -147,7 +147,7 @@ implementation found in the AT&T Documenter's Workbench (DWB),
 with the following limitations.
 .
 .
-.IP \[bu] 2n
+.IP \[bu] 3n
 Omitted features include
 the logo and company name strings,
 .B }Z
@@ -164,14 +164,14 @@ the
 register;
 and the
 .B OK
-(other keywords),
+(other keywords)
 and
 .B PM
 (proprietary markings)
 macros.
 .
 .
-.IP \[bu] 2n
+.IP \[bu]
 The
 .B CS
 (output cover sheet)
@@ -588,7 +588,7 @@ published interface but are documented aspects of
 .I groff mm.
 .
 .
-.TP
+.TP 8n \" "COVEND" + 2n
 .BI )E\  "level text"
 Add heading text
 .I text
@@ -1285,10 +1285,10 @@ to\~0 to suppress these.
 .
 .TP
 .BR EC \~\c
-.RI [ title \~[ override \~[ flag \~[  refname ]]]]
+.RI [ title \~[ override \~[ flag \~[ ref-name ]]]]
 Caption an equation.
 .
-The caption consists of the string
+A caption comprises the string
 .B Liec
 followed by an automatically incrementing counter stored in the register
 .BR Ec ,
@@ -1343,14 +1343,14 @@ enclosing display.
 .
 .
 .IP
-.I refname
-stores the equation number using
-.BR SETR ;
-it can be retreived with
-.RB \[lq] .GETST
-.IR refname \[rq].
+Specifying
+.I ref-name
+stores the equation number as if by
+.RB \[lq] .SETR
+.I ref-name
+.BR \[rs]n[Ec] \[rq].
 .
-This argument is a GNU extension.
+Recognition of this argument is a GNU extension.
 .
 .
 .IP
@@ -1490,7 +1490,7 @@ is used.
 .
 .TP
 .BR EX \~\c
-.RI [ title \~[ override \~[ flag \~[  refname ]]]]
+.RI [ title \~[ override \~[ flag \~[ ref-name ]]]]
 Caption an exhibit.
 .
 Arguments are handled analogously to
@@ -1529,7 +1529,12 @@ Output the string
 .BR Letfc ,
 or the specified
 .I closing-text,
-as the formal closing of a letter.
+as the formal closing of a letter or memorandum.
+.
+See
+.B LT
+and
+.BR MT .
 .
 .
 .TP
@@ -1601,7 +1606,7 @@ see
 .
 .TP
 .BR FG \~\c
-.RI [ title \~[ override \~[ flag \~[  refname ]]]]
+.RI [ title \~[ override \~[ flag \~[ ref-name ]]]]
 Caption a figure.
 .
 Arguments are handled analogously to
@@ -1676,87 +1681,60 @@ the footnote marker in the body text must be explicitly written.
 .
 .
 .TP
-.BI GETHN\  "refname \fR[\fPvarname\fR]\fP"
-Include the heading number where the corresponding
-.RB \[lq] .SETR
-.IR refname \[rq]
-was placed.
-.
-This is displayed as \[lq]X.X.X.\[rq] in pass\~1.
-.
-See
-.BR INITR .
-.
-If
-.I varname
-is used,
-.B GETHN
-sets the string
-.I varname
-to the heading number.
-.
-.TP
-.BI GETPN\  "refname \fR[\fPvarname\fR]\fP"
-Include the page number where the corresponding
-.RB \[lq] .SETR
-.IR refname \[rq]
-was placed.
-.
-This is displayed as \[lq]9999\[rq] in pass\~1.
+.BI GETHN\~ ref-name\~\c
+.RI [ string ]
+Interpolate
+.IR ref-name 's
+heading number,
+or,
+if
+.I string
+is specified,
+store it there.
 .
 See
 .BR INITR .
 .
-If
-.I varname
-is used,
-.B GETPN
-sets the string
-.I varname
-to the page number.
 .
 .TP
-.BI GETR\  refname
-Combine
-.B GETHN
-and
-.B GETPN
-with the text \[lq]chapter\[rq] and \[lq],\~page\[rq].
+.BI GETPN\~ ref-name\~\c
+.RI [ string ]
+Interpolate
+.IR ref-name 's
+page number,
+or,
+if
+.I string
+is specified,
+store it there.
 .
-The string
-.B Qrf
-contains the text for the cross reference:
+See
+.BR INITR .
 .
-.RS
-.IP
-\&.ds Qrf See chapter \[rs]\[rs]*[Qrfh], page \[rs]\[rs]*[Qrfp].
-.RE
-.
-.IP
-.B Qrf
-may be changed to support other languages.
-.
-Strings
-.B Qrfh
-and
-.B Qrfp
-are set by
-.B GETR
-and contain the page and heading number,
-respectively.
 .
 .TP
-.BI GETST\  "refname \fR[\fPvarname\fR]\fP"
-Include the string saved with the second argument to
-.BR .SETR .
+.BI GETR\~ ref-name
+Retrieve location data for reference
+.I ref-name
+and interpolate string
+.B Qrf
+as a cross reference to it.
 .
-This is a dummy string in pass\~1.
+See
+.BR INITR .
 .
-If
-.I varname
-is used,
-.B GETST
-sets it to the saved string.
+.
+.TP
+.BI GETST\~ ref-name\~\c
+.RI [ string ]
+Interpolate
+.IR ref-name 's
+auxiliary reference datum,
+or,
+if
+.I string
+is specified,
+store it there.
 .
 See
 .BR INITR .
@@ -1793,9 +1771,9 @@ is unnecessary.
 .
 .
 .IP
+The optional
 .I title
-specifies an optional title;
-it must be double-quoted if it contains spaces.
+must be double-quoted if it contains spaces.
 .
 .I mm
 appends
@@ -1937,9 +1915,9 @@ macros to enable further customization of headings.
 .
 (DWB
 .I mm
-called these \[lq]exits\[rq].)
+termed them \[lq]exits\[rq].)
 .
-They can be used to change the heading's
+Hooks can change the heading's
 .I mark
 (the numbered portion before any heading title),
 its vertical spacing,
@@ -2060,16 +2038,12 @@ It could be used to change the page header to include a section heading.
 .
 .
 .TP
-.BI HC\  \fR[\fPhyphenation-character\fR]\fP
+.BI HC\~ \fR[\fPhyphenation-character\fR]\fP
 Set hyphenation character.
 .
-Default value is \[lq]\[rs]%\[rq].
+The default is \[lq]\[rs]%\[rq].
 .
 Resets to the default if called without argument.
-.
-Hyphenation can be turned off by setting register
-.B Hy
-to\~0 at the beginning of the file.
 .
 .
 .TP
@@ -2088,12 +2062,18 @@ An explicitly empty argument also indicates the default.
 .
 .
 .TP
-.BI HU\~ heading-text
-Set an unnumbered section heading.
+.BI HU\~ title \~\c
+.RI [ suffix ]
+Set an unnumbered section heading with
+.I title
+and,
+as a GNU extension,
+an optional
+.I suffix.
 .
-Except for a heading number,
-it is treated as a numbered heading of the level stored in
-.RB register\~ Hu ;
+The heading is treated as a numbered heading of the level stored in
+.RB register\~ Hu ,
+but no heading number is output;
 .RB see\~ H .
 .
 .
@@ -2246,12 +2226,12 @@ with the arguments given to
 .
 .
 .TP
-.BI INITR\~ id
+.BI INITR\~ file-name-prefix
 Initialize the cross reference macros.
 .
 Cross references are written to the standard error stream,
 which should be redirected into a file named
-.RI id .qrf .
+.RI file-name-prefix .qrf .
 .
 .MR mmroff @MAN1EXT@
 handles this and the two formatting passes it requires.
@@ -2261,8 +2241,8 @@ handles this and the two formatting passes it requires.
 .\"by default deactivates the unsafe operations that are required by
 .\".BR INITR .
 .
-The first pass identifies cross references,
-and the second one includes them.
+The first pass identifies cross references;
+the second includes them.
 .\"
 .\".B INITR
 .\"can be used several times,
@@ -2270,13 +2250,12 @@ and the second one includes them.
 .\".B INITR
 .\"that is active.
 .
-.
-.IP
 See
 .BR SETR ,
+.BR GETHN ,
 .BR GETPN ,
 and
-.BR GETHN .
+.BR GETST .
 .
 .
 .TP
@@ -2333,36 +2312,31 @@ purpose.
 .
 .
 .br
-.ne 5v
+.ne 3v
 .IP
-The nesting level of lists is tracked by
-.I mm;
-the outermost level is\~0.
+.I mm
+tracks the nesting level of lists;
+the outermost is\~0.
 .
-The text of each list item is indented by
-.I text-indent;
-the default is taken from the
-.B Li
-register
-(in ens).
-.
-Each item's mark is indented by
-.I mark-indent;
-the default is
-.BR 0n .
+Each list item is indented by
+.I text-indent,
+and its mark
+by
+.I mark-indent.
 .
 The mark is normally left-aligned.
 .
 If
 .I pad
 is greater than zero,
+it overrides
 .I mark-indent
-is overridden such that
+such that
 .I pad
 ens of space follow the mark.
 .
 .I type
-selects one of six possible ways to display the mark.
+determines the mark's format.
 .
 .
 .IP
@@ -2386,7 +2360,8 @@ If
 is\~0 and
 .I mark
 is unspecified,
-the items are set with a hanging indent.
+.I mm
+sets items with a hanging indent.
 .
 Otherwise,
 .I mark
@@ -2395,7 +2370,7 @@ is interpreted as a string defining the mark.
 If
 .I type
 is greater than zero,
-items are automatically numbered;
+items are automatically numbered and
 .I mark
 is interpreted as a register format.
 .
@@ -2630,8 +2605,8 @@ Semi-blocked:
 as
 .BR BL ,
 but the first line of each paragraph is indented by
-.BR 5m .
-.\" XXX: https://savannah.gnu.org/bugs/?64315
+.B \[rs]n[Pi]
+ens.
 T}
 FB@T{
 Fully blocked:
@@ -2955,7 +2930,7 @@ to select a default paragraph indentation style.
 .
 The register
 .B Ps
-controls the vertical spacing between paragraphs.
+determines the amount of vertical space between paragraphs.
 .
 .
 .TP
@@ -3353,41 +3328,48 @@ the default adjustment is restored.
 .
 .
 .TP
-.BI SETR\  "refname \fR[\fPstring\fR]\fP"
-Remember the current heading and page numbers as
-.IR refname .
+.BI SETR\~ ref-name\~\c
+.RI [ string ]
+Create reference
+.IR ref-name ,
+storing its heading and page numbers.
 .
-Saves
+If
 .I string
-if
-.I string
-is defined.
-.
-.I string
-is retrieved with
+is present,
+.I "groff mm"
+saves it as an auxiliary datum for retrieval by
 .BR GETST .
 .
 See
 .BR INITR .
 .
+.
 .TP
-.BI SG\  \fR[\fParg\  \fR[\fP1\fR]]\fP
-Signature line.
+.BR SG\~ [\c
+.IR arg \~[\c
+.BR 1 ]]
+Write a signature line.
 .
-Prints the authors name(s) after the formal closing.
+Authors' names are placed after the formal closing;
+see
+.B LT
+(one author only)
+and
+.BR MT .
 .
-The argument is appended to the reference data, printed at either the
-first or last author.
-.
-The reference data is the location, department, and initials specified
-with
-.BR AU .
-.
-It is printed at the first author if the second argument is given,
-otherwise at the last.
-.
-No reference data is printed if the author(s) is specified through
-.BR WA / WE .
+For memoranda,
+reference data
+(the location,
+department,
+and initials specified in an
+.B AU
+call),
+followed by any
+.IR arg ,
+are written at the left margin preceding the last author's name,
+or preceding the first if a second argument is present and the
+memorandum type supports it.
 .
 See section \[lq]Internals\[rq] below.
 .
@@ -3460,7 +3442,7 @@ Reset tab stops to every 5\~ens.
 .ne 4v
 .TP
 .BR TB \~\c
-.RI [ title \~[ override \~[ flag \~[  refname ]]]]
+.RI [ title \~[ override \~[ flag \~[ ref-name ]]]]
 Caption a table.
 .
 Arguments are handled analogously to
@@ -3927,7 +3909,7 @@ localizable text.
 These are presented in quotation marks.
 .
 .
-.TP
+.TP 9.5n \" "Letnsdef" + 2n + hand-tuned for PDF
 .B App
 \[lq]APPENDIX\[rq]
 .
@@ -3964,20 +3946,21 @@ and so on.
 .
 .TP
 .B DT
-The date;
-set by the
-.B ND
-macro
-(defaults to the date the document is formatted).
+stores the date or other identifier set by
+.BR ND ,
+if called,
+and otherwise one constructed using
+the formatter's date registers;
+see
+.MR groff @MAN1EXT@ .
 .
-The format is the conventional one for the
+The
 .I groff
-locale,
-but see the
+locale determines its format,
+but see
 .B ISODATE
-macro and
-.B Iso
-register.
+and register
+.BR Iso .
 .
 .
 .TP
@@ -4004,13 +3987,18 @@ it is surrounded by square brackets.
 .
 .TP
 .B H1txt
-Updated by
-.B .H
+stores the text of the current heading;
+.B H
 and
-.B .HU
-to the current heading text.
-.
-Also updated in table of contents & friends.
+.B HU
+update it,
+as does
+.B TC
+when processing table of contents entries and captions of displayed
+figures,
+tables,
+equations,
+and exhibits.
 .
 .
 .TP
@@ -4146,9 +4134,9 @@ NS code@String@Contents
 .
 .TP
 .B Letnsdef
-Select the notation format used by
+selects the notation format when
 .B NS
-when it is given no argument.
+is given no argument.
 .
 The default is
 .RB \[lq] 0 \[rq].
@@ -4216,14 +4204,18 @@ The default is
 .
 .
 .TP
-.BR MO1 \|.\|.\|.\| MO12
+.B MO1
+.TQ
+\&.\|.\|.
+.TQ
+.B MO12
 \[lq]January\[rq] through \[lq]December\[rq]
 .
 .
 .TP
 .B Qrf
-\[lq]See chapter \[rs]\[rs]*[Qrfh],
-page \[rs]\[rs]n[Qrfp].\[rq]
+\[lq]See chapter \[rs]E*[Qrfh],
+page \[rs]En[Qrfp].\[rq]
 .
 .
 .TP
@@ -4328,7 +4320,7 @@ disabled)
 otherwise.
 .
 .
-.TP
+.TP 9n \" "Letwam" + 2n + hand-tuned for PDF
 .B .mgm
 indicates that
 .I groff mm
@@ -4572,7 +4564,11 @@ see
 .
 .
 .TP
-.BR H1 \|.\|.\|.\| H14
+.B H1
+.TQ
+\&.\|.\|.
+.TQ
+.B H14
 are auto-incrementing counters corresponding to each heading level;
 see
 .BR H .
@@ -4592,9 +4588,8 @@ see
 .\" XXX: This may be insufficiently general; see Savannah #62825.
 .TP
 .B H1h
-is a copy of
-A copy of register
-.RB register\~ H1 ,
+is a copy of register
+.BR H1 ,
 but it is incremented just before a page break.
 .
 This can be useful in user-defined macros;
@@ -4627,6 +4622,8 @@ see
 .RB ( 0 ).
 .
 .
+.br
+.ne 7v
 .TP
 .B Hi
 configures the indentation of text after headings.
@@ -4905,6 +4902,8 @@ Value 5 is a GNU extension
 .RB ( 0 ).
 .
 .
+.br
+.ne 3v
 .IP
 .TS
 tab(@);
@@ -5220,9 +5219,7 @@ see
 .SH Internals
 .\" ====================================================================
 .
-The
-.B LT
-letter macros call further macros depending on the letter type,
+The letter macros call further macros depending on the letter type,
 with which they are suffixed.
 .
 It is therefore possible to define additional letter types,
@@ -5234,19 +5231,23 @@ sets the registers
 .B Pt
 and
 .B Pi
-to 0 and\~5, \" XXX: ...but doesn't use Pi for indentation...
+to 0 and\~5,
 respectively.
-.\" XXX: and why aren't both of these actions the responsibility of
-.\" let@init_type as described below?
 .
-The following macros must be defined to support a new letter type.
+(DWB
+.I mm
+used a value of 3 for
+.BR Pi .)
+.
+It then calls an initialization macro corresponding to the type.
+.
+Define the following macros to support a new letter type.
 .
 .
 .TP
 .BI let@init_ type
-.B LT
-calls this macro to initialize any registers and other data needed by
-the letter type.
+initializes
+any registers and other data needed by the letter type.
 .
 .
 .TP
@@ -5330,8 +5331,8 @@ implementation of the memorandum macros.
 .
 .TP
 .I @MACRODIR@/mm.tmac
-is wrapper to load
-.IR m.tmac .
+is a wrapper enabling the package to be loaded with the option
+.RB \[lq] "\-m mm" \[rq].
 .
 .
 .TP
@@ -5366,21 +5367,37 @@ implements memorandum type 5.
 .
 .TP
 .I @TMAC_MDIR@/locale
-performs any (further) desired necessary localization;
-empty by default.
+performs any (further) desired necessary localization if present.
 .
 .
+.br
+.ne 5v \" 4v plus bigger type size for heading
 .\" ====================================================================
 .SH Authors
 .\" ====================================================================
 .
-The GNU version of the
-.I mm
-macro package was written by
 .MT jh@\:axis\:.se
 J\[:o]rgen H\[:a]gg
 .ME
-of Lund, Sweden.
+of Lund, Sweden,
+wrote the GNU version of the
+.I mm
+macro package
+based on an early version of
+.I "groff ms"
+by
+.MT jjc@\:jclark\:.com
+James Clark
+.ME .
+.
+.MT wl@\:gnu\:.org
+Werner Lemberg
+.ME
+and
+.MT g.branden\:.robinson@\:gmail\:.com
+G.\& Branden Robinson
+.ME
+revised and updated it.
 .
 .
 .\" ====================================================================

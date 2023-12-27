@@ -38,85 +38,85 @@ static bool is_valid_expression(units *v, int scaling_unit,
 				bool is_mandatory = false);
 static bool is_valid_expression_start();
 
-int get_vunits(vunits *res, unsigned char si)
+bool get_vunits(vunits *res, unsigned char si)
 {
   if (!is_valid_expression_start())
-    return 0;
+    return false;
   units x;
   if (is_valid_expression(&x, si, false /* is_parenthesized */)) {
     *res = vunits(x);
-    return 1;
+    return true;
   }
   else
-    return 0;
+    return false;
 }
 
-int get_hunits(hunits *res, unsigned char si)
+bool get_hunits(hunits *res, unsigned char si)
 {
   if (!is_valid_expression_start())
-    return 0;
+    return false;
   units x;
   if (is_valid_expression(&x, si, false /* is_parenthesized */)) {
     *res = hunits(x);
-    return 1;
+    return true;
   }
   else
-    return 0;
+    return false;
 }
 
 // for \B
 
-int get_number_rigidly(units *res, unsigned char si)
+bool get_number_rigidly(units *res, unsigned char si)
 {
   if (!is_valid_expression_start())
-    return 0;
+    return false;
   units x;
   if (is_valid_expression(&x, si, false /* is_parenthesized */,
 			  true /* is_mandatory */)) {
     *res = x;
-    return 1;
+    return true;
   }
   else
-    return 0;
+    return false;
 }
 
-int get_number(units *res, unsigned char si)
+bool get_number(units *res, unsigned char si)
 {
   if (!is_valid_expression_start())
-    return 0;
+    return false;
   units x;
   if (is_valid_expression(&x, si, false /* is_parenthesized */)) {
     *res = x;
-    return 1;
+    return true;
   }
   else
-    return 0;
+    return false;
 }
 
-int get_integer(int *res)
+bool get_integer(int *res)
 {
   if (!is_valid_expression_start())
-    return 0;
+    return false;
   units x;
   if (is_valid_expression(&x, 0, false /* is_parenthesized */)) {
     *res = x;
-    return 1;
+    return true;
   }
   else
-    return 0;
+    return false;
 }
 
-enum incr_number_result { BAD, ABSOLUTE, INCREMENT, DECREMENT };
+enum incr_number_result { INVALID, ASSIGN, INCREMENT, DECREMENT };
 
 static incr_number_result get_incr_number(units *res, unsigned char);
 
-int get_vunits(vunits *res, unsigned char si, vunits prev_value)
+bool get_vunits(vunits *res, unsigned char si, vunits prev_value)
 {
   units v;
   switch (get_incr_number(&v, si)) {
-  case BAD:
-    return 0;
-  case ABSOLUTE:
+  case INVALID:
+    return false;
+  case ASSIGN:
     *res = v;
     break;
   case INCREMENT:
@@ -128,16 +128,16 @@ int get_vunits(vunits *res, unsigned char si, vunits prev_value)
   default:
     assert(0 == "unhandled switch case returned by get_incr_number()");
   }
-  return 1;
+  return true;
 }
 
-int get_hunits(hunits *res, unsigned char si, hunits prev_value)
+bool get_hunits(hunits *res, unsigned char si, hunits prev_value)
 {
   units v;
   switch (get_incr_number(&v, si)) {
-  case BAD:
-    return 0;
-  case ABSOLUTE:
+  case INVALID:
+    return false;
+  case ASSIGN:
     *res = v;
     break;
   case INCREMENT:
@@ -149,16 +149,16 @@ int get_hunits(hunits *res, unsigned char si, hunits prev_value)
   default:
     assert(0 == "unhandled switch case returned by get_incr_number()");
   }
-  return 1;
+  return true;
 }
 
-int get_number(units *res, unsigned char si, units prev_value)
+bool get_number(units *res, unsigned char si, units prev_value)
 {
   units v;
   switch (get_incr_number(&v, si)) {
-  case BAD:
-    return 0;
-  case ABSOLUTE:
+  case INVALID:
+    return false;
+  case ASSIGN:
     *res = v;
     break;
   case INCREMENT:
@@ -170,16 +170,16 @@ int get_number(units *res, unsigned char si, units prev_value)
   default:
     assert(0 == "unhandled switch case returned by get_incr_number()");
   }
-  return 1;
+  return true;
 }
 
-int get_integer(int *res, int prev_value)
+bool get_integer(int *res, int prev_value)
 {
   units v;
   switch (get_incr_number(&v, 0)) {
-  case BAD:
-    return 0;
-  case ABSOLUTE:
+  case INVALID:
+    return false;
+  case ASSIGN:
     *res = v;
     break;
   case INCREMENT:
@@ -191,15 +191,15 @@ int get_integer(int *res, int prev_value)
   default:
     assert(0 == "unhandled switch case returned by get_incr_number()");
   }
-  return 1;
+  return true;
 }
 
 
 static incr_number_result get_incr_number(units *res, unsigned char si)
 {
   if (!is_valid_expression_start())
-    return BAD;
-  incr_number_result result = ABSOLUTE;
+    return INVALID;
+  incr_number_result result = ASSIGN;
   if (tok.ch() == '+') {
     tok.next();
     result = INCREMENT;
@@ -211,7 +211,7 @@ static incr_number_result get_incr_number(units *res, unsigned char si)
   if (is_valid_expression(res, si, false /* is_parenthesized */))
     return result;
   else
-    return BAD;
+    return INVALID;
 }
 
 static bool is_valid_expression_start()
@@ -296,7 +296,7 @@ static bool is_valid_expression(units *v, int scaling_unit,
     if (!is_valid_term(&v2, scaling_unit, is_parenthesized,
 		       is_mandatory))
       return false;
-    int overflow = 0;
+    bool had_overflow = false;
     switch (op) {
     case '<':
       *v = *v < v2;
@@ -330,13 +330,13 @@ static bool is_valid_expression(units *v, int scaling_unit,
     case '+':
       if (v2 < 0) {
 	if (*v < INT_MIN - v2)
-	  overflow = 1;
+	  had_overflow = true;
       }
       else if (v2 > 0) {
 	if (*v > INT_MAX - v2)
-	  overflow = 1;
+	  had_overflow = true;
       }
-      if (overflow) {
+      if (had_overflow) {
 	error("addition overflow");
 	return false;
       }
@@ -345,13 +345,13 @@ static bool is_valid_expression(units *v, int scaling_unit,
     case '-':
       if (v2 < 0) {
 	if (*v > INT_MAX + v2)
-	  overflow = 1;
+	  had_overflow = true;
       }
       else if (v2 > 0) {
 	if (*v < INT_MIN + v2)
-	  overflow = 1;
+	  had_overflow = true;
       }
-      if (overflow) {
+      if (had_overflow) {
 	error("subtraction overflow");
 	return false;
       }
@@ -361,20 +361,20 @@ static bool is_valid_expression(units *v, int scaling_unit,
       if (v2 < 0) {
 	if (*v > 0) {
 	  if ((unsigned)*v > -(unsigned)INT_MIN / -(unsigned)v2)
-	    overflow = 1;
+	    had_overflow = true;
 	}
 	else if (-(unsigned)*v > INT_MAX / -(unsigned)v2)
-	  overflow = 1;
+	  had_overflow = true;
       }
       else if (v2 > 0) {
 	if (*v > 0) {
 	  if (*v > INT_MAX / v2)
-	    overflow = 1;
+	    had_overflow = true;
 	}
 	else if (-(unsigned)*v > -(unsigned)INT_MIN / v2)
-	  overflow = 1;
+	  had_overflow = true;
       }
-      if (overflow) {
+      if (had_overflow) {
 	error("multiplication overflow");
 	return false;
       }

@@ -9,6 +9,9 @@
 .\"
 .\" Requires the poppler-utils package (for pdfinfo(1) and pdftops(1)).
 .\" Requires running troff(1) in unsafe mode.
+.\"
+.\" Internal macro names start with `pdfpic@`; internal registers and
+.\" strings start with `pdfpic*`.
 .
 .do if d PDFPIC .nx
 .
@@ -41,7 +44,6 @@
 .  rm pdfpic*file-extension
 .  rm pdfpic*file-name-base
 .  rm pdfpic*temporary-directory
-.  rm pdfpic*temporary-file
 .  rr pdfpic*do-conversion
 .  rr pdfpic*offset-mode
 .  rr pdfpic*indentation
@@ -51,6 +53,40 @@
 .  rr pdfpic*desired-width
 .  rr pdfpic*desired-height
 ..
+.
+.\" Get image dimensions.  The `tr` command to strip null bytes is
+.\" distasteful, but its necessity is imposed on us.  See
+.\" <https://gitlab.freedesktop.org/poppler/poppler/-/issues/776>.
+.\"
+.\" The following is a circus of portability and escaping constraints.
+.\" See <https://savannah.gnu.org/bugs/index.php?64061>.  Modify it
+.\" only with great caution and after testing with a variety of seds.
+.\" (See the "HACKING" file in groff's source distribution.)  Keep in
+.\" mind that the argument(s) to `sy` are assembled into a C string
+.\" and then passed to system(3), which invokes "sh -c" on the string.
+.\"
+.\" We therefore shut off roff's escape mechanism _twice_: once while
+.\" defining the macro, and once while interpreting part of it, to
+.\" preserve backslashes that we need in the constructed C string.
+.\"
+.\" We _still_ must escape the backslashes in the string appendments to
+.\" keep them from being interpreted as commencing roff escape sequences
+.\" when the string they populate is later interpolated.
+.eo
+.de pdfpic@get-image-dimensions
+.  ds pdfpic*command pdfinfo \$1
+.  eo
+.  as pdfpic*command " | tr -d '\\000'
+.  as pdfpic*command " | sed -n -e '/Page  *size:/
+.  as pdfpic*command s/Page  *size:  *\\([0-9.]*\\)  *x  *\([0-9.]*\\).*$/
+.  as pdfpic*command . \\\\R@pdfpic*width  (p;\\1)@
+.  as pdfpic*command " \\\\R@pdfpic*height (p;\\2)@
+.  as pdfpic*command /p'
+.  ec
+.  pso \*[pdfpic*command]
+.  rm pdfpic*command
+..
+.ec
 .
 .de PDFPIC
 .  if !\\n[.U] \{\
@@ -132,6 +168,7 @@
 .    as pdfpic*pspic-args \\*[pdfpic*file-name-base].eps \\$*
 .
 .    PSPIC \\*[pdfpic*pspic-args]
+.    pdfpic@cleanup
 .    return
 .  \}
 .
@@ -160,28 +197,8 @@
 skipping '\\$1'
 .    return
 .  \}
-.  ds pdfpic*temporary-file \\*[pdfpic*temporary-directory]/pdfpic\n[$$]
 .
-.  \" Get image dimensions.  The `tr` command to strip null bytes is
-.  \" distasteful, but its necessity is imposed on us.  See
-.  \" <https://gitlab.freedesktop.org/poppler/poppler/-/issues/776>.
-.  ec @
-.  sy pdfinfo @$1 | \
-tr -d '\000' | \
-grep "Page *size" | \
-sed -e 's/Page *size: *\\([[:digit:].]*\\) *x *\\([[:digit:].]*\\).*$/\
-.nr pdfpic*width (p;\\1)\\n\
-.nr pdfpic*height  (p;\\2)/' \
-> @*[pdfpic*temporary-file]
-.  ec
-.  if \\n[systat] \{\
-.    pdfpic@error retrieval of '\\$1' image dimensions failed with \
-exit status \\n[systat]; skipping
-.    return
-.  \}
-.  so \\*[pdfpic*temporary-file]
-.  sy rm \\*[pdfpic*temporary-file]
-.
+.  pdfpic@get-image-dimensions \\$1
 .  nr pdfpic*did-pdfinfo-work 1
 .  if !r pdfpic*width .nr pdfpic*did-pdfinfo-work 0
 .  if !r pdfpic*height .nr pdfpic*did-pdfinfo-work 0

@@ -276,7 +276,7 @@ symbolsl.afm: $(srcdir)/symbolsl.awk $(srcdir)/../symbolsl.ps
 	    $(afmdir)/Symbol.afm` tmp.afm >$(OUTDIR)/$@ \
 	  && $(RM) Fontmap tmp.afm
 
-zapfdr.afm: $(srcdir)/apfdr.sed
+zapfdr.afm: $(srcdir)/zapfdr.sed
 	sed -f $(srcdir)/zapfdr.sed \
 	  `$(AFMNAME) $(afmdir)/ZapfDingbats.afm` >$(OUTDIR)/$@
 

@@ -57,6 +57,7 @@ public:
   vunits get_vertical_position() { return vertical_position; }
   vunits get_high_water_mark() { return high_water_mark; }
   virtual vunits distance_to_next_trap() = 0;
+  virtual const char * get_next_trap_name() = 0;
   void need(vunits);
   const char *get_diversion_name() { return nm.contents(); }
   virtual void set_diversion_trap(symbol, vunits) = 0;
@@ -84,6 +85,7 @@ public:
   void vjustify(symbol);
 #endif /* COLUMN */
   vunits distance_to_next_trap();
+  const char *get_next_trap_name();
   void set_diversion_trap(symbol, vunits);
   void clear_diversion_trap();
   void copy_file(const char *filename);
@@ -125,6 +127,7 @@ public:
   hunits get_page_offset() { return page_offset; }
   vunits get_page_length() { return page_length; }
   vunits distance_to_next_trap();
+  const char *get_next_trap_name();
   void add_trap(symbol nm, vunits pos);
   void change_trap(symbol nm, vunits pos);
   void remove_trap(symbol);

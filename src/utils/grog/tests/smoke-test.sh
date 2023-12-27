@@ -124,11 +124,6 @@ echo "testing ms(7) document $doc" >&2
 "$grog" "$doc" | \
     grep -Fqx 'groff -ms '"$doc"
 
-doc=$src/doc/ms.ms
-echo "testing eqn(1)- and tbl(1)-using ms(7) document $doc" >&2
-"$grog" "$doc" | \
-    grep -Fqx 'groff -e -t -ms '"$doc"
-
 doc=$src/doc/pic.ms
 echo "testing tbl(1)-, eqn(1)-, and pic(1)-using ms(7) document $doc" \
     >&2

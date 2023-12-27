@@ -95,6 +95,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .	@divert \\$*
 ..
 .
+.\" Wrap the `bp` request so that we disregard the enablement of
+.\" no-space mode, which we enter after displays and equations to
+.\" prevent multiple sources of vertical space (like the DD and PD
+.\" registers) from incorrectly accumulating.  Thus, if the user
+.\" requests a page break, we honor it.  See Savannah #62688 & #64005.
+.als @break-page bp
+.de bp
+.	nr @saved-no-space-mode \\n[.ns]
+.	rs
+.	ie \\n[.br] '@break-page \\$1
+.	el          .@break-page \\$1
+.	if \\n[@saved-no-space-mode] .ns
+.	rr @saved-no-space-mode
+..
+.
 .de @init
 .if !rPO .nr PO \\n(.o
 .\" a non-empty environment
@@ -373,8 +388,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .AE
 ..
 .de cov*break-page
-.ie \\n[cov*rp-no-renumber] .bp
-.el .bp 1
+.ie \\n[cov*rp-no-renumber] .@break-page
+.el .@break-page 1
 ..
 .de cov*print
 .als cov*print @nop
@@ -559,7 +574,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .	\" flush out any floating keeps
 .	while \\n[kp@tail]>\\n[kp@head] \{\
 .		rs
-.		bp
+.		@break-page
 .	\}
 .\}
 .ie !\\n(.$ \{\
@@ -650,7 +665,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .	\" Switching environments ensures that we don't get an unnecessary
 .	\" blank line at the top of the page.
 .	ev ne
-'	bp
+'	@break-page
 .	ev
 .\}
 .el \{\
@@ -665,7 +680,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .			rm pg*next-format
 .		\}
 .	\}
-'	bp
+'	@break-page
 .\}
 ..
 .\" pg@begin number format
@@ -698,9 +713,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .\" overflow left, or floating keeps.
 .while \\n[kp@tail]>\\n[kp@head]:\\n[pg@fn-flag] \{\
 .	rs
-.	bp
+.	@break-page
 .\}
-.bp
+.@break-page
 ..
 .nr pg@text-ended 0
 .de pg@end-text
@@ -1141,6 +1156,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .el \
 .	ps \\n[PS]
 .\" don't set VS so that it can be defaulted from PS
+.\" Set vertical spacing defaults to 120% of type size.
 .ie rVS \{\
 .	ie (\\n[VS] >= 1000) \
 .		par*vs "(\\n[VS]p / 1000u)"
@@ -1149,9 +1165,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .\}
 .el \{\
 .	ie (\\n[PS] >= 1000) \
-.		par*vs "((\\n[PS]p / 1000u) + 2p)"
+.		par*vs "((\\n[PS]p / 1000u) * 120u / 100u)"
 .	el \
-.		par*vs "(\\n[PS] + 2)"
+.		par*vs "(\\n[PS] * 120u / 100u)"
 .\}
 .if dFAM .fam \\*[FAM]
 .if !rHY .nr HY 6
@@ -1184,11 +1200,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .de par@init
 .if !rLT .nr LT \\n[LL]
 .if !rFL .nr FL \\n[LL]*\\*[FR]
+.\" Set vertical spacing defaults to 120% of type size.
 .if !rVS \{\
 .	ie (\\n[PS] >= 1000) \
-.		nr VS (\\n[PS] + 2000)
+.		nr VS (\\n[PS]p / 1000u * 120u / 100u)
 .	el \
-.		nr VS (\\n[PS] + 2)
+.		nr VS (\\n[PS] * 120u / 100u)
 .\}
 .if !rDI .nr DI .5i
 .if !rFPS \{\
@@ -1199,9 +1216,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .\}
 .if !rFVS \{\
 .	ie (\\n[FPS] >= 1000) \
-.		nr FVS (\\n[FPS] + 2000)
+.		nr FVS (\\n[FPS]p / 1000u * 120u / 100u)
 .	el \
-.		nr FVS (\\n[FPS] + 2)
+.		nr FVS (\\n[FPS] * 120u / 100u)
 .\}
 .\" don't change environment 0
 .ev h
@@ -1870,14 +1887,27 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .if \\n[tbl@within-table] \
 .	@error .EQ is not allowed within a .TS/.TE table
 .br
+.nr eqn*type 0
 .ds eqn*num "\\$2
-.ie '\\$1'L' .nr eqn*type 0
-.el \{\
-.	ie '\\$1'I' .nr eqn*type 1
-.	el \{\
-.		nr eqn*type 2
-.		if !'\\$1'C' .ds eqn*num "\\$1
+.if '\\$1'L' .nr eqn*type 1
+.if '\\$1'I' .nr eqn*type 2
+.if '\\$1'C' .nr eqn*type 3
+.if !\\n[eqn*type] \{\
+.	ds eqn*msg .EQ: unrecognized alignment '\\$1';
+.	ie (\\n[.$] = 1) \{\
+.		if !'\\$1'' \{\
+.			as eqn*msg " assuming it is an equation label
+.			@warning \\*[eqn*msg]
+.			ds eqn*num "\\$1
+.		\}
 .	\}
+.	el .if (\\n[.$] > 1) \{\
+.		if !'\\$1'' \{\
+.			as eqn*msg " centering equation
+.			@warning \\*[eqn*msg]
+.		\}
+.	\}
+.	rm eqn*msg
 .\}
 .di eqn*div
 .in 0
@@ -1885,12 +1915,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .	nr eqn*ll \\n[.l]
 .	ll 1000n
 .\}
-.if \\n[eqn*type]=0 .EQN-HTML-IMAGE-LEFT
-.if \\n[eqn*type]=1 \{\
+.if \\n[eqn*type]=1 .EQN-HTML-IMAGE-LEFT
+.if \\n[eqn*type]=2 \{\
 .   if '\*(.T'html' .RS
 .EQN-HTML-IMAGE-INLINE
 .\}
-.if \\n[eqn*type]=2 .EQN-HTML-IMAGE
+.if \\n[eqn*type]=3 .EQN-HTML-IMAGE
 .nf
 ..
 .de @div-end!eqn*div
@@ -1917,12 +1947,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .			ie r ps4html .ds@need \\n[dn]u-1v+\n[.V]u+1i
 .			el .ds@need \\n[dn]u-1v+\n[.V]u
 .			chop eqn*div
-.			ie \\n[eqn*type]=0 \{\
+.			ie \\n[eqn*type]=1 \{\
 .				ta (u;\\n[.l]-\\n[.i])R
 \\*[eqn*div]\t\\*[eqn*num]
 .			\}
 .			el \{\
-.				ie \\n[eqn*type]=1 .ta \\n[DI]u \
+.				ie \\n[eqn*type]=2 .ta \\n[DI]u \
 (u;\\n[.l]-\\n[.i])R
 .				el .ta (u;\\n[.l]-\\n[.i]/2)C \
 (u;\\n[.l]-\\n[.i])R
@@ -1946,12 +1976,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .		if r ps4html    \\*[eqn*div]
 .	\}
 .       if !'\*(.T'html' .fi
-.	if \\n[eqn*type]=0 .EQN-HTML-IMAGE-END
-.	if \\n[eqn*type]=1 \{\
+.	if \\n[eqn*type]=1 .EQN-HTML-IMAGE-END
+.	if \\n[eqn*type]=2 \{\
 .		EQN-HTML-IMAGE-END
 .		if '\*(.T'html' .RE
 .	\}
-.	if \\n[eqn*type]=2 .EQN-HTML-IMAGE-END
+.	if \\n[eqn*type]=3 .EQN-HTML-IMAGE-END
 .	if '\*(.T'html' \
 .		ll \\n[eqn*ll]u
 .\}
@@ -2065,7 +2095,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .de @PS
 .br
 .sp \\n[DD]u
-.ie !\\n[.$]=2 \{\
+.ie \\n[.$]<2 \{\
 .	ds pic*msg .PS: expected 2 arguments, got \\n[.$]\"
 .	as pic*msg ; not preprocessed with pic?\"
 .	@error \\*[pic*msg]
@@ -2084,6 +2114,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .de PE
 .PF
 .sp \\n[DD]u+.5m
+.ns
 ..
 .\" ****************************
 .\" ******** module ref ********

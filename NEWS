@@ -7,6 +7,154 @@
 This file describes recent user-visible changes in groff.  Bug fixes are
 not described.  There are more details in the man and info pages.
 
+VERSION next
+============
+
+troff
+-----
+
+o In nroff mode (in other words, when producing output for devices that
+  claim to be terminals), the formatter now reports warning diagnostics
+  regarding certain output problems using units of lines instead of
+  inches (or the unit configured with the `warnscale` request) to
+  describe the vertical drawing position where the problem occurred.
+
+o The device-independent output now reports unbreakable spaces (those
+  produced with the `\~` escape sequence) as word breaks with the
+  documentary 'w' command, just as it does for regular breakable spaces.
+
+o A new read-only, string-valued register, `.trap`, interpolates the
+  name of the next vertical position trap that will be sprung.
+
+o A new request, `phw`, reports to the standard error stream the current
+  list of hyphenation exceptions.
+
+eqn
+---
+
+o The "gifont" primitive replaces "gfont" as the means of configuring
+  the global italic face in preprocessed equations.  "gfont" remains
+  recognized as a synonym for backward compatibility.  The new name is
+  intended to ease acquisition of the eqn language in light of GNU eqn's
+  thirty-year-old extensions "gbfont" and "grfont".
+
+o New parameters tunable with the GNU eqn "set" primitive, "half_space"
+  and "full_space", enable a document to configure the space widths
+  produced by the eqn tokens '^' and '~', respectively.  Previously,
+  their widths were determined by the "thin_space" and "thick_space"
+  parameters used to tune GNU eqn's automatic spacing computations.
+
+o The new "reset" primitive restores a named parameter to its default.
+
+Macro packages
+--------------
+
+o mom version 2.6 is distributed with this release.  It supports
+  multi-line headings.  Thanks to Peter Schaffter.
+
+o The device-specific macro files loaded by "troffrc" automatically on
+  startup, such as "ps.tmac" and "html.tmac", no longer perform font
+  translations for font names used by varieties of AT&T troff ('C',
+  'Hb', 'HX', and many others).  These names are not portable: in AT&T
+  troff, the font repertoire, like the special character repertoire, was
+  device-dependent.  Since groff 1.23.0, our diagnostic messages report
+  problems with attempts to use nonexistent font names.  We recommend
+  addressing such portability issues wherever suits you: (1) in a
+  document, perhaps by using `ie` and `el` requests and the `.g`
+  register to test for groff extensions, then `ie` and `el` again with
+  the `F` groff conditional expression operator to check for font
+  availability, and performing font remappings with the groff `ftr`
+  request as desired; (2) doing so in your "troffrc" file; or (3) by
+  modifying these macro files similarly.  Users of the "dvi" and "lbp"
+  output devices should be aware that these devices don't supply full
+  families of monospaced fonts (and never have).  See grodvi(1) and
+  grolbp(1).
+
+o Hyperlink support is now enabled by default on non-HTML devices that
+  support it (PDF and terminal devices) for an (man) documents.
+  Instructions and commented code for disabling it remain in the
+  "man.local" file.
+
+o The an (man) and doc (mdoc) macro packages now support a `BP` register
+  to configure the ("base") paragraph inset amount; that is the amount
+  used by man(7) for paragraphs not within an `RS`/`RE` relative inset,
+  and in mdoc(7) for all paragraphs.  Formerly, the `IN` register
+  configured this amount with other indentation and inset amount
+  parameters used by man(7).  (In mdoc(7), it had no other purpose.)
+  The base paragraph indentation default is now 5n, corresponding to
+  that used by historical man(7) and mdoc(7) implementations going back
+  to Unix Version 7 (1979) and 4.3BSD-Reno (1990), respectively.
+
+o The an (man) and doc (mdoc) macro packages now support a `PO` register
+  to configure the page offset used by the formatter.
+
+o The an (man) macro package now supports a `TS` register to configure
+  the minimum space required between the tag of a `TP` paragraph and its
+  body.  (If the width of the tag's formatted text plus this space
+  exceeds the paragraph indentation, the line is broken after the tag.)
+  This parameter, formerly hard-coded as `1n`, now defaults to `2n`.
+
+o The an (man) and doc (mdoc) macro packages now use slightly different
+  vertical margins when formatting for typesetters, to align more
+  closely with the traditional implementations of these packages.  Per
+  man(7) in the AT&T Unix System III manual (June 1980), the text area
+  was 6.5 by 10 inches.  When formatting for terminals with continuous
+  rendering disabled (by default, it is enabled), the page footer now
+  sets 1 line higher than before.
+
+o The new macro file "koi8-r.tmac" supports the KOI8-R character
+  encoding, which supports the new Russian locale for groff.
+
+o The m (mm) macro package's `HU` macro now supports a second argument
+  as a GNU extension.  It corresponds to the optional third argument of
+  the `H` macro.
+
+o The m (mm) macro package's `IND` macro (a GNU extension), now calls
+  `SK` only if no `TXIND` macro is defined, instead of performing this
+  action as part of the fallback when no `TYIND` macro is defined.
+
+o The s (ms) macro package now sets the vertical spacing register
+  defaults for normal (`VS`) and footnote (`FVS`) text to 120% of the
+  type size configured in the `PS` and `FPS` registers, respectively,
+  rather than 2 points larger, to comport with generally accepted
+  typesetting principles.  Thus, when formatting a document with a type
+  size of 20 points, the vertical spacing now defaults to 24 points
+  rather than 22.
+
+Miscellaneous
+-------------
+
+o Russian language input documents using the KOI8-R encoding are now
+  supported, including hyphenation patterns from the ruhyphen project
+  and localized strings for the man, ms, me, mm, and mom packages.
+  Thanks to Nikita Ivanov.
+
+o Spanish language input documents are now supported, including
+  hyphenation patterns from the hyph-utf8 project and localized strings
+  for the man, ms, me, mm, and mom packages.  Thanks to Eloi Montañés.
+
+o If groff programs have their current time overridden by the
+  SOURCE_DATE_EPOCH environment variable, then that time is always
+  displayed in UTC.  That environment variable is normally only set when
+  specifically requesting build systems to produce reproducible output,
+  and it is useful for reproducibility test harnesses to vary the TZ
+  environment variable and ensure that it does not affect the output of
+  the build; those harnesses have no way to set TZ=UTC only for groff
+  programs.  People setting SOURCE_DATE_EPOCH are likely to be more in
+  the "system programmer" camp as described in the release notes for
+  1.23.0, so it is easier to defend time-zone-invariant output to them.
+  In all other cases, the current time remains displayed in local time.
+
+o grog(1) no longer supports the `--ligatures` and `--run` options.
+  Simulate the former (which was specific to the "pdf" output device)
+  with the option sequence "-P -U -P y", and the latter by using the
+  command substitution feature of your shell; see section "Examples" of
+  groff(1).
+
+o The groff_diff(7) man page no longer contains examples.  They remain
+  in groff's Texinfo manual.
+
+
 VERSION 1.23.0
 ==============
 
@@ -424,7 +572,7 @@ o The "ptx.tmac" macro file, a counterpart to the GNU coreutils ptx(1)
   long been part of the source distribution.
 
 o The s (ms) macro package now enables the formatter's "no-space mode"
-  after ending displays (`DE`), equations (`EN`), tables (`TS`), and
+  after ending displays (`DE`), equations (`EN`), tables (`TE`), and
   pictures without flyback (`PE`).  This means that display distance
   spacing (the `DD` register) overrides the spacing that may follow in a
   subsequent paragraph, section heading, or display instead of
@@ -516,6 +664,15 @@ o On output devices using the Latin-1 character encoding ("groff -T
   sequences like `this' in the input (character remapping with 'char'
   requests and similar notwithstanding).
 
+o The grops driver (which produces PostScript), like the `fp` request
+  in the troff formatter (see above), no longer no longer accepts file
+  names with slashes in them as a document prologue, encoding file, or
+  resource (such as a font to be downloaded).  All such files must be
+  accessible within the directory of the output device for which they
+  were prepared.  Use the GROFF_FONT_PATH environment variable or
+  groff's "-F" command-line option to specify additional directories in
+  which such files should be sought.
+
 gropdf
 ------
 
@@ -566,11 +723,11 @@ o groff's Texinfo manual is included in the distribution archive in
 
 o A compilation of all of groff's man pages in PDF and UTF-8-encoded
   text (with SGR escape sequences) is produced by the build.  Many of
-  the documents in this 380+-page document have been heavily revised or
-  rewritten, including tbl(1), groff(1), groff_diff(7), groff_font(5),
-  groff(7), groff_char(7), and roff(7).  The PDF version uses pdfmark
-  extensions to produce an internal bookmark for every man page
-  document, section heading, and subsection heading.
+  the documents in this 380+-page collection have been heavily revised
+  or rewritten, including tbl(1), groff(1), groff_diff(7),
+  groff_font(5), groff(7), groff_char(7), and roff(7).  The PDF version
+  uses pdfmark extensions to produce an internal bookmark for every man
+  page document, section heading, and subsection heading.
 
 o Larry Kollar's "Using groff with the ms Macro Package" has been
   resurrected after 20+ years, revised, and updated.
@@ -589,8 +746,8 @@ o Building groff from its distribution archive no longer requires byacc
   (or GNU Bison) to be installed.
 
 o m4 is now required to build.  Any m4 that implements the features
-  documented in the Version 7 Unix m4(1) man page, and the `-D` option,
-  should suffice.
+  documented in the Seventh Edition Unix m4(1) man page, and the `-D`
+  option, should suffice.
 
 o New 'configure' options '--{en,dis}able-groff-allocator' control
   whether groff uses its own malloc/free-wrapping allocator to implement
@@ -2421,7 +2578,7 @@ o The `asciify' request has been extended to `unformat' space characters
   unbreakable space character.
 
 o The new `unformat' request is similar to `asciify' but only handles
-  space characters and tabs specially if the diversion is reread,
+  space characters and tabs specially if the diversion is interpolated,
   retaining font information.  This makes it possible to reformat
   diversions; for example the following
 
@@ -3481,7 +3638,7 @@ vertical position trap to be sprung.
 
 The `cf' request now behaves sensibly in a diversion.  If used in a
 diversion, it now arranges for the file to be copied to the output when
-the diversion is reread.
+the diversion is interpolated.
 
 There is a new request `trf' (transparent file) similar to `cf', but
 more like `\!'.

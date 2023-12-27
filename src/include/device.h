@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
@@ -17,9 +16,14 @@ for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
-// The target device.  Once initialized, the device doesn't change during
-// the entire program run.  Sample devices are 'ps' (for Postscript), 'html'
-// (for HTML), and 'ascii', 'latin1', 'utf8' for TTY output.
+// The target device.  Once initialized, the device doesn't change
+// during the entire program run.  Sample devices are 'ps' (for
+// PostScript), 'html' (for HTML), and 'ascii', 'latin1', 'utf8' for
+// terminal output.
 extern const char *device;
 
-// end of device.h
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

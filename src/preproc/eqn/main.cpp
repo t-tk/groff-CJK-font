@@ -1,4 +1,4 @@
-/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2023 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
 This file is part of groff.
@@ -62,9 +62,8 @@ static const char *input_char_description(int c)
   case '\177':
     return "a delete character";
   }
-  size_t bufsz = sizeof "character code " + INT_DIGITS + 1;
-  // repeat expression; no VLAs in ISO C++
-  static char buf[sizeof "character code " + INT_DIGITS + 1];
+  const size_t bufsz = sizeof "character code " + INT_DIGITS + 1;
+  static char buf[bufsz];
   (void) memset(buf, 0, bufsz);
   if (csprint(c)) {
     buf[0] = '\'';
@@ -310,8 +309,10 @@ static char *delim_search(char *ptr, int delim)
 void usage(FILE *stream)
 {
   fprintf(stream,
-    "usage: %s [-CNrR] [-d xy] [-f font] [-m n] [-M dir] [-p n] [-s n]"
-    " [-T name] [file ...]\n"
+    "usage: %s [-CNrR] [-d xy] [-f global-italic-font]"
+    " [-m minimum-type-size] [-M eqnrc-directory]"
+    " [-p super/subscript-size-reduction] [-s global-type-size]"
+    " [-T device] [file ...]\n"
     "usage: %s {-v | --version}\n"
     "usage: %s --help\n",
     program_name, program_name, program_name);
@@ -323,7 +324,7 @@ int main(int argc, char **argv)
   static char stderr_buf[BUFSIZ];
   setbuf(stderr, stderr_buf);
   int opt;
-  int load_startup_file = 1;
+  bool want_startup_file = true;
   static const struct option long_options[] = {
     { "help", no_argument, 0, CHAR_MAX + 1 },
     { "version", no_argument, 0, 'v' },
@@ -337,7 +338,7 @@ int main(int argc, char **argv)
       compatible_flag = 1;
       break;
     case 'R':			// don't load eqnrc
-      load_startup_file = 0;
+      want_startup_file = true;
       break;
     case 'M':
       config_macro_path.command_line_dir(optarg);
@@ -361,7 +362,7 @@ int main(int argc, char **argv)
       }
       break;
     case 'f':
-      set_gfont(optarg);
+      set_gifont(optarg);
       break;
     case 'T':
       device = optarg;
@@ -371,12 +372,12 @@ int main(int argc, char **argv)
       }
       else if (strcmp(device, "MathML") == 0) {
 	output_format = mathml;
-	load_startup_file = 0;
+	want_startup_file = false;
       }
       else if (strcmp(device, "mathml:xhtml") == 0) {
 	device = "MathML";
 	output_format = mathml;
-	load_startup_file = 0;
+	want_startup_file = false;
 	xhtml = 1;
       }
       break;
@@ -425,24 +426,25 @@ int main(int argc, char **argv)
     }
   init_table(device);
   init_char_table();
+  init_param_table();
+  std::atexit(free_param_table);
   printf(".do if !dEQ .ds EQ\n"
 	 ".do if !dEN .ds EN\n");
   if (output_format == troff) {
     printf(".if !'\\*(.T'%s' "
-	   ".if !'\\*(.T'html' "	// the html device uses '-Tps' to render
-				  // equations as images
-	   ".tm warning: %s should have been given a '-T\\*(.T' option\n",
-	   device, program_name);
+	   // the html device uses '-Tps' to render equations as images
+	   ".if !'\\*(.T'html' "
+	   ".tm \\n[.F]: warning: %s should have been given a"
+	   " '-T\\*(.T' option\n", device, program_name);
     printf(".if '\\*(.T'html' "
 	   ".if !'%s'ps' "
-	   ".tm warning: %s should have been given a '-Tps' option\n",
-	   device, program_name);
+	   ".tmc \\n[.F]: warning: %s should have been given a '-Tps'"
+	   " option\n", device, program_name);
     printf(".if '\\*(.T'html' "
-	   ".if !'%s'ps' "
-	   ".tm warning: (it is advisable to invoke groff via: groff -Thtml -e)\n",
+	   ".if !'%s'ps' .tm1 (consider invoking 'groff -Thtml -e')\n",
 	   device);
   }
-  if (load_startup_file) {
+  if (want_startup_file) {
     char *path;
     FILE *fp = config_macro_path.open_file(STARTUP_FILE, &path);
     if (fp) {

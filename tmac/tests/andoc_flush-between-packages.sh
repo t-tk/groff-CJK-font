@@ -26,7 +26,7 @@ groff="${abs_top_builddir:-.}/test-groff"
 # flushed, and page footers written,  before proceeding to the next
 # document.  Check going from man(7) to mdoc(7) documents and back.
 
-EXAMPLE=\
+input=\
 '.TH man\-flush\-test 7 2020-10-11 "groff test page 1"
 .SH Name
 man\-flush-test \- a sanity test for groff_man(7)
@@ -49,22 +49,23 @@ man\-flush-test2 \- a second sanity test for groff_man(7)
 This supernumerary loquacious sentence should end up with a
 partially-collected output line.'
 
-OUTPUT=$(printf "%s\n" "$EXAMPLE" | "$groff" -Tascii -P-cbou -mandoc)
+output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -mandoc)
+echo "$output"
 
 FAIL=
 
 # Strip blank lines from the output first; all we care about for this
 # test is the presence, adjacency, and ordering of non-blank lines.
 
-if [ -z "$(echo "$OUTPUT" \
+if [ -z "$(echo "$output" \
     | sed '/^$/d' \
-    | sed -n '/collected/{N;/test page 1/p;}')" ]
+    | sed -n '/lected output line/{N;/test page 1/p;}')" ]
 then
     FAIL=yes
     echo "man to mdoc transition failed" >&2
 fi
 
-if [ -z "$(echo "$OUTPUT" \
+if [ -z "$(echo "$output" \
     | sed '/^$/d' \
     | sed -n '/partially-collected/{N;/test page 2/p;}')" ]
 then

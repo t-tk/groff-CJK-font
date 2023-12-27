@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (C) 2021 Free Software Foundation, Inc.
+# Copyright (C) 2021-2023 Free Software Foundation, Inc.
 #
 # This file is part of groff.
 #
@@ -18,9 +18,14 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-set -e
-
 grotty="${abs_top_builddir:-.}/grotty"
+
+fail=
+
+wail () {
+  echo "...FAILED" >&2
+  fail=yes
+}
 
 input="x T utf8
 x res 240 24 40
@@ -78,42 +83,49 @@ output=$(echo "$input" | "$grotty" -F font -F build/font | od -t c)
 #0000326
 
 echo "testing for URI that corresponds to no character cells" >&2
-echo "$output" | grep -Eq 'A 033 +] +8 +; +; +033 +\\'
+echo "$output" | grep -Eq 'A 033 +] +8 +; +; +033 +\\' || wail
 
 echo "testing http URI (1)" >&2
-echo "$output" | grep -Eq '0000020 +.*033 +] +8 +; +; +h + t +t +p'
+echo "$output" \
+    | grep -Eq '0000020 +.*033 +] +8 +; +; +h + t +t +p' || wail
 
 echo "testing http URI (2)" >&2
-echo "$output" | grep -Eq '0000040 +: +/ +/ +e +x +a +m +p +l +e +\. +c'
+echo "$output" \
+    | grep -Eq '0000040 +: +/ +/ +e +x +a +m +p +l +e +\. +c' || wail
 
 echo "testing http URI (3)" >&2
-echo "$output" | grep -Eq '0000040.* +o +m +/ +1'
+echo "$output" | grep -Eq '0000040.* +o +m +/ +1' || wail
 
 echo "testing http URI (4)" >&2
-echo "$output" | grep -Eq '0000060 +033 +\\'
+echo "$output" | grep -Eq '0000060 +033 +\\' || wail
 
 echo "testing mailto URI (1)" >&2
-echo "$output" | grep -Eq '0000120 +.* +033 +] +8 +;$'
+echo "$output" | grep -Eq '0000120 +.* +033 +] +8 +;$' || wail
 
 echo "testing mailto URI (2)" >&2
-echo "$output" | grep -Eq '0000140 +; +m +a +i +l +t +o +: +g +\. +b'
+echo "$output" \
+    | grep -Eq '0000140 +; +m +a +i +l +t +o +: +g +\. +b' || wail
 
 echo "testing mailto URI (3)" >&2
-echo "$output" | grep -Eq '0000140.* +r +a +n +d +e$'
+echo "$output" | grep -Eq '0000140.* +r +a +n +d +e$' || wail
 
 echo "testing mailto URI (4)" >&2
-echo "$output" | grep -Eq '0000160 +n +\. +r +o +b +i +n +s +o +n +@'
+echo "$output" \
+    | grep -Eq '0000160 +n +\. +r +o +b +i +n +s +o +n +@' || wail
 
 echo "testing mailto URI (5)" >&2
-echo "$output" | grep -Eq '0000160.* +g +m +a +i +l$'
+echo "$output" | grep -Eq '0000160.* +g +m +a +i +l$' || wail
 
 echo "testing mailto URI (6)" >&2
-echo "$output" | grep -Eq '0000200 +\. +c +o +m +033 +\\ +B +r +a +n +d'
+echo "$output" \
+    | grep -Eq '0000200 +\. +c +o +m +033 +\\ +B +r +a +n +d' || wail
 
 echo "testing mailto URI (7)" >&2
-echo "$output" | grep -Eq '0000200.* +e +n +033 +] +8$'
+echo "$output" | grep -Eq '0000200.* +e +n +033 +] +8$' || wail
 
 echo "testing mailto URI (8)" >&2
-echo "$output" | grep -Eq '0000220 +; +; +033 +\\'
+echo "$output" | grep -Eq '0000220 +; +; +033 +\\' || wail
 
-# vim:set ai et sw=4 ts=4 tw=72:
+test -z "$fail"
+
+# vim:set autoindent expandtab shiftwidth=2 tabstop=2 textwidth=72:

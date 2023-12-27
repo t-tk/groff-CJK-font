@@ -16,6 +16,10 @@ for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <assert.h>
 
 #include "driver.h"
@@ -542,7 +546,7 @@ void draw_dvi_printer::end_page(int len)
 
 void dvi_printer::do_special(const char *s)
 {
-  int len = strlen(s);
+  size_t len = strlen(s);
   if (len == 0)
     return;
   possibly_begin_line();

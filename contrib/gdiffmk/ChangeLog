@@ -1,3 +1,45 @@
+2023-12-19  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* gdiffmk.sh: Refactor.
+	(Diagnose): New function writes arguments to the standard error
+	stream.
+	(Usage): Stop unconditionally writing to the standard error
+	stream.  If given arguments, there is a usage error: use
+	`Diagnose` to write the error and identify problem explicitly as
+	a "usage error", set the exit status to 2, not 255 (which is not
+	good practice per POSIX[1]--shells use the eighth bit of the
+	exit status to indicate that a signal was received), redirect
+	output to the standard error stream, and put a blank line on the
+	output to separate the diagnostic from the lengthy help message
+	that follows.  Otherwise, write only the "help message" to the
+	standard output stream and exit with status 0.  Use a here
+	document instead of `echo` and escaped newlines.
+	(WouldClobber): Exit with status 4 instead of 3 if the output
+	operand would clobber one of the inputs.
+	(RequiresArgument): Exit with status 2 instead of (an attempt
+	at) 255 if a required argument is missing.
+	(main): Drop now-unnecessary prefix from `$BADOPTION`.  Exit
+	with status 3 if the diff(1) command doesn't support the `-D`
+	option instead of treating this as a usage error (status 3 is
+	also used if the shell's `test` doesn't support `-ef`).  Add
+	period to end of sentence.
+	* gdiffmk.1.man (Exit status): Add section.
+
+	[1] https://pubs.opengroup.org/onlinepubs/9699919799/utilities/\
+	      V3_chap02.html#tag_18_08_02
+
+2023-12-19  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* gdiffmk.sh: Use only one space after {command name, colon}
+	sequence in diagnostic messages, not two.  This aligns better
+	with the GNU Coding Standards.
+	* tests/baseline.7: Update test expectations.
+
+2023-07-17  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tests/runtests.sh: Stop endorsing shebang line space myth.
+	See <https://savannah.gnu.org/bugs/?64058>.
+
 2023-02-09  G. Branden Robinson <g.branden.robinson@gmail.com>
 
 	Revise test regime.  Reduce amount of indirection required to

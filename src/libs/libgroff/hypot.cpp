@@ -32,3 +32,9 @@ double groff_hypot(double x, double y)
 
   return result;
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

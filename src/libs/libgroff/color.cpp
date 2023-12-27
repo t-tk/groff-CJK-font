@@ -20,6 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 #include "color.h"
 #include "cset.h"
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <assert.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -395,7 +399,7 @@ char *color::print_color()
   return s;
 }
 
-color default_color;
+color default_color("");
 
 // Local Variables:
 // fill-column: 72

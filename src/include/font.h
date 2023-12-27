@@ -163,16 +163,16 @@ public:
 			// (one of LIG_ff, LIG_fi, ...).
   int get_italic_correction(glyph *, int);	// If the given glyph (arg1)
 			// at the given point size (arg2) is followed by an
-			// unslanted glyph, some horizontal white space may
+			// unslanted glyph, some horizontal whitespace may
 			// need to be inserted in between.  See the groff
 			// manual, description of \/.  Return the amount
-			// (width) of this white space.
+			// (width) of this whitespace.
   int get_left_italic_correction(glyph *, int);	// If the given glyph (arg1)
 			// at the given point size (arg2) is preceded by an
 			// unslanted roman glyph, some horizontal white
 			// space may need to be inserted in between.  See
 			// the groff manual, description of \,.  Return the
-			// amount (width) of this white space.
+			// amount (width) of this whitespace.
   int get_subscript_correction(glyph *, int);	// If the given glyph (arg1)
 			// at the given point size (arg2)is followed by a
 			// subscript glyph, the horizontal position may need
