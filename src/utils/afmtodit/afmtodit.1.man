@@ -90,7 +90,7 @@ PostScript and PDF output
 .SH Description
 .\" ====================================================================
 .
-.I afmtodit
+.I \%afmtodit
 adapts an
 Adobe Font Metric
 file,
@@ -100,7 +100,7 @@ for use with the
 and
 .B pdf
 output devices of
-.MR groff @MAN1EXT@ .
+.MR @g@troff @MAN1EXT@ .
 .
 .I map-file
 associates a
@@ -166,7 +166,7 @@ character name can't be deduced using the Adobe Glyph List
 built into
 .IR afmtodit ),
 then
-.I afmtodit
+.I \%afmtodit
 puts the PostScript glyph into the
 .I groff
 font description file as an unnamed glyph which can only be accessed
@@ -224,8 +224,8 @@ If the font file proper
 is available,
 listing it in the files
 .I @FONTDIR@/\:\%devps/\:\%download
-and/or
-.IR @FONTDIR@/\:\%devpdf/\:\%download ;
+and
+.I @FONTDIR@/\:\%devpdf/\:\%download
 enables it to be embedded in the output produced by
 .MR grops @MAN1EXT@
 and
@@ -237,7 +237,7 @@ respectively.
 If the
 .B \-i
 option is used,
-.I afmtodit
+.I \%afmtodit
 automatically generates an italic correction,
 a left italic correction,
 and a subscript correction for each glyph
@@ -302,7 +302,7 @@ displays a usage message,
 while
 .B \-v
 and
-.B \-\-version
+.B \%\-\-version
 show version information;
 all exit afterward.
 .
@@ -317,9 +317,9 @@ this is used by
 in the positioning of accents.
 .
 By default
-.I afmtodit
+.I \%afmtodit
 uses the negative of the
-.B ItalicAngle
+.B \%ItalicAngle
 specified in the AFM file;
 with true italic fonts it is sometimes desirable to use a slant that is
 less than this.
@@ -535,6 +535,69 @@ are used to produce the font description files provided with
 for the
 .I \%grops
 output driver.
+.
+.
+.\" ====================================================================
+.SH Diagnostics
+.\" ====================================================================
+.
+.TP
+.RI "AGL name \[aq]" x "\[aq] already mapped to groff name \[aq]" y\c
+.RI "\[aq]; ignoring AGL name \[aq]uni" XXXX \[aq]
+You can disregard these if they're in the form shown,
+where the ignored AGL name contains four hexadecimal digits
+.IR XXXX .
+.
+The Adobe Glyph List (AGL) has its own names for glyphs;
+they are often
+different from
+.IR groff 's
+special character names.
+.
+.I \%afmtodit
+is constructing a mapping from
+.I groff
+special character names to AGL names;
+this can be a one-to-one or many-to-one mapping,
+but one-to-many will not work,
+so
+.I \%afmtodit
+discards the excess mappings.
+.
+For example,
+if
+.I x
+is
+.BR *D ,
+.I y
+is
+.BR \%Delta ,
+and
+.I z
+is
+.BR uni0394 ,
+.I \%afmtodit
+is telling you that the
+.I groff
+font description that it is writing cannot map the
+.I groff
+special character
+.B \[rs][*D]
+to AGL glyphs
+.B \%Delta
+and
+.B uni0394
+at the same time.
+.
+.
+.IP
+If you get a message like this but are unhappy with which mapping is
+ignored,
+a remedy is to craft an alternative
+.I map-file
+and re-run
+.I \%afmtodit
+using it.
 .
 .
 .\" ====================================================================

@@ -20,7 +20,7 @@ for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-Version 2.5_c
+Version 2.5_d
 -------------
 Antoine de St-Exupéry asserted that elegance in engineering is
 achieved not when there is nothing left to add, but when there is
@@ -53,7 +53,7 @@ extensions, and float management).
 .if (\n[.x]\n[.y] < 118) \
 .   ab [mom]: You need GNU troff version 1.18 or higher to run this version of mom.
 \# Mom version
-.ds version 2.5_c
+.ds version 2.5_d
 .if dVERSION \{\
 .   ab [mom]: Version \*[version]
 .\}
@@ -295,7 +295,7 @@ end
 .    br
 .    nr #PAGE_WIDTH \\$1
 .    if !r#L_MARGIN .L_MARGIN \\n[.o]
-.    R_MARGIN 1i
+.    if !r#R_MARGIN .R_MARGIN 1i
 .    if '\\*[.T]'pdf' \X'papersize=\\n[#PAGE_WIDTH]z,\\n[#PAGE_LENGTH]z'\c
 .END
 \#
@@ -2136,7 +2136,7 @@ end
 \v'\\*[$UNDERSCORE_GAP]+\\n[#UNDERSCORE_WEIGHT_ADJ]u'\
 \D'l \\n[#TEXT_WIDTH]u 0'\
 \Z'\D't \\n[#RULE_WEIGHT]''\
-\v'-(\\*[$UNDERSCORE_GAP]+\\n[#UNDERSCORE_WEIGHT_ADJ]u)\\*[$SUFFIX]'
+\v'-(\\*[$UNDERSCORE_GAP]+\\n[#UNDERSCORE_WEIGHT_ADJ]u)'\\*[$SUFFIX]
 .    \}
 .    nr #UNDERSCORE_WEIGHT     \\n[#SAVED_UNDERSCORE_WEIGHT]
 .    nr #UNDERSCORE_WEIGHT_ADJ \\n[#SAVED_UNDERSCORE_WEIGHT_ADJ]
@@ -2211,7 +2211,7 @@ end
 \v'\\*[$RULE_GAP]+\\n[#UNDERSCORE_WEIGHT]u'\
 \D'l \\n[#TEXT_WIDTH]u 0'\
 \Z'\D't \\n[#RULE_WEIGHT]''\
-\v'-(\\*[$UNDERSCORE_GAP]+\\*[$RULE_GAP])-(\\n[#UNDERSCORE_WEIGHT]u*2u)\\*[$SUFFIX]'
+\v'-(\\*[$UNDERSCORE_GAP]+\\*[$RULE_GAP])-(\\n[#UNDERSCORE_WEIGHT]u*2u)'\\*[$SUFFIX]
 .    \}
 .    nr #UNDERSCORE_WEIGHT     \\n[#SAVED_UNDERSCORE_WEIGHT]
 .    nr #UNDERSCORE_WEIGHT_ADJ \\n[#SAVED_UNDERSCORE_WEIGHT_ADJ]
@@ -2836,10 +2836,8 @@ end
 \#   described horizontal rule.
 \# *Notes:
 \#   Rules are drawn left-to-right, from the baseline down, and
-\#   return to their point of origin.  Color must be set in the
-\#   macro; otherwise the color will be black, regardless of current
-\#   .gcolor.  If no arg given (full measure rule), the rule weight
-\#   is the one set by RULE_WEIGHT.
+\#   return to their point of origin.  If no arg given (full measure
+\#   rule), the rule weight is the one set by RULE_WEIGHT.
 \#
 .MAC DRH END
 .    GRAPHICAL_OBJ
@@ -2847,7 +2845,10 @@ end
 .    ds $RL_INDENT \\$2
 .    ds $RL_LENGTH \\$3
 .    ie !'\\$4'' .ds $RL_COLOR  \\$4
-.    el          .ds $RL_COLOR \\*[default]
+.    el \{\
+.       ie '\\n[.m]'' .ds $RL_COLOR \\*[default]
+.       el .ds $RL_COLOR \\n[.m]
+.    \}
 .    nr #SAVED_WEIGHT     \\n[#RULE_WEIGHT]
 .    nr #SAVED_WEIGHT_ADJ \\n[#RULE_WEIGHT_ADJ]
 .    di NULL
@@ -2859,31 +2860,31 @@ end
 .          nr #RESTORE_L_LENGTH \\n[.l]
 .          if \\n[#INDENT_BOTH_ACTIVE] .ll \\n[.l]u-\\n[#BL_INDENT]u
 .          if \\n[#INDENT_LEFT_ACTIVE] .ll \\n[.l]u-\\n[#L_INDENT]u
-\D't \\n[#RULE_WEIGHT]'\
-\h'\\*[$RL_INDENT]-\\n[#RULE_WEIGHT]u'\
+\Z'\D't \\n[#RULE_WEIGHT]''\
+\h'\\*[$RL_INDENT]+\\n[#RULE_WEIGHT_ADJ]u'\
 \v'\\n[#RULE_WEIGHT_ADJ]u'\
 \D'l \En[.l]u 0'\v'-\\n[#RULE_WEIGHT_ADJ]u'\
 \v'-\\n[#RULE_WEIGHT_ADJ]u'\
-\D't \\n[#SAVED_RULE_WEIGHT]'
+\Z'\D't \\n[#SAVED_RULE_WEIGHT]''
 .          ll \\n[#RESTORE_L_LENGTH]u
 .          rr #RESTORE_L_LENGTH
 .       \}
 .       el \{\
-\D't \\n[#RULE_WEIGHT]'\
-\h'\\*[$RL_INDENT]-\\n[#RULE_WEIGHT]u'\
+\Z'\D't \\n[#RULE_WEIGHT]''\
+\h'\\*[$RL_INDENT]+\\n[#RULE_WEIGHT_ADJ]u'\
 \v'\\n[#RULE_WEIGHT_ADJ]u'\
 \D'l \En[.l]u 0'\v'-\\n[#RULE_WEIGHT_ADJ]u'\
 \v'-\\n[#RULE_WEIGHT_ADJ]u'\
-\D't \\n[#SAVED_RULE_WEIGHT]'
+\Z'\D't \\n[#SAVED_RULE_WEIGHT]''
 .       \}
 .    \}
 .    el \{\
-\D't \\n[#RULE_WEIGHT]'\
-\h'\\*[$RL_INDENT]-\\n[#RULE_WEIGHT]u'\
+\Z'\D't \\n[#RULE_WEIGHT]''\
+\h'\\*[$RL_INDENT]+\\n[#RULE_WEIGHT_ADJ]u'\
 \v'\\n[#RULE_WEIGHT_ADJ]u'\
 \D'l \\*[$RL_LENGTH] 0'\
 \v'-\\n[#RULE_WEIGHT_ADJ]u'\
-\D't \\n[#SAVED_RULE_WEIGHT]'
+\Z'\D't \\n[#SAVED_RULE_WEIGHT]''
 .          rr #RESTORE_L_LENGTH
 .    \}
 .    if \\n[#FILLED]=1 \{\
@@ -2931,16 +2932,18 @@ end
 .       if \\n[#INDENT_BOTH_ACTIVE] .ll \\n[.l]u-\\n[#BL_INDENT]u
 .       if \\n[#INDENT_LEFT_ACTIVE] .ll \\n[.l]u-\\n[#L_INDENT]u
 .       PRINT \
-\D't \\n[#RULE_WEIGHT]'\v'\\n[#RULE_WEIGHT_ADJ]u'\
-\h'-\\n[#RULE_WEIGHT]u'\
+\Z'\D't \\n[#RULE_WEIGHT]''\
+\v'\\n[#RULE_WEIGHT_ADJ]u'\
+\h'\\n[#RULE_WEIGHT_ADJ]u'\
 \D'l \En[.l]u 0'\v'-\\n[#RULE_WEIGHT_ADJ]u'\h'|0'\c
 .       ll
 .       rr #RESTORE_L_LENGTH
 .    \}
 .    el \{\
 .       PRINT \
-\D't \\n[#RULE_WEIGHT]'\v'\\n[#RULE_WEIGHT_ADJ]u'\
-\h'-\\n[#RULE_WEIGHT]u'\
+\Z'\D't \\n[#RULE_WEIGHT]''\
+\v'\\n[#RULE_WEIGHT_ADJ]u'\
+\h'\\n[#RULE_WEIGHT_ADJ]u'\
 \D'l \En[.l]u 0'\v'-\\n[#RULE_WEIGHT_ADJ]u'\h'|0'\c
 .    \}
 .    if \\n[fill] \{\
@@ -2960,10 +2963,7 @@ end
 \#   Draws described vertical rule.
 \# *Notes:
 \#   Rules are drawn left-to-right, from the baseline down, and
-\#   return to their point of origin.  Color must be set in the
-\#   macro; otherwise the color will be black, regardless of current
-\#   .gcolor.
-\#
+\#   return to their point of origin.
 .MAC DRV END
 .    GRAPHICAL_OBJ
 .    ds $RL_WEIGHT \\$1
@@ -2971,13 +2971,16 @@ end
 .    ds $RL_DEPTH  \\$3
 .    ie !'\\$4'' \
 .       ds $RL_COLOR  \\$4
-.    el .ds $RL_COLOR \\*[default]
+.    el \{\
+.       ie '\\n[.m]'' .ds $RL_COLOR \\*[default]
+.       el .ds $RL_COLOR \\n[.m]
+.    \}
 .    nr #SAVED_WEIGHT     \\n[#RULE_WEIGHT]
 .    nr #SAVED_WEIGHT_ADJ \\n[#RULE_WEIGHT_ADJ]
 .    RULE_WEIGHT \\*[$RL_WEIGHT]
 .    COLOR \\*[$RL_COLOR]
-\D't \\n[#RULE_WEIGHT]'\
-\h'\\*[$RL_INDENT]-\\n[#RULE_WEIGHT_ADJ]u'\
+\Z'\D't \\n[#RULE_WEIGHT]''\
+\h'\\*[$RL_INDENT]+\\n[#RULE_WEIGHT]u+\\n[#RULE_WEIGHT_ADJ]u'\
 \D'l 0 \\*[$RL_DEPTH]'\
 \D't \\n[#SAVED_RULE_WEIGHT]'
 .    if \\n[#FILLED]=1 \{\
@@ -3012,8 +3015,7 @@ end
 \# *Notes:
 \#   Boxes are drawn left-to-right, from the baseline down, and
 \#   return to their point of origin.  Box rules are drawn from the
-\#   perimeter inwards.  Color must be set in the macro; otherwise
-\#   the color will be black, regardless of current .gcolor.
+\#   perimeter inwards.
 \#
 .MAC DBX END
 .    GRAPHICAL_OBJ
@@ -3046,26 +3048,29 @@ end
 .       ie d$\\$5_FILL .ds $BX_COLOR \\*[$\\$5_FILL]
 .       el             .ds $BX_COLOR \\$5
 .    \}
-.    el .ds $BX_COLOR \\*[default]
+.    el \{\
+.       ie '\\n[.m]'' .ds $BX_COLOR \\*[default]
+.       el .ds $BX_COLOR \\n[.m]
+.    \}
 .    nr #SAVED_WEIGHT     \\n[#RULE_WEIGHT]
 .    nr #SAVED_WEIGHT_ADJ \\n[#WEIGHT_ADJ]
 .    if !'\\$1'SOLID' .RULE_WEIGHT \\*[$BX_WEIGHT]
 .    ds $BX_INDENT \\*[$BX_INDENT]-\\n[#WEIGHT_ADJ]u
 .    ie \\n[#BX_SOLID]=1 \{\
 .       fcolor \\*[$BX_COLOR]
-\h'\\*[$BX_INDENT]'\
+\h'\\*[$BX_INDENT]+\\n[#BOX_WEIGHT_ADJ]u+\\n[#RULE_WEIGHT]u'\
 \D'P \\*[$BX_WIDTH] 0 0 \\*[$BX_DEPTH] -\\*[$BX_WIDTH] 0 0 -\\*[$BX_DEPTH]'
 .       fcolor
 .       rr #BX_SOLID
 .    \}
 .    el \{\
 .       COLOR \\*[$BX_COLOR]
-\D't \\n[#RULE_WEIGHT]'\
-\h'\\*[$BX_INDENT]'\
+\Z'\D't \\n[#RULE_WEIGHT]''\
+\h'\\*[$BX_INDENT]+\\n[#RULE_WEIGHT]u+\\n[#RULE_WEIGHT_ADJ]u'\
 \v'\\n[#WEIGHT_ADJ]u'\
 \D'p \\*[$BX_WIDTH]-\\n[#RULE_WEIGHT]u 0 0 \\*[$BX_DEPTH]-\\n[#RULE_WEIGHT]u -\\*[$BX_WIDTH]+\\n[#RULE_WEIGHT]u 0 0 -\\*[$BX_DEPTH]+\\n[#RULE_WEIGHT]u'\
 \v'-\\n[#WEIGHT_ADJ]u'\
-\D't \\n[#SAVED_RULE_WEIGHT]'
+\Z'\D't \\n[#SAVED_RULE_WEIGHT]''
 .       gcolor
 .    \}
 .    sp -1v
@@ -3100,9 +3105,7 @@ end
 \# *Notes:
 \#   Ellipses (circles) are drawn left-to-right, from the baseline
 \#   down, and return to their point of origin.  Ellipse rules are
-\#   drawn from the perimeter inwards.  Color must be set in the
-\#   macro; otherwise the color will be black, regardless of current
-\#   .gcolor.
+\#   drawn from the perimeter inwards.
 \#
 .MAC DCL END
 .    GRAPHICAL_OBJ
@@ -3135,14 +3138,17 @@ end
 .       ie d$\\$5_FILL .ds $CL_COLOR \\*[$\\$5_FILL]
 .       el             .ds $CL_COLOR \\$5
 .    \}
-.    el .ds $CL_COLOR \\*[default]
+.    el \{\
+.       ie '\\n[.m]'' .ds $CL_COLOR \\*[default]
+.       el .ds $CL_COLOR \\n[.m]
+.    \}
 .    nr #SAVED_WEIGHT     \\n[#RULE_WEIGHT]
 .    nr #SAVED_WEIGHT_ADJ \\n[#WEIGHT_ADJ]
 .    if !'\\$1'SOLID' .RULE_WEIGHT \\*[$CL_WEIGHT]
 .    ds $CL_INDENT \\*[$CL_INDENT]-\\n[#WEIGHT_ADJ]u
 .    ie \\n[#CL_SOLID]=1 \{\
 .       fcolor \\*[$CL_COLOR]
-\h'\\*[$CL_INDENT]'\
+\h'\\*[$CL_INDENT]+\\n[#RULE_WEIGHT]u'\
 \v'\\*[$CL_DEPTH]/2u'\
 \D'E \\*[$CL_WIDTH]-\\n[#RULE_WEIGHT]u \\*[$CL_DEPTH]-\\n[#RULE_WEIGHT]u'\
 \v'-\\*[$CL_DEPTH]/2u'
@@ -3151,12 +3157,12 @@ end
 .    \}
 .    el \{\
 .       COLOR \\*[$CL_COLOR]
-\D't \\n[#RULE_WEIGHT]'\
-\h'\\*[$CL_INDENT]'\
+\Z'\D't \\n[#RULE_WEIGHT]''\
+\h'\\*[$CL_INDENT]+\\n[#RULE_WEIGHT]u+\\n[#RULE_WEIGHT_ADJ]u'\
 \v'\\*[$CL_DEPTH]/2u'\
 \D'e \\*[$CL_WIDTH]-\\n[#RULE_WEIGHT]u \\*[$CL_DEPTH]-\\n[#RULE_WEIGHT]u'\
 \v'-(\\*[$CL_DEPTH]/2u)'\
-\D't \\n[#SAVED_RULE_WEIGHT]'
+\Z'\D't \\n[#SAVED_RULE_WEIGHT]''
 .       gcolor
 .    \}
 .    sp -1v

@@ -332,9 +332,11 @@ or terminal output.
 .SH "Input format"
 .\" ====================================================================
 .
-Input to
-.I @g@troff
-must be in one of two character encodings it can recognize:
+Input to GNU
+.I troff \" GNU
+is organized into lines separated by the Unix newline character
+(U+000A),
+and must be in one of two character encodings it can recognize:
 IBM code page 1047 on EBCDIC systems,
 and ISO\~Latin-1 (8859-1) otherwise.
 .
@@ -344,20 +346,13 @@ subset of ISO\~10646 (\[lq]Unicode\[rq]) is recommended;
 see
 .MR groff_char @MAN7EXT@ .
 .
-.MR groff @MAN1EXT@
-and the
+The
 .MR preconv @MAN1EXT@
-preprocessor can transform other encodings,
+preprocessor transforms other encodings,
 including UTF-8,
 to satisfy
 .IR @g@troff 's
 requirements.
-.
-.
-.P
-.I groff
-input is organized into lines separated by the Unix newline character
-(U+000A).
 .
 .
 .\" ====================================================================
@@ -393,12 +388,11 @@ request can change the control character.
 .
 .
 .IP \[aq]
-The neutral apostrophe is recognized where the control character is;
-it is the
-.I no-break control character.
+The neutral apostrophe is the
+.I "no-break control character,"
+recognized where the control character is.
 .
-It works as the control character does,
-but suppresses the break implied by the
+It suppresses the (first) break implied by the
 .request .bp ,
 .request .cf ,
 .request .fi ,
@@ -412,10 +406,7 @@ and
 .request .trf
 requests.
 .
-If the no-break control character is used with any of these requests,
-.I @g@troff
-suppresses the break;
-instead the requested operation takes effect at the next break.
+The requested operation takes effect at the next break.
 .
 It makes
 .request .br
@@ -862,10 +853,12 @@ can be smaller to avoid problems with integer roundoff.
 .
 The minimum distances that a device can work with in the horizontal and
 vertical directions are termed its
-.I motion quanta,
-.B \[rs]n[.H]
+.I "motion quanta,"
+stored in the
+.B .H
 and
-.B \[rs]n[.V]
+.B .V
+registers,
 respectively.
 .
 Measurements are rounded to applicable motion quanta.
@@ -913,11 +906,14 @@ see below.
 .\" expressions".
 A
 .I numeric expression
-evaluates to an integer:
-it can be as simple as a literal
-.RB \[lq] 0 \[rq]
-or it can be a complex sequence of register and string interpolations
-interleaved with measurement operators.
+evaluates to an integer.
+.
+The following operators are recognized.
+.\"evaluates to an integer:
+.\"it can be as simple as a literal
+.\".RB \[lq] 0 \[rq]
+.\"or it can be a complex sequence of register and string interpolations
+.\"interleaved with measurement operators.
 .
 .
 .P
@@ -2110,6 +2106,8 @@ T}
 .TE
 .
 .
+.br
+.ne 2v
 .P
 If the first argument to an
 .BR .if ,
@@ -4563,13 +4561,12 @@ Interpolate string with name
 .
 .
 .TP
-.ESC[] * "string arg1 arg2 \fR\&.\|.\|.\fP"
+.ESC[] * "string arg \fR\&.\|.\|.\fP"
 Interpolate string with name
 .I string
 (of arbitrary length),
 taking
-.IR arg1 ,
-.IR arg2 ,
+.I arg
 \&.\|.\|.\&
 as arguments.
 .
@@ -4772,13 +4769,11 @@ Interpolate glyph with name
 .
 .
 .TP
-.ESC[] "" "base-char comp1 comp2 \fR\&.\|.\|."
+.ESC[] "" "base-char comp \fR\&.\|.\|."
 Interpolate composite glyph constructed from
 .I base-char
-and components
-.IR comp1 ,
-.IR comp2 ,
-and so on.
+and each component
+.IR comp .
 .
 .
 .TP
@@ -5061,6 +5056,8 @@ Set fill color to that with arbitrarily long
 Restore previous fill color.
 .
 .
+.br
+.ne 4v \" XXX: why not 3v?
 .TP
 .ESC n r
 Interpolate contents of register with one-character
@@ -5413,8 +5410,9 @@ and
 are horizontal and vertical motions relative to the drawing position
 or previous point in the command.
 .
-The default scaling unit for horizontal measurements is
-.BR m ;
+The default scaling unit for horizontal measurements
+(and diameters of circles)
+.RB is\~ m ;
 for vertical ones,
 .BR v .
 .
@@ -5449,7 +5447,7 @@ leaving drawing position at
 .\" XXX: This is one case where a valid coordinate pair could be off the
 .\" page (even negative) and we need to discuss this frankly.
 .TP
-.BI \[rs]D\[aq]a\~ "hc hv h v" \[aq]
+.BI \[rs]D\[aq]a\~ "hc vc h v" \[aq]
 Draw circular arc centered at
 .RI ( hc ,\~ vc )
 counterclockwise from the drawing position to a point
@@ -6869,6 +6867,8 @@ As noted,
 it is superfluous to add\~1 to any non-zero even mode.
 .
 .
+.br
+.ne 2v
 .P
 The places within a word that are eligible for hyphenation are
 determined by language-specific data
@@ -7138,6 +7138,8 @@ where
 expects them as control characters if you mean to use them literally.
 .
 .
+.br
+.ne 2v
 .P
 Macro definitions can be nested to arbitrary depth.
 .
@@ -7188,6 +7190,17 @@ or conditions on the input that,
 when reached or fulfilled,
 call a specified macro.
 .
+A
+.I "vertical position trap"
+calls a macro when the formatter's vertical drawing position reaches or
+passes,
+in the downward direction,
+a certain location on the output page or in a diversion.
+.
+Its applications include setting page headers and footers,
+body text in multiple columns,
+and footnotes.
+.
 These traps can occur at a given location on the page
 .RB ( .wh ,\~ .ch );
 at a given location in the current diversion
@@ -7195,7 +7208,20 @@ at a given location in the current diversion
 these are known as
 vertical position traps,
 which can be disabled and re-enabled
-.RB ( .vpt );
+.RB ( .vpt ).
+.
+.
+.P
+A diversion is not formatted in the context of a page,
+so it lacks page location traps;
+instead it can have a
+.I "diversion trap."
+.
+There can exist at most one such vertical position trap per diversion.
+.
+.
+.P
+Other kinds of trap can be planted
 at a blank line
 .RB ( .blm );
 at a line with leading space characters
@@ -7245,14 +7271,19 @@ with its corresponding amount of motion
 .\" ====================================================================
 .
 A
-.I page location trap
-is sprung when the vertical drawing position reaches or passes,
-in the downward direction,
-the place at which it is planted
-(with
-.B .wh
-or
-.BR .ch ).
+.I "page location trap"
+is a vertical position trap that applies to
+the page;
+that is,
+to undiverted output.
+.
+Many can be present;
+manage them with
+the
+.B wh
+and
+.B ch
+requests.
 .
 Non-negative page locations given to these requests set the trap
 relative to the top of the page;
