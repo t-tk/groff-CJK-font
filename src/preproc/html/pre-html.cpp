@@ -70,6 +70,14 @@
 
 // Most MS-DOS and Win32 environments will be missing the 'fork'
 // capability (some, like Cygwin, have it, but it is better avoided).
+//
+// Bruno Haible adds in 2023:
+//   However, because on Cygwin, neither ... __MSDOS__ [nor] _WIN32 is
+//   defined, the code [here] *will* use fork() on Cygwin.  Which works
+//   fine, but is known to be slow.  However, I don't know whether the
+//   native Windows code (_WIN32) will work on Cygwin: many native
+//   Windows APIs don't work right from within Cygwin, because the
+//   worlds inside and outside a Cygwin process are quite different.
 
 # define MAY_FORK_CHILD_PROCESS 0
 

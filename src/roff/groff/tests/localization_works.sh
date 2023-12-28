@@ -40,6 +40,10 @@ echo "testing English localization" >&2
 OUTPUT=$(echo "$DOC" | "$groff" -Tascii -m en)
 echo "$OUTPUT" | grep -qx english
 
+echo "testing Spanish localization" >&2
+OUTPUT=$(echo "$DOC" | "$groff" -Tascii -m es)
+echo "$OUTPUT" | grep -qx spanish
+
 echo "testing French localization" >&2
 OUTPUT=$(echo "$DOC" | "$groff" -Tascii -m fr)
 echo "$OUTPUT" | grep -qx french
@@ -51,6 +55,10 @@ echo "$OUTPUT" | grep -qx italian
 echo "testing Japanese localization" >&2
 OUTPUT=$(echo "$DOC" | "$groff" -Tascii -m ja)
 echo "$OUTPUT" | grep -qx japanese
+
+echo "testing Russian localization" >&2
+OUTPUT=$(echo "$DOC" | "$groff" -Tascii -m ru)
+echo "$OUTPUT" | grep -qx russian
 
 echo "testing Swedish localization" >&2
 OUTPUT=$(echo "$DOC" | "$groff" -Tascii -m sv)

@@ -1,3 +1,480 @@
+2023-03-16  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* src/libs/libxutil/XFontName.c (utoa): Rename function from
+	this...
+	(xu_utoa): ...to this, to avoid name collision when using
+	"newlib" portability library.
+	(XFormatFontName): Update call site.
+	* PROBLEMS: Drop item.
+
+	Fixes <https://savannah.gnu.org/bugs/?63831>.  Thanks to Brian
+	Inglis for the report.
+
+2023-05-13  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[man]: Preserve user-selected font family.
+
+	* tmac/an.tmac: When initializing, save the currently selected
+	font family as `an*body-family` instead of forcing 'T' (Times,
+	which is the formatter's default, even on nroff-mode devices
+	that can't switch families).  This change makes the formatter's
+	`-f` option work on man(7) documents again (important for
+	Japanese man pages, but there is now once again nothing stopping
+	you from viewing man pages in Palatino or Helvetica on the 'ps'
+	and 'pdf' devices where these families are available).  It also
+	reopens an avenue for rogue pages to affect the rendering of
+	unrelated documents later in batch rendering, but there are many
+	other, and worse, ways for rogue pages to do damage.  Problem
+	introduced by me in commit e0e16d8e65, 15 March 2022.
+
+	Fixes <https://savannah.gnu.org/bugs/?64130>.  Thanks to Deri
+	James for the report.
+
+2023-05-01  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[man]: Stop `HP` producing excess vertical space.
+
+	* tmac/an.tmac (HP): Fix thinko/typo when expanding macro as
+	string to call `an-deprecation-warn`.
+	* tmac/an-ext.tmac (SY): Put 1v of vertical space on the output
+	if we are starting a (non-nested) synopsis.
+
+	Thanks to Alex Colomar for the report.  Problem introduced by me
+	in commit aea1dfb11b, 6 March 2022.
+
+2023-04-28  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[ms]: Default vertical spacing to 120% of type size, not 2
+	points larger.
+
+	* tmac/s.tmac (par@load-init, par@init): Do it.
+	* NEWS: Add item.
+
+2023-04-26  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[pdfpic]: Refactor.
+
+	* tmac/pdfpic.tmac: Migrate gathering of image dimensions from
+	`sy` and a temporary file to `pso`.
+	(pdfpic@cleanup): Drop `pdfpic*temporary-file` string.
+	(pdfpic@get-image-dimensions): Remove redirection.  Invoke
+	`pso`, not `sy`.
+	(PDFPIC): Stop constructing `pdfpic*temporary-file` string.
+	Stop testing `systat` register.  Stop sourcing and deleting
+	temporary file.
+
+2023-04-21  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/pdfpic.tmac: Refactor to make comprehensible some
+	woefully undocumented cleverness and improve efficiency.
+	(PDFPIC): Break out flaming-hoop-leaping "clever" bit of `sy`
+	usage into its own macro, calling from here and relocating its
+	requests from here...
+	(pdfpic@get-image-dimensions): ...to here.  When using `sy`
+	request to collect and munge output of pdfinfo(1), (a) disable
+	the escape character while defining the macro; (b) construct the
+	command in a roff string, appending to it in discrete, hopefully
+	comprehensible chunks; (c) disable the escape character during
+	macro interpretation wherever possible (most of it); (d) retain
+	doubled backslashes so that they survive subsequent string
+	interpolation; (e) stop using grep(1) in the pipeline when
+	sed(1) is perfectly capable of performing its own input
+	filtering; (f) invoke sed with '-n' option and emit output only
+	upon a successful substitution; (g) replace unportable(!) POSIX
+	BRE character class '[:digit:]' in substitution match text with
+	'[0-9]'; and most importantly (h) replace multi-line sed 's'
+	replacement text (see below for the reason we can't use it) with
+	single roff control line employing the groff extension escape
+	sequence `\R` to assign multiple registers.  Annotate
+	portability and escaping challenges.  Tested on GNU/Linux, macOS
+	12, and (with simulated pdfinfo(1) output) Solaris 11.
+
+	There is a problem with trying to embed true newlines into the
+	arguments of a `sy` request.  The C++ function that GNU troff
+	uses to assemble the command string (character by character)
+	_does not recognize C/C++ string literal escape sequences_.
+	This means that you _cannot_ embed "\n" in `sy`'s arguments and
+	have it survive, as a newline character, into the command string
+	passed to the standard C library's system(3) function.  ("A\nB"
+	gets encoded as 'A', '\\', 'n', 'B', not 'A', '\n', 'B'.)
+	Unfortunately, this appears to be AT&T troff-compatible
+	behavior.  But it means that you _cannot_ portably construct
+	multi-line replacement text for sed's 's' command.  (Other sed
+	commands like 'a', 'c', and 'i' will be similarly affected.)
+	See Savannah #64071.
+
+	* PROBLEMS: Drop item.
+
+	Fixes <https://savannah.gnu.org/bugs/?64061>.  Thanks to Bruno
+	Haible for the report, and to him and Ralph Corderoy for the
+	discussion of portable and efficient sed constructs.
+
+2023-04-27  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[pdfpic]: Clean up better.
+
+	* tmac/pdfpic.tmac (PDFPIC): Call `pdfpic@cleanup` before
+	returning when falling back to `PSPIC` for non-PDF documents.
+
+2023-04-05  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/tty.tmac: Add angle bracket fallbacks.
+
+	Thanks to Mike Fulton for the report, and to Ralph Corderoy and
+	Dave Kemper for the discussion.
+
+2023-03-13  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[tests]: Add Spanish language support (5/5).
+
+	* src/roff/groff/tests/localization_works.sh:
+	* tmac/tests/e_ld-works.sh: Test it.
+
+	Fixes <https://savannah.gnu.org/bugs/?63921>.  Thanks to Eloi
+	Montañés.
+
+2023-03-13  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[docs]: Add Spanish language support (4/5).
+
+	* doc/groff.texi (Manipulating Hyphenation):
+	* doc/ms.ms (Language and localization):
+	* man/groff_tmac.5.man (Localization files): Document it.
+
+	* NEWS: Add item.
+
+2023-03-13  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[tmac]: Add Spanish language support (3/5).
+
+	* tmac/hyphen.es:
+	* tmac/es.tmac: Update editor aids.
+
+2023-03-13  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[tmac]: Add Spanish language support (2/5).
+
+	* tmac/es.tmac: Spell weekday and month names in lowercase;
+	every style authority I could find online mandates this, and it
+	meshes with my half-remembered formal instruction in the
+	language.  Fix groff composite special character escape
+	sequences to place the base character first.  Replace one
+	Unicode special character escape sequence with a composite
+	special character escape sequence, for consistency.
+
+2023-03-13  Eloi Montañés <em@ilsrv.com>
+
+	[tmac]: Add Spanish language support (1/5).
+
+	* tmac/hyphen.es: Add hyphenation patterns (encoded in Latin-9).
+	* tmac/es.tmac: Add groff locale for Spanish.
+	* tmac/tmac.am (TMACNORMALFILES): Ship new files.
+	* doc/groff.texi (Manipulating Hyphenation): Add file/package
+	  index entry for "es.tmac".
+	* LICENSES: Update for CTAN Spanish hyphenation patterns.
+
+2023-03-09  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[tests]: Add Russian language support (7/7).
+
+	* src/roff/groff/tests/localization_works.sh:
+	* tmac/tests/e_ld-works.sh: Test it.
+
+	Fixes <https://savannah.gnu.org/bugs/?63076>.  Thanks to Nikita
+	Ivanov.
+
+2023-03-08  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[docs]: Add Russian language support (6/7).
+
+	* doc/groff.texi (Input Encodings, Manipulating Hyphenation):
+	* doc/ms.ms (Language and localization):
+	* man/groff_tmac.5.man (Localization packages, Input encodings):
+	Document support for KOI8-R encoding and Russian language.
+
+2023-03-08  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[tmac]: Add Russian language support (5/7).
+
+	* tmac/tmac.am (TMACNORMALFILES): Ship new Russian language
+	support files.
+
+2023-03-08  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[tmac]: Add Russian language support (4/7).
+
+	* tmac/koi8-ru.tmac: Rename this file...
+	* tmac/koi8-r.tmac: ...to this.  There _is_ a "KOI8-RU"
+	encoding, which appears to subsume KOI8-B and KOI8-U (by
+	replacing more box drawing characters), but this file does not
+	remap their values to applicable Unicode code points.
+	* tmac/ru.tmac: Load the encoding file under its new name.
+
+2023-03-08  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[tmac]: Add Russian language support (3/7).
+
+	* tmac/hyphen.ru:
+	* tmac/ru.tmac: Update editor aids so these files can be edited
+	more intelligibly using GNU Emacs.  Annotate apparent problem
+	with Vim's KOI8-R support.
+
+2023-03-08  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	Add Russian language support (2/7).
+
+	LICENSES: Update for CTAN Russian hyphenation patterns.
+
+2023-03-08  Nikita Ivanov <nikita.vyach.ivanov@gmail.com>
+
+	[tmac]: Add Russian language support (1/7).
+
+	* tmac/hyphen.ru: Add hyphenation patterns (encoded in KOI8-R).
+	* tmac/koi8-ru.tmac: Add character encoding support.
+	* tmac/ru.tmac: Add groff locale for Russian.
+
+2023-04-07  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/s.tmac (@EQ): Trivially refactor.  Shift valid
+	pseudo-enumeration type values from 0..2 to 1..3 so that they
+	more idiomatically test for truth values in roff (where zero and
+	negative values are false).  Simplify a conditional accordingly.
+
+2023-04-07  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[ms]: Fix Savannah #64013.
+
+	* tmac/s.tmac (@EQ): Revise argument handling.  If there is only
+	one argument and it is not a recognized alignment, warn and
+	treat it as an equation label.  If there are two arguments but
+	the first is not a recognized alignment, throw a warning
+	diagnostic (but still use default alignment with the second
+	argument as label).  An explicitly empty first argument is
+	synonymous with "C".
+
+	Fixes <https://savannah.gnu.org/bugs/?64013>.
+
+2023-04-07  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[ms]: Regression-test Savannah #64013.
+
+	* tmac/tests/s_EQ-handles-empty-first-arg.sh: Do it.
+	* tmac/tmac.am (tmac_TESTS): Run test.
+
+2023-04-05  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[ms]: Fix Savannah #64005.
+
+	* tmac/s.tmac (@break-page, bp): Define alias for `bp` request
+	and wrapper for `bp` to (if needed) temporarily disable no-space
+	mode, so that a document's `bp` requests are honored even if
+	no-space mode is on, as can happen after displays.  Fixes a
+	regression from groff 1.22.4 and historical ms implementations
+	introduced by me on 6 July when resolving Savannah #62688.
+
+	Fixes <https://savannah.gnu.org/bugs/?64005>.  Thanks to Michał
+	Kruszewski for reporting the problem and Dave Kemper for
+	identifying the cause.
+
+2023-04-05  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[ms]: Regression-test Savannah #64005.
+
+	* tmac/tests/s_honor-page-break-after-display.sh: Do it.
+	* tmac/tmac.am (tmac_TESTS): Run test.
+
+2023-03-24  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/mdoc/doc-common (Sh): Restore hyphenation configured with
+	`HY` register upon entry to any new section.  Disable adjustment
+	and hyphenation when in the "Synopsis" section.
+
+	Fixes <https://savannah.gnu.org/bugs/?63957>.  Thanks to Alex
+	Colomar for reporting an issue that brought this one to light.
+
+2023-03-24  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[mdoc]: Regression-test Savannah #63957.
+
+	* tmac/tests/doc_synopsis_is_not_adjusted.sh: Do it.
+	* tmac/tmac.am (tmac_TESTS): Run test.
+
+2023-03-14  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/tmac.am (tmac/stamp-wrap): Stop prepending groff's man(7)
+	package wrapper ("-man") on hosts with a system man package with
+	a request to source itself; this was search-and-replace damage
+	from resolving Savannah #60789.  The wrapper still worked, but
+	reported any errors inside the wrapped macro package many times
+	until the process ran out of file descriptors.  Problem
+	introduced by me in commit fdac25937f, 2021-07-05.
+
+	Fixes <https://savannah.gnu.org/bugs/?63924>.
+
+2023-05-13  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tmac/tests/an-ext_SY-and-YS-work.sh: Add test.
+	* tmac/tmac.am (tmac_TESTS): Run test.
+
+2023-04-28  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[build]: Skip an Autoconf check if not necessary.
+
+	* m4/groff.m4 (GROFF_PNMTOPS_NOSETPAGE): Skip check if no
+	"pnmtops" command was found.
+
+2023-04-06  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[doc]: Abstract document dependencies on the mom package.
+
+	* doc/doc.am (doc/automake.pdf): Replace dependency with new
+	macro `TMAC_PACKAGE_MOM`.
+
+	Aligns with <https://savannah.gnu.org/bugs/?62541> (4/4).
+
+2023-04-03  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[doc]: Add document dependencies on the ms package.
+
+	* tmac/tmac.am (TMAC_PACKAGE_MS): Define new macro comprising
+	the files of the ms package.
+	* doc/doc.am (doc/ms.ps, doc/webpage.ps, doc/pic.html)
+	(doc/pic.ps): Add dependency on new macro.
+
+	Fixes <https://savannah.gnu.org/bugs/?62541> (2/4).
+
+2023-04-03  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[doc]: Add document dependencies on the "me" package.
+
+	* tmac/tmac.am (TMAC_PACKAGE_ME): Define new macro comprising
+	the files of the "me" package.
+	* doc/doc.am (doc/grnexmpl.ps, doc/meintro.ps)
+	(doc/meintro_fr.ps, doc/meref.ps): Add dependency on new macro.
+
+	Fixes <https://savannah.gnu.org/bugs/?62541> (1/4).
+
+2023-04-03  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[build]: Install PDF documents better.  Ship only one copy of
+	"automake.pdf", and install it and the new "groff-man-pages.pdf"
+	in the "pdf/" subdirectory of the destination "doc" directory.
+
+	* doc/doc.am (PROCESSEDDOCFILES): Drop
+	"$(PROCESSEDDOCFILES_PDF)" from macro definition.
+	(nodist_docpdfdoc_DATA) [USE_GROPDF]: Use it here instead,
+	replacing a literal "doc/automake.pdf".
+	(mostlyclean-doc) [USE_GROPDF]: Clean these same files.
+
+2023-04-03  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[build]: Ship groff.dvi (our Texinfo manual in DVI format).
+
+	* doc/doc.am (install-dvi-local, uninstall-dvi): Add targets.
+	(uninstall-local): Depend on "uninstall-dvi".
+
+2023-04-03  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[build]: Resume shipping pic.html.
+
+	* m4/groff.m4 (GROFF_CHECK_GROHTML_PROGRAMS)
+	(GROFF_GROHTML_PROGRAM_NOTICE, GROFF_PNMTOOLS_CAN_BE_QUIET):
+	Rename "make_htmldoc" to "use_grohtml" as expected by
+	"configure.ac".  Also stop `AC_SUBST`ing it; we don't need
+	"@use_grohtml@" in our Makefiles since an `AM_CONDITIONAL` in
+	configure.ac already does an equivalent thing.  Continues commit
+	aa5787c1eb by me from 20 May.
+	(PROCESSEDDOCFILES): Drop "$(PROCESSEDDOCFILES_HTML)" from macro
+	definition; annotate why.
+
+2023-03-13  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	m4/groff.m4 (GROFF_TMAC): Eliminate garbage leading space from
+	contents of `tmac_wrap` shell variable.
+
+2023-03-13  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[build]: Clarify output of `GROFF_TMAC` Autoconf test.
+
+	* configure.ac: Correct characterization of the list of macro
+	packages reported.  It is not the list of macro packages
+	receiving a "g" prefix, but the list of macro packages reciving
+	a wrapper macro file in groff's macro directory, each of which
+	sources the corresponding system (likely AT&T-descended troff)
+	macro package.  Fixes wording I introduced in commit 4d30dd7424,
+	31 May.
+	* m4/groff.m4 (GROFF_TMAC): Clarify first "checking" message:
+	we are looking for a file name prefix on existing system macro
+	packages (like "tmac.").  This has nothing to do with the prefix
+	applied to groff commands, or the "g" prefixed to groff
+	implementations of the man, mm, and ms packages.  Tighten
+	wording of second "checking" message.  Consistently say "(none)"
+	instead of "none" or "none found".
+
+	Fixes <https://savannah.gnu.org/bugs/?63900>.
+
+2023-03-11  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* doc/doc.am (install-txt): Look for "groff.txt" in the source
+	and build directories in sequence; it could be in either place
+	depending on whether the build is from the Git repository or
+	from a distribution archive.  Annotate this.  Fixes
+	"install-doc" target when building from Git repository.  Problem
+	introduced by me in commit 691fc70108, 22 February.  Thanks to
+	Nikita Ivanov for the report.
+	(install-pdf-local, install-html-local): Similar.
+
+	Also fixes <https://savannah.gnu.org/bugs/?64059>, later
+	reported anonymously.
+
+2023-03-10  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* doc/doc.am (maintainer-clean-local): Remove temporary "*.t2d"
+	and "*.t2p" directories created by texi2dvi.
+
+2023-04-20  Bruno Haible <bruno@clisp.org>
+
+	[build]: Fix gxditview linking on AIX.
+
+	* m4/groff.m4 (GROFF_X11): Add macro dependency on
+	`AC_CANONICAL_HOST`.  Introduce new variable `X_AW_DEPS`, empty
+	on most hosts.  If we otherwise have Athena widget library
+	support, and the host is AIX, force linkage against Xpm and Xext
+	libraries to reflect modern Athena dependencies, which AIX's
+	linker doesn't figure out on its own.  `AC_SUBST` this variable,
+	exposing it to Automake files.
+	* src/devices/xditview/xditview.am (gxditview_LDADD): Use it.
+
+	{A similar change might also be useful for HP-UX, another Unix
+	System V descendant; see
+	<http://hpux.connect.org.uk/hppd/cgi-bin/wwwtar?/hpux/Gnu/\
+	groff-1.23.0/groff-1.23.0-src-11.31.tar.gz+groff-1.23.0/\
+	HPUX.Install+text>.  --GBR, 2023-07-10}
+
+2023-04-20  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* bootstrap.conf (gnulib_modules): Add "sys_wait" module.  MinGW
+	does not provide "sys/wait.h", which we require in
+	src/preproc/html/pre-html.cpp since commit 11137209ed, 27 June.
+
+2023-04-20  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* Makefile.am: Initialize (as empty) Automake variables that we
+	don't use but which gnulib modules expect to be defined.
+	(AUTOMAKE_OPTIONS, SUBDIRS, noinst_HEADERS, noinst_LTLIBRARIES)
+	(pkgdata_DATA, MOSTLYCLEANDIRS, AM_CFLAGS): Do it.
+
+	Thanks to Bruno Haible for the advice.
+
+2023-04-22  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	[mdoc]: Regression-test Savannah #57665, but for mdoc.
+
+	* tmac/tests/doc_TS-do-not-keep-tables-when-cR-set.sh: Do it.
+	* tmac/tmac.am (tmac_TESTS): Run test.
+
+	Fixes <https://savannah.gnu.org/bugs/?64037>.
+
 2023-06-21  G. Branden Robinson <g.branden.robinson@gmail.com>
 
 	[ms]: Offer advice to users of PDF who want a table of contents

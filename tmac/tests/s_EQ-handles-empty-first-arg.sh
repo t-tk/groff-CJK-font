@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (C) 2020-2023 Free Software Foundation, Inc.
+# Copyright (C) 2023 Free Software Foundation, Inc.
 #
 # This file is part of groff.
 #
@@ -20,32 +20,17 @@
 
 groff="${abs_top_builddir:-.}/test-groff"
 
-# Regression-test Savannah #57665.
+# Regression-test Savannah #64013.
 #
-# The interior of this text is fragile with respect to line count.
+# Render an equation label even if the alignment argument is empty.
 
-input='.TH ts\-hell 1 2020-10-09 "groff test suite"
-.SH Name
-ts\-hell \- turn off tbl keeps when continuous rendering
-.SH Description
-A long table should not get spurious blank lines inserted into it when
-continuously rendering.
-.
-This arises from
-.IR tbl (1)
-using \[lq]keeps\[rq].
-.
-We do not need those when
-.B cR
-is set.
-.
-.TS
-l.
-'$(n=1; while [ $n -le 66 ]; do echo $n; n=$(( n + 1 )); done)'
-.TE'
+input='.LP
+.EQ "" (1)
+x + y = z
+.EN'
 
-output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -t -man)
+output=$(printf "%s\n" "$input" | "$groff" -e -ms -Tascii -P-cbou)
 echo "$output"
-test -z "$(echo "$output" | sed -n '/^  *1$/,/^  *66$/s/^ *$/FNORD/p')"
+echo "$output" | grep -qx ' *x+y=z *(1)'
 
 # vim:set ai et sw=4 ts=4 tw=72:

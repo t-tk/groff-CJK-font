@@ -59,26 +59,6 @@ Some portability issues are known to affect groff's gdiffmk utility.
 
 ----------------------------------------------------------------------
 
-* The `PDFPIC` macro doesn't work / its automated test fails.
-
-  FAIL: tmac/tests/pdfpic_does-not-choke-on-bad-pdfinfo-output.sh
-
-Due to a limitation (shared by AT&T troff) in the way the `sy` request
-constructs a C string argument to the C library's system(3) function,
-groff requires a GNU sed(1) extension that interprets "\n" as a newline
-in the replacement text of the 's' command.  (We might enhance GNU
-troff's `sy` request to avoid this dependency in the future.)  We have
-observed this problem on Solaris 10 and 11 and Mac OS X 10.11.6, but not
-macOS 12: the last's sed supports the extension in question.
-
-Install GNU sed in the default $PATH as "gsed" and edit
-tmac/pdfpic.tmac.  On line 172, change "sed" to "gsed".  Alternatively,
-you can use the absolute path to GNU sed's location.  (`system()`
-sanitizes $PATH to avoid privilege escalation.)  Then (re-)make the
-"check" target or format your PDFPIC-employing document again.
-
-----------------------------------------------------------------------
-
 [groff 1.19.2]
 
 * When viewing man pages, some characters on my UTF-8 terminal emulator
@@ -826,21 +806,6 @@ Compilation Problems
 This is a known problem.  We haven't tracked down the cause yet, but
 have improved the reporting of the test output in hopes that we can
 isolate it in a future release.
-
-----------------------------------------------------------------------
-
-* I get a build failure on Cygwin / a system using newlib and GCC 11.
-
-"newlib" defines a function called "utoa" which conflicts with a static
-(file scope-local) function in src/libs/libxutil/XFontName.c.
-
-We expect to fix this in the near future; in the meantime, you can patch
-the file to rename the function (and update its call sites) or, if you
-don't require the "gxditview" output previewer or "xtotroff" utility,
-you can build groff without X11 support.
-
-  $ make distclean
-  $ ./configure --without-x
 
 ----------------------------------------------------------------------
 

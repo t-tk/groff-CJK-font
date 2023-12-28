@@ -74,10 +74,16 @@ PROCESSEDDOCFILES_PS = \
   doc/pic.ps
 PROCESSEDDOCFILES_TXT = \
   doc/groff-man-pages.utf8.txt
+# XXX: $(PROCESSEDDOCFILES_HTML) is omitted because pic.html gets
+# special handling: it needs to be placed in a subdirectory with its
+# image files.  If we include it here, a copy of its table of contents,
+# full of broken links to each section, gets placed directly in
+# $(DESTDIR)/$(docdir).
+#
+# $(PROCESSEDDOCFILES_PDF) is omitted because it's unnecessary; the
+# Automake macro nodist_docpdfdoc_DATA does what we need.
 PROCESSEDDOCFILES = \
-  $(PROCESSEDDOCFILES_HTML) \
   $(PROCESSEDDOCFILES_PS) \
-  $(PROCESSEDDOCFILES_PDF) \
   $(PROCESSEDDOCFILES_TXT)
 
 # Declare minimal dependencies for documents by output driver.
@@ -102,14 +108,12 @@ nodist_otherdoc_DATA = $(PROCESSEDDOCFILES) $(GENERATEDDOCFILES)
 MOSTLYCLEANFILES += $(GENERATEDDOCFILES) $(PROCESSEDDOCFILES)
 EXTRA_DIST += $(DOCFILES_NOINST)
 
-# pdf doc, written in mom and therefore using contrib/mom/mom.am
-# definitions
 EXTRA_DIST += doc/automake.mom
 if USE_GROPDF
 docpdfdocdir = $(pdfdocdir)
-nodist_docpdfdoc_DATA = doc/automake.pdf
+nodist_docpdfdoc_DATA = $(PROCESSEDDOCFILES_PDF)
 endif
-doc/automake.pdf: doc/automake.mom pdfmom contrib/mom/om.tmac
+doc/automake.pdf: doc/automake.mom pdfmom $(TMAC_PACKAGE_MOM)
 
 # GNU PIC html documentation, installed in $(htmldocdir)
 # Other pic*.html files are installed by the local rule
@@ -270,7 +274,7 @@ doc/groff-man-pages.utf8.txt: $(GROFF_MAN_PAGES_ALL) eqn pic tbl \
 	  $(tmac_srcdir)/en.tmac $(GROFF_MAN_PAGES3) > $@
 
 doc/grnexmpl.ps: $(doc_srcdir)/grnexmpl.me $(doc_srcdir)/grnexmpl.g \
-  grn eqn
+  $(TMAC_PACKAGE_ME) grn eqn
 	$(GROFF_V)$(MKDIR_P) `dirname $@` \
 	&& $(DOC_GROFF) -Tps -ge -me $(doc_srcdir)/grnexmpl.me >$@
 
@@ -296,14 +300,14 @@ doc/grnexmpl.ps: $(doc_srcdir)/grnexmpl.me $(doc_srcdir)/grnexmpl.g \
 # special way that is explicitly not countenanced by POSIX.
 #
 #   "The application shall ensure that the target portion is a valid
-#   target name (see Target Rules) of the form .s2 or .s1.s2 (where .s1
-#   and .s2 are suffixes that have been given as prerequisites of the
-#   .SUFFIXES special target and s1 and s2 do not contain any <slash> or
-#   <period> characters.) If there is only one <period> in the target,
-#   it is a single-suffix inference rule. Targets with two periods are
-#   double-suffix inference rules. Inference rules can have only one
-#   target before the <colon>."
-#     (POSIX Issue 8, make(1), "Inference Rules")
+#   target name (see Target Rules, ...) of the form .s2 or .s1.s2 (where
+#   .s1 and .s2 are suffixes that have been given as prerequisites of
+#   the .SUFFIXES special target and s1 and s2 do not contain any
+#   <slash> or <period> characters.) If there is only one <period> in
+#   the target, it is a single-suffix inference rule. Targets with two
+#   periods are double-suffix inference rules. Inference rules can have
+#   only one target before the <colon>."
+#     (POSIX Issue 8 Draft 3, make(1), "Inference Rules")
 #
 # A double-suffix rule won't work in an obvious way because its
 # semantics are that the suffix is replaced, not removed.  You have to
@@ -324,6 +328,9 @@ doc/grnexmpl.ps: $(doc_srcdir)/grnexmpl.me $(doc_srcdir)/grnexmpl.g \
 # implementors to agree.  -- GBR
 .PRECIOUS: $(GENERATEDDOCFILES)
 SUFFIXES += .me.in .me
+
+doc/meintro.ps doc/meintro_fr.ps doc/meref.ps: $(TMAC_PACKAGE_ME)
+
 .me.in.me:
 	$(GROFF_V)$(MKDIR_P) `dirname $@` \
 	&& $(DOC_SED) $< >$@
@@ -338,16 +345,16 @@ doc/meintro_fr.ps: doc/meintro_fr.me preconv
 	$(GROFF_V)$(MKDIR_P) `dirname $@` \
 	&& $(DOC_GROFF) -K utf8 -t -Tps -me -mfr $< >$@
 
-doc/ms.ps: $(doc_srcdir)/ms.ms eqn tbl
+doc/ms.ps: $(doc_srcdir)/ms.ms $(TMAC_PACKAGE_MS) eqn tbl
 	$(GROFF_V)$(MKDIR_P) `dirname $@` \
 	&& $(DOC_GROFF) -et -Tps -ms $(doc_srcdir)/ms.ms >$@
 
-doc/pic.ps: $(doc_srcdir)/pic.ms eqn pic tbl
+doc/pic.ps: $(doc_srcdir)/pic.ms $(TMAC_PACKAGE_MS) eqn pic tbl
 	$(GROFF_V)$(MKDIR_P) `dirname $@` \
 	&& $(DOC_GROFF) -pet -Tps -ms $(doc_srcdir)/pic.ms >$@
 
 doc/webpage.ps: $(DOC_GNU_EPS) tmac/www.tmac tbl
-doc/webpage.ps: $(doc_srcdir)/webpage.ms
+doc/webpage.ps: $(doc_srcdir)/webpage.ms $(TMAC_PACKAGE_MS)
 	$(GROFF_V)$(MKDIR_P) `dirname $@` \
 	&& $(DOC_GROFF) -I $(doc_srcdir) -I $(doc_builddir) -t -Tps \
 	  -ms -mwww $(doc_srcdir)/webpage.ms >$@
@@ -359,7 +366,7 @@ doc/webpage.ps: $(doc_srcdir)/webpage.ms
 
 doc/pic.html: eqn pic tbl
 doc/pic.html: tmac/www.tmac
-doc/pic.html: $(doc_srcdir)/pic.ms
+doc/pic.html: $(doc_srcdir)/pic.ms $(TMAC_PACKAGE_MS)
 	$(GROFF_V)$(MKDIR_P) $(doc_builddir) \
 	&& cd $(doc_builddir) \
 	&& $(DOC_GROFF) -pet -P-Ipic -P-Dimg -P-jpic -Thtml -ms \
@@ -411,6 +418,9 @@ if USE_GROHTML
 	  done; \
 	  rmdir  $(doc_builddir)/img || :; \
 	fi
+endif
+if USE_GROPDF
+	$(RM) $(PROCESSEDDOCFILES_PDF)
 endif
 
 install-data-hook: install_doc_htmldoc
@@ -619,12 +629,22 @@ maintainer-clean-local:
 	$(RM) $(doc_builddir)/groff.dvi
 	$(RM) $(doc_builddir)/groff.txt
 	$(RM) -r $(doc_builddir)/groff.html.*
+	$(RM) -r $(doc_builddir)/*.t2d $(doc_builddir)/*.t2p
+
+# Generated forms of the groff Texinfo manual might be in the source
+# directory (distribution archive build) or in the build directory (Git
+# repository build).
 
 install-data-local: install-txt
 install-txt:
 	-test -d $(DESTDIR)$(docdir) \
 	  || $(mkinstalldirs) $(DESTDIR)$(docdir)
-	cp $(top_srcdir)/doc/groff.txt $(DESTDIR)$(docdir)
+	for d in $(doc_builddir) $(doc_srcdir); do \
+	  if [ -f "$$d"/groff.txt ]; then \
+	    cp "$$d"/groff.txt $(DESTDIR)$(docdir); \
+	    break; \
+	  fi; \
+	done
 
 install-data-local: install_infodoc
 install_infodoc: doc/groff.info
@@ -639,22 +659,47 @@ install_infodoc: doc/groff.info
 	    break; \
 	  fi; \
 	done
+
+install-dvi-local: doc/groff.dvi
+	-test -d $(DESTDIR)$(docdir) \
+	  || $(mkinstalldirs) $(DESTDIR)$(docdir)
+	for d in $(doc_builddir) $(doc_srcdir); do \
+	  if [ -f "$$d"/groff.dvi ]; then \
+	    cp "$$d"/groff.dvi $(DESTDIR)$(docdir); \
+	    break; \
+	  fi; \
+	done
+
 install-pdf-local: doc/groff.pdf
 	-test -d $(DESTDIR)$(pdfdocdir) \
 	  || $(mkinstalldirs) $(DESTDIR)$(pdfdocdir)
-	cp $(top_srcdir)/doc/groff.pdf $(DESTDIR)$(pdfdocdir)
+	for d in $(doc_builddir) $(doc_srcdir); do \
+	  if [ -f "$$d"/groff.pdf ]; then \
+	    cp "$$d"/groff.pdf $(DESTDIR)$(pdfdocdir); \
+	    break; \
+	  fi; \
+	done
+
 install-html-local: doc/groff.html
 	-test -d $(DESTDIR)$(htmldocdir)/groff.html.mono \
 	  || $(mkinstalldirs) $(DESTDIR)$(htmldocdir)/groff.html.mono
-	cp -r $(top_srcdir)/doc/groff.html \
-	  $(DESTDIR)$(htmldocdir)/groff.html.mono
-	cp -r $(top_srcdir)/doc/groff.html.node \
-	  $(DESTDIR)$(htmldocdir)
+	for d in $(doc_builddir) $(doc_srcdir); do \
+	  if [ -f "$$d"/groff.html ]; then \
+	    cp -r "$$d"/groff.html \
+	      $(DESTDIR)$(htmldocdir)/groff.html.mono; \
+	    cp -r "$$d"/groff.html.node \
+	      $(DESTDIR)$(htmldocdir); \
+	    break; \
+	  fi; \
+	done
 
-uninstall-local: uninstall_infodoc uninstall-pdf uninstall-html \
-  uninstall-txt
+uninstall-local: uninstall_infodoc uninstall-dvi uninstall-pdf \
+  uninstall-html uninstall-txt
 uninstall_doc: uninstall-local
 uninstall-doc: uninstall-local
+uninstall-dvi:
+	$(RM) $(DESTDIR)$(docdir)/groff.dvi
+	-rmdir $(DESTDIR)$(docdir)
 uninstall_infodoc:
 	-$(INSTALL_INFO) --remove --info-dir=$(DESTDIR)$(infodir) \
 	  $(DESTDIR)$(infodir)/groff.info

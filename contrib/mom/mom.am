@@ -33,6 +33,7 @@ man7_MANS += contrib/mom/groff_mom.7
 
 # Files installed in $(tmacdir).
 # MOMNORMALFILES are located in the source tree.
+# Also see TMAC_PACKAGE_MOM below.
 MOMNORMALFILES = \
   contrib/mom/mom.tmac \
   contrib/mom/om.tmac
@@ -114,7 +115,8 @@ contrib/mom/examples/tests-mom.sh: \
   $(top_builddir)/config.status \
   $(MOMPROCESSEDEXAMPLEFILES) \
   $(top_srcdir)/$(mom_test_template)
-	$(AM_V_GEN)sed \
+	$(AM_V_GEN)$(MKDIR_P) `dirname $@` \
+	&& sed \
 	  -e "s|[@]abs_top_builddir[@]|$(abs_top_builddir)|g" \
 	  -e "s|[@]groff_have_urw_fonts[@]|$(groff_have_urw_fonts)|g" \
 	  $(top_srcdir)/$(mom_test_template) > $@ \
@@ -173,6 +175,10 @@ uninstall_mom:
 	if test -d $(DESTDIR)$(htmldocdir)/mom; then \
 	  rmdir $(DESTDIR)$(htmldocdir)/mom; \
 	fi
+
+# Define convenience macro for in-tree documents to depend on.  Don't
+# use this above.
+TMAC_PACKAGE_MOM = contrib/mom/om.tmac
 
 
 # Local Variables:
