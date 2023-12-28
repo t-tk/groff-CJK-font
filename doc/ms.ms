@@ -3028,11 +3028,13 @@ provides several strings that you can customize for your own purposes,
 or redefine to adapt the macro package to languages other than English.
 .
 It is already localized for
-.\" cs, de, fr, it, sv
+.\" cs, de, fr, it, ru, es, sv
 Czech,
 German,
 French,
 Italian,
+Russian,
+Spanish,
 and
 Swedish.
 .

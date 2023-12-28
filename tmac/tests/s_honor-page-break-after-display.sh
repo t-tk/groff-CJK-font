@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (C) 2020-2023 Free Software Foundation, Inc.
+# Copyright (C) 2023 Free Software Foundation, Inc.
 #
 # This file is part of groff.
 #
@@ -20,32 +20,21 @@
 
 groff="${abs_top_builddir:-.}/test-groff"
 
-# Regression-test Savannah #57665.
-#
-# The interior of this text is fragile with respect to line count.
+# Regression-test Savannah #64005.
 
-input='.TH ts\-hell 1 2020-10-09 "groff test suite"
-.SH Name
-ts\-hell \- turn off tbl keeps when continuous rendering
-.SH Description
-A long table should not get spurious blank lines inserted into it when
-continuously rendering.
-.
-This arises from
-.IR tbl (1)
-using \[lq]keeps\[rq].
-.
-We do not need those when
-.B cR
-is set.
-.
-.TS
-l.
-'$(n=1; while [ $n -le 66 ]; do echo $n; n=$(( n + 1 )); done)'
-.TE'
+input='.pl 18v
+.LP
+The first page is \n%.
+.DS
+display
+.DE
+.bp
+.LP
+The second page is \n%.
+.pl \n(nlu'
 
-output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -t -man)
+output=$(printf '%s\n' "$input" | "$groff" -Tascii -P-cbou -ms)
 echo "$output"
-test -z "$(echo "$output" | sed -n '/^  *1$/,/^  *66$/s/^ *$/FNORD/p')"
+echo "$output" | grep -Fqx 'The second page is 2.'
 
 # vim:set ai et sw=4 ts=4 tw=72:

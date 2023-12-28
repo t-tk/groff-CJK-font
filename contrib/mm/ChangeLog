@@ -1,3 +1,119 @@
+2023-07-04 G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* m.tmac: Stop suppressing warnings if Boolean register `Ref` is
+	true.  Diagnostic output does not interfere with index/reference
+	output, the lines of which are prefixed in a way that is not
+	confusable with warnings.
+
+2023-06-30 G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* m.tmac (IND): Throw error if vertical drawing position is
+	negative.  (What page number can be recorded when that is the
+	case?)  Thanks to Damian McGuckin for raising this scenario.
+
+2023-06-30 G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	Trivially refactor.
+
+	* m.tmac (let@mt-closing): Rename this...
+	(let@formal-closing): ...to this, since it has nothing to do
+	with memorandum types.
+	(FC, let@fc_BL, let@fc_SB): Update call and alias sites.
+
+2023-05-25  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* m.tmac (let@print-head): Unconditionally put one vee of space
+	on the output before returning.
+
+	Fixes <https://savannah.gnu.org/bugs/?63695>.
+
+2023-05-25  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	Regression-test Savannah #63695.
+
+	* tests/LT-should-space-after-inside-address.sh: Do it.
+	* mm.am (mm_TESTS): Run test.
+
+2023-05-25  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	Accept a second argument to `HU`.
+
+	* m.tmac (HU): Pass `H` all of our arguments.  Also validate
+	quantity of arguments and throw error if called with none.
+
+	Fixes <https://savannah.gnu.org/bugs/?64204>.
+
+2023-05-25  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	Slightly revise index output.
+
+	* m.tmac (INDP): Call `SK` if `TXIND` is not defined, instead of
+	as the first thing if `TYIND` is not defined.  This is easier to
+	rationalize in the documentation as something that happens
+	before the index caption is written.  This way any page breaking
+	or spacing prior to the index is strictly `TXIND`'s
+	responsibility, and the formatting of the index caption itself,
+	followed by any formatting changes appropriate to the index
+	entries, belongs to `TYIND`.
+
+2023-07-04 G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* m.tmac (IND): Use `hd@mark-trimmed` instead of `hd*mark` in
+	index entries, just as is done with references; we don't want
+	trailing spaces in it.
+
+2023-05-18  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	Improve input validation of `INITI`, `IND` macros.
+
+	* m.tmac (INITI): Validate the index type (first argument) here
+	instead of only later when `IND` is called.  Actually verify
+	that the second argument is present and usable.
+	(IND): Verify that we're given arguments.
+
+	Fixes <https://savannah.gnu.org/bugs/?64205>.
+
+2023-05-18  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* m.tmac (Indcmd): Drop relic string.  Nothing interpolates it;
+	it hasn't been used since before groff 1.16 (February 2000).
+
+2023-05-17  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* m.tmac (let@print-head): Unconditionally `sp`ace after setting
+	the text produced by ".LO SJ", instead of only doing so if the
+	letter type was not "simplified" (".LT SP").
+
+	Fixes <https://savannah.gnu.org/bugs/?64209>.
+
+2023-05-17  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* m.tmac (pg@next-page): Break the line before `ne`eding a large
+	amount of space to force a page (or column) break.
+
+	Fixes <https://savannah.gnu.org/bugs/?64207>.
+
+2023-07-04  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* mmroff.pl: Honor `GROFF_BIN_PATH` environment variable.
+	* mmroff.1.man (Environment): Add section documenting this.
+
+2023-07-04  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* mmroff.pl: Trivially refactor.  Rename scalars.
+	- `check_macro` -> `first_pass`
+	- `run_macro` -> `second_pass`
+
+2023-04-01  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* mmroff.pl: Document `--help` and `--version` options in usage
+	message.
+
+2023-06-30  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* tests/indexing-works.sh: Add unit test.
+	* mm.am (mm_TESTS): Run test.
+
 2023-05-25  G. Branden Robinson <g.branden.robinson@gmail.com>
 
 	* groff_mm.7.man (Macros) <INDP>: Clarify operation.

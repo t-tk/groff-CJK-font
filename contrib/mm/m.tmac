@@ -268,8 +268,6 @@ Index		array!index
 .\"
 .\" header text for the index
 .ds Index INDEX
-.\" command to sort the index
-.ds Indcmd sort
 .\"
 .\" flag for mkindex
 .if !r Idxf .nr Idxf 0
@@ -375,10 +373,9 @@ Index		array!index
 .\" for .INITR
 .\"
 .\" Output references to stderr if non-zero
-.ie !r Ref \{\
+.if !r Ref \{\
 .	nr Ref 0
 .\}
-.el .warn 0
 .\"
 .\"---------------------------------------------
 .\" set local variables.
@@ -1035,7 +1032,8 @@ numeric; got '\\$1'
 .ds \\$1 \\$[\\n[hd*sp-tmp]]
 ..
 .de HU
-.H 0 "\\$1"
+.if \\n[.$]=0 .@error \\$0: expected 1 or 2 arguments, got \\n[.$]
+.H 0 \\$@
 ..
 .\"-------------
 .de H
@@ -1297,6 +1295,7 @@ numeric; got '\\$1'
 .\" stop output and begin on next page. Fix footnotes and all that.
 .de pg@next-page
 .\".debug next-page
+.br
 .ne 999i		\" activate trap
 .\" .pg@footer
 ..
@@ -3331,35 +3330,52 @@ exceeds depth of nested lists (\\n[li*lvl])
 ..
 .\"########################### module ind ############################
 .\"--------------------
-.\" Another type of index system
+.\" initialize index
 .\" INITI type filename [macro]
+.\" XXX: Since we can build only one index at a time[1], it shouldn't be
+.\" necessary to have a mandatory filename argument[2].  Consider
+.\" letting the mmroff Perl script generate a temporary filename for us.
+.\"
+.\" [1] Why?  Indexes go through Perl anyway, and it can keep track of
+.\" an arbitrary number of lists to sort independently.
+.\"
+.\" [2] Just "name" would be a better term for it since we
+.\" unconditionally suffix it with ".ind".
 .de INITI
 .if \\n[.$]<2 .@error \\$0: expected 2 or 3 arguments, got \\n[.$]
-.\" ignore if INITI has already been used
+.ds ind*ref \" empty
+.ds ind*type \\$1
+.nr ind*type-is-valid 0
+.if '\\*[ind*type]'N' .nr ind*type-is-valid 1
+.if '\\*[ind*type]'H' .nr ind*type-is-valid 1
+.if '\\*[ind*type]'B' .nr ind*type-is-valid 1
+.if !\\n[ind*type-is-valid] .@error \\$0: invalid index type '\\$1'
+.rr ind*type-is-valid
+.if \\n[D]>1 .tm INITI: type=\\*[ind*type]
+.if '\\$2'' .@error \\$0: index file name not specified
 .if d ind*file .@error \\$0: index file name already set
 .ds ind*file \\$2.ind
 .if \\n[D]>1 .tm INITI: source \\*[ind*file]
-.if !d ind*file .@error \\$0: index file name not specified
-.ds ind*type \\$1
 .if \\n[Ref] \{\
 .	if \\n[.$]>2 .tm .\\\\" Imacro: \\$3
 .\}
 ..
 .\"---------------
+.\" collect index entry
+.\" IND term ...
 .de IND
-.if !d ind*file .@error \\$0: no active index; call INITI"
-.if \\n[D]>1 .tm IND: type=\\*[ind*type]
-.ds ind*ref \" empty
-.if '\\*[ind*type]'N' .ds ind*ref \\n[%]
-.if '\\*[ind*type]'H' .ds ind*ref \\*[hd*mark]
-.if '\\*[ind*type]'B' .ds ind*ref \\*[hd*mark]\t\\n[%]
-.if '\\*[ind*ref]'' .@abort invalid index type '\\*[ind*type]'
-.\"
+.if !d ind*file .@error \\$0: no active index; call INITI first
+.if \\n[.$]<1 .@error \\$0: expected at least 1 argument, got \\n[.$]
+.if '\\$1'' .@error \\$0: cannot record empty index entry
+.if \\n[nl]<0 .@error \\$0: cannot record index entry when not on a page
 .ds ind*line \\$1
 .while \\n[.$]>0 \{\
 .	shift
 .	as ind*line \t\\$1
 .\}
+.if '\\*[ind*type]'N' .ds ind*ref \\n[%]
+.if '\\*[ind*type]'H' .ds ind*ref \\*[hd@mark-trimmed]
+.if '\\*[ind*type]'B' .ds ind*ref \\*[hd@mark-trimmed]\t\\n[%]
 .as ind*line \\*[ind*ref]
 .if \\n[Ref] .tm .\\\\" IND \\*[ind*line]
 ..
@@ -3370,10 +3386,10 @@ exceeds depth of nested lists (\\n[li*lvl])
 .	if !\\n[Cp] .pg@next-page
 .	\" print INDEX
 .	\" execute user-defined macros
-.	if d TXIND .TXIND
+.	ie d TXIND .TXIND
+.	el .SK
 .	ie d TYIND .TYIND
 .	el \{\
-.		SK
 .		ce
 \\*[Index]
 .		SP 3
@@ -3398,10 +3414,10 @@ exceeds depth of nested lists (\\n[li*lvl])
 .ie \\n[.$] .ds let*i \\$1
 .el .ds let*i \\*[Letfc]
 .ie d let*type .let@fc_\\*[let*type] "\\*[let*i]" \\$@
-.el .let@mt-closing "\\*[let*i]" \\$@
+.el .let@formal-closing "\\*[let*i]" \\$@
 ..
 .\"-------
-.de let@mt-closing
+.de let@formal-closing
 .ne 5v
 .in (u;\\n[.l]/2)
 .sp
@@ -3527,7 +3543,7 @@ undefined
 .if \w'\\$5'&\\$4 \\$5
 .fi
 ..
-.als let@fc_BL let@mt-closing
+.als let@fc_BL let@formal-closing
 .\"-----------
 .\" Semiblocked letter
 .de let@init_SB
@@ -3538,7 +3554,7 @@ undefined
 .let@print-head 1
 ..
 .als let@sg_SB let@sg_BL
-.als let@fc_SB let@mt-closing
+.als let@fc_SB let@formal-closing
 .\"-----------
 .\" Full-blocked letter
 .de let@init_FB
@@ -3635,14 +3651,15 @@ undefined
 .	ie '\\*[let*type]'SP' \{\
 .		sp 2
 .		misc@toupper "\\*[let*lo-SJ]"
-.		sp
 .	\}
 .	el \{\
 .		sp
 .		if '\\*[let*type]'SB' .ti +5m
 \\*[LetSJ] \f[\\*[@sdf_font]]\\*[let*lo-SJ]\fP
 .	\}
+.	sp
 .\}
+.sp
 ..
 .\"-------------------
 .\" .IA [name [title]]

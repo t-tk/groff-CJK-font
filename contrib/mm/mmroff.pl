@@ -1,5 +1,5 @@
 #!@PERL@
-# Copyright (C) 1989-2020 Free Software Foundation, Inc.
+# Copyright (C) 1989-2023 Free Software Foundation, Inc.
 #
 # This file is part of groff.
 #
@@ -8,8 +8,8 @@
 # Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# groff is distributed in the hope that it will be useful, but WITHOUT ANY
-# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# groff is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 # FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 # for more details.
 #
@@ -18,6 +18,8 @@
 
 use strict;
 use warnings;
+
+use Config;
 
 (my $progname = $0) =~s @.*/@@;
 
@@ -31,6 +33,8 @@ my $no_exec;
 
 if (grep(/^--help$/, @ARGV)) {
 	print "usage: mmroff [-x] [groff-option ...] [file ...]\n";
+	print "usage: mmroff --version\n";
+	print "usage: mmroff --help\n";
 	exit;
 }
 
@@ -45,13 +49,29 @@ if (grep(/^-x$/, @ARGV)) {
 	@ARGV = grep(!/^-x$/, @ARGV);
 }
 
+# Locate groff executable.
+my $path = $ENV{'GROFF_BIN_PATH'};
+my $groff;
+
+if ($path) {
+	for my $dir (split($Config{path_sep}, $path)) {
+		my $candidate = "$dir/groff";
+		if (-x $candidate) {
+			$groff = $candidate;
+			last;
+		}
+	}
+}
+
+$groff = "groff" if (!$groff);
+
 # mmroff should always have -mm, but not twice
 @ARGV = grep(!/^-mm$/, @ARGV);
-my $check_macro = "groff -rRef=1 -z -mm @ARGV";
-my $run_macro = "groff -mm @ARGV";
+my $first_pass = "$groff -rRef=1 -z -mm @ARGV";
+my $second_pass = "$groff -mm @ARGV";
 
 my (%cur, $rfilename, $max_height, $imacro, $max_width, @out, @indi);
-open(MACRO, "$check_macro 2>&1 |") || die "run $check_macro:$!";
+open(MACRO, "$first_pass 2>&1 |") || die "run $first_pass:$!";
 while(<MACRO>) {
 	if (m#^\.\\" Rfilename: (\S+)#) {
 		# remove all directories just to be more secure
@@ -118,7 +138,7 @@ if ($rfilename) {
 }
 
 exit 0 if $no_exec;
-exit system($run_macro);
+exit system($second_pass);
 
 sub print_index {
 	my ($f, $ind, $macro) = @_;

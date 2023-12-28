@@ -20,21 +20,27 @@
 
 groff="${abs_top_builddir:-.}/test-groff"
 
-set -e
+fail=
+
+wail () {
+    echo ...FAILED >&2
+    fail=YES
+}
 
 # Regression-test Savannah #59971.
 #
 # Hyphenation needs to be restored between (and after) text blocks just
 # as adjustment is.
 
-EXAMPLE='.nr LL 78n
+input='.nr LL 78n
 .hw a-bc-def-ghij-klmno-pqrstu-vwxyz
 .LP
 Here is a table with hyphenation disabled in its text block.
 .
 .TS
-l lx.
-foo	T{
+tab(@);
+L Lx.
+foo@T{
 .nh
 abcdefghijklmnopqrstuvwxyz
 abcdefghijklmnopqrstuvwxyz
@@ -45,14 +51,16 @@ T}
 Let us see if hyphenation is enabled again as it should be.
 abcdefghijklmnopqrstuvwxyz'
 
-OUTPUT=$(printf "%s\n" "$EXAMPLE" | "$groff" -Tascii -P-cbou -t -ms)
+output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -t -ms)
 
-echo "$OUTPUT"
+echo "$output"
 
-echo "testing whether hyphenation disabled in table text block" >&2
-! echo "$OUTPUT" | grep '^foo' | grep -- '-$'
+echo "checking whether hyphenation disabled in table text block" >&2
+echo "$output" | grep '^foo' | grep -- '-$' && wail
 
-echo "testing whether hyphenation enabled after table" >&2
-echo "$OUTPUT" | grep -qx 'Let us see.*lmno-'
+echo "checking whether hyphenation enabled after table" >&2
+echo "$output" | grep -qx 'Let us see.*lmno-' || wail
 
-# vim:set ai noet sw=4 ts=4 tw=72:
+test -z "$fail"
+
+# vim:set ai et sw=4 ts=4 tw=72:

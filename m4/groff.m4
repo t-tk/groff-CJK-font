@@ -174,12 +174,12 @@ AC_DEFUN([GROFF_USE_TEX_CHECK], [
 # grohtml needs the following programs to produce images from tbl(1)
 # tables and eqn(1) equations.
 
-dnl Any macro that tests $make_htmldoc should AC_REQUIRE this.
+dnl Any macro that tests $use_grohtml should AC_REQUIRE this.
 
 AC_DEFUN([GROFF_CHECK_GROHTML_PROGRAMS], [
   AC_REQUIRE([GROFF_GHOSTSCRIPT_PATH])
 
-  make_htmldoc=no
+  use_grohtml=no
   missing=
   m4_foreach([groff_prog],
 dnl Keep this list of programs in sync with grohtml test scripts.
@@ -195,7 +195,7 @@ dnl Keep this list of programs in sync with grohtml test scripts.
 
   if test -z "$missing"
   then
-      make_htmldoc=yes
+      use_grohtml=yes
   else
     plural=`set $missing; test $[#] -gt 1 && echo s`
     oxford=`set $missing; test $[#] -gt 2 && echo ,`
@@ -227,14 +227,13 @@ dnl Keep this list of programs in sync with grohtml test scripts.
   groff-generated documentation in HTML format.
 "
    fi
-   AC_SUBST([make_htmldoc])
 ])
 
 
 AC_DEFUN([GROFF_GROHTML_PROGRAM_NOTICE], [
   AC_REQUIRE([GROFF_CHECK_GROHTML_PROGRAMS])
 
-  if test "$make_htmldoc" = no
+  if test "$use_grohtml" = no
   then
     AC_MSG_NOTICE([$grohtml_notice])
   fi
@@ -457,7 +456,7 @@ AC_DEFUN([GROFF_PNMTOOLS_CAN_BE_QUIET], [
 
   pnmtools_quiet=
 
-  if test "$make_htmldoc" = yes
+  if test "$use_grohtml" = yes
   then
     AC_MSG_CHECKING([whether PNM tools accept the '-quiet' option])
     if echo P2 2 2 255 0 1 2 0 | pnmtops -quiet > /dev/null 2>&1
@@ -480,14 +479,19 @@ AC_DEFUN([GROFF_PNMTOOLS_CAN_BE_QUIET], [
 AC_DEFUN([GROFF_PNMTOPS_NOSETPAGE], [
   AC_REQUIRE([GROFF_PNMTOOLS_CAN_BE_QUIET])
 
-  pnmtops_nosetpage="pnmtops $pnmtools_quiet"
-  AC_MSG_CHECKING([whether pnmtops accepts the '-nosetpage' option])
-  if echo P2 2 2 255 0 1 2 0 | pnmtops -nosetpage > /dev/null 2>&1
+  if test "$pnmtops" = missing
   then
-    AC_MSG_RESULT([yes])
-    pnmtops_nosetpage="pnmtops $pnmtools_quiet -nosetpage"
+    pnmtops_nosetpage=no
   else
-    AC_MSG_RESULT([no])
+    pnmtops_nosetpage="pnmtops $pnmtools_quiet"
+    AC_MSG_CHECKING([whether pnmtops accepts the '-nosetpage' option])
+    if echo P2 2 2 255 0 1 2 0 | pnmtops -nosetpage > /dev/null 2>&1
+    then
+      AC_MSG_RESULT([yes])
+      pnmtops_nosetpage="pnmtops $pnmtools_quiet -nosetpage"
+    else
+      AC_MSG_RESULT([no])
+    fi
   fi
   AC_SUBST([pnmtops_nosetpage])
 ])
@@ -1118,74 +1122,90 @@ fopen(0, 0);
 
 
 AC_DEFUN([GROFF_TMAC],
-  [AC_MSG_CHECKING([for prefix of system macro packages])
+  [AC_MSG_CHECKING([file name prefix of system macro packages])
    sys_tmac_prefix=
    sys_tmac_file_prefix=
-   for d in /usr/share/lib/tmac /usr/lib/tmac; do
-     for t in "" tmac.; do
-       for m in an s m; do
-	 f=$d/$t$m
-	 if test -z "$sys_tmac_prefix" \
-	    && test -f $f \
-	    && grep '^\.if' $f >/dev/null 2>&1; then
-	   sys_tmac_prefix=$d/$t
-	   sys_tmac_file_prefix=$t
-	 fi
+   for d in /usr/share/lib/tmac /usr/lib/tmac
+   do
+     for t in "" tmac.
+     do
+       for m in an s m
+       do
+         f=$d/$t$m
+         if test -z "$sys_tmac_prefix" \
+            && test -f $f \
+            && grep '^\.if' $f >/dev/null 2>&1
+         then
+           sys_tmac_prefix=$d/$t
+           sys_tmac_file_prefix=$t
+         fi
        done
      done
    done
-   sys_tmac_prefix_result=none
+   sys_tmac_prefix_result='(none)'
    test -z "$sys_tmac_prefix" \
-	|| sys_tmac_prefix_result="$sys_tmac_prefix"
+     || sys_tmac_prefix_result="$sys_tmac_prefix"
    AC_MSG_RESULT([$sys_tmac_prefix_result])
    AC_SUBST([sys_tmac_prefix])
 
-   AC_MSG_CHECKING([which system macro packages should be made available])
+   AC_MSG_CHECKING([for system macro packages to make available])
    tmac_wrap=
-   if test "$sys_tmac_file_prefix" = tmac.; then
-     for f in $sys_tmac_prefix*; do
+   space=
+   if test "$sys_tmac_file_prefix" = tmac.
+   then
+     for f in $sys_tmac_prefix*
+     do
        suff=`echo $f | sed -e "s;$sys_tmac_prefix;;"`
        case "$suff" in
        e)
-	 ;;
+         ;;
        *)
-	 grep "Copyright.*Free Software Foundation" $f >/dev/null \
-	      || tmac_wrap="$tmac_wrap $suff" ;;
+         if ! grep "Copyright.*Free Software Foundation" $f >/dev/null
+         then
+           tmac_wrap="$tmac_wrap$space$suff"
+           space=' '
+         fi ;;
        esac
      done
-   elif test -n "$sys_tmac_prefix"; then
+   elif test -n "$sys_tmac_prefix"
+   then
      files=`echo $sys_tmac_prefix*`
      grep "\\.so" $files >conftest.sol
-     for f in $files; do
+     for f in $files
+     do
        case "$f" in
        ${sys_tmac_prefix}e)
-	 ;;
+         ;;
        *.me)
-	 ;;
+         ;;
        */ms.*)
-	 ;;
+         ;;
        *)
-	 b=`basename $f`
-	 if grep "\\.so.*/$b\$" conftest.sol >/dev/null \
-	    || grep -l "Copyright.*Free Software Foundation" $f >/dev/null; then
-	   :
-	 else
-	   suff=`echo $f | sed -e "s;$sys_tmac_prefix;;"`
-	   case "$suff" in
-	   tmac.*)
-	     ;;
-	   *)
-	     tmac_wrap="$tmac_wrap $suff" ;;
-	   esac
-	 fi
+         b=`basename $f`
+         if grep "\\.so.*/$b\$" conftest.sol >/dev/null \
+            || grep -l "Copyright.*Free Software Foundation" $f \
+               >/dev/null
+         then
+           :
+         else
+           suff=`echo $f | sed -e "s;$sys_tmac_prefix;;"`
+           case "$suff" in
+           tmac.*)
+             ;;
+           *)
+             tmac_wrap="$tmac_wrap$space$suff"
+             space=' ' ;;
+           esac
+         fi
        esac
      done
      rm -f conftest.sol
    fi
-   tmac_wrap_result="none found"
+   tmac_wrap_result='(none)'
    test -z "$tmac_wrap" || tmac_wrap_result="$tmac_wrap"
    AC_MSG_RESULT([$tmac_wrap_result])
-   AC_SUBST([tmac_wrap])])
+   AC_SUBST([tmac_wrap])
+])
 
 
 # Searching if a non-GNU Troff is installed.  The built-in register
@@ -1628,6 +1648,7 @@ make an error "Path separator is ';'"
 # Check for X11.
 
 AC_DEFUN([GROFF_X11], [
+  AC_REQUIRE([AC_CANONICAL_HOST])
   AC_REQUIRE([AC_PATH_XTRA])
   groff_no_x=$no_x
   if test -z "$groff_no_x"
@@ -1638,6 +1659,7 @@ AC_DEFUN([GROFF_X11], [
     CFLAGS="$CFLAGS $X_CFLAGS"
     LDFLAGS="$LDFLAGS $X_LIBS"
     LIBS="$LIBS $X_PRE_LIBS -lX11 $X_EXTRA_LIBS"
+    X_AW_DEPS=
 
     LIBS="$LIBS -lXaw"
     AC_MSG_CHECKING([for Xaw library and header files])
@@ -1650,9 +1672,20 @@ AC_DEFUN([GROFF_X11], [
         ]],
         [])
       ],
-      [AC_MSG_RESULT([yes])],
-      [AC_MSG_RESULT([no])
-      groff_no_x=yes])
+      [
+        AC_MSG_RESULT([yes])
+        # Modern versions of Xaw depend on the Xpm library and the SHAPE
+        # extension.  AIX's linker doesn't figure this out on its own.
+        case $host_os in
+          aix*) X_AW_DEPS="-lXpm -lXext" ;;
+        esac
+      ],
+      [
+        AC_MSG_RESULT([no])
+        groff_no_x=yes
+      ])
+
+    AC_SUBST([X_AW_DEPS])
 
     LIBS="$LIBS -lXmu"
     AC_MSG_CHECKING([for Xmu library and header files])

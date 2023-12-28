@@ -222,7 +222,7 @@ then
   if test -n "$tmac_wrap"
   then
   echo "\
- prefix used for macro packages   : $tmac_wrap"
+ wrappers used for macro packages : $tmac_wrap"
   fi
 fi
 echo "\
