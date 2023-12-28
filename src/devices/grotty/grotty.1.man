@@ -53,9 +53,9 @@ output driver for typewriter-like (terminal) devices
 .
 .SY grotty
 .RB [ \-dfho ]
-.RB [ \-i | \-r ]
+.RB [ \-i \||\| \-r ]
 .RB [ \-F\~\c
-.IR dir ]
+.IR font-directory ]
 .RI [ file\~ .\|.\|.]
 .YS
 .
@@ -63,7 +63,7 @@ output driver for typewriter-like (terminal) devices
 .SY "grotty \-c"
 .RB [ \-bBdfhouU ]
 .RB [ \-F\~\c
-.IR dir ]
+.IR font-directory ]
 .RI [ file\~ .\|.\|.]
 .YS
 .
@@ -77,7 +77,7 @@ output driver for typewriter-like (terminal) devices
 .B \-v
 .
 .SY grotty
-.B \-\-version
+.B \%\-\-version
 .YS
 .
 .
@@ -101,7 +101,6 @@ is invoked by
 when the latter is given one of the
 .RB \[lq] \-T\~ascii \[rq],
 .RB \[lq] \-T\~latin1 \[rq],
-.BR \-Tlatin1 ,
 or
 .RB \[lq] \-T\~utf8 \[rq]
 options on systems using ISO character encoding standards,
@@ -130,7 +129,7 @@ is \[lq]\-\[rq],
 .I grotty
 reads the standard input stream.
 .
-Output is written to the standard output stream.
+It writes to the standard output stream.
 .
 .
 .P
@@ -292,10 +291,11 @@ There is therefore no need to filter its output through
 .\" ====================================================================
 .
 .I grotty
-understands one device control function produced by the
-.I roff
+supports a device control command accessed with the
+.RB \%\[lq] device \[rq]
+request or
 .B \[rs]X
-escape sequence in a document.
+escape sequence.
 .
 .
 .TP
@@ -404,12 +404,12 @@ displays a usage message,
 while
 .B \-v
 and
-.B \-\-version
+.B \%\-\-version
 show version information;
 all exit afterward.
 .
 .
-.TP
+.TP 8n \" "-F dir" + 2n
 .B \-b
 Suppress the use of overstriking for bold characters in legacy output
 format.
@@ -676,7 +676,7 @@ See
 is intended only for simple documents.
 .
 .
-.IP \[bu] 2n
+.IP \[bu] 3n
 There is no support for fractional horizontal or vertical motions.
 .
 .
@@ -685,13 +685,6 @@ There is no support for fractional horizontal or vertical motions.
 .B \[rs]D
 escape sequences producing anything other than horizontal and vertical
 lines are not supported.
-.
-.
-.IP \[bu]
-Characters above the first line
-(that is,
-with a vertical drawing position of\~0)
-cannot be rendered.
 .
 .
 .IP \[bu]
@@ -719,7 +712,7 @@ varies:
 (5)\~foreground color;
 (6)\~background color;
 and
-(7)\~horizontal and vertical line-drawing.
+(7)\~horizontal and vertical line drawing.
 .
 .
 .P
@@ -763,24 +756,22 @@ $ \c
 .SH "See also"
 .\" ====================================================================
 .
+.UR http://\:www\:.ecma\-international\:.org/\:publications/\:files/\:\
+ECMA\-ST/\:\%Ecma\-048\:.pdf
 \[lq]Control Functions for Coded Character Sets\[rq]
 (ECMA-48)
 5th\~edition,
-Ecma International,
-June\~1991.
+\%Ecma International,
+June 1991.
+.UE
 .
 A gratis version of ISO\~6429,
 this document includes a normative description of SGR escape sequences.
 .
-Available at
-.UR http://\:www\:.ecma\-international\:.org/\:publications/\:files/\:\
-ECMA\-ST/\:Ecma\-048\:.pdf
-.UE .
-.
 .
 .P
 .UR https://\:gist\:.github\:.com/\:egmontkob/\:\
-eb114294efbcd5ad\:b1944c9f3cb5feda
+eb114294\:efbcd5ad\:b1944c9f\:3cb5feda
 \[lq]Hyperlinks in Terminal Emulators\[rq]
 .UE ,
 Egmont Koblinger.

@@ -88,10 +88,13 @@ PROCESSEDDOCFILES = \
 
 # Declare minimal dependencies for documents by output driver.
 PROCESSEDFILES_DEPS_HTML = pre-grohtml groff troff post-grohtml \
-  font/devhtml/stamp font/devps/stamp
-PROCESSEDFILES_DEPS_PS = groff troff grops font/devps/stamp
-PROCESSEDFILES_DEPS_PDF = groff troff gropdf font/devpdf/stamp
-PROCESSEDFILES_DEPS_TXT = groff troff grotty font/devutf8/stamp
+  tmac/html.tmac tmac/html-end.tmac font/devhtml/stamp font/devps/stamp
+PROCESSEDFILES_DEPS_PS = groff troff grops tmac/ps.tmac \
+  font/devps/stamp
+PROCESSEDFILES_DEPS_PDF = groff troff gropdf tmac/pdf.tmac \
+  font/devpdf/stamp
+PROCESSEDFILES_DEPS_TXT = groff troff grotty tmac/tty.tmac \
+  font/devutf8/stamp
 
 if USE_GROHTML
 $(PROCESSEDDOCFILES_HTML): $(PROCESSEDFILES_DEPS_HTML)
@@ -341,18 +344,21 @@ doc/meintro.ps doc/meintro_fr.ps doc/meref.ps: $(TMAC_PACKAGE_ME)
 
 # Use '-K utf8', not '-k', in case 'configure' didn't find uchardet.
 # The French translation uses tbl; its English counterpart does not.
-doc/meintro_fr.ps: doc/meintro_fr.me preconv
+doc/meintro_fr.ps: doc/meintro_fr.me preconv tbl
 	$(GROFF_V)$(MKDIR_P) `dirname $@` \
 	&& $(DOC_GROFF) -K utf8 -t -Tps -me -mfr $< >$@
 
-doc/ms.ps: $(doc_srcdir)/ms.ms $(TMAC_PACKAGE_MS) eqn tbl
+doc/ms.ps: $(doc_srcdir)/ms.ms $(TMAC_PACKAGE_MS) eqn pic tbl
 	$(GROFF_V)$(MKDIR_P) `dirname $@` \
-	&& $(DOC_GROFF) -et -Tps -ms $(doc_srcdir)/ms.ms >$@
+	&& $(DOC_GROFF) -pet -Tps -ms $(doc_srcdir)/ms.ms >$@
 
 doc/pic.ps: $(doc_srcdir)/pic.ms $(TMAC_PACKAGE_MS) eqn pic tbl
 	$(GROFF_V)$(MKDIR_P) `dirname $@` \
 	&& $(DOC_GROFF) -pet -Tps -ms $(doc_srcdir)/pic.ms >$@
 
+# groff(1)'s `-I` implies `-g` and `-s`, so we must depend on grn and
+# soelim even though the document doesn't require them.
+doc/webpage.ps: grn soelim
 doc/webpage.ps: $(DOC_GNU_EPS) tmac/www.tmac tbl
 doc/webpage.ps: $(doc_srcdir)/webpage.ms $(TMAC_PACKAGE_MS)
 	$(GROFF_V)$(MKDIR_P) `dirname $@` \
@@ -372,11 +378,12 @@ doc/pic.html: $(doc_srcdir)/pic.ms $(TMAC_PACKAGE_MS)
 	&& $(DOC_GROFF) -pet -P-Ipic -P-Dimg -P-jpic -Thtml -ms \
 	  $(doc_srcdir)/pic.ms > pic.html
 
-doc/webpage.html: tbl
-doc/webpage.html: tmac/www.tmac
-doc/webpage.html: $(DOC_GNU_EPS)
+# groff(1)'s `-I` implies `-g` and `-s`, so we must depend on grn and
+# soelim even though the document doesn't require them.
+doc/webpage.html: grn soelim
+doc/webpage.html: $(DOC_GNU_EPS) tmac/www.tmac tbl
 doc/webpage.html: $(doc_srcdir)/groff.css
-doc/webpage.html: $(doc_srcdir)/webpage.ms
+doc/webpage.html: $(doc_srcdir)/webpage.ms $(TMAC_PACKAGE_MS)
 	$(GROFF_V)$(MKDIR_P) $(doc_builddir) \
 	&& cd $(doc_builddir) \
 	&& $(DOC_GROFF) -t -I $(doc_srcdir) -P-jwebpage -P-nrb \

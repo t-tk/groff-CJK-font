@@ -45,6 +45,16 @@ special character and glyph repertoire
 .\}
 .rr do-fallback
 .
+.\" It is important for this page not to tell lies beloved of
+.\" indifferent man page authors.  See, for example,
+.\" <https://lwn.net/Articles/947941/>.
+.tr ''--^^``~~
+.do char ' '
+.do char - -
+.do char ^ ^
+.do char ` `
+.do char ~ ~
+.
 .
 .\" ====================================================================
 .SH Description
@@ -150,7 +160,7 @@ formatted.
 .
 This page was rendered for device
 .B \*[.T]
-using font
+primarily using font
 .BR \n[.fn] .
 .
 .
@@ -355,7 +365,7 @@ like
 .BR ds ,
 also treat
 .B \[dq]
-non-literally.)
+non-literally at the beginning of an argument.)
 .
 Furthermore,
 not all of the special character escape sequences are portable to AT&T
@@ -403,9 +413,9 @@ _
 \[aq]	\[cq] closing single quote	\f[CR]\[rs][aq]\f[] neutral apostrophe
 \-	- hyphen	\f[CR]\[rs]\-\f[] or \f[CR]\[rs][\-]\f[] minus sign/Unix dash
 \[rs]	(escape character)	\f[CR]\[rs]e\f[] or \f[CR]\[rs][rs]\f[] reverse solidus
-\[ha]	\[u02C6] modifier circumflex	\f[CR]\[rs](ha\f[] circumflex/caret/\[lq]hat\[rq]
+\[ha]	\[u02C6] modifier circumflex	\f[CR]\[rs][ha]\f[] circumflex/caret/\[lq]hat\[rq]
 \[ga]	\[oq] opening single quote	\f[CR]\[rs](ga\f[] grave accent
-\[ti]	\[u02DC] modifier tilde	\f[CR]\[rs](ti\f[] tilde
+\[ti]	\[u02DC] modifier tilde	\f[CR]\[rs][ti]\f[] tilde
 .TE
 .
 .
@@ -431,7 +441,8 @@ character in input outside an escape sequence
 to mean a hyphen,
 as in the phrase \[lq]long-term\[rq].
 .
-For a minus sign in running text or a Unix command-line option dash,
+For a minus sign in running text or a Unix file name or command-line
+option dash,
 use
 .B \[rs]\-
 (or
@@ -441,9 +452,9 @@ in
 if you find it helps the clarity of the source document).
 .
 (Another minus sign,
-for use in mathematical equations,
+for use in mathematical expressions,
 is available as
-.BR \[rs][mi] ).
+.BR \[rs](mi .)
 .
 AT&T
 .I troff
@@ -784,7 +795,7 @@ with hexadecimal letters accepted in uppercase form only.
 Thus,
 .B \[rs][u02DA]
 accesses the (spacing) ring accent,
-producing \[lq]\[u02DA]\[rq].
+producing \[lq]\^\[u02DA]\^\[rq].
 .
 .
 .\" Use "GNU troff" in this paragraph because the contrast with AT&T
@@ -870,7 +881,7 @@ glyph name repertoire is presented in tabular form.
 The meanings of the columns are as follows.
 .
 .
-.TP 8n
+.TP 9n \" "Unicode" + 2n
 .B Output
 shows the glyph as it appears on the device used to render this
 document;
@@ -940,13 +951,13 @@ Often,
 such glyphs lack bold or italic style forms or have metrics that look
 incongruous in ordinary prose.
 .
-A few which are not uncommon in running text have \[lq]text
+A few that are not uncommon in running text have \[lq]text
 variants\[rq],
 which should work better in that context.
 .
 Conversely,
 a handful of glyphs that are normally drawn from a text font may be
-required in mathematical equations.
+required in mathematical expressions.
 .
 Both sets of exceptions are noted in the tables where they appear
 (\[lq]Logical symbols\[rq] and \[lq]Mathematical symbols\[rq]).
@@ -1084,18 +1095,20 @@ L Lf(CR) L Lx.
 .\" ====================================================================
 .
 Normally,
-the formatting of a special character advances the drawing position as
-an ordinary character does.
+the formatter advances the drawing position after setting a special
+character,
+as it does for ordinary ones.
 .
 .IR groff 's
 .B composite
-request designates a special character as combining.
+request designates a special character as combining,
+suppressing advancement.
 .
 The
-.I composite.tmac
+.I \%composite.tmac
 macro file,
 loaded automatically by the default
-.IR troffrc ,
+.IR \%troffrc ,
 maps the following special characters to the combining characters shown
 below.
 .
@@ -1318,10 +1331,9 @@ parentheses:
 .P
 Not all devices supply bracket pieces that can be piled up with
 .B \[rs]b
-due to the restrictions of the escape's piling algorithm.
+due to the restrictions of the formatter's piling algorithm.
 .
-A general solution to build brackets out of pieces is the following
-macro:
+The following macro offers a more general bracket-building solution.
 .
 .
 .RS
@@ -1356,15 +1368,15 @@ macro:
 .
 .
 .P
-Another complication is the fact that some glyphs which represent
-bracket pieces in AT&T
+Further complicating matters is that some glyphs representing bracket
+pieces in AT&T
 .I troff
-can be used for other mathematical symbols as well,
-for example
+can be used for other mathematical symbols as well;
+for example,
 .B \[rs](lf
 and
-.BR \[rs](rf ,
-which provide the floor operator.
+.B \[rs](rf
+provide the floor operator.
 .
 Some output devices,
 such as
@@ -2005,8 +2017,8 @@ and bold styles available,
 several ASCII characters were not present at all,
 nor was most of the Teletype's extended character set.
 .
-AT&T commissioned a \[lq]special\[rq] font to ensure no loss of
-repertoire.
+AT&T commissioned a \[lq]special\[rq] font to retain their accustomed
+glyph repertoire.
 .
 .
 .br

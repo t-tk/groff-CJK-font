@@ -9,7 +9,7 @@ document formatting system
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 1989-2022 Free Software Foundation, Inc.
+.\" Copyright (C) 1989-2023 Free Software Foundation, Inc.
 .\"
 .\" This file is part of groff, the GNU roff type-setting system.
 .\"
@@ -108,7 +108,7 @@ document formatting system
 .RI [ file\~ .\|.\|.]
 .
 .SY groff
-.B \-\-version
+.B \%\-\-version
 .RI [ option\~ .\|.\|.\&]
 .RI [ file\~ .\|.\|.]
 .YS
@@ -132,7 +132,6 @@ is a typesetting system that reads plain text input files that include
 formatting commands to produce output in PostScript,
 PDF,
 HTML,
-DVI,
 or other formats,
 or for display to a terminal.
 .
@@ -223,12 +222,13 @@ or are interpreted differently by
 .IR groff .
 .
 .
-.TP
+.TP 9n \" "-m name" + 2n
 .BI \-D\~ enc
-Set fallback input encoding used by
-.MR preconv @MAN1EXT@
-to
-.IR enc ;
+Use
+.I enc
+as
+.MR preconv @MAN1EXT@ 's
+fallback input encoding;
 implies
 .BR \-k .
 .
@@ -267,16 +267,17 @@ but also implies
 and
 .BR \-s .
 .
-It is passed to
-.MR @g@soelim @MAN1EXT@
-and the output driver,
-and
-.I @g@grn
-is passed an
-.B \-M
-option with
-.I dir
-as its argument.
+.I groff
+passes
+.B \-I
+options and their arguments to
+.MR @g@soelim @MAN1EXT@ ,
+.MR @g@troff @MAN1EXT@ ,
+and output drivers;
+with the option letter changed to
+.BR \-M ,
+the same arguments are passed to
+.MR @g@grn @MAN1EXT@ .
 .
 .
 .TP
@@ -342,7 +343,7 @@ and
 .BI \-L\~ arg
 Pass
 .I arg
-to the print spooler program.
+to the print spooler.
 .
 If multiple
 .IR arg s
@@ -354,7 +355,7 @@ option.
 .I groff
 does not prefix an option dash to
 .I arg
-before passing it to the spooler program.
+before passing it to the spooler.
 .
 .
 .TP
@@ -413,9 +414,8 @@ Run
 .MR @g@refer @MAN1EXT@
 preprocessor.
 .
-No mechanism is provided for passing arguments to
-.I @g@refer
-because most
+No mechanism is provided for passing arguments to it;
+most
 .I @g@refer
 options have equivalent language elements that can be specified within
 the document.
@@ -448,13 +448,19 @@ preprocessor.
 .
 .TP
 .BI \-T\~ dev
-Direct
-.I @g@troff
-to format the input for the output device
-.IR dev .
+Prepare output for device
+.I dev.
 .
 .I groff
-then calls an output driver to convert
+passes the
+.B \-T
+option and its argument to
+.IR @g@troff ,
+then
+(unless the
+.B \-Z
+option is used)
+calls an output driver to convert
 .IR @g@troff 's
 output to a form appropriate for
 .IR dev ;
@@ -463,8 +469,10 @@ see subsection \[lq]Output devices\[rq] below.
 .
 .TP
 .B \-U
-Operate in unsafe mode:
-pass the
+Operate in unsafe mode.
+.
+.I groff
+passes the
 .B \-U
 option to
 .I @g@pic
@@ -475,7 +483,7 @@ and
 .TP
 .B \-v
 .TQ
-.B \-\-version
+.B \%\-\-version
 Write version information for
 .I groff
 and all programs run by it to the standard output stream;
@@ -490,12 +498,11 @@ to the formatter and any pre- or postprocessors invoked.
 .B \-V
 Output the pipeline that
 .I groff
-would run to the standard output stream,
-but do not execute it.
+would run to the standard output stream and exit.
 .
 If given more than once,
 .I groff
-both writes and runs the pipeline.
+both writes the pipeline to the standard error stream and runs it.
 .
 .
 .TP
@@ -506,12 +513,14 @@ instead of the usual postprocessor to (pre)view a document on an X11
 display.
 .
 Combining this option with
-.B \-Tps
+.RB \[lq] "\-T ps" \[rq]
 uses the font metrics of the PostScript device,
 whereas the
-.B \-TX75
+.RB \[lq] "\-T X75" \[rq],
+.RB \[lq] "\-T X75\-12" \[rq]
+.RB \[lq] "\-T X100" \[rq],
 and
-.B \-TX100
+.RB \[lq] "\-T X100\-12" \[rq]
 options use the metrics of X11 fonts.
 .
 .
@@ -537,7 +546,7 @@ The following options are passed as-is to the formatter program
 and described in more detail in its man page.
 .
 .
-.TP
+.TP 9n \" "-m mac" + 2n + hand-tuned for PDF
 .B \-a
 Generate a plain text approximation of the typeset output.
 .
@@ -562,9 +571,9 @@ implies
 .
 .
 .TP
-.BI \-d\~ cs
+.BI \-d\~ ctext
 .TQ
-.BI \-d\~ name = string
+.BI \-d\~ string = text
 Define string.
 .
 .
@@ -603,10 +612,18 @@ for input files.
 .
 .
 .TP
-.BI \-m\~ name
-Process
-.RI name .tmac
+.BI \-m\~ mac
+Read macro package
+.I mac
 before input files.
+.
+.I groff
+passes
+.B \-m
+options and their arguments to
+.MR @g@eqn @MAN1EXT@ ,
+.MR grap 1 ,
+.MR @g@grn @MAN1EXT@ .
 .
 .
 .TP
@@ -615,11 +632,19 @@ Search directory
 .I dir
 for macro files.
 .
+.I groff
+passes
+.B \-M
+options and their arguments to
+.MR @g@eqn @MAN1EXT@ ,
+.MR grap 1 ,
+.MR @g@grn @MAN1EXT@ .
+.
 .
 .TP
 .BI \-n\~ num
-Number the first page
-.IR num .
+Begin numbering pages at
+.I num.
 .
 .
 .TP
@@ -636,15 +661,13 @@ Define register.
 .
 .
 .TP
-.BI \-w\~ name
+.BI \-w\~ cat
 .TQ
-.BI \-W\~ name
-Enable
-.RB ( \-w )
-or inhibit
-.RB ( \-W )
-emission of warnings in category
-.IR name .
+.BI \-W\~ cat
+Enable and inhibit,
+respectively,
+warnings in category
+.I cat.
 .
 .
 .TP
@@ -667,8 +690,8 @@ comprising preprocessors,
 macro packages,
 output drivers
 (or \[lq]postprocessors\[rq]),
-a suite of utilities,
-and the formatter
+and a suite of utilities,
+with the formatter program
 .I @g@troff
 at its heart.
 .
@@ -760,7 +783,7 @@ $ \c
 $ \c
 .B echo \[dq]Hello, world!\[dq] | groff \-Tdvi > hello.dvi
 $ \c
-.B xdvi hello.html
+.B xdvi hello.dvi
 .EE
 .
 .
@@ -819,86 +842,95 @@ It is even.
 .SS "Paper format"
 .\" ====================================================================
 .
-In GNU
-.IR roff ,
-the page dimensions for the formatter
+.\" BEGIN Keep parallel with groff.texi node "Paper Format".
 .I @g@troff
-and for output devices are handled separately.
+reads the device description file
+.I DESC
+for the selected output device when it starts;
+page dimensions declared there are used if present.
 .
-In the formatter,
-requests are used to set the page length
-.RB ( .pl ),
-page offset
-(or left margin,
-.BR .po ),
-and line length
-.RB ( .ll ).
+.IR groff 's
+build process configures a default page format
+and writes it to typesetters'
+.I DESC
+files.
 .
-The right margin is not explicitly configured;
-the combination of page offset and line length provides the information
-necessary to derive it.
-.
-The
-.I papersize
-macro package,
-automatically loaded by
-.IR @g@troff ,
-provides an interface for configuring page dimensions by convenient
-names,
-like \[lq]letter\[rq] or
-\[lq]A4\[rq];
-see
-.MR groff_tmac @MAN5EXT@ .
-.
-The formatter's default in this installation is
+This installation defaults to
 .RB \[lq] @PAGE@ \[rq].
 .
-.
-.P
-It is up to each macro package to respect the page dimensions configured
-in this way.
-.
-Some offer alternative mechanisms.
-.
-.
-.P
-For each output device,
-the size of the output medium can be set in its
+If the
 .I DESC
-file.
-.
-Most output drivers also recognize a command-line option
-.B \-p
-to override the default dimensions and an option
-.B \-l
-to use landscape orientation.
+file lacks this information,
+the formatter and output driver use a page length of 11i (inches) for
+compatibility with AT&T
+.IR troff . \" AT&T
 .
 See
-.MR groff_font @MAN5EXT@
-for a description of the
-.B papersize
-directive,
-which takes an argument of the same form as
-.BR \-p .
+.MR groff_font @MAN5EXT@ .
+.
+.
+.P
+In the formatter,
+the
+.B pl
+request changes the page length,
+but macro packages often do not support alteration of the paper format
+within a document.
+.
+One might,
+for instance,
+want to switch between portrait and landscape orientations.
+.
+Macro packages lack a consistent approach to configuration of parameters
+dependent on the paper format;
+some,
+like
+.IR ms ,
+benefit from a preamble in the document prior to the first macro call,
+while others,
+like
+.IR mm ,
+instead require the specification of registers on the command line to
+configure page dimensions.
+.
+.
+.P
+Output drivers for typesetters also recognize command-line options
+.B \-p
+to override the default page dimensions and
+.B \-l
+to use landscape orientation.
 .
 The output driver's man page,
 such as
 .MR grops @MAN1EXT@ ,
-may also be helpful.
+may be helpful.
 .
-.I groff
-uses the command-line option
+.
+.P
+.IR groff 's
+.RB \[lq] "\-d \%paper" \[rq]
+command-line option is a convenient means of setting the paper format;
+see
+.MR groff_tmac @MAN5EXT@ .
+.
+Combine it with appropriate
 .B \-P
-to pass options to output devices;
-for example,
-use the following for PostScript output on A4 paper in landscape
+options for the output driver,
+overriding its defaults.
+.
+The following command formats for PostScript on A4 paper in landscape
 orientation.
 .
 .
-.IP
+.P
+.RS
 .EX
-groff \-Tps \-dpaper=a4l \-P\-pa4 \-P\-l \-ms foo.ms > foo.ps
+$ \c
+.B "groff \-T ps \-d paper=a4l \-P \-pa4 \-P \-l \-ms my.ms >my.ps"
 .EE
+.RE
+.\" END Keep parallel with groff.texi node "Paper Format".
 .
 .
 .\" ====================================================================
@@ -907,23 +939,20 @@ groff \-Tps \-dpaper=a4l \-P\-pa4 \-P\-l \-ms foo.ms > foo.ps
 .
 The
 .I groff
-program is a wrapper around the
-.MR @g@troff @MAN1EXT@
-program.
+program wraps
+.MR @g@troff @MAN1EXT@ ,
+allowing one to specify preprocessors via command-line options and
+running the appropriate output driver for the selected output device.
 .
-It allows one to specify preprocessors via command-line options and
-automatically runs the appropriate postprocessor for the selected
-output device.
-.
-Doing so,
+This convenience avoids
 the manual construction of pipelines or management of temporary files
 required of users of traditional
 .MR roff @MAN7EXT@
-systems can be avoided.
+systems.
 .
-Use the
+Use
 .MR grog @MAN1EXT@
-program to infer an appropriate
+to infer an appropriate
 .I groff
 command line to format a document.
 .
@@ -956,7 +985,7 @@ can be found in
 GNU
 .I roff
 extensions to the AT&T
-.I troff
+.I troff \" AT&T
 language,
 a common subset of
 .I roff
@@ -1253,7 +1282,7 @@ It can be specified on the command line as
 .
 A
 .MR man 1
-librarian program \" such as man-db, since 2001
+librarian \" such as man-db, since 2001
 may use this macro file to delegate loading of the correct macro
 package;
 it is thus unnecessary for
@@ -1707,6 +1736,11 @@ command.
 .SH Environment
 .\" ====================================================================
 .
+Environment variables in the host system affect the behavior of programs
+supplied by
+.I groff
+as follows.
+.
 Normally,
 the path separator in environment variables ending with
 .I PATH
@@ -1719,14 +1753,15 @@ Windows uses a semicolon instead.
 .
 .TP
 .I GROFF_BIN_PATH
-This search path,
-followed by
-.IR PATH ,
-is used to locate commands executed by
-.IR groff .
+Locate
+.I groff \" system
+commands
+in these directories,
+followed by those in
+.IR PATH .
 .
-If it is not set,
-the installation directory of the GNU
+If not set,
+the installation directory of GNU
 .I roff
 executables,
 .IR @BINDIR@ ,
@@ -1736,10 +1771,11 @@ is searched before
 .
 .TP
 .I GROFF_COMMAND_PREFIX
-GNU
-.I roff
-can be configured at compile time to apply a prefix to the names of the
-programs it provides that had a counterpart in AT&T
+Apply a prefix to certain GNU @code{roff} commands.
+.
+.I groff
+can be configured at compile time to apply a prefix to the names of
+programs it provides that had counterparts in AT&T
 .IR troff , \" AT&T
 so that name collisions are avoided at run time.
 .
@@ -1757,10 +1793,10 @@ would be installed as
 .IR gtroff .
 .
 Besides
-.IR troff , \" GNU
+.IR troff , \" generic
 the prefix applies to
-the formatter
-.IR nroff ; \" GNU
+the formatter wrapper
+.IR nroff ; \" generic (but not a wrapper in AT&T troff)
 the preprocessors
 .IR eqn , \" generic
 .IR grn , \" generic
@@ -1777,11 +1813,14 @@ and
 .
 .TP
 .I GROFF_ENCODING
-The value of this variable is passed to the
+Specify the assumed character encoding of input files.
+.
+.I groff
+passes its value as an argument to
 .IR preconv (@MAN1EXT@)
 preprocessor's
 .B \-e
-option to select the character encoding of input files.
+option.
 .
 This variable's existence implies
 the
@@ -1816,7 +1855,7 @@ and
 .
 .TP
 .I GROFF_TMAC_PATH
-Seek macro files in this list of directories.
+Seek macro packages in this list of directories.
 .
 See
 .MR @g@troff @MAN1EXT@
@@ -1829,10 +1868,10 @@ and
 Create temporary files in this directory.
 .
 If not set,
-but the environment variable
+but
 .I \%TMPDIR
-is set,
-temporary files are created there instead.
+is,
+the latter is used instead.
 .
 On Windows systems,
 if neither of the foregoing are set,
@@ -1871,39 +1910,46 @@ option overrides
 .
 .TP
 .I SOURCE_DATE_EPOCH
-A time stamp
+Declare a time stamp
 (expressed as seconds since the Unix epoch)
 to use as the output creation time stamp in place of the current time.
 .
 The time is converted to human-readable form using
-.MR localtime 3
+.MR gmtime 3
+and
+.MR asctime 3
 when the formatter starts up and stored in registers usable by documents
 and macro packages.
 .
 .
 .TP
 .I TZ
-The time zone to use when converting the current time
-(or value of
-.IR SOURCE_DATE_EPOCH )
-to human-readable form;
+Declare the time zone to use when converting the current time to
+human-readable form;
 see
 .MR tzset 3 .
+.
+If
+.I SOURCE_DATE_EPOCH
+is used,
+it is always converted to human-readable form using UTC.
 .
 .
 .\" ====================================================================
 .SH Examples
 .\" ====================================================================
 .
+.\" BEGIN Keep parallel with groff.texi node "Invocation Examples".
 .I roff
 systems are best known for formatting man pages.
 .
-Once a
+A
 .MR man 1
-librarian program has located a man page,
-it may execute a
+librarian program,
+having located a page,
+might render it with a
 .I groff
-command much like the following.
+command.
 .
 .RS
 .EX
@@ -1912,11 +1958,12 @@ groff \-t \-man \-Tutf8 /usr/share/man/man1/groff.1
 .RE
 .
 The librarian will also pipe the output through a pager,
-which might not interpret the SGR terminal escape sequences
+which might not interpret terminal escape sequences
 .I groff
 emits for boldface,
 underlining,
-or italics;
+italics,
+or hyperlinking;
 see section \[lq]Limitations\[rq] below.
 .
 .
@@ -1944,9 +1991,9 @@ a pipeline.
 .
 .
 .P
-Using
-.IR groff ,
-this pipe can be shortened to an equivalent command.
+Shorten this pipeline to an equivalent command using
+.IR groff .
+.
 .
 .IP
 .EX
@@ -1974,6 +2021,7 @@ required leading dashes
 .\" --help or --version.
 .\"or
 .\".RB \[lq] \-\- \[rq]
+.\" XXX: grolbp does.
 because
 .I groff
 passes the arguments as-is to the postprocessor;
@@ -2000,6 +2048,7 @@ groff \-X \-Z mydoc.t | gxditview \-title \[aq]trial run\[aq] \-
 .RE
 .
 are equivalent.
+.\" END Keep parallel with groff.texi node "Invocation Examples".
 .
 .
 .\" ====================================================================
@@ -2266,6 +2315,21 @@ is the primary
 manual.
 .
 You can browse it interactively with \[lq]info groff\[rq].
+.
+.
+.P
+A list of all
+.I groff
+man pages follows.
+.
+A few
+.RI ( \%grohtml ,
+.IR gropdf ,
+.IR gxditview ,
+and
+.IR xtotroff )
+will be unavailable if their corresponding programs were disabled during
+compilation.
 .
 .
 .\" groff ships 59 man pages generated from 58 source files.  The

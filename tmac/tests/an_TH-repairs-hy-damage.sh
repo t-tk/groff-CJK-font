@@ -20,22 +20,24 @@
 
 groff="${abs_top_builddir:-.}/test-groff"
 
-EXAMPLE='.TH mal 1 2020-08-21 "groff test suite"
+input='.TH mal 1 2020-08-21 "groff test suite"
 .SH Name
 mal \- malevolent man page
 .SH Description
 .nh
-Wicked page disables hyphenation.
-Wicked page disables hyphenation.
-Wicked page disables hyphenation.
+A wicked page disables hyphenation.
+A wicked page disables hyphenation.
+A wicked page disables hyphenation.
 .TH ino 1 2020-08-21 "groff test suite"
 .SH Name
 ino \- innocent man page
 .SH Description
-Innocent, unoffending man page enjoys hyphenation.
-Innocent, unoffending man page enjoys hyphenation.'
+An innocent, unoffending man page enjoys hyphenation.
+An innocent, unoffending man page enjoys hyphenation.'
 
-printf "%s\n" "$EXAMPLE" | "$groff" -Tascii -P-cbou -man \
-    | grep -qE 'unoffend-'
+output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -man)
+echo "$output"
+
+echo "$output" | grep -qE 'unof-'
 
 # vim:set ai et sw=4 ts=4 tw=72:

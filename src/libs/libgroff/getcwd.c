@@ -18,7 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
 /* Partial emulation of getcwd in terms of getwd. */
 
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
+
 #include <sys/param.h>
 #include <string.h>
 #include <errno.h>
@@ -52,3 +55,9 @@ char *getcwd(buf, size)
     return buf;
   }
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

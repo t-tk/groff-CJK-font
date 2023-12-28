@@ -60,20 +60,20 @@ or MathML
 .
 .SY @g@eqn
 .RB [ \-CNrR ]
-.RB [ \- d
+.RB [ \- d\~\c
 .IR xy ]
-.RB [ \-f
-.IR F ]
-.RB [ \-m
-.IR n ]
-.RB [ \-M
-.IR dir ]
-.RB [ \-p
-.IR n ]
-.RB [ \-s
-.IR n ]
-.RB [ \-T
-.IR dev ]
+.RB [ \-f\~\c
+.IR global-italic-font ]
+.RB [ \-m\~\c
+.IR minimum-type-size ]
+.RB [ \-M\~\c
+.IR eqnrc-directory ]
+.RB [ \-p\~\c
+.IR super/subscript-size-reduction ]
+.RB [ \-s\~\c
+.IR global-type-size ]
+.RB [ \-T\~\c
+.IR device ]
 .RI [ file\~ .\|.\|.]
 .YS
 .
@@ -87,7 +87,7 @@ or MathML
 .B \-v
 .
 .SY @g@eqn
-.B \-\-version
+.B \%\-\-version
 .YS
 .
 .
@@ -147,7 +147,7 @@ must be used.
 .
 If no
 .I file
-operands are given on the command line,
+operands are present,
 or if
 .I file
 is
@@ -192,12 +192,10 @@ There are some references to the differences between \*[tx] and GNU
 below;
 these may safely be ignored if you do not know \*[tx].
 .
-.
-.P
-Three points are worth special note. \" good, bad, and different
+Four points are worth note.
 .
 .
-.IP \[bu] 2n
+.IP \[bu] 3n
 GNU
 .I eqn \" GNU
 emits Presentation MathML output when invoked with the
@@ -214,7 +212,7 @@ though it may suffice for simple inputs.
 .
 .IP \[bu]
 GNU
-.I eqn
+.I eqn \" GNU
 sets the input token
 .RB \[lq] .\|.\|.\& \[rq]
 as an ellipsis on the text baseline,
@@ -223,6 +221,15 @@ not the three centered dots of AT&T
 .
 Set an ellipsis on the math axis with the GNU extension macro
 .BR cdots .
+.
+.
+.IP \[bu]
+GNU
+.IR eqn 's\" GNU
+.B delim
+command does not treat an
+.RB \[lq] on \[rq]
+argument as a pair of equation delimiters.
 .
 .
 .\" ====================================================================
@@ -270,8 +277,8 @@ the output.
 .
 .
 .P
-The following input characters not only separate tokens,
-but manage their grouping and spacing as well.
+Beyond their primary functions,
+the following input characters separate tokens as well.
 .
 .
 .TP
@@ -351,7 +358,7 @@ language.
 .
 They can configure an aspect of the preprocessor's state,
 as when setting a \[lq]global\[rq] font selection or type size
-.RB ( gfont
+.RB ( gifont
 and
 .BR gsize ),
 or declaring or deleting macros
@@ -403,7 +410,7 @@ Lf(CR) Lf(CR) Lw(1i) Lf(CR) Lf(CR).
 .I Macros
 permit primitives,
 components,
-and other macros to be collected and referred to by a single token.
+and other macros to be collected and used together as a single token.
 .
 Predefined macros make convenient the preparation of
 .I eqn
@@ -596,17 +603,20 @@ and
 .SS "New primitives"
 .\" ====================================================================
 .
-The GNU extension primitives
+We describe the GNU extension primitives
 .RB \[lq] type \[rq]
 and
 .B \%chartype
-are discussed in subsection \[lq]Spacing and typeface\[rq] above;
+in subsection \[lq]Spacing and typeface\[rq] above;
 .RB \[lq] set \[rq]
+and
+.RB \[lq] reset \[rq]
 in subsection \[lq]Customization\[rq] below;
 and
-.B grfont
+.BR gbfont ,
+.BR gifont ,
 and
-.B gbfont
+.B grfont
 in subsection \[lq]Fonts\[rq] below.
 .
 In the following synopses,
@@ -621,23 +631,25 @@ Set
 as an accent over
 .IR e1 .
 .
+.I @g@eqn
+assumes that
 .I e2
-is assumed to be at the appropriate height for a lowercase letter
-without an ascender;
-.I @g@ eqn
-vertically shifts it depending on
+is at the appropriate height for a lowercase letter without an ascender,
+and shifts it vertically based on
 .IR e1 's
 height.
 .
 For example,
+.I @g@eqn
+defines
 .B hat
-is defined as follows.
+as follows.
 .
 .
 .RS
 .IP
 .EX
-accent { "\[ha]" }
+accent { roman "\[ha]" }
 .EE
 .RE
 .
@@ -1038,7 +1050,7 @@ right delimiters,
 respectively.
 .
 If yours does,
-consider swapping them,
+swap them,
 or select others.
 .
 .
@@ -1067,14 +1079,13 @@ or select others.
 .BI rpile\~ n\~\c
 .BR {\~ .\|.\|.\& \~}
 The integer
-.RI value\~ n
-(in hundredths of an em)
-increases the vertical spacing between rows,
-using
-.IR groff 's
+.RI value\~ n ,
+in hundredths of an em,
+uses the formatter's
 .B \[rs]x
-escape sequence
-(the value has no effect in MathML mode).
+escape sequence to increase the vertical spacing between rows;
+.I @g@eqn
+ignores it when producing MathML.
 .
 Negative values are accepted but have no effect.
 .
@@ -1100,11 +1111,13 @@ They have no effect when generating MathML,
 which delegates typesetting to a MathML rendering engine.
 .
 Configure these parameters with the
-.B set
-primitive.
+.RB \[lq] set \[rq]
+and
+.RB \[lq] reset \[rq]
+primitives.
 .
 .
-.TP
+.TP 9n \" "set p n" + 2n
 .BI set\~ "p n"
 assigns
 .RI parameter\~ p
@@ -1112,33 +1125,37 @@ the integer
 .RI value\~ n ;
 .IR n \~is
 interpreted in units of hundredths of an em unless otherwise stated.
-.
 For example,
 .
-.
 .RS
-.IP
+.RS
 .EX
 set x_height 45
 .EE
 .RE
 .
-.
-.IP
 says that
 .I @g@eqn
 should assume that the font's x-height is 0.45\~ems.
+.RE
 .
 .
-.RS
+.TP
+.BI reset\~ p
+restores the default value of
+.RI parameter\~ p.
+.
+.
 .P
-Available parameters are as follows;
+Available parameters
+.I p
+are as follows;
 defaults are shown in parentheses.
 .
 We intend these descriptions to be expository rather than rigorous.
 .
 .
-.TP 17n
+.TP 24n \" "default_rule_thickness" + 2n
 .B minimum_size
 sets a floor for the type size
 (in scaled points)
@@ -1236,11 +1253,7 @@ The width of subscripts and superscripts is increased by this amount
 .TP
 .B thin_space
 This amount of space is automatically inserted after punctuation
-characters.
-.
-It also configures the width of the space produced by the
-.B \[ha]
-token
+characters
 .RB ( 17 ).
 .
 .
@@ -1254,9 +1267,21 @@ binary operators
 .TP
 .B thick_space
 This amount of space is automatically inserted on either side of
-relations.
+relations
+.RB ( 28 ).
 .
-It also configures the width of the space produced by the
+.
+.TP
+.B half_space
+configures the width of the space produced by the
+.B \[ha]
+token
+.RB ( 17 ).
+.
+.
+.TP
+.B full_space
+configures the width of the space produced by the
 .B \[ti]
 token
 .RB ( 28 ).
@@ -1524,7 +1549,6 @@ and
 .B cp1047
 devices,
 .RB otherwise\~ 0 .
-.RE
 .
 .
 .\" ====================================================================
@@ -1684,15 +1708,15 @@ and bold.
 .
 Assign each a
 .I groff
-typeface with the primitives
-.BR gfont ,
+typeface with the GNU extension primitives
 .BR \%grfont ,
+.BR \%gifont ,
 and
 .B \%gbfont.
 .
 The defaults are the styles
-.BR I ,
 .BR R ,
+.BR I ,
 and
 .B B
 (applied to the current font family).
@@ -1719,13 +1743,19 @@ primitive to select an (upright) bold style.
 .RI Select\~ f
 as the bold font.
 .
-This is a GNU extension.
-.
 .
 .TP
-.BI gfont\~ f
+.BI gifont\~ f
 .RI Select\~ f
 as the italic font.
+.
+For
+AT&T
+.I eqn \" AT&T
+compatibility,
+.B gfont
+is recognized as a synonym for
+.BR gifont .
 .
 .
 .TP
@@ -1733,11 +1763,9 @@ as the italic font.
 .RI Select\~ f
 as the roman font.
 .
-This is a GNU extension.
-.
 .
 .br
-.ne 4v
+.ne 6v
 .\" ====================================================================
 .SH Options
 .\" ====================================================================
@@ -1747,12 +1775,12 @@ displays a usage message,
 while
 .B \-v
 and
-.B \-\-version
+.B \%\-\-version
 show version information;
 all exit afterward.
 .
 .
-.TP
+.TP 8.125n \" "-M dir" + 2n + hand-tuned for PDF
 .B \-C
 Recognize
 .B .EQ
@@ -1785,7 +1813,7 @@ statements in the source file override this option.
 .TP
 .BI \-f\~ F
 is equivalent to
-.RB \[lq] gfont
+.RB \[lq] gifont
 .IR F \[rq].
 .
 .
@@ -1853,24 +1881,28 @@ This option is deprecated.
 Prepare output for the device
 .IR dev .
 .
-In most cases,
-the effect of this is to define a macro
+This option
+defines a macro
 .I dev
-with a value
-.RB of\~ 1 ;
+with the
+.RB value\~ 1 ;
 .I eqnrc
-uses this to provide definitions appropriate for the device.
+thereby provides definitions appropriate to the device.
 .
 However,
-if the specified driver is \[lq]MathML\[rq],
-the output is MathML markup rather than
-.I @g@troff
-input,
+if
+.I dev
+is
+.RB \[lq] MathML \[rq],
+.I @g@eqn
+produces output in that language rather than
+.IR roff ,
 and
 .I eqnrc
-is not loaded at all.
+is not loaded.
+.\" XXX: why NOT load eqnrc?
 .
-The default output device is
+The default device is
 .BR @DEVICE@ .
 .
 .
@@ -1880,16 +1912,19 @@ The default output device is
 .
 .TP
 .I @MACRODIR@/\:\%eqnrc
-Initialization file.
+initializes the preprocessor.
+.
+Any valid
+.I @g@eqn
+input is accepted.
 .
 .
 .\" ====================================================================
 .SH "MathML mode limitations"
 .\" ====================================================================
 .
-MathML is designed on the assumption that it cannot know the exact
-physical characteristics of the media and devices on which it will
-be rendered.
+MathML's design assumes that it cannot know the exact physical
+characteristics of the media and devices on which it will be rendered.
 .
 It does not support control of motions and sizes to the same
 degree
@@ -1897,9 +1932,12 @@ degree
 does.
 .
 .
-.IP \[bu] 2n
-.I @g@eqn
-customization parameters have no effect on generated MathML.
+.IP \[bu] 3n
+GNU
+.IR eqn 's\" GNU
+rendering parameters
+(see section \[lq]Customziation\[rq] above)
+have no effect on generated MathML.
 .
 .
 .IP \[bu]
@@ -1975,12 +2013,12 @@ For instance,
 the
 .I eqn \" generic
 command
-.RB \%\[lq]\^ "gfont PI" \^\[rq]
+.RB \%\[lq]\^ "gifont PI" \^\[rq]
 does not select
 .IR groff 's
 Palatino italic font for the global italic face;
 you must use
-.RB \%\[lq]\^ "gfont \[dq]PI\[dq]" \^\[rq]
+.RB \%\[lq]\^ "gifont \[dq]PI\[dq]" \^\[rq]
 instead.
 .
 .
@@ -2121,8 +2159,9 @@ delim off
 .
 .
 .P
-The quadratic formula illustrates use of fractions and radicals,
-and affords an opportunity to use the full space token
+The quadratic formula affords an opportunity to use fractions,
+radicals,
+and the full space token
 .BR \[ti] .
 .
 .
@@ -2209,12 +2248,13 @@ above in greater detail.
 .
 .
 .P
-.MR groff_char @MAN7EXT@ ,
-particularly subsections \[lq]Logical symbols\[rq],
-\[lq]Mathematical symbols\[rq],
-and \[lq]Greek glyphs\[rq],
+.MR groff_char @MAN7EXT@
 documents a variety of special character escape sequences useful in
 mathematical typesetting.
+.
+See subsections \[lq]Logical symbols\[rq],
+\[lq]Mathematical symbols\[rq],
+and \[lq]Greek glyphs\[rq] in particular.
 .
 .
 .P

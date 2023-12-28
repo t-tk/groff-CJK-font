@@ -96,14 +96,14 @@ int tabs::compatible (const char *s)
     s++;
 
   while (*s != (char)0 && last != NULL) {
-    // move over white space
+    // move over whitespace
     while ((*s != (char)0) && isspace(*s))
       s++;
     // collect alignment
     align = *s;
     // move over alignment
     s++;
-    // move over white space
+    // move over whitespace
     while ((*s != (char)0) && isspace(*s))
       s++;
     // collect tab position
@@ -136,14 +136,14 @@ void tabs::init (const char *s)
     s++;
 
   while (*s != (char)0) {
-    // move over white space
+    // move over whitespace
     while ((*s != (char)0) && isspace(*s))
       s++;
     // collect alignment
     align = *s;
     // move over alignment
     s++;
-    // move over white space
+    // move over whitespace
     while ((*s != (char)0) && isspace(*s))
       s++;
     // collect tab position

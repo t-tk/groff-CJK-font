@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/sh
 # shdeps.sh: Generate OS dependency fixups, for 'groff' shell scripts
 #
 # Copyright (C) 2004-2020 Free Software Foundation, Inc.

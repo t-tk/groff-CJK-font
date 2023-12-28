@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
@@ -24,7 +23,7 @@ public:
   vunits();
   vunits(units);
   units to_units();
-  int is_zero();
+  bool is_zero();
   vunits& operator+=(const vunits&);
   vunits& operator-=(const vunits&);
   friend inline vunits scale(vunits n, units x, units y); // scale n by x/y
@@ -53,7 +52,7 @@ public:
   hunits();
   hunits(units);
   units to_units();
-  int is_zero();
+  bool is_zero();
   hunits& operator+=(const hunits&);
   hunits& operator-=(const hunits&);
   friend inline hunits scale(hunits n, units x, units y); // scale n by x/y
@@ -75,10 +74,10 @@ public:
 
 extern const hunits H0;
 
-extern int get_vunits(vunits *, unsigned char si);
-extern int get_hunits(hunits *, unsigned char si);
-extern int get_vunits(vunits *, unsigned char si, vunits prev_value);
-extern int get_hunits(hunits *, unsigned char si, hunits prev_value);
+extern bool get_vunits(vunits *, unsigned char si);
+extern bool get_hunits(hunits *, unsigned char si);
+extern bool get_vunits(vunits *, unsigned char si, vunits prev_value);
+extern bool get_hunits(hunits *, unsigned char si, hunits prev_value);
 
 inline vunits:: vunits() : n(0)
 {
@@ -89,7 +88,7 @@ inline units vunits::to_units()
   return n*vresolution;
 }
 
-inline int vunits::is_zero()
+inline bool vunits::is_zero()
 {
   return n == 0;
 }
@@ -198,7 +197,7 @@ inline units hunits::to_units()
   return n*hresolution;
 }
 
-inline int hunits::is_zero()
+inline bool hunits::is_zero()
 {
   return n == 0;
 }
@@ -337,3 +336,8 @@ inline units points_to_units(units n)
   return scale(n, units_per_inch, 72);
 }
 
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

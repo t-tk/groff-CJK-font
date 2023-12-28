@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (C) 2021 Free Software Foundation, Inc.
+# Copyright (C) 2021-2023 Free Software Foundation, Inc.
 #
 # This file is part of groff.
 #
@@ -41,12 +41,20 @@ output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -men 2>&1)
 echo 'checking raw troff with -men' >&2
 echo "$output" | grep -Fqx '.hy=4' || wail
 
+output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -mes 2>&1)
+echo 'checking raw troff with -mes' >&2
+echo "$output" | grep -Fqx '.hy=1' || wail
+
 output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -mfr 2>&1)
 echo 'checking raw troff with -mfr' >&2
 echo "$output" | grep -Fqx '.hy=4' || wail
 
 output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -mit 2>&1)
 echo 'checking raw troff with -mit' >&2
+echo "$output" | grep -Fqx '.hy=1' || wail
+
+output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -mru 2>&1)
+echo 'checking raw troff with -mru' >&2
 echo "$output" | grep -Fqx '.hy=1' || wail
 
 output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -msv 2>&1)
@@ -65,12 +73,20 @@ output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -me -men 2>&1)
 echo 'checking -me with -men' >&2
 echo "$output" | grep -Fqx '.hy=6' || wail
 
+output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -me -mes 2>&1)
+echo 'checking -me with -mes' >&2
+echo "$output" | grep -Fqx '.hy=2' || wail
+
 output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -me -mfr 2>&1)
 echo 'checking -me with -mfr' >&2
 echo "$output" | grep -Fqx '.hy=6' || wail
 
 output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -me -mit 2>&1)
 echo 'checking -me with -mit' >&2
+echo "$output" | grep -Fqx '.hy=2' || wail
+
+output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -me -mru 2>&1)
+echo 'checking -me with -mru' >&2
 echo "$output" | grep -Fqx '.hy=2' || wail
 
 output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -me -msv 2>&1)
@@ -89,12 +105,20 @@ output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -ms -men 2>&1)
 echo 'checking -ms with -men' >&2
 echo "$output" | grep -Fqx '.hy=6' || wail
 
+output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -ms -mes 2>&1)
+echo 'checking -ms with -mes' >&2
+echo "$output" | grep -Fqx '.hy=2' || wail
+
 output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -ms -mfr 2>&1)
 echo 'checking -ms with -mfr' >&2
 echo "$output" | grep -Fqx '.hy=6' || wail
 
 output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -ms -mit 2>&1)
 echo 'checking -ms with -mit' >&2
+echo "$output" | grep -Fqx '.hy=2' || wail
+
+output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -ms -mru 2>&1)
+echo 'checking -ms with -mru' >&2
 echo "$output" | grep -Fqx '.hy=2' || wail
 
 output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -ms -msv 2>&1)
@@ -116,12 +140,20 @@ output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -rcR=0 -man -men 2>&1
 echo 'checking -man with -rcR=0 -men' >&2
 echo "$output" | grep -Fqx '.hy=6' || wail
 
+output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -rcR=0 -man -mes 2>&1)
+echo 'checking -man with -rcR=0 -mes' >&2
+echo "$output" | grep -Fqx '.hy=2' || wail
+
 output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -rcR=0 -man -mfr 2>&1)
 echo 'checking -man with -rcR=0 -mfr' >&2
 echo "$output" | grep -Fqx '.hy=6' || wail
 
 output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -rcR=0 -man -mit 2>&1)
 echo 'checking -man with -rcR=0 -mit' >&2
+echo "$output" | grep -Fqx '.hy=2' || wail
+
+output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -rcR=0 -man -mru 2>&1)
+echo 'checking -man with -rcR=0 -mru' >&2
 echo "$output" | grep -Fqx '.hy=2' || wail
 
 output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -rcR=0 -man -msv 2>&1)
@@ -140,12 +172,20 @@ output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -rcR=1 -man -men 2>&1
 echo 'checking -man with -rcR=1 -men' >&2
 echo "$output" | grep -Fqx '.hy=4' || wail
 
+output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -rcR=1 -man -mes 2>&1)
+echo 'checking -man with -rcR=1 -mes' >&2
+echo "$output" | grep -Fqx '.hy=1' || wail
+
 output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -rcR=1 -man -mfr 2>&1)
 echo 'checking -man with -rcR=1 -mfr' >&2
 echo "$output" | grep -Fqx '.hy=4' || wail
 
 output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -rcR=1 -man -mit 2>&1)
 echo 'checking -man with -rcR=1 -mit' >&2
+echo "$output" | grep -Fqx '.hy=1' || wail
+
+output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -rcR=1 -man -mru 2>&1)
+echo 'checking -man with -rcR=1 -mru' >&2
 echo "$output" | grep -Fqx '.hy=1' || wail
 
 output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -rcR=1 -man -msv 2>&1)

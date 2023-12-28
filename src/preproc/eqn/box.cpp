@@ -1,4 +1,4 @@
-/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2023 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
 This file is part of groff.
@@ -16,6 +16,10 @@ for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <assert.h>
 
 #include "eqn.h"
@@ -23,67 +27,69 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
 const char *current_roman_font;
 
-char *gfont = 0;
-char *grfont = 0;
-char *gbfont = 0;
+char *gifont = 0 /* nullptr */;
+char *grfont = 0 /* nullptr */;
+char *gbfont = 0 /* nullptr */;
 int gsize = 0;
 
-int script_size_reduction = -1;	// negative means reduce by a percentage 
+int script_size_reduction = -1;	// negative means reduce by a percentage
 
 int positive_space = -1;
 int negative_space = -1;
 
 int minimum_size = 5;
 
-int fat_offset = 4;
-int body_height = 85;
-int body_depth = 35;
+static int fat_offset = 4;
+static int over_hang = 0;
+static int accent_width = 31;
+static int delimiter_factor = 900;
+static int delimiter_shortfall = 50;
 
-int over_hang = 0;
-int accent_width = 31;
-int delimiter_factor = 900;
-int delimiter_shortfall = 50;
+static int null_delimiter_space = 12;
+static int script_space = 5;
+static int thin_space = 17;
+static int half_space = 17;
+static int medium_space = 22;
+static int thick_space = 28;
+static int full_space = 28;
 
-int null_delimiter_space = 12;
-int script_space = 5;
-int thin_space = 17;
-int medium_space = 22;
-int thick_space = 28;
-
-int num1 = 70;
-int num2 = 40;
+static int num1 = 70;
+static int num2 = 40;
 // we don't use num3, because we don't have \atop
-int denom1 = 70;
-int denom2 = 36;
-int axis_height = 26;		// in 100ths of an em
-int sup1 = 42;
-int sup2 = 37;
-int sup3 = 28;
-int default_rule_thickness = 4;
-int sub1 = 20;
-int sub2 = 23;
-int sup_drop = 38;
-int sub_drop = 5;
-int x_height = 45;
-int big_op_spacing1 = 11;
-int big_op_spacing2 = 17;
-int big_op_spacing3 = 20;
-int big_op_spacing4 = 60;
-int big_op_spacing5 = 10;
+static int denom1 = 70;
+static int denom2 = 36;
+static int axis_height = 26;	// in 100ths of an em
+static int sup1 = 42;
+static int sup2 = 37;
+static int sup3 = 28;
+static int default_rule_thickness = 4;
+static int sub1 = 20;
+static int sub2 = 23;
+static int sup_drop = 38;
+static int sub_drop = 5;
+static int x_height = 45;
+static int big_op_spacing1 = 11;
+static int big_op_spacing2 = 17;
+static int big_op_spacing3 = 20;
+static int big_op_spacing4 = 60;
+static int big_op_spacing5 = 10;
 
 // These are for piles and matrices.
 
-int baseline_sep = 140;		// = num1 + denom1
-int shift_down = 26;		// = axis_height
-int column_sep = 100;		// = em space
-int matrix_side_sep = 17;	// = thin space
+static int baseline_sep = 140;		// = num1 + denom1
+static int shift_down = 26;		// = axis_height
+static int column_sep = 100;		// = em space
+static int matrix_side_sep = 17;	// = thin space
 
-int nroff = 0;			// should we grok ndefine or tdefine?
+static int body_height = 85;
+static int body_depth = 35;
 
-struct S {
+static int nroff = 0;		// should we grok ndefine or tdefine?
+
+struct param {
   const char *name;
   int *ptr;
-} param_table[] = {
+} default_param_table[] = {
   { "fat_offset", &fat_offset },
   { "over_hang", &over_hang },
   { "accent_width", &accent_width },
@@ -94,6 +100,8 @@ struct S {
   { "thin_space", &thin_space },
   { "medium_space", &medium_space },
   { "thick_space", &thick_space },
+  { "half_space", &half_space },
+  { "full_space", &full_space },
   { "num1", &num1 },
   { "num2", &num2 },
   { "denom1", &denom1 },
@@ -122,17 +130,60 @@ struct S {
   { "body_height", &body_height },
   { "body_depth", &body_depth },
   { "nroff", &nroff },
-  { 0, 0 }
 };
+
+struct param *param_table = 0 /* nullptr */;
+
+// Use the size of default_param_table to iterate through both it and
+// param_table, because the former is known constant to the compiler.
 
 void set_param(const char *name, int value)
 {
-  for (int i = 0; param_table[i].name != 0; i++)
+  for (size_t i = 0; i <= array_length(default_param_table); i++)
     if (strcmp(param_table[i].name, name) == 0) {
-      *param_table[i].ptr = value;
+      *(param_table[i].ptr) = value;
       return;
     }
-  error("unrecognised parameter '%1'", name);
+  error("'set' primitive does not recognize parameter name '%1'", name);
+}
+
+void reset_param(const char *name)
+{
+  for (size_t i = 0; i < array_length(default_param_table); i++)
+    if (strcmp(param_table[i].name, name) == 0) {
+      *param_table[i].ptr = *(default_param_table[i].ptr);
+      return;
+    }
+  error("'reset' primitive does not recognize parameter name '%1'",
+	name);
+}
+
+int get_param(const char *name)
+{
+  for (size_t i = 0; i < array_length(default_param_table); i++)
+    if (strcmp(param_table[i].name, name) == 0)
+      return *(param_table[i].ptr);
+  assert(0 == "attempted to access parameter not in table");
+  fatal("internal error: unrecognized parameter name '%1'", name);
+}
+
+void init_param_table()
+{
+  param_table = new param[array_length(default_param_table)];
+  for (size_t i = 0; i < array_length(default_param_table); i++) {
+    param_table[i].name = default_param_table[i].name;
+    param_table[i].ptr = new int(*(default_param_table[i].ptr));
+  }
+}
+
+void free_param_table()
+{
+  if (param_table != 0 /* nullptr */) {
+    for (size_t i = 0; i < array_length(default_param_table); i++)
+      delete param_table[i].ptr;
+    delete[] param_table;
+    param_table = 0 /* nullptr */;
+  }
 }
 
 int script_style(int style)
@@ -187,9 +238,9 @@ void set_script_reduction(int n)
   script_size_reduction = n;
 }
 
-const char *get_gfont()
+const char *get_gifont()
 {
-  return gfont ? gfont : "I";
+  return gifont ? gifont : "I";
 }
 
 const char *get_grfont()
@@ -202,10 +253,10 @@ const char *get_gbfont()
   return gbfont ? gbfont : "B";
 }
 
-void set_gfont(const char *s)
+void set_gifont(const char *s)
 {
-  delete[] gfont;
-  gfont = strsave(s);
+  delete[] gifont;
+  gifont = strsave(s);
 }
 
 void set_grfont(const char *s)
@@ -294,7 +345,7 @@ void box::top_level()
     printf(".nr " SAVED_FONT_REG " \\n[.f]\n");
     printf(".ft\n");
     printf(".nr " SAVED_PREV_FONT_REG " \\n[.f]\n");
-    printf(".ft %s\n", get_gfont());
+    printf(".ft %s\n", get_gifont());
     printf(".nr " SAVED_SIZE_REG " \\n[.ps]\n");
     if (gsize > 0) {
       char buf[INT_DIGITS + 1];
@@ -303,7 +354,7 @@ void box::top_level()
     }
     current_roman_font = get_grfont();
     // This catches tabs used within \Z (which aren't allowed).
-    b->check_tabs(0);
+    b->diagnose_tab_stop_usage(0);
     int r = b->compute_metrics(DISPLAY_STYLE);
     printf(".ft \\n[" SAVED_PREV_FONT_REG "]\n");
     printf(".ft \\n[" SAVED_FONT_REG "]\n");
@@ -334,7 +385,7 @@ void box::top_level()
 	   "\\s'\\En[" SAVED_INLINE_SIZE_REG "]u'"
 	   "\n");
     printf(".as1 " LINE_STRING " \\&\\E*[" SAVE_FONT_STRING "]");
-    printf("\\f[%s]", get_gfont());
+    printf("\\f[%s]", get_gifont());
     printf("\\s'\\En[" SAVED_SIZE_REG "]u'");
     current_roman_font = get_grfont();
     b->output();
@@ -413,7 +464,7 @@ void box::output()
 {
 }
 
-void box::check_tabs(int)
+void box::diagnose_tab_stop_usage(int)
 {
 }
 
@@ -435,7 +486,7 @@ int box::right_is_italic()
 void box::hint(unsigned)
 {
 }
-  
+
 void box::handle_char_type(int, int)
 {
 }
@@ -470,10 +521,10 @@ box_list::~box_list()
   delete[] p;
 }
 
-void box_list::list_check_tabs(int level)
+void box_list::list_diagnose_tab_stop_usage(int level)
 {
   for (int i = 0; i < len; i++)
-    p[i]->check_tabs(level);
+    p[i]->diagnose_tab_stop_usage(level);
 }
 
 
@@ -499,7 +550,8 @@ int pointer_box::compute_metrics(int style)
 void pointer_box::compute_subscript_kern()
 {
   p->compute_subscript_kern();
-  printf(".nr " SUB_KERN_FORMAT " \\n[" SUB_KERN_FORMAT "]\n", uid, p->uid);
+  printf(".nr " SUB_KERN_FORMAT " \\n[" SUB_KERN_FORMAT "]\n", uid,
+	 p->uid);
 }
 
 void pointer_box::compute_skew()
@@ -509,9 +561,9 @@ void pointer_box::compute_skew()
 	 uid, p->uid);
 }
 
-void pointer_box::check_tabs(int level)
+void pointer_box::diagnose_tab_stop_usage(int level)
 {
-  p->check_tabs(level);
+  p->diagnose_tab_stop_usage(level);
 }
 
 int simple_box::compute_metrics(int)
@@ -568,7 +620,7 @@ void quoted_text_box::output()
   }
 }
 
-tab_box::tab_box() : disabled(0)
+tab_box::tab_box() : disabled(false)
 {
 }
 
@@ -580,26 +632,12 @@ void tab_box::output()
     printf("\\t");
 }
 
-void tab_box::check_tabs(int level)
+void tab_box::diagnose_tab_stop_usage(int level)
 {
   if (level > 0) {
-    error("tabs allowed only at outermost level");
-    disabled = 1;
+    error("tabs allowed only at outermost lexical level");
+    disabled = true;
   }
-}
-
-space_box::space_box()
-{
-  spacing_type = SUPPRESS_TYPE;
-}
-
-void space_box::output()
-{
-  if (output_format == troff)
-    printf("\\h'%dM'", thick_space);
-  else if (output_format == mathml)
-    // &ThickSpace; doesn't display right under Firefox 1.5.
-    printf("<mtext>&ensp;</mtext>");
 }
 
 half_space_box::half_space_box()
@@ -610,9 +648,56 @@ half_space_box::half_space_box()
 void half_space_box::output()
 {
   if (output_format == troff)
+    printf("\\h'%dM'", half_space);
+  else if (output_format == mathml)
+    printf("<mtext>&ThinSpace;</mtext>");
+  else
+    assert("unimplemented output format");
+}
+
+full_space_box::full_space_box()
+{
+  spacing_type = SUPPRESS_TYPE;
+}
+
+void full_space_box::output()
+{
+  if (output_format == troff)
+    printf("\\h'%dM'", full_space);
+  else if (output_format == mathml)
+    printf("<mtext>&ThickSpace;</mtext>");
+  else
+    assert("unimplemented output format");
+}
+
+thick_space_box::thick_space_box()
+{
+  spacing_type = SUPPRESS_TYPE;
+}
+
+void thick_space_box::output()
+{
+  if (output_format == troff)
+    printf("\\h'%dM'", thick_space);
+  else if (output_format == mathml)
+    printf("<mtext>&ThickSpace;</mtext>");
+  else
+    assert("unimplemented output format");
+}
+
+thin_space_box::thin_space_box()
+{
+  spacing_type = SUPPRESS_TYPE;
+}
+
+void thin_space_box::output()
+{
+  if (output_format == troff)
     printf("\\h'%dM'", thin_space);
   else if (output_format == mathml)
     printf("<mtext>&ThinSpace;</mtext>");
+  else
+    assert("unimplemented output format");
 }
 
 void box_list::list_debug_print(const char *sep)
@@ -634,9 +719,19 @@ void half_space_box::debug_print()
   fprintf(stderr, "^");
 }
 
-void space_box::debug_print()
+void full_space_box::debug_print()
 {
   fprintf(stderr, "~");
+}
+
+void thick_space_box::debug_print()
+{
+  fprintf(stderr, "~");
+}
+
+void thin_space_box::debug_print()
+{
+  fprintf(stderr, "^");
 }
 
 void tab_box::debug_print()

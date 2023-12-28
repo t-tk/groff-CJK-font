@@ -66,11 +66,11 @@ echo "$output" \
         -e '}' \
     | grep -q . || wail
 
-# 11 spaces in the spaceful sed expression below
+# 9 spaces in the spaceful sed expression below
 echo 'checking for correct indentation of broken synopsis lines' >&2
 echo "$output" \
     | sed -n -e '/foo operand1/{' \
-        -e 'n;/           operand7.*/p' \
+        -e 'n;/         operand7.*/p' \
         -e '}' \
     | grep -q . || wail
 

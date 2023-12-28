@@ -10,7 +10,7 @@ typesetter and document formatter
 .\" Legal Terms
 .\" ====================================================================
 .\"
-.\" Copyright (C) 1989-2021 Free Software Foundation, Inc.
+.\" Copyright (C) 1989-2023 Free Software Foundation, Inc.
 .\"
 .\" This file is part of groff, the GNU roff type-setting system.
 .\"
@@ -93,7 +93,7 @@ typesetter and document formatter
 .B \-v
 .
 .SY @g@troff
-.B \-\-version
+.B \%\-\-version
 .YS
 .
 .
@@ -114,12 +114,13 @@ document formatting system.
 .
 If no
 .I file
-operands are given on the command line,
+operands are present,
 or if
 .I file
 is
 .RB \[lq] \- \[rq],
-the standard input stream is read.
+.I @g@troff
+reads the standard input stream.
 .
 .
 .P
@@ -147,12 +148,12 @@ display a usage message,
 while
 .B \-v
 and
-.B \-\-version
+.B \%\-\-version
 show version information;
 all exit afterward.
 .
 .
-.TP
+.TP 9n \" "-m mac" + 2n + hand-tuned for PDF
 .B \-a
 Generate a plain text approximation of the typeset output.
 .
@@ -164,14 +165,20 @@ This option produces a sort of abstract preview of the formatted output.
 .
 .
 .RS
-.IP \[bu] 2n
+.IP \[bu] 3n
 Page breaks are marked by a phrase in angle brackets;
 for example,
 \[lq]<beginning of page>\[rq].
 .
 .
 .IP \[bu]
-Lines are broken where they would be in the formatted output.
+Lines are broken where they would be in formatted output.
+.
+.
+.IP \[bu]
+Vertical motion,
+apart from that implied by a break,
+is not represented.
 .
 .
 .IP \[bu]
@@ -187,14 +194,10 @@ are not represented.
 .
 .
 .IP \[bu]
-Vertical motions are not represented.
-.
-.
-.IP \[bu]
-Special characters are rendered in angle brackets;
+A special character is rendered as its identifier between angle
+brackets;
 for example,
-the default soft hyphen character appears as
-\[lq]<hy>\[rq].
+a hyphen appears as \[lq]<hy>\[rq].
 .RE
 .
 .
@@ -249,11 +252,11 @@ as
 .I text.
 .
 .IR c \~must
-be one character;
+be a one-character identifier;
 .I string
 can be of arbitrary length.
 .
-Such string assignments happen before any macro file is loaded,
+Such assignments happen before any macro file is loaded,
 including the startup file.
 .
 Due to
@@ -351,19 +354,16 @@ option of Unix C compilers.
 .
 .
 .TP
-.BI \-m\~ name
-Process the file
-.RI name .tmac
-prior to any input files.
+.BI \-m\~ mac
+Search for the macro package
+.RI mac .tmac
+and read it prior to any input files.
 .
 If not found,
-.IR tmac. name
+.IR tmac. mac
 is attempted.
 .
-.I name
-(in both arrangements)
-is presumed to be a macro file;
-see the description of
+See the description of
 .I GROFF_TMAC_PATH
 in section \[lq]Environment\[rq] below for the default search locations
 and ordering.
@@ -428,11 +428,11 @@ as
 .I numeric-expression.
 .
 .IR c \~must
-be a one-character name;
+be a one-character identifier;
 .I register
 can be of arbitrary length.
 .
-Such register assignments happen before any macro file is loaded,
+Such assignments happen before any macro file is loaded,
 including the startup file.
 .
 Due to
@@ -493,15 +493,13 @@ options above.
 .
 .
 .TP
-.BI \-w\~ name
+.BI \-w\~ cat
 .TQ
-.BI \-W\~ name
-Enable
-.RB ( \-w )
-or inhibit
-.RB ( \-W )
+.BI \-W\~ cat
+Enable and inhibit,
+respectively,
 warnings in category
-.I name.
+.I cat.
 .
 See section \[lq]Warnings\[rq] below.
 .
@@ -865,19 +863,21 @@ A timestamp
 to use as the output creation timestamp in place of the current time.
 .
 The time is converted to human-readable form using
-.MR localtime 3
+.MR gmtime 3
+and
+.MR asctime 3
 when the formatter starts up and stored in registers usable by documents
 and macro packages.
 .
 .
 .TP
 .I TZ
-The timezone to use when converting the current time
-(or value of
-.IR SOURCE_DATE_EPOCH )
-to human-readable form;
+The time zone to use when converting the current time to human-readable form;
 see
 .MR tzset 3 .
+If
+.I SOURCE_DATE_EPOCH
+is used, it is always converted to human-readable form using UTC.
 .
 .
 .\" ====================================================================

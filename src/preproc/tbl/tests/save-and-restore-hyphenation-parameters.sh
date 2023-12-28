@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (C) 2021 Free Software Foundation, Inc.
+# Copyright (C) 2021-2023 Free Software Foundation, Inc.
 #
 # This file is part of groff.
 #
@@ -34,8 +34,14 @@ wail () {
 
 input='.nr LL 78n
 .hw a-bc-def-ghij-klmno-pqrstu-vwxyz
+.hym 2n
+.hys 1n
 .LP
+before: .hym=\n[.hym], .hys=\n[.hys]
+.br
+.
 Here is a table with hyphenation disabled in its text block.
+.
 .
 .TS
 tab(@);
@@ -47,6 +53,11 @@ abcdefghijklmnopqrstuvwxyz
 abcdefghijklmnopqrstuvwxyz
 T}
 .TE
+.
+.
+.LP
+after: .hym=\n[.hym], .hys=\n[.hys]
+.br
 .
 Let us see if hyphenation is enabled again as it should be.
 abcdefghijklmnopqrstuvwxyz'
@@ -60,6 +71,11 @@ echo "$output" | grep '^foo' | grep -- '-$' && wail
 
 echo "checking whether hyphenation enabled after table" >&2
 echo "$output" | grep -qx 'Let us see.*lmno-' || wail
+
+# Regression-test Savannah #64122.
+
+echo "checking whether hyphenation margin and spacing preserved" >&2
+echo "$output" | grep -Fqx 'after: .hym=48, .hys=24' || wail
 
 test -z "$fail"
 

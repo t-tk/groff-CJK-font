@@ -36,8 +36,8 @@
 .nr TC-MARGIN \w'00' \" expect 2-digit page numbers at most
 .ie t .nr PI 3.5n
 .el   .nr PI 4n
-.ND May 2023
-.EH '%''May 2023'
+.ND September 2023
+.EH '%''September 2023'
 .EF ''''
 .OH 'Using \f[I]groff\f[] with the \f[I]ms\f[] macros''%'
 .OF ''''
@@ -91,7 +91,7 @@ and behavior of AT&T Unix Version\~7
 .
 Many extensions from 4.2BSD (Berkeley)
 .\" Few changes were made in 4.3, Tahoe, Reno, or 4.4.
-and Tenth Edition Research Unix have been recreated.
+and Research Tenth Edition Unix have been recreated.
 .AE
 .
 .
@@ -165,7 +165,7 @@ Put a macro call on a line by itself.
 .
 Use
 .CW .PP
-if you want your paragraph's first line to be indented,
+if you want your paragraph's first line indented,
 or
 .CW .LP
 if you don't.
@@ -624,7 +624,7 @@ and
 registers use the larger value if the vertical motion quantum of the
 output device is too coarse for the smaller one;
 usually,
-this is the case only for output to terminals and emulators thereof.
+this is the case only for output to terminals.
 .
 .
 .\" ------------------------
@@ -697,6 +697,10 @@ is mandatory if
 is called.
 .
 .
+.if n \{
+.  br
+.  ne 12v
+.\}
 .TS H
 box;
 lb lb
@@ -763,7 +767,7 @@ Call it repeatedly to specify multiple authors.
 T}
 _
 \&.AI	T{
-Specify the preceding author's institution.
+Specify the preceding author's institutional affiliation.
 .
 An
 .CW .AU
@@ -925,11 +929,12 @@ registers set the type size and vertical spacing
 (distance between text baselines),
 respectively.
 .
-The font family and type size are ignored on terminal devices.
+The font family and type size are ignored on terminals.
 .
-Setting these parameters before the first call of a heading,
+Set these parameters before the first call of a heading,
 paragraphing,
-or (non-date) document description macro also applies them to headers,
+or (non-date) document description macro to apply them to
+headers,
 footers,
 and
 (for
@@ -969,7 +974,7 @@ is equivalent to using the
 .CW nh
 request.
 .
-This is a Tenth Edition Research Unix extension.
+This is a Research Tenth Edition Unix extension.
 .KE
 .
 .
@@ -1038,8 +1043,7 @@ to the first output line of the paragraph,
 all output lines,
 or all but the first.
 .
-All paragraphing macro calls cause the insertion of vertical space in
-the amount stored in the
+These calls insert vertical space in the amount stored in the
 .CW PD
 register,
 except at page or column breaks.
@@ -1332,7 +1336,10 @@ and
 .CW SN\-NO\-DOT
 (with the terminating period omitted).
 .
-These are GNU extensions.
+These,
+and
+.CW SN\-STYLE ,
+are GNU extensions.
 .
 .
 .PP
@@ -1469,9 +1476,13 @@ multiplied by the difference of
 and
 .I depth .
 .
+.CW GROWPS
+and
+.CW PSINCR
+are GNU extensions.
 .
-For example,
-the sequence
+.
+The input
 .
 .TS
 box center;
@@ -1491,10 +1502,10 @@ Machairodontinae
 .
 .
 .LP
-will cause \[lq]1. Carnivora\[rq] to be printed in 13-point text,
-followed by \[lq]1.1. Felinae\[rq] in 11.5-point text,
+causes \[lq]1. Carnivora\[rq] to be printed in 13-point type,
+followed by \[lq]1.1. Felinae\[rq] in 11.5-point type,
 while \[lq]1.1.1. Felis catus\[rq] and all more deeply nested headings
-will remain in the 10-point text specified by the
+remain in the 10-point type specified by the
 .CW PS
 register.
 .
@@ -1527,6 +1538,8 @@ region
 (see subsequent sections)
 between the heading and the subsequent paragraph suppresses this
 grouping.
+.
+This is a GNU extension.
 .
 .
 .\" The next table is huge and we need a lot of room for it, but we
@@ -1626,7 +1639,7 @@ but use a
 .BI "bold italic"
 or bold oblique style instead of upright bold.
 .
-This is a Tenth Edition Research Unix extension.
+This is a Research Tenth Edition Unix extension.
 .\" possibly 9th, but definitely not Berkeley
 T}
 _
@@ -1637,7 +1650,7 @@ but use a
 .CW constant-width
 (monospaced) roman typeface instead of bold.
 .
-This is a Tenth Edition Research Unix extension.
+This is a Research Tenth Edition Unix extension.
 .\" possibly 9th, but definitely not Berkeley
 T}
 _
@@ -1648,9 +1661,8 @@ and draw a
 .BX box
 around it.
 .
-On terminal devices,
-reverse video is used instead
-(see the implementation note below).
+On terminals,
+reverse video or another means of highlighting is used instead.
 .
 If you want
 .I text
@@ -1672,6 +1684,10 @@ Typeset
 with an
 .UL underline .
 .
+On terminals,
+.I text
+is bracketed with underscores (\[lq]_\[rq]).
+.
 .I post,
 if present,
 is set after
@@ -1690,13 +1706,13 @@ type size,
 paragraphing,
 or heading macro call.
 .
-You can
+Call
 .LG
-specify this macro
+the macro
 .LG
 multiple times
 .NL
-to enlarge the type size as needed.
+to enlarge the type size further.
 T}
 _
 \&.SM	T{
@@ -1710,13 +1726,13 @@ type size,
 paragraphing,
 or heading macro call.
 .
-You can
+Call
 .SM
-specify this macro
+the macro
 .SM
 multiple times
 .NL
-to reduce the type size as needed.
+to reduce the type size further.
 T}
 _
 \&.NL	T{
@@ -1848,57 +1864,6 @@ _
 .KE
 .
 .
-.nr PS -2
-.nr VS -2
-.LP
-.B1
-.hy 0
-.I "Implementation note:"
-In
-.CW nroff
-mode,
-the
-.CW BX
-macro \[lq]boxes\[rq] its argument by bracketing it with
-.I groff
-extension escape sequences to set the foreground color to black and the
-background to white and then reset them to their previous values;
-the terminal output driver,
-.I grotty (1),
-converts these to ISO\~6429 color escape sequences,
-which may be ignored or mishandled by some terminals,
-or may be disabled by
-.I grotty 's
-.CW \-c
-option.
-.
-Further,
-if the terminal is set up to use these colors in those roles already,
-.CW .BX
-will cause no visible effect in the output.
-.
-Surmounting these challenges would require adding features to
-.I grotty ,
-for instance to provide a mechanism to request ISO\~6429's
-\[lq]standout\[rq] mode \" That's "smso" and "rmso" in terminfo.
-(often supported on monochrome terminals),
-or to replace the presumed support of the terminal for ISO\~6429 escape
-sequences with the use of a library that can query the capabilities of
-the terminal and adapt the output sent to the device accordingly.
-.
-(Practically,
-this likely means adding a dependency on
-.CW libtinfo .)
-.
-Contact the
-.I groff
-development mailing list if you'd like to contribute.
-.sp \n[PD]/2
-.B2
-.nr PS +2
-.nr VS +2
-.
-.
 .NH 2
 Lists
 .XS
@@ -1931,6 +1896,9 @@ that a
 argument remains affixed to the first call.
 .
 .
+.\" We assume Times roman font metrics for these examples.
+.if t .ds gwidth 0.4i
+.if n .ds gwidth 0.5i
 .TS H
 box center;
 cb cb
@@ -1987,7 +1955,7 @@ _
 T{
 .nf
 A glossary-style list:
-\&.IP lawyers 0.4i
+\&.IP lawyers \*[gwidth]
 Two or more attorneys.
 \&.IP guns
 Firearms,
@@ -1999,7 +1967,7 @@ lawyers and guns!
 T}	T{
 A glossary-style list:
 .
-.IP lawyers 0.4i
+.IP lawyers \*[gwidth]
 Two or more attorneys.
 .IP guns
 Firearms,
@@ -2012,23 +1980,18 @@ T}
 .
 .PP
 In the enumerated list example,
-we employed the
+we created a register
+.CW step
+with the
 .CW nr
-request to create a register of our own,
-.CW step .
-.
-We initialized it to zero and assigned it an auto-increment of 1.
+request,
+initializing it to zero and setting its auto-increment to 1.
 .
 Each time we use the escape sequence
-.CW \[rs]n+[PI]
+.CW \[rs]n+[step]
 (note the plus sign),
 the formatter applies the increment just before interpolating the
 register's value.
-.
-Preparing the
-.CW PI
-register as well enables us to rearrange the list without the tedium of
-updating macro calls.
 .
 .
 .PP
@@ -2089,7 +2052,7 @@ T}	T{
 .fi
 T}	T{
 .nf
-\&.IP guns\[rs]h\[aq]0.4i\[aq]
+\&.IP guns\[rs]h\[aq]\*[gwidth]\[aq]
 Firearms,
 .fi
 T}
@@ -2102,14 +2065,27 @@ _
 T{
 A glossary-style list:
 .
-.IP lawyers 0.4i
+.IP lawyers \*[gwidth]
 Two or more attorneys.
-.IP guns\h\[aq]0.4i\[aq] 0.4i
+.IP guns\h\[aq]\*[gwidth]\[aq] \*[gwidth]
 Firearms,
 preferably large-caliber.
 .IP money
 Gotta pay for those lawyers and guns!
 T}
+.TE
+.
+.
+.PP
+If you need a measurement more than once,
+you can store the measured width of text in a register.
+.
+.
+.TS
+box center;
+lf(CR).
+\&.nr width \[rs]w\[aq]guns\[aq]
+\&.IP guns\[rs]h\[aq]\[rs]n[width]\[aq]
 .TE
 .
 .
@@ -2121,11 +2097,10 @@ Indented regions
 .
 .
 .LP
-You may need to indent a region of text while otherwise formatting it
-normally.
+You can indent a region of text while otherwise formatting it normally.
 .
-Indented regions can be nested;
-you can change
+Such indented regions can be nested;
+change
 .CW \[rs]n[PI]
 before each call to vary the amount of inset.
 .
@@ -2239,19 +2214,19 @@ You can alternatively specify a
 .I "floating keep:"
 if a keep cannot fit on the current page,
 .I ms
-holds its contents and allows material following the keep
+holds it,
+allowing material following the keep
 (in the source document)
 to fill the remainder of the current page.
 .
-When the page breaks,
-whether by reaching the end or
+When the page breaks by reaching its bottom or by
 .CW bp
 request,
 .I ms
 puts the floating keep at the beginning of the next page.
 .
-This is useful for placing large graphics or tables that do not need to
-appear exactly where they occur in the source document.
+Use floating keeps to house large graphics or tables that do not
+need to appear exactly where they occur in the source document.
 .
 .
 .TS
@@ -2302,19 +2277,21 @@ _
 .KS
 .LP
 Boxed keep macros cause breaks;
-if you need to box a word or phrase within a line,
-see the
-.CW BX
-macro in section \[lq]Typeface and decoration\[rq] above.
+to box words within a line,
+recall
+.CW .BX
+in section \[lq]Typeface and decoration\[rq] above.
 .
 Box lines are drawn as close as possible to the text they enclose so
 that they are usable within paragraphs.
 .
-If you wish to place one or more paragraphs in a boxed keep,
+When boxing entire paragraphs thus,
 you may improve their appearance by calling
 .CW .B1
 after the first paragraphing macro,
-and by adding a small amount of vertical space before calling
+and invoking the
+.CW sp
+request before calling
 .CW .B2 .
 .
 .
@@ -2333,7 +2310,7 @@ Happy Fun Ball may suddenly accelerate to dangerous speeds.
 .
 .LP
 If you want a boxed keep to float,
-you will need to enclose the
+enclose the
 .CW .B1
 and
 .CW .B2
@@ -2396,14 +2373,13 @@ cf(CR) s | lx .
 .
 .
 .PP
-The distance stored in
+.I "groff ms"
+inserts the distance stored in
 .CW \[rs]n[DD]
-is inserted before and after each pair of display macros;
+before and after each pair of display macros;
 this is a Berkeley extension.
 .
-In
-.I "groff ms" ,
-this distance replaces any adjacent inter-paragraph distance
+This distance replaces any adjacent inter-paragraph distance
 or subsequent spacing prior to a section heading.
 .
 The
@@ -2421,6 +2397,31 @@ and to equations set with
 .CW .EQ\~I \[rq]. \[lq]
 .
 Changes to either register take effect at the next display boundary.
+.
+.
+.PP
+The display distance applies even in footnotes
+(discussed below),
+which may cause a footnote with a display at its end to
+\[lq]emptily\[rq] spill to the next page.
+.
+Consider the following tactic to compensate.
+.
+.
+.TS
+box center;
+lf(CR).
+\&.FS
+Recall the ideal gas law.
+\&.nr DD-saved \[rs]n[DD] \[rs]" stash display distance
+\&.nr DD 0            \[rs]" eliminate automatic space around display
+\&.sp \[rs]n[DD-saved]u   \[rs]" manually put space before it
+\&.EQ
+P V = n R T
+\&.EN
+\&.FE
+\&.nr DD \[rs]n[DD-saved] \[rs]" restore previous setting
+.TE
 .
 .
 .KS
@@ -2495,6 +2496,7 @@ T}
 _
 T{
 \&.PS
+.I "h v"
 .br
 \&.PE
 .br
@@ -2511,10 +2513,17 @@ or
 ends it,
 the latter with \[lq]flyback\[rq] to the vertical position at its top.
 .
-You can create
+Create
 .I pic
 input manually or with a program such as
 .I xfig (1).
+.
+.I h
+and
+.I v
+are the horizontal and vertical dimensions of the picture;
+.I pic
+supplies them automatically.
 T}
 _
 T{
@@ -2612,7 +2621,7 @@ Attempting to place a multi-page table inside a keep can lead to
 unpleasant results,
 particularly if the
 .I tbl
-.CW allbox
+.CW \%allbox
 option is used.
 .KE
 .
@@ -2644,10 +2653,40 @@ giving us more flexibility to reorganize the document.
 p ~ = ~ q sqrt { 1 + ~ ( x / q sup 2 ) }
 .EN
 .
-Use
+.
+.PP
+Create diagrams with
+.I pic .
+.
+.
+.TS
+box center;
+Lf(CR).
+\&.PS
+circle "input";
+arrow;
+box width 1.5i "\[rs]f[CR]groff \-Rept \-ms\[rs]f[]";
+arrow;
+circle "output";
+\&.PE
+.TE
+.
+.
+.if t \{\
+.PS
+circle "input";
+arrow;
+box width 1.5i "\f[CR]groff \-Rept \-ms\f[]";
+arrow;
+circle "output";
+.PE
+.\}
+.
+.
+.PP
 .I groff
 options
-to run preprocessors on the input:
+run preprocessors on the input:
 .CW \-e
 for
 .I eqn ,
@@ -2814,6 +2853,7 @@ this macro has an empty definition.
 is a GNU extension.
 .
 .
+.KS
 .PP
 The following input was used to produce the first sentence in this
 section.
@@ -2834,6 +2874,7 @@ like this symbolic footnote
 \&.FE
 or arbitrary user-specified text.
 .TE
+.KE
 .
 .
 .PP
@@ -2905,7 +2946,7 @@ lf(CR) lx .
 _
 0	T{
 Set an automatic number as a superscript
-(on typesetter devices)
+(on typesetters)
 or surrounded by square brackets
 (on terminals).
 .
@@ -3453,8 +3494,8 @@ with
 .I pdfjam (1),
 or with
 .I gropdf (1)'s
-.B .pdfswitchtopage
-feature,
+.CW pdfswitchtopage
+macro,
 for example.
 .
 .
@@ -3635,6 +3676,8 @@ T}
 .TE
 .KE
 .
+.
+.ne 8v
 .nr SavedPageNumber \n%
 .nr SavedH1 \n[H1] \" groff ms internal name
 .nr SavedH2 \n[H2] \" groff ms internal name
@@ -3801,6 +3844,8 @@ T{
 T}
 .TE
 .
+.
+.ne 8v
 .nr SavedPageNumber \n%
 .nr SavedH1 \n[H1] \" groff ms internal name
 .nr SavedH2 \n[H2] \" groff ms internal name
@@ -3908,8 +3953,8 @@ they cannot be used with AT&T
 .I troff .
 .
 .I "groff ms"
-supports features described above as Berkeley and Tenth Edition Research
-Unix extensions,
+supports features described above as Berkeley and
+Research Tenth Edition Unix extensions,
 and adds several of its own.
 .
 .
@@ -3940,9 +3985,9 @@ rather than to ignore them silently.
 .
 .
 .PP
-Tenth Edition \" possibly 9th
-Research Unix supported
-.B P1 /
+Research Tenth Edition \" possibly 9th
+Unix supported
+.B P1 /\c
 .B P2
 macros to bracket code examples;
 .I "groff ms"
@@ -4002,7 +4047,7 @@ they do so not by incrementing or decrementing it,
 but by setting it absolutely.
 .
 This can cause problems for documents that define additional macros of
-their own that try to manipulate indentation.
+their own that manipulate indentation.
 .
 Use
 .CW .RS

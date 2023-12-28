@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
@@ -27,7 +26,7 @@ const char **symbol::table = 0;
 int symbol::table_used = 0;
 int symbol::table_size = 0;
 char *symbol::block = 0;
-int symbol::block_size = 0;
+size_t symbol::block_size = 0;
 
 const symbol NULL_SYMBOL;
 const symbol EMPTY_SYMBOL("");
@@ -132,7 +131,7 @@ symbol::symbol(const char *p, int how)
     s = *pp = p;
   }
   else {
-    int len = strlen(p)+1;
+    size_t len = strlen(p) + 1;
     if (block == 0 || block_size < len) {
       block_size = len > BLOCK_SIZE ? len : BLOCK_SIZE;
       block = new char [block_size];
@@ -155,3 +154,9 @@ symbol concat(symbol s1, symbol s2)
 }
 
 symbol default_symbol("default");
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

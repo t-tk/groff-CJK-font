@@ -1,4 +1,4 @@
-/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2023 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
 This file is part of groff.
@@ -31,7 +31,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 #include "charinfo.h"
 #include "macropath.h"
 #include "input.h"
-#include <math.h>
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#include <math.h> // ceil()
 
 symbol default_family("T");
 
@@ -723,14 +728,14 @@ environment::environment(symbol nm)
   prev_glyph_color(&default_color),
   fill_color(&default_color),
   prev_fill_color(&default_color),
+  control_character('.'),
+  no_break_control_character('\''),
   seen_space(0),
   seen_eol(0),
   suppress_next_eol(0),
   seen_break(0),
   tabs(units_per_inch/2, TAB_LEFT),
   name(nm),
-  control_char('.'),
-  no_break_control_char('\''),
   hyphen_indicator_char(0)
 {
   prev_family = family = lookup_family(default_family);
@@ -816,14 +821,14 @@ environment::environment(const environment *e)
   prev_glyph_color(e->prev_glyph_color),
   fill_color(e->fill_color),
   prev_fill_color(e->prev_fill_color),
+  control_character(e->control_character),
+  no_break_control_character(e->no_break_control_character),
   seen_space(e->seen_space),
   seen_eol(e->seen_eol),
   suppress_next_eol(e->suppress_next_eol),
   seen_break(e->seen_break),
   tabs(e->tabs),
   name(e->name),		// so that, e.g., '.if "\n[.ev]"0"' works
-  control_char(e->control_char),
-  no_break_control_char(e->no_break_control_char),
   hyphen_indicator_char(e->hyphen_indicator_char)
 {
 }
@@ -866,8 +871,8 @@ void environment::copy(const environment *e)
   width_total = 0;
   space_total = 0;
   input_line_start = 0;
-  control_char = e->control_char;
-  no_break_control_char = e->no_break_control_char;
+  control_character = e->control_character;
+  no_break_control_character = e->no_break_control_character;
   hyphen_indicator_char = e->hyphen_indicator_char;
   spread_flag = 0;
   line = 0;
@@ -914,6 +919,32 @@ environment::~environment()
   delete leader_node;
   delete_node_list(line);
   delete_node_list(numbering_nodes);
+}
+
+unsigned char environment::get_control_character()
+{
+  return control_character;
+}
+
+bool environment::set_control_character(unsigned char c)
+{
+  if (c == no_break_control_character)
+    return false;
+  control_character = c;
+  return true;
+}
+
+unsigned char environment::get_no_break_control_character()
+{
+  return no_break_control_character;
+}
+
+bool environment::set_no_break_control_character(unsigned char c)
+{
+  if (c == control_character)
+    return false;
+  no_break_control_character = c;
+  return true;
 }
 
 hunits environment::get_input_line_position()
@@ -1205,14 +1236,14 @@ void glyph_color_change()
 
 static symbol P_symbol("P");
 
-void font_change()
+static void select_font()
 {
   symbol s = get_name();
   bool is_number = true;
-  if (s.is_null() || s == P_symbol) {
+  if (s.is_null())
     s = P_symbol;
+  if (s == P_symbol)
     is_number = false;
-  }
   else {
     for (const char *p = s.contents(); p != 0 && *p != 0; p++)
       if (!csdigit(*p)) {
@@ -1224,15 +1255,41 @@ void font_change()
   // requested.  We must warn here if a bogus font name is selected.
   if (is_number)
     (void) curenv->set_font(atoi(s.contents()));
-  else
-    if (!curenv->set_font(s))
+  else {
+    if (s == "DESC")
+      error("'%1' is not a valid font name", s.contents());
+    else if (!curenv->set_font(s))
       warning(WARN_FONT, "cannot select font '%1'", s.contents());
+  }
   skip_line();
+}
+
+bool is_family_valid(const char *fam)
+{
+#if 0 // C++11, some day
+  std::vector<const char *> styles{"R", "I", "B", "BI"}; // C++11
+  for (auto style : styles) // C++11
+#else
+  const size_t nstyles = 4;
+  const char *st[nstyles] = { "R", "I", "B", "BI" };
+  std::vector<const char *> styles(st, (st + nstyles));
+  std::vector<const char *>::iterator style;
+  for (style = styles.begin(); style != styles.end(); style++)
+#endif
+    if (!is_font_name(fam, *style))
+      return false;
+  return true;
 }
 
 void family_change()
 {
   symbol s = get_name();
+  if (s != 0 /* nullptr */)
+    if (!is_family_valid(s.contents())) {
+      error("'%1' is not a valid font family", s.contents());
+      skip_line();
+      return;
+    }
   curenv->set_family(s);
   skip_line();
 }
@@ -1315,7 +1372,7 @@ void fill()
 {
   while (!tok.is_newline() && !tok.is_eof())
     tok.next();
-  if (break_flag)
+  if (want_break)
     curenv->do_break();
   curenv->fill = 1;
   tok.next();
@@ -1325,7 +1382,7 @@ void no_fill()
 {
   while (!tok.is_newline() && !tok.is_eof())
     tok.next();
-  if (break_flag)
+  if (want_break)
     curenv->do_break();
   curenv->fill = 0;
   curenv->suppress_next_eol = 1;
@@ -1341,7 +1398,7 @@ void center()
     n = 0;
   while (!tok.is_newline() && !tok.is_eof())
     tok.next();
-  if (break_flag)
+  if (want_break)
     curenv->do_break();
   curenv->right_justify_lines = 0;
   curenv->center_lines = n;
@@ -1358,7 +1415,7 @@ void right_justify()
     n = 0;
   while (!tok.is_newline() && !tok.is_eof())
     tok.next();
-  if (break_flag)
+  if (want_break)
     curenv->do_break();
   curenv->center_lines = 0;
   curenv->right_justify_lines = n;
@@ -1465,7 +1522,7 @@ void indent()
     temp = curenv->prev_indent;
   while (!tok.is_newline() && !tok.is_eof())
     tok.next();
-  if (break_flag)
+  if (want_break)
     curenv->do_break();
   curenv->have_temporary_indent = 0;
   curenv->prev_indent = curenv->indent;
@@ -1482,7 +1539,7 @@ void temporary_indent()
     err = 1;
   while (!tok.is_newline() && !tok.is_eof())
     tok.next();
-  if (break_flag)
+  if (want_break)
     curenv->do_break();
   if (temp < H0) {
     warning(WARN_RANGE, "total indent cannot be negative");
@@ -1534,30 +1591,6 @@ void underline()
   do_underline(0);
 }
 
-void control_char()
-{
-  curenv->control_char = '.';
-  if (has_arg()) {
-    if (tok.ch() == 0)
-      error("bad control character");
-    else
-      curenv->control_char = tok.ch();
-  }
-  skip_line();
-}
-
-void no_break_control_char()
-{
-  curenv->no_break_control_char = '\'';
-  if (has_arg()) {
-    if (tok.ch() == 0)
-      error("bad control character");
-    else
-      curenv->no_break_control_char = tok.ch();
-  }
-  skip_line();
-}
-
 void margin_character()
 {
   while (tok.is_space())
@@ -1607,7 +1640,7 @@ void number_lines()
     curenv->numbering_nodes = nd;
     curenv->line_number_digit_width = env_digit_width(curenv);
     int n;
-    if (!tok.usable_as_delimiter()) {
+    if (!tok.is_usable_as_delimiter()) {
       if (get_integer(&n, next_line_number)) {
 	next_line_number = n;
 	if (next_line_number < 0) {
@@ -1620,7 +1653,7 @@ void number_lines()
       while (!tok.is_space() && !tok.is_newline() && !tok.is_eof())
 	tok.next();
     if (has_arg()) {
-      if (!tok.usable_as_delimiter()) {
+      if (!tok.is_usable_as_delimiter()) {
 	if (get_integer(&n)) {
 	  if (n <= 0) {
 	    warning(WARN_RANGE, "negative or zero line number multiple");
@@ -1633,14 +1666,15 @@ void number_lines()
 	while (!tok.is_space() && !tok.is_newline() && !tok.is_eof())
 	  tok.next();
       if (has_arg()) {
-	if (!tok.usable_as_delimiter()) {
+	if (!tok.is_usable_as_delimiter()) {
 	  if (get_integer(&n))
 	    curenv->number_text_separation = n;
 	}
 	else
 	  while (!tok.is_space() && !tok.is_newline() && !tok.is_eof())
 	    tok.next();
-	if (has_arg() && !tok.usable_as_delimiter() && get_integer(&n))
+	if (has_arg() && !tok.is_usable_as_delimiter()
+	    && get_integer(&n))
 	  curenv->line_number_indent = n;
       }
     }
@@ -2376,7 +2410,7 @@ void environment::construct_new_line_state(node *n)
 
 extern int global_diverted_space;
 
-void environment::do_break(int do_spread)
+void environment::do_break(bool want_adjustment)
 {
   int was_centered = 0;
   if (curdiv == topdiv && topdiv->before_first_page) {
@@ -2391,7 +2425,7 @@ void environment::do_break(int do_spread)
       line = new space_node(H0, get_fill_color(), line);
       space_total++;
     }
-    possibly_break_line(0, do_spread);
+    possibly_break_line(0, want_adjustment);
   }
   while (line != 0 && line->discardable()) {
     width_total -= line->width();
@@ -2435,23 +2469,23 @@ int environment::is_empty()
   return !current_tab && line == 0 && pending_lines == 0;
 }
 
-void do_break_request(int spread)
+void do_break_request(bool want_adjustment)
 {
   while (!tok.is_newline() && !tok.is_eof())
     tok.next();
-  if (break_flag)
-    curenv->do_break(spread);
+  if (want_break)
+    curenv->do_break(want_adjustment);
   tok.next();
 }
 
-void break_request()
+static void break_without_adjustment()
 {
-  do_break_request(0);
+  do_break_request(false);
 }
 
-void break_spread_request()
+static void break_with_adjustment()
 {
-  do_break_request(1);
+  do_break_request(true);
 }
 
 void title()
@@ -3287,8 +3321,9 @@ void environment::print_env()
   errprint("  font number: %1\n", fontno);
   errprint("  previous family: '%1'\n", prev_family->nm.contents());
   errprint("  family: '%1'\n", family->nm.contents());
-  errprint("  space size: %1/36 em\n", space_size);
-  errprint("  sentence space size: %1/36 em\n", sentence_space_size);
+  errprint("  space size: %1/12 of font spacewidth\n", space_size);
+  errprint("  sentence space size: %1/12 of font spacewidth\n",
+	   sentence_space_size);
   errprint("  previous line interrupted: %1\n",
 	   prev_line_interrupted ? "yes" : "no");
   errprint("  fill mode: %1\n", fill ? "on" : "off");
@@ -3421,10 +3456,8 @@ void print_env()
 void init_env_requests()
 {
   init_request("ad", adjust);
-  init_request("br", break_request);
-  init_request("brp", break_spread_request);
-  init_request("c2", no_break_control_char);
-  init_request("cc", control_char);
+  init_request("br", break_without_adjustment);
+  init_request("brp", break_with_adjustment);
   init_request("ce", center);
   init_request("cu", continuous_underline);
   init_request("ev", environment_switch);
@@ -3433,7 +3466,7 @@ void init_env_requests()
   init_request("fc", field_characters);
   init_request("fi", fill);
   init_request("fcolor", fill_color_change);
-  init_request("ft", font_change);
+  init_request("ft", select_font);
   init_request("gcolor", glyph_color_change);
   init_request("hc", hyphen_char);
   init_request("hlm", hyphen_line_max_request);
@@ -3531,7 +3564,7 @@ struct trie_node;
 
 class trie {
   trie_node *tp;
-  virtual void do_match(int len, void *val) = 0;
+  virtual void do_match(int, void *) = 0;
   virtual void do_delete(void *) = 0;
   void delete_trie_node(trie_node *);
 public:
@@ -3539,7 +3572,7 @@ public:
   virtual ~trie();		// virtual to shut up g++
   void insert(const char *, int, void *);
   // find calls do_match for each match it finds
-  void find(const char *pat, int patlen);
+  void find(const char *, int);
   void clear();
 };
 
@@ -3547,14 +3580,14 @@ class hyphen_trie : private trie {
   int *h;
   void do_match(int i, void *v);
   void do_delete(void *v);
-  void insert_pattern(const char *pat, int patlen, int *num);
-  void insert_hyphenation(dictionary *ex, const char *pat, int patlen);
+  void insert_pattern(const char *, int, int *);
+  void insert_hyphenation(dictionary *, const char *, int);
   int hpf_getc(FILE *f);
 public:
   hyphen_trie() {}
   ~hyphen_trie() {}
-  void hyphenate(const char *word, int len, int *hyphens);
-  void read_patterns_file(const char *name, int append, dictionary *ex);
+  void hyphenate(const char *, int, int *);
+  void read_patterns_file(const char *, int, dictionary *);
 };
 
 struct hyphenation_language {
@@ -3568,9 +3601,15 @@ struct hyphenation_language {
 dictionary language_dictionary(5);
 hyphenation_language *current_language = 0;
 
-static void set_hyphenation_language()
+static void select_hyphenation_language()
 {
-  symbol nm = get_name(true /* required */);
+  if (!has_arg()) {
+    warning(WARN_MISSING, "hyphenation language selection request"
+	    " expects argument");
+    skip_line();
+    return;
+  }
+  symbol nm = get_name();
   if (!nm.is_null()) {
     current_language = (hyphenation_language *)language_dictionary.lookup(nm);
     if (!current_language) {
@@ -3584,10 +3623,17 @@ static void set_hyphenation_language()
 const int WORD_MAX = 256;	// we use unsigned char for offsets in
 				// hyphenation exceptions
 
-static void hyphen_word()
+static void add_hyphenation_exceptions()
 {
+  if (!has_arg()) {
+    warning(WARN_MISSING, "hyphenation exception request expects one or"
+	    " more arguments");
+    skip_line();
+    return;
+  }
   if (!current_language) {
-    error("no current hyphenation language");
+    error("cannot add hyphenation exceptions when no hyphenation"
+	  " language is set");
     skip_line();
     return;
   }
@@ -3628,6 +3674,42 @@ static void hyphen_word()
       if (tem)
 	delete[] tem;
     }
+  }
+  skip_line();
+}
+
+static void print_hyphenation_exceptions()
+{
+  dictionary_iterator iter(current_language->exceptions);
+  symbol entry;
+  unsigned char *hypoint;
+  // Pathologically, we could have a hyphenation point after every
+  // character in a word except the last.  The word may have a trailing
+  // space; see `hyphen_trie::read_patterns_file()`.
+  const size_t bufsz = WORD_MAX * 2;
+  char wordbuf[bufsz];
+  while(iter.get(&entry, reinterpret_cast<void **>(&hypoint))) {
+    assert(!entry.is_null());
+    assert(hypoint != 0 /* nullptr */);
+    string word = entry.contents();
+    (void) memset(wordbuf, '\0', bufsz);
+    size_t i = 0, j = 0, len = word.length();
+    bool is_mode_dependent = false;
+    while (i < len) {
+      if ((hypoint != 0 /* nullptr */) && (*hypoint == i)) {
+	wordbuf[j++] = '-';
+	hypoint++;
+      }
+      if (word[i] == ' ') {
+	assert(i == (len - 1));
+	is_mode_dependent = true;
+      }
+      wordbuf[j++] = word[i++];
+    }
+    errprint("%1", wordbuf);
+    if (is_mode_dependent)
+      errprint("\t*");
+    errprint("\n");
   }
   skip_line();
 }
@@ -4088,8 +4170,9 @@ void hyphenate(hyphen_list *h, unsigned flags)
   }
 }
 
-static void do_hyphenation_patterns_file(bool append)
+static void read_hyphenation_patterns_from_file(bool append)
 {
+  // TODO: Read a file name, not a groff identifier.
   symbol name = get_long_name(true /* required */);
   if (!name.is_null()) {
     if (!current_language)
@@ -4102,14 +4185,26 @@ static void do_hyphenation_patterns_file(bool append)
   skip_line();
 }
 
-static void hyphenation_patterns_file()
+static void load_hyphenation_patterns_from_file()
 {
-  do_hyphenation_patterns_file(false /* append */);
+  if (!has_arg()) {
+    warning(WARN_MISSING, "hyphenation pattern load request expects"
+	    " argument");
+    skip_line();
+    return;
+  }
+  read_hyphenation_patterns_from_file(false /* append */);
 }
 
-static void hyphenation_patterns_file_append()
+static void append_hyphenation_patterns_from_file()
 {
-  do_hyphenation_patterns_file(true /* append */);
+  if (!has_arg()) {
+    warning(WARN_MISSING, "hyphenation pattern appendment request"
+	    " expects argument");
+    skip_line();
+    return;
+  }
+  read_hyphenation_patterns_from_file(true /* append */);
 }
 
 class hyphenation_language_reg : public reg {
@@ -4124,10 +4219,11 @@ const char *hyphenation_language_reg::get_string()
 
 void init_hyphen_requests()
 {
-  init_request("hw", hyphen_word);
-  init_request("hla", set_hyphenation_language);
-  init_request("hpf", hyphenation_patterns_file);
-  init_request("hpfa", hyphenation_patterns_file_append);
+  init_request("hw", add_hyphenation_exceptions);
+  init_request("phw", print_hyphenation_exceptions);
+  init_request("hla", select_hyphenation_language);
+  init_request("hpf", load_hyphenation_patterns_from_file);
+  init_request("hpfa", append_hyphenation_patterns_from_file);
   register_dictionary.define(".hla", new hyphenation_language_reg);
 }
 

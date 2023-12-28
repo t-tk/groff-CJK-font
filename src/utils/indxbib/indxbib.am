@@ -36,18 +36,18 @@ install_indxbib: $(indxbib_srcdir)/eign
 	-test -d $(DESTDIR)$(datasubdir) \
 	  || $(mkinstalldirs) $(DESTDIR)$(datasubdir)
 	if test -f /usr/lib/eign; then \
-	  rm -f $(DESTDIR)$(common_words_file); \
-	  ln -s /usr/lib/eign $(DESTDIR)$(common_words_file) 2>/dev/null \
+	  $(RM) $(DESTDIR)$(common_words_file); \
+	  $(LN_S) /usr/lib/eign $(DESTDIR)$(common_words_file) 2>/dev/null \
 	    || ln /usr/lib/eign $(DESTDIR)$(common_words_file) 2>/dev/null \
 	    || cp /usr/lib/eign $(DESTDIR)$(common_words_file); \
 	else \
-	  rm -f $(DESTDIR)$(common_words_file); \
+	  $(RM) $(DESTDIR)$(common_words_file); \
 	  $(INSTALL_DATA) $(indxbib_srcdir)/eign $(DESTDIR)$(common_words_file); \
 	fi
 
 uninstall-local: uninstall_indxbib
 uninstall_indxbib:
-	rm -f $(DESTDIR)$(common_words_file)
+	$(RM) $(DESTDIR)$(common_words_file)
 
 
 # Local Variables:

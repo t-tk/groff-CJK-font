@@ -30,6 +30,10 @@ X command to specify inline escape sequence (how to specify unprintable chars?)
 X command to include bitmap graphics
 */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <assert.h>
 
 #include "driver.h"

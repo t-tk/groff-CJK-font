@@ -70,7 +70,9 @@ $groff = "groff" if (!$groff);
 my $first_pass = "$groff -rRef=1 -z -mm @ARGV";
 my $second_pass = "$groff -mm @ARGV";
 
-my (%cur, $rfilename, $max_height, $imacro, $max_width, @out, @indi);
+my (%cur, $rfilename, $imacro, @out, @indi);
+my $max_height = 0;
+my $max_width = 0;
 open(MACRO, "$first_pass 2>&1 |") || die "run $first_pass:$!";
 while(<MACRO>) {
 	if (m#^\.\\" Rfilename: (\S+)#) {
@@ -101,7 +103,7 @@ while(<MACRO>) {
 		next;
 	}
 	if (m#^\.\\" PIC id (\d+)#) {
-		%cur = ('id', $1);
+		%cur = ('id' => $1);
 		next;
 	}
 	if (m#^\.\\" PIC file (\S+)#) {
@@ -155,8 +157,8 @@ sub print_index {
 }
 
 sub ps_calc {
+	return unless exists($cur{'llx'});
 	my ($f) = @_;
-
 	my $w = abs($cur{'llx'}-$cur{'urx'});
 	my $h = abs($cur{'lly'}-$cur{'ury'});
 	$max_width = $w if $w > $max_width;
@@ -172,14 +174,14 @@ sub ps_calc {
 	push(@out, ".nr pict*w!$id $w\n");
 	push(@out, ".nr pict*h!$id $h\n");
 }
-		
 
 sub psbb {
 	my ($f) = @_;
 
 	unless (open(IN, $f)) {
-		print STDERR "Warning: Postscript file $f:$!";
-		next;
+		print STDERR "$progname: warning: cannot open"
+			. " PostScript file $f: $!\n";
+		return;
 	}
 	while(<IN>) {
 		if (/^%%BoundingBox:\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)/) {
@@ -191,7 +193,6 @@ sub psbb {
 	}
 	close(IN);
 }
-
 
 1;
 # Local Variables:

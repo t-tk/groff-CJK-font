@@ -22,7 +22,9 @@ internet at <http://www.gnu.org/licenses/gpl-2.0.txt>. */
  * font indexes and back
  */
 
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
 
 #include <stdlib.h>
 #include <string.h>

@@ -16,8 +16,6 @@ for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
-extern int debug_state;
-
 #include "troff.h"
 
 #ifdef HAVE_UNISTD_H
@@ -189,7 +187,6 @@ protected:
   int slant;
 public:
   tfont_spec(symbol, int, font *, font_size, int, int);
-  tfont_spec(const tfont_spec &spec) { *this = spec; }
   tfont_spec plain();
   int operator==(const tfont_spec &);
   friend tfont *font_info::get_tfont(font_size fs, int, int, int);
@@ -721,9 +718,7 @@ tfont::tfont(tfont_spec &spec) : tfont_spec(spec)
 /* output_file */
 
 class real_output_file : public output_file {
-#ifndef POPEN_MISSING
   int piped;
-#endif
   int printing;		// decision via optional page list
   int output_on;	// \O[0] or \O[1] escape sequences
   virtual void really_transparent_char(unsigned char) = 0;
@@ -1651,7 +1646,6 @@ void output_file::off()
 real_output_file::real_output_file()
 : printing(0), output_on(1)
 {
-#ifndef POPEN_MISSING
   if (pipe_command) {
     if ((fp = popen(pipe_command, POPEN_WT)) != 0) {
       piped = 1;
@@ -1660,7 +1654,6 @@ real_output_file::real_output_file()
     error("pipe open failed: %1", strerror(errno));
   }
   piped = 0;
-#endif /* not POPEN_MISSING */
   fp = stdout;
 }
 
@@ -1679,7 +1672,6 @@ real_output_file::~real_output_file()
     fp = 0;
     fatal("unable to flush output file: %1", strerror(errno));
   }
-#ifndef POPEN_MISSING
   if (piped) {
     int result = pclose(fp);
     fp = 0;
@@ -1697,7 +1689,6 @@ real_output_file::~real_output_file()
     }
   }
   else
-#endif /* not POPEN MISSING */
   if (fclose(fp) < 0) {
     fp = 0;
     fatal("unable to close output file: %1", strerror(errno));
@@ -5839,6 +5830,7 @@ int word_space_node::is_tag()
 void unbreakable_space_node::tprint(troff_output_file *out)
 {
   out->fill_color(col);
+  out->word_marker();
   if (is_html) {
     // we emit the space width as a negative glyph index
     out->flush_tbuf();
@@ -5945,6 +5937,9 @@ static symbol get_font_translation(symbol nm)
 
 dictionary font_dictionary(50);
 
+// Mount font at position `n` with troff identifier `name` and
+// description file name `external_name`.  If `check_only`, just look up
+// `name` in the existing list of mounted fonts.
 static bool mount_font_no_translate(int n, symbol name,
 				    symbol external_name,
 				    bool check_only = false)
@@ -5997,14 +5992,15 @@ bool mount_font(int n, symbol name, symbol external_name)
   return mount_font_no_translate(n, name, external_name);
 }
 
-int check_font(symbol fam, symbol name)
+// True for abstract styles and resolved font names.
+bool is_font_name(symbol fam, symbol name)
 {
-  if (check_style(name))
+  if (is_abstract_style(name))
     name = concat(fam, name);
   return mount_font_no_translate(0, name, name, true /* check only */);
 }
 
-int check_style(symbol s)
+bool is_abstract_style(symbol s)
 {
   int i = symbol_fontno(s);
   return i < 0 ? 0 : font_table[i]->is_style();
@@ -6028,27 +6024,52 @@ bool mount_style(int n, symbol name)
   return true;
 }
 
-/* global functions */
-
-void font_translate()
+// True for valid (not necessarily used) font mounting positions.
+static bool is_nonnegative_integer(const char *str)
 {
-  symbol from = get_name(true /* required */);
-  if (!from.is_null()) {
-    symbol to = get_name();
-    if (to.is_null() || from == to)
-      font_translation_dictionary.remove(from);
-    else
-      (void)font_translation_dictionary.lookup(from, (void *)to.contents());
+  return strspn(str, "0123456789") == strlen(str);
+}
+
+static void translate_font()
+{
+  if (!(has_arg())) {
+    warning(WARN_MISSING, "one or two font names expected in font"
+	    " translation request");
+    skip_line();
+    return;
   }
+  symbol from = get_name(true /* required */);
+  assert(!from.is_null()); // has_arg()+get_name() should ensure this
+  if (is_nonnegative_integer(from.contents())) {
+    error("cannot translate a font mounting position");
+    skip_line();
+    return;
+  }
+  symbol to = get_name();
+  if ((!to.is_null()) && is_nonnegative_integer(to.contents())) {
+    error("cannot translate to a font mounting position");
+    skip_line();
+    return;
+  }
+  if (to.is_null() || from == to)
+    font_translation_dictionary.remove(from);
+  else
+    (void) font_translation_dictionary.lookup(from,
+					      (void *)to.contents());
   skip_line();
 }
 
-void font_position()
+static void mount_font_at_position()
 {
+  if (!has_arg()) {
+    warning(WARN_MISSING, "font mounting request expects arguments");
+    skip_line();
+    return;
+  }
   int n;
   if (get_integer(&n)) {
     if (n < 0)
-      error("negative font position");
+      error("font mounting position %1 is negative", n);
     else {
       symbol internal_name = get_name(true /* required */);
       if (!internal_name.is_null()) {
@@ -6155,16 +6176,27 @@ void font_family::invalidate_fontno(int n)
   }
 }
 
-void style()
+static void associate_style_with_font_position()
 {
+  if (!has_arg()) {
+    warning(WARN_MISSING, "abstract style configuration request expects"
+	    " arguments");
+    skip_line();
+    return;
+  }
   int n;
   if (get_integer(&n)) {
     if (n < 0)
-      error("negative font position");
+      error("font mounting position %1 is negative", n);
     else {
-      symbol internal_name = get_name(true /* required */);
-      if (!internal_name.is_null())
-	(void) mount_style(n, internal_name);
+      if (!has_arg())
+	warning(WARN_MISSING, "abstract style configuration request"
+		" expects a second argument");
+      else {
+	symbol internal_name = get_name(true /* required */);
+	if (!internal_name.is_null())
+	  (void) mount_style(n, internal_name);
+      }
     }
   }
   skip_line();
@@ -6188,7 +6220,7 @@ static bool has_font(font_lookup_info *finfo)
 {
   int n;
   tok.skip();
-  if (tok.usable_as_delimiter()) {
+  if (tok.is_usable_as_delimiter()) {
     symbol s = get_name(true /* required */);
     finfo->requested_name = (char *)s.contents();
     if (!s.is_null()) {
@@ -6211,8 +6243,14 @@ static bool has_font(font_lookup_info *finfo)
 
 static int underline_fontno = 2;
 
-void underline_font()
+static void select_underline_font()
 {
+  if (!has_arg()) {
+    warning(WARN_MISSING, "underline font selection request expects an"
+	    " argument");
+    skip_line();
+    return;
+  }
   font_lookup_info finfo;
   if (!has_font(&finfo))
     font_lookup_error(finfo, "to make it the underline font");
@@ -6226,8 +6264,14 @@ int get_underline_fontno()
   return underline_fontno;
 }
 
-void define_font_special_character()
+static void define_font_specific_character()
 {
+  if (!has_arg()) {
+    warning(WARN_MISSING, "font-specific fallback character definition"
+	    " request expects arguments");
+    skip_line();
+    return;
+  }
   font_lookup_info finfo;
   if (!has_font(&finfo)) {
     font_lookup_error(finfo, "to define font-specific fallback glyph");
@@ -6242,8 +6286,14 @@ void define_font_special_character()
   }
 }
 
-void remove_font_special_character()
+static void remove_font_specific_character()
 {
+  if (!has_arg()) {
+    warning(WARN_MISSING, "font-specific fallback character removal"
+	    " request expects arguments");
+    skip_line();
+    return;
+  }
   font_lookup_info finfo;
   if (!has_font(&finfo))
     font_lookup_error(finfo, "to remove font-specific fallback glyph");
@@ -6293,8 +6343,14 @@ static void read_special_fonts(special_font_list **sp)
   }
 }
 
-void font_special_request()
+static void set_font_specific_special_fonts()
 {
+  if (!has_arg()) {
+    warning(WARN_MISSING, "font-specific special font configuration"
+	    " request expects at least one argument");
+    skip_line();
+    return;
+  }
   font_lookup_info finfo;
   if (!has_font(&finfo))
     font_lookup_error(finfo, "to mark other fonts as special"
@@ -6304,33 +6360,70 @@ void font_special_request()
   skip_line();
 }
 
-void special_request()
+static void set_special_fonts()
 {
   read_special_fonts(&global_special_fonts);
   skip_line();
 }
 
-void font_zoom_request()
+static void zoom_font()
 {
-  font_lookup_info finfo;
-  if (!has_font(&finfo))
-    font_lookup_error(finfo, "to set a zoom factor for it");
-  else {
-    int n = finfo.position;
-    if (font_table[n]->is_style())
-      warning(WARN_FONT, "can't set zoom factor for a style");
-    else {
-      int zoom;
-      if (has_arg() && get_integer(&zoom)) {
-	if (zoom < 0)
-	  warning(WARN_FONT, "can't use negative zoom factor");
-	else
-	  font_table[n]->set_zoom(zoom);
-      }
-      else
-        font_table[n]->set_zoom(0);
-    }
+  if (!(has_arg())) {
+    warning(WARN_MISSING, "font name expected in zoom factor setting"
+	    " request");
+    skip_line();
+    return;
   }
+  symbol font_name = get_name();
+  // has_arg()+get_name() should ensure the following
+  assert(font_name != 0 /* nullptr */);
+  if (is_nonnegative_integer(font_name.contents())) {
+    warning(WARN_FONT, "cannot set zoom factor of a font mounting"
+	    " position");
+    skip_line();
+    return;
+  }
+  if (!(has_arg())) {
+    warning(WARN_MISSING, "zoom factor expected in zoom factor setting"
+	    " request");
+    skip_line();
+    return;
+  }
+  int fpos = next_available_font_position();
+  if (!(mount_font(fpos, font_name))) {
+    error("cannot mount font '%1' to set a zoom factor for it",
+	  font_name.contents());
+    skip_line();
+    return;
+  }
+#if 0
+  // This would be a good diagnostic to have, but mount_font() is too
+  // formally complex to make it easy.  Instead it will fail in the
+  // above test on a font named "R", for instance, when that is
+  // literally true but might not help users who don't understand that
+  // "R", "I", "B", and "BI" are (by default) abstract styles, not fonts
+  // in the GNU troff sense.  It is a shame that a lot of our validation
+  // functions are willing only to handle arguments that they eat from
+  // the input stream (i.e., you can't pass them information you
+  // obtained elsewhere).  That design also forces us to validate
+  // request arguments in the order they appear in the input, and seems
+  // unnecessarily inflexible to me.  --GBR
+  if (font_table[fpos]->is_style()) {
+    warning(WARN_FONT, "ignoring request to set font zoom factor on an"
+	    " abstract style");
+    skip_line();
+    return;
+  }
+#endif
+  int zoom = 0;
+  get_integer(&zoom);
+  if (zoom < 0) {
+    warning(WARN_RANGE, "ignoring negative font zoom factor '%1'",
+	    zoom);
+    skip_line();
+    return;
+  }
+  font_table[fpos]->set_zoom(zoom);
   skip_line();
 }
 
@@ -6421,21 +6514,28 @@ hunits env_narrow_space_width(environment *env)
     return font_table[fn]->get_narrow_space_width(fs);
 }
 
-void bold_font()
+// XXX: We can only conditionally (un)embolden a font specified by name,
+// not position.  Does ".bd 1 2" mean "embolden font position 1 by 2
+// units" (really one unit), or "stop conditionally emboldening font 2
+// when font 1 is selected"?
+
+static void embolden_font()
 {
+  if (in_nroff_mode) {
+    skip_line();
+    return;
+  }
   font_lookup_info finfo;
-  if (!has_font(&finfo))
+  if (!(has_arg()))
+    warning(WARN_MISSING, "font name or position expected in"
+	    " emboldening request");
+  else if (!has_font(&finfo))
     font_lookup_error(finfo, "for emboldening");
   else {
     int n = finfo.position;
     if (has_arg()) {
-      // This is a bit non-orthogonal, but faithful to CSTR #54.  We can
-      // only conditionally embolden a font specified by name, not
-      // position, so ".bd S B 4" works but ".bd 5 3 4" does not.  The
-      // latter bolds the font at position 5 unconditionally, and
-      // ignores the third argument.
-      if (tok.usable_as_delimiter()) {
-      font_lookup_info finfo2;
+      if (tok.is_usable_as_delimiter()) {
+	font_lookup_info finfo2;
 	if (!has_font(&finfo2))
 	  font_lookup_error(finfo2, "for conditional emboldening");
 	else {
@@ -6448,9 +6548,7 @@ void bold_font()
 	}
       }
       else {
-	font_lookup_info finfo2;
-	  if (!has_font(&finfo2))
-	    font_lookup_error(finfo2, "for conditional emboldening");
+	// A numeric second argument must be an emboldening amount.
 	units offset;
 	if (get_number(&offset, 'u') && offset >= 1)
 	  font_table[n]->set_bold(hunits(offset - 1));
@@ -6516,8 +6614,13 @@ hunits track_kerning_function::compute(int size)
     return H0;
 }
 
-void track_kern()
+static void configure_track_kerning()
 {
+  if (!(has_arg())) {
+    warning(WARN_MISSING, "track kerning request expects arguments");
+    skip_line();
+    return;
+  }
   font_lookup_info finfo;
   if (!has_font(&finfo))
     font_lookup_error(finfo, "for track kerning");
@@ -6540,8 +6643,13 @@ void track_kern()
   skip_line();
 }
 
-void constant_space()
+static void constantly_space_font()
 {
+  if (!(has_arg())) {
+    warning(WARN_MISSING, "constant spacing request expects arguments");
+    skip_line();
+    return;
+  }
   font_lookup_info finfo;
   if (!has_font(&finfo))
     font_lookup_error(finfo, "for constant spacing");
@@ -6562,7 +6670,7 @@ void constant_space()
   skip_line();
 }
 
-void ligature()
+static void set_ligature_mode()
 {
   int lig;
   if (has_arg() && get_integer(&lig) && lig >= 0 && lig <= 2)
@@ -6572,7 +6680,7 @@ void ligature()
   skip_line();
 }
 
-void kern_request()
+static void set_kerning_mode()
 {
   int k;
   if (has_arg() && get_integer(&k))
@@ -6582,7 +6690,7 @@ void kern_request()
   skip_line();
 }
 
-void set_soft_hyphen_char()
+static void set_soft_hyphen_character()
 {
   soft_hyphen_char = get_optional_char();
   if (!soft_hyphen_char)
@@ -6594,7 +6702,7 @@ void init_output()
 {
   if (suppress_output_flag)
     the_output = new suppress_output_file;
-  else if (ascii_output_flag)
+  else if (want_abstract_output)
     the_output = new ascii_output_file;
   else
     the_output = new troff_output_file;
@@ -6625,26 +6733,27 @@ const char *printing_reg::get_string()
 
 void init_node_requests()
 {
-  init_request("bd", bold_font);
-  init_request("cs", constant_space);
-  init_request("fp", font_position);
-  init_request("fschar", define_font_special_character);
-  init_request("fspecial", font_special_request);
-  init_request("fzoom", font_zoom_request);
-  init_request("ftr", font_translate);
-  init_request("kern", kern_request);
-  init_request("lg", ligature);
-  init_request("rfschar", remove_font_special_character);
-  init_request("shc", set_soft_hyphen_char);
-  init_request("special", special_request);
-  init_request("sty", style);
-  init_request("tkf", track_kern);
-  init_request("uf", underline_font);
-  register_dictionary.define(".fp", new next_available_font_position_reg);
+  init_request("bd", embolden_font);
+  init_request("cs", constantly_space_font);
+  init_request("fp", mount_font_at_position);
+  init_request("fschar", define_font_specific_character);
+  init_request("fspecial", set_font_specific_special_fonts);
+  init_request("fzoom", zoom_font);
+  init_request("ftr", translate_font);
+  init_request("kern", set_kerning_mode);
+  init_request("lg", set_ligature_mode);
+  init_request("rfschar", remove_font_specific_character);
+  init_request("shc", set_soft_hyphen_character);
+  init_request("special", set_special_fonts);
+  init_request("sty", associate_style_with_font_position);
+  init_request("tkf", configure_track_kerning);
+  init_request("uf", select_underline_font);
+  register_dictionary.define(".fp",
+			     new next_available_font_position_reg);
   register_dictionary.define(".kern",
-			       new readonly_register(&global_kern_mode));
+			     new readonly_register(&global_kern_mode));
   register_dictionary.define(".lg",
-			       new readonly_register(&global_ligature_mode));
+			     new readonly_register(&global_ligature_mode));
   register_dictionary.define(".P", new printing_reg);
   soft_hyphen_char = get_charinfo(HYPHEN_SYMBOL);
 }

@@ -26,7 +26,7 @@ class symbol {
   static int table_used;
   static int table_size;
   static char *block;
-  static int block_size;
+  static size_t block_size;
   const char *s;
 public:
   symbol(const char *p, int how = 0);

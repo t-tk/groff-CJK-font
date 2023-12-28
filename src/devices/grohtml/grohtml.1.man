@@ -84,7 +84,7 @@ output driver for HTML
 .B \-v
 .
 .SY pre\-grohtml
-.B \-\-version
+.B \%\-\-version
 .YS
 .
 .
@@ -113,7 +113,7 @@ output driver for HTML
 .B \-v
 .
 .SY post\-grohtml
-.B \-\-version
+.B \%\-\-version
 .YS
 .
 .
@@ -161,7 +161,7 @@ is
 .I \%grohtml
 reads the standard input stream.
 .
-Output is written to the standard output stream.
+It writes to the standard output stream.
 .
 .
 .P
@@ -190,7 +190,7 @@ to HTML.
 .
 .P
 .I \%grohtml
-writes output encoded in \%UTF-8 and has built-in HTML entities for all
+writes \%UTF-8-\:encoded output and has built-in HTML entities for all
 non-composite Unicode characters.
 .
 In spite of this,
@@ -198,8 +198,8 @@ In spite of this,
 may issue warnings about unknown special characters if they can't be
 found during the first pass.
 .
-Such warnings can be safely ignored unless the special characters
-appear inside a table or equation.
+You can ignore these warnings unless the special characters appear
+inside a table or equation.
 .
 .
 .\" ====================================================================
@@ -319,7 +319,7 @@ displays a usage message,
 while
 .B \-v
 and
-.B \-\-version
+.B \%\-\-version
 show version information;
 all exit afterward.
 .
@@ -616,18 +616,20 @@ A timestamp
 to use as the output creation timestamp in place of the current time.
 .
 The time is converted to human-readable form using
-.MR ctime 3
+.MR gmtime 3
+and
+.MR asctime 3 ,
 and recorded in an HTML comment.
 .
 .
 .TP
 .I TZ
-The time zone to use when converting the current time
-(or value of
-.IR SOURCE_DATE_EPOCH )
-to human-readable form;
+The time zone to use when converting the current time to human-readable form;
 see
 .MR tzset 3 .
+If
+.I SOURCE_DATE_EPOCH
+is used, it is always converted to human-readable form using UTC.
 .
 .
 .\" ====================================================================

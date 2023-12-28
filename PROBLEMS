@@ -37,10 +37,6 @@ General Problems
 
 Some portability issues are known to affect groff's gdiffmk utility.
 
-- A defect in GNU diffutils 3.9 (January 2023) causes gdiffmk to
-  malfunction and its automated test to fail.  See
-  <https://debbugs.gnu.org/db/61/61193.html>.
-
 - gdiffmk does not work with BusyBox diff (which does not implement GNU
   diff's "-D" option).
 
@@ -330,13 +326,10 @@ and recompile groff:
 
 [groff 1.06]
 
-* groff can't handle my troff document.  It works fine with AT&T
-  troff.
+* groff can't handle my troff document.  It works fine with AT&T troff.
 
-Read the section on incompatibilities in groff_diff(7).  Try using the
--C option.  Alternatively there's the sed script `tmac/fixmacros.sed'
-which attempts to edit a file of macros so that it can be used with
-groff without the -C flag.
+Read section "Implementation differences" in groff_diff(7) (or that of
+groff's Texinfo manual), and try groff's '-C' command-line option.
 
 ----------------------------------------------------------------------
 
@@ -424,20 +417,20 @@ arguments.  The use of compatibility mode is strongly discouraged.
 
 ----------------------------------------------------------------------
 
-* gtroff gives warnings about lines like
+* GNU troff gives warnings about lines like
   .ev	\" a comment
-  (with a tab after the .ev).
+  (with a tab after ".ev").
 
-A tab character cannot be used as a substitute for a space character
-(except in one case: between a control character at the beginning of a
-line and the name of a macro or request).  For example, in Unix troff
+A tab character cannot be used as a substitute for a space character,
+except immediately after a control character.  For example, in AT&T
+troff,
 
-  .ps	\" restore the previous point size
+  .ps	\" restore the previous type size
 
-(with a tab after the .ps) does NOT restore the previous point-size;
-instead it is silently ignored.  Since this is very likely to be an
-error, gtroff can give a warning about it.  If you want to align
-comments, you can do it like this:
+(with a tab after ".ps") does NOT restore the previous type size;
+instead it is silently ignored.  Since this is very likely unintended,
+GNU troff diagnoses it as an error.  If you want to align comments, you
+can do it like this.
 
   .ev\"				\" a comment
 
@@ -475,7 +468,7 @@ The solution is to fix the manual page.
 
 It might be better still to avoid such computations in macro arguments,
 however; programs that are not *roff formatters that attempt to
-interpret man pages can lack the ability to interpret numeric
+interpret man pages can lack the ability to evaluate numeric
 expressions.  See section "Portability" of groff_man_style(7).
 
 
@@ -568,22 +561,49 @@ available in the devps directory.
 
 ----------------------------------------------------------------------
 
-* I've configured groff for A4 paper, but gtroff still seems to think
-  that the length of a page (as returned by `\n(.p') is 11 inches.
+* I've configured groff for A4 paper, but GNU troff still seems to think
+  that the length of a page (interpolated by `\n(.p`) is 11 inches.
 
-This is intentional.  The PAGE option during configuration is used
-only by grops.  For compatibility with AT&T troff, the default page
-length in GNU troff is always 11 inches.  The page length can be changed
-with the `pl' request.
+The "configure" script recognizes a PAGE parameter.  Set it like this.
 
-A convenient way to set paper dimensions is to use the -dpaper option
-of groff, together with proper -P options for the postprocessor
-(overriding the default).  For example, use the following command for
-PostScript output on A4 paper in landscape orientation.
+  $ ./configure PAGE=A4
 
-  groff -Tps -dpaper=a4l -P-pa4 -P-l -ms foo.ms > foo.ps
+If the parameter is not set, the script undertakes a variety of efforts
+to figure out the correct default paper format, such as checking an
+"/etc/papersize" file.  If it determines the paper format through such
+inference, the source of information is reported in the Autoconf
+"checking default paper format" message.
 
-See groff(1) and groff_tmac(5) for more information.
+This paper format populates the device description files for the output
+drivers grodvi(1), groplbp(1), grolj4(1), gropdf(1), and grops(1) with a
+"papersize" directive.  (See groff_font(5).)  If this directive is not
+present, the formatter and output drivers assume a page length of 11
+inches for compatibility with AT&T troff.
+
+In the formatter, the `pl` request changes the page length, but macro
+packages often do not support alteration of the paper format within a
+document.  One might, for instance, want to switch between portrait and
+landscape orientations.  Macro packages lack a consistent approach to
+configuration of parameters dependent on the paper format; some, like
+"ms", benefit from a preamble in the document prior to the first macro
+call, while others, like "mm", instead require the specification of
+registers on the command line to configure page dimensions.
+
+Output drivers for typesetters also recognize command-line options `-p`
+to override the default page dimensions and `-l` to use landscape
+orientation.  The output driver's man page, such as grops(1), may be
+helpful.
+
+groff's "-d paper" command-line option is a convenient means of setting
+the paper format; see groff_tmac(5).  Combine it with appropriate `-P`
+options for the output driver, overriding its defaults.
+
+The following command formats for PostScript on A4 paper in landscape
+orientation.
+
+  $ groff -T ps -d paper=a4l -P -pa4 -P -l -ms foo.ms > foo.ps
+
+See groff(1), section "Paper format".
 
 ----------------------------------------------------------------------
 
@@ -744,8 +764,7 @@ To get PostScript output from `man -t', you also need to create a
 * I'm having problems formatting HP-UX 9.0 man pages with groff -man.
 
 Copy HP's tmac.an into /usr/local/share/groff/site-tmac/an.tmac, and
-either put `.cp 1' at the beginning or filter it (and any files it
-.so's) through tmac/fixmacros.sed.
+put `.cp 1' at the beginning.
 
 ----------------------------------------------------------------------
 
@@ -1018,7 +1037,7 @@ into
 
 (put .man at begin of the list).
 
-The bug is reported to the maintainer of the make(1) tool of those
+The bug has been reported to the maintainer of the make(1) tool of those
 systems.
 
 ----------------------------------------------------------------------

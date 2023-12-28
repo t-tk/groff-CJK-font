@@ -95,3 +95,9 @@ int putenv(const char *string)
 
   return 0;
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

@@ -798,6 +798,11 @@ endif
 # Other files that should be present in the distribution tarball.
 EXTRA_DIST += \
   BUG-REPORT \
+  ChangeLog.old \
+  ChangeLog.111 \
+  ChangeLog.112 \
+  ChangeLog.113 \
+  ChangeLog.114 \
   ChangeLog.115 \
   ChangeLog.116 \
   ChangeLog.117 \

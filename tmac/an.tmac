@@ -170,7 +170,7 @@
 .
 .de an-reset-margin-and-inset-level
 .  nr an-inset-level 1
-.  nr an-margin \\n[IN]
+.  nr an-margin \\n[BP]
 .  nr an-saved-margin1 \\n[IN]
 .  nr an-prevailing-indent \\n[IN]
 .  nr an-saved-prevailing-indent1 \\n[IN]
@@ -262,7 +262,7 @@
 .  \}
 .
 .  \" The previous document rendered in a batch may have been in a
-.  \" different language.  If this one is in English, (re-)init strings.
+.  \" different language.
 .  if '\\*[locale]'english' .an*localize-strings
 .
 .  ps \\n[PS]u
@@ -279,7 +279,6 @@
 .  an-reset-paragraph-spacing
 .  an-reset-margin-and-inset-level
 .
-.  nr an-tag-separation 1n
 .  nr an-need-no-space-mode 0
 .  nr an-need-break 0
 .  nr an-is-in-diversion 0
@@ -355,7 +354,7 @@
 .  if !\\n[cR] \{\
 .    wh 0 an-header
 .    ie r FT .nr an*footer-location \\n[FT]
-.    el      .nr an*footer-location (-.5i)
+.    el      .nr an*footer-location (-.5i - 1v)
 .    wh \\n[an*footer-location]u an-footer
 .    wh (\\n[an*footer-location]u - .5i) an-break-body-text
 .    rr an*footer-location
@@ -418,7 +417,7 @@
 .if d PT .ig
 .de1 PT
 .  ie \\n[cR] .pl +1v
-.  el         .sp .5i
+.  el         .sp (.5i - .5m)
 .  if !\\n[an*was-TH-bookmark-emitted] \{\
 .    an*bookmark 1 \E*[an*page-ref-string]
 .    nr an*was-TH-bookmark-emitted 1
@@ -428,7 +427,7 @@
 .    pl +1v
 .    sp 1v
 .  \}
-.  el .sp |1i
+.  el .sp |(1i - 1m)
 ..
 .
 .\" Write the page footer; can be redefined by man.local.
@@ -633,7 +632,8 @@ contains unsupported escape sequence
 .  ne (2v + 1u)
 .  \" Does the tag fit within the paragraph indentation?
 .  nr an-tag-fits \
-     (\\n[dl] + \\n[an-tag-separation] <= \\n[an-prevailing-indent])
+     (\\n[dl] + (\\n[TS]*\\n[an*enforce-tag-separation]) \
+        <= \\n[an-prevailing-indent])
 .  if \\n[an-tag-fits] .DEVTAG-COL 1
 .  an-div
 .  if \\n[an-tag-fits] .sp -1v
@@ -681,7 +681,7 @@ contains unsupported escape sequence
 .  an-break-paragraph
 .  an-reset-margin-and-inset-level
 .  fi
-.  in \\n[an-margin]u
+.  in \\n[BP]u
 .  ti 0
 .  nr an-devtag-needs-end-of-heading 1
 .  DEVTAG-SH 1
@@ -708,7 +708,7 @@ contains unsupported escape sequence
 .  an-break-paragraph
 .  an-reset-margin-and-inset-level
 .  fi
-.  in \\n[IN]u
+.  in \\n[BP]u
 .  ti \\n[SN]u
 .  nr an-devtag-needs-end-of-heading 1
 .  DEVTAG-SH 2
@@ -751,9 +751,24 @@ contains unsupported escape sequence
 .  if \\n[.$] \&\\$*
 ..
 .
-.\" Set arguments (or next input line producing written or drawn output
-.\" if none) in bold style at smaller type size.
+.\" Deprecated: Set arguments (or next input line producing written or
+.\" drawn output if none) in bold style at smaller type size.
+.\"
+.\" This is a SunOS 4.0 extension.
+.\"
+.\" Instead of
+.\"   .SB whatever
+.\" say
+.\"   .SM
+.\"   .B whatever
+.\" or
+.\"   .B
+.\"   .SM whatever
+.\" to portably get an identical effect.
+.\"
+.\" .SB [text]
 .de1 SB
+.  nop \\*[an-deprecation-warn]\\
 .  it 1 an-input-trap
 .  ps -1
 .  ft B
@@ -790,6 +805,7 @@ contains unsupported escape sequence
 .\" Set an indented paragraph.
 .\" .IP [marker[ indentation-amount]]
 .de1 IP
+.  nr an*enforce-tag-separation 0
 .  an-break-paragraph
 .  ie !\\n[.$] \{\
 .    ne (1v + 1u)
@@ -800,6 +816,7 @@ contains unsupported escape sequence
 .    el               .TP
 .    nop \&\\$1
 .  \}
+.  nr an*enforce-tag-separation 1
 ..
 .
 .\" Set a paragraph with a hanging indentation.
@@ -990,6 +1007,11 @@ contains unsupported escape sequence
 .
 .\" Deprecated: Style an option with an argument (mandatory if
 .\" specified) for a command synopsis.
+.\"
+.\" This is a Documenter's Workbench troff extension.  It is not
+.\" flexible enough to handle GNU-style options like
+.\" `--input=file-name`.  Use font alternation macros instead.
+.\"
 .\" .OP flag [option-parameter]
 .de1 OP
 .  nop \\*[an-deprecation-warn]\\
@@ -1013,16 +1035,29 @@ contains unsupported escape sequence
 .  nr an*saved-paragraph-distance \\n[PD]
 .  nr PD 1v
 .  nf
+.  nr an*unmap-fonts 0
 .  \" If using the DVI output device, we have no constant-width fonts of
 .  \" bold weight and, relatedly, no constant-width family (because that
 .  \" requires all four styles).  Remap the bold styles to normal ones.
-.  ie '\*[.T]'dvi' \{\
+.  \"
+.  \" Use the "switch/case" style of nested `ie`/`el` requests.
+.        ie '\*[.T]'dvi' \{\
 .    ftr R CW
 .    ftr B CW
 .    ftr I CWI
 .    ftr BI CWI
+.    nr an*unmap-fonts 1
 .  \}
-.  el .fam \\*[an*example-family]
+.  \" The LBP output device lacks a Courier bold-italic face.
+.  el \{.ie '\*[.T]'lbp' \{\
+.    ftr R CR
+.    ftr B CB
+.    ftr I CI
+.    ftr BI CI
+.    nr an*unmap-fonts 1
+.  \}
+.  el                    .fam \\*[an*example-family]
+.  \}
 .  ft R
 .  nr an*is-in-example 1
 ..
@@ -1035,11 +1070,12 @@ contains unsupported escape sequence
 .    return
 .  \}
 .  \" Undo the remappings from `EX`.
-.  ie '\*[.T]'dvi' \{\
+.  if \\n[an*unmap-fonts] \{\
 .    ftr R
 .    ftr B
 .    ftr I
 .    ftr BI
+.    rr an*unmap-fonts
 .  \}
 .  fam \\*[an*saved-family]
 .  ft \\n[an*saved-font]
@@ -1091,6 +1127,9 @@ contains unsupported escape sequence
 .    ie \\n[dn] \{\
 .      if \\n[an*is-output-html] \
 .        nop \X^html:<a href="\\*[an*prefix]\\*[an*hyperlink]">^\c
+.      if \\n[an*is-output-pdf] \
+.        pdfhref W -D \\*[an*prefix]\\*[an*hyperlink] -- \
+\\*[an*hyperlink]\c
 .      if \\n[an*is-output-terminal] \
 .        nop \X^tty: link \\*[an*prefix]\\*[an*hyperlink]^\c
 .      \" Strip off the final newline of the diversion and emit it.
@@ -1108,6 +1147,9 @@ contains unsupported escape sequence
 .      if \\n[an*is-output-html] \
 .        nop \X^html:<a href="\\*[an*prefix]\\*[an*hyperlink]">\
 \\*[an*hyperlink]</a>^\c
+.      if \\n[an*is-output-pdf] \
+.        pdfhref W -D \\*[an*prefix]\\*[an*hyperlink] -- \
+\\*[an*hyperlink]\c
 .      if \\n[an*is-output-terminal] \
 .        nop \X^tty: link \\*[an*prefix]\\*[an*hyperlink]^\
 \\*[an*hyperlink]\X^tty: link^\c
@@ -1273,6 +1315,8 @@ contains unsupported escape sequence
 .nr an-devtag-needs-end-of-heading 0
 .nr an-devtag-needs-second-column 0
 .
+.nr an*enforce-tag-separation 1
+.
 .\" Track whether the strings that set header and footer text need to be
 .\" reconfigured.  This happens when batch-rendering and starting a new
 .\" page.
@@ -1290,7 +1334,6 @@ contains unsupported escape sequence
 .
 .nr an*can-hyperlink 0
 .if (  \n[an*is-output-html] \
-     : \n[an*is-output-pdf] \
      : \n[an*is-output-terminal]) \
 .  nr an*can-hyperlink 1
 .
@@ -1323,6 +1366,10 @@ contains unsupported escape sequence
 .  if !r PDFOUTLINE.FOLDLEVEL .nr PDFOUTLINE.FOLDLEVEL 1
 .  if !r PDFHREF.VIEW.LEADING .nr PDFHREF.VIEW.LEADING 10p
 .\}
+.
+.\" base paragraph indentation
+.if !r BP \
+.  nr BP 5n
 .
 .\" continuous rendering (one long page)
 .if !r cR \{\
@@ -1479,6 +1526,10 @@ contains unsupported escape sequence
 .  \}
 .\}
 .
+.\" page offset
+.if r PO \
+.  po \n[PO]u
+.
 .\" type size
 .if !r S \{\
 .  nr S 10
@@ -1487,6 +1538,10 @@ contains unsupported escape sequence
 .  if '\*[.T]'X100-12' \
 .    nr S 12
 .\}
+.
+.\" required paragraph tag separation
+.if !r TS \
+.  nr TS 2n
 .
 .\" subsection indentation
 .if !r SN \

@@ -1,3 +1,80 @@
+2023-08-31  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	Rename test scripts for consistency.
+
+	* tests/LT_SP_AU_without_AT_works.sh:
+	* tests/LT_SP_multi-word_LO_SJ_works.sh:
+	* tests/MT_5_includes_AT_in_SG.sh:
+	* tests/ms_cover_sheet_robust_to_missing_AF.sh: Rename these...
+	* tests/LT-SP-AU-without-AT-works.sh:
+	* tests/LT-SP-multi-word-LO-SJ-works.sh:
+	* tests/MT-5-includes-AT-in-SG.sh:
+	* tests/ms-cover-sheet-robust-to-missing-AF.sh: ...to these.
+
+	* mm.am (mm_TESTS): Reflect renames.
+
+2023-08-24  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* m.tmac (Qrf): Define string contents using `\E` instead of
+	`\\` for better robustness.  See our Texinfo manual,
+	node/section "Copy mode".
+
+2023-08-24  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* mmroff.pl: Fix code style nits; resolve Perl warnings.
+	Initialize scalars `max_height` and `max_width` before using
+	them.  Add to `cur` hash instead of reinitializing it when
+	reading "PIC id" comment from input.
+	(ps_calc): Return early if bounding box keys in `cur` hash not
+	populated.
+	(psbb): Use `return` instead of `next` to exit early from
+	non-loop.  Improve diagnostic message: identify who is speaking,
+	what operation failed, and end with newline.
+
+	Fixes <https://savannah.gnu.org/bugs/?64312>.
+
+2023-08-23  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	Validate reference system state and user input.
+
+	* m.tmac (qrf*validate-identifier): New macro tests argument for
+	validity as roff identifier, since user input is applied to this
+	purpose.
+	(INITR): Throw error if mandatory argument omitted; keeps us
+	from creating a (likely unwanted) dotfile, ".qrf".
+	(SETR, GETST, GETHN, GETPN, GETR): Throw error if reference
+	system macros used without initialization.
+	(SETR, GETST, GETHN, GETPN): Validate arguments to be used as
+	string identifiers.
+
+2023-08-19  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* m.tmac: Flush displays at end of input even if they cause page
+	breaks.  Inspection of source code suggests that the problem
+	dates back to the introduction of the package in groff 1.04,
+	1991-11-17.  Our mm stumbled into a pitfall of AT&T
+	compatibility.  Our Texinfo manual (which did not exist yet in
+	1991) says: "For historical reasons (compatibility with AT&T
+	'troff'), the end-of-input macro exits as soon as it causes a
+	page break if no partially collected line remains. ..."
+
+	Fixes <https://savannah.gnu.org/bugs/?64336>.
+
+2023-08-19  G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	Regression-test Savannah #64336.
+
+	* tests/flush-long-displays-at-end-of-input.sh: Do it.
+	* mm.am (mm_TESTS): Run test.
+
+2023-08-16 G. Branden Robinson <g.branden.robinson@gmail.com>
+
+	* groff_mm.7.man: Document difference from DWB in paragraph
+	indentation for semi-blocked letter style.  Correct
+	mischaracterization of it in `LT` macro descriptions.
+
+	Fixes <https://savannah.gnu.org/bugs/?64315>.
+
 2023-07-04 G. Branden Robinson <g.branden.robinson@gmail.com>
 
 	* m.tmac: Stop suppressing warnings if Boolean register `Ref` is
@@ -60,7 +137,7 @@
 
 	* m.tmac (IND): Use `hd@mark-trimmed` instead of `hd*mark` in
 	index entries, just as is done with references; we don't want
-	trailing spaces in it.
+	trailing spaces in them.
 
 2023-05-18  G. Branden Robinson <g.branden.robinson@gmail.com>
 
@@ -122,7 +199,7 @@
 
 2023-02-17  G. Branden Robinson <g.branden.robinson@gmail.com>
 
-	[mm]: Add `--help` option support to mmroff.
+	Add `--help` option support to mmroff.
 
 	* mmroff.pl: Recognize `--help` option.
 	* mmroff.1.man (Synopsis, Options): Document.
@@ -423,7 +500,7 @@
 
 2022-10-09  G. Branden Robinson <g.branden.robinson@gmail.com>
 
-	[mm]: Add `--version` option support to mmroff.
+	Add `--version` option support to mmroff.
 
 	* mm.am (mmroff): Replace `@VERSION@` token in script.
 	* mmroff.pl: Recognize `--version` option.
@@ -444,7 +521,7 @@
 
 2022-10-09  G. Branden Robinson <g.branden.robinson@gmail.com>
 
-	[mm]: Refactor generation of "mmroff" script.
+	Refactor generation of "mmroff" script.
 
 	* mmroff.pl: Replace absolute filespec with `@PERL@` replacement
 	token.  This is documentary; the filespec was getting replaced
@@ -736,9 +813,7 @@
 
 2021-05-30  G. Branden Robinson <g.branden.robinson@gmail.com>
 
-	[mm]: Cease warning level manipulation.
-
-	Stop mm macro package from manipulating warnings.
+	Cease warning level manipulation.
 
 	* m.tmac: Remove code that attempted to enable all warnings if
 	none were given on the command line.  It did this by simply
@@ -1774,13 +1849,14 @@ Sun Jan 1 00:00:00 1991 Joergen Haegg (jh at efd.lth.se)
 
 ________________________________________________________________________
 
-Copyright 1991-2020 Free Software Foundation, Inc.
+Copyright 1991-2023 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright
 notice and this notice are preserved.
 
 Local Variables:
+coding: latin-1
 fill-column: 72
 mode: change-log
 version-control: never

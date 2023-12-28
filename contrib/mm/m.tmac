@@ -298,7 +298,7 @@ Index		array!index
 .ds MO11 November
 .ds MO12 December
 .\" for GETR
-.ds Qrf See chapter \\*[Qrfh], page \\*[Qrfp].
+.ds Qrf See chapter \E*[Qrfh], page \E*[Qrfp].
 .\"
 .\" header- and footer-size will only change to the current
 .\" if Pgps is > 0.
@@ -1243,6 +1243,7 @@ numeric; got '\\$1'
 .nr pg*cols-per-page 1
 .nr pg*cur-po \n[@po]
 .nr pg*head-mark 0
+.nr pg*at-end-of-input 0
 .\"
 .nr pg*ps \n[@ps]
 .nr pg*vs \n[@vs]
@@ -1296,6 +1297,7 @@ numeric; got '\\$1'
 .de pg@next-page
 .\".debug next-page
 .br
+.if \\n[pg*at-end-of-input] \c
 .ne 999i		\" activate trap
 .\" .pg@footer
 ..
@@ -1544,6 +1546,7 @@ numeric; got '\\$1'
 .\"-------------------------
 .\" print out all pending text
 .de pg@end-of-text
+.nr pg*at-end-of-input 1
 .if \\n[D]>2 .tm ---------- End of text processing ----------------
 .df@eot-print
 .ref@eot-print
@@ -3250,25 +3253,48 @@ exceeds depth of nested lists (\\n[li*lvl])
 .\" This was needed when I discovered that groff was considered unsafe
 .\" and groff -U didn't work. It's a workaround like the original
 .\" index method, but not in my view elegant enough.
+.
+.\" Store name of the interface macro calling qrf*validate-identifier.
+.\" Re-empty it after use to catch internal logic errors.
+.ds qrf*caller \" empty
+.
+.\" Validate argument as roff identifier.
+.\" qrf*validate-identifier candidate
+.de qrf*validate-identifier
+.if !\\n[.$]=1 .@abort expected an argument, got \\n[.$]
+.if '\\*[qrf*caller]'' .@abort qrf*caller string not initialized
+.if !\A'\\$1' \{
+.	ds qref*msg \\*[qrf*caller]: '\\$1' is not a valid roff string\"
+.	as qref*msg " name\"
+.	@error \\*[qref*msg]
+.\}
+.ds qrf*caller \" empty
+..
 .\"
-.\" init reference system
+.\" INITR id
+.\" Initialize reference system.  Read/write file id.qrf.
 .de INITR
+.if \\n[.$]<1 .@error \\$0: expected an argument
 .ds qrf*file \\$1.qrf
-.nr qrf*pass 2
+.nr qrf*pass 2 \" magic number
 .if \\n[D]>1 .tm INITR: source \\*[qrf*file]
 .ie \\n[Ref] \{\
 .	tm .\\\\" Rfilename: \\*[qrf*file]
 .\}
-.el 'so  \\*[qrf*file]
+.el .so \\*[qrf*file]
 ..
 .\"---------------
-.\" set a reference.
+.\" SETR ref-name [string]
+.\" Set (define) a reference ref-name; store auxiliary datum in string.
 .de SETR
 .if \\n[.$]<1 .@error \\$0: expected 1 or 2 arguments, got \\n[.$]
-.if !r qrf*pass .tm \\$0: no .INITR in this file \" XXX: .@error?
+.if !r qrf*pass .@error \\$0: references uninitialized; call INITR first
+.ds qrf*caller \\$0\"
 .if \\n[Ref] \{\
+.	qrf*validate-identifier \\$1
 .	ds qrf*name qrf*ref-\\$1
-.	if \\n[D]>2 .tm SETR: ref \\*[qrf*name]=\\*[hd@mark-trimmed],\\n[%]
+.	if \\n[D]>2 \
+.		tm \\$0: ref \\*[qrf*name]=\\*[hd@mark-trimmed],\\n[%]
 .	\" heading-number
 .	ds \\*[qrf*name]-hn \\*[hd@mark-trimmed]
 .	\" page-number
@@ -3277,56 +3303,78 @@ exceeds depth of nested lists (\\n[li*lvl])
 .	if \\n[Ref] \{\
 .		tm .ds \\*[qrf*name]-hn \\*[hd@mark-trimmed]
 .		tm .ds \\*[qrf*name]-pn \\n[%]
-.		if !'\\$2'' .tm .ds \\*[qrf*name]-xx \\$2
+.		if \\n[.$]>1 \{\
+.			qrf*validate-identifier \\$2
+.			tm .ds \\*[qrf*name]-xx \\$2
+.		\}
 .	\}
 .\}
 ..
 .\"---------------
-.\" get misc-string
-.\" If two arg -> set var. arg to misc-string.
+.\" Interpolate or retrieve reference ref-name's auxiliary datum.
+.\" GETST ref-name [string]
 .de GETST
 .if \\n[.$]<1 .@error \\$0: expected 1 or 2 arguments, got \\n[.$]
-.if !r qrf*pass .tm \\$0: no .INITR in this file \" XXX: .@error?
+.if !r qrf*pass .@error \\$0: references uninitialized; call INITR first
+.ds qrf*caller \\$0\"
+.qrf*validate-identifier \\$1
 .ds qrf*name qrf*ref-\\$1
-.	if d \\*[qrf*name]-xx \{\
-.		ie \\n[.$]>1 .ds \\$2 \\*[\\*[qrf*name]-xx]
-.		el \\*[\\*[qrf*name]-xx]\c
+.if d \\*[qrf*name]-xx \{\
+.	ie \\n[.$]>1 \{\
+.		ds qrf*caller \\$0\"
+.		qrf*validate-identifier \\$2
+.		ds \\$2 \\*[\\*[qrf*name]-xx]
 .	\}
+.	el \\*[\\*[qrf*name]-xx]\c
 .\}
 ..
 .\"---------------
-.\" get header-number
-.\" If two arg -> set var. arg to header-number.
+.\" Interpolate or retrieve reference ref-name's heading number.
+.\" GETHN ref-name [string]
 .de GETHN
 .if \\n[.$]<1 .@error \\$0: expected 1 or 2 arguments, got \\n[.$]
-.if !r qrf*pass .tm \\$0: no .INITR in this file \" XXX: .@error?
+.if !r qrf*pass .@error \\$0: references uninitialized; call INITR first
+.ds qrf*caller \\$0\"
+.qrf*validate-identifier \\$1
 .ds qrf*name qrf*ref-\\$1
 .if d \\*[qrf*name]-hn \{\
-.	ie \\n[.$]>1 .ds \\$2 \\*[\\*[qrf*name]-hn]
+.	ie \\n[.$]>1 \{\
+.		ds qrf*caller \\$0\"
+.		qrf*validate-identifier \\$2
+.		ds \\$2 \\*[\\*[qrf*name]-hn]
+.	\}
 .	el \\*[\\*[qrf*name]-hn]\c
 .\}
 ..
 .\"---------------
-.\" get page-number
-.\" If two arg -> set var. arg to page-number.
+.\" Interpolate or retrieve reference ref-name's page number.
+.\" GETPN ref-name [string]
 .de GETPN
 .if \\n[.$]<1 .@error \\$0: expected 1 or 2 arguments, got \\n[.$]
-.if !r qrf*pass .tm \\$0: no .INITR in this file \" XXX: .@error?
+.if !r qrf*pass .@error \\$0: references uninitialized; call INITR first
+.ds qrf*caller \\$0\"
+.qrf*validate-identifier \\$1
 .ds qrf*name qrf*ref-\\$1
 .if d \\*[qrf*name]-pn \{\
-.	ie \\n[.$]>1 .ds \\$2 \\*[\\*[qrf*name]-pn]
+.	ie \\n[.$]>1 \{\
+.		ds qrf*caller \\$0\"
+.		qrf*validate-identifier \\$2
+.		ds \\$2 \\*[\\*[qrf*name]-pn]
+.	\}
 .	el \\*[\\*[qrf*name]-pn]\c
 .\}
 ..
 .\"----------
+.\" Retrieve and interpolate reference ref-name's heading and page data.
+.\" GETR ref-name
 .de GETR
 .if \\n[.$]<1 .@error \\$0: expected an argument
-.ie !r qrf*pass .tm \\$0: no .INITR in this file" \" XXX: .@error?
-.el \{\
-.	GETHN \\$1 Qrfh
-.	GETPN \\$1 Qrfp
+.if !r qrf*pass .@error \\$0: references uninitialized; call INITR first
+.ds qrf*caller \\$0\"
+.qrf*validate-identifier \\$1
+.GETHN \\$1 Qrfh
+.GETPN \\$1 Qrfp
 \\*[Qrf]
-.\}
 ..
 .\"########################### module ind ############################
 .\"--------------------

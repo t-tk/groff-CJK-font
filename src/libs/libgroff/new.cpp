@@ -16,6 +16,8 @@ for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
+#include <attribute.h> // gnulib: MAYBE_UNUSED
+
 #include "lib.h"
 
 #include <stddef.h>
@@ -54,8 +56,7 @@ void operator delete(void *p) throw()
     free(p);
 }
 
-void operator delete(void *p,
-		     __attribute__((__unused__)) long unsigned int size)
+void operator delete(void *p, MAYBE_UNUSED long unsigned int size)
 {
   // It's ugly to duplicate the code from delete(void *) above, but if
   // we don't, g++ 6.3 can't figure out we're calling through it to

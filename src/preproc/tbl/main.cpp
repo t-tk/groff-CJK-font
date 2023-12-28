@@ -535,8 +535,10 @@ options *process_options(table_input &in)
 entry_modifier::entry_modifier()
 : vertical_alignment(CENTER), zero_width(0), stagger(0)
 {
-  vertical_spacing.inc = vertical_spacing.val = 0;
-  point_size.inc = point_size.val = 0;
+  vertical_spacing.relativity = size_expression::ABSOLUTE;
+  vertical_spacing.whole = 0;
+  type_size.relativity = size_expression::ABSOLUTE;
+  type_size.whole = 0;
 }
 
 entry_modifier::~entry_modifier()
@@ -575,31 +577,31 @@ void entry_format::debug_print() const
   case FORMAT_VSPAN:
     putc('^', stderr);
     break;
-  case FORMAT_HLINE:
+  case FORMAT_HRULE:
     putc('_', stderr);
     break;
-  case FORMAT_DOUBLE_HLINE:
+  case FORMAT_DOUBLE_HRULE:
     putc('=', stderr);
     break;
   default:
     assert(0 == "invalid column classifier in switch");
     break;
   }
-  if (point_size.val != 0) {
+  if (type_size.whole != 0) {
     putc('p', stderr);
-    if (point_size.inc > 0)
+    if (type_size.relativity == size_expression::INCREMENT)
       putc('+', stderr);
-    else if (point_size.inc < 0)
+    else if (type_size.relativity == size_expression::DECREMENT)
       putc('-', stderr);
-    fprintf(stderr, "%d ", point_size.val);
+    fprintf(stderr, "%d ", type_size.whole);
   }
-  if (vertical_spacing.val != 0) {
+  if (vertical_spacing.whole != 0) {
     putc('v', stderr);
-    if (vertical_spacing.inc > 0)
+    if (vertical_spacing.relativity == size_expression::INCREMENT)
       putc('+', stderr);
-    else if (vertical_spacing.inc < 0)
+    else if (vertical_spacing.relativity == size_expression::DECREMENT)
       putc('-', stderr);
-    fprintf(stderr, "%d ", vertical_spacing.val);
+    fprintf(stderr, "%d ", vertical_spacing.whole);
   }
   if (!font.empty()) {
     putc('f', stderr);
@@ -635,7 +637,7 @@ struct format {
   char *equal;
   char *expand;
   entry_format **entry;
-  char **vline;
+  char **vrule;
 
   format(int nr, int nc);
   ~format();
@@ -658,26 +660,26 @@ format::format(int nr, int nc) : nrows(nr), ncolumns(nc)
   entry = new entry_format *[nrows];
   for (i = 0; i < nrows; i++)
     entry[i] = new entry_format[ncolumns];
-  vline = new char*[nrows];
+  vrule = new char*[nrows];
   for (i = 0; i < nrows; i++) {
-    vline[i] = new char[ncolumns+1];
+    vrule[i] = new char[ncolumns+1];
     for (int j = 0; j < ncolumns+1; j++)
-      vline[i][j] = 0;
+      vrule[i][j] = 0;
   }
 }
 
 void format::add_rows(int n)
 {
   int i;
-  char **old_vline = vline;
-  vline = new char*[nrows + n];
+  char **old_vrule = vrule;
+  vrule = new char*[nrows + n];
   for (i = 0; i < nrows; i++)
-    vline[i] = old_vline[i];
-  delete[] old_vline;
+    vrule[i] = old_vrule[i];
+  delete[] old_vrule;
   for (i = 0; i < n; i++) {
-    vline[nrows + i] = new char[ncolumns + 1];
+    vrule[nrows + i] = new char[ncolumns + 1];
     for (int j = 0; j < ncolumns + 1; j++)
-      vline[nrows + i][j] = 0;
+      vrule[nrows + i][j] = 0;
   }
   entry_format **old_entry = entry;
   entry = new entry_format *[nrows + n];
@@ -696,10 +698,10 @@ format::~format()
   delete[] equal;
   delete[] expand;
   for (int i = 0; i < nrows; i++) {
-    delete[] vline[i];
+    delete[] vrule[i];
     delete[] entry[i];
   }
-  delete[] vline;
+  delete[] vrule;
   delete[] entry;
 }
 
@@ -707,8 +709,8 @@ struct input_entry_format : public entry_format {
   input_entry_format *next;
   string width;
   int separation;
-  int vline;
-  int vline_count;
+  int vrule;
+  int vrule_count;
   bool is_last_column;
   bool is_equal_width;
   int expand;
@@ -722,8 +724,8 @@ input_entry_format::input_entry_format(format_type t, input_entry_format *p)
 {
   separation = -1;
   is_last_column = false;
-  vline = 0;
-  vline_count = 0;
+  vrule = 0;
+  vrule_count = 0;
   is_equal_width = false;
   expand = 0;
 }
@@ -744,7 +746,7 @@ void free_input_entry_format_list(input_entry_format *list)
 void input_entry_format::debug_print()
 {
   int i;
-  for (i = 0; i < vline_count; i++)
+  for (i = 0; i < vrule_count; i++)
     putc('|', stderr);
   entry_format::debug_print();
   if (!width.empty()) {
@@ -759,7 +761,7 @@ void input_entry_format::debug_print()
     putc('x', stderr);
   if (separation >= 0)
     fprintf(stderr, "%d", separation); 
-  for (i = 0; i < vline; i++)
+  for (i = 0; i < vrule; i++)
     putc('|', stderr);
   if (is_last_column)
     putc(',', stderr);
@@ -777,7 +779,7 @@ format *process_format(table_input &in, options *opt,
   bool is_first_row = true;
   int c = in.get();
   for (;;) {
-    int vline_count = 0;
+    int vrule_count = 0;
     bool got_format = false;
     bool got_period = false;
     format_type t = FORMAT_LEFT;
@@ -827,22 +829,22 @@ format *process_format(table_input &in, options *opt,
       case '_':
       case '-':			// tbl also accepts this
 	got_format = true;
-	t = FORMAT_HLINE;
+	t = FORMAT_HRULE;
 	if (is_first_row)
-	  opt->flags |= table::HAS_TOP_HLINE;
+	  opt->flags |= table::HAS_TOP_HRULE;
 	break;
       case '=':
 	got_format = true;
-	t = FORMAT_DOUBLE_HLINE;
+	t = FORMAT_DOUBLE_HRULE;
 	break;
       case '.':
 	got_period = true;
 	break;
       case '|':
 	// leading vertical line in row
-	opt->flags |= table::HAS_TOP_VLINE;
-	vline_count++;
-	// list->vline_count is updated later
+	opt->flags |= table::HAS_TOP_VRULE;
+	vrule_count++;
+	// list->vrule_count is updated later
 	break;
       case ' ':
       case '\t':
@@ -865,13 +867,13 @@ format *process_format(table_input &in, options *opt,
     if (got_period)
       break;
     list = new input_entry_format(t, list);
-    if (vline_count > 2) {
-      vline_count = 2;
+    if (vrule_count > 2) {
+      vrule_count = 2;
       error("more than 2 vertical lines at beginning of row description");
     }
-    list->vline_count = vline_count;
+    list->vrule_count = vrule_count;
     // Now handle modifiers.
-    vline_count = 0;
+    vrule_count = 0;
     bool is_valid_modifier_sequence = true;
     do {
       switch (c) {
@@ -988,32 +990,41 @@ format *process_format(table_input &in, options *opt,
       case 'p':
       case 'P':
 	{
-	  inc_number &ps = list->point_size;
-	  ps.val = 0;
-	  ps.inc = 0;
-	  c = in.get();
+	  size_expression &ps = list->type_size;
+	  ps.relativity = size_expression::ABSOLUTE;
+	  ps.whole = 0;
+	  do {
+	    c = in.get();
+	  } while (c == ' ' || c == '\t');
+	  if (c == EOF) {
+	    error("'p' column modifier missing type size parameter");
+	    break;
+	  }
 	  if (c == '+' || c == '-') {
-	    ps.inc = (c == '+' ? 1 : -1);
+	    if (c == '+')
+	      ps.relativity = size_expression::INCREMENT;
+	    else if (c == '-')
+	      ps.relativity = size_expression::DECREMENT;
 	    c = in.get();
 	  }
 	  if (c == EOF || !csdigit(c)) {
 	    warning("'p' column modifier must be followed by"
 		    " (optionally signed) integer; ignoring");
-	    ps.inc = 0;
+	    ps.relativity = size_expression::ABSOLUTE;
 	  }
 	  else {
 	    do {
-	      ps.val *= 10;
-	      ps.val += c - '0';
+	      ps.whole *= 10;
+	      ps.whole += c - '0';
 	      c = in.get();
 	    } while (c != EOF && csdigit(c));
 	  }
-	  if (ps.val > MAX_POINT_SIZE || ps.val < -MAX_POINT_SIZE) {
+	  if (ps.whole > MAX_POINT_SIZE || ps.whole < -MAX_POINT_SIZE) {
 	    warning("'p' column modifier argument magnitude of %1"
-		    " points out of range (> %2); ignoring", ps.val,
+		    " points out of range (> %2); ignoring", ps.whole,
 		    MAX_POINT_SIZE);
-	    ps.val = 0;
-	    ps.inc = 0;
+	    ps.whole = 0;
+	    ps.relativity = size_expression::ABSOLUTE;
 	  }
 	  break;
 	}
@@ -1030,41 +1041,56 @@ format *process_format(table_input &in, options *opt,
       case 'v':
       case 'V':
 	{
-	  inc_number &vs = list->vertical_spacing;
-	  vs.val = 0;
-	  vs.inc = 0;
-	  c = in.get();
+	  size_expression &vs = list->vertical_spacing;
+	  vs.whole = 0;
+	  vs.relativity = size_expression::ABSOLUTE;
+	  do {
+	    c = in.get();
+	  } while (c == ' ' || c == '\t');
+	  if (c == EOF) {
+	    error("'v' column modifier missing vertical spacing"
+		  " parameter");
+	    break;
+	  }
 	  if (c == '+' || c == '-') {
-	    vs.inc = (c == '+' ? 1 : -1);
+	    if (c == '+')
+	      vs.relativity = size_expression::INCREMENT;
+	    else if (c == '-')
+	      vs.relativity = size_expression::DECREMENT;
 	    c = in.get();
 	  }
 	  if (c == EOF || !csdigit(c)) {
 	    warning("'v' column modifier must be followed by"
 		    " (optionally signed) integer; ignoring");
-	    vs.inc = 0;
+	    vs.whole = 0;
+	    vs.relativity = size_expression::ABSOLUTE;
 	  }
 	  else {
 	    do {
-	      vs.val *= 10;
-	      vs.val += c - '0';
+	      vs.whole *= 10;
+	      vs.whole += c - '0';
 	      c = in.get();
 	    } while (c != EOF && csdigit(c));
 	  }
-	  if (vs.val > MAX_VERTICAL_SPACING
-	      || vs.val < -MAX_VERTICAL_SPACING) {
+	  if (vs.whole > MAX_VERTICAL_SPACING
+	      || vs.whole < -MAX_VERTICAL_SPACING) {
 	    warning("'v' column modifier argument magnitude of %1"
-		    " points out of range (> %2); ignoring", vs.val,
+		    " points out of range (> %2); ignoring", vs.whole,
 		    MAX_VERTICAL_SPACING);
-	    vs.val = 0;
-	    vs.inc = 0;
+	    vs.whole = 0;
+	    vs.relativity = size_expression::ABSOLUTE;
 	  }
 	  break;
 	}
       case 'w':
       case 'W':
-	c = in.get();
-	while (c == ' ' || c == '\t')
+	do {
 	  c = in.get();
+	} while (c == ' ' || c == '\t');
+	if (c == EOF) {
+	  error("'w' column modifier missing width parameter");
+	  break;
+	}
 	if (c == '(') {
 	  list->width = "";
 	  c = in.get();
@@ -1115,9 +1141,9 @@ format *process_format(table_input &in, options *opt,
 	break;
       case '|':
 	if (is_first_row)
-	  opt->flags |= table::HAS_TOP_VLINE;
+	  opt->flags |= table::HAS_TOP_VRULE;
 	c = in.get();
-	vline_count++;
+	vrule_count++;
 	break;
       case ' ':
       case '\t':
@@ -1131,13 +1157,13 @@ format *process_format(table_input &in, options *opt,
 	break;
       }
     } while (is_valid_modifier_sequence);
-    if (vline_count > 2) {
-      vline_count = 2;
+    if (vrule_count > 2) {
+      vrule_count = 2;
       error("more than 2 vertical lines after column descriptor");
     }
-    list->vline += vline_count;
+    list->vrule += vrule_count;
     if (c == '\n' || c == ',') {
-      vline_count = 0;
+      vrule_count = 0;
       is_first_row = false;
       c = in.get();
       list->is_last_column = true;
@@ -1242,9 +1268,9 @@ format *process_format(table_input &in, options *opt,
 	error("multiple widths for column %1", col + 1);
       f->width[col] = tem->width;
     }
-    if (tem->vline_count)
-      f->vline[row][col] = tem->vline_count;
-    f->vline[row][col + 1] = tem->vline;
+    if (tem->vrule_count)
+      f->vrule[row][col] = tem->vrule_count;
+    f->vrule[row][col + 1] = tem->vrule;
     if (tem->is_last_column) {
       row++;
       col = 0;
@@ -1256,8 +1282,8 @@ format *process_format(table_input &in, options *opt,
   list = 0 /* nullptr */;
   for (col = 0; col < ncolumns; col++) {
     entry_format *e = f->entry[f->nrows - 1] + col;
-    if (e->type != FORMAT_HLINE
-	&& e->type != FORMAT_DOUBLE_HLINE
+    if (e->type != FORMAT_HRULE
+	&& e->type != FORMAT_DOUBLE_HRULE
 	&& e->type != FORMAT_SPAN)
       break;
   }
@@ -1281,7 +1307,7 @@ table *process_data(table_input &in, format *f, options *opt)
   int current_row = 0;
   int format_index = 0;
   bool give_up = false;
-  enum { DATA_INPUT_LINE, TROFF_INPUT_LINE, SINGLE_HLINE, DOUBLE_HLINE } type;
+  enum { DATA_INPUT_LINE, TROFF_INPUT_LINE, SINGLE_HRULE, DOUBLE_HRULE } type;
   table *tbl = new table(ncolumns, opt->flags, opt->linesize,
 			 opt->decimal_point_char);
   if (opt->delim[0] != '\0')
@@ -1306,11 +1332,11 @@ table *process_data(table_input &in, format *f, options *opt)
       int d = in.get();
       if (d == '\n') {
 	if (c == '_')
-	  type = SINGLE_HLINE;
+	  type = SINGLE_HRULE;
 	else
-	  type = DOUBLE_HLINE;
+	  type = DOUBLE_HRULE;
 	if (0 == current_row)
-	  tbl->flags |= table::HAS_TOP_HLINE;
+	  tbl->flags |= table::HAS_TOP_HRULE;
       }
       else {
 	in.unget(d);
@@ -1331,8 +1357,8 @@ table *process_data(table_input &in, format *f, options *opt)
 	  int cnt;
 	  for (cnt = 0; cnt < ncolumns; cnt++) {
 	    entry_format *e = f->entry[format_index] + cnt;
-	    if (e->type != FORMAT_HLINE
-		&& e->type != FORMAT_DOUBLE_HLINE
+	    if (e->type != FORMAT_HRULE
+		&& e->type != FORMAT_DOUBLE_HRULE
 		// Unfortunately tbl treats a span as needing data.
 		// && e->type != FORMAT_SPAN
 		)
@@ -1344,7 +1370,7 @@ table *process_data(table_input &in, format *f, options *opt)
 	    tbl->add_entry(current_row, cnt, input_entry,
 			   f->entry[format_index] + cnt, current_filename,
 			   current_lineno);
-	  tbl->add_vlines(current_row, f->vline[format_index]);
+	  tbl->add_vrules(current_row, f->vrule[format_index]);
 	  format_index++;
 	  current_row++;
 	}
@@ -1507,7 +1533,7 @@ table *process_data(table_input &in, format *f, options *opt)
 	for (; col < ncolumns; col++)
 	  tbl->add_entry(current_row, col, input_entry, &line_format[col],
 			 current_filename, current_lineno - 1);
-	tbl->add_vlines(current_row, f->vline[format_index]);
+	tbl->add_vrules(current_row, f->vrule[format_index]);
 	current_row++;
 	format_index++;
       }
@@ -1541,11 +1567,11 @@ table *process_data(table_input &in, format *f, options *opt)
 	}
       }
       break;
-    case SINGLE_HLINE:
-      tbl->add_single_hline(current_row);
+    case SINGLE_HRULE:
+      tbl->add_single_hrule(current_row);
       break;
-    case DOUBLE_HLINE:
-      tbl->add_double_hline(current_row);
+    case DOUBLE_HRULE:
+      tbl->add_double_hrule(current_row);
       break;
     default:
       assert(0 == "invalid `type` in switch");

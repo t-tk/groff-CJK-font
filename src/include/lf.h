@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 2014-2020 Free Software Foundation, Inc.
      Written by Werner Lemberg (wl@gnu.org)
 
@@ -17,5 +16,11 @@ for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
-int interpret_lf_args(const char *p);
+bool interpret_lf_args(const char *p);
 void normalize_for_lf (string &fn);
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

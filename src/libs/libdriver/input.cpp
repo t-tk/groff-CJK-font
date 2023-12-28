@@ -59,7 +59,7 @@
      3 lines having a fixed structure, while classical troff specified
      the sequence of the first 3 commands without further
      restrictions.  Now the parser is smart about additional
-     white space, comments, and empty lines in the prologue.
+     whitespace, comments, and empty lines in the prologue.
    - The old parser allowed space characters only as syntactical
      separators, while classical troff had tab characters as well.
      Now any sequence of tabs and/or spaces is a syntactical
@@ -395,7 +395,7 @@ IntArray *get_possibly_integer_args();
 char *get_string_arg(void);	// read in next string arg, ended by WS
 inline bool is_space_or_tab(const Char);
 				// test on space/tab char
-Char next_arg_begin(void);	// skip white space on current line
+Char next_arg_begin(void);	// skip whitespace on current line
 Char next_command(void);	// go to next command, evt. diff. line
 inline bool odd(const int);	// test if integer is odd
 void position_to_end_of_args(const IntArray * const);
@@ -900,7 +900,7 @@ get_string_arg(void)
     buf.append(c);
     c = get_char();
   }
-  unget_char(c);		// restore white space
+  unget_char(c);		// restore whitespace
   return buf.make_string();
 }
 

@@ -20,15 +20,28 @@
 
 groff="${abs_top_builddir:-.}/test-groff"
 
+fail=
+
+wail () {
+  echo "...FAILED" >&2
+  fail=yes
+}
+
 # Ensure that we get backtrace output across file and pipe boundaries.
 # Savannah #58153.
-OUT=$("$groff" -b -ww -U 2>&1 >/dev/null <<EOF
+output=$("$groff" -b -ww -U 2>&1 <<EOF
 .ec @
 .pso printf '@s[-20]'
 EOF
 )
 
-set -e
+echo "$output"
 
-printf "%s\n" "$OUT" | grep -qw 'backtrace: pipe'
-printf "%s\n" "$OUT" | grep -qw 'backtrace: file'
+echo "checking that pipe object is visible in backtrace"
+printf "%s\n" "$output" | grep -qw 'backtrace: pipe' || wail
+echo "checking that file object is visible in backtrace"
+printf "%s\n" "$output" | grep -qw 'backtrace: file' || wail
+
+test -z "$fail"
+
+# vim:set autoindent expandtab shiftwidth=2 tabstop=2 textwidth=72:

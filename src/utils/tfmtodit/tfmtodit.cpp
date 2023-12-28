@@ -48,6 +48,10 @@ both be zero. */
 
 #include "lib.h"
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <assert.h>
 #include <errno.h>
 #include <math.h>
@@ -764,7 +768,7 @@ int main(int argc, char **argv)
   if (special_flag)
     fputs("special\n", stdout);
   char *internal_name = strsave(argv[optind]);
-  int len = strlen(internal_name);
+  size_t len = strlen(internal_name);
   if (len > 4 && strcmp(internal_name + len - 4, ".tfm") == 0)
     internal_name[len - 4] = '\0';
   // DIR_SEPS[] are possible directory separator characters, see

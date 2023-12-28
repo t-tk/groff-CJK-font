@@ -17,9 +17,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
 /* Unfortunately vendors seem to have problems writing a <signal.h>
-that is correct for C++, so we implement all signal handling in C. */
+   that is correct for C++, so we implement all signal handling in C. */
+// TODO: Revisit that 1993 claim in 2023.  Use gnulib?
 
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -75,3 +78,9 @@ void ignore_fatal_signals()
 }
 
 #endif /* not HAVE_RENAME */
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

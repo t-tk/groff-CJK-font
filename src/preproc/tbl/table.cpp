@@ -59,6 +59,7 @@ const int DEFAULT_COLUMN_SEPARATION = 3;
 #define NEEDED_REG PREFIX "needed"
 #define REPEATED_MARK_MACRO PREFIX "rmk"
 #define REPEATED_VPT_MACRO PREFIX "rvpt"
+#define TEXT_BLOCK_STAGGERING_MACRO PREFIX "sp"
 #define SUPPRESS_BOTTOM_REG PREFIX "supbot"
 #define SAVED_DN_REG PREFIX "dn"
 #define SAVED_HYPHENATION_MODE_REG PREFIX "hyphmode"
@@ -677,7 +678,7 @@ void block_entry::position_vertically()
 		  " CENTER, or BOTTOM");
     }
   if (mod->stagger)
-    prints(".sp -.5v\n");
+    prints("." TEXT_BLOCK_STAGGERING_MACRO " -.5v\n");
 }
 
 int block_entry::divert(int ncols, const string *mw, int *sep, int do_expand)
@@ -777,6 +778,8 @@ void left_block_entry::print()
 {
   printfs(".in +\\n[%1]u\n", column_start_reg(start_col));
   printfs(".%1\n", block_diversion_name(start_row, start_col));
+  if (mod->stagger)
+    prints("." TEXT_BLOCK_STAGGERING_MACRO " .5v\n");
   prints(".in\n");
 }
 
@@ -793,6 +796,8 @@ void right_block_entry::print()
 	  span_width_reg(start_col, end_col),
 	  block_width_reg(start_row, start_col));
   printfs(".%1\n", block_diversion_name(start_row, start_col));
+  if (mod->stagger)
+    prints("." TEXT_BLOCK_STAGGERING_MACRO " .5v\n");
   prints(".in\n");
 }
 
@@ -809,6 +814,8 @@ void center_block_entry::print()
 	  span_width_reg(start_col, end_col),
 	  block_width_reg(start_row, start_col));
   printfs(".%1\n", block_diversion_name(start_row, start_col));
+  if (mod->stagger)
+    prints("." TEXT_BLOCK_STAGGERING_MACRO " .5v\n");
   prints(".in\n");
 }
 
@@ -833,6 +840,8 @@ void alphabetic_block_entry::print()
 	  span_width_reg(start_col, end_col),
 	  span_alphabetic_width_reg(start_col, end_col));
   printfs(".%1\n", block_diversion_name(start_row, start_col));
+  if (mod->stagger)
+    prints("." TEXT_BLOCK_STAGGERING_MACRO " .5v\n");
   prints(".in\n");
 }
 
@@ -1000,21 +1009,22 @@ void set_modifier(const entry_modifier *m)
 {
   if (!m->font.empty())
     printfs(".ft %1\n", m->font);
-  if (m->point_size.val != 0) {
+  if (m->type_size.whole != 0) {
     prints(".ps ");
-    if (m->point_size.inc > 0)
+    if (m->type_size.relativity == size_expression::INCREMENT)
       prints('+');
-    else if (m->point_size.inc < 0)
+    else if (m->type_size.relativity == size_expression::DECREMENT)
       prints('-');
-    printfs("%1\n", as_string(m->point_size.val));
+    printfs("%1\n", as_string(m->type_size.whole));
   }
-  if (m->vertical_spacing.val != 0) {
+  if (m->vertical_spacing.whole != 0) {
     prints(".vs ");
-    if (m->vertical_spacing.inc > 0)
+    if (m->vertical_spacing.relativity == size_expression::INCREMENT)
       prints('+');
-    else if (m->vertical_spacing.inc < 0)
+    else if (m->vertical_spacing.relativity
+	     == size_expression::DECREMENT)
       prints('-');
-    printfs("%1\n", as_string(m->vertical_spacing.val));
+    printfs("%1\n", as_string(m->vertical_spacing.whole));
   }
   if (!m->macro.empty())
     printfs(".%1\n", m->macro);
@@ -1024,13 +1034,13 @@ void set_inline_modifier(const entry_modifier *m)
 {
   if (!m->font.empty())
     printfs("\\f[%1]", m->font);
-  if (m->point_size.val != 0) {
+  if (m->type_size.whole != 0) {
     prints("\\s[");
-    if (m->point_size.inc > 0)
+    if (m->type_size.relativity == size_expression::INCREMENT)
       prints('+');
-    else if (m->point_size.inc < 0)
+    else if (m->type_size.relativity == size_expression::DECREMENT)
       prints('-');
-    printfs("%1]", as_string(m->point_size.val));
+    printfs("%1]", as_string(m->type_size.whole));
   }
   if (m->stagger)
     prints("\\v'-.5v'");
@@ -1040,7 +1050,7 @@ void restore_inline_modifier(const entry_modifier *m)
 {
   if (!m->font.empty())
     prints("\\f[\\n[" SAVED_FONT_REG "]]");
-  if (m->point_size.val != 0)
+  if (m->type_size.whole != 0)
     prints("\\s[\\n[" SAVED_SIZE_REG "]]");
   if (m->stagger)
     prints("\\v'.5v'");
@@ -1095,44 +1105,44 @@ void text_stuff::print(table *)
   location_force_filename = 1;	// it might have been a .lf command
 }
 
-struct single_hline_stuff : public stuff {
-  single_hline_stuff(int);
+struct single_hrule_stuff : public stuff {
+  single_hrule_stuff(int);
   void print(table *);
   int is_single_line();
 };
 
-single_hline_stuff::single_hline_stuff(int r) : stuff(r)
+single_hrule_stuff::single_hrule_stuff(int r) : stuff(r)
 {
 }
 
-void single_hline_stuff::print(table *tbl)
+void single_hrule_stuff::print(table *tbl)
 {
   printed = 1;
-  tbl->print_single_hline(row);
+  tbl->print_single_hrule(row);
 }
 
-int single_hline_stuff::is_single_line()
+int single_hrule_stuff::is_single_line()
 {
   return 1;
 }
 
-struct double_hline_stuff : stuff {
-  double_hline_stuff(int);
+struct double_hrule_stuff : stuff {
+  double_hrule_stuff(int);
   void print(table *);
   int is_double_line();
 };
 
-double_hline_stuff::double_hline_stuff(int r) : stuff(r)
+double_hrule_stuff::double_hrule_stuff(int r) : stuff(r)
 {
 }
 
-void double_hline_stuff::print(table *tbl)
+void double_hrule_stuff::print(table *tbl)
 {
   printed = 1;
-  tbl->print_double_hline(row);
+  tbl->print_double_hrule(row);
 }
 
-int double_hline_stuff::is_double_line()
+int double_hrule_stuff::is_double_line()
 {
   return 1;
 }
@@ -1251,7 +1261,7 @@ table::table(int nc, unsigned f, int ls, char dpc)
 : nrows(0), ncolumns(nc), linesize(ls), decimal_point_char(dpc),
   vrule_list(0), stuff_list(0), span_list(0),
   entry_list(0), entry_list_tailp(&entry_list), entry(0),
-  vline(0), row_is_all_lines(0), left_separation(0),
+  vrule(0), row_is_all_lines(0), left_separation(0),
   right_separation(0), total_separation(0), allocated_rows(0), flags(f)
 {
   minimum_width = new string[ncolumns];
@@ -1272,10 +1282,10 @@ table::~table()
 {
   for (int i = 0; i < nrows; i++) {
     delete[] entry[i];
-    delete[] vline[i];
+    delete[] vrule[i];
   }
   delete[] entry;
-  delete[] vline;
+  delete[] vrule;
   while (entry_list) {
     table_entry *tem = entry_list;
     entry_list = entry_list->next;
@@ -1347,14 +1357,14 @@ void table::add_text_line(int r, const string &s, const char *filename,
   add_stuff(new text_stuff(s, r, filename, lineno));
 }
 
-void table::add_single_hline(int r)
+void table::add_single_hrule(int r)
 {
-  add_stuff(new single_hline_stuff(r));
+  add_stuff(new single_hrule_stuff(r));
 }
 
-void table::add_double_hline(int r)
+void table::add_double_hrule(int r)
 {
-  add_stuff(new double_hline_stuff(r));
+  add_stuff(new double_hrule_stuff(r));
 }
 
 void table::allocate(int r)
@@ -1367,7 +1377,7 @@ void table::allocate(int r)
 	if (allocated_rows <= r)
 	  allocated_rows = r + 1;
 	entry = new PPtable_entry[allocated_rows];
-	vline = new char*[allocated_rows];
+	vrule = new char*[allocated_rows];
       }
       else {
 	table_entry ***old_entry = entry;
@@ -1378,10 +1388,10 @@ void table::allocate(int r)
 	entry = new PPtable_entry[allocated_rows];
 	memcpy(entry, old_entry, sizeof(table_entry**)*old_allocated_rows);
 	delete[] old_entry;
-	char **old_vline = vline;
-	vline = new char*[allocated_rows];
-	memcpy(vline, old_vline, sizeof(char*)*old_allocated_rows);
-	delete[] old_vline;
+	char **old_vrule = vrule;
+	vrule = new char*[allocated_rows];
+	memcpy(vrule, old_vrule, sizeof(char*)*old_allocated_rows);
+	delete[] old_vrule;
       }
     }
     assert(allocated_rows > r);
@@ -1390,9 +1400,9 @@ void table::allocate(int r)
       int i;
       for (i = 0; i < ncolumns; i++)
 	entry[nrows][i] = 0;
-      vline[nrows] = new char[ncolumns+1];
+      vrule[nrows] = new char[ncolumns+1];
       for (i = 0; i < ncolumns+1; i++)
-	vline[nrows][i] = 0;
+	vrule[nrows][i] = 0;
       nrows++;
     }
   }
@@ -1513,7 +1523,14 @@ void table::add_entry(int r, int c, const string &str,
 		      const entry_format *f, const char *fn, int ln)
 {
   allocate(r);
-  table_entry *e = 0;
+  table_entry *e = 0 /* nullptr */;
+  int len = str.length();
+  if (len > 1) {
+    string last_two_chars = str.substring((len - 2), 2);
+    if ("\\z" == last_two_chars)
+      error_with_file_and_line(fn, ln, "table entry ends with"
+			       " zero-motion escape sequence");
+  }
   char *s = str.extract();
   if (str.search('\n') >= 0) {
     bool was_changed = false;
@@ -1631,14 +1648,14 @@ void table::add_entry(int r, int c, const string &str,
     case FORMAT_VSPAN:
       do_vspan(r, c);
       break;
-    case FORMAT_HLINE:
+    case FORMAT_HRULE:
       if ((str.length() != 0) && (str != "\\&"))
 	error_with_file_and_line(fn, ln,
 				 "ignoring non-empty data entry using"
 				 " '_' column classifier");
       e = new single_line_entry(this, f);
       break;
-    case FORMAT_DOUBLE_HLINE:
+    case FORMAT_DOUBLE_HRULE:
       if ((str.length() != 0) && (str != "\\&"))
 	error_with_file_and_line(fn, ln,
 				 "ignoring non-empty data entry using"
@@ -1647,7 +1664,7 @@ void table::add_entry(int r, int c, const string &str,
       break;
     default:
       assert(0 == "table column format not in FORMAT_{SPAN,LEFT,CENTER,"
-		  "RIGHT,NUMERIC,ALPHABETIC,VSPAN,HLINE,DOUBLE_HLINE}");
+		  "RIGHT,NUMERIC,ALPHABETIC,VSPAN,HRULE,DOUBLE_HRULE}");
     }
   }
   if (e) {
@@ -1674,7 +1691,7 @@ void table::add_entry(int r, int c, const string &str,
 
 // add vertical lines for row r
 
-void table::add_vlines(int r, const char *v)
+void table::add_vrules(int r, const char *v)
 {
   allocate(r);
   bool lwarned = false;
@@ -1692,7 +1709,7 @@ void table::add_vlines(int r, const char *v)
       twarned = true;
     }
     else
-      vline[r][i] = v[i];
+      vrule[r][i] = v[i];
   }
 }
 
@@ -1808,8 +1825,8 @@ void table::init_output()
 	 ".  hy \\\\n[" SAVED_HYPHENATION_MODE_REG "]\n"
 	 ".  hla \\\\*[" SAVED_HYPHENATION_LANG_NAME "]\n"
 	 ".  hlm \\\\n[" SAVED_HYPHENATION_MAX_LINES_REG "]\n"
-	 ".  hym \\\\n[" SAVED_HYPHENATION_MARGIN_REG "]\n"
-	 ".  hys \\\\n[" SAVED_HYPHENATION_SPACE_REG "]\n"
+	 ".  hym \\\\n[" SAVED_HYPHENATION_MARGIN_REG "]u\n"
+	 ".  hys \\\\n[" SAVED_HYPHENATION_SPACE_REG "]u\n"
 	 ".  ad \\n[.j]\n"
 	 ".  ie \\n[.u] .fi\n"
 	 ".  el .nf\n"
@@ -1839,6 +1856,10 @@ void table::init_output()
 	 ".nr " NEED_BOTTOM_RULE_REG " 1\n"
 	 ".nr " SUPPRESS_BOTTOM_REG " 0\n"
 	 ".eo\n"
+	 ".de " TEXT_BLOCK_STAGGERING_MACRO "\n"
+	 ".  ie !'\\n(.z'' \\!.3sp \"\\$1\"\n"
+	 ".  el .sp \\$1\n"
+	 "..\n"
 	 ".de " REPEATED_MARK_MACRO "\n"
 	 ".  mk \\$1\n"
 	 ".  if !'\\n(.z'' \\!." REPEATED_MARK_MACRO " \"\\$1\"\n"
@@ -2254,9 +2275,9 @@ void table::compute_total_separation()
     left_separation = right_separation = 1;
   else {
     for (int r = 0; r < nrows; r++) {
-      if (vline[r][0] > 0)
+      if (vrule[r][0] > 0)
 	left_separation = 1;
-      if (vline[r][ncolumns] > 0)
+      if (vrule[r][ncolumns] > 0)
 	right_separation = 1;
     }
   }
@@ -2454,7 +2475,7 @@ void table::compute_widths()
   compute_column_positions();
 }
 
-void table::print_single_hline(int r)
+void table::print_single_hrule(int r)
 {
   prints(".vs " LINE_SEP ">?\\n[.V]u\n"
 	 ".ls 1\n"
@@ -2480,14 +2501,14 @@ void table::print_single_hline(int r)
 	break;
       printfs("\\h'|\\n[%1]u",
 	      column_divide_reg(start_col));
-      if ((r > 0 && vline[r-1][start_col] == 2)
-	  || (r < nrows && vline[r][start_col] == 2))
+      if ((r > 0 && vrule[r-1][start_col] == 2)
+	  || (r < nrows && vrule[r][start_col] == 2))
 	prints("-" HALF_DOUBLE_LINE_SEP);
       prints("'");
       printfs("\\D'l |\\n[%1]u",
 	      column_divide_reg(end_col));
-      if ((r > 0 && vline[r-1][end_col] == 2)
-	  || (r < nrows && vline[r][end_col] == 2))
+      if ((r > 0 && vrule[r-1][end_col] == 2)
+	  || (r < nrows && vrule[r][end_col] == 2))
 	prints("+" HALF_DOUBLE_LINE_SEP);
       prints(" 0'");
       start_col = end_col;
@@ -2498,7 +2519,7 @@ void table::print_single_hline(int r)
 	 ".vs\n");
 }
 
-void table::print_double_hline(int r)
+void table::print_double_hrule(int r)
 {
   prints(".vs " LINE_SEP "+" DOUBLE_LINE_SEP
 	 ">?\\n[.V]u\n"
@@ -2528,12 +2549,12 @@ void table::print_double_hline(int r)
       if (end_col <= start_col)
 	break;
       const char *left_adjust = 0;
-      if ((r > 0 && vline[r-1][start_col] == 2)
-	  || (r < nrows && vline[r][start_col] == 2))
+      if ((r > 0 && vrule[r-1][start_col] == 2)
+	  || (r < nrows && vrule[r][start_col] == 2))
 	left_adjust = "-" HALF_DOUBLE_LINE_SEP;
       const char *right_adjust = 0;
-      if ((r > 0 && vline[r-1][end_col] == 2)
-	  || (r < nrows && vline[r][end_col] == 2))
+      if ((r > 0 && vrule[r-1][end_col] == 2)
+	  || (r < nrows && vrule[r][end_col] == 2))
 	right_adjust = "+" HALF_DOUBLE_LINE_SEP;
       printfs("\\v'-" DOUBLE_LINE_SEP "'"
 	      "\\h'|\\n[%1]u",
@@ -2699,12 +2720,12 @@ void table::build_vrule_list()
     for (col = 1; col < ncolumns; col++) {
       int start_row = 0;
       for (;;) {
-	while (start_row < nrows && vline_spanned(start_row, col))
+	while (start_row < nrows && vrule_spanned(start_row, col))
 	  start_row++;
 	if (start_row >= nrows)
 	  break;
 	int end_row = start_row;
-	while (end_row < nrows && !vline_spanned(end_row, col))
+	while (end_row < nrows && !vrule_spanned(end_row, col))
 	  end_row++;
 	end_row--;
 	add_vertical_rule(start_row, end_row, col, 0);
@@ -2718,20 +2739,20 @@ void table::build_vrule_list()
   }
   for (int end_row = 0; end_row < nrows; end_row++)
     for (col = 0; col < ncolumns+1; col++)
-      if (vline[end_row][col] > 0
-	  && !vline_spanned(end_row, col)
+      if (vrule[end_row][col] > 0
+	  && !vrule_spanned(end_row, col)
 	  && (end_row == nrows - 1
-	      || vline[end_row+1][col] != vline[end_row][col]
-	      || vline_spanned(end_row+1, col))) {
+	      || vrule[end_row+1][col] != vrule[end_row][col]
+	      || vrule_spanned(end_row+1, col))) {
 	int start_row;
 	for (start_row = end_row - 1;
 	     start_row >= 0
-	     && vline[start_row][col] == vline[end_row][col]
-	     && !vline_spanned(start_row, col);
+	     && vrule[start_row][col] == vrule[end_row][col]
+	     && !vrule_spanned(start_row, col);
 	     start_row--)
 	  ;
 	start_row++;
-	add_vertical_rule(start_row, end_row, col, vline[end_row][col] > 1);
+	add_vertical_rule(start_row, end_row, col, vrule[end_row][col] > 1);
       }
   for (vertical_rule *p = vrule_list; p; p = p->next)
     if (p->is_double)
@@ -2765,7 +2786,7 @@ void table::define_bottom_macro()
 	 ".    mk " SAVED_VERTICAL_POS_REG "\n");
   if (flags & (BOX | ALLBOX | DOUBLEBOX)) {
     prints(".    if \\n[T.]&\\n[" NEED_BOTTOM_RULE_REG "] \\{\\\n");
-    print_single_hline(0);
+    print_single_hrule(0);
     prints(".    \\}\n");
   }
   prints(".    ls 1\n");
@@ -2808,7 +2829,7 @@ void table::define_bottom_macro()
 
 // is the vertical line before column c in row r horizontally spanned?
 
-int table::vline_spanned(int r, int c)
+int table::vrule_spanned(int r, int c)
 {
   assert(r >= 0 && r < nrows && c >= 0 && c < ncolumns + 1);
   return (c != 0 && c != ncolumns && entry[r][c] != 0
@@ -2977,7 +2998,7 @@ void table::do_row(int r)
 	 ".sp |\\n[" BOTTOM_REG "]u\n"
 	 "\\*[" TRANSPARENT_STRING_NAME "].nr " NEED_BOTTOM_RULE_REG " 1\n");
   if (r != nrows - 1 && (flags & ALLBOX)) {
-    print_single_hline(r + 1);
+    print_single_hrule(r + 1);
     prints("\\*[" TRANSPARENT_STRING_NAME "].nr " NEED_BOTTOM_RULE_REG " 0\n");
   }
   if (r != nrows - 1) {
@@ -3033,13 +3054,13 @@ void table::do_top()
 	   ".vs\n");
   }
   else if (flags & (ALLBOX | BOX))
-    print_single_hline(0);
+    print_single_hrule(0);
   // On terminal devices, a vertical rule on the first row of the table
   // will stick out 1v above it if it the table is unboxed or lacks a
   // horizontal rule on the first row.  This is necessary for grotty's
   // rule intersection detection.  We must make room for it so that the
   // vertical rule is not drawn above the top of the page.
-  else if ((flags & HAS_TOP_VLINE) && !(flags & HAS_TOP_HLINE))
+  else if ((flags & HAS_TOP_VRULE) && !(flags & HAS_TOP_HRULE))
     prints(".if n .sp\n");
   prints(".nr " STARTING_PAGE_REG " \\n%\n");
   //printfs(".mk %1\n", row_top_reg(0));

@@ -240,6 +240,8 @@ else
  X11 app defaults directory       : $appdefdir"
 fi
 echo "\
+ default paper format             : $PAGE"
+echo "\
  'groff -l' uses print spooler    : $groff_have_spooler
  use URW fonts for PDF output     : $groff_have_urw_fonts"
 if test "$groff_have_urw_fonts" = yes

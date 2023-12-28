@@ -329,6 +329,7 @@ and reset to 1 by
 .b .sh ,
 and
 .b .sx .
+The indentation amount is not configurable.
 .TL
 .b .bu
 .DE
@@ -340,6 +341,7 @@ between adjacent bulleted paragraphs,
 .\" TODO: Move the following application note to meintro.me.in or some
 .\" future non-introductory me(7) usage manual.
 enabling the construction of compact itemized lists.
+The indentation amount is not configurable.
 .sh 1 "Sectioning"
 .pp
 Numbered sections
@@ -540,9 +542,9 @@ to obtain section depth-dependent spacing.
 .ds TP \(aq\,\fIL\/\fP\(aq\,\fIM\/\fP\(aq\,\fIR\/\fP\(aq
 .pp
 Headers and footers
-are known as
-.i "three-part titles"
-for their left,
+are together known as
+.i titles ;
+they have left,
 middle,
 and right-hand components
 .i L,
@@ -575,7 +577,7 @@ if it contains more than two adjacent spaces
 or more than eight spaces total.
 .pp
 The placement
-of headers and footers
+of titles
 is controlled by four registers
 initialized to values scaled
 with respect to the default type size and vertical spacing.
@@ -600,14 +602,14 @@ to the (nominal) bottom of the text.
 \*(ME uses \*T's environment 0 for body text,
 1 for keeps
 (see below),
-and 2 for headers and footers.
+and 2 for titles.
 The default line length is two inches less than the page width
 (e.g.,
 6.5i on U.S.\& letter paper).
 The default page offset
 (left margin)
 is determined by the output device;
-it is typically 1.0i on typesetting devices and 0 on terminals.
+it is typically 1.0i on typesetters and 0 on terminals.
 .TL
 .b .xl
 .i \(+-n
@@ -685,7 +687,7 @@ of every odd-numbered page.
 .TL
 .b .hx
 .DE
-Suppress headers and footers
+Suppress titles
 on the next page.
 .TL
 .b .$h
@@ -1247,7 +1249,7 @@ It has no effect in \*N mode.
 .DE
 Underline
 .i W.
-On typesetting output devices,
+On typesetters,
 this is true underlining,
 in contrast to the
 .b .ul
@@ -1255,7 +1257,7 @@ request,
 which changes to the
 .q "underline font"
 (usually italics in \*G).
-On terminal output devices,
+On terminals,
 .i W
 is surrounded by underscores.
 This argument should not be subject to adjustment,
@@ -1271,12 +1273,11 @@ is reliable only when filling is disabled.
 Set
 .i W
 in a box.
-On typesetting output devices,
+On typesetters,
 .i W
 is surrounded by rules (lines).
-On terminal output devices,
-.i W
-is simulated with ISO\~6429 color escape sequences
+On terminals,
+boxing is simulated with device escape sequences
 or surrounded by vertical bars.
 It is not marked specially on
 .i groff 's
@@ -1288,6 +1289,18 @@ or breaking;
 .b .bx
 is reliable only when filling is disabled.
 .sh 1 "Preprocessor Support"
+.TL
+.b .[
+.DE
+Begin
+.i \%@g@refer (1)
+bibliographic reference.
+.TL
+.b .]
+.DE
+End
+.i \%@g@refer
+bibliographic reference.
 .TL
 .b .EQ
 .i A
@@ -1361,7 +1374,7 @@ is
 you can call
 .b .TH
 after some table rows
-to repeat them across columns or pages.
+to repeat them as headings at the tops of pages or columns.
 If you want a table to float,
 surround the
 .b .TS
@@ -1415,7 +1428,7 @@ leaving the drawing position at the bottom of the picture.
 .DE
 End
 .i \%@g@pic
-picture,
+picture with flyback,
 leaving the drawing position at the top of the picture.
 .TL
 .b .IS
@@ -1442,7 +1455,7 @@ leaving the drawing position at the bottom of the picture.
 .DE
 End
 .i ideal
-picture,
+picture with flyback,
 leaving the drawing position at the top of the picture.
 .TL
 .b .GS
@@ -1473,7 +1486,7 @@ leaving the drawing position at the bottom of the picture.
 .DE
 End
 .i \%@g@grn
-picture,
+picture with flyback,
 leaving the drawing position at the top of the picture.
 .sh 1 "Formal Documents"
 .TL
@@ -1558,7 +1571,7 @@ backslashes must precede
 .)f
 For example,
 \[lq]\c
-.b ".++ RA |||\eEn(ch.%|" \[rq]
+.b ".++ RA ###\eEn(ch.%#" \[rq]
 numbers appendices and pages as
 .bi A .\c
 .bi n
@@ -1576,15 +1589,15 @@ etc.\&)
 should be preceded by a
 .b .+c
 call.
-It is easier when using
-\*T to put the front matter
-at the end of the paper,
-so that the table of contents
-can be collected and put out;
-this material can then be resequenced
-by a tool that processes the output format,
-or physically moved
-to the beginning of the printed document.
+Because \*T formats the document
+in a single pass,
+a table of contents can be automatically produced only
+at the end of the paper.
+You can resequence this material with the
+.b pdfswitchtopage
+macro (for PDF output)
+or a tool that processes \*T output,
+or physically recollate the pages of a printed document.
 .TL
 .b .+c
 .i T
@@ -1733,14 +1746,11 @@ the text from a figure.
 .TL
 .b .ep
 .DE
-End this page,
-but do not begin the next page.
-Useful for forcing out footnotes,
-but other than
-that hardly ever used.
-Must be followed by a
-.b .bp
-request or the end of input.
+End the page,
+flushing pending footnotes.
+A document should then end
+or call
+.b .bp .
 .\" dead-tree pagination
 .br
 .ne 6v
@@ -1852,7 +1862,7 @@ otherwise continue with the number modified by
 .b .sk
 .DE
 Leave the next output page blank
-except for headers and footers.
+except for titles.
 This can reserve space
 for a full-page diagram
 produced externally
@@ -1893,8 +1903,8 @@ Interpolate delayed text number surrounded by square brackets:
 .ST {
 .DE
 Begin superscripting:
-move upward and reduce the type size.
-The line height is increased above by
+move upward and reduce type size.
+The line height increases above by
 .NR (sx
 [0.2m]
 to accommodate the superscript.
@@ -1904,7 +1914,7 @@ output a left square bracket.
 .ST }
 .DE
 End superscripting:
-reverse the motion and type size change of
+reverse motion and type size change of
 .ST { .
 In \*N mode,
 output a right square bracket.
@@ -1926,8 +1936,8 @@ output a right square bracket.
 .ST <
 .DE
 Begin subscripting:
-move downward and reduce the type size.
-The line height is increased below by
+move downward and reduce type size.
+The line height increases below by
 .NR (sx
 to accommodate the subscript.
 In \*N mode,
@@ -1936,7 +1946,7 @@ output a left angle bracket.
 .ST >
 .DE
 End subscripting:
-reverse the motion and type size change of
+reverse motion and type size change of
 .ST < .
 In \*N mode,
 output a right angle bracket.
@@ -2153,7 +2163,7 @@ for a \*T built-in function
 .b \e ).
 .pp
 The type code can carry a variety of annotations.
-A section sign \(sc indicates features interpreted by \*T
+A section sign \(sc indicates features implemented by \*T
 rather than the \*(ME package.
 The dagger \(dg and double dagger \(dd identify user-definable macros.
 Those marked with

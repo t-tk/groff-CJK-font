@@ -26,7 +26,7 @@ groff="${abs_top_builddir:-.}/test-groff"
 #
 # Based on an example by Bjarni Igni Gislason.
 
-EXAMPLE='.TH tbl\-tabs\-test 1 2020-10-20 "groff test suite"
+input='.TH tbl\-tabs\-test 1 2020-10-20 "groff test suite"
 .SH Name
 tbl\-tabs\-test \- see if tbl messes up the tab stops
 .SH Description
@@ -58,27 +58,29 @@ case $#
 esac
 .EE'
 
-OUTPUT=$(printf "%s\n" "$EXAMPLE" | "$groff" -Tascii -P-cbou -t -man)
-FAIL=
+output=$(printf "%s\n" "$input" | "$groff" -Tascii -P-cbou -t -man)
+echo "$output"
 
-if ! echo "$OUTPUT" | grep -Eq '^ {12}if foo$'
+fail=
+
+if ! echo "$output" | grep -Eq '^ {10}if foo$'
 then
-    FAIL=yes
+    fail=yes
     echo "first tab stop is wrong" >&2
 fi
 
-if ! echo "$OUTPUT" | grep -Eq '^ {17}bar$'
+if ! echo "$output" | grep -Eq '^ {15}bar$'
 then
-    FAIL=yes
+    fail=yes
     echo "second tab stop is wrong" >&2
 fi
 
-if ! echo "$OUTPUT" | grep -Eq '^ {22}qux$'
+if ! echo "$output" | grep -Eq '^ {20}qux$'
 then
-    FAIL=yes
+    fail=yes
     echo "third tab stop is wrong" >&2
 fi
 
-test -z "$FAIL"
+test -z "$fail"
 
 # vim:set ai noet sw=4 ts=4 tw=72:

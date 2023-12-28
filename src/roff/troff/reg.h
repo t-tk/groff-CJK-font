@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
@@ -30,10 +29,19 @@ public:
   virtual void set_value(units);
 };
 
+// TODO: Use template to parameterize class in the pointed-to data type?
+
 class readonly_register : public reg {
   int *p;
 public:
   readonly_register(int *);
+  const char *get_string();
+};
+
+class readonly_boolean_register : public reg {
+  bool *p;
+public:
+  readonly_boolean_register(bool *);
   const char *get_string();
 };
 
@@ -64,11 +72,17 @@ public:
 };
 
 extern object_dictionary register_dictionary;
-extern void set_number_reg(symbol nm, units n);
+extern void set_register(symbol nm, units n);
 extern void check_output_limits(int x, int y);
 extern void reset_output_registers();
 
-reg *lookup_number_reg(symbol);
+extern reg *look_up_register(symbol);
 #if 0
-void inline_define_reg();
+void inline_define_register();
 #endif
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

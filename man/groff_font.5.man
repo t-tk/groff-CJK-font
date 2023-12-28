@@ -48,7 +48,8 @@ device and font description files
 .SH Description
 .\" ====================================================================
 .
-.\" BEGIN Keep parallel with groff.texi node "Device and Font Files".
+.\" BEGIN Keep parallel with groff.texi node "Device and Font
+.\" Description Files".
 The
 .I groff
 font and output device description formats are slight
@@ -94,7 +95,7 @@ among many others,
 while the
 .B utf8
 device
-(for terminal emulators)
+(for terminals)
 has only font descriptions for the roman,
 italic,
 bold,
@@ -157,7 +158,7 @@ character and extend to the end of a line.
 Empty lines are ignored.
 .
 .
-.TP
+.TP 8n \" "vert n" + 2n
 .BI family\~ fam
 The default font family is
 .IR fam .
@@ -597,7 +598,7 @@ and the same comment syntax is supported.
 Empty lines are ignored throughout.
 .
 .
-.TP
+.TP 8n \" "name F" + 2n
 .BI name\~ F
 The name of the font
 .RI is\~ F .
@@ -609,7 +610,7 @@ Simple integers are valid,
 but their use is discouraged.
 .
 .RI ( groff
-requests and escape sequences interpret non-negative font names as
+requests and escape sequences interpret non-negative integers as
 mounting positions instead.
 .
 Further,
@@ -673,8 +674,9 @@ The list of ligatures must not extend over more than one line.
 .B special
 The font is
 .IR special :
-when a glyph is requested that is not present in the current font,
-it is sought in any mounted fonts that bear this property.
+when a glyph is requested that is not present in the formatter's
+currently selected font,
+the glyph is sought in any mounted fonts that bear this property.
 .
 .
 .P
@@ -710,7 +712,7 @@ The directive
 .B charset
 starts the character set subsection.
 .
-(For typesetter devices,
+(On typesetters,
 this directive is misnamed since it starts a list of glyphs,
 not characters.)
 .
@@ -731,20 +733,15 @@ spaces or tabs and organized as follows.
 .P
 .I name
 identifies the glyph:
-if
-.I name
-is a printable
-.RI character\~ c ,
-it corresponds to the
+a printable
+.RI character\~ c
+corresponds to the
 .I troff \" generic
 ordinary
-.RI character\~ c .
-.
-If
-.I name
-is a multi-character sequence not beginning with
+.RI character\~ c ,
+and a multi-character sequence not beginning with
 .BR \[rs] ,
-it corresponds to the GNU
+corresponds to the GNU
 .I troff \" GNU
 special character escape sequence
 \[lq]\c
@@ -875,7 +872,7 @@ it should be less than the italic correction.
 .
 .
 .P
-For fonts used with typesetting devices,
+For fonts used with typesetters,
 the
 .I type
 field gives a featural description of the glyph:
@@ -893,7 +890,7 @@ and stored in the
 .B ct
 register.
 .
-In font descriptions for terminal devices,
+In font descriptions for terminals,
 all glyphs might have a type of zero,
 regardless of their appearance.
 .
@@ -1020,7 +1017,8 @@ the space between them should be increased
 .
 Most kerning pairs should have a negative value
 .RI for\~ n .
-.\" END Keep parallel with groff.texi node "Device and Font Files".
+.\" END Keep parallel with groff.texi node "Device and Font Description
+.\" Files".
 .
 .
 .br

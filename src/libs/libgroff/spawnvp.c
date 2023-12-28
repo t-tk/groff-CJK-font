@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
 #ifdef HAVE_CONFIG_H
-# include "config.h"
+# include <config.h>
 #endif
 
 #include <stdio.h>
@@ -117,4 +117,8 @@ spawnvp_wrapper(int mode, char *path, char **argv)
 
 #endif  /* __MSDOS__ || _WIN32 */
 
-/* spawnvp.c: end of file */
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

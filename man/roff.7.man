@@ -73,9 +73,9 @@ The manual pages on Unix systems
 (\[lq]man\~pages\[rq])
 and bestselling books on software engineering,
 including Brian Kernighan and Dennis Ritchie's
-.I The C Programming Language
+.I "The C Programming Language"
 and W.\& Richard Stevens's
-.I Advanced Programming in the Unix Environment
+.IR "Advanced Programming in the Unix Environment" ,
 have been written using
 .I roff
 systems.
@@ -89,9 +89,9 @@ implementation.
 .
 .P
 Below we present
-typographical concepts that form the background of all
+typographical concepts foundational to understanding any
 .I roff
-implementations,
+implementation,
 narrate the development history of some
 .I roff
 systems,
@@ -353,8 +353,9 @@ formatter translates horizontal tab characters,
 also called simply \[lq]tabs\[rq],
 in the input into movements to the next tab stop.
 .
-These tab stops are by default located every half inch measured from the
-current position on the input line.
+Tab stops are by default located every half inch measured from the
+drawing position corresponding to the beginning of the input line;
+see subsection \[lq]Page geometry\[rq] below.
 .
 With them,
 simple tables can be made.
@@ -473,8 +474,6 @@ formatter scans the replacement for further requests,
 macro calls,
 and escape sequences.
 .
-.
-.P
 In
 .I roff
 systems,
@@ -532,8 +531,9 @@ system imposes a rectangular coordinate system with its upper left
 corner as the origin.
 .
 Coordinate values are in basic units and increase down and to the right.
-Useful ones are therefore always positive and within numeric ranges
+Useful ones are typically positive and within numeric ranges
 corresponding to the page boundaries.
+.\" You could draw an arc of a circle whose center is off the page.
 .
 .
 .P
@@ -1284,6 +1284,8 @@ preprocessor for formatting tables,
 also by Lesk.
 .
 .
+.br
+.ne 3v
 .P
 For Unix Version\~7
 (January 1979),
@@ -1435,15 +1437,16 @@ In 2007, \" TODO: verify
 Caldera/SCO and Sun Microsystems,
 having acquired rights to AT&T Documenter's Workbench (DWB)
 .I troff
-(a descendant of the Bell Labs code),
+(a descendant of Bell Labs device-independent
+.IR troff ),
 released it under a free but GPL-incompatible license.
 .
 .UR https://\:github\:.com/\:n\-t\-roff/\:DWB3.3
 This implementation
 .UE
-was made portable to modern POSIX systems,
-and adopted and enhanced first by Gunnar Ritter and then Carsten Kunze
-to produce
+was made portable to modern POSIX systems.
+.
+Gunnar Ritter and later Carsten Kunze then enhanced it to produce
 .UR https://github.com/n-t-roff/heirloom-doctools
 Heirloom Doctools
 .I troff
@@ -1527,8 +1530,7 @@ taken as the input
 to the next,
 without passing through secondary storage.
 .
-(On non-Unix systems,
-pipelines may have to be simulated with temporary files.)
+(Non-Unix systems may simulate pipelines with temporary files.)
 .
 .
 .RS
@@ -1552,7 +1554,7 @@ language input to the formatter,
 which in turn generates a document in a page description language that
 is then interpreted by a postprocessor for viewing,
 printing,
-or further processing.
+or further handling.
 .
 .
 .P
@@ -1576,7 +1578,7 @@ Most
 .I roff
 input files employ the macros of a document formatting package,
 intermixed with instructions for one or more preprocessors,
-and seasoned with escape sequences and requests from the
+and are seasoned with escape sequences and requests from the
 .I roff
 language.
 .
@@ -1757,7 +1759,7 @@ particularly if they are similar.
 The names of the devices and their driver programs are not standardized.
 .
 Technological fashions evolve;
-the devices used for document preparation when AT&T
+the devices popular for document preparation when AT&T
 .I troff \" AT&T
 was first written in the 1970s are no longer used in production
 environments.
@@ -2075,7 +2077,7 @@ formatter.
 Several traditions have accrued in service of these goals.
 .
 .
-.IP \[bu] 2n
+.IP \[bu] 3n
 Follow sentence endings in the input with newlines to ease their
 recognition.
 .\" Texinfo: (@pxref{Sentences}).
@@ -2278,14 +2280,14 @@ It is also possible to have the mode automatically selected when a
 file is loaded into the editor.
 .
 .
-.IP \(bu 2n
-The most general method is to include file-local variables at the end of
+.IP \[bu] 3n
+The most general approach includes file-local variables at the end of
 the file;
 we can also configure the fill column this way.
 .
 .
 .RS
-.IP
+.RS
 .EX
 \&.\[rs]" Local Variables:
 \&.\[rs]" fill\-column: 72
@@ -2293,40 +2295,40 @@ we can also configure the fill column this way.
 \&.\[rs]" End:
 .EE
 .RE
+.RE
 .
-.IP \(bu
+.
+.IP \[bu]
 Certain file name extensions,
-such as those commonly used by man pages,
-trigger the automatic activation of the
+like those often
+used by man pages,
+activate
 .I nroff
-mode.
+mode automatically.
 .
 .
 .br
 .ne 3v
-.IP \(bu
-Technically,
-having the sequence
-.
+.IP \[bu]
+Loading a file with the sequence
 .
 .RS
-.IP
+.RS
 .EX
 \&.\[rs]" \%\-*\- nroff \-*\-
 .EE
 .RE
 .
-.
-.IP
-in the first line of a file will cause Emacs to enter the
+in its first line into an Emacs buffer causes the editor to enter its
 .I nroff
-major mode when it is loaded into the buffer.
+major mode.
 .
 Unfortunately,
 some implementations of the
 .MR man 1
 program are confused by this practice,
 so we discourage it.
+.RE
 .
 .
 .\" ====================================================================
@@ -2365,7 +2367,7 @@ and \[lq]syntax\[rq].
 Then put the following at the end of your
 .I roff
 files,
-after any Emacs configuration:
+after any Emacs configuration.
 .\" ...because Emacs pattern-matches against 3000 bytes from the end of
 .\" the buffer [or until hitting a 0x0C (FF, form-feed control)] for
 .\" "Local Variables:", but Vim only checks as many lines as its
@@ -2531,12 +2533,8 @@ and can be found at Ralph Corderoy's site
 (see above)
 or via Internet search.
 .
-.
-.P
-Of foremost significance are two mentioned in section \[lq]History\[rq]
-above,
-describing the language and its device-independent implementation,
-respectively.
+Of foremost significance are those describing the language and its
+device-independent implementation.
 .
 .
 .P
@@ -2568,32 +2566,30 @@ GitHub repository
 .SS "Manual pages"
 .\" ====================================================================
 .
-As a system of multiple components,
-a
+A componentized system like
 .I roff
-system potentially has many man pages,
+potentially has many man pages,
 each describing an aspect of it.
 .
 Unfortunately,
-there is no consistent naming scheme for these pages among the different
-.I roff
+there is no consistent naming scheme for these pages among the various
 implementations.
 .
 .
 .P
-For GNU
+In GNU
 .IR roff ,
 the
 .MR groff @MAN1EXT@
 man page enumerates all man pages distributed with the system,
 and individual pages frequently refer to external resources as well as
-manuals distributed with
-.I groff
-on a variety of topics.
+manuals on a variety of topics
+distributed with
+.IR groff .
 .
 .
 .P
-With other
+In other
 .IR roff s,
 you are on your own,
 but

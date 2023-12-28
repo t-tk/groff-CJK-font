@@ -21,7 +21,9 @@ internet at <http://www.gnu.org/licenses/gpl-2.0.txt>. */
  * build/parse X Font name strings
  */
 
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
 
 #include <X11/Xlib.h>
 #include <X11/Xos.h>

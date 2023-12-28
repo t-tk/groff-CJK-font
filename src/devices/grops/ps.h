@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /* Copyright (C) 1989-2020 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
@@ -20,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 class ps_output {
 public:
   ps_output(FILE *, int max_line_length);
-  ps_output &put_string(const uint16_t *, int, int);
+  ps_output &put_string(const uint16_t *, size_t, int);
   ps_output &put_number(int);
   ps_output &put_fix_number(int);
   ps_output &put_float(double);
@@ -41,8 +40,8 @@ public:
   FILE *get_file();
 private:
   FILE *fp;
-  int col;
-  int max_line_length;		// not including newline
+  size_t col;
+  size_t max_line_length;		// not including newline
   int need_space;
   int fixed_point;
 };
@@ -127,3 +126,9 @@ enum {
 #include "searchpath.h"
 
 extern search_path include_search_path;
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

@@ -1,5 +1,4 @@
-// -*- C++ -*-
-/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2023 Free Software Foundation, Inc.
      Written by James Clark (jjc@jclark.com)
 
 This file is part of groff.
@@ -27,7 +26,7 @@ public:
   int compute_metrics(int style);
   void output();
   void debug_print();
-  void check_tabs(int);
+  void diagnose_tab_stop_usage(int);
 };
 
 box *make_sqrt_box(box *pp)
@@ -51,8 +50,9 @@ int sqrt_box::compute_metrics(int style)
   int r = p->compute_metrics(cramped_style(style));
   printf(".nr " TEMP_REG " \\n[" HEIGHT_FORMAT "]+\\n[" DEPTH_FORMAT
 	 "]+%dM+(%dM/4)\n",
-	 p->uid, p->uid, default_rule_thickness,
-	 (style > SCRIPT_STYLE ? x_height : default_rule_thickness));
+	 p->uid, p->uid, get_param("default_rule_thickness"),
+	 (style > SCRIPT_STYLE ? get_param("x_height")
+			       : get_param("default_rule_thickness")));
   printf(".nr " SIZE_FORMAT " \\n[.ps]\n", uid);
   printf(".ds " SQRT_STRING_FORMAT " " SQRT_CHAR "\n", uid);
   printf(".ds " BAR_STRING " " RADICAL_EXTENSION_CHAR "\n");
@@ -60,7 +60,7 @@ int sqrt_box::compute_metrics(int style)
 	 " 0\\w" DELIMITER_CHAR SQRT_CHAR DELIMITER_CHAR "\n",
 	 uid);
   printf(".if \\n[rst]-\\n[rsb]-%dM<\\n[" TEMP_REG "] \\{",
-	 default_rule_thickness);
+	 get_param("default_rule_thickness"));
 
   printf(".nr " INDEX_REG " 0\n"
 	 ".de " TEMP_MACRO "\n"
@@ -77,7 +77,7 @@ int sqrt_box::compute_metrics(int style)
 	 ".el .nr " INDEX_REG " 0-1\n"
 	 "..\n"
 	 "." TEMP_MACRO "\n",
-	 uid, uid, default_rule_thickness);
+	 uid, uid, get_param("default_rule_thickness"));
 
   printf(".if \\n[" INDEX_REG "]<0 \\{");
 
@@ -99,14 +99,14 @@ int sqrt_box::compute_metrics(int style)
 	 ".\\}\n"
 	 "..\n"
 	 "." TEMP_MACRO "\n",
-	 uid, uid, default_rule_thickness);
-  
+	 uid, uid, get_param("default_rule_thickness"));
+
   printf(".\\}\\}\n");
 
   printf(".nr " SMALL_SIZE_FORMAT " \\n[.ps]\n", uid);
   // set TEMP_REG to the amount by which the radical sign is too big
   printf(".nr " TEMP_REG " \\n[rst]-\\n[rsb]-%dM-\\n[" TEMP_REG "]\n",
-	 default_rule_thickness);
+	 get_param("default_rule_thickness"));
   // If TEMP_REG is negative, the bottom of the radical sign should
   // be -TEMP_REG above the bottom of p. If it's positive, the bottom
   // of the radical sign should be TEMP_REG/2 below the bottom of p.
@@ -142,7 +142,8 @@ int sqrt_box::compute_metrics(int style)
 	 ">?(\\n[" SUP_RAISE_FORMAT "]+\\n[rst])\n",
 	 uid, p->uid, uid);
   // put a bit of extra space above the bar
-  printf(".nr " HEIGHT_FORMAT " +%dM\n", uid, default_rule_thickness);
+  printf(".nr " HEIGHT_FORMAT " +%dM\n", uid,
+	 get_param("default_rule_thickness"));
   printf(".ps \\n[" SIZE_FORMAT "]u\n", uid);
   return r;
 }
@@ -180,7 +181,13 @@ void sqrt_box::debug_print()
   fprintf(stderr, " }");
 }
 
-void sqrt_box::check_tabs(int level)
+void sqrt_box::diagnose_tab_stop_usage(int level)
 {
-  p->check_tabs(level + 1);
+  p->diagnose_tab_stop_usage(level + 1);
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

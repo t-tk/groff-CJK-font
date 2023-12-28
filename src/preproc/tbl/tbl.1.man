@@ -67,7 +67,7 @@ documents
 .B \-v
 .
 .SY @g@tbl
-.B \-\-version
+.B \%\-\-version
 .YS
 .
 .
@@ -123,7 +123,7 @@ option to
 .
 If no
 .I file
-operands are given on the command line,
+operands are present,
 or if
 .I file
 is
@@ -162,6 +162,8 @@ pages
 (see below).
 .
 .
+.\" XXX: The following is a general caveat about preprocessors (or would
+.\" be, once recast); move it.
 .P
 (Experienced
 .I roff
@@ -246,7 +248,7 @@ region options makes a table \[lq]boxed\[rq] for the purpose of later
 discussion.
 .
 .
-.TP
+.TP 16n \" "decimalpoint(c)" + 2n + hand-tuned for PDF
 .B allbox
 Enclose each table entry in a box;
 implies
@@ -257,10 +259,11 @@ implies
 .B box
 Enclose the entire table region in a box.
 .
-As a GNU extension,
-the alternative option name
+GNU
+.I tbl \" GNU
+recognizes
 .B frame
-is also recognized.
+as a synonym.
 .
 .
 .TP
@@ -269,10 +272,11 @@ Center the table region with respect to the current indentation and line
 length;
 the default is to left-align it.
 .
-As a GNU extension,
-the alternative option name
+GNU
+.I tbl \" GNU
+recognizes
 .B centre
-is also recognized.
+as a synonym.
 .
 .
 .TP
@@ -310,10 +314,11 @@ Enclose the entire table region in a double box;
 implies
 .BR box .
 .
-As a GNU extension,
-the alternative option name
+GNU
+.I tbl \" GNU
+recognizes
 .B \%doubleframe
-is also recognized.
+as a synonym.
 .
 .
 .TP
@@ -504,12 +509,13 @@ the second and any further rows' first and second columns are left- and
 right-aligned,
 respectively.
 .
-.\" slack text for window/orphan control
-.\"If more rows of entries are added to the table data,
-.\"they reuse the row definition
-.\".RB \[lq] LR \[rq].
+If more rows of entries are added to the table data,
+they reuse the row definition
+.RB \[lq] LR \[rq].
 .
 .
+.br
+.ne 3v
 .P
 The row definition with the most column descriptors determines the
 number of columns in the table;
@@ -519,6 +525,8 @@ side with
 classifiers as many times as necessary to make the table rectangular.
 .
 .
+.br
+.ne 5v
 .\" ====================================================================
 .SS "Column classifiers"
 .\" ====================================================================
@@ -608,22 +616,23 @@ with respect to each other.
 .
 .
 .IP
-The appearance of
+Decimal separators in
 .I @g@eqn
 equations
 within
 .BR N -classified
 columns
-can be troublesome due to the foregoing textual scan for a decimal
-separator.
+can conflict with
+.IR @g@tbl 's
+use of them for alignment.
 .
-Use the
+Specify the
 .B \%delim
 region option to make
 .I @g@tbl
 ignore the data within
 .I eqn
-delimiters for that purpose.
+delimiters.
 .
 .
 .TP
@@ -650,6 +659,12 @@ if data are found there,
 .I @g@tbl
 issues a diagnostic message.
 .
+If the entire row definition consists of these classifiers,
+it is treated as a
+.RB \[lq] _ \[rq]
+occupying a row of table entries,
+and no corresponding data are expected.
+.
 .
 .TP
 .B =
@@ -659,6 +674,12 @@ An empty table entry is expected to correspond to this classifier;
 if data are found there,
 .I @g@tbl
 issues a diagnostic message.
+.
+If the entire row definition consists of these classifiers,
+it is treated as a
+.RB \[lq] = \[rq]
+occupying a row of table entries,
+and no corresponding data are expected.
 .
 .
 .TP
@@ -687,13 +708,13 @@ use the
 .B .T&
 token at the start of a line.
 .
-It is followed by a format specification and table data,
+Follow it with a format specification and table data,
 but
 .I not
 region options.
 .
-The quantity of columns in a new table format thus introduced cannot
-increase relative to the previous table format;
+The quantity of columns in a format thus introduced cannot increase
+relative to the previous format;
 in that case,
 you must end the table region and start another.
 .
@@ -708,10 +729,11 @@ columnar alignment.
 .
 .
 .P
-Attempting to horizontally span in the first column or vertically span
-on the first row is an error.
+Spanning horizontally in the first column or vertically on the first row
+is an error.
 .
-Non-rectangular span areas are also not supported.
+.I @g@tbl
+does not support non-rectangular span areas.
 .
 .
 .\" ====================================================================
@@ -720,11 +742,11 @@ Non-rectangular span areas are also not supported.
 .
 Any number of modifiers can follow a column classifier.
 .
-Arguments to modifiers,
+Modifier arguments,
 where accepted,
 are case-sensitive.
 .
-If the same modifier is applied to a column specifier more than once,
+If a given modifier is applied to a classifier more than once,
 or if conflicting modifiers are applied,
 only the last occurrence has effect.
 .
@@ -885,7 +907,7 @@ of its range.
 Move the column up one half-line,
 \[lq]staggering\[rq] the rows.
 .
-This is a GNU extension.
+This is a Research Tenth Edition Unix extension.
 .
 .
 .TP
@@ -1066,7 +1088,7 @@ do not persist between entries.
 Several forms of table entry are interpreted specially.
 .
 .
-.IP \[bu] 2n
+.IP \[bu] 3n
 If a table row contains only an underscore or equals sign
 .RB ( _
 or
@@ -1076,7 +1098,7 @@ respectively,
 is drawn across the table at that point.
 .
 .
-.IP \[bu] 2n
+.IP \[bu]
 A table entry containing only
 .B _
 or
@@ -1088,7 +1110,7 @@ joining its
 neighbors.
 .
 .
-.IP \[bu] 2n
+.IP \[bu]
 Prefixing a lone underscore or equals sign with a backslash also has
 meaning.
 .
@@ -1270,7 +1292,7 @@ modifiers are not specified for
 columns of a text block's span,
 the default length of the text block
 (more precisely,
-the line length used to process the text block diversion)
+the line length used to process the text block's diversion)
 is computed as
 .IR L \[tmu] C /( N +1),
 .\" ...and rounded to the horizontal motion quantum of the output device
@@ -1398,7 +1420,7 @@ removes constraints endured by users of AT&T
 .IR tbl .\" AT&T
 .
 .
-.IP \[bu] 2n
+.IP \[bu] 3n
 Region options can be specified in any lettercase.
 .
 .
@@ -1468,7 +1490,7 @@ which sees only
 .BR \[rs]$1 ,
 .BR \[rs]$2 ,
 and so on,
-and therefore can't recognize a decimal separator that only appears
+and therefore can't recognize a decimal separator that appears only
 later when
 .I @g@troff
 interpolates a macro or string definition.
@@ -1516,7 +1538,7 @@ displays a usage message,
 while
 .B \-v
 and
-.B \-\-version
+.B \%\-\-version
 show version information;
 all exit afterward.
 .
@@ -1600,12 +1622,12 @@ See section \[lq]Examples\[rq] below for a demonstration.
 .
 .
 .P
-Double horizontal rules are not supported by
-.MR grotty @MAN1EXT@ ;
-single rules are used instead.
+.MR grotty @MAN1EXT@
+does not support
+double horizontal rules;
+it uses single rules instead.
 .
-.I \%grotty
-also ignores half-line motions,
+It also ignores half-line motions,
 so the
 .B u
 column modifier has no effect.
@@ -1613,9 +1635,8 @@ column modifier has no effect.
 On terminal devices
 .RI (\[lq] nroff\~ mode\[rq]),
 horizontal rules and box borders occupy a full vee of space;
-this amount is doubled for
 .B doublebox
-tables.
+doubles that for borders.
 .
 Tables using these features thus require more vertical space in
 .I nroff
@@ -1726,6 +1747,8 @@ _
 .\}
 .
 .
+.br
+.ne 3v
 .\" ====================================================================
 .SH Examples
 .\" ====================================================================

@@ -1,4 +1,4 @@
-#! /usr/bin/env perl
+#!/usr/bin/env perl
 #
 # Copyright (C) 1991-2020 Free Software Foundation, Inc.
 # 

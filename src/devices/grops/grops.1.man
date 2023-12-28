@@ -89,7 +89,7 @@ output driver for PostScript
 .B \-v
 .
 .SY grops
-.B \-\-version
+.B \%\-\-version
 .YS
 .
 .
@@ -130,7 +130,7 @@ is \[lq]\-\[rq],
 .I grotty
 reads the standard input stream.
 .
-Output is written to the standard output stream.
+It writes to the standard output stream.
 .
 .
 .P
@@ -161,12 +161,12 @@ displays a usage message,
 while
 .B \-v
 and
-.B \-\-version
+.B \%\-\-version
 show version information;
 all exit afterward.
 .
 .
-.TP
+.TP 8n \" "-F dir" + 2n
 .BI \-b\~ n
 Work around problems with spoolers,
 previewers,
@@ -510,23 +510,25 @@ where
 is the PostScript name of the font,
 and
 .I file
-is the name of the file containing it;
-lines beginning with
+is the name of the file containing it.
+.
+Blank lines and those
+beginning with
 .B #
-and blank lines are ignored;
+are ignored;
 fields may be separated by tabs or spaces.
 .
 .I file
-is sought using the same mechanism as that for
+is sought using the same mechanism as for
 .I groff
 font description files.
 .
 The
 .I download
-file itself is also sought using this mechanism;
+file itself is as well;
 currently,
-only the first matching file found in the device and font description
-search path is used.
+the first matching file found in the device and font description search
+path is used.
 .
 .
 .P
@@ -605,7 +607,7 @@ should be used.
 .
 .
 .P
-The default stroke and fill color is black.
+The default stroke and fill colors are black.
 .
 For colors defined in the \[lq]rgb\[rq] color space,
 .B setrgbcolor
@@ -624,7 +626,6 @@ some older printers.
 .SS Typefaces
 .\" ====================================================================
 .
-.P
 Styles called
 .BR R ,
 .BR I ,
@@ -646,7 +647,7 @@ each having members in each of these styles.
 .
 .
 .RS
-.TP
+.TP 8n \" BMBI + 2n + hand-tuned for PDF
 .B AR
 .FT AR
 AvantGarde-Book
@@ -841,13 +842,13 @@ Times-BoldItalic
 .
 .
 .br
-.ne 2v
+.ne 3v
 .P
 Another text font is not a member of a family.
 .
 .
 .RS
-.TP
+.TP 8n \" BMBI (above) + 2n + hand-tuned for PDF
 .B ZCMI
 .FT ZCMI
 ZapfChancery-MediumItalic
@@ -869,7 +870,7 @@ Symbol;
 which offers a Euro glyph for use with old devices lacking it;
 and
 .BR ZDR ,
-a reversed version of ZapfDingbats
+a reversed version of Zapf Dingbats
 (with symbols flipped about the vertical axis).
 .
 Most glyphs in these fonts are unnamed and must be accessed using
@@ -1286,7 +1287,7 @@ produces an EPS file.
 .RS
 .P
 .EX
-#! /bin/sh
+#!/bin/sh
 groff \-P\-b16 "$1" > "$1".ps
 gs \-dNOPAUSE \-sDEVICE=bbox \-\- "$1".ps 2> "$1".bbox
 sed \-e "/\[ha]%%Orientation/r $1.bbox" \[rs]
@@ -1400,7 +1401,7 @@ The following is a step-by-step font installation guide for
 .I grops.
 .
 .
-.IP \[bu] 2n
+.IP \[bu] 3n
 Convert your font to something
 .I groff
 understands.
@@ -1610,7 +1611,8 @@ versions 1.19.2 and earlier contained descriptions of a slightly
 different set of the base 35 PostScript level 2 fonts defined by Adobe.
 .
 The older set has 229 glyphs and a larger set of kerning pairs;
-the newer one has 314 glyphs and includes the Euro glyph.
+the newer one has 314 glyphs,
+including the Euro sign.
 .
 For backwards compatibility,
 these old font descriptions are also installed in the
@@ -1696,18 +1698,20 @@ A timestamp
 to use as the output creation timestamp in place of the current time.
 .
 The time is converted to human-readable form using
-.MR ctime 3
+.MR gmtime 3
+and
+.MR asctime 3 ,
 and recorded in a PostScript comment.
 .
 .
 .TP
 .I TZ
-The time zone to use when converting the current time
-(or value of
-.IR SOURCE_DATE_EPOCH )
-to human-readable form;
+The time zone to use when converting the current time to human-readable form;
 see
 .MR tzset 3 .
+If
+.I SOURCE_DATE_EPOCH
+is used, it is always converted to human-readable form using UTC.
 .
 .
 .\" ====================================================================

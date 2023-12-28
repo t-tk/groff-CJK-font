@@ -26,8 +26,11 @@ set -e
 # Ensure .Mt renders correctly.
 
 input='.Dd 2021-02-10
-.Dt mandoc 1
+.Dt foo 1
 .Os groff test suite
+.Sh Name
+.Nm foo
+.Nd frobnicate a bar
 .Sh Authors
 .An -nosplit
 The
@@ -38,6 +41,7 @@ and is maintained by
 .An Ingo Schwarze Aq Mt schwarze@openbsd.org .'
 
 output=$(echo "$input" | "$groff" -Tascii -P-cbou -mdoc)
+echo "$output"
 
 echo "$output" \
     | grep -Fq 'written by Kristaps Dzonsons <kristaps@bsd.lv>'

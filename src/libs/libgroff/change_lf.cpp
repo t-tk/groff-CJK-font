@@ -16,7 +16,10 @@ for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
+
 #include <string.h>
 
 extern char *strsave(const char *);
@@ -35,3 +38,9 @@ void change_lineno(int ln)
 {
   current_lineno = ln;
 }
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

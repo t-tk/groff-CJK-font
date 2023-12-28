@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/sh
 #
 # Copyright (C) 1991-2020 Free Software Foundation, Inc.
 # 

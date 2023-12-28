@@ -106,7 +106,7 @@ input=".TH foo 1 2022-06-07 \"groff test suite\"
 output=$(printf "%s\n" "$input" | "$groff" -man -Tascii -P-cbou 2>&1)
 
 echo "checking that TP macro uses correct input trap 'itc'" >&2
-echo "$output" | grep -Fqx '       --bar[=baz]' || wail # 7 spaces
+echo "$output" | grep -Fqx '     --bar[=baz]' || wail # 5 spaces
 
 test -z "$fail"
 

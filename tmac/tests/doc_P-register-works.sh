@@ -43,11 +43,11 @@ echo "$output"
 
 echo "checking first page footer" >&2
 echo "$output" | grep -En "^groff test suite +2022-12-11 +13$" \
-    | grep '^64:' || wail
+    | grep '^63:' || wail
 
 echo "checking second page footer" >&2
 echo "$output" | grep -En "^groff test suite +2022-12-11 +14$" \
-    | grep '^130:' || wail
+    | grep '^129:' || wail
 
 test -z "$fail"
 

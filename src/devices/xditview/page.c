@@ -4,7 +4,9 @@
  * map page numbers to file position
  */
 
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
 
 #include <X11/Xos.h>
 #include <X11/IntrinsicP.h>

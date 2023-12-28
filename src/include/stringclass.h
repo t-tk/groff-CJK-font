@@ -16,6 +16,10 @@ for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
@@ -192,3 +196,9 @@ inline string &string::operator+=(char c)
 void put_string(const string &, FILE *);
 
 string as_string(int);
+
+// Local Variables:
+// fill-column: 72
+// mode: C++
+// End:
+// vim: set cindent noexpandtab shiftwidth=2 textwidth=72:

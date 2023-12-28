@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/sh
 # ------------------------------------------------------------------------------
 #
 # Function: Format PDF Output from groff Markup

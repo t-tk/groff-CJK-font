@@ -90,7 +90,7 @@ or TeX
 .B \-v
 .
 .SY @g@pic
-.B \-\-version
+.B \%\-\-version
 .YS
 .
 .
@@ -113,19 +113,17 @@ embedded in
 or \*[tx] input files into the language understood by \*[tx] or
 .IR @g@troff .
 .
-It copies the contents of each
-.I file
-to the standard output stream,
-except that lines between
+It copies each
+.IR file 's
+contents to the standard output stream,
+except for lines between
 .B .PS
 and any of
 .BR .PE ,
 .BR .PF ,
 or
 .B .PY
-are interpreted as picture descriptions in the
-.I pic
-language.
+which it interprets as picture descriptions.
 .
 End a
 .I @g@pic
@@ -148,12 +146,13 @@ option to
 .
 If no
 .I file
-operands are given on the command line,
+operands are present,
 or if
 .I file
 is
 .RB \[lq] \- \[rq],
-the standard input stream is read.
+.I @g@pic
+reads the standard input stream.
 .
 .
 .P
@@ -203,12 +202,12 @@ displays a usage message,
 while
 .B \-v
 and
-.B \-\-version
+.B \%\-\-version
 show version information;
 all exit afterward.
 .
 .
-.TP
+.TP 8n \" "-T dev" + 2n
 .B \-c
 Be more compatible with
 .IR tpic ;
@@ -318,6 +317,7 @@ GNU
 .I pic \" GNU
 always does this.
 .
+.
 .TP
 .BI \-T\~ dev
 Generate output for the
@@ -339,7 +339,7 @@ is device-independent.
 .
 This section primarily discusses the differences between GNU
 .I pic \" GNU
-and the Eighth Edition Research Unix version of AT&T
+and the Eighth Edition Unix version of AT&T
 .I pic \" AT&T
 (1985).
 .
@@ -374,15 +374,14 @@ commands it produced for \*[tx].)
 .P
 Lines beginning with
 .B \[rs]
-are passed through transparently;
-a
+are passed through unaltered except for a
 .B %
-is added to the end of the line to avoid unwanted spaces.
+suffix to avoid unwanted spaces.
 .
-You can safely use this feature to change fonts or the value of
+Use this feature to change fonts or the value of
 .BR \[rs]baselineskip .
 .
-Anything else may well produce undesirable results;
+Other applications may produce undesirable results;
 use at your own risk.
 .
 By default,
@@ -413,9 +412,8 @@ You must print that vbox yourself using the command
 .
 for instance.
 .
-Since the vbox has a height of zero
-(it is defined with
-.BR \[rs]vtop )
+Since the vbox has a height of zero\[em]it is defined with
+.BR \[rs]vtop \[em]\c
 this will produce slightly more vertical space above the picture than
 below it;
 .
@@ -430,7 +428,7 @@ would avoid this.
 To give the vbox a positive height and a depth of zero
 (as used by \*[lx]'s
 .IR \%graphics.sty ,
-for example)
+for example),
 define the following macro in your document.
 .
 .RS
@@ -495,31 +493,29 @@ increment
 .I variable
 by 1.
 .
-If
 .I expr3
-is prefixed by
-.B *
-then
-.I variable
-will instead be multiplied by
-.IR expr3 .
-.
-The value of
-.I expr3
-can be negative for the additive case;
+can be negative,
+in which case
 .I variable
 is then tested whether it is greater than or equal to
 .IR expr2 .
 .
-For the multiplicative case,
+A
+.B *
+prefix on
+.I variable
+multiplies it by
 .I expr3
-must be greater than zero.
+(which must be greater than zero)
+at each iteration rather than incrementing it.
 .
-If the constraints aren't met,
-the loop isn't executed.
+If the range constraint on
+.I expr3
+isn't met,
+the loop will not execute.
 .
 .I X
-can be any character not occurring in
+can be any character not in
 .IR body .
 .
 .TP
@@ -533,11 +529,11 @@ otherwise do
 .IR if-false .
 .
 .I X
-can be any character not occurring in
+can be any character not in
 .IR if-true .
 .
 .I Y
-can be any character not occurring in
+can be any character not in
 .IR if-false .
 .
 .TP
@@ -552,7 +548,7 @@ must be an expression,
 a position,
 or text.
 .
-This is useful for debugging.
+This feature is useful for debugging.
 .
 .TP
 .BI command\~ arg\c
@@ -575,7 +571,7 @@ allows the values of
 .I pic
 variables to be passed to the formatter.
 .
-For example,
+Thus,
 .
 .RS
 .EX
@@ -661,7 +657,7 @@ lines will be read only until a line the first word of which is
 that line will then be discarded.
 .
 .I X
-can be any character not occurring in
+can be any character not in
 .IR body .
 .
 For example,
@@ -731,34 +727,38 @@ to their default values times the new value of
 .
 .
 .TP
-\fBplot\fR \fIexpr\fR [\fB"\,\fItext\*(ic\fB"\fR]
-This is a text object which is constructed by using
+.BI plot\~ expr\~\c
+.RI [\[dq] text \[dq]]
+Create a text object by using
 .I text
-as a format string for sprintf
+as a format string for
+.MR sprintf 3
 with an argument of
 .IR expr .
 .
 If
 .I text
-is omitted a format string of
+is omitted,
 .B \[dq]%g\[dq]
-is used.
+is implied.
 .
-Attributes can be specified in the same way as for a normal text
-object.
-Be very careful that you specify an appropriate format string;
-.I @g@pic
-does only very limited checking of the string.
+Attributes can be specified in the same way as for a normal text object.
 .
-This is deprecated in favour of
+.B Caution:
+be very careful that you specify an appropriate format string in
+.I text;
+.IR @g@pic 's
+validation of it is limited.
+.
+.B plot
+is deprecated in favour of
 .BR sprintf .
 .
 .TP
 .IB var \~:=\~ expr
 .RS
-This syntax resembles variable assignment with
-.B =
-except that
+Update an existing variable.
+.
 .I var
 must already be defined,
 and
@@ -883,75 +883,58 @@ A bare expression,
 .IR expr ,
 is acceptable as an attribute;
 it is equivalent to
-.IR dir\ expr ,
+.RI \[lq] "dir expr" \[rq],
 where
 .I dir
 is the current direction.
 .
-For example
-.LP
-.RS
-.B line 2i
-.RE
-.LP
-means draw a line 2\ inches long in the current direction.
+For example,
+.RB \[lq] "line 2i" \[rq]
+draws a line 2\~inches long in the current direction.
 .
 The \[oq]i\[cq]
 (or \[oq]I\[cq])
 character is ignored;
 to use another measurement unit,
 set the
-.I scale
+.B scale
 variable to an appropriate value.
 .
 .
-.LP
+.P
 The maximum width and height of the picture are taken from the variables
 .B maxpswid
 and
 .BR maxpsht .
 .
 Initially,
-these have values 8.5 and 11.
+these have values 8.5 and 11,
+respectively.
 .
 .
 .LP
-Scientific notation is allowed for numbers.
-For example
-.
-.
-.RS
-.LP
-.B
-x = 5e\-2
-.RE
+Scientific notation is allowed for numbers,
+as with
+.RB \[lq] "x = 5e\-2" \[rq].
 .
 .
 .LP
 Text attributes can be compounded.
 .
 For example,
-.
-.RS
-.LP
-.B
-"foo" above ljust
-.RE
-.
-.
-.LP
+.RB \[lq]\^ "\[dq]foo\[dq] above ljust" \^\[rq]
 is valid.
 .
 .
 .LP
-There is no limit to the depth to which blocks can be examined.
+There is no limit to the depth to which blocks can be nested.
 .
 For example,
 .RS
 .LP
 .EX
 [A: [B: [C: box ]]] with .A.B.C.sw at 1,2
-circle at last [\^].A.B.C
+circle at last [].A.B.C
 .EE
 .RE
 .
@@ -961,8 +944,8 @@ is acceptable.
 .
 .
 .LP
-Arcs now have compass points determined by the circle of which the arc
-is a part.
+Arcs have compass points determined by the circle of which the arc is a
+part.
 .
 .
 .LP
@@ -970,7 +953,8 @@ Circles,
 ellipses,
 and arcs can be dotted or dashed.
 .
-In \*[tx] mode splines can be dotted or dashed also.
+In \*[tx] mode,
+splines can be dotted or dashed as well.
 .
 .
 .LP
@@ -990,33 +974,36 @@ is used.
 .
 Initially,
 .B boxrad
-has a value of\ 0.
+has a value of\~0.
 .
 A box with rounded corners can be dotted or dashed.
 .
 .
-.LP
-Boxes can have slanted sides.
-.
-This effectively changes the shape of a box from a rectangle to an
-arbitrary parallelogram.
+.br
+.ne 3v
+.P
+Boxes can have slanted sides,
+generalizing them from rectangles to parallelograms.
 .
 The
-.B xslanted
+.B \%xslanted
 and
-.B yslanted
-attributes specify the x and y\~offset of the box's upper right
-corner from its default position.
+.B \%yslanted
+attributes specify the
+.I x
+and
+.I y
+offsets of the box's upper right corner from its default position.
 .
 .
 .LP
 The
 .B .PS
-line can have a second argument specifying a maximum height for
-the picture.
+line accepts a second argument specifying a maximum height for the
+picture.
 .
-If the width of zero is specified the width will be ignored in computing
-the scaling factor for the picture.
+If a width of zero is specified,
+it will be ignored when computing the scaling factor for the picture.
 .
 GNU
 .I pic \" GNU
@@ -1024,38 +1011,39 @@ will always scale a picture by the same amount vertically as well as
 horizontally.
 .
 This is different from DWB 2.0
-.I pic \" foreign
+.IR pic , \" foreign
 which may scale a picture by a different amount vertically than
 horizontally if a height is specified.
 .
 .
 .LP
-Each text object has an invisible box associated with it.
+Each text object has an associated invisible box that determines its
+compass points and implicit motion.
 .
-The compass points of a text object are determined by this box.
+The dimensions of the box are taken from its width and height
+attributes.
 .
-The implicit motion associated with the object is also determined
-by this box.
+If the width attribute is not supplied,
+the value of
+.B textwid
+is assumed.
 .
-The dimensions of this box are taken from the width and height
-attributes;
-if the width attribute is not supplied then the width will be taken to
-be
-.BR textwid ;
-if the height attribute is not supplied then the height will be taken to
-be the number of text strings associated with the object times
+If the height attribute is not supplied,
+the height will default to the number of text strings associated with
+the object times
 .BR textht .
 .
 Initially,
 .B textwid
 and
 .B textht
-have a value of 0.
+have values of\~0.
 .
 .
 .LP
 In
 (almost all)
+.\" XXX: So what _are_ the exceptions?
 places where a quoted text string can be used,
 an expression of the form
 .
@@ -1064,13 +1052,13 @@ an expression of the form
 .BI sprintf(\[dq] format \[dq],\~ arg ,\fR\~.\|.\|.\fB)
 .
 .
-.LP
-can also be used;
-this will produce the arguments formatted according to
+.P
+can be used instead;
+this will produce the arguments per the
 .IR format ,
 which should be a string as described in
-.MR printf 3
-appropriate for the number of arguments supplied.
+.MR printf 3 ,
+and appropriate to the quantity of arguments supplied.
 .
 Only the modifiers
 .RB \[lq] # \[rq],
@@ -1093,45 +1081,43 @@ are supported.
 .LP
 The thickness of the lines used to draw objects is controlled by the
 .B linethick
-variable.
+variable,
+which is measured in points.
 .
-This gives the thickness of lines in points.
+A negative value indicates the default thickness.
 .
-A negative value means use the default thickness:
-in \*[tx] output mode,
-this means use a thickness of 8 milliinches;
-in \*[tx] output mode with the
+In \*[tx] output mode when the
 .B \-c
-option,
-this means use the line thickness specified by
-.B .ps
-lines;
-in
-.I troff
-output mode,
-this means use a thickness proportional to the pointsize.
+option is not given,
+this means 8 milliinches.
 .
-A zero value means draw the thinnest possible line supported by
-the output device.
+In
+.I troff
+and \*[tx]
+.B \-c
+output modes,
+the default thickness corresponds to the type size.
+.
+(Thus,
+if the type size is 10 points,
+a line is 10 points thick.)
+.
+A
+.B linethick
+value of zero draws the thinnest possible line supported by the output
+device.
 .
 Initially,
-it has a value of \-1.
+.B linethick
+has a value of \-1.
 .
-There is also a
+A
 .BR thick [ ness ]
-attribute.
+attribute is also available.
 .
 For example,
-.
-.
-.RS
-.LP
-.B circle thickness 1.5
-.RE
-.
-.
-.LP
-would draw a circle using a line with a thickness of 1.5 points.
+.RB \[lq] "circle thickness 1.5" \[rq]
+draws a circle with a line thickness of 1.5 points.
 .
 The thickness of lines is not affected by the
 value of the
@@ -1145,35 +1131,37 @@ line.
 .LP
 Boxes
 (including boxes with rounded corners or slanted sides),
-circles and ellipses can be filled by giving them an attribute of
-.BR fill [ ed ].
-.
-This takes an optional argument of an expression with a value between
+circles,
+and ellipses can be filled by giving them an attribute of
+.BR fill [ ed ],
+which takes an optional expression argument with a value between
 0 and 1;
 0 will fill it with white,
 1 with black,
 values in between with a proportionally gray shade.
 .
-A value greater than 1 can also be used:
-this means fill with the
-shade of gray that is currently being used for text and lines.
+A value greater than 1 is interpreted as the shade of gray that is
+being used for text and lines.
 .
 Normally this will be black,
 but output devices may provide a mechanism for changing this.
 .
 Without an argument,
-then the value of the variable
+the value of the variable
 .B \%fillval
-will be used.
+is used.
 .
 Initially,
-this has a value of 0.5.
+.B \%fillval
+has a value of 0.5.
 .
-The invisible attribute does not affect the filling of objects.
+The
+.B \%invisible
+attribute does not affect the filling of objects.
 .
-Any text associated with a filled object will be added after the object
-has been filled,
-so that the text will not be obscured by the filling.
+Text associated with a filled object is added after the object is
+filled,
+so that the text is not obscured by the filling.
 .
 .
 .P
@@ -1205,6 +1193,10 @@ request
 (see
 .MR groff @MAN7EXT@ ).
 .
+.I @g@pic
+assumes at the beginning of each picture that the stroke and fill colors
+are set to the device defaults.
+.
 .
 .LP
 To change the name of the vbox in \*[tx] mode,
@@ -1213,42 +1205,33 @@ set the pseudo-variable
 (which is actually a specially parsed command)
 within a picture.
 .
-Example:
+For example,
 .RS
-.LP
-.B .PS
-.br
-.B figname = foobar;
-.br
-.B ...
-.br
-.B .PE
+.EX
+\&.PS
+figname = foobar;
+circle "dig here";
+\&.PE
+.EE
 .RE
 .
-.
-.LP
-The picture is then available in the box
+makes the picture available in the box
 .BR \[rs]foobar .
 .
 .
 .LP
-.I @g@pic
-assumes that at the beginning of a picture both glyph and fill color are
-set to the default value.
-.
-.
-.LP
-Arrow heads will be drawn as solid triangles if the variable
-.B arrowhead
+Arrow heads are drawn as solid triangles if the variable
+.B \%arrowhead
 is non-zero and either \*[tx] mode is enabled or the
 .B \-n
-option has not been given.
+option is not used.
 .
 Initially,
-.B arrowhead
-has a value of\ 1.
+.B \%arrowhead
+has a value of\~1.
 .
-Solid arrow heads are always filled with the current outline color.
+Solid arrow heads are always filled with the current outline (stroke)
+color.
 .
 .
 .LP
@@ -1262,30 +1245,31 @@ The
 .B \-T
 option is therefore redundant.
 .
-All numbers are taken to be in inches;
-numbers are never interpreted to be in
+Except where noted,
+all measurements and dimensions use inches implicitly;
+they are never interpreted as
 .I troff
-machine units.
+basic units.
 .
 .
 .LP
 Objects can have an
-.B aligned
-attribute.
-.
-This will only work if the postprocessor is
+.B \%aligned
+attribute,
+but it is supported only by the
 .MR grops @MAN1EXT@
-or
-.MR gropdf @MAN1EXT@ .
+and
+.MR gropdf @MAN1EXT@
+output drivers.
 .
-Any text associated with an object having the
-.B aligned
-attribute will be rotated about the center of the object
-so that it is aligned in the direction from the start point
-to the end point of the object.
+Any text associated with an
+.B \%aligned
+object is rotated about the object's center
+such that it is oriented along a line connecting the start and end
+points of the object.
 .
-This attribute will have no effect on objects whose start and end points
-are coincident.
+.B \%aligned
+has no effect on objects whose start and end points are coincident.
 .
 .
 .LP
@@ -1311,150 +1295,104 @@ for i = 1 to 4 do {
 .
 .
 .\" ====================================================================
-.SH Conversion
+.SS "Converting \f[I]pic\f[] to other image formats"
 .\" ====================================================================
 .
-To obtain a stand-alone picture from a
+To create a stand-alone graphics file from a
 .I @g@pic
 file,
-enclose your
+first compose the picture.
+.
+Bracket your
 .I pic \" language
 code with
 .B .PS
 and
 .B .PE
-requests;
-.I roff
-configuration commands may be added at the beginning of the file,
-but no
-.I roff
-text.
+tokens.
 .
-.
-.LP
-It is necessary to feed this file into
 .I groff
-without adding any page information,
-so you must check which
-.B .PS
-and
-.B .PE
-requests are actually called.
+requests that don't produce formatted output may precede
+.BR .PS ,
+but no text should be formatted.
 .
-For example,
-the
+That restriction applies to the injection of text by macro packages,
+which may include a page number even on the first page,
+as
 .I mm
-macro package adds a page number,
-which is very annoying.
+does by default.
 .
-At the moment,
-calling standard
-.I groff
-without any macro package works.
-.
-Alternatively,
-you can define your own requests,
-e.g.,
-to do nothing:
+Writing a \[lq]raw\[rq]
+.I roff
+document that uses no macro package is an economical approach.
 .
 .
-.LP
-.RS
-.EX
-\&.de PS
-\&..
-\&.de PE
-\&..
-.EE
-.RE
-.
-.
-.LP
-.I groff
-itself does not provide direct conversion into other graphics file
-formats.
-.
-But there are lots of possibilities if you first transform your
-picture into PostScript\*R format using the
-.I groff
-option
-.BR \-Tps .
-.
-Since this
-.IR ps -file
-lacks BoundingBox information it is not very useful by itself, but it
-may be fed into other conversion programs, usually named
-.BI ps2 other
-or
-.BI psto other
-or the like.
-.
-Moreover,
-the PostScript interpreter Ghostscript
-.RI ( gs (1))
-has built-in graphics conversion devices that are called with the option
-.
-.
-.LP
-.RS
-.BI "gs \-sDEVICE=" <devname>
-.RE
-.
-.
-.LP
-Call
-.
-.
-.LP
-.RS
-.B gs \-\-help
-.RE
-.
-.
-.LP
-for a list of the available devices.
-.
-.
-.LP
-An alternative may be to use the
-.B \-Tpdf
-option to convert your picture directly into
-.B PDF
-format.
-.
-The MediaBox of the file produced can be controlled by passing a
-.B \-P\-p
-papersize to
-.IR groff .
-.
-.
-.br
-.ne 3v
 .P
-As the Encapsulated PostScript File Format
-.B EPS
-is getting more and more important,
-and the conversion wasn't regarded trivial in the past you might be
-interested to know that there is a conversion tool named
-.I ps2eps
-which does the right job.
+Next,
+convert
+the
+.IR roff / pic
+input into the desired format.
 .
-It is much better than the tool
-.I ps2epsi
-packaged with
-.IR gs .
+.I groff
+distributes a simple utility,
+.MR pic2graph @MAN1EXT@ ,
+for this purpose.
+.
+Other possibilities exist,
+particularly if you first transform your picture into PostScript format
+with
+.RB \[lq] "groff \-T ps" \[rq].
+.
+However,
+such a PostScript file will lack bounding box information;
+.I roff
+formatters produce page-sized output.
+.
+Several tools with names beginning \[lq]psto\[rq] or \[lq]ps2\[rq] exist
+that can infer the bounding box and perform a format conversion.
+.
+One of these is
+the PostScript interpreter Ghostscript
+.RI ( gs (1)),
+which exposes format converters via its
+.B \-sDEVICE=
+option.
+.
+.RB \[lq] "gs \-\-help" \[rq]
+lists available devices.
 .
 .
-.LP
-For bitmapped graphic formats,
-you should use
-.IR pstopnm ;
-the resulting (intermediate)
+.P
+Alternatively,
+produce a PDF with
+.RB \[lq] "groff \-T pdf" \[rq];
+.MR gropdf @MAN1EXT@ 's
+.B \-p
+option will set the MediaBox of the file.
+.
+.
+.P
+The Encapsulated PostScript File (EPS) format is still sometimes seen.
+.
+The aforementioned Ghostscript offers
+.MR ps2epsi 1 ,
+and a standalone package and command
+.MR ps2eps 1
+is also available.
+.
+.
+.P
+For raster image formats,
+use
+.MR pstopnm 1 ;
+the resulting
 .MR pnm 5
-file can be then converted to virtually any graphics format using the
-tools of the
-.B netpbm
-package.
+file can be then converted to virtually any image format using the
+.I netpbm
+tools.
+.
+.\" XXX: We should talk about SVG.
 .
 .
 .\" ====================================================================
@@ -1470,6 +1408,12 @@ offers simple definitions of the
 and
 .B PY
 macros.
+.
+Load it with the
+.B mso
+request
+when eschewing a full-service macro package,
+or using one that doesn't supply its own definitions for them.
 .
 .
 .\" ====================================================================
@@ -1491,7 +1435,7 @@ The interpretation of
 .B \%fillval
 is incompatible with the
 .I pic \" AT&T
-in Tenth Edition Research Unix,
+in Research Tenth Edition Unix,
 which interprets 0 as black and 1 as white.
 .
 .
@@ -1512,6 +1456,8 @@ is part of the
 distribution.
 .
 .
+.br
+.ne 2v
 .P
 \[lq]PIC\[em]A Graphics Language for Typesetting: User Manual\[rq],
 by Brian W.\& Kernighan,
@@ -1524,7 +1470,7 @@ AT&T Bell Laboratories Computing Science Technical Report No.\& 116
 .I ps2eps
 is available from CTAN mirrors, e.g.,
 .UR ftp://\:ftp\:.dante\:.de/\:tex\-archive/\:support/\:ps2eps/
-.UE
+.UE .
 .
 .
 .LP
@@ -1541,7 +1487,7 @@ W.\& Richard Stevens,
 .UE
 .
 .
-.LP
+.P
 .MR @g@troff @MAN1EXT@ ,
 .MR groff_out @MAN5EXT@ ,
 .MR tex 1 ,

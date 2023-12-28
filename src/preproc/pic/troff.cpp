@@ -271,6 +271,9 @@ inline position troff_output::transform(const position &pos)
 // If this register is defined, geqn won't produce '\x's.
 #define EQN_NO_EXTRA_SPACE_REG "0x"
 
+#define SAVED_STROKE_COLOR_STR "gpic*saved-stroke-color"
+#define SAVED_FILL_COLOR_STR "gpic*saved-fill-color"
+
 void troff_output::start_picture(double sc,
 				 const position &ll, const position &ur)
 {
@@ -291,6 +294,10 @@ void troff_output::start_picture(double sc,
   // This guarantees that if the picture is used in a diversion it will
   // have the right width.
   printf("\\h'%.3fi'\n.sp -1\n", width);
+  (void) puts(".ds " SAVED_STROKE_COLOR_STR " default");
+  (void) puts(".ds " SAVED_FILL_COLOR_STR " default");
+  (void) puts(".if !'\\n[.m]'' .ds " SAVED_STROKE_COLOR_STR " \\n[.m]");
+  (void) puts(".if !'\\n[.M]'' .ds " SAVED_FILL_COLOR_STR " \\n[.M]");
 }
 
 void troff_output::finish_picture()
@@ -303,6 +310,8 @@ void troff_output::finish_picture()
   printf(".if \\n(" FILL_REG " .fi\n");
   printf(".br\n");
   printf(".nr " EQN_NO_EXTRA_SPACE_REG " 0\n");
+  (void) puts(".gcolor \\*[" SAVED_STROKE_COLOR_STR "]");
+  (void) puts(".fcolor \\*[" SAVED_FILL_COLOR_STR "]");
   // this is a little gross
   set_location(current_filename, current_lineno);
   if (want_flyback)
@@ -554,22 +563,39 @@ void troff_output::dot(const position &cent, const line_type &lt)
 	   "\\v'%.3fi+%.2fm'"
 	   ".\n.sp -1\n",
 	   c.x,
-	   c.y, 
+	   c.y,
 	   DOT_AXIS);
   }
 }
 
+// We might consider putting this in libgroff.  We treat null pointers
+// like NaNs: they are incommensurable even with themselves.
+bool strsame(const char *s, const char *t)
+{
+  if ((s == 0 /* nullptr */) || (t == 0 /* nullptr */))
+    return false;
+  return (strcmp(s, t) == 0);
+}
+
 void troff_output::set_location(const char *s, int n)
 {
-  if (last_filename != 0 && strcmp(s, last_filename) == 0)
-    printf(".lf %d\n", n);
-  else {
-    printf(".lf %d %s\n", n, s);
-    char *lfn = strdup(s);
-    if (0 == lfn)
-      fatal("memory allocation failure while copying file name");
-    last_filename = lfn;
+  assert(s != 0 /* nullptr */);
+  bool update_file_name = false;
+  if (s != 0 /* nullptr */) {
+    if (!strsame(s, last_filename)) {
+      char *lfn = strdup(s);
+      if (0 /* nullptr */ == lfn)
+	fatal("memory allocation failure while copying file name");
+      if (last_filename != 0 /* nullptr */)
+	free(const_cast<char *>(last_filename));
+      last_filename = lfn;
+      update_file_name = true;
+    }
   }
+  if (update_file_name)
+    printf(".lf %d %s\n", n, s);
+  else
+    printf(".lf %d\n", n);
 }
 
 // Local Variables:

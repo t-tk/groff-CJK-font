@@ -354,10 +354,9 @@ precede it with the dummy character.
 .
 .Pp
 In this document,
-macros whose argument lists are parsed for callable arguments are
-referred to as
-.Em parsed ,
-and those that may be called from an argument list are referred to as
+a macro that parses its argument list for other macro names is termed
+.Em parsed ;
+macros that permit other macros to call them thus are described as
 .Em callable .
 .
 This usage is a technical
@@ -566,14 +565,12 @@ Use the special character escape sequence
 .Ql \[rs](dq
 to format it.
 .\" That's NOT a groffism, but showed up in the "post" and "Latin1"
-.\" devices of Tenth Edition Research Unix.
+.\" devices of Documenter's Workbench (DWB) 3.3 troff.
 .
-Further,
-this glyph should not be used for conventional quotation;
-.Xr mdoc
-offers several quotation macros.
-.
-See subsection
+Avoid using
+.Ql \[rs](dq
+for conventional quotation;
+see subsection
 .Sx "Enclosure and quoting macros"
 below.
 .
@@ -823,6 +820,7 @@ literal.
 .
 .Pp
 Many macros possess an implicit width,
+.\" See tmac/mdoc/doc-common for values.
 used when they are contained in lists and displays.
 .
 If you avoid relying on these default measurements,
@@ -1418,7 +1416,7 @@ The result is:
 The punctuation is not recognized and all is output in the
 font used by
 .Ql .Ar .
-If the punctuation is separated by a leading white space:
+If the punctuation is separated by a leading whitespace:
 .
 .
 .Pp
@@ -1574,15 +1572,6 @@ If called without arguments,
 .Sq Ar
 is output.
 .
-This places the ellipsis in italics,
-which is ugly and incorrect,
-and will be noticed on terminals that underline text instead of using an
-oblique typeface.
-.
-We recommend using
-.Ql ".Ar file \&No ..."
-instead.
-.
 .
 .Pp
 .Dl Usage: .Ar Oo Ao argument Ac Oc No ...
@@ -1592,8 +1581,6 @@ instead.
 .Bl -tag -width ".Li .Ar\ file1\ file2" -compact -offset 15n
 .It Li .Ar
 .Ar
-.It Li .Ar file \&No ...
-.Ar file No ...
 .It Li ".Ar file1"
 .Ar file1
 .It Li ".Ar file1 ."
@@ -2566,6 +2553,8 @@ X/Open
 .El
 .Pp
 .
+.br
+.ne 4v
 Miscellaneous
 .Pp
 .Bl -tag -width ".Li \-p1003.1g\-2000" -compact -offset indent
@@ -5052,7 +5041,7 @@ the page text is broken before writing the footer.
 .
 It is ignored if continuous rendering is enabled.
 .
-The default is \-0.5i.
+The default is \(lq\-0.5i\~\-\~1v\(rq.
 .
 .
 .Pp
@@ -5088,17 +5077,16 @@ register to zero.
 .Pp
 The paragraph and subsection heading indentation amounts can be changed
 by setting the registers
-.Ql IN
+.Ql BP
 and
 .Ql SN .
 .
-.Dl groff \-Tutf8 \-rIN=5n \-rSN=2n \-mdoc foo.man | less \-R
+.Dl groff \-Tutf8 \-rBP=4n \-rSN=2n \-mdoc foo.man | less \-R
 .
-The default paragraph indentation is 7.2n on typesetters and 7n on
-terminals.
+The default paragraph and subsection heading indentation amounts are 5n
+and 3n, respectively.
 .
-The default subsection heading indentation amount is 3n;
-section headings are set with an indentation of zero.
+Section headings are set with an indentation of zero.
 .
 .
 .Pp
@@ -5120,6 +5108,15 @@ Setting the
 register starts enumeration of pages at its value.
 .
 The default is\~1.
+.
+.
+.Pp
+The
+.Ql PO
+register configures the page offset.
+.
+The default is device-dependent;
+typically 0 for terminal devices and 1i otherwise.
 .
 .
 .Pp
@@ -5197,9 +5194,17 @@ package and loads further components as needed from the
 subdirectory.
 .
 .
+.It Pa @MACRODIR@/\:doc\-old\:.tmac
+implements a legacy version of the
+.Xr mdoc
+package;
+it was superseded in 4.4BSD (1994)
+and is needed only to render certain man pages from 4.3BSD-Reno.
+.
+.
 .It Pa @MACRODIR@/\:mdoc\:.tmac
-is a wrapper that loads
-.Pa doc.tmac .
+is a wrapper enabling the package to be loaded with the option
+.Dq Li "\-m mdoc" .
 .
 .
 .It Pa @MACRODIR@/\:mdoc/\:doc\-common

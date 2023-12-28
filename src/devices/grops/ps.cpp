@@ -31,6 +31,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 #include "curtime.h"
 
 #include "ps.h"
+
+#include <errno.h> // errno
 #include <time.h>
 
 #ifdef NEED_DECLARATION_PUTENV
@@ -169,7 +171,7 @@ ps_output &ps_output::end_comment()
 
 ps_output &ps_output::comment_arg(const char *s)
 {
-  int len = strlen(s);
+  size_t len = strlen(s);
   if (col + len + 1 > max_line_length) {
     putc('\n', fp);
     fputs("%%+", fp);
@@ -200,10 +202,10 @@ ps_output &ps_output::put_delimiter(char c)
   return *this;
 }
 
-ps_output &ps_output::put_string(const uint16_t *s, int n, int is_utf16be)
+ps_output &ps_output::put_string(const uint16_t *s, size_t n, int is_utf16be)
 {
-  int len = 0;
-  int i;
+  size_t len = 0;
+  size_t i;
   for (i = 0; i < n; i++) {
     uint16_t c = s[i];
     if (is_utf16be) {
@@ -297,7 +299,7 @@ ps_output &ps_output::put_number(int n)
 {
   char buf[1 + INT_DIGITS + 1];
   sprintf(buf, "%d", n);
-  int len = strlen(buf);
+  size_t len = strlen(buf);
   if (col > 0 && col + len + need_space > max_line_length) {
     putc('\n', fp);
     col = 0;
@@ -316,7 +318,7 @@ ps_output &ps_output::put_number(int n)
 ps_output &ps_output::put_fix_number(int i)
 {
   const char *p = if_to_a(i, fixed_point);
-  int len = strlen(p);
+  size_t len = strlen(p);
   if (col > 0 && col + len + need_space > max_line_length) {
     putc('\n', fp);
     col = 0;
@@ -336,7 +338,7 @@ ps_output &ps_output::put_float(double d)
 {
   char buf[128];
   sprintf(buf, "%.4f", d);
-  int last = strlen(buf) - 1;
+  ptrdiff_t last = strlen(buf) - 1;
   while (buf[last] == '0')
     last--;
   if (buf[last] == '.')
@@ -359,7 +361,7 @@ ps_output &ps_output::put_float(double d)
 
 ps_output &ps_output::put_symbol(const char *s)
 {
-  int len = strlen(s);
+  size_t len = strlen(s);
   if (col > 0 && col + len + need_space > max_line_length) {
     putc('\n', fp);
     col = 0;
@@ -379,7 +381,7 @@ ps_output &ps_output::put_color(unsigned int c)
 {
   char buf[128];
   sprintf(buf, "%.3g", double(c) / double(color::MAX_COLOR_VAL));
-  int len = strlen(buf);
+  size_t len = strlen(buf);
   if (col > 0 && col + len + need_space > max_line_length) {
     putc('\n', fp);
     col = 0;
@@ -397,7 +399,7 @@ ps_output &ps_output::put_color(unsigned int c)
 
 ps_output &ps_output::put_literal_symbol(const char *s)
 {
-  int len = strlen(s);
+  size_t len = strlen(s);
   if (col > 0 && col + len + 1 > max_line_length) {
     putc('\n', fp);
     col = 0;
@@ -815,8 +817,13 @@ void ps_printer::define_encoding(const char *encoding, int encoding_index)
     vec[i] = 0;
   char *path;
   FILE *fp = font::open_file(encoding, &path);
-  if (fp == 0)
+  if (0 /* nullptr */ == fp) {
+    // If errno not valid, assume file rejected due to '/'.
+    if (errno <= 0)
+      fatal("refusing to traverse directories to open PostScript"
+	    " encoding file '%1'");
     fatal("can't open encoding file '%1'", encoding);
+  }
   int lineno = 1;
   const int BUFFER_SIZE = 512;
   char buf[BUFFER_SIZE];
@@ -1421,13 +1428,8 @@ ps_printer::~ps_printer()
      .end_comment();
   {
     fputs("%%CreationDate: ", out.get_file());
-#ifdef LONG_FOR_TIME_T
-    long
-#else
-    time_t
-#endif
-    t = current_time();
-    fputs(ctime(&t), out.get_file());
+    struct tm *t = current_time();
+    fputs(asctime(t), out.get_file());
   }
   for (font_pointer_list *f = font_list; f; f = f->next) {
     ps_font *psf = (ps_font *)(f->p);
